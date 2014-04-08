@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>DD4T-MVC4</id>
+    <version>1.31.1</version>
+    <title>DD4T support for MVC4</title>
+    <authors>Quirijn Slings</authors>
+    <owners>Quirijn Slings</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>https://code.google.com/p/dynamic-delivery-4-tridion/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>DD4T support for ASP.NET MVC 4.0</description>
+    <dependencies>
+      <dependency id="DD4TFramework" version="1.31.0" />
+    </dependencies>
+    <references>
+      <reference file="DD4T.Mvc.dll" />
+    </references>
+  </metadata>
+</package>

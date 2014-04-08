@@ -1,0 +1,1 @@
+!function(){var a={};a.isSmallScreen=Modernizr.mq("only screen and (max-width: 768px)"),window.SDL_ENV=a}($),function(){$("body").fitVids()}($),function(){$(".carousel-inner").swipe({swipeLeft:function(){$(this).parent().carousel("next")},swipeRight:function(){$(this).parent().carousel("prev")},threshold:75})}($);

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>DD4T-Tridion-2013sp1</id>
+    <version>1.31.1</version>
+    <title>DD4T Providers for Tridion 2013 SP1</title>
+    <authors>Quirijn Slings</authors>
+    <owners>Quirijn Slings</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>https://code.google.com/p/dynamic-delivery-4-tridion/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>DD4T Providers for Tridion 2013 SP1</description>
+    <copyright>Copyright 2014</copyright>
+    <dependencies>
+      <dependency id="DD4TFramework" version="1.31.0" />
+    </dependencies>
+  </metadata>
+</package>

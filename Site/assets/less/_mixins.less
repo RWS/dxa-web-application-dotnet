@@ -1,0 +1,28 @@
+
+@import "../../bower_components/bootstrap/less/mixins.less";
+
+.img-retina-responsive(@min-width; @file-1x; @file-2x; @width-1x; @height-1x) {
+
+  @media (min-width: @min-width){
+  	background-image: url("@{file-1x}");
+  }
+
+  @media
+  only screen and (-webkit-min-device-pixel-ratio: 2) and (min-width: @min-width),
+  only screen and (   min--moz-device-pixel-ratio: 2) and (min-width: @min-width),
+  only screen and (     -o-min-device-pixel-ratio: 2/1) and (min-width: @min-width),
+  only screen and (        min-device-pixel-ratio: 2) and (min-width: @min-width),
+  only screen and (                min-resolution: 192dpi) and (min-width: @min-width),
+  only screen and (                min-resolution: 2dppx) and (min-width: @min-width) {
+    background-image: url("@{file-2x}");
+    background-size: @width-1x @height-1x;
+  }
+}
+
+#gradient{
+  .radial-ellipse(@inner-color: #555; @outer-color: #333) {
+    background-image: -webkit-radial-gradient(ellipse, @inner-color, @outer-color);
+    background-image: radial-gradient(ellipse, @inner-color, @outer-color);
+    background-repeat: no-repeat;
+  }
+}

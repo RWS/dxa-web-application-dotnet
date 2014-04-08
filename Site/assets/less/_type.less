@@ -1,0 +1,28 @@
+
+
+h1, 
+h2,
+h3,
+h4,
+h5,
+h6{
+	&+.meta{
+		margin-top: -(@line-height-computed / 2);
+	}
+}
+
+.ribbon{
+	background: fadein(@ribbon-bg, 100%);
+	background: @ribbon-bg;
+	color: @ribbon-color;
+}
+
+.glow{
+	text-shadow: 0 0 3px @glow-bg-color;
+	color: @glow-color;
+
+	.no-textshadow{
+		filter: progid:DXImageTransform.Microsoft.Glow(color=@glow-bg-color);
+	}
+}
+

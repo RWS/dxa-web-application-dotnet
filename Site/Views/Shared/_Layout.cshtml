@@ -1,0 +1,197 @@
+﻿@model Sdl.Web.Mvc.Models.WebPage
+@using Sdl.Web.Mvc.Html
+<!DOCTYPE html>
+<html class='no-js'>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Home | SDL</title>
+
+    <link rel="stylesheet/less" type="text/css" href="/assets/less/main.less" />
+    <script src="/assets/scripts/discover-min.js"></script>
+    <script src="/bower_components/less.js/dist/less-1.7.0.min.js"></script>
+
+    <script src="/assets/scripts/header.js"></script>
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+
+
+    <div class="navbar navbar-default" role="navigation">
+        <div class="container">
+
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-logo" href="/" alt='SDL'>
+                    <img src='/assets/images/temp/sdl-globe.png' alt='SDL Logo' />
+                </a>
+            </div>
+
+            <div class="navbar-collapse collapse">
+
+                <ul class="nav navbar-nav utility-nav">
+                    <li>
+                        <a href="#">Utility Nav</a>
+                    </li>
+                    <li>
+                        <a href="#">Account</a>
+                    </li>
+                    <li>
+                        <a href="#">Log out</a>
+                    </li>
+                </ul>
+
+                <ul class="nav navbar-nav main-nav">
+                    <li>
+                        <a href="#">Section One</a>
+                    </li>
+                    <li class="active">
+                        <a href="#">Section Two</a>
+                    </li>
+                    <li>
+                        <a href="#">Section Three</a>
+                    </li>
+                </ul>
+
+                <form class='navbar-form navbar-right'>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search">
+                    </div>
+                </form>
+
+
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <div role="main">
+        @RenderBody()
+    </div>
+
+
+
+
+    <footer class='page-footer'>
+
+        <div class='container'>
+
+            <div class='row'>
+                <div class='col-sm-3'>
+                    <div class='h4'>Footer Links</div>
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="#">Link one</a>
+                        </li>
+                        <li>
+                            <a href="#">Link two</a>
+                        </li>
+                        <li>
+                            <a href="#">Link three</a>
+                        </li>
+                        <li>
+                            <a href="#">Link four</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class='col-sm-3'>
+                    <div class='h4'>News/Blog</div>
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="#">Link one</a>
+                        </li>
+                        <li>
+                            <a href="#">Link two</a>
+                        </li>
+                        <li>
+                            <a href="#">Link three</a>
+                        </li>
+                        <li>
+                            <a href="#">Link four</a>
+                        </li>
+                    </ul>
+
+                </div>
+                <div class='col-sm-3'>
+
+
+                </div>
+                <div class='col-sm-3'>
+                    <div class='icon-list'>
+                        <a href='#' class="fa-stack fa-lg">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-twitter fa-stack-1x"></i>
+                        </a>
+                        <a href='#' class="fa-stack fa-lg">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-facebook fa-stack-1x"></i>
+                        </a>
+                        <a href='#' class="fa-stack fa-lg">
+                            <i class="fa fa-circle fa-stack-2x"></i>
+                            <i class="fa fa-linkedin fa-stack-1x"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+
+            <ul class='list-inline text-center'>
+                <li>
+                    <small>&copy; Copyright 2014</small>
+                </li>
+                <li>
+                    <small><a href="#">Cookie Policy</a></small>
+                </li>
+                <li>
+                    <small><a href="#">Privacy</a></small>
+                </li>
+            </ul>
+            @*foreach (var value in Html.AdfClaims())
+{
+            <strong>@value.Key.ToString()</strong>  @value.Value.ToString()<br/>
+}*@
+
+        </div>
+    </footer>
+
+
+
+
+
+    <script src="/assets/scripts/plugins.js"></script>
+
+    <script src="/assets/scripts/custom.js"></script>
+
+    <script src="/assets/scripts/theme-customiser.js"></script>
+
+
+    <script>
+        (function (b, o, i, l, e, r) {
+            b.GoogleAnalyticsObject = l; b[l] || (b[l] =
+            function () { (b[l].q = b[l].q || []).push(arguments) }); b[l].l = +new Date;
+            e = o.createElement(i); r = o.getElementsByTagName(i)[0];
+            e.src = '//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e, r)
+        }(window, document, 'script', 'ga'));
+        ga('create', 'UA-XXXXX-X'); ga('send', 'pageview');
+    </script>
+    @ViewBag.InlineEditingBootstrap
+</body>
+</html>

@@ -1,0 +1,22 @@
+
+figure{
+	margin-bottom: @line-height-computed;
+	position: relative;
+
+	img{
+		display: block;
+		max-width: 100%;
+		height: auto;
+	}
+
+	figcaption{
+		margin-top: (@line-height-computed / 4);
+		color: @gray-light;
+
+		&.text-center{
+			margin-left: (@line-height-computed / 2);
+			margin-right: (@line-height-computed / 2);
+		}
+	}
+}
+

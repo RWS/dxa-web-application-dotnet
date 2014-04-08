@@ -1,0 +1,8 @@
+﻿@model Sdl.Web.Mvc.Models.Region
+<div @Semantics.Region(Model)>
+    <h1>Region: @Model.Name</h1>
+    @foreach (var item in Model.Items)
+    {
+        @ViewBag.Renderer.Render(item,Html)
+    }
+</div>

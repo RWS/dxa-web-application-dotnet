@@ -1,0 +1,18 @@
+﻿@model Sdl.Web.Mvc.Models.Article
+@using Sdl.Web.Mvc.Html
+@{
+    var context = @Html.Context();
+}
+<article class="jumbotron" @Semantics.Entity(Model)>
+    <h1 @Semantics.Property(Model,"Headline")>@Model.Headline</h1>
+    @if (Model.Image != null)
+{
+    <div>
+        <strong>Browser/Device has display width: @context.Browser.DisplayWidth , pixel ratio: @context.Device.PixelRatio</strong><br/>
+        <img @Semantics.Property(Model, "Image") src="@Html.ResponsiveImageUrl(Model.Image.Url, 270)" style="max-width:100%;"/>
+    </div>
+}
+    <div @Semantics.Property(Model, "ArticleBody")>
+        @Html.Raw(Model.ArticleBody)
+    </div>
+</article>

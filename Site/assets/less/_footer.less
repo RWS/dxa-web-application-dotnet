@@ -1,0 +1,32 @@
+
+.page-footer{
+	background-color: @page-footer-bg-color;
+	color: @page-footer-color;
+	padding: @page-footer-vertical-padding 0;
+	margin-top: @page-footer-margin-top;
+
+	a{
+		color: @page-footer-link-color;
+	}
+
+	.fa-stack{
+		.fa-stack-2x{
+			color: @page-footer-icon-stack-bg-color;
+		}
+		.fa-stack-1x{
+			color: @page-footer-icon-stack-color;
+		}
+	}
+
+	a.fa-stack{
+		&:hover,
+		&:focus{
+			.fa-stack-2x{
+				color: @link-color;
+			}
+			.fa-stack-1x{
+				color: #FFF;
+			}
+		}
+	}
+}
