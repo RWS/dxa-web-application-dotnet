@@ -146,18 +146,19 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="assets\css\main.css" />
+    <Content Include="assets\fonts\fontawesome-webfont.svg" />
+    <Content Include="assets\fonts\fontawesome-webfont.woff" />
     <Content Include="assets\images\temp\sdl-globe.png" />
-    <None Include="assets\less\main.less" />
     <Content Include="assets\less\_bootstrap.less" />
     <Content Include="assets\less\_footer.less" />
-    <Content Include="assets\less\_icons.less" />
     <Content Include="assets\less\_mixins.less" />
     <Content Include="assets\less\_nav.less" />
-    <Content Include="assets\less\_text.less" />
     <Content Include="assets\less\_variables.less" />
     <Content Include="assets\scripts\custom.js" />
     <Content Include="assets\scripts\discover-min.js" />
     <Content Include="assets\scripts\header.js" />
+    <Content Include="assets\scripts\PIE.htc" />
     <Content Include="assets\scripts\plugins.js" />
     <Content Include="assets\scripts\theme-customiser.js" />
     <Content Include="bower_components\bootstrap\less\utilities.less" />
@@ -191,6 +192,20 @@
     <Content Include="bower_components\bootstrap\less\badges.less" />
     <Content Include="bower_components\bootstrap\less\breadcrumbs.less" />
     <Content Include="bower_components\bootstrap\less\button-groups.less" />
+    <Content Include="assets\less\icons.less" />
+    <Content Include="assets\less\main.less" />
+    <Content Include="assets\less\_article.less" />
+    <Content Include="assets\less\_boxes.less" />
+    <Content Include="assets\less\_carousel.less" />
+    <Content Include="assets\less\_figures.less" />
+    <Content Include="assets\less\_images.less" />
+    <Content Include="assets\less\_layout.less" />
+    <Content Include="assets\less\_links.less" />
+    <Content Include="assets\less\_type.less" />
+    <Content Include="assets\less\_videos.less" />
+    <Content Include="assets\fonts\fontawesome-webfont.eot" />
+    <Content Include="assets\fonts\fontawesome-webfont.ttf" />
+    <Content Include="assets\fonts\FontAwesome.otf" />
     <None Include="bower_components\bootstrap\less\variables.less" />
     <Content Include="bower_components\bootstrap\less\wells.less" />
     <Content Include="bower_components\font-awesome\less\bordered-pulled.less" />
@@ -226,6 +241,7 @@
     <Content Include="bower_components\font-awesome\less\stacked.less" />
     <Content Include="bower_components\font-awesome\less\variables.less" />
     <Content Include="Views\Region\Main.cshtml" />
+    <None Include="Properties\PublishProfiles\Publish to Local Demo Site.pubxml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -235,9 +251,6 @@
     <Content Include="packages.config">
       <SubType>Designer</SubType>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="assets\fonts\fontawesome-webfont.woff" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sdl.Web.DD4T\Sdl.Web.DD4T.csproj">
