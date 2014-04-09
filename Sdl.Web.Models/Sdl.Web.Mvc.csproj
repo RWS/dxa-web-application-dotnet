@@ -39,7 +39,7 @@
     <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Tridion.ContentDelivery.AmbientData">
-      <HintPath>..\Refs\Tridion.ContentDelivery.AmbientData.dll</HintPath>
+      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
