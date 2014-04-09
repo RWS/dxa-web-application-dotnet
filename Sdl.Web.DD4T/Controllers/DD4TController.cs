@@ -17,6 +17,7 @@ using DD4T.Factories;
 using DD4T.Utils;
 using Fac = DD4T.ContentModel.Factories;
 using DD4T.ContentModel.Exceptions;
+using System.Text.RegularExpressions;
 
 namespace Sdl.Web.DD4T
 {
@@ -64,7 +65,7 @@ namespace Sdl.Web.DD4T
                 throw new HttpException(404, "Page cannot be found");
             }
             ViewBag.Renderer = Renderer;
-            ViewBag.InlineEditingBootstrap = Semantics.GetInlineEditingBootstrap(model);
+            ViewBag.InlineEditingBootstrap = Markup.GetInlineEditingBootstrap(model);
             return GetView(model);
         }
 
@@ -137,7 +138,8 @@ namespace Sdl.Web.DD4T
         protected virtual string GetViewName(IComponentPresentation componentPresentation)
         { 
             var template = componentPresentation.ComponentTemplate;
-            string viewName = template.Title.Replace(" ", "");
+            //strip region and whitespace
+            string viewName = Regex.Replace(template.Title, @"\[.*\]|\s", "");
             if (template.MetadataFields != null && template.MetadataFields.ContainsKey("view"))
             {
                 viewName = componentPresentation.ComponentTemplate.MetadataFields["view"].Value;

@@ -217,6 +217,7 @@
     <None Include="bower_components\bootstrap\less\mixins.less" />
     <Content Include="bower_components\bootstrap\less\type.less" />
     <Content Include="bower_components\less.js\dist\less-1.7.0.min.js" />
+    <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -242,9 +243,18 @@
     <Content Include="bower_components\font-awesome\less\variables.less" />
     <Content Include="Views\Region\Main.cshtml" />
     <None Include="Properties\PublishProfiles\Publish to Local Demo Site.pubxml" />
+    <Content Include="Views\Region\3-Column.cshtml" />
+    <Content Include="Views\Component\Teaser.cshtml" />
+    <Content Include="Views\Component\Teaser-ImageOverlay.cshtml" />
+    <Content Include="Views\Page\HomePage.cshtml" />
+    <Content Include="Views\Region\2-Column.cshtml" />
+    <Content Include="Views\Region\Hero.cshtml" />
+    <Content Include="Views\Page\SectionPage.cshtml" />
+    <Content Include="Views\Component\Carousel.cshtml" />
+    <Content Include="Views\Component\Teaser-Carousel.cshtml" />
+    <Content Include="Views\Shared\Breadcrumb.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Data\" />
     <Folder Include="bin\" />
   </ItemGroup>
   <ItemGroup>
@@ -284,7 +294,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>59860</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://staging.corporate-site.com</IISUrl>
+          <IISUrl>http://staging.corporate-site.com/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

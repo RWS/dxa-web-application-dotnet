@@ -73,8 +73,9 @@
     <Compile Include="Binaries\IBinaryFileManager.cs" />
     <Compile Include="Controllers\DD4TController.cs" />
     <Compile Include="Html\DD4TRenderer.cs" />
-    <Compile Include="Html\Semantics.cs" />
+    <Compile Include="Html\Markup.cs" />
     <Compile Include="Mapping\DD4TModelFactory.cs" />
+    <Compile Include="Mapping\ExtensionlessLinkFactory.cs" />
     <Compile Include="Mapping\ExtensionMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

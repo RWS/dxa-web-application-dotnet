@@ -31,7 +31,7 @@ namespace Sdl.Web.DD4T
                     action = cp.ComponentTemplate.MetadataFields["action"].Value;
                 }
                 MvcHtmlString result = helper.Action(action, controller, new { componentPresentation = cp });
-                return Semantics.Parse(result,cp);
+                return Markup.Parse(result,cp);
             }
             return null;
         }

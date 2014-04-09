@@ -31,6 +31,16 @@ namespace Sdl.Web.Mvc.Html
             return String.Format("/cid/fit/{0}{1}/source/site{2}", fixHeight ? "x" : "", width, url);
         }
 
+        public static string FixedSizeImageUrl(this HtmlHelper helper, string url, int size, bool fixHeight = true, double aspect = 1.62)
+        {
+            //default aspect is the Golden Ratio
+            var context = new ContextEngine();
+            size = size * context.Device.PixelRatio;
+            int height = fixHeight ? size : (int) (size / aspect);
+            int width = fixHeight ? (int)(size * aspect) : size;
+            return String.Format("/cid/scale/{0}x{1}/source/site{2}", width, height, url);
+        }
+
         public static ContextEngine Context(this HtmlHelper helper)
         {
             return new ContextEngine();

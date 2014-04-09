@@ -2,9 +2,17 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class='container'>
-   @foreach (Sdl.Web.Mvc.Models.Region region in Model.Regions.Values)
+<div class="container">
+    @if (Model.Regions.ContainsKey("Hero"))
     {
-        @ViewBag.Renderer.Render(region,Html)
+        @ViewBag.Renderer.Render(Model.Regions["Hero"],Html)
+    }
+    @Html.Partial("Breadcrumb")
+    @foreach (Sdl.Web.Mvc.Models.Region region in Model.Regions.Values)
+    {
+        if (region.Name!="Hero")
+        {
+            @ViewBag.Renderer.Render(region,Html)
+        }
     }
 </div>

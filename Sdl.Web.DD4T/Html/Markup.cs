@@ -11,7 +11,7 @@ using System.Web.Mvc;
 namespace Sdl.Web.DD4T
 {
     //TODO - abstract this away from DD4t
-    public static class Semantics
+    public static class Markup
     {
         //TODO - this needs to be abstracted away...
         private static string PAGE_FORMAT = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\"}} -->";
@@ -64,7 +64,7 @@ namespace Sdl.Web.DD4T
                     }
                 }
             }
-            return new MvcHtmlString(html.DocumentNode.InnerHtml);
+            return new MvcHtmlString(html.DocumentNode.SelectSingleNode("/html").InnerHtml);
         }
     }
 }

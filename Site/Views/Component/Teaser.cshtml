@@ -1,0 +1,11 @@
+﻿@model Sdl.Web.Mvc.Models.Teaser
+<div class="jumbotron">
+    <h4>@Model.Headline</h4>
+    <p>@Model.Text</p>
+    @if (Model.Link != null)
+    {
+        <p>
+            <a href="@Model.Link.Url" title="@Model.Link.AlternateText">@(Model.Link.LinkText ?? "Read more") <i class="fa fa-chevron-right"></i></a>
+        </p>
+    }
+</div>

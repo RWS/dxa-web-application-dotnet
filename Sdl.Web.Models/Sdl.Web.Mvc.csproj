@@ -50,6 +50,7 @@
     <Compile Include="Html\IRenderer.cs" />
     <Compile Include="Mapping\BaseModelFactory.cs" />
     <Compile Include="Mapping\IModelFactory.cs" />
+    <Compile Include="Models\Component\ItemList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\Common\Image.cs" />
     <Compile Include="Models\Common\Link.cs" />

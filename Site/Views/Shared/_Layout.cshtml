@@ -6,11 +6,14 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Home | SDL</title>
+    <title>Hotel Site</title>
 
-    <link rel="stylesheet/less" type="text/css" href="/assets/less/main.less" />
-    <script src="/assets/scripts/discover-min.js"></script>
-    <script src="/bower_components/less.js/dist/less-1.7.0.min.js"></script>
+    <!--
+      <link rel="stylesheet/less" type="text/css" href="/assets/less/main.less" />
+      <script src="/bower_components/less.js/dist/less-1.7.0.min.js"></script>
+    -->
+
+    <link rel="stylesheet" href="/assets/css/main.css">
 
     <script src="/assets/scripts/header.js"></script>
 
@@ -36,8 +39,8 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-logo" href="/" alt='SDL'>
-                    <img src='/assets/images/temp/sdl-globe.png' alt='SDL Logo' />
+                <a class="navbar-logo" href="/" alt='Home'>
+                    <img src='/assets/images/temp/logo.png' alt='SDL Logo' />
                 </a>
             </div>
 
@@ -56,10 +59,10 @@
                 </ul>
 
                 <ul class="nav navbar-nav main-nav">
-                    <li>
-                        <a href="#">Section One</a>
-                    </li>
                     <li class="active">
+                        <a href="/examples/article.html">Examples</a>
+                    </li>
+                    <li>
                         <a href="#">Section Two</a>
                     </li>
                     <li>
@@ -82,7 +85,10 @@
 
 
     <div role="main">
-        @RenderBody()
+        <div class='container'>
+            @RenderBody()
+        </div>
+
     </div>
 
 
@@ -163,10 +169,6 @@
                     <small><a href="#">Privacy</a></small>
                 </li>
             </ul>
-            @*foreach (var value in Html.AdfClaims())
-{
-            <strong>@value.Key.ToString()</strong>  @value.Value.ToString()<br/>
-}*@
 
         </div>
     </footer>
