@@ -36,7 +36,7 @@
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Tridion.ContentDelivery.AmbientData">
-      <HintPath>..\..\Refs\Tridion.ContentDelivery.AmbientData.dll</HintPath>
+      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
