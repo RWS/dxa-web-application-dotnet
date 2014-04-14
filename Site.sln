@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Tridion.Context.Mvc", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Tridion.Context", "Sdl.Tridion.Context\Sdl.Tridion.Context.csproj", "{0EB67333-D2B5-4316-B64D-88AD06D5FBBD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Tridion", "Sdl.Web.Tridion\Sdl.Web.Tridion.csproj", "{AE4651DF-A42F-4863-A0E1-870EACF3D072}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{0EB67333-D2B5-4316-B64D-88AD06D5FBBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0EB67333-D2B5-4316-B64D-88AD06D5FBBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0EB67333-D2B5-4316-B64D-88AD06D5FBBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE4651DF-A42F-4863-A0E1-870EACF3D072}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE4651DF-A42F-4863-A0E1-870EACF3D072}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE4651DF-A42F-4863-A0E1-870EACF3D072}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE4651DF-A42F-4863-A0E1-870EACF3D072}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

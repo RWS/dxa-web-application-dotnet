@@ -5,7 +5,7 @@ using System.Web;
 
 namespace Sdl.Web.Mvc.Models
 {
-    public class Teaser
+    public class Teaser : Entity
     {
         public Link Link { get; set; }
         public string Headline { get; set; }
