@@ -7,6 +7,8 @@ using System.Web.Mvc;
 using Tridion.ContentDelivery.AmbientData;
 using Sdl.Tridion.Context.Mvc;
 using Sdl.Tridion.Context;
+using System.Web;
+using System.Globalization;
 
 namespace Sdl.Web.Mvc.Html
 {
@@ -46,6 +48,14 @@ namespace Sdl.Web.Mvc.Html
             return new ContextEngine();
         }
 
+        public static string Resource(this HtmlHelper htmlHelper, string resourceName)
+        {
+            return (string)Resource(htmlHelper.ViewContext.HttpContext, resourceName);
+        }
 
+        public static object Resource(this HttpContextBase httpContext, string resourceName)
+        {
+            return httpContext.GetGlobalResourceObject(CultureInfo.CurrentUICulture.ToString(), resourceName);
+        }
     }
 }

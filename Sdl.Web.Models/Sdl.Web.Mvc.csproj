@@ -49,10 +49,13 @@
   <ItemGroup>
     <Compile Include="Configuration\Configuration.cs" />
     <Compile Include="Configuration\Localization.cs" />
+    <Compile Include="Configuration\ResourceProviderFactory.cs" />
+    <Compile Include="Configuration\ResourceProvider.cs" />
     <Compile Include="Formatting\FormatFilterAttribute.cs" />
     <Compile Include="Html\BaseRenderer.cs" />
     <Compile Include="Html\HtmlHelperExtensions.cs" />
     <Compile Include="Html\IRenderer.cs" />
+    <Compile Include="Html\UrlHelperExtension.cs" />
     <Compile Include="Mapping\BaseModelFactory.cs" />
     <Compile Include="Mapping\IModelFactory.cs" />
     <Compile Include="Models\Component\ItemList.cs" />
@@ -72,6 +75,7 @@
     <Compile Include="Models\Page\Region.cs" />
     <Compile Include="Models\Page\WebPage.cs" />
     <Compile Include="Statics\IStaticFileManager.cs" />
+    <Compile Include="Statics\StaticRedirectModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sdl.Tridion.Context.Mvc\Sdl.Tridion.Context.Mvc.csproj">

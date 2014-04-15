@@ -11,12 +11,15 @@ using System.Web.Script.Serialization;
 
 namespace Sdl.Web.Mvc
 {
+    /// <summary>
+    /// Needs refactoring to separate out the loading of config
+    /// </summary>
     public static class Configuration
     {
         public static IStaticFileManager StaticFileManager { get; set; }
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _configuration;
         public static Dictionary<string, Localization> Localizations { get; set; }
-        private const string DEFAULT_LOCALIZATION = "";
+        public const string DEFAULT_LOCALIZATION = "";
         private static object configLock = new object();
         public static string GetConfig(string key, string localization = DEFAULT_LOCALIZATION)
         {
@@ -168,7 +171,9 @@ namespace Sdl.Web.Mvc
         {
             return GetConfig("environment.cmsurl");
         }
-
-        
+        public static string GetVersion()
+        {
+            return ConfigurationManager.AppSettings["Sdl.Web.SiteVersion"];
+        }
     }
 }

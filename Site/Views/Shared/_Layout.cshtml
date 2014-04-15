@@ -13,9 +13,9 @@
       <script src="/bower_components/less.js/dist/less-1.7.0.min.js"></script>
     -->
 
-    <link rel="stylesheet" href="/assets/css/main.css">
-
-    <script src="/assets/scripts/header.js"></script>
+    <link rel="stylesheet" href="@Url.VersionedContent("/assets/css/main.css")">
+   
+    <script src="@Url.VersionedContent("/assets/scripts/header.js")"></script>
 
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -40,7 +40,7 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-logo" href="/" alt='Home'>
-                    <img src='/assets/images/temp/logo.png' alt='SDL Logo' />
+                    <img src="@Url.VersionedContent("/assets/images/temp/logo.png")" alt='SDL Logo' />
                 </a>
             </div>
 
@@ -177,11 +177,11 @@
 
 
 
-    <script src="/assets/scripts/plugins.js"></script>
+    <script src="@Url.VersionedContent("/assets/scripts/plugins.js")"></script>
 
-    <script src="/assets/scripts/custom.js"></script>
+    <script src="@Url.VersionedContent("/assets/scripts/custom.js")"></script>
 
-    <script src="/assets/scripts/theme-customiser.js"></script>
+    <script src="@Url.VersionedContent("/assets/scripts/theme-customiser.js")"></script>
 
 
     <script>
