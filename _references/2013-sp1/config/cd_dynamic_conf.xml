@@ -6,7 +6,7 @@
         <StaticMappings>
             <Publications>
                 <Publication Id="4">
-                    <Host Domain="saintjohn01.ams.dev" Port="82" Protocol="http" Path=""/>
+                    <Host Domain="saintjohn01.ams.dev" Protocol="http" Port="82" Path=""/>
                 </Publication>
             </Publications>
         </StaticMappings>

@@ -13,13 +13,14 @@ using DD4T.Factories.Caching;
 using DD4T.ContentModel.Exceptions;
 using DD4T.ContentModel.Factories;
 using DD4T.Factories;
+using Sdl.Web.Mvc;
 
 namespace Sdl.Web.DD4T
 {
     /// <summary>
     /// Ensures a Binary file is cached on the file-system from the Tridion Broker DB
     /// </summary>
-    public class BinaryFileManager : IBinaryFileManager
+    public class BinaryFileManager : IBinaryFileManager, IStaticFileManager
     {
         #region caching
         private ICacheAgent _cacheAgent = null;
@@ -60,8 +61,6 @@ namespace Sdl.Web.DD4T
             String physicalPath = request.PhysicalPath;
             string cacheKey = GetCacheKey(urlPath);
             DateTime? lastPublishedDate = CacheAgent.Load(cacheKey) as DateTime?;
-
-
             if (lastPublishedDate == null)
             {
                 DateTime lpb = BinaryFactory.FindLastPublishedDate(urlPath);
@@ -91,12 +90,8 @@ namespace Sdl.Web.DD4T
 
             // the normal situation (where a binary is still in Tridion and it is present on the file system already and it is up to date) is now covered
             // Let's handle the exception situations. 
-            IBinary binary = null;
-            try
-            {
-                BinaryFactory.TryFindBinary(urlPath, out binary);
-            }
-            catch (BinaryNotFoundException)
+            IBinary binary = GetBinaryFromBroker(urlPath);
+            if (binary==null)
             {
                 LoggerService.Debug("Binary with url {0} not found", urlPath);
                 // binary does not exist in Tridion, it should be removed from the local file system too
@@ -195,6 +190,22 @@ namespace Sdl.Web.DD4T
                 LoggerService.Debug("done ({0})", physicalPath);
             }
         }
+
+        protected IBinary GetBinaryFromBroker(string urlPath)
+        {
+            IBinary binary = null;
+            BinaryFactory.TryFindBinary(urlPath, out binary);
+            return binary;
+        }
+
         #endregion
+
+        public string SerializeForVersion(string url, string applicationRoot, string version, bool returnContents = false)
+        {
+            IBinary binary = GetBinaryFromBroker(url);
+            string filepath = (applicationRoot + url).Replace("system/", "system/" + version + "/");
+            WriteBinaryToFile(binary, filepath, null);
+            return returnContents ? Encoding.UTF8.GetString(binary.BinaryData) : null;
+        }
     }
 }

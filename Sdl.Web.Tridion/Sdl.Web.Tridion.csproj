@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0EB67333-D2B5-4316-B64D-88AD06D5FBBD}</ProjectGuid>
+    <ProjectGuid>{AE4651DF-A42F-4863-A0E1-870EACF3D072}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sdl.Tridion.Context</RootNamespace>
-    <AssemblyName>Sdl.Tridion.Context</AssemblyName>
+    <RootNamespace>Sdl.Web.Tridion</RootNamespace>
+    <AssemblyName>Sdl.Web.Tridion</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -33,25 +33,30 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
-    <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="Tridion.ContentDelivery.AmbientData">
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Tridion.ContentDelivery.AmbientData, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ContextClaims.cs" />
-    <Compile Include="ClaimUris.cs" />
-    <Compile Include="ContextEngine.cs" />
-    <Compile Include="BrowserClaims.cs" />
-    <Compile Include="DeviceClaims.cs" />
-    <Compile Include="OsClaims.cs" />
+    <Compile Include="Context\BrowserClaims.cs" />
+    <Compile Include="Context\ClaimUris.cs" />
+    <Compile Include="Context\ContextClaims.cs" />
+    <Compile Include="Context\ContextEngine.cs" />
+    <Compile Include="Context\DeviceClaims.cs" />
+    <Compile Include="Context\OsClaims.cs" />
+    <Compile Include="Config\TridionConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Families.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="Context\Families.xml">
       <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

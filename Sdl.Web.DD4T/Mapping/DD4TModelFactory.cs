@@ -99,7 +99,7 @@ namespace Sdl.Web.DD4T
         {
             if (field.Values.Count > 0 || (field.EmbeddedValues!=null && field.EmbeddedValues.Count > 0))
             {
-                PropertyInfo pi = model.GetType().GetProperty(field.Name.Substring(0, 1).ToUpper() + field.Name.Substring(1));
+                PropertyInfo pi = GetPropertyForField(model, field);
                 if (pi != null)
                 {
                     //TODO check/cast to the type we are mapping to 
@@ -127,6 +127,15 @@ namespace Sdl.Web.DD4T
                     }
                 }
             }
+        }
+
+        private PropertyInfo GetPropertyForField(object model, IField field)
+        {
+            //Default behaviour is to PascalCase the field xml name
+            var propertyName = field.Name.Substring(0, 1).ToUpper() + field.Name.Substring(1);
+            //Multivalue fields will typically have a non-pluralized field name (eg paragraph), but the property 
+            //in the model is likely to be a List type property with a pluralized property name (eg Paragraphs)
+            return model.GetType().GetProperty(propertyName) ??  model.GetType().GetProperty(propertyName + "s");
         }
 
         private object GetDates(IField field, Type modelType, bool multival)

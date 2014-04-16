@@ -3,5 +3,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="schemas/cd_link_conf.xsd">
     <Publications>
+      <Publication Id="4">
+        <Host Domain="saintjohn01.ams.dev" Port="82" Path=""/>
+      </Publication>
     </Publications>
 </Configuration>

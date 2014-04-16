@@ -68,21 +68,28 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Binaries\BinaryDistributionModule.cs" />
-    <Compile Include="Binaries\BinaryFileManager.cs" />
-    <Compile Include="Binaries\IBinaryFileManager.cs" />
+    <Compile Include="Statics\BinaryDistributionModule.cs" />
     <Compile Include="Controllers\DD4TController.cs" />
     <Compile Include="Html\DD4TRenderer.cs" />
     <Compile Include="Html\Markup.cs" />
     <Compile Include="Mapping\DD4TModelFactory.cs" />
     <Compile Include="Mapping\ExtensionlessLinkFactory.cs" />
     <Compile Include="Mapping\ExtensionMethods.cs" />
+    <Compile Include="Mapping\PublicationResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Statics\BinaryFileManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Statics\IBinaryFileManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sdl.Web.Models\Sdl.Web.Mvc.csproj">
       <Project>{923b2009-9a0b-4425-88a5-bf7af25c8f8b}</Project>
       <Name>Sdl.Web.Mvc</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj">
+      <Project>{ae4651df-a42f-4863-a0e1-870eacf3d072}</Project>
+      <Name>Sdl.Web.Tridion</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

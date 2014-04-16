@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Sdl.Tridion.Context")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Sdl.Web.Tridion")]
+[assembly: AssemblyDescription("SDL Standard Web Application Tridion Assembly")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Sdl.Tridion.Context")]
-[assembly: AssemblyCopyright("Copyright ©  2013")]
+[assembly: AssemblyCompany("SDL Tridion B.V.")]
+[assembly: AssemblyProduct("SDL Standard Web Application")]
+[assembly: AssemblyCopyright("Copyright ©  2014 SDL Tridion Development Lab B.V.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("21651b56-4e2b-46d3-bd55-9dba9f58dcdb")]
+[assembly: Guid("79b49d73-970d-4689-97c8-4e022d86a316")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("7.1.0.0")]
+[assembly: AssemblyFileVersion("7.1.0.0")]

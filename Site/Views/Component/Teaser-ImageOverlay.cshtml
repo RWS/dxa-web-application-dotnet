@@ -1,15 +1,19 @@
 ﻿@model Sdl.Web.Mvc.Models.Teaser
-<div class="feature">
+<div class="feature" @Markup.Entity(Model)>
     @if (Model.Link!=null)
     {
         <a href="@Model.Link.Url" title="@Model.Link.AlternateText">
-            <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 350, true)">
+            <div @Markup.Property(Model, "Image")>
+                <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 350, true)">
+            </div>
         </a>
     }
     else
     {
-        <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 350, true)">
+        <div @Markup.Property(Model,"Image")>
+            <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 350, true)">
+        </div>
     }
-    <h4 class="overlay overlay-top ribbon">@Model.Headline</h4>
-    <p class="overlay overlay-bottom glow">@Model.Text</p>
+    <h4 class="overlay overlay-top ribbon" @Markup.Property(Model, "Headline")>@Model.Headline</h4>
+    <p class="overlay overlay-bottom glow" @Markup.Property(Model, "Text")>@Model.Text</p>
 </div>

@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Sdl.Web.Mvc.Models
 {
-    public class ItemList
+    public class ItemList : Entity
     {
-        public List<object> ItemListElement { get; set; }
+        public List<object> ItemListElements { get; set; }
     }
 }

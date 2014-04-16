@@ -18,7 +18,7 @@ namespace Sdl.Web.DD4T
         private static string PAGE_SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" defer=\"defer\" src=\"{0}/WebUI/Editors/SiteEdit/Views/Bootstrap/Bootstrap.aspx?mode=js\" id=\"tridion.siteedit\"></script>";
         private static string REGION_FORMAT = "";//TODO
         private static string CP_FORMAT = "<!-- Start Component Presentation: {{\"ComponentID\" : \"{0}\", \"ComponentModified\" : \"{1}\", \"ComponentTemplateID\" : \"{2}\", \"ComponentTemplateModified\" : \"{2}\", \"IsRepositoryPublished\" : false}} -->";
-        private static string FIELD_FORMAT = "<!-- Start Component Field: {{\"XPath\":\"tcm:Content/custom:{0}/custom:{1}\"}} -->";
+        private static string FIELD_FORMAT = "<!-- Start Component Field: {{\"XPath\":\"tcm:Content/custom:{0}/custom:{1}[{2}]\"}} -->";
         private static string DATE_FORMAT = "s";
 
         public static MvcHtmlString Entity(Entity entity)
@@ -42,18 +42,24 @@ namespace Sdl.Web.DD4T
 
         public static MvcHtmlString Parse(MvcHtmlString result, IComponentPresentation cp)
         {
-            //TODO abstract DD4T content model away, only process for staging
+            //TODO abstract DD4T content model away, only process for preview requests
+            //TODO extend for embedded fields/embedded components
             HtmlDocument html = new HtmlDocument();
             html.LoadHtml(String.Format("<html>{0}</html>", result.ToString()));
-            var entity = html.DocumentNode.SelectSingleNode("//*[@typeof='Article']");
+            var entity = html.DocumentNode.SelectSingleNode("//*[@typeof]");
             if (entity != null)
             {
+                string type = entity.Attributes["typeof"].Value;
                 HtmlCommentNode cpData = html.CreateComment(String.Format(CP_FORMAT, cp.Component.Id, cp.Component.RevisionDate.ToString(DATE_FORMAT), cp.ComponentTemplate.Id, cp.ComponentTemplate.RevisionDate.ToString(DATE_FORMAT)));
                 entity.ChildNodes.Insert(0, cpData);
+                string lastProperty = "";
+                int index = 1;
                 foreach (var property in entity.SelectNodes("//*[@property]"))
                 {
                     var propName = property.Attributes["property"].Value;
-                    HtmlCommentNode fieldData = html.CreateComment(String.Format(FIELD_FORMAT, "Article", propName));
+                    index = propName == lastProperty ? index+1 : 1;
+                    lastProperty = propName;
+                    HtmlCommentNode fieldData = html.CreateComment(String.Format(FIELD_FORMAT, type, propName, index));
                     if (property.HasChildNodes)
                     {
                         property.ChildNodes.Insert(0, fieldData);

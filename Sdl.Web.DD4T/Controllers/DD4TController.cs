@@ -37,14 +37,15 @@ namespace Sdl.Web.DD4T
             //TODO dependency injection?
             this.PageFactory = new PageFactory()
             {
-                //TODO handle multiple publication ids
-                PageProvider = new TridionPageProvider() { PublicationId = ConfigurationHelper.PublicationId },
-                ComponentFactory = new ComponentFactory(),
-                LinkFactory = new LinkFactory()
+                PageProvider = new TridionPageProvider(),
+                PublicationResolver = new PublicationResolver(),
+                ComponentFactory = new ComponentFactory() { PublicationResolver = new PublicationResolver() },
+                LinkFactory = new LinkFactory() { PublicationResolver = new PublicationResolver() }
             };
             this.ComponentFactory = new ComponentFactory()
             {
                 ComponentProvider = new TridionComponentProvider(),
+                PublicationResolver = new PublicationResolver()                
             };
         }
 

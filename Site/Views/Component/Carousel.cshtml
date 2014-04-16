@@ -1,27 +1,27 @@
 ﻿@model Sdl.Web.Mvc.Models.ItemList
-<div id="carousel-large" class="carousel slide">
+<div id="carousel-large" class="carousel slide" @Markup.Entity(Model)>
     <ol class="carousel-indicators">
-        @for (int i = 0; i < Model.ItemListElement.Count; i++)
+        @for (int i = 0; i < Model.ItemListElements.Count; i++)
         {
             <li data-target="#carousel-large" data-slide-to="@i" class="@(i == 0 ? "active" : "")"></li>
         }
     </ol>
     <div class="carousel-inner">
-        @for(int i=0 ;i < Model.ItemListElement.Count; i++)
+        @for (int i = 0; i < Model.ItemListElements.Count; i++)
+{
+    var item = Model.ItemListElements[i];
+    <div class="item @(i==0?"active":"")" @Markup.Property(Model, "ItemListElement")>
+        @if (item is Teaser)
         {
-            var item = Model.ItemListElement[i];
-            <div class="item @(i==0?"active":"")">
-                @if (item is Teaser)
-                {
-                    Html.RenderPartial("Teaser-Carousel", item);
-                }
-                else if (item is Image)
-                {
-                    var img = (Image)Model.ItemListElement[i];
-                    <img src="@Html.FixedSizeImageUrl(img.Url, 350, true, 3.3)" alt="@img.AlternateText" />
-                }
-            </div>
+            Html.RenderPartial("Teaser-Carousel", item);
         }
+        else if (item is Image)
+        {
+            var img = (Image)Model.ItemListElements[i];
+            <img src="@Html.FixedSizeImageUrl(img.Url, 350, true, 3.3)" alt="@img.AlternateText" />
+        }
+    </div>
+}
     </div>
     <!-- Controls -->
     <a class="left carousel-control" href="#carousel-large" data-slide="prev">

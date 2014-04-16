@@ -4,8 +4,11 @@ using System.IO;
 using Tridion.ContentDelivery.AmbientData;
 using System.Xml.Linq;
 
-namespace Sdl.Tridion.Context
+namespace Sdl.Web.Tridion.Context
 {
+    /// <summary>
+    /// Based on https://github.com/NunoLinhares/TridionContextEngineWrapper/tree/master/Sdl.Tridion.Context
+    /// </summary>
     public class ContextEngine
     {
         private readonly BrowserClaims _browser;

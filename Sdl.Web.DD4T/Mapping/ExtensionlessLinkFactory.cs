@@ -9,7 +9,7 @@ namespace Sdl.Web.DD4T
 {
     public class ExtensionlessLinkFactory : LinkFactory
     {
-        public new string ResolveExtensionlessLink(string componentUri)
+        public string ResolveExtensionlessLink(string componentUri)
         {
             return RemoveExtension(base.ResolveLink(componentUri));
         }

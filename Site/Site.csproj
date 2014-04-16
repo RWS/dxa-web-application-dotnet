@@ -15,7 +15,7 @@
     <AssemblyName>Site</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>true</UseIISExpress>
+    <UseIISExpress>false</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -146,77 +146,19 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="assets\css\main.css" />
-    <Content Include="assets\fonts\fontawesome-webfont.svg" />
-    <Content Include="assets\fonts\fontawesome-webfont.woff" />
-    <Content Include="assets\images\temp\sdl-globe.png" />
-    <Content Include="assets\less\_bootstrap.less" />
-    <Content Include="assets\less\_footer.less" />
-    <Content Include="assets\less\_mixins.less" />
-    <Content Include="assets\less\_nav.less" />
-    <Content Include="assets\less\_variables.less" />
-    <Content Include="assets\scripts\custom.js" />
-    <Content Include="assets\scripts\discover-min.js" />
-    <Content Include="assets\scripts\header.js" />
-    <Content Include="assets\scripts\PIE.htc" />
-    <Content Include="assets\scripts\plugins.js" />
-    <Content Include="assets\scripts\theme-customiser.js" />
-    <Content Include="bower_components\bootstrap\less\utilities.less" />
-    <Content Include="bower_components\bootstrap\less\modals.less" />
-    <Content Include="bower_components\bootstrap\less\navbar.less" />
-    <Content Include="bower_components\bootstrap\less\navs.less" />
-    <Content Include="bower_components\bootstrap\less\normalize.less" />
-    <Content Include="bower_components\bootstrap\less\pager.less" />
-    <Content Include="bower_components\bootstrap\less\pagination.less" />
-    <Content Include="bower_components\bootstrap\less\panels.less" />
-    <Content Include="bower_components\bootstrap\less\popovers.less" />
-    <Content Include="bower_components\bootstrap\less\print.less" />
-    <Content Include="bower_components\bootstrap\less\progress-bars.less" />
-    <Content Include="bower_components\bootstrap\less\responsive-utilities.less" />
-    <Content Include="bower_components\bootstrap\less\scaffolding.less" />
-    <Content Include="bower_components\bootstrap\less\tables.less" />
-    <Content Include="bower_components\bootstrap\less\thumbnails.less" />
-    <Content Include="bower_components\bootstrap\less\tooltip.less" />
-    <Content Include="bower_components\bootstrap\less\carousel.less" />
-    <Content Include="bower_components\bootstrap\less\close.less" />
-    <Content Include="bower_components\bootstrap\less\code.less" />
-    <Content Include="bower_components\bootstrap\less\component-animations.less" />
-    <Content Include="bower_components\bootstrap\less\dropdowns.less" />
-    <Content Include="bower_components\bootstrap\less\grid.less" />
-    <Content Include="bower_components\bootstrap\less\input-groups.less" />
-    <Content Include="bower_components\bootstrap\less\jumbotron.less" />
-    <Content Include="bower_components\bootstrap\less\labels.less" />
-    <Content Include="bower_components\bootstrap\less\list-group.less" />
-    <Content Include="bower_components\bootstrap\less\media.less" />
-    <Content Include="bower_components\bootstrap\less\alerts.less" />
-    <Content Include="bower_components\bootstrap\less\badges.less" />
-    <Content Include="bower_components\bootstrap\less\breadcrumbs.less" />
-    <Content Include="bower_components\bootstrap\less\button-groups.less" />
-    <Content Include="assets\less\icons.less" />
-    <Content Include="assets\less\main.less" />
-    <Content Include="assets\less\_article.less" />
-    <Content Include="assets\less\_boxes.less" />
-    <Content Include="assets\less\_carousel.less" />
-    <Content Include="assets\less\_figures.less" />
-    <Content Include="assets\less\_images.less" />
-    <Content Include="assets\less\_layout.less" />
-    <Content Include="assets\less\_links.less" />
-    <Content Include="assets\less\_type.less" />
-    <Content Include="assets\less\_videos.less" />
-    <Content Include="assets\fonts\fontawesome-webfont.eot" />
-    <Content Include="assets\fonts\fontawesome-webfont.ttf" />
-    <Content Include="assets\fonts\FontAwesome.otf" />
-    <None Include="bower_components\bootstrap\less\variables.less" />
-    <Content Include="bower_components\bootstrap\less\wells.less" />
-    <Content Include="bower_components\font-awesome\less\bordered-pulled.less" />
-    <Content Include="bower_components\font-awesome\less\core.less" />
-    <Content Include="bower_components\font-awesome\less\fixed-width.less" />
-    <None Include="bower_components\font-awesome\less\font-awesome.less" />
-    <Content Include="bower_components\bootstrap\less\buttons.less" />
-    <Content Include="bower_components\bootstrap\less\forms.less" />
-    <None Include="bower_components\bootstrap\less\mixins.less" />
-    <Content Include="bower_components\bootstrap\less\type.less" />
-    <Content Include="bower_components\less.js\dist\less-1.7.0.min.js" />
+    <Content Include="system\assets\css\main.css" />
+    <Content Include="system\assets\fonts\fontawesome-webfont.svg" />
+    <Content Include="system\assets\fonts\fontawesome-webfont.woff" />
+    <Content Include="system\assets\images\temp\sdl-globe.png" />
+    <Content Include="system\assets\scripts\custom.js" />
+    <Content Include="system\assets\scripts\discover-min.js" />
+    <Content Include="system\assets\scripts\header.js" />
+    <Content Include="system\assets\scripts\PIE.htc" />
+    <Content Include="system\assets\scripts\plugins.js" />
+    <Content Include="system\assets\scripts\theme-customiser.js" />
+    <Content Include="system\assets\fonts\fontawesome-webfont.eot" />
+    <Content Include="system\assets\fonts\fontawesome-webfont.ttf" />
+    <Content Include="system\assets\fonts\FontAwesome.otf" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Web.config">
@@ -232,15 +174,6 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Page\ContentPage.cshtml" />
     <Content Include="Views\Component\Article.cshtml" />
-    <Content Include="bower_components\font-awesome\less\icons.less" />
-    <Content Include="bower_components\font-awesome\less\larger.less" />
-    <Content Include="bower_components\font-awesome\less\list.less" />
-    <Content Include="bower_components\font-awesome\less\mixins.less" />
-    <Content Include="bower_components\font-awesome\less\path.less" />
-    <Content Include="bower_components\font-awesome\less\rotated-flipped.less" />
-    <Content Include="bower_components\font-awesome\less\spinning.less" />
-    <Content Include="bower_components\font-awesome\less\stacked.less" />
-    <Content Include="bower_components\font-awesome\less\variables.less" />
     <Content Include="Views\Region\Main.cshtml" />
     <None Include="Properties\PublishProfiles\Publish to Local Demo Site.pubxml" />
     <Content Include="Views\Region\3-Column.cshtml" />
@@ -271,9 +204,9 @@
       <Project>{923b2009-9a0b-4425-88a5-bf7af25c8f8b}</Project>
       <Name>Sdl.Web.Mvc</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Sdl.Tridion.Context.Mvc\Sdl.Tridion.Context.Mvc.csproj">
-      <Project>{87762bc5-b81b-4e2e-995d-5ce9dadbafa4}</Project>
-      <Name>Sdl.Tridion.Context.Mvc</Name>
+    <ProjectReference Include="..\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj">
+      <Project>{ae4651df-a42f-4863-a0e1-870eacf3d072}</Project>
+      <Name>Sdl.Web.Tridion</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
@@ -294,7 +227,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>59860</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:59860/</IISUrl>
+          <IISUrl>http://saintjohn01.ams.dev:82</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
