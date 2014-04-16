@@ -48,10 +48,22 @@ namespace Sdl.Web.Tridion
         private static Dictionary<string, string> GetLocalization(XElement xElement)
         {
             var res = new Dictionary<string,string>();
-            res.Add("Protocol",xElement.Attribute("Protocol") == null ? "http" : xElement.Attribute("Protocol").Value);
-            res.Add("Domain", xElement.Attribute("Domain") == null ? "no-domain-in-cd_link_conf" : xElement.Attribute("Domain").Value);
-            res.Add("Port", xElement.Attribute("Port") == null ? "" : ":" + xElement.Attribute("Port").Value);
-            res.Add("Path", (xElement.Attribute("Path") == null || xElement.Attribute("Path").Value == "/") ? "" : xElement.Attribute("Path").Value);
+            if (xElement.Attribute("Protocol") != null)
+            {
+                res.Add("Protocol", xElement.Attribute("Protocol").Value);
+            }
+            if (xElement.Attribute("Domain") != null)
+            {
+                res.Add("Domain", xElement.Attribute("Domain").Value);
+            }
+            if (xElement.Attribute("Port") != null)
+            {
+                res.Add("Port", xElement.Attribute("Port").Value);
+            }
+            if (xElement.Attribute("Path") != null)
+            {
+                res.Add("Path", xElement.Attribute("Path").Value);
+            }
             res.Add("LocalizationId", xElement.Parent.Attribute("Id").Value);
             return res;
         }

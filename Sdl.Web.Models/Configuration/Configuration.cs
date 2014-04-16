@@ -21,11 +21,15 @@ namespace Sdl.Web.Mvc
         public static Dictionary<string, Localization> Localizations { get; set; }
         public const string DEFAULT_LOCALIZATION = "";
         private static object configLock = new object();
-        public static string GetConfig(string key, string localization = DEFAULT_LOCALIZATION)
+        public static string GetConfig(string key, string localization = null)
         {
             if (_configuration == null)
             {
                 Load(HttpContext.Current.Server.MapPath("~"));
+            }
+            if (localization == null)
+            {
+                localization = WebRequestContext.Localization.Path;
             }
             if (_configuration.ContainsKey(localization))
             {
@@ -47,7 +51,7 @@ namespace Sdl.Web.Mvc
             }
             else
             {
-                throw new Exception("Configuration localization '{0}' does not exist.");
+                throw new Exception(String.Format("Configuration localization '{0}' does not exist.",localization));
             }
         }
 
@@ -108,26 +112,26 @@ namespace Sdl.Web.Mvc
         private static void CheckOrCreateVersion(string applicationRoot, string version)
         {
             var tempDirSuffix = "_temp";
-            var versionRoot = String.Format("{0}/system/{1}", applicationRoot, version);
-            if (!Directory.Exists(versionRoot))
+            List<string> processedLocations = new List<string>();
+            foreach (var loc in Localizations.Values)
             {
-                var tempVersionRoot = versionRoot + tempDirSuffix;
-                //Create a temp dir - when everything succeeds we copy files to main folder above, and rename this
-                var di = Directory.CreateDirectory(tempVersionRoot);
-                //Find bootstrap file(s) in broker DB and take it from there.
-                List<string> processedLocations = new List<string>();
-                foreach (var loc in Localizations.Values)
+                if (!processedLocations.Contains(loc.Path))
                 {
-                    if (!processedLocations.Contains(loc.Path))
+                    var versionRoot = String.Format("{0}{1}/system/{2}", applicationRoot, loc.Path, version);
+                    if (!Directory.Exists(versionRoot))
                     {
+                        var tempVersionRoot = versionRoot + tempDirSuffix;
+                        //Create a temp dir - when everything succeeds we copy files to main folder above, and rename this
+                        var di = Directory.CreateDirectory(tempVersionRoot);
+                        //Find bootstrap file(s) in broker DB and take it from there.
                         var url = loc.Path + "/system/_all.json";
                         SerializeFile(url, applicationRoot, version + tempDirSuffix, 2);
                         processedLocations.Add(loc.Path);
-                    }
+                        CleanAndCopyToParentDirectory(tempVersionRoot, version + tempDirSuffix);
+                        Directory.Move(tempVersionRoot, versionRoot);
+                    } 
                 }
-                CleanAndCopyToParentDirectory(tempVersionRoot, version + tempDirSuffix);
-                Directory.Move(tempVersionRoot, versionRoot);
-            } 
+            }
         }
 
         private static void CleanAndCopyToParentDirectory(string tempVersionRoot, string tempDirName)
@@ -206,7 +210,7 @@ namespace Sdl.Web.Mvc
                 var localization = new Localization();
                 localization.Protocol = !loc.ContainsKey("Protocol") ? "http" : loc["Protocol"];
                 localization.Domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_link_conf" : loc["Domain"];
-                localization.Port = !loc.ContainsKey("Port") ? "" : ":" + loc["Port"];
+                localization.Port = !loc.ContainsKey("Port") ? "" : loc["Port"];
                 localization.Path = (!loc.ContainsKey("Path") || loc["Path"] == "/") ? "" : loc["Path"];
                 localization.LocalizationId = !loc.ContainsKey("LocalizationId") ? 0 : Int32.Parse(loc["LocalizationId"]);
                 Localizations.Add(localization.GetBaseUrl(), localization);
