@@ -146,19 +146,19 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="assets\css\main.css" />
-    <Content Include="assets\fonts\fontawesome-webfont.svg" />
-    <Content Include="assets\fonts\fontawesome-webfont.woff" />
-    <Content Include="assets\images\temp\sdl-globe.png" />
-    <Content Include="assets\scripts\custom.js" />
-    <Content Include="assets\scripts\discover-min.js" />
-    <Content Include="assets\scripts\header.js" />
-    <Content Include="assets\scripts\PIE.htc" />
-    <Content Include="assets\scripts\plugins.js" />
-    <Content Include="assets\scripts\theme-customiser.js" />
-    <Content Include="assets\fonts\fontawesome-webfont.eot" />
-    <Content Include="assets\fonts\fontawesome-webfont.ttf" />
-    <Content Include="assets\fonts\FontAwesome.otf" />
+    <Content Include="system\assets\css\main.css" />
+    <Content Include="system\assets\fonts\fontawesome-webfont.svg" />
+    <Content Include="system\assets\fonts\fontawesome-webfont.woff" />
+    <Content Include="system\assets\images\temp\sdl-globe.png" />
+    <Content Include="system\assets\scripts\custom.js" />
+    <Content Include="system\assets\scripts\discover-min.js" />
+    <Content Include="system\assets\scripts\header.js" />
+    <Content Include="system\assets\scripts\PIE.htc" />
+    <Content Include="system\assets\scripts\plugins.js" />
+    <Content Include="system\assets\scripts\theme-customiser.js" />
+    <Content Include="system\assets\fonts\fontawesome-webfont.eot" />
+    <Content Include="system\assets\fonts\fontawesome-webfont.ttf" />
+    <Content Include="system\assets\fonts\FontAwesome.otf" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Web.config">
@@ -203,10 +203,6 @@
     <ProjectReference Include="..\Sdl.Web.Models\Sdl.Web.Mvc.csproj">
       <Project>{923b2009-9a0b-4425-88a5-bf7af25c8f8b}</Project>
       <Name>Sdl.Web.Mvc</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Sdl.Tridion.Context.Mvc\Sdl.Tridion.Context.Mvc.csproj">
-      <Project>{87762bc5-b81b-4e2e-995d-5ce9dadbafa4}</Project>
-      <Name>Sdl.Tridion.Context.Mvc</Name>
     </ProjectReference>
     <ProjectReference Include="..\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj">
       <Project>{ae4651df-a42f-4863-a0e1-870eacf3d072}</Project>

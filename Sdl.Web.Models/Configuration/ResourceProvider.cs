@@ -20,9 +20,8 @@ namespace Sdl.Web.Mvc
         private static object resourceLock = new object();
         public object GetObject(string resourceKey, System.Globalization.CultureInfo culture)
         {
-            //TODO map cultures to localization (publication) paths
-            string cultureName = (culture == null ? "" : culture.Name);
-            var dictionary = GetResourceCache(cultureName);
+            //Ignore the culture - we read this from the RequestContext
+            var dictionary = GetResourceCache();
             if (!dictionary.Contains(resourceKey))
             {
                 //default is to return resource key, to aid troubleshooting
@@ -36,9 +35,9 @@ namespace Sdl.Web.Mvc
             get { return new ResourceReader(GetResourceCache()); }
         }
 
-        private IDictionary GetResourceCache(string localization = Configuration.DEFAULT_LOCALIZATION)
+        private IDictionary GetResourceCache()
         {
-            return Resources(localization);
+            return Resources(WebRequestContext.Localization.Path);
         }
 
         public IDictionary Resources(string localization)

@@ -2,6 +2,9 @@
 
 namespace Sdl.Web.Tridion.Context
 {
+    /// <summary>
+    /// Based on https://github.com/NunoLinhares/TridionContextEngineWrapper/tree/master/Sdl.Tridion.Context
+    /// </summary>
     public static class ClaimUris
     {
         private const string UriContext = "taf:claim:context:";

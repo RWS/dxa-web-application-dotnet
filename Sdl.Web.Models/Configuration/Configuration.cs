@@ -85,6 +85,23 @@ namespace Sdl.Web.Mvc
                         }
                     }
                 }
+                //Filter out localizations that were not found on disk, and add culture from config
+                Dictionary<string, Localization> relevantLocalizations = new Dictionary<string, Localization>();
+                foreach (var loc in Localizations)
+                {
+                    if (_configuration.ContainsKey(loc.Value.Path))
+                    {
+                        var config = _configuration[loc.Value.Path];
+                        if (config.ContainsKey("site") && config["site"].ContainsKey("culture"))
+                        {
+                            loc.Value.Culture = config["site"]["culture"];
+                        }
+                        relevantLocalizations.Add(loc.Key, loc.Value);
+                    }
+                }
+                Localizations = relevantLocalizations;
+                //Update the localizations to contain the appropriate culture
+
             }            
         }
 
@@ -98,10 +115,15 @@ namespace Sdl.Web.Mvc
                 //Create a temp dir - when everything succeeds we copy files to main folder above, and rename this
                 var di = Directory.CreateDirectory(tempVersionRoot);
                 //Find bootstrap file(s) in broker DB and take it from there.
+                List<string> processedLocations = new List<string>();
                 foreach (var loc in Localizations.Values)
                 {
-                    var url = loc.Path + "/system/_all.json";
-                    SerializeFile(url, applicationRoot, version + tempDirSuffix, 2);
+                    if (!processedLocations.Contains(loc.Path))
+                    {
+                        var url = loc.Path + "/system/_all.json";
+                        SerializeFile(url, applicationRoot, version + tempDirSuffix, 2);
+                        processedLocations.Add(loc.Path);
+                    }
                 }
                 CleanAndCopyToParentDirectory(tempVersionRoot, version + tempDirSuffix);
                 Directory.Move(tempVersionRoot, versionRoot);
@@ -157,7 +179,7 @@ namespace Sdl.Web.Mvc
         }
         public static string GetDefaultExtension()
         {
-            return ConfigurationManager.AppSettings["Sdl.Web.DefaultPageExtension"] ?? "";
+            return ".html";
         }
         public static string GetRegionController()
         {
@@ -174,6 +196,21 @@ namespace Sdl.Web.Mvc
         public static string GetVersion()
         {
             return ConfigurationManager.AppSettings["Sdl.Web.SiteVersion"];
+        }
+
+        public static void SetLocalizations(List<Dictionary<string, string>> localizations)
+        {
+            Localizations = new Dictionary<string, Localization>();
+            foreach (var loc in localizations)
+            {
+                var localization = new Localization();
+                localization.Protocol = !loc.ContainsKey("Protocol") ? "http" : loc["Protocol"];
+                localization.Domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_link_conf" : loc["Domain"];
+                localization.Port = !loc.ContainsKey("Port") ? "" : ":" + loc["Port"];
+                localization.Path = (!loc.ContainsKey("Path") || loc["Path"] == "/") ? "" : loc["Path"];
+                localization.LocalizationId = !loc.ContainsKey("LocalizationId") ? 0 : Int32.Parse(loc["LocalizationId"]);
+                Localizations.Add(localization.GetBaseUrl(), localization);
+            }
         }
     }
 }

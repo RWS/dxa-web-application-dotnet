@@ -42,15 +42,13 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="Tridion.ContentDelivery.AmbientData">
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\Configuration.cs" />
     <Compile Include="Configuration\Localization.cs" />
     <Compile Include="Configuration\ResourceProviderFactory.cs" />
     <Compile Include="Configuration\ResourceProvider.cs" />
+    <Compile Include="Context\WebRequestContext.cs" />
     <Compile Include="Formatting\FormatFilterAttribute.cs" />
     <Compile Include="Html\BaseRenderer.cs" />
     <Compile Include="Html\HtmlHelperExtensions.cs" />
@@ -78,13 +76,9 @@
     <Compile Include="Statics\StaticRedirectModule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sdl.Tridion.Context.Mvc\Sdl.Tridion.Context.Mvc.csproj">
-      <Project>{87762bc5-b81b-4e2e-995d-5ce9dadbafa4}</Project>
-      <Name>Sdl.Tridion.Context.Mvc</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Sdl.Tridion.Context\Sdl.Tridion.Context.csproj">
-      <Project>{0eb67333-d2b5-4316-b64d-88ad06d5fbbd}</Project>
-      <Name>Sdl.Tridion.Context</Name>
+    <ProjectReference Include="..\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj">
+      <Project>{ae4651df-a42f-4863-a0e1-870eacf3d072}</Project>
+      <Name>Sdl.Web.Tridion</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

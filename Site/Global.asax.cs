@@ -46,7 +46,7 @@ namespace Site
         protected void Application_Start()
         {
             Configuration.StaticFileManager = new Sdl.Web.DD4T.BinaryFileManager();
-            Configuration.Localizations = TridionConfig.LocalizationMap;
+            Configuration.SetLocalizations(TridionConfig.PublicationMap);
             Configuration.Load(Server.MapPath("~"));
             AreaRegistration.RegisterAllAreas();
             RegisterGlobalFilters(GlobalFilters.Filters);
@@ -55,6 +55,7 @@ namespace Site
 
         protected void Application_BeginRequest()
         {
+            //TODO this is an attempt to determin if the request is coming from XPM
             var referrer = HttpContext.Current.Request.UrlReferrer;
             if (referrer != null && referrer.Host == new Uri(Configuration.GetCmsUrl()).Host)
             {

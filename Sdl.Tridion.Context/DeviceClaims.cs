@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Sdl.Tridion.Context
+namespace Sdl.Web.Tridion.Context
 {
     public class DeviceClaims : ContextClaims
     {

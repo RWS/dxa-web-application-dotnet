@@ -1,6 +1,7 @@
 ﻿@model Sdl.Web.Mvc.Models.Article
 @{
-    var context = @Html.Context();
+    //temp variable for debugging
+    var context = Sdl.Web.Mvc.WebRequestContext.ContextEngine;
 }
 <article class="rich-text" @Markup.Entity(Model)>
     <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>

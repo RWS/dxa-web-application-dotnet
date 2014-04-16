@@ -7,8 +7,8 @@
     <ProjectGuid>{0EB67333-D2B5-4316-B64D-88AD06D5FBBD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sdl.Tridion.Context</RootNamespace>
-    <AssemblyName>Sdl.Tridion.Context</AssemblyName>
+    <RootNamespace>Sdl.Web.Tridion.Context</RootNamespace>
+    <AssemblyName>Sdl.Web.Tridion.Context</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
