@@ -15,7 +15,7 @@
     <AssemblyName>Site</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>false</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -107,33 +107,8 @@
       <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.30506.0\lib\net40\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="Tridion.ContentDelivery, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.ContentDelivery.AmbientData, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.ContentDelivery.Configuration, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.Configuration.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.ContentDelivery.Interop, Version=7.1.0.10, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.Interop.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.Context, Version=7.1.2.1706, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.Context.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.Context.Image, Version=7.1.2.1706, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Tridion.Context.Image">
       <HintPath>..\_references\2013-sp1\Tridion.Context.Image.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.Context.Interop, Version=7.1.2.1706, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.Context.Interop.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -227,7 +202,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>59860</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://saintjohn01.ams.dev:82</IISUrl>
+          <IISUrl>http://localhost:59860/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
