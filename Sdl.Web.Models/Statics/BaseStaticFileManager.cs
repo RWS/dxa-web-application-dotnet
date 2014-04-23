@@ -17,7 +17,7 @@ namespace Sdl.Web.Mvc
     public abstract class BaseStaticFileManager : IStaticFileManager
     {
         protected const string TEMP_DIR_SUFFIX = "_temp";
-
+        
         public virtual void CreateStaticAssets(string applicationRoot)
         {
             List<string> folders = new List<string>();
@@ -50,9 +50,13 @@ namespace Sdl.Web.Mvc
                 //finally update the current version - we only do this if everything worked!
                 Configuration.CurrentVersion = Configuration.SiteVersion;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 //TODO if something goes wrong we need to delete all temp and newly created version folders, to ensure we don't have a partial version
+            }
+            finally
+            {
+                //TODO Delete old versions
             }
         }
 
