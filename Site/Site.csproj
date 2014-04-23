@@ -161,6 +161,7 @@
     <Content Include="Views\Component\Carousel.cshtml" />
     <Content Include="Views\Component\Teaser-Carousel.cshtml" />
     <Content Include="Views\Shared\Breadcrumb.cshtml" />
+    <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
