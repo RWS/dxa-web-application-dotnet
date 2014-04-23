@@ -4,6 +4,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Helpers;
@@ -12,20 +13,34 @@ using System.Web.Script.Serialization;
 namespace Sdl.Web.Mvc
 {
     /// <summary>
-    /// Needs refactoring to separate out the loading of config
+    /// General Configuration Class which reads configuration from json files on disk
     /// </summary>
     public static class Configuration
     {
         public static IStaticFileManager StaticFileManager { get; set; }
-        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _configuration;
         public static Dictionary<string, Localization> Localizations { get; set; }
-        public const string DEFAULT_LOCALIZATION = "";
+        public static string VERSION_REGEX = "(v\\d*.\\d*)";
+        public static string SYSTEM_FOLDER = "system";
+        
+        private static string _currentVersion = null;
+        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _configuration;
         private static object configLock = new object();
-        public static string GetConfig(string key, string localization = DEFAULT_LOCALIZATION)
+        
+        /// <summary>
+        /// Gets a (localized) configuration setting
+        /// </summary>
+        /// <param name="key">The configuration key, in the format "section.name" (eg "environment.cmsurl")</param>
+        /// <param name="localization">The localization (eg "en", "fr") - if none specified this is inferred from the request context</param>
+        /// <returns>The configuration matching the key for the given localization</returns>
+        public static string GetConfig(string key, string localization = null)
         {
             if (_configuration == null)
             {
-                Load(HttpContext.Current.Server.MapPath("~"));
+                Load(AppDomain.CurrentDomain.BaseDirectory);
+            }
+            if (localization == null)
+            {
+                localization = WebRequestContext.Localization.Path;
             }
             if (_configuration.ContainsKey(localization))
             {
@@ -47,41 +62,52 @@ namespace Sdl.Web.Mvc
             }
             else
             {
-                throw new Exception("Configuration localization '{0}' does not exist.");
+                throw new Exception(String.Format("Configuration localization '{0}' does not exist.",localization));
             }
         }
 
+        /// <summary>
+        /// Loads configuration into memory from database/disk
+        /// </summary>
+        /// <param name="applicationRoot">The root filepath of the application</param>
         public static void Load(string applicationRoot)
         {
-            var version = ConfigurationManager.AppSettings["Sdl.Web.SiteVersion"];
-            if (version == null)
-            {
-                throw new Exception("Cannot find Sdl.Web.SiteVersion in application config appSettings.");
-            }
-            CheckOrCreateVersion(applicationRoot, version);
+            //We are updating a static variable, so need to be thread safe
             lock (configLock)
             {
+                //Ensure that the config files have been written to disk
+                StaticFileManager.CreateStaticAssets(applicationRoot);
                 _configuration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
                 foreach (var loc in Localizations.Values)
                 {
                     if (!_configuration.ContainsKey(loc.Path))
                     {
                         var config = new Dictionary<string, Dictionary<string, string>>();
-                        var path = String.Format("{0}{1}/system/config/_all.json", applicationRoot, loc.Path);
+                        var path = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, AddVersionToPath(SYSTEM_FOLDER + "/config/_all.json"));
                         if (File.Exists(path))
                         {
+                            //The _all.json file contains a reference to all other configuration files
                             var bootstrapJson = Json.Decode(File.ReadAllText(path));
                             foreach (string file in bootstrapJson.files)
                             {
                                 var type = file.Substring(file.LastIndexOf("/") + 1);
                                 type = type.Substring(0, type.LastIndexOf(".")).ToLower();
-                                var configPath = applicationRoot + file;
+                                var configPath = applicationRoot + AddVersionToPath(file);
                                 if (File.Exists(configPath))
                                 {
                                     config.Add(type, GetConfigFromFile(configPath));
                                 }
+                                else
+                                {
+                                    //TODO log a warning, or throw an error?!
+                                }
                             }
                             _configuration.Add(loc.Path, config);
+                        }
+                        else
+                        {
+                            //TODO log a warning, although this should not be an error, as it is quite possible that localizations are configured
+                            //for which no configuration has yet been published
                         }
                     }
                 }
@@ -100,73 +126,7 @@ namespace Sdl.Web.Mvc
                     }
                 }
                 Localizations = relevantLocalizations;
-                //Update the localizations to contain the appropriate culture
-
             }            
-        }
-
-        private static void CheckOrCreateVersion(string applicationRoot, string version)
-        {
-            var tempDirSuffix = "_temp";
-            var versionRoot = String.Format("{0}/system/{1}", applicationRoot, version);
-            if (!Directory.Exists(versionRoot))
-            {
-                var tempVersionRoot = versionRoot + tempDirSuffix;
-                //Create a temp dir - when everything succeeds we copy files to main folder above, and rename this
-                var di = Directory.CreateDirectory(tempVersionRoot);
-                //Find bootstrap file(s) in broker DB and take it from there.
-                List<string> processedLocations = new List<string>();
-                foreach (var loc in Localizations.Values)
-                {
-                    if (!processedLocations.Contains(loc.Path))
-                    {
-                        var url = loc.Path + "/system/_all.json";
-                        SerializeFile(url, applicationRoot, version + tempDirSuffix, 2);
-                        processedLocations.Add(loc.Path);
-                    }
-                }
-                CleanAndCopyToParentDirectory(tempVersionRoot, version + tempDirSuffix);
-                Directory.Move(tempVersionRoot, versionRoot);
-            } 
-        }
-
-        private static void CleanAndCopyToParentDirectory(string tempVersionRoot, string tempDirName)
-        {
-            //Now clean up old and Create new directories
-            foreach (string dirPath in Directory.GetDirectories(tempVersionRoot, "*",SearchOption.AllDirectories))
-            {
-                var newPath = dirPath.Replace("/" + tempDirName,"");
-                if (Directory.Exists(newPath))
-                {
-                    try
-                    {
-                        Directory.Delete(newPath,true);
-                    }
-                    catch(Exception ex)
-                    {
-                        //TODO Log a warning, but don't stop processing
-                    }
-                }
-                Directory.CreateDirectory(newPath);
-            }
-            //Copy all the files & Replaces any files with the same name
-            foreach (string newPath in Directory.GetFiles(tempVersionRoot, "*.*", SearchOption.AllDirectories))
-            {
-                File.Copy(newPath, newPath.Replace("/" + tempDirName, ""), true);
-            } 
-        }
-
-        private static void SerializeFile(string url, string applicationRoot, string version, int bootstrapLevel = 0)
-        {
-            string fileContents = StaticFileManager.SerializeForVersion(url, applicationRoot, version, bootstrapLevel!=0);
-            if (bootstrapLevel!=0)
-            {
-                var bootstrapJson = Json.Decode(fileContents);
-                foreach (string file in bootstrapJson.files)
-                {
-                    SerializeFile(file, applicationRoot, version, bootstrapLevel - 1);
-                }
-            }
         }
 
         private static Dictionary<string, string> GetConfigFromFile(string file)
@@ -175,7 +135,7 @@ namespace Sdl.Web.Mvc
         }
         public static string GetDefaultPageName()
         {
-            return ConfigurationManager.AppSettings["Sdl.Web.DefaultPage"] ?? "index.html";
+            return "index.html";
         }
         public static string GetDefaultExtension()
         {
@@ -183,19 +143,72 @@ namespace Sdl.Web.Mvc
         }
         public static string GetRegionController()
         {
-            return ConfigurationManager.AppSettings["Sdl.Web.RegionController"] ?? "Region";
+            return "Region";
         }
         public static string GetRegionAction()
         {
-            return ConfigurationManager.AppSettings["Sdl.Web.RegionAction"] ?? "Region";
+            return "Region";
         }
         public static string GetCmsUrl()
         {
             return GetConfig("environment.cmsurl");
         }
-        public static string GetVersion()
+        
+        public static String AddVersionToPath(string path)
         {
-            return ConfigurationManager.AppSettings["Sdl.Web.SiteVersion"];
+            return path.Replace(SYSTEM_FOLDER + "/", String.Format("{0}/{1}/", SYSTEM_FOLDER, CurrentVersion));
+        }
+
+        public static String RemoveVersionFromPath(string path)
+        {
+            return Regex.Replace(path, SYSTEM_FOLDER + "/" + VERSION_REGEX + "/", delegate(Match match)
+            {
+                return SYSTEM_FOLDER + "/";
+            });
+        }
+
+        public static string SiteVersion
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["Sdl.Web.SiteVersion"];
+            }
+        }
+
+        public static string CurrentVersion
+        {
+            get
+            {
+                if (_currentVersion == null)
+                {
+                    //The current version is the the latest version that exists on disk in one or more localizations
+                    //UNLESS an earlier version is specified in web.config (Sdl.Web.SiteVersion) for rollback purposes
+                    //When a new version is serialized to disk the current version will also be updated accordingly
+                    foreach (var loc in Localizations.Values)
+                    {
+                        DirectoryInfo di = new DirectoryInfo(String.Format("{0}{1}/{2}", AppDomain.CurrentDomain.BaseDirectory, loc.Path, SYSTEM_FOLDER));
+                        if (di.Exists)
+                        {
+                            foreach (DirectoryInfo dir in di.GetDirectories("v*"))
+                            {
+                                if (_currentVersion == null || dir.Name.CompareTo(_currentVersion) > 0)
+                                {
+                                    _currentVersion = dir.Name;
+                                }
+                            }
+                        }
+                    }
+                    if (_currentVersion == null || _currentVersion.CompareTo(SiteVersion) > 0)
+                    {
+                        _currentVersion = SiteVersion;
+                    }
+                }
+                return _currentVersion;
+            }
+            set
+            {
+                _currentVersion = value;
+            }
         }
 
         public static void SetLocalizations(List<Dictionary<string, string>> localizations)
@@ -206,7 +219,7 @@ namespace Sdl.Web.Mvc
                 var localization = new Localization();
                 localization.Protocol = !loc.ContainsKey("Protocol") ? "http" : loc["Protocol"];
                 localization.Domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_link_conf" : loc["Domain"];
-                localization.Port = !loc.ContainsKey("Port") ? "" : ":" + loc["Port"];
+                localization.Port = !loc.ContainsKey("Port") ? "" : loc["Port"];
                 localization.Path = (!loc.ContainsKey("Path") || loc["Path"] == "/") ? "" : loc["Path"];
                 localization.LocalizationId = !loc.ContainsKey("LocalizationId") ? 0 : Int32.Parse(loc["LocalizationId"]);
                 Localizations.Add(localization.GetBaseUrl(), localization);

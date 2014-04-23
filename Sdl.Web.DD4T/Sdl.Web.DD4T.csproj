@@ -68,7 +68,6 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Statics\BinaryDistributionModule.cs" />
     <Compile Include="Controllers\DD4TController.cs" />
     <Compile Include="Html\DD4TRenderer.cs" />
     <Compile Include="Html\Markup.cs" />
@@ -77,6 +76,9 @@
     <Compile Include="Mapping\ExtensionMethods.cs" />
     <Compile Include="Mapping\PublicationResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Statics\BinaryDistributionModule.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Statics\BinaryFileManager.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -72,6 +72,7 @@
     <Compile Include="Models\Page\Header.cs" />
     <Compile Include="Models\Page\Region.cs" />
     <Compile Include="Models\Page\WebPage.cs" />
+    <Compile Include="Statics\BaseStaticFileManager.cs" />
     <Compile Include="Statics\IStaticFileManager.cs" />
     <Compile Include="Statics\StaticRedirectModule.cs" />
   </ItemGroup>

@@ -14,6 +14,9 @@ using System.Web.Script.Serialization;
 
 namespace Sdl.Web.Mvc
 {
+    /// <summary>
+    /// Resource Provider to read resources from JSON files on disk
+    /// </summary>
     public class ResourceProvider : IResourceProvider
     {
         private static Dictionary<string, Dictionary<string, object>> _resources;
@@ -55,33 +58,46 @@ namespace Sdl.Web.Mvc
 
         private void LoadResources()
         {
+            //We are reading into a static variable, so need to be thread safe
             lock (resourceLock)
             {
-                var applicationRoot = HttpContext.Current.Server.MapPath("~");
+                var applicationRoot = AppDomain.CurrentDomain.BaseDirectory;
                 _resources = new Dictionary<string, Dictionary<string, object>>();
                 foreach (var loc in Configuration.Localizations.Values)
                 {
+                    //Just in case the same localization is in there more than once
                     if (!_resources.ContainsKey(loc.Path))
                     {
                         var resources = new Dictionary<string, object>();
-                        var path = String.Format("{0}{1}/system/resources/_all.json", applicationRoot, loc.Path);
+                        var path = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, Configuration.AddVersionToPath(Configuration.SYSTEM_FOLDER + "/resources/_all.json"));
                         if (File.Exists(path))
                         {
+                            //The _all.json file contains a list of all other resources files to load
                             var bootstrapJson = Json.Decode(File.ReadAllText(path));
                             foreach (string file in bootstrapJson.files)
                             {
                                 var type = file.Substring(file.LastIndexOf("/") + 1);
                                 type = type.Substring(0, type.LastIndexOf(".")).ToLower();
-                                var filePath = applicationRoot + file;
+                                var filePath = applicationRoot + Configuration.AddVersionToPath(file);
                                 if (File.Exists(filePath))
                                 {
                                     foreach (var item in GetResourcesFromFile(filePath))
                                     {
-                                        resources.Add(String.Format("{0}.{1}",type,item.Key), item.Value);
+                                        //we ensure resource key uniqueness by adding the type (which comes from the filename)
+                                        resources.Add(String.Format("{0}.{1}", type, item.Key), item.Value);
                                     }
+                                }
+                                else
+                                {
+                                    //TODO log a warning
                                 }
                             }
                             _resources.Add(loc.Path, resources);
+                        }
+                        else
+                        {
+                            //TODO Log a warning - although this should not be an error - 
+                            //its quite possible that localizations are configured for which resources are not yet available.
                         }
                     }
                 }

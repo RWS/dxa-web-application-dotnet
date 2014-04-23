@@ -15,12 +15,7 @@ namespace Sdl.Web.DD4T
     {
         public int ResolvePublicationId()
         {
-            int pubid = WebRequestContext.Localization.LocalizationId;
-            if (pubid==0)
-            {
-                pubid = ConfigurationHelper.PublicationId;
-            }
-            return pubid;
+            return WebRequestContext.Localization.LocalizationId;
         }
     }
 }
