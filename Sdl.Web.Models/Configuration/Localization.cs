@@ -16,7 +16,7 @@ namespace Sdl.Web.Mvc
         public string Culture { get; set; }
         public string GetBaseUrl() 
         {
-            return String.Format("{0}://{1}{2}{3}", Protocol, Domain, Port, Path);
+            return String.Format("{0}://{1}{2}{3}", Protocol, Domain, String.IsNullOrEmpty(Port) ? Port : ":" + Port, String.IsNullOrEmpty(Path) || Path.StartsWith("/") ? Path : "/" + Path);
         }
     }
 }

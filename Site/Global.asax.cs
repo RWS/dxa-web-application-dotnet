@@ -24,8 +24,10 @@ namespace Site
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+            
             //routes.IgnoreRoute("{*favicon}", new { favicon = @"(.*/)?favicon.ico(/.*)?" });
             routes.IgnoreRoute("cid/{*pathInfo}");
+            
             //Tridion page route
             routes.MapRoute(
                "TridionPage",
@@ -47,6 +49,7 @@ namespace Site
         {
             Configuration.StaticFileManager = new Sdl.Web.DD4T.BinaryFileManager();
             Configuration.SetLocalizations(TridionConfig.PublicationMap);
+            var currentVersion = Configuration.CurrentVersion;
             Configuration.Load(Server.MapPath("~"));
             AreaRegistration.RegisterAllAreas();
             RegisterGlobalFilters(GlobalFilters.Filters);

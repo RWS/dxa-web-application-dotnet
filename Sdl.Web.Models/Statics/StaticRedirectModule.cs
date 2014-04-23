@@ -15,7 +15,6 @@ namespace Sdl.Web.Mvc
     /// </summary>
     public class StaticRedirectModule : IHttpModule
     {
-        private static string VERSION_REGEX = @"system/(v\d*.\d*/)";
         public void Init(HttpApplication context)
         {
             context.BeginRequest += new EventHandler(this.BeginRequest);
@@ -25,16 +24,11 @@ namespace Sdl.Web.Mvc
         {
             HttpApplication application = (HttpApplication)sender;
             HttpContext context = application.Context;
-            bool rewrite = false;
-            var url = Regex.Replace(context.Request.Url.AbsolutePath, VERSION_REGEX, delegate(Match match)
+            var url = context.Request.Url.AbsolutePath;
+            var versionLessUrl = Configuration.RemoveVersionFromPath(url);
+            if (url != versionLessUrl)
             {
-                rewrite = true;
-                return "system/";
-            });
-            if (rewrite)
-            {
-                //does it make sense to do a 301 redirect? http://msdn.microsoft.com/en-us/library/system.web.httpresponse.redirectlocation(v=vs.110).aspx
-                context.Response.Redirect(url);
+                context.Response.Redirect(versionLessUrl);
             }
         }
 

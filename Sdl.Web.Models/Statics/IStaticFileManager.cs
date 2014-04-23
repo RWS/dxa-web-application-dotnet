@@ -8,6 +8,7 @@ namespace Sdl.Web.Mvc
 {
     public interface IStaticFileManager
     {
-        string SerializeForVersion(string url, string applicationRoot, string version, bool returnContents = false );
+        void CreateStaticAssets(string applicationRoot);
+        string Serialize(string url, string applicationRoot, string suffix, bool returnContents = false );
     }
 }

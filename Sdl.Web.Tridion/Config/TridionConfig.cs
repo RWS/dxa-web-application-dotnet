@@ -32,9 +32,9 @@ namespace Sdl.Web.Tridion
         {
             lock(lock1)
             {
-                var rootApplicationFolder = HttpContext.Current.Server.MapPath("~/bin");
+                var rootApplicationFolder = AppDomain.CurrentDomain.BaseDirectory + "/bin";
                 _localizations = new List<Dictionary<string, string>>();
-                XDocument config = XDocument.Load(rootApplicationFolder + "/config/cd_link_conf.xml");
+                XDocument config = XDocument.Load(rootApplicationFolder + "/config/cd_dynamic_conf.xml");
                 if (config != null)
                 {
                     foreach (var pub in config.Descendants("Publication"))

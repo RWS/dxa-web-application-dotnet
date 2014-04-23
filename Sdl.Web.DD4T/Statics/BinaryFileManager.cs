@@ -20,7 +20,7 @@ namespace Sdl.Web.DD4T
     /// <summary>
     /// Ensures a Binary file is cached on the file-system from the Tridion Broker DB
     /// </summary>
-    public class BinaryFileManager : IBinaryFileManager, IStaticFileManager
+    public class BinaryFileManager : BaseStaticFileManager, IBinaryFileManager
     {
         #region caching
         private ICacheAgent _cacheAgent = null;
@@ -200,10 +200,10 @@ namespace Sdl.Web.DD4T
 
         #endregion
 
-        public string SerializeForVersion(string url, string applicationRoot, string version, bool returnContents = false)
+        public override string Serialize(string url, string applicationRoot, string suffix, bool returnContents = false)
         {
             IBinary binary = GetBinaryFromBroker(url);
-            string filepath = (applicationRoot + url).Replace("system/", "system/" + version + "/");
+            string filepath = applicationRoot + url.Replace(Configuration.SYSTEM_FOLDER + "/", Configuration.SYSTEM_FOLDER + suffix + "/");
             WriteBinaryToFile(binary, filepath, null);
             return returnContents ? Encoding.UTF8.GetString(binary.BinaryData) : null;
         }

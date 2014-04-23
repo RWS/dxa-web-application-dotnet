@@ -44,12 +44,15 @@ namespace Sdl.Web.Mvc
             {
                 return Configuration.Localizations.SingleOrDefault().Value;
             }
-            var uri = HttpContext.Current.Request.Url.AbsoluteUri;
-            foreach (var key in Configuration.Localizations.Keys)
+            if (HttpContext.Current != null && HttpContext.Current.Request != null)
             {
-                if (uri.StartsWith(key))
+                var uri = HttpContext.Current.Request.Url.AbsoluteUri;
+                foreach (var key in Configuration.Localizations.Keys)
                 {
-                    return Configuration.Localizations[key];
+                    if (uri.StartsWith(key))
+                    {
+                        return Configuration.Localizations[key];
+                    }
                 }
             }
             //TODO - should we throw an error instead?
@@ -58,12 +61,15 @@ namespace Sdl.Web.Mvc
         
         protected static object GetFromContextStore(string key)
         {
-            return HttpContext.Current.Items[key];
+            return HttpContext.Current == null ? null : HttpContext.Current.Items[key];
         }
 
         protected static object AddToContextStore(string key, object value)
         {
-            HttpContext.Current.Items[key] = value;
+            if (HttpContext.Current != null)
+            {
+                HttpContext.Current.Items[key] = value;
+            }
             return value;
         }
     }
