@@ -186,6 +186,7 @@
     <Content Include="system\Views\Component\Teaser-Carousel.cshtml" />
     <Content Include="system\Views\Shared\Breadcrumb.cshtml" />
     <Content Include="system\Views\Page\_ViewStart.cshtml" />
+    <Content Include="system\Views\Page\ContentPage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
