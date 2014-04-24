@@ -19,40 +19,90 @@ namespace Sdl.Web.Mvc
     {
         public static IStaticFileManager StaticFileManager { get; set; }
         public static Dictionary<string, Localization> Localizations { get; set; }
-        public static string VERSION_REGEX = "(v\\d*.\\d*)";
-        public static string SYSTEM_FOLDER = "system";
+        public const string VERSION_REGEX = "(v\\d*.\\d*)";
+        public const string SYSTEM_FOLDER = "system";
+        public const string CORE_MODULE_NAME = "core";
         
         private static string _currentVersion = null;
-        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _configuration;
+        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _localConfiguration;
+        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _globalConfiguration;
+        private static string _defaultLocalization = null;
+        public static string DefaultLocalization
+        {
+            get
+            {
+                return _defaultLocalization;
+            }
+        }
+
+        public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LocalConfiguration
+        {
+            get
+            {
+                if (_localConfiguration == null)
+                {
+                    LoadConfig();
+                }
+                return _localConfiguration;
+            }
+        }
+        public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> GlobalConfiguration
+        {
+            get
+            {
+                if (_globalConfiguration == null)
+                {
+                    LoadConfig();
+                }
+                return _globalConfiguration;
+            }
+        }
         private static object configLock = new object();
         
         /// <summary>
+        /// Gets a (global) configuration setting
+        /// </summary>
+        /// <param name="key">The configuration key, in the format "section.name" (eg "Schema.Article")</param>
+        /// <param name="module">The module (eg "Search") - if none specified this defaults to "Core"</param>
+        /// <returns>The configuration matching the key for the given module</returns>
+        public static string GetGlobalConfig(string key, string module = CORE_MODULE_NAME)
+        {
+            return GetConfig(GlobalConfiguration, key, module, true);
+        }
+
+        /// <summary>
         /// Gets a (localized) configuration setting
         /// </summary>
-        /// <param name="key">The configuration key, in the format "section.name" (eg "environment.cmsurl")</param>
+        /// <param name="key">The configuration key, in the format "section.name" (eg "Environment.CmsUrl")</param>
         /// <param name="localization">The localization (eg "en", "fr") - if none specified this is inferred from the request context</param>
         /// <returns>The configuration matching the key for the given localization</returns>
         public static string GetConfig(string key, string localization = null)
         {
-            if (_configuration == null)
-            {
-                Load(AppDomain.CurrentDomain.BaseDirectory);
-            }
             if (localization == null)
             {
                 localization = WebRequestContext.Localization.Path;
             }
-            if (_configuration.ContainsKey(localization))
+            return GetConfig(LocalConfiguration, key, localization);
+        }
+
+        private static void LoadConfig()
+        {
+            Load(AppDomain.CurrentDomain.BaseDirectory);
+        }
+        
+        private static string GetConfig(Dictionary<string, Dictionary<string, Dictionary<string, string>>> config, string key, string type, bool global = false)
+        {
+            if (config.ContainsKey(type))
             {
-                var config = _configuration[localization];
+                var subConfig = config[type];
                 var bits = key.Split('.');
                 if (bits.Length == 2)
                 {
-                    if (config.ContainsKey(bits[0]))
+                    if (subConfig.ContainsKey(bits[0]))
                     {
-                        if (config[bits[0]].ContainsKey(bits[1]))
+                        if (subConfig[bits[0]].ContainsKey(bits[1]))
                         {
-                            return config[bits[0]][bits[1]];
+                            return subConfig[bits[0]][bits[1]];
                         }
                         throw new Exception(String.Format("Configuration key {0} does not exist in section {1}", bits[1], bits[0]));
                     }
@@ -62,7 +112,7 @@ namespace Sdl.Web.Mvc
             }
             else
             {
-                throw new Exception(String.Format("Configuration localization '{0}' does not exist.",localization));
+                throw new Exception(String.Format("Configuration for {0} '{1}' does not exist.", global ? "module" : "localization", type));
             }
         }
 
@@ -77,10 +127,12 @@ namespace Sdl.Web.Mvc
             {
                 //Ensure that the config files have been written to disk
                 StaticFileManager.CreateStaticAssets(applicationRoot);
-                _configuration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
+
+                _localConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
+                _globalConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
                 foreach (var loc in Localizations.Values)
                 {
-                    if (!_configuration.ContainsKey(loc.Path))
+                    if (!_localConfiguration.ContainsKey(loc.Path))
                     {
                         var config = new Dictionary<string, Dictionary<string, string>>();
                         var path = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, AddVersionToPath(SYSTEM_FOLDER + "/config/_all.json"));
@@ -88,6 +140,10 @@ namespace Sdl.Web.Mvc
                         {
                             //The _all.json file contains a reference to all other configuration files
                             var bootstrapJson = Json.Decode(File.ReadAllText(path));
+                            if (bootstrapJson.defaultLocalization)
+                            {
+                                _defaultLocalization = loc.Path;
+                            }
                             foreach (string file in bootstrapJson.files)
                             {
                                 var type = file.Substring(file.LastIndexOf("/") + 1);
@@ -95,14 +151,27 @@ namespace Sdl.Web.Mvc
                                 var configPath = applicationRoot + AddVersionToPath(file);
                                 if (File.Exists(configPath))
                                 {
-                                    config.Add(type, GetConfigFromFile(configPath));
+                                    //For the default localization we load in global configuration
+                                    if (type.Contains(".") && loc.Path==_defaultLocalization)
+                                    {
+                                        var bits = type.Split('.');
+                                        if (!_globalConfiguration.ContainsKey(bits[0]))
+                                        {
+                                            _globalConfiguration.Add(bits[0], new Dictionary<string, Dictionary<string, string>>());
+                                        }
+                                        _globalConfiguration[bits[0]].Add(bits[1], GetConfigFromFile(configPath));
+                                    }
+                                    else
+                                    {
+                                        config.Add(type, GetConfigFromFile(configPath));
+                                    }
                                 }
                                 else
                                 {
                                     //TODO log a warning, or throw an error?!
                                 }
                             }
-                            _configuration.Add(loc.Path, config);
+                            _localConfiguration.Add(loc.Path, config);
                         }
                         else
                         {
@@ -111,16 +180,19 @@ namespace Sdl.Web.Mvc
                         }
                     }
                 }
-                //Filter out localizations that were not found on disk, and add culture from config
+                //Filter out localizations that were not found on disk, and add culture/set default localization from config
                 Dictionary<string, Localization> relevantLocalizations = new Dictionary<string, Localization>();
                 foreach (var loc in Localizations)
                 {
-                    if (_configuration.ContainsKey(loc.Value.Path))
+                    if (_localConfiguration.ContainsKey(loc.Value.Path))
                     {
-                        var config = _configuration[loc.Value.Path];
-                        if (config.ContainsKey("site") && config["site"].ContainsKey("culture"))
+                        var config = _localConfiguration[loc.Value.Path];
+                        if (config.ContainsKey("site"))
                         {
-                            loc.Value.Culture = config["site"]["culture"];
+                            if (config["site"].ContainsKey("culture"))
+                            {
+                                loc.Value.Culture = config["site"]["culture"];
+                            }
                         }
                         relevantLocalizations.Add(loc.Key, loc.Value);
                     }
