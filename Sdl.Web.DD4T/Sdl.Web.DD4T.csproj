@@ -29,6 +29,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DD4T.ContentModel">
       <HintPath>..\packages\DD4TFramework.1.31.0\lib\DD4T.ContentModel.dll</HintPath>
