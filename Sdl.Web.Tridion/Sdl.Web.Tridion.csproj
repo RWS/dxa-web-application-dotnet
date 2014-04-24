@@ -42,6 +42,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
     </Reference>
+    <Reference Include="Tridion.Context">
+      <HintPath>..\_references\2013-sp1\Tridion.Context.dll</HintPath>
+    </Reference>
+    <Reference Include="Tridion.Context.Image">
+      <HintPath>..\_references\2013-sp1\Tridion.Context.Image.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context\BrowserClaims.cs" />
