@@ -145,22 +145,23 @@
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
-    <Content Include="Views\Web.config" />
-    <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Page\ContentPage.cshtml" />
-    <Content Include="Views\Component\Article.cshtml" />
-    <Content Include="Views\Region\Main.cshtml" />
+    <Content Include="system\Views\Web.config" />
+    <Content Include="system\Views\Page\_Layout.cshtml" />
+    <Content Include="system\Views\Component\Article.cshtml" />
+    <Content Include="system\Views\Region\Main.cshtml" />
     <None Include="Properties\PublishProfiles\Publish to Local Demo Site.pubxml" />
-    <Content Include="Views\Region\3-Column.cshtml" />
-    <Content Include="Views\Component\Teaser.cshtml" />
-    <Content Include="Views\Component\Teaser-ImageOverlay.cshtml" />
-    <Content Include="Views\Page\HomePage.cshtml" />
-    <Content Include="Views\Region\2-Column.cshtml" />
-    <Content Include="Views\Region\Hero.cshtml" />
-    <Content Include="Views\Page\SectionPage.cshtml" />
-    <Content Include="Views\Component\Carousel.cshtml" />
-    <Content Include="Views\Component\Teaser-Carousel.cshtml" />
-    <Content Include="Views\Shared\Breadcrumb.cshtml" />
+    <Content Include="system\Views\Region\3-Column.cshtml" />
+    <Content Include="system\Views\Component\Teaser.cshtml" />
+    <Content Include="system\Views\Component\Teaser-ImageOverlay.cshtml" />
+    <Content Include="system\Views\Page\HomePage.cshtml" />
+    <Content Include="system\Views\Region\2-Column.cshtml" />
+    <Content Include="system\Views\Region\Hero.cshtml" />
+    <Content Include="system\Views\Page\SectionPage.cshtml" />
+    <Content Include="system\Views\Component\Carousel.cshtml" />
+    <Content Include="system\Views\Component\Teaser-Carousel.cshtml" />
+    <Content Include="system\Views\Shared\Breadcrumb.cshtml" />
+    <Content Include="system\Views\Page\_ViewStart.cshtml" />
+    <Content Include="system\Views\Page\ContentPage.cshtml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
   </ItemGroup>
   <ItemGroup>

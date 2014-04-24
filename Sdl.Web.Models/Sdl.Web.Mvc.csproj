@@ -51,6 +51,7 @@
     <Compile Include="Configuration\Localization.cs" />
     <Compile Include="Configuration\ResourceProviderFactory.cs" />
     <Compile Include="Configuration\ResourceProvider.cs" />
+    <Compile Include="Context\ContextAwareViewEngine.cs" />
     <Compile Include="Context\WebRequestContext.cs" />
     <Compile Include="Formatting\FormatFilterAttribute.cs" />
     <Compile Include="Html\BaseRenderer.cs" />

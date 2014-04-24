@@ -52,6 +52,9 @@ namespace Site
             AreaRegistration.RegisterAllAreas();
             RegisterGlobalFilters(GlobalFilters.Filters);
             RegisterRoutes(RouteTable.Routes);
+            ViewEngines.Engines.Clear();
+            //Register Custom Razor View Engine
+            ViewEngines.Engines.Add(new ContextAwareViewEngine());
         }
 
         protected void Application_BeginRequest()
