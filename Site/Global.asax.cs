@@ -32,8 +32,8 @@ namespace Site
             routes.MapRoute(
                "TridionPage",
                "{*PageId}",
-               new { controller = "Page", action = "Page" }, // Parameter defaults
-               new { pageId = @"^(.*)?$" } // Parameter constraints
+               new { controller = "Page", action = "Page" }, 
+               new { pageId = @"^(.*)?$" } 
             );
 
             routes.MapRoute(
@@ -41,8 +41,6 @@ namespace Site
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             );
-            routes.IgnoreRoute("cid/{*pathInfo}");
-            
         }
 
         protected void Application_Start()
