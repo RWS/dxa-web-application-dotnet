@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -54,6 +57,9 @@
     <Compile Include="Html\HtmlHelperExtensions.cs" />
     <Compile Include="Html\IRenderer.cs" />
     <Compile Include="Html\UrlHelperExtension.cs" />
+    <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="Logging\Log4NetLogger.cs" />
+    <Compile Include="Logging\Logger.cs" />
     <Compile Include="Mapping\BaseModelFactory.cs" />
     <Compile Include="Mapping\IModelFactory.cs" />
     <Compile Include="Models\Component\ItemList.cs" />
@@ -81,6 +87,9 @@
       <Project>{ae4651df-a42f-4863-a0e1-870eacf3d072}</Project>
       <Name>Sdl.Web.Tridion</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -92,6 +92,7 @@ namespace Sdl.Web.Mvc
         
         private static string GetConfig(Dictionary<string, Dictionary<string, Dictionary<string, string>>> config, string key, string type, bool global = false)
         {
+            Exception ex = null;
             if (config.ContainsKey(type))
             {
                 var subConfig = config[type];
@@ -104,16 +105,22 @@ namespace Sdl.Web.Mvc
                         {
                             return subConfig[bits[0]][bits[1]];
                         }
-                        throw new Exception(String.Format("Configuration key {0} does not exist in section {1}", bits[1], bits[0]));
+                        ex = new Exception(String.Format("Configuration key {0} does not exist in section {1}", bits[1], bits[0]));
                     }
-                    throw new Exception(String.Format("Configuration section {0} does not exist", bits[0]));
+                    ex = new Exception(String.Format("Configuration section {0} does not exist", bits[0]));
                 }
-                throw new Exception(String.Format("Configuration key {0} is in the wrong format. It should be in the format [section].[key], for example \"environment.cmsurl\"", key));
+                ex = new Exception(String.Format("Configuration key {0} is in the wrong format. It should be in the format [section].[key], for example \"environment.cmsurl\"", key));
             }
             else
             {
-                throw new Exception(String.Format("Configuration for {0} '{1}' does not exist.", global ? "module" : "localization", type));
+                ex = new Exception(String.Format("Configuration for {0} '{1}' does not exist.", global ? "module" : "localization", type));
             }
+            if (ex != null)
+            {
+                Log.Error(ex);
+                throw ex;
+            }
+            return null;
         }
 
         /// <summary>
@@ -134,15 +141,18 @@ namespace Sdl.Web.Mvc
                 {
                     if (!_localConfiguration.ContainsKey(loc.Path))
                     {
+                        Log.Debug("Loading config for localization : '{0}'", loc.Path);
                         var config = new Dictionary<string, Dictionary<string, string>>();
                         var path = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, AddVersionToPath(SYSTEM_FOLDER + "/config/_all.json"));
                         if (File.Exists(path))
                         {
                             //The _all.json file contains a reference to all other configuration files
+                            Log.Debug("Loading config bootstrap file : '{0}'", path);
                             var bootstrapJson = Json.Decode(File.ReadAllText(path));
                             if (bootstrapJson.defaultLocalization)
                             {
                                 _defaultLocalization = loc.Path;
+                                Log.Info("Set default localization : '{0}'", loc.Path);
                             }
                             foreach (string file in bootstrapJson.files)
                             {
@@ -151,6 +161,7 @@ namespace Sdl.Web.Mvc
                                 var configPath = applicationRoot + AddVersionToPath(file);
                                 if (File.Exists(configPath))
                                 {
+                                    Log.Debug("Loading config from file: {0}", configPath);
                                     //For the default localization we load in global configuration
                                     if (type.Contains(".") && loc.Path==_defaultLocalization)
                                     {
@@ -168,15 +179,14 @@ namespace Sdl.Web.Mvc
                                 }
                                 else
                                 {
-                                    //TODO log a warning, or throw an error?!
+                                    Log.Error("Config file: {0} does not exist - skipping", configPath);
                                 }
                             }
                             _localConfiguration.Add(loc.Path, config);
                         }
                         else
                         {
-                            //TODO log a warning, although this should not be an error, as it is quite possible that localizations are configured
-                            //for which no configuration has yet been published
+                            Log.Warn("Localization configuration bootstrap file: {0} does not exist - skipping this localization", path);
                         }
                     }
                 }
@@ -198,6 +208,7 @@ namespace Sdl.Web.Mvc
                     }
                 }
                 Localizations = relevantLocalizations;
+                Log.Debug("The following localizations are active for this site: {0}", String.Join(", ", Localizations.Select(l=>l.Key).ToArray()));
             }            
         }
 
@@ -205,6 +216,7 @@ namespace Sdl.Web.Mvc
         {
             return new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(File.ReadAllText(file));
         }
+
         public static string GetDefaultPageName()
         {
             return "index.html";
