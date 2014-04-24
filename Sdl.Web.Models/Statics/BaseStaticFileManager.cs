@@ -34,10 +34,15 @@ namespace Sdl.Web.Mvc
                             //Create a temp dir - if everything succeeds we rename this
                             var tempVersionRoot = versionRoot + TEMP_DIR_SUFFIX;
                             var di = Directory.CreateDirectory(tempVersionRoot);
+                            Log.Debug("Created temp version root: {0}", tempVersionRoot);
                             //Find bootstrap file and take it from there.
                             var url = String.Format("{0}/{1}/_all.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, Configuration.SYSTEM_FOLDER);
                             SerializeFile(url, applicationRoot, String.Format("/{0}{1}", Configuration.SiteVersion, TEMP_DIR_SUFFIX), 2);
                             folders.Add(versionRoot);
+                        }
+                        else
+                        {
+                            Log.Debug("Version root {0} already exists. Nothing to do", versionRoot);
                         }
                     }
                 }
@@ -45,14 +50,27 @@ namespace Sdl.Web.Mvc
                 foreach (var folder in folders)
                 {
                     Directory.Move(folder + TEMP_DIR_SUFFIX, folder);
-                    //TODO add logging
+                    Log.Debug("Renamed temp version root to : {0}", folder);
                 }
                 //finally update the current version - we only do this if everything worked!
                 Configuration.CurrentVersion = Configuration.SiteVersion;
+                Log.Debug("Current version is now {0}", Configuration.CurrentVersion);
             }
             catch (Exception ex)
             {
-                //TODO if something goes wrong we need to delete all temp and newly created version folders, to ensure we don't have a partial version
+                Log.Error(ex, "Error creating files on disk.");
+                //If something goes wrong we need to delete all temp and newly created version folders, to ensure we don't have a partial version
+                foreach (var folder in folders)
+                {
+                    if (Directory.Exists(folder + TEMP_DIR_SUFFIX))
+                    {
+                        Directory.Delete(folder + TEMP_DIR_SUFFIX);
+                    }
+                    else if (Directory.Exists(folder))
+                    {
+                        Directory.Delete(folder);
+                    }
+                }
             }
             finally
             {

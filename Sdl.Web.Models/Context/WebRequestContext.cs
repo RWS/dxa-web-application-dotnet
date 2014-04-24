@@ -51,6 +51,7 @@ namespace Sdl.Web.Mvc
                 {
                     if (uri.StartsWith(key))
                     {
+                        Log.Debug("Request for {0} is from localization '{1}'", uri, Configuration.Localizations[key].Path);
                         return Configuration.Localizations[key];
                     }
                 }

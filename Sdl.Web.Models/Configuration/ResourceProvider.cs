@@ -51,7 +51,9 @@ namespace Sdl.Web.Mvc
             }
             if (!_resources.ContainsKey(localization))
             {
-                throw new Exception(String.Format("No resources can be found for localization {0}. Check that the localization path is correct and the resources have been published.",localization));
+                var ex = new Exception(String.Format("No resources can be found for localization {0}. Check that the localization path is correct and the resources have been published.",localization));
+                Log.Error(ex);
+                throw ex;
             }
             return _resources[localization];
         }
@@ -68,11 +70,13 @@ namespace Sdl.Web.Mvc
                     //Just in case the same localization is in there more than once
                     if (!_resources.ContainsKey(loc.Path))
                     {
+                        Log.Debug("Loading resources for localization : '{0}'", loc.Path);
                         var resources = new Dictionary<string, object>();
                         var path = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, Configuration.AddVersionToPath(Configuration.SYSTEM_FOLDER + "/resources/_all.json"));
                         if (File.Exists(path))
                         {
                             //The _all.json file contains a list of all other resources files to load
+                            Log.Debug("Loading resource bootstrap file : '{0}'", path);
                             var bootstrapJson = Json.Decode(File.ReadAllText(path));
                             foreach (string file in bootstrapJson.files)
                             {
@@ -81,6 +85,7 @@ namespace Sdl.Web.Mvc
                                 var filePath = applicationRoot + Configuration.AddVersionToPath(file);
                                 if (File.Exists(filePath))
                                 {
+                                    Log.Debug("Loading resources from file: {0}", filePath);
                                     foreach (var item in GetResourcesFromFile(filePath))
                                     {
                                         //we ensure resource key uniqueness by adding the type (which comes from the filename)
@@ -89,15 +94,14 @@ namespace Sdl.Web.Mvc
                                 }
                                 else
                                 {
-                                    //TODO log a warning
+                                    Log.Error("Resource file: {0} does not exist - skipping", filePath);
                                 }
                             }
                             _resources.Add(loc.Path, resources);
                         }
                         else
                         {
-                            //TODO Log a warning - although this should not be an error - 
-                            //its quite possible that localizations are configured for which resources are not yet available.
+                            Log.Warn("Localization resource bootstrap file: {0} does not exist - skipping this localization", path);
                         }
                     }
                 }
