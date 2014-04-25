@@ -43,6 +43,7 @@ namespace Sdl.Web.DD4T
                 }
                 else
                 {
+                    // TODO get model from schema annotation, if that is not available fall back on root element name
                     var entityType = component.Schema.RootElementName;
                     model = GetEntity(entityType);
                     var type = model.GetType();
