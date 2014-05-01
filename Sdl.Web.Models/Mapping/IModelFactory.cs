@@ -9,6 +9,6 @@ namespace Sdl.Web.Mvc.Mapping
     public interface IModelFactory
     {
         object CreateEntityModel(object entity,string view);
-        object CreatePageModel(object page,string view);
+        object CreatePageModel(object page,string view = null,Dictionary<string,object> subPages = null);
     }
 }

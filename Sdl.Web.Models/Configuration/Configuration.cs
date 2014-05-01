@@ -309,5 +309,15 @@ namespace Sdl.Web.Mvc
                 Localizations.Add(localization.GetBaseUrl(), localization);
             }
         }
+
+        public static string LocalizeUrl(string url)
+        {
+            if (!String.IsNullOrEmpty(DefaultLocalization))
+            {
+                return DefaultLocalization + "/" + url;
+            }
+            return url;
+        }
+
     }
 }

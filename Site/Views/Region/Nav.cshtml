@@ -1,0 +1,24 @@
+﻿@model Region
+<div class="navbar-collapse collapse" @Markup.Region(Model)>
+    @foreach (var item in Model.Items)
+    {
+        @ViewBag.Renderer.Render(item,Html)
+    }
+    @* TODO Hardcoded - The main nav and search box will become CPs in the region eventually*@
+    <ul class="nav navbar-nav main-nav">
+        <li class="active">
+            <a href="/examples/article.html">Examples</a>
+        </li>
+        <li>
+            <a href="#">Section Two</a>
+        </li>
+        <li>
+            <a href="#">Section Three</a>
+        </li>
+    </ul>
+    <form class='navbar-form navbar-right'>
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+        </div>
+    </form>
+</div>

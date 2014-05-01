@@ -63,6 +63,7 @@
     <Compile Include="Mapping\BaseModelFactory.cs" />
     <Compile Include="Mapping\IModelFactory.cs" />
     <Compile Include="Models\Component\ItemList.cs" />
+    <Compile Include="Models\Component\LinkList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\Common\Image.cs" />
     <Compile Include="Models\Common\Link.cs" />
@@ -70,7 +71,6 @@
     <Compile Include="Models\Common\Semantics.cs" />
     <Compile Include="Models\Component\Article.cs" />
     <Compile Include="Models\Component\Entity.cs" />
-    <Compile Include="Models\Component\LinkGroup.cs" />
     <Compile Include="Models\Component\Paragraph.cs" />
     <Compile Include="Models\Component\Teaser.cs" />
     <Compile Include="Models\Page\Breadcrumb.cs" />

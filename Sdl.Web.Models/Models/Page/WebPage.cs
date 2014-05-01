@@ -22,10 +22,8 @@ namespace Sdl.Web.Mvc.Models
 
         /*Other stuff to consider:
          1. Specific css/js for the page based on its components/plugins
-         2. Navigation (should it hang off the page, or be inherent in the app)
-         3. Analytics variables
-         4. Parent SG id(s) for building navigation state - could be part of breadcrumb
-         5. Ads/regions for ads
+         2. Analytics variables
+         3. Parent SG id(s) for building navigation state - could be part of breadcrumb
          */
         public WebPage()
         {
