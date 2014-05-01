@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Collections;
 using DD4T.ContentModel.Factories;
 using DD4T.Factories;
+using Sdl.Web.Mvc;
 
 namespace Sdl.Web.DD4T
 {
@@ -63,13 +64,12 @@ namespace Sdl.Web.DD4T
             }
         }
 
-        public override object CreatePageModel(object data, string view)
+        public override object CreatePageModel(object data, string view = null, Dictionary<string,object> subPages = null)
         {
             IPage page = data as IPage;
             if (page != null)
             {
                 WebPage model = new WebPage{Id=page.Id,Title=page.Title};
-                //TODO we need some logic to set the header, footer, breadcrumb etc.
                 foreach (var cp in page.ComponentPresentations)
                 {
                     string regionName = GetRegionFromComponentPresentation(cp);
@@ -79,6 +79,82 @@ namespace Sdl.Web.DD4T
                     }
                     model.Regions[regionName].Items.Add(cp);
                 }
+                //Add header/footer
+                if (subPages != null)
+                {
+                    if (subPages.ContainsKey("Header"))
+                    {
+                        WebPage headerPage = (WebPage)this.CreatePageModel(subPages["Header"]);
+                        if (headerPage != null)
+                        {
+                            var header = new Header { Regions = new Dictionary<string, Region>() };
+                            foreach (var region in headerPage.Regions)
+                            {
+                                //The main region should contain a Teaser containing the header logo etc.
+                                if (region.Key == "Main")
+                                {
+                                    if (region.Value.Items.Count > 0)
+                                    {
+                                        Teaser headerTeaser = this.CreateEntityModel(region.Value.Items[0]) as Teaser;
+                                        if (headerTeaser != null)
+                                        {
+                                            header.Logo = headerTeaser.Image;
+                                            header.LogoLink = headerTeaser.Link;
+                                            header.Heading = headerTeaser.Headline;
+                                            header.Subheading = headerTeaser.Text;
+                                        }
+                                        else
+                                        {
+                                            Log.Warn("Header 'page' does not contain a Teaser in the Main region. Cannot set logo/heading/subheading");
+                                        }
+                                    }
+                                }
+                                //Other regions are simply added to the header regions container
+                                else
+                                {
+                                    header.Regions.Add(region.Key, region.Value);
+                                }
+                            }
+                            model.Header = header;
+                        }
+                    }
+                    if (subPages.ContainsKey("Footer"))
+                    {
+                        WebPage footerPage = (WebPage)this.CreatePageModel(subPages["Footer"]);
+                        if (footerPage != null)
+                        {
+                            var footer = new Footer { Regions = new Dictionary<string, Region>() };
+                            foreach (var region in footerPage.Regions)
+                            {
+                                //The main region should contain a LinkList containing the footer copyright and links.
+                                if (region.Key == "Main")
+                                {
+                                    if (region.Value.Items.Count > 0)
+                                    {
+                                        LinkList footerLinks = this.CreateEntityModel(region.Value.Items[0]) as LinkList;
+                                        if (footerLinks != null)
+                                        {
+                                            footer.Copyright = footerLinks.Headline;
+                                            footer.Links = footerLinks.Links;
+                                        }
+                                        else
+                                        {
+                                            Log.Warn("Footer 'page' does not contain a Teaser in the Main region. Cannot set logo/copyright");
+                                        }
+                                    }
+                                }
+                                //Other regions are simply added to the header regions container
+                                else
+                                {
+                                    footer.Regions.Add(region.Key, region.Value);
+                                }
+                            }
+                            model.Footer = footer;
+                        }
+                    }
+                }
+
+
                 return model;
             }
             throw new Exception(String.Format("Cannot create model for class {0}. Expecting IPage.", data.GetType().FullName));
@@ -104,25 +180,26 @@ namespace Sdl.Web.DD4T
                 {
                     //TODO check/cast to the type we are mapping to 
                     bool multival = pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
+                    Type propertyType = multival ? pi.PropertyType.GetGenericArguments()[0] : pi.PropertyType;
                     switch (field.FieldType)
                     {
                         case (FieldType.Date):
-                            pi.SetValue(model, GetDates(field, pi.PropertyType, multival));
+                            pi.SetValue(model, GetDates(field, propertyType, multival));
                             break;
                         case (FieldType.Number):
-                            pi.SetValue(model, GetNumbers(field, pi.PropertyType, multival));
+                            pi.SetValue(model, GetNumbers(field, propertyType, multival));
                             break;
                         case (FieldType.MultiMediaLink):
-                            pi.SetValue(model, GetMultiMediaLinks(field, pi.PropertyType, multival));
+                            pi.SetValue(model, GetMultiMediaLinks(field, propertyType, multival));
                             break;
                         case (FieldType.ComponentLink):
-                            pi.SetValue(model, GetMultiComponentLinks(field, pi.PropertyType, multival));
+                            pi.SetValue(model, GetMultiComponentLinks(field, propertyType, multival));
                             break;
                         case (FieldType.Embedded):
-                            pi.SetValue(model, GetMultiEmbedded(field, pi.PropertyType, multival));
+                            pi.SetValue(model, GetMultiEmbedded(field, propertyType, multival));
                             break;
                         default:
-                            pi.SetValue(model, GetStrings(field, pi.PropertyType, multival));
+                            pi.SetValue(model, GetStrings(field, propertyType, multival));
                             break;
                     }
                 }
@@ -199,9 +276,9 @@ namespace Sdl.Web.DD4T
             }
         }
 
-        private object GetMultiEmbedded(IField field, Type modelType, bool multival)
+        private object GetMultiEmbedded(IField field, Type propertyType, bool multival)
         {
-            if (typeof(Link).IsAssignableFrom(modelType))
+            if (propertyType == typeof(Link))
             {
                 var links = GetLinks(field.EmbeddedValues);
                 if (multival)
@@ -210,7 +287,6 @@ namespace Sdl.Web.DD4T
                 }
                 else
                 {
-                    
                     return links.Count > 0 ? links[0] : null;
                 }
             }

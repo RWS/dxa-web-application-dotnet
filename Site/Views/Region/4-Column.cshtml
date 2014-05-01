@@ -1,0 +1,14 @@
+﻿@model Sdl.Web.Mvc.Models.Region
+<div class="container" @Markup.Region(Model)>
+@for (int i = 0; i < Math.Ceiling(Model.Items.Count / 4.0); i++)
+{
+    <div class="row">
+        @for (int j = 0; j < 4 && (4*i + j < Model.Items.Count) ; j++)
+        {
+            <div class="col-sm-3">
+                @ViewBag.Renderer.Render(Model.Items[i + j], Html)
+            </div>
+        }
+    </div>
+}
+</div>

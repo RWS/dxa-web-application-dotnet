@@ -1,0 +1,19 @@
+﻿@model Footer
+<footer class='page-footer'>
+    @foreach (Region region in Model.Regions.Values)
+    {
+        @ViewBag.Renderer.Render(region,Html)
+    }
+    <hr />
+    <ul class='list-inline text-center'>
+	    <li>
+		    <small>@Model.Copyright</small>
+	    </li>
+        @foreach(var link in Model.Links)
+        {
+	    <li>
+		    <small><a href="@link.Url" title="@link.AlternateText">@link.LinkText</a></small>
+	    </li>
+        }
+    </ul>
+</footer>

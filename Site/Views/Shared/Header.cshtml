@@ -1,0 +1,20 @@
+﻿@model Sdl.Web.Mvc.Models.Header
+<div class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">@Html.Resource("core.toggleNavigationText")</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-logo" href="@Model.LogoLink.Url" alt="@Model.LogoLink.LinkText">
+                <img src="@Model.Logo.Url" alt="@Model.Logo.AlternateText">
+            </a>
+        </div>
+        @foreach (Region region in Model.Regions.Values)
+        {
+            @ViewBag.Renderer.Render(region,Html)
+        }
+    </div>
+</div>

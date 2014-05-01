@@ -19,7 +19,7 @@ namespace Sdl.Web.Mvc.Mapping
             return data;
         }
 
-        public virtual object CreatePageModel(object data, string view)
+        public virtual object CreatePageModel(object data, string view = null, Dictionary<string,object> subPages = null)
         {
             //in an ideal world, we do not need to map...
             return data;

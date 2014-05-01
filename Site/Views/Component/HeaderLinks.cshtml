@@ -1,0 +1,9 @@
+﻿@model Sdl.Web.Mvc.Models.LinkList
+<ul class="nav navbar-nav utility-nav">
+    @foreach(var link in Model.Links)
+    {
+    <li>
+        <a href="@link.Url" title="@link.AlternateText">@link.LinkText</a>
+    </li>
+    }
+</ul>

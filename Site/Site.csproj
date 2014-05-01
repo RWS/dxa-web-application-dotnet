@@ -163,6 +163,12 @@
     <Content Include="system\Views\Page\_ViewStart.cshtml" />
     <Content Include="system\Views\Page\ContentPage.cshtml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
+    <Content Include="Views\Shared\Footer.cshtml" />
+    <Content Include="Views\Shared\Header.cshtml" />
+    <Content Include="Views\Region\4-Column.cshtml" />
+    <Content Include="Views\Component\FooterLinkGroup.cshtml" />
+    <Content Include="Views\Component\HeaderLinks.cshtml" />
+    <Content Include="Views\Region\Nav.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

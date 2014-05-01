@@ -1,0 +1,13 @@
+﻿@model Sdl.Web.Mvc.Models.LinkList
+@if (!String.IsNullOrEmpty(Model.Headline))
+{
+    <div class="h4">@Model.Headline</div>
+}
+<ul class="list-unstyled">
+    @foreach(var link in Model.Links)
+    {
+	<li>
+		<a href="@link.Url" title="@link.AlternateText">@link.LinkText</a>
+	</li>
+    }
+</ul>
