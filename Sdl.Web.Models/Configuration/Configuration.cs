@@ -107,9 +107,15 @@ namespace Sdl.Web.Mvc
                         }
                         ex = new Exception(String.Format("Configuration key {0} does not exist in section {1}", bits[1], bits[0]));
                     }
-                    ex = new Exception(String.Format("Configuration section {0} does not exist", bits[0]));
+                    else
+                    {
+                        ex = new Exception(String.Format("Configuration section {0} does not exist", bits[0]));
+                    }
                 }
-                ex = new Exception(String.Format("Configuration key {0} is in the wrong format. It should be in the format [section].[key], for example \"environment.cmsurl\"", key));
+                else
+                {
+                    ex = new Exception(String.Format("Configuration key {0} is in the wrong format. It should be in the format [section].[key], for example \"environment.cmsurl\"", key));
+                }
             }
             else
             {
