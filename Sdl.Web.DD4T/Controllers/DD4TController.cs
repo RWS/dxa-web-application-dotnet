@@ -102,8 +102,16 @@ namespace Sdl.Web.DD4T
         {
             string viewName = GetViewName(page);
             var subPages = new Dictionary<string, object>();
-            subPages.Add("Header", this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/header"))));
-            subPages.Add("Footer", this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/footer"))));
+            var headerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/header")));
+            var footerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/footer")));
+            if (headerModel != null)
+            {
+                subPages.Add("Header", headerModel);
+            }
+            if (footerModel != null)
+            {
+                subPages.Add("Footer", footerModel);
+            }
             var model = ModelFactory.CreatePageModel(page, viewName, subPages);
             return base.View(viewName, model);
         }

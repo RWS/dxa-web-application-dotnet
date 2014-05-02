@@ -6,9 +6,12 @@
     }
     <hr />
     <ul class='list-inline text-center'>
-	    <li>
+	    @if (Model.Copyright!=null)
+        {
+        <li>
 		    <small>@Model.Copyright</small>
 	    </li>
+        }
         @foreach(var link in Model.Links)
         {
 	    <li>
