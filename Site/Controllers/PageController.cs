@@ -2,7 +2,6 @@
 using System.Web;
 using System.Web.Mvc;
 using Sdl.Web.DD4T;
-using Sdl.Web.Mvc.Formatting;
 
 namespace Site.Controllers
 {

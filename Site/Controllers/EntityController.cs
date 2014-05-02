@@ -5,9 +5,9 @@ using Sdl.Web.DD4T;
 
 namespace Site.Controllers
 {
-    public class ComponentController : DD4TController
+    public class EntityController : DD4TController
     {
-        public ComponentController()
+        public EntityController()
         {
             this.ModelFactory = new DD4TModelFactory();
             this.Renderer = new DD4TRenderer();

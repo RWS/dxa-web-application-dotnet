@@ -53,6 +53,7 @@
     <Compile Include="Configuration\ResourceProvider.cs" />
     <Compile Include="Context\ContextAwareViewEngine.cs" />
     <Compile Include="Context\WebRequestContext.cs" />
+    <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Formatting\FormatFilterAttribute.cs" />
     <Compile Include="Html\BaseRenderer.cs" />
     <Compile Include="Html\HtmlHelperExtensions.cs" />

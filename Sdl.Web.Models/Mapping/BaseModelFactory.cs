@@ -30,13 +30,21 @@ namespace Sdl.Web.Mvc.Mapping
             var semantics = new Semantics { Type = entityType, Vocabulary = GetDefaultVocabulary() };
             entityType = "Sdl.Web.Mvc.Models." + entityType;
             //TODO models will not always be in this assembly (modules, third party/custom etc.)
-            var entity = Activator.CreateInstance("Sdl.Web.Mvc", entityType).Unwrap();
-            PropertyInfo pi = entity.GetType().GetProperty("Semantics");
-            if (pi != null)
+            try
             {
-                pi.SetValue(entity, semantics);
+                var entity = Activator.CreateInstance("Sdl.Web.Mvc", entityType).Unwrap();
+                PropertyInfo pi = entity.GetType().GetProperty("Semantics");
+                if (pi != null)
+                {
+                    pi.SetValue(entity, semantics);
+                }
+                return entity;
             }
-            return entity;
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Could not load entity type {0}", entityType);
+            }
+            return null;
         }
 
         protected virtual string GetDefaultVocabulary()

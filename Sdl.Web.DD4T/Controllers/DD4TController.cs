@@ -25,13 +25,11 @@ namespace Sdl.Web.DD4T
     /// Port of TridionControllerBase, to add minor customizations (like removing the component presentation renderer) and 
     /// avoid having direct reference to DD4T.MVC in web app
     /// </summary>
-    public class DD4TController : Controller
+    public class DD4TController : BaseController
     {
         public virtual Fac.IPageFactory PageFactory { get; set; }
         public virtual Fac.IComponentFactory ComponentFactory { get; set; }
-        public virtual IModelFactory ModelFactory { get; set; }
-        public virtual IRenderer Renderer { get; set; }
-
+        
         public DD4TController()
         {
             //TODO dependency injection?
@@ -49,45 +47,12 @@ namespace Sdl.Web.DD4T
             };
         }
 
-
-        [HandleError]
-        public ActionResult Page(string pageId)
-        {
-            //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
-            //1. Try adding the default extension, so /news becomes /news.html
-            var model = this.GetModelForPage(ParseUrl(pageId));
-            if (model==null && !pageId.EndsWith("/") && pageId.LastIndexOf(".") <= pageId.LastIndexOf("/"))
-            {
-                //2. Try adding the default page, so /news becomes /news/index.html
-                model = this.GetModelForPage(ParseUrl(pageId + "/"));
-            }
-            if (model == null)
-            {
-                throw new HttpException(404, "Page cannot be found");
-            }
-            ViewBag.Renderer = Renderer;
-            ViewBag.InlineEditingBootstrap = Markup.GetInlineEditingBootstrap(model);
-            return GetView(model);
-        }
-
-        public virtual ActionResult Region(Region region)
-        {
-            ViewBag.Renderer = Renderer;
-            return GetView(region);
-        }
-
-        public virtual ActionResult ComponentPresentation(IComponentPresentation componentPresentation)
-        {
-            ViewBag.Renderer = Renderer;
-            return GetView(componentPresentation);
-        }
-
-        protected IPage GetModelForPage(string PageId)
+        protected override object GetModelForPage(string pageUrl)
         {
             IPage page;
             if (PageFactory != null)
             {
-                if (PageFactory.TryFindPage(string.Format("/{0}", PageId), out page))
+                if (PageFactory.TryFindPage(string.Format("/{0}", pageUrl), out page))
                 {
                     return page;
                 }
@@ -98,65 +63,44 @@ namespace Sdl.Web.DD4T
             return page;
         }
         
-        protected ViewResult GetView(IPage page)
+        protected override string GetPageViewName(object pageObject)
         {
-            string viewName = GetViewName(page);
-            var subPages = new Dictionary<string, object>();
-            var headerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/header")));
-            var footerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/footer")));
-            if (headerModel != null)
-            {
-                subPages.Add("Header", headerModel);
-            }
-            if (footerModel != null)
-            {
-                subPages.Add("Footer", footerModel);
-            }
-            var model = ModelFactory.CreatePageModel(page, viewName, subPages);
-            return base.View(viewName, model);
-        }
-
-        protected virtual string GetViewName(IPage page)
-        {
+            var page = (IPage)pageObject;
             var viewName = page.PageTemplate.Title.Replace(" ", "");
-            if (page.PageTemplate.MetadataFields != null && page.PageTemplate.MetadataFields.ContainsKey("view"))
+            var module = Configuration.GetDefaultModuleName();
+            if (page.PageTemplate.MetadataFields != null)
             {
-                viewName = page.PageTemplate.MetadataFields["view"].Value;
+                if (page.PageTemplate.MetadataFields.ContainsKey("view"))
+                {
+                    viewName = page.PageTemplate.MetadataFields["view"].Value;
+                }
+                if (page.PageTemplate.MetadataFields.ContainsKey("module"))
+                {
+                    module = page.PageTemplate.MetadataFields["module"].Value;
+                }
             }
-            return viewName;
+            return String.Format("{0}/{1}", module, viewName);
         }
 
-        public virtual string ParseUrl(string url)
+        protected override string GetEntityViewName(object entity)
         {
-            var defaultPageFileName = Configuration.GetDefaultPageName();
-            return string.IsNullOrEmpty(url) ? defaultPageFileName : (url.EndsWith("/") ? url + defaultPageFileName : url += Configuration.GetDefaultExtension());
-        }
-        protected virtual ViewResult GetView(Region region)
-        {
-            return base.View(GetViewName(region), region);
-        }
-
-        protected virtual string GetViewName(Region region)
-        {
-            return region.Name.Replace(" ", "");
-        }
-
-        protected  ViewResult GetView(IComponentPresentation componentPresentation)
-        {
-            var viewName = GetViewName(componentPresentation);
-            return View(viewName, ModelFactory.CreateEntityModel(componentPresentation, viewName));
-        }
-
-        protected virtual string GetViewName(IComponentPresentation componentPresentation)
-        { 
+            var componentPresentation = (ComponentPresentation)entity;
             var template = componentPresentation.ComponentTemplate;
             //strip region and whitespace
             string viewName = Regex.Replace(template.Title, @"\[.*\]|\s", "");
-            if (template.MetadataFields != null && template.MetadataFields.ContainsKey("view"))
+            var module = Configuration.GetDefaultModuleName();
+            if (template.MetadataFields != null)
             {
-                viewName = componentPresentation.ComponentTemplate.MetadataFields["view"].Value;
+                if (template.MetadataFields.ContainsKey("view"))
+                {
+                    viewName = componentPresentation.ComponentTemplate.MetadataFields["view"].Value;
+                }
+                if (template.MetadataFields.ContainsKey("module"))
+                {
+                    module = componentPresentation.ComponentTemplate.MetadataFields["module"].Value;
+                }
             }
-            return viewName;
+            return String.Format("{0}/{1}",module, viewName);
         }
     }
 }

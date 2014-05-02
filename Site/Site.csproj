@@ -112,9 +112,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\ComponentController.cs" />
+    <Compile Include="Controllers\EntityController.cs" />
     <Compile Include="Controllers\PageController.cs" />
     <Compile Include="Controllers\RegionController.cs" />
+    <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -147,28 +148,30 @@
     </Content>
     <Content Include="system\Views\Web.config" />
     <Content Include="system\Views\Page\_Layout.cshtml" />
-    <Content Include="system\Views\Component\Article.cshtml" />
-    <Content Include="system\Views\Region\Main.cshtml" />
+    <Content Include="system\Views\Entity\Core\Article.cshtml" />
+    <Content Include="system\Views\Region\Core\Main.cshtml" />
     <None Include="Properties\PublishProfiles\Publish to Local Demo Site.pubxml" />
-    <Content Include="system\Views\Region\3-Column.cshtml" />
-    <Content Include="system\Views\Component\Teaser.cshtml" />
-    <Content Include="system\Views\Component\Teaser-ImageOverlay.cshtml" />
-    <Content Include="system\Views\Page\HomePage.cshtml" />
-    <Content Include="system\Views\Region\2-Column.cshtml" />
-    <Content Include="system\Views\Region\Hero.cshtml" />
-    <Content Include="system\Views\Page\SectionPage.cshtml" />
-    <Content Include="system\Views\Component\Carousel.cshtml" />
-    <Content Include="system\Views\Component\Teaser-Carousel.cshtml" />
-    <Content Include="system\Views\Shared\Breadcrumb.cshtml" />
+    <Content Include="system\Views\Region\Core\3-Column.cshtml" />
+    <Content Include="system\Views\Entity\Core\Teaser.cshtml" />
+    <Content Include="system\Views\Entity\Core\Teaser-ImageOverlay.cshtml" />
+    <Content Include="system\Views\Page\Core\HomePage.cshtml" />
+    <Content Include="system\Views\Region\Core\2-Column.cshtml" />
+    <Content Include="system\Views\Region\Core\Hero.cshtml" />
+    <Content Include="system\Views\Page\Core\SectionPage.cshtml" />
+    <Content Include="system\Views\Entity\Core\Carousel.cshtml" />
+    <Content Include="system\Views\Entity\Core\Teaser-Carousel.cshtml" />
+    <Content Include="system\Views\Shared\Core\Breadcrumb.cshtml" />
     <Content Include="system\Views\Page\_ViewStart.cshtml" />
-    <Content Include="system\Views\Page\ContentPage.cshtml" />
+    <Content Include="system\Views\Page\Core\ContentPage.cshtml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
-    <Content Include="system\Views\Region\4-Column.cshtml" />
-    <Content Include="system\Views\Shared\Footer.cshtml" />
-    <Content Include="system\Views\Shared\Header.cshtml" />
-    <Content Include="system\Views\Region\Nav.cshtml" />
-    <Content Include="system\Views\Component\FooterLinkGroup.cshtml" />
-    <Content Include="system\Views\Component\HeaderLinks.cshtml" />
+    <Content Include="system\Views\Region\Core\4-Column.cshtml" />
+    <Content Include="system\Views\Shared\Core\Footer.cshtml" />
+    <Content Include="system\Views\Shared\Core\Header.cshtml" />
+    <Content Include="system\Views\Region\Core\Nav.cshtml" />
+    <Content Include="system\Views\Entity\Core\FooterLinkGroup.cshtml" />
+    <Content Include="system\Views\Entity\Core\HeaderLinks.cshtml" />
+    <Content Include="system\Views\Entity\_Error.cshtml" />
+    <Content Include="system\Views\Search\SearchResults.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

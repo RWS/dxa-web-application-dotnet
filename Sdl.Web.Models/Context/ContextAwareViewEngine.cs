@@ -36,8 +36,10 @@ namespace Sdl.Web.Mvc
             ViewLocationFormats = new[]
              {
             "~/system/"+version+"/Views/{1}/{0}.cshtml",
+            "~/system/"+version+"/Views/{0}.cshtml",
             "~/system/"+version+"/Views/Shared/{0}.cshtml",
             "~/system/Views/{1}/{0}.cshtml",
+            "~/system/Views/{0}.cshtml",
             "~/system/Views/Shared/{0}.cshtml"
              };
             MasterLocationFormats = new[]
@@ -50,8 +52,10 @@ namespace Sdl.Web.Mvc
             PartialViewLocationFormats = new[]
              {
             "~/system/"+version+"/Views/{1}/{0}.cshtml",
+            "~/system/"+version+"/Views/{0}.cshtml",
             "~/system/"+version+"/Views/Shared/{0}.cshtml",
             "~/system/Views/{1}/{0}.cshtml",
+            "~/system/Views/{0}.cshtml",
             "~/system/Views/Shared/{0}.cshtml"
              };
         }

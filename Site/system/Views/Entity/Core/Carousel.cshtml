@@ -13,7 +13,7 @@
     <div class="item @(i==0?"active":"")" @Markup.Property(Model, "ItemListElement")>
         @if (item is Teaser)
         {
-            Html.RenderPartial("Teaser-Carousel", item);
+            Html.RenderPartial("Core/Teaser-Carousel", item);
         }
         else if (item is Image)
         {

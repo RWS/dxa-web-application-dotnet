@@ -20,8 +20,8 @@ namespace Sdl.Web.DD4T
             var cp = item as IComponentPresentation;
             if (cp!=null)
             {
-                string controller = ConfigurationHelper.ComponentPresentationController;
-                string action  = ConfigurationHelper.ComponentPresentationAction;
+                string controller = Configuration.GetEntityController();
+                string action = Configuration.GetEntityAction();
                 if (cp.ComponentTemplate.MetadataFields != null && cp.ComponentTemplate.MetadataFields.ContainsKey("controller"))
                 {
                     controller = cp.ComponentTemplate.MetadataFields["controller"].Value;
@@ -30,7 +30,7 @@ namespace Sdl.Web.DD4T
                 {
                     action = cp.ComponentTemplate.MetadataFields["action"].Value;
                 }
-                MvcHtmlString result = helper.Action(action, controller, new { componentPresentation = cp });
+                MvcHtmlString result = helper.Action(action, controller, new { entity = cp });
                 return Markup.Parse(result,cp);
             }
             return null;

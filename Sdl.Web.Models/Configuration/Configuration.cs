@@ -233,6 +233,20 @@ namespace Sdl.Web.Mvc
         {
             return "Region";
         }
+
+        public static string GetEntityController()
+        {
+            return "Entity";
+        }
+        public static string GetEntityAction()
+        {
+            return "Entity";
+        }
+        public static string GetDefaultModuleName()
+        {
+            return "Core";
+        }
+
         public static string GetCmsUrl()
         {
             return GetConfig("environment.cmsurl");
@@ -318,6 +332,5 @@ namespace Sdl.Web.Mvc
             }
             return url;
         }
-
     }
 }

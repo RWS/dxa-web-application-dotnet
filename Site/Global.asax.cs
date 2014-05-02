@@ -31,7 +31,7 @@ namespace Site
             //Tridion page route
             routes.MapRoute(
                "TridionPage",
-               "{*PageId}",
+               "{*pageUrl}",
                new { controller = "Page", action = "Page" }, 
                new { pageId = @"^(.*)?$" } 
             );

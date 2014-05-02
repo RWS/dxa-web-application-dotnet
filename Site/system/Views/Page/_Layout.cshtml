@@ -29,7 +29,7 @@
 
     @if (Model.Header!=null)
     {
-        @Html.Partial("Header",Model.Header)
+        @Html.Partial("Core/Header",Model.Header)
     }
 
     <div role="main">
@@ -41,7 +41,7 @@
 
     @if (Model.Footer!=null)
     {
-        @Html.Partial("Footer",Model.Footer)
+        @Html.Partial("Core/Footer",Model.Footer)
     }
 
     <script src="@Url.VersionedContent("/assets/scripts/plugins.js")"></script>

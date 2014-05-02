@@ -46,22 +46,26 @@ namespace Sdl.Web.DD4T
                 {
                     var entityType = component.Schema.RootElementName;
                     model = GetEntity(entityType);
-                    var type = model.GetType();
-                    foreach (var field in component.Fields)
+                    if (model != null)
                     {
-                        SetProperty(model, field.Value);
-                    }
-                    foreach (var field in component.MetadataFields)
-                    {
-                        SetProperty(model, field.Value);
+                        var type = model.GetType();
+                        foreach (var field in component.Fields)
+                        {
+                            SetProperty(model, field.Value);
+                        }
+                        foreach (var field in component.MetadataFields)
+                        {
+                            SetProperty(model, field.Value);
+                        }
                     }
                 }
                 return model;
             }
             else
             {
-                throw new Exception(String.Format("Cannot create model for class {0}. Expecting IComponentPresentation/IComponent.", data.GetType().FullName));
+                Log.Error("Cannot create model for class {0}. Expecting IComponentPresentation/IComponent.", data.GetType().FullName);
             }
+            return null;
         }
 
         public override object CreatePageModel(object data, string view = null, Dictionary<string,object> subPages = null)
