@@ -5,19 +5,19 @@ namespace Sdl.Web.Mvc.Mapping
     public class SemanticSchemaField
     {
         // {"name":"headline","isMultiValue":false,"semantics":[{"vocab":"s","property":"headline"}],"fields":[]}
-        public string Name { get; set; }
-        public bool IsMultiValue { get; set; }
-        public List<SemanticProperty> Semantics { get; set; }
-        public List<SemanticSchemaField> Fields { get; set; }
+        public string name { get; set; }
+        public bool isMultiValue { get; set; }
+        public List<SemanticProperty> semantics { get; set; }
+        public List<SemanticSchemaField> fields { get; set; }
 
         /// <summary>
         /// Check if current field contains given semantic property
         /// </summary>
         /// <param name="semanticProperty">the semantic property to check against</param>
-        /// <returns>true if current field contains a combination of semanticProperty.Vocab and semanticProperty.PropertyName, false otherwise</returns>
+        /// <returns>true if current field contains a combination of semanticProperty.vocab and semanticProperty.property, false otherwise</returns>
         public bool Contains(SemanticProperty semanticProperty)
         {
-            foreach (var property in Semantics)
+            foreach (var property in semantics)
             {
                 if (property.Equals(semanticProperty))
                 {
@@ -40,7 +40,7 @@ namespace Sdl.Web.Mvc.Mapping
                 return this;
             }
 
-            foreach (var subField in Fields)
+            foreach (var subField in fields)
             {
                 SemanticSchemaField field = subField.Find(semanticProperty);
                 if (field != null)

@@ -3,11 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Resources;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 using System.Web.Compilation;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
@@ -20,8 +16,8 @@ namespace Sdl.Web.Mvc
     public class ResourceProvider : IResourceProvider
     {
         private static Dictionary<string, Dictionary<string, object>> _resources;
-        private static object resourceLock = new object();
-        public object GetObject(string resourceKey, System.Globalization.CultureInfo culture)
+        private static readonly object ResourceLock = new object();
+        public object GetObject(string resourceKey, CultureInfo culture)
         {
             //Ignore the culture - we read this from the RequestContext
             var dictionary = GetResourceCache();
@@ -33,7 +29,7 @@ namespace Sdl.Web.Mvc
             return dictionary[resourceKey];
         }
 
-        public System.Resources.IResourceReader ResourceReader
+        public IResourceReader ResourceReader
         {
             get { return new ResourceReader(GetResourceCache()); }
         }
@@ -61,7 +57,7 @@ namespace Sdl.Web.Mvc
         private void LoadResources()
         {
             //We are reading into a static variable, so need to be thread safe
-            lock (resourceLock)
+            lock (ResourceLock)
             {
                 var applicationRoot = AppDomain.CurrentDomain.BaseDirectory;
                 _resources = new Dictionary<string, Dictionary<string, object>>();
@@ -72,7 +68,7 @@ namespace Sdl.Web.Mvc
                     {
                         Log.Debug("Loading resources for localization : '{0}'", loc.Path);
                         var resources = new Dictionary<string, object>();
-                        var path = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, Configuration.AddVersionToPath(Configuration.SYSTEM_FOLDER + "/resources/_all.json"));
+                        var path = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, Configuration.AddVersionToPath(Configuration.SystemFolder + "/resources/_all.json"));
                         if (File.Exists(path))
                         {
                             //The _all.json file contains a list of all other resources files to load

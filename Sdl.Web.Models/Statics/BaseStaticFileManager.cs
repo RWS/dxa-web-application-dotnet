@@ -25,7 +25,7 @@ namespace Sdl.Web.Mvc
             {
                 foreach (var loc in Configuration.Localizations.Values)
                 {
-                    var versionRoot = String.Format("{0}{1}/{2}/{3}", applicationRoot, loc.Path, Configuration.SYSTEM_FOLDER, Configuration.SiteVersion);
+                    var versionRoot = String.Format("{0}{1}/{2}/{3}", applicationRoot, loc.Path, Configuration.SystemFolder, Configuration.SiteVersion);
                     if (!folders.Contains(versionRoot))
                     {
                         //If the version already exists, we do nothing
@@ -36,7 +36,7 @@ namespace Sdl.Web.Mvc
                             var di = Directory.CreateDirectory(tempVersionRoot);
                             Log.Debug("Created temp version root: {0}", tempVersionRoot);
                             //Find bootstrap file and take it from there.
-                            var url = String.Format("{0}/{1}/_all.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, Configuration.SYSTEM_FOLDER);
+                            var url = String.Format("{0}/{1}/_all.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, Configuration.SystemFolder);
                             SerializeFile(url, applicationRoot, String.Format("/{0}{1}", Configuration.SiteVersion, TEMP_DIR_SUFFIX), 2);
                             folders.Add(versionRoot);
                         }

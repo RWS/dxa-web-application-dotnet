@@ -5,10 +5,10 @@ namespace Sdl.Web.Mvc.Mapping
     public class SemanticSchema
     {
         // {"id":80,"rootElement":"Article","fields":[{"name":"headline","isMultiValue":false,"semantics":[{"vocab":"s","property":"headline"}],"fields":[]},{"name":"image","isMultiValue":false,"semantics":[{"vocab":"s","property":"image"}],"fields":[]},{"name":"articleBody","isMultiValue":false,"semantics":[{"vocab":"s","property":"articleBody"}],"fields":[]}],"semantics":[{"vocab":"s","entity":"Article"}]}
-        public string Id { get; set; }
-        public string RootElement { get; set; }
-        public List<SemanticSchemaField> Fields { get; set; }
-        public List<SemanticProperty> Semantics { get; set; }
+        public long id { get; set; }
+        public string rootElement { get; set; }
+        public List<SemanticSchemaField> fields { get; set; }
+        public List<SemanticEntity> semantics { get; set; }
 
         /// <summary>
         /// Find SemanticSchemaField with given semantic property
@@ -17,7 +17,7 @@ namespace Sdl.Web.Mvc.Mapping
         /// <returns>schema field or one of its sub fields that match with the given semantic property</returns>
         public SemanticSchemaField Find(SemanticProperty semanticProperty)
         {
-            foreach (var field in Fields)
+            foreach (var field in fields)
             {
                 var matchingField = field.Find(semanticProperty);
                 if (matchingField != null)

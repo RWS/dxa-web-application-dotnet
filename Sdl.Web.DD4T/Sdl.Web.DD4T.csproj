@@ -78,7 +78,6 @@
     <Compile Include="Mapping\ExtensionlessLinkFactory.cs" />
     <Compile Include="Mapping\ExtensionMethods.cs" />
     <Compile Include="Mapping\PublicationResolver.cs" />
-    <Compile Include="Mapping\SemanticMapping.cs" />
     <Compile Include="Mapping\TridionEntityMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Statics\BinaryDistributionModule.cs">
