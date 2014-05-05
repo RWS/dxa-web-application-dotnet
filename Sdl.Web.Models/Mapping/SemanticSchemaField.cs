@@ -15,7 +15,7 @@ namespace Sdl.Web.Mvc.Mapping
         /// </summary>
         /// <param name="semanticProperty">the semantic property to check against</param>
         /// <returns>true if current field contains a combination of semanticProperty.vocab and semanticProperty.property, false otherwise</returns>
-        public bool Contains(SemanticProperty semanticProperty)
+        public bool Contains(SemanticFieldProperty semanticProperty)
         {
             foreach (var property in semantics)
             {
@@ -33,7 +33,7 @@ namespace Sdl.Web.Mvc.Mapping
         /// </summary>
         /// <param name="semanticProperty">the semantic property to check against</param>
         /// <returns>current field or one of its sub fields that match with the given semantic property</returns>
-        public SemanticSchemaField Find(SemanticProperty semanticProperty)
+        public SemanticSchemaField Find(SemanticFieldProperty semanticProperty)
         {
             if (Contains(semanticProperty))
             {

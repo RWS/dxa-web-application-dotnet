@@ -15,7 +15,7 @@ namespace Sdl.Web.Mvc.Mapping
         /// </summary>
         /// <param name="semanticProperty">the semantic property to check against</param>
         /// <returns>schema field or one of its sub fields that match with the given semantic property</returns>
-        public SemanticSchemaField Find(SemanticProperty semanticProperty)
+        public SemanticSchemaField Find(SemanticFieldProperty semanticProperty)
         {
             foreach (var field in fields)
             {

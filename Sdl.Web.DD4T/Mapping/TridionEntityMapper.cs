@@ -7,7 +7,7 @@ namespace Sdl.Web.DD4T.Mapping
 {
     public class TridionEntityMapper : IEntityMapper
     {
-        public string GetPropertyValue(object sourceEntity, List<SemanticProperty> properties)
+        public object GetPropertyValue(object sourceEntity, List<SemanticFieldProperty> properties)
         {
             IComponent component = ((IComponentPresentation)sourceEntity).Component;
 
@@ -25,7 +25,22 @@ namespace Sdl.Web.DD4T.Mapping
                 var matchingField = schema.Find(semanticProperty);
                 if (matchingField != null && component.Fields.ContainsKey(matchingField.name))
                 {
-                    return component.Fields[matchingField.name].Value;
+                    IField field = component.Fields[matchingField.name];
+
+                    // TODO return correct index from possible multiple values
+                    switch (field.FieldType)
+                    {
+                        case FieldType.Number:
+                            return field.NumericValues[0];
+                        case FieldType.Date:
+                            return field.DateTimeValues[0];
+                        case FieldType.ComponentLink:
+                            return field.LinkedComponentValues[0];
+                        case FieldType.Keyword:
+                            return field.Keywords[0];
+                        default:
+                            return field.Value;
+                    }
                 }
             }
 

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Sdl.Web.Mvc.Mapping
 {
     public interface IEntityMapper
     {
-        object GetPropertyValue(object sourceEntity, List<SemanticProperty> properties);
+        object GetPropertyValue(object sourceEntity, List<SemanticFieldProperty> properties);
     }
 }
