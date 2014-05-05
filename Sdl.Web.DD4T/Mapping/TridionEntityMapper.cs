@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using DD4T.ContentModel;
 using Sdl.Web.Mvc.Mapping;
 
@@ -14,10 +10,11 @@ namespace Sdl.Web.DD4T.Mapping
         {
             IComponent component = ((IComponentPresentation)sourceEntity).Component;
 
-            // get semantic mappings for fields from schema
-            // TODO load schemas from json and find current schema by its item id
             // tcm:0-1
             string[] uriParts = component.Schema.Id.Split('-');
+
+            // get semantic mappings for fields from schema
+            // TODO load schemas from json and find current schema by its item id
             SemanticSchema schema = new SemanticSchema { Id = uriParts[1]};
 
             foreach (var semanticProperty in properties)

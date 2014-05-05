@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Sdl.Web.Mvc;
+using Sdl.Web.Mvc.Mapping;
 
 namespace Sdl.Web.DD4T.Mapping
 {
@@ -18,8 +15,21 @@ namespace Sdl.Web.DD4T.Mapping
         public const string SystemFolder = "system";
         public const string CoreModuleName = "core";
 
-        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _semanticMap;
-        public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> SemanticMap
+        private static List<SemanticVocabulary> _semanticVocabularies;
+        public static List<SemanticVocabulary> SemanticVocabularies
+        {
+            get 
+            {
+                if (_semanticVocabularies == null)
+                {
+                    LoadMapping();
+                }
+                return _semanticVocabularies;
+            }
+        }
+
+        private static Dictionary<string, List<SemanticSchema>> _semanticMap;
+        public static Dictionary<string, List<SemanticSchema>> SemanticMap
         {
             get
             {
@@ -33,14 +43,14 @@ namespace Sdl.Web.DD4T.Mapping
         private static readonly object MappingLock = new object();
 
         /// <summary>
-        /// Gets a semantic mapping
+        /// Gets a semantic schema by id
         /// </summary>
-        /// <param name="key">The mapping key, in the format "section.name" (eg "Schema.Article")</param>
+        /// <param name="id">The schema ID</param>
         /// <param name="module">The module (eg "Search") - if none specified this defaults to "Core"</param>
-        /// <returns>The mapping matching the key for the given module</returns>
-        public static string GetMapping(string key, string module = CoreModuleName)
+        /// <returns>The semantic schema matching the id for the given module</returns>
+        public static SemanticSchema GetSchema(string id, string module = CoreModuleName)
         {
-            return GetMapping(SemanticMap, key, module);
+            return GetSchema(SemanticMap, id, module);
         }
 
 
@@ -49,36 +59,24 @@ namespace Sdl.Web.DD4T.Mapping
             Load(AppDomain.CurrentDomain.BaseDirectory);
         }
 
-        private static string GetMapping(Dictionary<string, Dictionary<string, Dictionary<string, string>>> config, string key, string type)
+        private static SemanticSchema GetSchema(Dictionary<string, List<SemanticSchema>> mapping, string id, string type)
         {
             Exception ex;
-            if (config.ContainsKey(type))
+            if (mapping.ContainsKey(type))
             {
-                var subConfig = config[type];
-                var bits = key.Split('.');
-                if (bits.Length == 2)
+                var list = mapping[type];
+                foreach (var semanticSchema in list)
                 {
-                    if (subConfig.ContainsKey(bits[0]))
+                    if (semanticSchema.Id.Equals(id))
                     {
-                        if (subConfig[bits[0]].ContainsKey(bits[1]))
-                        {
-                            return subConfig[bits[0]][bits[1]];
-                        }
-                        ex = new Exception(String.Format("Mapping key {0} does not exist in section {1}", bits[1], bits[0]));
-                    }
-                    else
-                    {
-                        ex = new Exception(String.Format("Mapping section {0} does not exist", bits[0]));
+                        return semanticSchema;
                     }
                 }
-                else
-                {
-                    ex = new Exception(String.Format("Mapping key {0} is in the wrong format. It should be in the format [section].[key], for example \"environment.cmsurl\"", key));
-                }
+                ex = new Exception(String.Format("Semantic Schema '{0}' for module '{1}' does not exist.", id, type));
             }
             else
             {
-                ex = new Exception(String.Format("Mapping for module '{0}' does not exist.", type));
+                ex = new Exception(String.Format("Semantic mappings for module '{0}' do not exist.", type));
             }
 
             Log.Error(ex);
@@ -86,7 +84,7 @@ namespace Sdl.Web.DD4T.Mapping
         }
 
         /// <summary>
-        /// Loads configuration into memory from database/disk
+        /// Loads semantic mapping into memory from database/disk
         /// </summary>
         /// <param name="applicationRoot">The root filepath of the application</param>
         public static void Load(string applicationRoot)
@@ -97,7 +95,10 @@ namespace Sdl.Web.DD4T.Mapping
                 // ensure that the config files have been written to disk
                 StaticFileManager.CreateStaticAssets(applicationRoot);
 
-                _semanticMap = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
+                _semanticMap = new Dictionary<string, List<SemanticSchema>>();
+                _semanticVocabularies = new List<SemanticVocabulary>();
+
+
             }
         }
     }

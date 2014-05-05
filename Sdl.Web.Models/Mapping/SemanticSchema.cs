@@ -4,7 +4,7 @@ namespace Sdl.Web.Mvc.Mapping
 {
     public class SemanticSchema
     {
-        //{"id":80,"rootElement":"Article","fields":[{"name":"headline","isMultiValue":false,"semantics":[{"vocab":"s","property":"headline"}],"fields":[]},{"name":"image","isMultiValue":false,"semantics":[{"vocab":"s","property":"image"}],"fields":[]},{"name":"articleBody","isMultiValue":false,"semantics":[{"vocab":"s","property":"articleBody"}],"fields":[]}],"semantics":[{"vocab":"s","entity":"Article"}]}
+        // {"id":80,"rootElement":"Article","fields":[{"name":"headline","isMultiValue":false,"semantics":[{"vocab":"s","property":"headline"}],"fields":[]},{"name":"image","isMultiValue":false,"semantics":[{"vocab":"s","property":"image"}],"fields":[]},{"name":"articleBody","isMultiValue":false,"semantics":[{"vocab":"s","property":"articleBody"}],"fields":[]}],"semantics":[{"vocab":"s","entity":"Article"}]}
         public string Id { get; set; }
         public string RootElement { get; set; }
         public List<SemanticSchemaField> Fields { get; set; }
