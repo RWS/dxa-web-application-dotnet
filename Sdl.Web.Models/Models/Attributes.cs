@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Sdl.Web.Mvc.Models
 {
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class SemanticEntityAttribute : Attribute
     {
         public SemanticEntityAttribute(string vocab) : this(vocab, null) { }
@@ -23,6 +24,8 @@ namespace Sdl.Web.Mvc.Models
         public string EntityName { get; set; }
         public bool IsDefaultVocab { get; set; }
     }
+
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public class SemanticPropertyAttribute : Attribute
     {
         public SemanticPropertyAttribute(string property)
