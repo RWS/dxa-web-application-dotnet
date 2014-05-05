@@ -1,12 +1,15 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace Sdl.Web.Mvc.Models
 {
+    [SemanticEntity("http://www.sdl.com/tridion/schemas/core", "Article")]
     public class Article : Entity
     {
+        [SemanticProperty("s:headline")]
         public string Headline { get; set; }
         public Image Image { get; set; }
         public string ArticleBody { get; set; }
