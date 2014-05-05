@@ -28,7 +28,6 @@ namespace Sdl.Web.DD4T
     public class DD4TController : BaseController
     {
         public virtual Fac.IPageFactory PageFactory { get; set; }
-        public virtual Fac.IComponentFactory ComponentFactory { get; set; }
         
         public DD4TController()
         {
@@ -39,11 +38,6 @@ namespace Sdl.Web.DD4T
                 PublicationResolver = new PublicationResolver(),
                 ComponentFactory = new ComponentFactory() { PublicationResolver = new PublicationResolver() },
                 LinkFactory = new LinkFactory() { PublicationResolver = new PublicationResolver() }
-            };
-            this.ComponentFactory = new ComponentFactory()
-            {
-                ComponentProvider = new TridionComponentProvider(),
-                PublicationResolver = new PublicationResolver()                
             };
         }
 
@@ -61,46 +55,6 @@ namespace Sdl.Web.DD4T
                 throw new ConfigurationException("No PageFactory configured");
 
             return page;
-        }
-        
-        protected override string GetPageViewName(object pageObject)
-        {
-            var page = (IPage)pageObject;
-            var viewName = page.PageTemplate.Title.Replace(" ", "");
-            var module = Configuration.GetDefaultModuleName();
-            if (page.PageTemplate.MetadataFields != null)
-            {
-                if (page.PageTemplate.MetadataFields.ContainsKey("view"))
-                {
-                    viewName = page.PageTemplate.MetadataFields["view"].Value;
-                }
-                if (page.PageTemplate.MetadataFields.ContainsKey("module"))
-                {
-                    module = page.PageTemplate.MetadataFields["module"].Value;
-                }
-            }
-            return String.Format("{0}/{1}", module, viewName);
-        }
-
-        protected override string GetEntityViewName(object entity)
-        {
-            var componentPresentation = (ComponentPresentation)entity;
-            var template = componentPresentation.ComponentTemplate;
-            //strip region and whitespace
-            string viewName = Regex.Replace(template.Title, @"\[.*\]|\s", "");
-            var module = Configuration.GetDefaultModuleName();
-            if (template.MetadataFields != null)
-            {
-                if (template.MetadataFields.ContainsKey("view"))
-                {
-                    viewName = componentPresentation.ComponentTemplate.MetadataFields["view"].Value;
-                }
-                if (template.MetadataFields.ContainsKey("module"))
-                {
-                    module = componentPresentation.ComponentTemplate.MetadataFields["module"].Value;
-                }
-            }
-            return String.Format("{0}/{1}",module, viewName);
         }
     }
 }

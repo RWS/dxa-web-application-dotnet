@@ -8,7 +8,7 @@ namespace Sdl.Web.Mvc.Mapping
         public long id { get; set; }
         public string rootElement { get; set; }
         public List<SemanticSchemaField> fields { get; set; }
-        public List<SemanticEntity> semantics { get; set; }
+        public List<SemanticSchemaEntity> semantics { get; set; }
 
         /// <summary>
         /// Find SemanticSchemaField with given semantic property

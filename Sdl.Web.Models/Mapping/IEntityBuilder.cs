@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Sdl.Web.Mvc.Mapping
 {
-    public interface IEntityMapper
+    public interface IEntityBuilder
     {
-        object GetPropertyValue(object sourceEntity, List<SemanticProperty> properties);
+        object Create(object sourceEntity,Type type);
     }
 }

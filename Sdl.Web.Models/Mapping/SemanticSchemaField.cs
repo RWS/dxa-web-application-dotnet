@@ -7,7 +7,7 @@ namespace Sdl.Web.Mvc.Mapping
         // {"name":"headline","isMultiValue":false,"semantics":[{"vocab":"s","property":"headline"}],"fields":[]}
         public string name { get; set; }
         public bool isMultiValue { get; set; }
-        public List<SemanticProperty> semantics { get; set; }
+        public List<SemanticFieldProperty> semantics { get; set; }
         public List<SemanticSchemaField> fields { get; set; }
 
         /// <summary>

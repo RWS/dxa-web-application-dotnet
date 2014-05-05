@@ -23,11 +23,11 @@ namespace Sdl.Web.DD4T
 
         public static MvcHtmlString Entity(Entity entity)
         {
-            return new MvcHtmlString(String.Format("vocab=\"{0}\" typeof=\"{1}\"", entity.Semantics.Vocabulary, entity.Semantics.Type));
+            return new MvcHtmlString("");//TODO - needs reworking (String.Format("vocab=\"{0}\" typeof=\"{1}\"", entity.Semantics.Vocabulary, entity.Semantics.Type));
         }
         public static MvcHtmlString Property(Entity entity, string property)
         {
-            return new MvcHtmlString(String.Format("property=\"{0}{1}\"", property.Substring(0, 1).ToLower(), property.Substring(1)));
+            return new MvcHtmlString(""); //TODO - needs reworking (String.Format("property=\"{0}{1}\"", property.Substring(0, 1).ToLower(), property.Substring(1)));
         }
         public static MvcHtmlString Region(Region region)
         {
