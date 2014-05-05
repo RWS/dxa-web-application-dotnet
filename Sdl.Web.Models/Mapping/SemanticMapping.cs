@@ -11,8 +11,6 @@ namespace Sdl.Web.Mvc.Mapping
     /// </summary>
     public static class SemanticMapping
     {
-        public static IStaticFileManager StaticFileManager { get; set; }
-
         private static List<SemanticVocabulary> _semanticVocabularies;
         public static List<SemanticVocabulary> SemanticVocabularies
         {
@@ -41,6 +39,29 @@ namespace Sdl.Web.Mvc.Mapping
         private static readonly object MappingLock = new object();
 
         /// <summary>
+        /// Gets semantic vocabulary by prefix
+        /// </summary>
+        /// <param name="prefix">the prefix</param>
+        /// <returns>semantic vocabulary for the given prefix</returns>
+        public static string GetVocabulary(string prefix)
+        {
+            return GetVocabulary(SemanticVocabularies, prefix);
+        }
+
+        private static string GetVocabulary(List<SemanticVocabulary> vocabularies, string prefix)
+        {
+            SemanticVocabulary vocabulary = vocabularies.Find(v => v.Prefix.Equals(prefix));
+            if (vocabulary != null)
+            {
+                return vocabulary.Vocab;
+            }
+
+            Exception ex = new Exception(string.Format("Semantic Vocabulary not found for prefix '{0}'", prefix));
+            Log.Error(ex);
+            throw ex;
+        }
+
+        /// <summary>
         /// Gets a semantic schema by id
         /// </summary>
         /// <param name="id">The schema ID</param>
@@ -57,24 +78,22 @@ namespace Sdl.Web.Mvc.Mapping
             Load(AppDomain.CurrentDomain.BaseDirectory);
         }
 
-        private static SemanticSchema GetSchema(Dictionary<string, List<SemanticSchema>> mapping, long id, string type)
+        private static SemanticSchema GetSchema(IReadOnlyDictionary<string, List<SemanticSchema>> mapping, long id, string type)
         {
             Exception ex;
             if (mapping.ContainsKey(type))
             {
-                var list = mapping[type];
-                foreach (var semanticSchema in list)
+                var semanticSchemaList = mapping[type];
+                SemanticSchema schema = semanticSchemaList.Find(s => s.Id.Equals(id));
+                if (schema != null)
                 {
-                    if (semanticSchema.Id.Equals(id))
-                    {
-                        return semanticSchema;
-                    }
+                    return schema;
                 }
-                ex = new Exception(String.Format("Semantic Schema '{0}' for module '{1}' does not exist.", id, type));
+                ex = new Exception(string.Format("Semantic Schema '{0}' for module '{1}' does not exist.", id, type));
             }
             else
             {
-                ex = new Exception(String.Format("Semantic mappings for module '{0}' do not exist.", type));
+                ex = new Exception(string.Format("Semantic mappings for module '{0}' do not exist.", type));
             }
 
             Log.Error(ex);
@@ -91,7 +110,7 @@ namespace Sdl.Web.Mvc.Mapping
             lock (MappingLock)
             {
                 // ensure that the config files have been written to disk
-                StaticFileManager.CreateStaticAssets(applicationRoot);
+                Configuration.StaticFileManager.CreateStaticAssets(applicationRoot);
 
                 _semanticMap = new Dictionary<string, List<SemanticSchema>>();
                 _semanticVocabularies = new List<SemanticVocabulary>();
@@ -100,31 +119,32 @@ namespace Sdl.Web.Mvc.Mapping
                 var path = String.Format("{0}{1}/{2}", applicationRoot, Configuration.DefaultLocalization, Configuration.AddVersionToPath(Configuration.SystemFolder + "/mappings/_all.json"));
                 if (File.Exists(path))
                 {
-                    //The _all.json file contains a reference to all other configuration files
+                    // the _all.json file contains a reference to all other configuration files
                     Log.Debug("Loading config bootstrap file : '{0}'", path);
                     var bootstrapJson = Json.Decode(File.ReadAllText(path));
                     foreach (string file in bootstrapJson.files)
                     {
-                        var type = file.Substring(file.LastIndexOf("/") + 1);
-                        type = type.Substring(0, type.LastIndexOf(".")).ToLower();
+                        var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                        type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
                         var configPath = applicationRoot + Configuration.AddVersionToPath(file);
                         if (File.Exists(configPath))
                         {
                             Log.Debug("Loading mapping from file: {0}", configPath);
                             if (type.Equals("vocabularies"))
                             {
-                                _semanticVocabularies = GetVocabularysFromFile(configPath);
+                                _semanticVocabularies = GetVocabulariesFromFile(configPath);
                             }
                             else
                             {
                                 var bits = type.Split('.');
+                                // we are only interested in schemas at the moment
                                 if (bits[1].Equals("schemas"))
                                 {
                                     if (!_semanticMap.ContainsKey(bits[0]))
                                     {
                                         _semanticMap.Add(bits[0], new List<SemanticSchema>());
                                     }
-                                    _semanticMap[bits[0]] = GetSchemasFromFile(configPath);                                    
+                                    _semanticMap[bits[0]] = GetSchemasFromFile(configPath);
                                 }
                             }
                         }
@@ -147,7 +167,7 @@ namespace Sdl.Web.Mvc.Mapping
             return new JavaScriptSerializer().Deserialize<List<SemanticSchema>>(File.ReadAllText(file));
         }
 
-        private static List<SemanticVocabulary> GetVocabularysFromFile(string file)
+        private static List<SemanticVocabulary> GetVocabulariesFromFile(string file)
         {
             return new JavaScriptSerializer().Deserialize<List<SemanticVocabulary>>(File.ReadAllText(file));
         }

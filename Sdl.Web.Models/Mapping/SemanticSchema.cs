@@ -11,15 +11,15 @@ namespace Sdl.Web.Mvc.Mapping
         public List<SemanticSchemaEntity> Semantics { get; set; }
 
         /// <summary>
-        /// Find SemanticSchemaField with given semantic property
+        /// FindFieldByProperty SemanticSchemaField with given semantic property
         /// </summary>
         /// <param name="semanticProperty">the semantic property to check against</param>
         /// <returns>schema field or one of its sub fields that match with the given semantic property</returns>
-        public SemanticSchemaField Find(SemanticFieldProperty semanticProperty)
+        public SemanticSchemaField FindFieldByProperty(SemanticFieldProperty semanticProperty)
         {
             foreach (var field in Fields)
             {
-                var matchingField = field.Find(semanticProperty);
+                var matchingField = field.FindFieldByProperty(semanticProperty);
                 if (matchingField != null)
                 {
                     return matchingField;

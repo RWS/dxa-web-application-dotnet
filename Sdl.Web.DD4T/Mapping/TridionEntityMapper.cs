@@ -7,6 +7,7 @@ namespace Sdl.Web.DD4T.Mapping
 {
     public class TridionEntityMapper : IEntityMapper
     {
+        // TODO probabaly need a method based on a List<SemanticProperty>, quite similar but with vocab name instead of prefix, so use SemanticMapping.GetVocabulary(prefix)
         public object GetPropertyValue(object sourceEntity, List<SemanticFieldProperty> properties)
         {
             IComponent component = ((IComponentPresentation)sourceEntity).Component;
@@ -16,13 +17,12 @@ namespace Sdl.Web.DD4T.Mapping
             long schemaId = Convert.ToInt64(uriParts[1]);
 
             // get semantic mappings for fields from schema
-            // TODO load schemas from json and find current schema by its item id
-            SemanticSchema schema = new SemanticSchema { Id = schemaId };
+            SemanticSchema schema = SemanticMapping.GetSchema(schemaId);
 
             foreach (var semanticProperty in properties)
             {
                 // find schema field that matches "vocab" = semanticProperty.vocab && "property" = semanticProperty.property
-                var matchingField = schema.Find(semanticProperty);
+                var matchingField = schema.FindFieldByProperty(semanticProperty);
                 if (matchingField != null && component.Fields.ContainsKey(matchingField.Name))
                 {
                     IField field = component.Fields[matchingField.Name];
