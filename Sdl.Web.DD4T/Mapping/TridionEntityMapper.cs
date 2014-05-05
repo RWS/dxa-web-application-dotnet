@@ -17,15 +17,15 @@ namespace Sdl.Web.DD4T.Mapping
 
             // get semantic mappings for fields from schema
             // TODO load schemas from json and find current schema by its item id
-            SemanticSchema schema = new SemanticSchema { id = schemaId };
+            SemanticSchema schema = new SemanticSchema { Id = schemaId };
 
             foreach (var semanticProperty in properties)
             {
                 // find schema field that matches "vocab" = semanticProperty.vocab && "property" = semanticProperty.property
                 var matchingField = schema.Find(semanticProperty);
-                if (matchingField != null && component.Fields.ContainsKey(matchingField.name))
+                if (matchingField != null && component.Fields.ContainsKey(matchingField.Name))
                 {
-                    IField field = component.Fields[matchingField.name];
+                    IField field = component.Fields[matchingField.Name];
 
                     // TODO return correct index from possible multiple values
                     switch (field.FieldType)

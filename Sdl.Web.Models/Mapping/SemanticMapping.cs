@@ -46,7 +46,7 @@ namespace Sdl.Web.Mvc.Mapping
         /// <param name="id">The schema ID</param>
         /// <param name="module">The module (eg "Search") - if none specified this defaults to "Core"</param>
         /// <returns>The semantic schema matching the id for the given module</returns>
-        public static SemanticSchema GetSchema(string id, string module = Configuration.CoreModuleName)
+        public static SemanticSchema GetSchema(long id, string module = Configuration.CoreModuleName)
         {
             return GetSchema(SemanticMap, id, module);
         }
@@ -57,7 +57,7 @@ namespace Sdl.Web.Mvc.Mapping
             Load(AppDomain.CurrentDomain.BaseDirectory);
         }
 
-        private static SemanticSchema GetSchema(Dictionary<string, List<SemanticSchema>> mapping, string id, string type)
+        private static SemanticSchema GetSchema(Dictionary<string, List<SemanticSchema>> mapping, long id, string type)
         {
             Exception ex;
             if (mapping.ContainsKey(type))
@@ -65,7 +65,7 @@ namespace Sdl.Web.Mvc.Mapping
                 var list = mapping[type];
                 foreach (var semanticSchema in list)
                 {
-                    if (semanticSchema.id.Equals(id))
+                    if (semanticSchema.Id.Equals(id))
                     {
                         return semanticSchema;
                     }
