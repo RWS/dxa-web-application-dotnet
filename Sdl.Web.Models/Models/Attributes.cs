@@ -17,12 +17,17 @@ namespace Sdl.Web.Mvc.Models
             Prefix = prefix;
             IsDefaultVocab = isDefaultVocab;
         }
-
-        
         public string Vocab { get; set; }
         public string Prefix { get; set; }
         public string EntityName { get; set; }
         public bool IsDefaultVocab { get; set; }
+        public override object TypeId
+        {
+            get
+            {
+                return this;
+            }
+        }
     }
 
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
@@ -33,5 +38,12 @@ namespace Sdl.Web.Mvc.Models
             PropertyName = property;
         }
         public string PropertyName { get; set; }
+        public override object TypeId
+        {
+            get
+            {
+                return this;
+            }
+        }
     }
 }

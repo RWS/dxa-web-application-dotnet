@@ -55,12 +55,10 @@ namespace Sdl.Web.Mvc
         }
 
         protected abstract object GetModelForPage(string pageUrl);
-        protected abstract string GetPageViewName(object page);
-        protected abstract string GetEntityViewName(object entity);
 
         protected ViewResult GetPageView(object page)
         {
-            string viewName = GetPageViewName(page);
+            var viewName = ModelFactory.GetPageViewName(page);
             var subPages = new Dictionary<string, object>();
             var headerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/header")));
             var footerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/footer")));
@@ -72,11 +70,10 @@ namespace Sdl.Web.Mvc
             {
                 subPages.Add("Footer", footerModel);
             }
-            var model = ModelFactory.CreatePageModel(page, viewName, subPages);
+            var model = ModelFactory.CreatePageModel(page, subPages, viewName);
             return base.View(viewName, model);
         }
 
-        
         protected virtual ViewResult GetRegionView(Region region)
         {
             return base.View(GetRegionViewName(region), region);
@@ -91,7 +88,7 @@ namespace Sdl.Web.Mvc
 
         protected ViewResult GetEntityView(object entity)
         {
-            var viewName = GetEntityViewName(entity);
+            var viewName = ModelFactory.GetEntityViewName(entity);
             var viewEngineResult = ViewEngines.Engines.FindPartialView(this.ControllerContext, viewName);
             if (viewEngineResult.View == null)
             {

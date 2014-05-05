@@ -1,5 +1,8 @@
 ﻿@model Sdl.Web.Mvc.Models.LinkList
+@if (Model.Links!=null && Model.Links.Count>0)
+{
 <ul class="nav navbar-nav utility-nav">
+    
     @foreach(var link in Model.Links)
     {
     <li>
@@ -7,3 +10,4 @@
     </li>
     }
 </ul>
+}
