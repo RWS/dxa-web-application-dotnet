@@ -37,31 +37,6 @@ namespace Sdl.Web.Mvc
             return GetPageView(model);
         }
 
-        public virtual ActionResult TopNavigation()
-        {
-            string navigationJsonString = this.GetContentForPage(Configuration.LocalizeUrl("navigation.json"));
-            var navigationModel = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
-            return View(navigationModel);
-        }
-
-        public virtual ActionResult LeftNavigation()
-        {
-            string navigationJsonString = this.GetContentForPage(Configuration.LocalizeUrl("navigation.json"));        
-            var navigationModel = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
-            //TODO: Filtering the Json here would help to pass only the part of the structure required would help to process. Tried Linq and SelectToken without luck
-
-            return View(navigationModel);
-        }
-
-        public virtual ActionResult Breadcrumb()
-        {
-            string navigationJsonString = this.GetContentForPage(Configuration.LocalizeUrl("navigation.json"));
-            var navigationModel = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
-            //TODO: Filtering the Json here would help to pass only the part of the structure required to process. Tried Linq  with Newtonsoft JS.net and SelectToken without luck
-            //TODO: We are generating the Model three times when we could actually generate it only once at least per call!
-            //TODO: Caching Strategy
-            return View(navigationModel);
-        }
 
         public virtual ActionResult Region(Region region)
         {
