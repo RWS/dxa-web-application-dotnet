@@ -30,9 +30,12 @@ namespace Sdl.Web.DD4T
             {
                 data.AppendFormat("typeof=\"{0}\"",String.Join(" ",entityTypes));
             }
-            foreach (var item in entity.EntityData)
+            if (Configuration.IsStaging)
             {
-                data.AppendFormat("data-{0}=\"{1}\"", item.Key, HttpUtility.HtmlAttributeEncode(item.Value));
+                foreach (var item in entity.EntityData)
+                {
+                    data.AppendFormat("data-{0}=\"{1}\"", item.Key, HttpUtility.HtmlAttributeEncode(item.Value));
+                }
             }
             return new MvcHtmlString(data.ToString());
         }
@@ -47,11 +50,14 @@ namespace Sdl.Web.DD4T
                 {
                     data.AppendFormat("typeof=\"{0}\"", String.Join(" ", propertyTypes));
                 }
-                if (entity.PropertyData.ContainsKey(property))
+                if (Configuration.IsStaging)
                 {
-                    var xpath = entity.PropertyData[property];
-                    var suffix = xpath.EndsWith("]") ? "" : String.Format("[{0}]",index);
-                    data.AppendFormat("data-xpath=\"{0}{1}\"", HttpUtility.HtmlAttributeEncode(xpath), suffix);
+                    if (entity.PropertyData.ContainsKey(property))
+                    {
+                        var xpath = entity.PropertyData[property];
+                        var suffix = xpath.EndsWith("]") ? "" : String.Format("[{0}]", index);
+                        data.AppendFormat("data-xpath=\"{0}{1}\"", HttpUtility.HtmlAttributeEncode(xpath), suffix);
+                    }
                 }
             }
             return new MvcHtmlString(data.ToString());
@@ -63,51 +69,60 @@ namespace Sdl.Web.DD4T
 
         public static MvcHtmlString GetInlineEditingBootstrap(IPage page)
         {
-            var html = String.Format(PAGE_FORMAT, page.Id, page.RevisionDate.ToString("s"), page.PageTemplate.Id, page.PageTemplate.RevisionDate) + String.Format(PAGE_SCRIPT, Configuration.GetCmsUrl());
-            return new MvcHtmlString(html);
+            if (Configuration.IsStaging)
+            {
+                var html = String.Format(PAGE_FORMAT, page.Id, page.RevisionDate.ToString("s"), page.PageTemplate.Id, page.PageTemplate.RevisionDate) + String.Format(PAGE_SCRIPT, Configuration.GetCmsUrl());
+                return new MvcHtmlString(html);
+            }
+            return null;
         }
 
         public static MvcHtmlString Parse(MvcHtmlString result, IComponentPresentation cp)
         {
-            //TODO abstract DD4T content model away, only process for preview requests
-            //TODO extend for embedded fields/embedded components
-            HtmlDocument html = new HtmlDocument();
-            html.LoadHtml(String.Format("<html>{0}</html>", result.ToString()));
-            var entity = html.DocumentNode.SelectSingleNode("//*[@data-componentid]");
-            if (entity != null)
+            if (Configuration.IsStaging)
             {
-                
-                //TODO remove attributes
-                string compId = ReadAndRemoveAttribute(entity, "data-componentid");
-                string compModified = ReadAndRemoveAttribute(entity, "data-componentmodified");
-                string templateId = ReadAndRemoveAttribute(entity, "data-componenttemplateid");
-                string templateModified = ReadAndRemoveAttribute(entity, "data-componenttemplatemodified");
-                HtmlCommentNode cpData = html.CreateComment(String.Format(CP_FORMAT, compId, compModified, templateId, templateModified));
-                entity.ChildNodes.Insert(0, cpData);
-                //string lastProperty = "";
-                //int index = 1;
-                var properties = entity.SelectNodes("//*[@data-xpath]");
-                if (properties != null && properties.Count > 0)
+
+                //TODO abstract DD4T content model away, only process for preview requests
+                //TODO extend for embedded fields/embedded components
+                HtmlDocument html = new HtmlDocument();
+                html.LoadHtml(String.Format("<html>{0}</html>", result.ToString()));
+                var entity = html.DocumentNode.SelectSingleNode("//*[@data-componentid]");
+                if (entity != null)
                 {
-                    foreach (var property in properties)
+
+                    //TODO remove attributes
+                    string compId = ReadAndRemoveAttribute(entity, "data-componentid");
+                    string compModified = ReadAndRemoveAttribute(entity, "data-componentmodified");
+                    string templateId = ReadAndRemoveAttribute(entity, "data-componenttemplateid");
+                    string templateModified = ReadAndRemoveAttribute(entity, "data-componenttemplatemodified");
+                    HtmlCommentNode cpData = html.CreateComment(String.Format(CP_FORMAT, compId, compModified, templateId, templateModified));
+                    entity.ChildNodes.Insert(0, cpData);
+                    //string lastProperty = "";
+                    //int index = 1;
+                    var properties = entity.SelectNodes("//*[@data-xpath]");
+                    if (properties != null && properties.Count > 0)
                     {
-                        var xpath = ReadAndRemoveAttribute(property, "data-xpath");
-                        //TODO index of mv fields
-                        //index = propName == lastProperty ? index+1 : 1;
-                        //lastProperty = propName;
-                        HtmlCommentNode fieldData = html.CreateComment(String.Format(FIELD_FORMAT, xpath));
-                        if (property.HasChildNodes)
+                        foreach (var property in properties)
                         {
-                            property.ChildNodes.Insert(0, fieldData);
-                        }
-                        else
-                        {
-                            property.ParentNode.InsertBefore(fieldData, property);
+                            var xpath = ReadAndRemoveAttribute(property, "data-xpath");
+                            //TODO index of mv fields
+                            //index = propName == lastProperty ? index+1 : 1;
+                            //lastProperty = propName;
+                            HtmlCommentNode fieldData = html.CreateComment(String.Format(FIELD_FORMAT, xpath));
+                            if (property.HasChildNodes)
+                            {
+                                property.ChildNodes.Insert(0, fieldData);
+                            }
+                            else
+                            {
+                                property.ParentNode.InsertBefore(fieldData, property);
+                            }
                         }
                     }
                 }
+                return new MvcHtmlString(html.DocumentNode.SelectSingleNode("/html").InnerHtml);
             }
-            return new MvcHtmlString(html.DocumentNode.SelectSingleNode("/html").InnerHtml);
+            return result;
         }
 
         private static string ReadAndRemoveAttribute(HtmlNode entity, string name)

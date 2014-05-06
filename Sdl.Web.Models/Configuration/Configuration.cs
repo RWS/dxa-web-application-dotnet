@@ -34,7 +34,7 @@ namespace Sdl.Web.Mvc
                 return _defaultLocalization;
             }
         }
-
+        public static bool IsStaging { get; set; }
         public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LocalConfiguration
         {
             get
@@ -152,10 +152,15 @@ namespace Sdl.Web.Mvc
                             //The _all.json file contains a reference to all other configuration files
                             Log.Debug("Loading config bootstrap file : '{0}'", path);
                             var bootstrapJson = Json.Decode(File.ReadAllText(path));
-                            if (bootstrapJson.defaultLocalization)
+                            if (bootstrapJson.defaultLocalization!=null && bootstrapJson.defaultLocalization)
                             {
                                 _defaultLocalization = loc.Path;
                                 Log.Info("Set default localization : '{0}'", loc.Path);
+                            }
+                            if (bootstrapJson.staging != null && bootstrapJson.staging)
+                            {
+                                IsStaging = true;
+                                Log.Info("This is site is staging");
                             }
                             foreach (string file in bootstrapJson.files)
                             {
