@@ -48,6 +48,7 @@ namespace Sdl.Web.DD4T
             {
                 if (PageFactory.TryFindPage(string.Format("/{0}", pageUrl), out page))
                 {
+                    ViewBag.InlineEditingBootstrap = Markup.GetInlineEditingBootstrap(page);
                     return page;
                 }
             }
