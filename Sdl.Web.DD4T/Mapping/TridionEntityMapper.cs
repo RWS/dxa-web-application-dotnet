@@ -5,14 +5,17 @@ using Sdl.Web.Mvc.Mapping;
 
 namespace Sdl.Web.DD4T.Mapping
 {
+    /// <summary>
+    /// DD4T Entity Mapper, expecting a DD4T ComponentPresentation as sourceEntity
+    /// </summary>
     public class TridionEntityMapper : IEntityMapper
     {
-        // TODO probabaly need a method based on a List<SemanticProperty>, quite similar but with vocab name instead of prefix, so use SemanticMapping.GetVocabulary(prefix)
+        // if we have vocab name instead of prefix, we can use SemanticMapping.GetVocabulary(prefix)
         public object GetPropertyValue(object sourceEntity, List<FieldSemantics> semantics)
         {
             IComponent component = ((IComponentPresentation)sourceEntity).Component;
 
-            // tcm:0-1
+            // tcm:1-2-8
             string[] uriParts = component.Schema.Id.Split('-');
             long schemaId = Convert.ToInt64(uriParts[1]);
 

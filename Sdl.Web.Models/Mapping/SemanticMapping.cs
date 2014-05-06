@@ -11,7 +11,19 @@ namespace Sdl.Web.Mvc.Mapping
     /// </summary>
     public static class SemanticMapping
     {
-        private static List<SemanticVocabulary> _semanticVocabularies;
+        /// <summary>
+        /// Default semantic vocabulary prefix.
+        /// </summary>
+        public const string DefaultPrefix = "tsi";
+
+        /// <summary>
+        /// Default semantic vocabulary.
+        /// </summary>
+        public const string DefaultVocabulary = "http://www.sdl.com/tridion/schemas/core";
+
+        /// <summary>
+        /// List of semantic vocabularies (prefix and name).
+        /// </summary>
         public static List<SemanticVocabulary> SemanticVocabularies
         {
             get
@@ -24,7 +36,9 @@ namespace Sdl.Web.Mvc.Mapping
             }
         }
 
-        private static Dictionary<string, List<SemanticSchema>> _semanticMap;
+        /// <summary>
+        /// Dictionary with semantic schema mappings, indexed by module name.
+        /// </summary>
         public static Dictionary<string, List<SemanticSchema>> SemanticMap
         {
             get
@@ -36,6 +50,9 @@ namespace Sdl.Web.Mvc.Mapping
                 return _semanticMap;
             }
         }
+
+        private static Dictionary<string, List<SemanticSchema>> _semanticMap;
+        private static List<SemanticVocabulary> _semanticVocabularies;
         private static readonly object MappingLock = new object();
 
         /// <summary>
@@ -56,7 +73,7 @@ namespace Sdl.Web.Mvc.Mapping
                 return vocabulary.Vocab;
             }
 
-            Exception ex = new Exception(string.Format("Semantic Vocabulary not found for prefix '{0}'", prefix));
+            Exception ex = new Exception(string.Format("Semantic vocabulary not found for prefix '{0}'", prefix));
             Log.Error(ex);
             throw ex;
         }
@@ -71,7 +88,6 @@ namespace Sdl.Web.Mvc.Mapping
         {
             return GetSchema(SemanticMap, id, module);
         }
-
 
         private static void LoadMapping()
         {
