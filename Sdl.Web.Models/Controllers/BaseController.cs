@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using System.Web.Script.Serialization;
 using Sdl.Web.Mvc.Models;
 using Sdl.Web.Mvc.Html;
 using Sdl.Web.Mvc.Mapping;
@@ -36,6 +37,32 @@ namespace Sdl.Web.Mvc
             return GetPageView(model);
         }
 
+        public virtual ActionResult TopNavigation()
+        {
+            string navigationJsonString = this.GetContentForPage(Configuration.LocalizeUrl("navigation.json"));
+            var navigationModel = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
+            return View(navigationModel);
+        }
+
+        public virtual ActionResult LeftNavigation()
+        {
+            string navigationJsonString = this.GetContentForPage(Configuration.LocalizeUrl("navigation.json"));        
+            var navigationModel = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
+            //TODO: Filtering the Json here would help to pass only the part of the structure required would help to process. Tried Linq and SelectToken without luck
+
+            return View(navigationModel);
+        }
+
+        public virtual ActionResult Breadcrumb()
+        {
+            string navigationJsonString = this.GetContentForPage(Configuration.LocalizeUrl("navigation.json"));
+            var navigationModel = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
+            //TODO: Filtering the Json here would help to pass only the part of the structure required to process. Tried Linq  with Newtonsoft JS.net and SelectToken without luck
+            //TODO: We are generating the Model three times when we could actually generate it only once at least per call!
+            //TODO: Caching Strategy
+            return View(navigationModel);
+        }
+
         public virtual ActionResult Region(Region region)
         {
             ViewBag.Renderer = Renderer;
@@ -55,6 +82,7 @@ namespace Sdl.Web.Mvc
         }
 
         protected abstract object GetModelForPage(string pageUrl);
+        protected abstract string GetContentForPage(string pageUrl);
         protected abstract string GetPageViewName(object page);
         protected abstract string GetEntityViewName(object entity);
 
@@ -64,6 +92,8 @@ namespace Sdl.Web.Mvc
             var subPages = new Dictionary<string, object>();
             var headerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/header")));
             var footerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/footer")));
+            
+            
             if (headerModel != null)
             {
                 subPages.Add("Header", headerModel);
