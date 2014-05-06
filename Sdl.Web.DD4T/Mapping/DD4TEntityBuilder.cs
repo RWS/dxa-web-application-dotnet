@@ -55,7 +55,7 @@ namespace Sdl.Web.DD4T.Mapping
                             // semantic mapping of fields
                             string fieldname;
 
-                            // get vocabulary for prefix
+                            // get vocabulary for prefix (use default vocabulary if prefix is missing)
                             string vocab = SemanticMapping.DefaultVocabulary;
                             if (!string.IsNullOrEmpty(info.Prefix))
                             {
