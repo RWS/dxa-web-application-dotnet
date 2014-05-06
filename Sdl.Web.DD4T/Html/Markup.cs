@@ -36,7 +36,7 @@ namespace Sdl.Web.DD4T
             }
             return new MvcHtmlString(data.ToString());
         }
-        public static MvcHtmlString Property(Entity entity, string property)
+        public static MvcHtmlString Property(Entity entity, string property, int index = 0)
         {
             StringBuilder data = new StringBuilder();
             var pi = entity.GetType().GetProperty(property);
@@ -49,7 +49,9 @@ namespace Sdl.Web.DD4T
                 }
                 if (entity.PropertyData.ContainsKey(property))
                 {
-                    data.AppendFormat("data-XPath=\"{0}\"", HttpUtility.HtmlAttributeEncode(entity.PropertyData[property]));
+                    var xpath = entity.PropertyData[property];
+                    var suffix = xpath.EndsWith("]") ? "" : String.Format("[{0}]",index);
+                    data.AppendFormat("data-xpath=\"{0}{1}\"", HttpUtility.HtmlAttributeEncode(xpath), suffix);
                 }
             }
             return new MvcHtmlString(data.ToString());

@@ -52,7 +52,12 @@ namespace Sdl.Web.DD4T.Mapping
                                 //truncate multivalue properties by one character as the Tridion field name is usually singular (eg link instead of links)
                                 fieldname = fieldname.Substring(0, fieldname.Length - 1);
                             }
-                            //TODO check metadata as well!
+                            //Hack - for mapping images to the Image property - this should use some semantics
+                            if (fieldname=="image" && component.ComponentType == ComponentType.Multimedia)
+                            {
+                                pi.SetValue(model, GetImages(new List<IComponent>{component})[0]);
+                            }
+                            //TODO check metadata/embedded fields as well!
                             if (component.Fields.ContainsKey(fieldname))
                             {
                                 var field = component.Fields[fieldname];

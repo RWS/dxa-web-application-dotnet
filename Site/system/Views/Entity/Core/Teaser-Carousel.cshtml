@@ -1,8 +1,10 @@
 ﻿@model Sdl.Web.Mvc.Models.Teaser
 @if (Model.Image!=null)
 {
-    <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 350, true, 3.3)">
+    <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 400, true, 3.3)">
 }
+@if (Model.Headline!=null || Model.Text!=null)
+{
 <div class="carousel-caption">
     @if (Model.Link != null)
     {
@@ -16,3 +18,4 @@
     }
     <p class="overlay overlay-bottom glow">@Model.Text</p>
 </div>
+}
