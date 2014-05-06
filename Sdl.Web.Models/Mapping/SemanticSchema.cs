@@ -2,24 +2,47 @@
 
 namespace Sdl.Web.Mvc.Mapping
 {
+    /// <summary>
+    /// Class for deserialized json schema.
+    /// {"Id":80,"RootElement":"Article","Fields":[...],"Semantics":[...]}
+    /// </summary>
     public class SemanticSchema
     {
-        // {"Id":80,"RootElement":"Article","Fields":[{"Name":"headline","IsMultiValue":false,"Semantics":[{"Vocab":"s","Property":"headline"}],"Fields":[]},{"Name":"image","IsMultiValue":false,"Semantics":[{"Vocab":"s","Property":"image"}],"Fields":[]},{"Name":"articleBody","IsMultiValue":false,"Semantics":[{"Vocab":"s","Property":"articleBody"}],"Fields":[]}],"Semantics":[{"Vocab":"s","Entity":"Article"}]}
+        /// <summary>
+        /// Schema (item) ID.
+        /// </summary>
         public long Id { get; set; }
-        public string RootElement { get; set; }
-        public List<SemanticSchemaField> Fields { get; set; }
-        public List<SemanticSchemaEntity> Semantics { get; set; }
 
         /// <summary>
-        /// FindFieldByProperty SemanticSchemaField with given semantic property
+        /// Schema root element name.
         /// </summary>
-        /// <param name="semanticProperty">the semantic property to check against</param>
-        /// <returns>schema field or one of its sub fields that match with the given semantic property</returns>
-        public SemanticSchemaField FindFieldByProperty(SemanticFieldProperty semanticProperty)
+        public string RootElement { get; set; }
+
+        /// <summary>
+        /// Schema fields.
+        /// </summary>
+        public List<SemanticSchemaField> Fields { get; set; }
+
+        /// <summary>
+        /// Schema semantics.
+        /// </summary>
+        public List<SchemaSemantics> Semantics { get; set; }
+
+        /// <summary>
+        /// Initializes a new empty instance of the <see cref="SemanticSchema"/> class.
+        /// </summary>
+        public SemanticSchema() { }
+
+        /// <summary>
+        /// Find <see cref="SemanticSchemaField"/> with given semantic property.
+        /// </summary>
+        /// <param name="fieldSemantics">The semantic property to check against</param>
+        /// <returns>Schema field or one of its embedded fields that match with the given semantic property, null if a match cannot be found</returns>
+        public SemanticSchemaField FindFieldByProperty(FieldSemantics fieldSemantics)
         {
             foreach (var field in Fields)
             {
-                var matchingField = field.FindFieldByProperty(semanticProperty);
+                var matchingField = field.FindFieldByProperty(fieldSemantics);
                 if (matchingField != null)
                 {
                     return matchingField;
