@@ -40,6 +40,7 @@ namespace Sdl.Web.Mvc.Mapping
         /// </summary>
         /// <remarks>
         /// Using <see cref="ILookup{TKey,TElement}"/> rather than a <see cref="Dictionary{TKey,TValue}"/> because it will allow for duplicate keys.
+        /// Duplicate keys make no sense, but we might have them, so this prevents runtime exceptions.
         /// </remarks>
         /// <returns>List with entity names indexed by vocabulary</returns>
         public ILookup<string, string> GetEntityNames()
