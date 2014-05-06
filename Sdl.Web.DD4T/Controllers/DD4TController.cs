@@ -62,6 +62,24 @@ namespace Sdl.Web.DD4T
 
             return page;
         }
+
+   
+
+        protected override string GetContentForPage(string pageUrl)
+        {
+            string page;
+            if (PageFactory != null)
+            {
+                if (PageFactory.TryFindPageContent(string.Format("/{0}", pageUrl), out page))
+                {
+                    return page;
+                }
+            }
+            else
+                throw new ConfigurationException("No PageFactory configured");
+
+            return page;
+        }
         
         protected override string GetPageViewName(object pageObject)
         {

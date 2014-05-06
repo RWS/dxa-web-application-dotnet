@@ -1,0 +1,18 @@
+﻿@model Sdl.Web.Mvc.Models.WebPage
+<div class="container">
+    @if (Model.Regions.ContainsKey("Hero"))
+    {
+        @ViewBag.Renderer.Render(Model.Regions["Hero"],Html)
+    }
+    @Html.Action("Breadcrumb", "Navigation")
+    @Html.Action("LeftNavigation", "Navigation")
+    <div class="col-sm-7">
+        @foreach (Sdl.Web.Mvc.Models.Region region in Model.Regions.Values)
+        {
+            if (region.Name != "Hero")
+            {
+                @ViewBag.Renderer.Render(region, Html)
+            }
+        }
+    </div>
+</div>

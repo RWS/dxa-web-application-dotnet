@@ -1,0 +1,43 @@
+﻿@model Sdl.Web.Mvc.Models.SitemapItem
+
+
+<ol class="breadcrumb">
+    <li><a href="/"><i class="fa fa-home"> <span class='sr-only'>aaa @Model.Title  ss</span></i></a></li>
+    @ShowLevel(Model.Items)        
+</ol>
+
+
+@{
+    
+    
+
+@helper ShowLevel(List<SitemapItem> items)
+{
+    var currentUrl = Request.Url.LocalPath.ToString().ToLower();
+
+    foreach (var item in items)
+    {
+
+        if (currentUrl.ToLower().Equals(item.Url))
+        {
+            <li class="active">@item.Title</li>
+            return;
+        }
+        if (currentUrl.Contains(item.Url))
+        {
+            <li><a href="@item.Url">@item.Title</a></li>
+            @ShowLevel(item.Items)
+            return;
+        }
+
+    }
+}
+
+
+
+
+
+}
+
+
+

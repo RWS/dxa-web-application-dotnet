@@ -17,9 +17,10 @@ namespace Sdl.Web.Mvc.Models
         //TODO: Are dictionaries better than explicit values? Somethings you may always have (description etc.)
         public Dictionary<string, string> Meta { get; set; }
         public Dictionary<string, Region> Regions { get; set; }
+        public Navigation Navigation { get; set; }
         public Header Header { get; set; }
         public Footer Footer { get; set; }
-
+        
         /*Other stuff to consider:
          1. Specific css/js for the page based on its components/plugins
          2. Analytics variables

@@ -1,0 +1,54 @@
+﻿@model Sdl.Web.Mvc.Models.SitemapItem
+
+@{
+    Layout = null;
+}
+
+
+<div class="col-sm-3">
+    <nav>
+        <ul class="nav nav-sidebar">
+            @Traverse(Model.Items)
+        </ul>
+    </nav>
+</div>
+
+
+@helper Traverse(List<SitemapItem> items)
+{
+    var currentUrl = Request.Url.LocalPath.ToString().ToLower();
+
+    foreach (var item in items)
+    {
+
+        if (currentUrl.ToLower().Equals(item.Url))
+        {
+            if (item.Type == "Page")
+            {
+                @displayLeftNavigationSection(items)
+            }
+            else
+            {
+                @displayLeftNavigationSection(item.Items)
+            }
+
+        }
+        if (currentUrl.Contains(item.Url))
+        {
+            @Traverse(item.Items)
+        }
+    }
+}
+
+@helper displayLeftNavigationSection(List<SitemapItem> items)
+{
+    foreach (var navItem in items)
+    {
+        if (navItem.Title != "Index")
+        {
+            <li class="@(navItem.Url == Request.Url.LocalPath.ToString() ? "active" : "")">
+                <a href="@navItem.Url">@navItem.Title</a>
+            </li>
+        }
+    }
+}
