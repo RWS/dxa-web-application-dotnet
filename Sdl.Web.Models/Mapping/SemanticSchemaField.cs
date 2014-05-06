@@ -34,15 +34,18 @@ namespace Sdl.Web.Mvc.Mapping
         public SemanticSchemaField() { }
 
         /// <summary>
-        /// Check if current field contains given semantic property.
+        /// Check if current field contains given semantics.
         /// </summary>
-        /// <param name="fieldSemantics">The semantic property to check against</param>
+        /// <param name="fieldSemantics">The semantics to check against</param>
         /// <returns>True if this field contains given semantics, false otherwise</returns>
-        public bool ContainsProperty(FieldSemantics fieldSemantics)
+        public bool ContainsSemantics(FieldSemantics fieldSemantics)
         {
             foreach (var property in Semantics)
             {
-                if (property.Equals(fieldSemantics))
+                // TODO add proper Equals implementation in FieldSemantics
+                if (property.Property.Equals(fieldSemantics.Property) &&
+                    property.Prefix.Equals(fieldSemantics.Prefix) && 
+                    property.Entity.Equals(fieldSemantics.Entity))
                 {
                     return true;
                 }
@@ -52,22 +55,23 @@ namespace Sdl.Web.Mvc.Mapping
         }
 
         /// <summary>
-        /// Find <see cref="SemanticSchemaField"/> with given semantic property.
+        /// Find <see cref="SemanticSchemaField"/> with given semantics.
         /// </summary>
-        /// <param name="fieldSemantics">The semantic property to check against</param>
+        /// <param name="fieldSemantics">The semantics to check against</param>
         /// <returns>This field or one of its embedded fields that match with the given semantics, null if a match cannot be found</returns>
-        public SemanticSchemaField FindFieldByProperty(FieldSemantics fieldSemantics)
+        public SemanticSchemaField FindFieldBySemantics(FieldSemantics fieldSemantics)
         {
-            if (ContainsProperty(fieldSemantics))
+            if (ContainsSemantics(fieldSemantics))
             {
                 return this;
             }
 
             foreach (var embeddedField in Fields)
             {
-                SemanticSchemaField field = embeddedField.FindFieldByProperty(fieldSemantics);
+                SemanticSchemaField field = embeddedField.FindFieldBySemantics(fieldSemantics);
                 if (field != null)
                 {
+                    // TODO when we return an embedded field, we should indicate that somehow
                     return field;
                 }
             }

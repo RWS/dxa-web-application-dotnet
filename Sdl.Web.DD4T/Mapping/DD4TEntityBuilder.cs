@@ -35,6 +35,14 @@ namespace Sdl.Web.DD4T.Mapping
             }
             if (component != null)
             {
+                // get schema item id from tcmuri -> tcm:1-2-8
+                string[] uriParts = component.Schema.Id.Split('-');
+                long schemaId = Convert.ToInt64(uriParts[1]);
+
+                // get schema entity names (indexed by vocabulary)
+                SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaId);
+                ILookup<string, string> entityNames = semanticSchema.GetEntityNames();
+
                 var model = Activator.CreateInstance(type);
                 Dictionary<string, string> vocabularies = GetVocabulariesFromType(type);
                 var propertySemantics = LoadPropertySemantics(type);
@@ -44,12 +52,39 @@ namespace Sdl.Web.DD4T.Mapping
                     {
                         foreach (var info in propertySemantics[pi.Name])
                         {
-                            bool multival = pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
-                            //Here we would do the mapping, but for now we do basic property name -> xml field mapping
-                            var fieldname = info.PropertyName;
-                            if (multival && !component.Fields.ContainsKey(info.PropertyName))
+                            // semantic mapping of fields
+                            string fieldname;
+
+                            // get vocabulary for prefix
+                            string vocab = SemanticMapping.DefaultVocabulary;
+                            if (!string.IsNullOrEmpty(info.Prefix))
                             {
-                                //truncate multivalue properties by one character as the Tridion field name is usually singular (eg link instead of links)
+                                vocab = vocabularies[info.Prefix];
+                            }
+
+                            // determine field semantics
+                            string prefix = SemanticMapping.GetPrefix(vocab);
+                            string property = info.PropertyName;
+                            string entity = entityNames[vocab].First();
+                            FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
+
+                            // locate semantic schema field
+                            SemanticSchemaField matchingField = semanticSchema.FindFieldBySemantics(fieldSemantics);
+                            if (matchingField != null)
+                            {
+                                // we found a field with given semantics
+                                fieldname = matchingField.Name;
+                            }
+                            else
+                            {
+                                // we did not find a field with given semantics, do basic property name -> xml field mapping
+                                fieldname = info.PropertyName;
+                            }
+
+                            bool multival = pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
+                            if (multival && !component.Fields.ContainsKey(fieldname))
+                            {
+                                // truncate multivalue properties by one character as the Tridion field name is usually singular (eg link instead of links)
                                 fieldname = fieldname.Substring(0, fieldname.Length - 1);
                             }
                             //Hack - for mapping images to the Image property - this should use some semantics

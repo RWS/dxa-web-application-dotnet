@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Sdl.Web.Mvc.Mapping
 {
@@ -34,15 +35,35 @@ namespace Sdl.Web.Mvc.Mapping
         public SemanticSchema() { }
 
         /// <summary>
-        /// Find <see cref="SemanticSchemaField"/> with given semantic property.
+        /// Get a list with schema entity names for its vocabularies. 
+        /// Using vocabulary name rather than prefix from json, as the prefixes can be different in the view. 
         /// </summary>
-        /// <param name="fieldSemantics">The semantic property to check against</param>
-        /// <returns>Schema field or one of its embedded fields that match with the given semantic property, null if a match cannot be found</returns>
-        public SemanticSchemaField FindFieldByProperty(FieldSemantics fieldSemantics)
+        /// <remarks>
+        /// Using <see cref="ILookup{TKey,TElement}"/> rather than a <see cref="Dictionary{TKey,TValue}"/> because it will allow for duplicate keys.
+        /// </remarks>
+        /// <returns>List with entity names indexed by vocabulary</returns>
+        public ILookup<string, string> GetEntityNames()
+        {
+            List<KeyValuePair<string, string>> entityNames = new List<KeyValuePair<string, string>>();
+            foreach (var schemaSemantics in Semantics)
+            {
+                string vocab = SemanticMapping.GetVocabulary(schemaSemantics.Prefix);
+                entityNames.Add(new KeyValuePair<string, string>(vocab, schemaSemantics.Entity));
+            }
+
+            return entityNames.ToLookup(x => x.Key, x => x.Value);
+        }
+
+        /// <summary>
+        /// Find <see cref="SemanticSchemaField"/> with given semantics.
+        /// </summary>
+        /// <param name="fieldSemantics">The semantics to check against</param>
+        /// <returns>Schema field or one of its embedded fields that match with the given semantics, null if a match cannot be found</returns>
+        public SemanticSchemaField FindFieldBySemantics(FieldSemantics fieldSemantics)
         {
             foreach (var field in Fields)
             {
-                var matchingField = field.FindFieldByProperty(fieldSemantics);
+                var matchingField = field.FindFieldBySemantics(fieldSemantics);
                 if (matchingField != null)
                 {
                     return matchingField;

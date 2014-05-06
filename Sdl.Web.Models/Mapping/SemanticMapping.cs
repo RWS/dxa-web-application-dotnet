@@ -56,10 +56,33 @@ namespace Sdl.Web.Mvc.Mapping
         private static readonly object MappingLock = new object();
 
         /// <summary>
-        /// Gets semantic vocabulary by prefix
+        /// Gets prefix for semantic vocabulary.
         /// </summary>
-        /// <param name="prefix">the prefix</param>
-        /// <returns>semantic vocabulary for the given prefix</returns>
+        /// <param name="vocab">Vocabulary name</param>
+        /// <returns>Prefix for this semantic vocabulary</returns>
+        public static string GetPrefix(string vocab)
+        {
+            return GetPrefix(SemanticVocabularies, vocab);
+        }
+
+        private static string GetPrefix(List<SemanticVocabulary> vocabularies, string vocab)
+        {
+            SemanticVocabulary vocabulary = vocabularies.Find(v => v.Vocab.Equals(vocab));
+            if (vocabulary != null)
+            {
+                return vocabulary.Prefix;
+            }
+
+            Exception ex = new Exception(string.Format("Prefix not found for semantic vocabulary '{0}'", vocab));
+            Log.Error(ex);
+            throw ex;
+        }
+
+        /// <summary>
+        /// Gets semantic vocabulary by prefix.
+        /// </summary>
+        /// <param name="prefix">The prefix</param>
+        /// <returns>Semantic vocabulary for the given prefix</returns>
         public static string GetVocabulary(string prefix)
         {
             return GetVocabulary(SemanticVocabularies, prefix);
@@ -79,7 +102,7 @@ namespace Sdl.Web.Mvc.Mapping
         }
 
         /// <summary>
-        /// Gets a semantic schema by id
+        /// Gets a semantic schema by id.
         /// </summary>
         /// <param name="id">The schema ID</param>
         /// <param name="module">The module (eg "Search") - if none specified this defaults to "Core"</param>
@@ -87,11 +110,6 @@ namespace Sdl.Web.Mvc.Mapping
         public static SemanticSchema GetSchema(long id, string module = Configuration.CoreModuleName)
         {
             return GetSchema(SemanticMap, id, module);
-        }
-
-        private static void LoadMapping()
-        {
-            Load(AppDomain.CurrentDomain.BaseDirectory);
         }
 
         private static SemanticSchema GetSchema(IReadOnlyDictionary<string, List<SemanticSchema>> mapping, long id, string type)
@@ -114,6 +132,11 @@ namespace Sdl.Web.Mvc.Mapping
 
             Log.Error(ex);
             throw ex;
+        }
+
+        private static void LoadMapping()
+        {
+            Load(AppDomain.CurrentDomain.BaseDirectory);
         }
 
         /// <summary>
