@@ -115,12 +115,12 @@ namespace Sdl.Web.Mvc.Mapping
                 _semanticMap = new Dictionary<string, List<SemanticSchema>>();
                 _semanticVocabularies = new List<SemanticVocabulary>();
 
-                Log.Debug("Loading config for default localization");
+                Log.Debug("Loading semantic mappings for default localization");
                 var path = String.Format("{0}{1}/{2}", applicationRoot, Configuration.DefaultLocalization, Configuration.AddVersionToPath(Configuration.SystemFolder + "/mappings/_all.json"));
                 if (File.Exists(path))
                 {
                     // the _all.json file contains a reference to all other configuration files
-                    Log.Debug("Loading config bootstrap file : '{0}'", path);
+                    Log.Debug("Loading semantic mapping bootstrap file : '{0}'", path);
                     var bootstrapJson = Json.Decode(File.ReadAllText(path));
                     foreach (string file in bootstrapJson.files)
                     {
@@ -150,13 +150,13 @@ namespace Sdl.Web.Mvc.Mapping
                         }
                         else
                         {
-                            Log.Error("Config file: {0} does not exist - skipping", configPath);
+                            Log.Error("Semantic mapping file: {0} does not exist - skipping", configPath);
                         }
                     }
                 }
                 else
                 {
-                    Log.Warn("Localization configuration bootstrap file: {0} does not exist - skipping this localization", path);
+                    Log.Warn("Semantic mapping bootstrap file: {0} does not exist - skipping this", path);
                 }
 
             }

@@ -67,8 +67,8 @@
     <Compile Include="Mapping\IEntityBuilder.cs" />
     <Compile Include="Mapping\IEntityMapper.cs" />
     <Compile Include="Mapping\IModelFactory.cs" />
-    <Compile Include="Mapping\SemanticSchemaEntity.cs" />
-    <Compile Include="Mapping\SemanticFieldProperty.cs" />
+    <Compile Include="Mapping\SchemaSemantics.cs" />
+    <Compile Include="Mapping\FieldSemantics.cs" />
     <Compile Include="Mapping\SemanticMapping.cs" />
     <Compile Include="Mapping\SemanticProperty.cs" />
     <Compile Include="Mapping\SemanticSchema.cs" />
