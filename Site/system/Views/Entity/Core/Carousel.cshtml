@@ -15,16 +15,11 @@
             for (int i = 0; i < Model.ItemListElements.Count; i++)
             {
                 var item = Model.ItemListElements[i];
-                <div class="item @(i==0?"active":"")" @Markup.Property(Model, "ItemListElement")>
+                <div class="item @(i==0?"active":"")" @Markup.Property(Model, "ItemListElements", i)>
                     @if (item is Teaser)
                     {
                         Html.RenderPartial("Core/Teaser-Carousel", item);
-                    }@*
-                    else if (item is Image)
-                    {
-                        var img = (Image)Model.ItemListElements[i];
-                        <img src="@Html.FixedSizeImageUrl(img.Url, 350, true, 3.3)" alt="@img.AlternateText" />
-                    }*@
+                    }
                 </div>
             }
         }
