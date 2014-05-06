@@ -175,6 +175,7 @@
     <Content Include="system\Views\Navigation\Breadcrumb.cshtml" />
     <Content Include="system\Views\Navigation\LeftNavigation.cshtml" />
     <Content Include="system\Views\Navigation\TopNavigation.cshtml" />
+    <Content Include="system\Views\Page\Core\LeftNavContentPage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
