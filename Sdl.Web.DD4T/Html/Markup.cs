@@ -55,7 +55,7 @@ namespace Sdl.Web.DD4T
                     if (entity.PropertyData.ContainsKey(property))
                     {
                         var xpath = entity.PropertyData[property];
-                        var suffix = xpath.EndsWith("]") ? "" : String.Format("[{0}]", index);
+                        var suffix = xpath.EndsWith("]") ? "" : String.Format("[{0}]", index+1);
                         data.AppendFormat("data-xpath=\"{0}{1}\"", HttpUtility.HtmlAttributeEncode(xpath), suffix);
                     }
                 }
