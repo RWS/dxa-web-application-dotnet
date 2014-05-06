@@ -10,5 +10,7 @@ namespace Sdl.Web.Mvc.Models
         public string Id { get; set; }
         public string Url { get; set; }
         public Semantics Semantics { get; set; }
+        public Dictionary<string, string> EntityData { get; set; }
+        public Dictionary<string, string> PropertyData { get; set; }
     }
 }

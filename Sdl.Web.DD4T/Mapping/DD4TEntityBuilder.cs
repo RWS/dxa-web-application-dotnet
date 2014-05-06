@@ -21,20 +21,28 @@ namespace Sdl.Web.DD4T.Mapping
         public override object Create(object sourceEntity,Type type)
         {
             IComponent component = sourceEntity as IComponent;
-            if (component==null && sourceEntity is IComponentPresentation)
+            Dictionary<string, string> entityData = null;
+            Dictionary<string, string> propertyData = new Dictionary<string, string>();
+            if (component == null && sourceEntity is IComponentPresentation)
             {
-                component = ((IComponentPresentation)sourceEntity).Component;
+                var cp = (IComponentPresentation)sourceEntity;
+                component = cp.Component;
+                entityData = GetEntityData(cp);
+            }
+            else
+            {
+                entityData = GetEntityData(component);
             }
             if (component != null)
             {
                 var model = Activator.CreateInstance(type);
                 Dictionary<string, string> vocabularies = GetVocabulariesFromType(type);
-                var propertyData = LoadPropertySemantics(type);
+                var propertySemantics = LoadPropertySemantics(type);
                 foreach (var pi in type.GetProperties())
                 {
-                    if (propertyData.ContainsKey(pi.Name))
+                    if (propertySemantics.ContainsKey(pi.Name))
                     {
-                        foreach (var info in propertyData[pi.Name])
+                        foreach (var info in propertySemantics[pi.Name])
                         {
                             bool multival = pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
                             //Here we would do the mapping, but for now we do basic property name -> xml field mapping
@@ -44,6 +52,7 @@ namespace Sdl.Web.DD4T.Mapping
                                 //truncate multivalue properties by one character as the Tridion field name is usually singular (eg link instead of links)
                                 fieldname = fieldname.Substring(0, fieldname.Length - 1);
                             }
+                            //TODO check metadata as well!
                             if (component.Fields.ContainsKey(fieldname))
                             {
                                 var field = component.Fields[fieldname];
@@ -69,11 +78,11 @@ namespace Sdl.Web.DD4T.Mapping
                                         pi.SetValue(model, GetStrings(field, propertyType, multival));
                                         break;
                                 }
+                                propertyData.Add(pi.Name,GetFieldXPath(field));
                                 //If we found a field, we are done - no need to process other semantics for this property
                                 break;
                             }
                         }
-
                         object value = null;
                         if (value != null)
                         {
@@ -81,9 +90,41 @@ namespace Sdl.Web.DD4T.Mapping
                         }
                     }
                 }
+                if (model is Entity)
+                {
+                    ((Entity)model).EntityData = entityData;
+                    ((Entity)model).PropertyData = propertyData;
+                }
                 return model;
             }
             return null;
+        }
+
+        private string GetFieldXPath(IField field)
+        {
+            return field.XPath;
+        }
+
+        protected virtual Dictionary<string, string> GetEntityData(IComponent comp)
+        {
+            var res = new Dictionary<string, string>();
+            if (comp != null)
+            {
+                res.Add("ComponentID", comp.Id);
+                res.Add("ComponentModified", comp.RevisionDate.ToString("s"));
+            }
+            return res;
+        }
+        protected virtual Dictionary<string, string> GetEntityData(IComponentPresentation cp)
+        {
+            if (cp != null)
+            {
+                var res = GetEntityData(cp.Component);
+                res.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
+                res.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("s"));
+                return res;
+            }
+            return new Dictionary<string, string>();
         }
 
         private object GetDates(IField field, Type modelType, bool multival)
