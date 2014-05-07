@@ -57,6 +57,7 @@ namespace Sdl.Web.Mvc
         }
 
         protected abstract object GetModelForPage(string pageUrl);
+        protected abstract string GetContentForPage(string pageUrl);
         protected ViewResult GetPageView(object page)
         {
             var viewName = ModelFactory.GetPageViewName(page);
