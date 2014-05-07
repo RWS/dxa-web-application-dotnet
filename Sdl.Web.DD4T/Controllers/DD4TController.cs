@@ -28,7 +28,6 @@ namespace Sdl.Web.DD4T
     public class DD4TController : BaseController
     {
         public virtual Fac.IPageFactory PageFactory { get; set; }
-        public virtual Fac.IComponentFactory ComponentFactory { get; set; }
         
         public DD4TController()
         {
@@ -40,11 +39,6 @@ namespace Sdl.Web.DD4T
                 ComponentFactory = new ComponentFactory() { PublicationResolver = new PublicationResolver() },
                 LinkFactory = new LinkFactory() { PublicationResolver = new PublicationResolver() }
             };
-            this.ComponentFactory = new ComponentFactory()
-            {
-                ComponentProvider = new TridionComponentProvider(),
-                PublicationResolver = new PublicationResolver()                
-            };
         }
 
         protected override object GetModelForPage(string pageUrl)
@@ -54,6 +48,7 @@ namespace Sdl.Web.DD4T
             {
                 if (PageFactory.TryFindPage(string.Format("/{0}", pageUrl), out page))
                 {
+                    ViewBag.InlineEditingBootstrap = Markup.GetInlineEditingBootstrap(page);
                     return page;
                 }
             }

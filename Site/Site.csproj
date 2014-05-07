@@ -160,7 +160,7 @@
     <Content Include="system\Views\Region\Core\Hero.cshtml" />
     <Content Include="system\Views\Page\Core\SectionPage.cshtml" />
     <Content Include="system\Views\Entity\Core\Carousel.cshtml" />
-    <Content Include="system\Views\Entity\Core\Teaser-Carousel.cshtml" />
+    <Content Include="system\Views\Entity\Core\Partials\TeaserHero-ImageOverlay.cshtml" />
     <Content Include="system\Views\Page\_ViewStart.cshtml" />
     <Content Include="system\Views\Page\Core\ContentPage.cshtml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
