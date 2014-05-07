@@ -176,6 +176,8 @@
     <Content Include="system\Views\Navigation\LeftNavigation.cshtml" />
     <Content Include="system\Views\Navigation\TopNavigation.cshtml" />
     <Content Include="system\Views\Page\Core\LeftNavContentPage.cshtml" />
+    <Content Include="system\Views\Entity\Core\TeaserColored.cshtml" />
+    <Content Include="system\Views\Entity\Core\TeaserHero-ImageOverlay.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
