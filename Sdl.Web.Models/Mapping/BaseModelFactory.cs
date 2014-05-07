@@ -16,33 +16,7 @@ namespace Sdl.Web.Mvc.Mapping
         public abstract string GetEntityViewName(object entity);
         public abstract string GetPageViewName(object entity);
 
-        private static Dictionary<string, Type> _viewModelRegistry = null;
         private static Dictionary<Type, IEntityBuilder> _entityBuilders = null;
-        public static Dictionary<string, Type> ViewModelRegistry
-        {
-            get
-            {
-                if (_viewModelRegistry == null)
-                {
-                    //TODO hardcoded for now
-                    _viewModelRegistry = new Dictionary<string, Type>();
-                    _viewModelRegistry.Add("Core/Article", typeof(Article));
-                    _viewModelRegistry.Add("Core/Carousel", typeof(Carousel));
-                    _viewModelRegistry.Add("Core/FooterLinkGroup", typeof(LinkList));
-                    _viewModelRegistry.Add("Core/HeaderLinks", typeof(LinkList));
-                    _viewModelRegistry.Add("Core/Teaser-Carousel", typeof(Teaser));
-                    _viewModelRegistry.Add("Core/Teaser-ImageOverlay", typeof(Teaser));
-                    _viewModelRegistry.Add("Core/Teaser", typeof(Teaser));
-                    _viewModelRegistry.Add("Core/Header", typeof(Teaser));
-                    _viewModelRegistry.Add("Core/Footer", typeof(LinkList));
-                }
-                return _viewModelRegistry;
-            }
-            set
-            {
-                _viewModelRegistry = value;
-            }
-        }
         public static Dictionary<Type, IEntityBuilder> EntityBuilders
         {
             get
@@ -61,28 +35,33 @@ namespace Sdl.Web.Mvc.Mapping
         }
         public IEntityBuilder DefaultEntityBuilder { get; set; }
 
-        public virtual object CreateEntityModel(object data, string view = null)
+        public virtual object CreateEntityModel(object data, Type viewModeltype = null)
         {
-            if (view == null)
+            if (viewModeltype == null)
             {
-                view = GetEntityViewName(data);
+                viewModeltype = GetEntityViewModelType(data);
             }
-            if (ViewModelRegistry.ContainsKey(view))
+            if (viewModeltype!=null)
             {
-                var type = ViewModelRegistry[view];
                 IEntityBuilder builder = DefaultEntityBuilder;
-                if (EntityBuilders.ContainsKey(type))
+                if (EntityBuilders.ContainsKey(viewModeltype))
                 {
-                    builder = EntityBuilders[type];
+                    builder = EntityBuilders[viewModeltype];
                 }
-                return builder.Create(data, type);
+                return builder.Create(data, viewModeltype);
             }
             else
             {
-                var ex = new Exception(String.Format("Cannot find view model for view {0}", view));
+                var ex = new Exception(String.Format("Cannot find view model for entity in ViewModelRegistry. Check the view is strongly typed using the @model statement"));
                 Log.Error(ex);
                 throw ex;
             }
+        }
+
+        public virtual Type GetEntityViewModelType(object data)
+        {
+            var viewName = GetEntityViewName(data);
+            return Configuration.ViewModelRegistry.ContainsKey(viewName) ? Configuration.ViewModelRegistry[viewName] : null;
         }
 
         public virtual object CreatePageModel(object data, Dictionary<string, object> subPages = null, string viewName = null)

@@ -18,6 +18,33 @@
         </figure>
     }
     <div class="content" @Markup.Property(Model, "ArticleBody")>
-        @Html.Raw(Model.ArticleBody)
+        @if (Model.Paragraphs!=null)
+        {
+            foreach (var para in Model.Paragraphs)
+            {
+                if (para.Subheading!=null)
+                {
+                    <h3 @Markup.Property(Model, "Subheading")>@para.Subheading</h3>
+                }
+                if (para.Content!=null)
+                {
+                    <div @Markup.Property(Model,"Content")>
+                        @Html.Raw(para.Content)
+                    </div>
+                }
+                if (para.Media!=null && para.Media is Image)
+                {
+                    <figure>
+                        <img @Markup.Property(Model, "Media") src="@Html.FixedSizeImageUrl(((Image)para.Media).Url,500,true)">
+                        @if (para.Caption!=null)
+                        {
+                            <figcaption @Markup.Property(Model, "Caption") >
+                                @para.Caption
+                            </figcaption>
+                        }
+                    </figure>
+                }
+            }
+        }
     </div>
 </article>

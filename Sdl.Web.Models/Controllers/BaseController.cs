@@ -90,6 +90,7 @@ namespace Sdl.Web.Mvc
         {
             var viewName = ModelFactory.GetEntityViewName(entity);
             var viewEngineResult = ViewEngines.Engines.FindPartialView(this.ControllerContext, viewName);
+            //TODO - put this logic in a action filter?
             if (viewEngineResult.View == null)
             {
                 Log.Error("Could not find view {0} in locations: {1}",viewName, String.Join(",", viewEngineResult.SearchedLocations));
@@ -97,7 +98,12 @@ namespace Sdl.Web.Mvc
             }
             else
             {
-                var model = ModelFactory.CreateEntityModel(entity, viewName);
+                if (!Configuration.ViewModelRegistry.ContainsKey(viewName))
+                {
+                    var path = ((BuildManagerCompiledView)viewEngineResult.View).ViewPath;
+                    Configuration.AddViewModelToRegistry(viewName, path);
+                }
+                var model = ModelFactory.CreateEntityModel(entity, Configuration.ViewModelRegistry[viewName]);
                 return View(viewName, model);
             }
         }

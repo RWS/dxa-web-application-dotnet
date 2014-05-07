@@ -16,8 +16,8 @@ namespace Sdl.Web.Mvc.Models
         public string ArticleBody { get; set; }
 
         public DateTime Date { get; set; }
-        public string Summary { get; set; }
-        public string Intro { get; set; }
+        public string Description { get; set; }
+        [SemanticProperty("s:articleBody")]
         public List<Paragraph> Paragraphs { get; set; }
         //TODO author, other meta
     }
