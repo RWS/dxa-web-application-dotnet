@@ -4,7 +4,7 @@
     {
         @ViewBag.Renderer.Render(Model.Regions["Hero"],Html)
     }
-    @Html.Partial("Core/Breadcrumb")
+    @Html.Action("Breadcrumb", "Navigation")
     @foreach (Sdl.Web.Mvc.Models.Region region in Model.Regions.Values)
     {
         if (region.Name!="Hero")

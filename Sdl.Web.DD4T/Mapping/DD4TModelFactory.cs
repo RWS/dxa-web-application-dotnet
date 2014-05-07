@@ -1,4 +1,5 @@
-﻿using DD4T.ContentModel;
+﻿using System.Web.Script.Serialization;
+using DD4T.ContentModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,6 +85,7 @@ namespace Sdl.Web.DD4T
                                 {
                                     header.Regions.Add(region.Key, region.Value);
                                 }
+
                             }
                             model.Header = header;
                         }

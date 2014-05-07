@@ -113,6 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\EntityController.cs" />
+    <Compile Include="Controllers\NavigationController.cs" />
     <Compile Include="Controllers\PageController.cs" />
     <Compile Include="Controllers\RegionController.cs" />
     <Compile Include="Controllers\SearchController.cs" />
@@ -160,7 +161,6 @@
     <Content Include="system\Views\Page\Core\SectionPage.cshtml" />
     <Content Include="system\Views\Entity\Core\Carousel.cshtml" />
     <Content Include="system\Views\Entity\Core\Partials\TeaserHero-ImageOverlay.cshtml" />
-    <Content Include="system\Views\Shared\Core\Breadcrumb.cshtml" />
     <Content Include="system\Views\Page\_ViewStart.cshtml" />
     <Content Include="system\Views\Page\Core\ContentPage.cshtml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
@@ -172,8 +172,10 @@
     <Content Include="system\Views\Entity\Core\HeaderLinks.cshtml" />
     <Content Include="system\Views\Entity\_Error.cshtml" />
     <Content Include="system\Views\Search\SearchResults.cshtml" />
-    <Content Include="system\Views\Entity\Core\TeaserHero-ImageOverlay.cshtml" />
-    <Content Include="system\Views\Entity\Core\TeaserColored.cshtml" />
+    <Content Include="system\Views\Navigation\Breadcrumb.cshtml" />
+    <Content Include="system\Views\Navigation\LeftNavigation.cshtml" />
+    <Content Include="system\Views\Navigation\TopNavigation.cshtml" />
+    <Content Include="system\Views\Page\Core\LeftNavContentPage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

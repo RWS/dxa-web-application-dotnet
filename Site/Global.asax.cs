@@ -28,7 +28,14 @@ namespace Site
             
             //routes.IgnoreRoute("{*favicon}", new { favicon = @"(.*/)?favicon.ico(/.*)?" });
             routes.IgnoreRoute("cid/{*pathInfo}");
-            
+
+            routes.MapRoute(
+                            "Navigation",
+                            "Navigation/{action}",
+                            new { controller = "Navigation", action = "TopNavigation" } 
+                        );
+
+
             //Tridion page route
             routes.MapRoute(
                "TridionPage",

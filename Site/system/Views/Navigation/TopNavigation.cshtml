@@ -1,0 +1,16 @@
+﻿@model Sdl.Web.Mvc.Models.SitemapItem
+
+@{
+    Layout = null;
+}
+<ul class="nav navbar-nav main-nav">
+    @foreach (var item in Model.Items)
+    {
+            if (item.Title != "Index")
+            {
+                <li class="@(item.Url == Request.Url.LocalPath.ToString() ? "active" : "")">
+                    <a href="@item.Url">@item.Title</a>
+                </li>
+            }
+    }
+</ul>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using System.Web.Script.Serialization;
 using Sdl.Web.Mvc.Models;
 using Sdl.Web.Mvc.Html;
 using Sdl.Web.Mvc.Mapping;
@@ -36,6 +37,7 @@ namespace Sdl.Web.Mvc
             return GetPageView(model);
         }
 
+
         public virtual ActionResult Region(Region region)
         {
             ViewBag.Renderer = Renderer;
@@ -55,13 +57,14 @@ namespace Sdl.Web.Mvc
         }
 
         protected abstract object GetModelForPage(string pageUrl);
-
         protected ViewResult GetPageView(object page)
         {
             var viewName = ModelFactory.GetPageViewName(page);
             var subPages = new Dictionary<string, object>();
             var headerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/header")));
             var footerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/footer")));
+            
+            
             if (headerModel != null)
             {
                 subPages.Add("Header", headerModel);
