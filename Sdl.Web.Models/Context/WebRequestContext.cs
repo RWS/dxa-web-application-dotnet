@@ -13,7 +13,7 @@ namespace Sdl.Web.Mvc
     /// </summary>
     public class WebRequestContext
     {
-        private static int maxWidth = 1140;
+        private static int maxWidth = 940;
         public static Localization Localization
         {
             get

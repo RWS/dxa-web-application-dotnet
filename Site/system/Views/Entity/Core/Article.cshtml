@@ -1,28 +1,27 @@
 ﻿@model Sdl.Web.Mvc.Models.Article
-@{
-    //temp variable for debugging
-    var context = Sdl.Web.Mvc.WebRequestContext.ContextEngine;
-}
 <article class="rich-text" @Markup.Entity(Model)>
-    <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
+    @if (Model.Image != null)
+    {
+        <div id="carousel-large" class="carousel">
+            <div class="carousel-inner">
+                <div class="item active">
+                    <img class="center-block" @Markup.Property(Model, "Image") src="@Html.FixedSizeImageUrl(Model.Image.Url, 285, true, 3.3)">
+                    <div class="overlay overlay-tl ribbon">
+                        <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
+    }
     @if (@Model.Date!=null)
     {
         <div class="meta">
             @Html.Date(Model.Date)
         </div>
-    }
-    @if (@Model.Section!=null)
-    {
-        <div class="meta" @Markup.Property(Model, "Section")>@Model.Section</div>
-    }
-    @if (Model.Image != null)
-    {
-        <figure>
-            <img class="center-block" @Markup.Property(Model, "Image") src="@Html.FixedSizeImageUrl(Model.Image.Url,500,true)">
-            <figcaption>
-                Browser/Device has display width: @context.Browser.DisplayWidth , pixel ratio: @context.Device.PixelRatio
-            </figcaption>
-        </figure>
     }
     <div class="content" @Markup.Property(Model, "ArticleBody")>
         @if (Model.Paragraphs!=null)
@@ -42,7 +41,7 @@
                 if (para.Media!=null && para.Media is Image)
                 {
                     <figure>
-                        <img @Markup.Property(Model, "Media") src="@Html.FixedSizeImageUrl(((Image)para.Media).Url,500,true)">
+                        <img @Markup.Property(Model, "Media") src="@Html.FixedSizeImageUrl(((Image)para.Media).Url,460,true,2)">
                         @if (para.Caption!=null)
                         {
                             <figcaption @Markup.Property(Model, "Caption") >

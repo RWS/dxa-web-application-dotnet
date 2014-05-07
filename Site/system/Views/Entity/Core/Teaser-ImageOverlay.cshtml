@@ -14,6 +14,6 @@
             <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 425, true)">
         </div>
     }
-    <h2 class="overlay overlay-top ribbon" @Markup.Property(Model, "Headline")>@Model.Headline</h2>
-    <h4 class="overlay overlay-bl ribbon" @Markup.Property(Model, "Text")>@Model.Text</h4>
+    <h3 class="overlay overlay-top ribbon" @Markup.Property(Model, "Headline")>@Model.Headline</h3>
+    <p class="overlay overlay-bl ribbon" @Markup.Property(Model, "Text")>@Model.Text</p>
 </div>

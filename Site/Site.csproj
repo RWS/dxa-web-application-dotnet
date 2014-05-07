@@ -173,6 +173,7 @@
     <Content Include="system\Views\Entity\_Error.cshtml" />
     <Content Include="system\Views\Search\SearchResults.cshtml" />
     <Content Include="system\Views\Entity\Core\TeaserHero-ImageOverlay.cshtml" />
+    <Content Include="system\Views\Entity\Core\TeaserColored.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
