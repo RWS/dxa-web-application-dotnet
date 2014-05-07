@@ -19,6 +19,18 @@ namespace Sdl.Web.Mvc.Mapping
         public string Path { get; set; }
 
         /// <summary>
+        /// Is field a metadata field?
+        /// </summary>
+        public bool IsMetadata
+        {
+            get
+            {
+                // metadata fields start their Path with /Metadata
+                return Path.StartsWith("/Metadata");
+            }
+        }
+
+        /// <summary>
         /// Is field an embedded field?
         /// </summary>
         public bool IsEmbedded
