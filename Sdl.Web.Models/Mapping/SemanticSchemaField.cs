@@ -4,7 +4,7 @@ namespace Sdl.Web.Mvc.Mapping
 {
     /// <summary>
     /// Class for deserialized json schema field.
-    /// {"Name":"headline","IsMultiValue":false,"Semantics":[...],"Fields":[...]}
+    /// {"Name":"headline","Path":"/Article/headline","IsMultiValue":false,"Semantics":[...],"Fields":[...]}
     /// </summary>
     public class SemanticSchemaField
     {
@@ -12,6 +12,32 @@ namespace Sdl.Web.Mvc.Mapping
         /// XML field name.
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// XML field path.
+        /// </summary>
+        public string Path { get; set; }
+
+        /// <summary>
+        /// Is field an embedded field?
+        /// </summary>
+        public bool IsEmbedded
+        {
+            get 
+            {
+                // path of an embedded field contains more than two forward slashes, 
+                // e.g. /Article/articleBody/subheading
+                int count = 0;
+                foreach (char c in Path)
+                {
+                    if (c == '/')
+                    {
+                        count++;
+                    }                    
+                }
+                return count > 2;
+            }
+        }
 
         /// <summary>
         /// Is field multivalued?
@@ -34,15 +60,18 @@ namespace Sdl.Web.Mvc.Mapping
         public SemanticSchemaField() { }
 
         /// <summary>
-        /// Check if current field contains given semantic property.
+        /// Check if current field contains given semantics.
         /// </summary>
-        /// <param name="fieldSemantics">The semantic property to check against</param>
+        /// <param name="fieldSemantics">The semantics to check against</param>
         /// <returns>True if this field contains given semantics, false otherwise</returns>
-        public bool ContainsProperty(FieldSemantics fieldSemantics)
+        public bool ContainsSemantics(FieldSemantics fieldSemantics)
         {
             foreach (var property in Semantics)
             {
-                if (property.Equals(fieldSemantics))
+                // TODO add proper Equals implementation in FieldSemantics
+                if (property.Property.Equals(fieldSemantics.Property) &&
+                    property.Prefix.Equals(fieldSemantics.Prefix) &&
+                    property.Entity.Equals(fieldSemantics.Entity))
                 {
                     return true;
                 }
@@ -52,22 +81,23 @@ namespace Sdl.Web.Mvc.Mapping
         }
 
         /// <summary>
-        /// Find <see cref="SemanticSchemaField"/> with given semantic property.
+        /// Find <see cref="SemanticSchemaField"/> with given semantics.
         /// </summary>
-        /// <param name="fieldSemantics">The semantic property to check against</param>
+        /// <param name="fieldSemantics">The semantics to check against</param>
         /// <returns>This field or one of its embedded fields that match with the given semantics, null if a match cannot be found</returns>
-        public SemanticSchemaField FindFieldByProperty(FieldSemantics fieldSemantics)
+        public SemanticSchemaField FindFieldBySemantics(FieldSemantics fieldSemantics)
         {
-            if (ContainsProperty(fieldSemantics))
+            if (ContainsSemantics(fieldSemantics))
             {
                 return this;
             }
 
             foreach (var embeddedField in Fields)
             {
-                SemanticSchemaField field = embeddedField.FindFieldByProperty(fieldSemantics);
+                SemanticSchemaField field = embeddedField.FindFieldBySemantics(fieldSemantics);
                 if (field != null)
                 {
+                    // TODO when we return an embedded field, we should indicate that somehow
                     return field;
                 }
             }

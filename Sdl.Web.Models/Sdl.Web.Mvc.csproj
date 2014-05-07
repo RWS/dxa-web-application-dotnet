@@ -65,7 +65,6 @@
     <Compile Include="Mapping\BaseEntityBuilder.cs" />
     <Compile Include="Mapping\BaseModelFactory.cs" />
     <Compile Include="Mapping\IEntityBuilder.cs" />
-    <Compile Include="Mapping\IEntityMapper.cs" />
     <Compile Include="Mapping\IModelFactory.cs" />
     <Compile Include="Mapping\SchemaSemantics.cs" />
     <Compile Include="Mapping\FieldSemantics.cs" />

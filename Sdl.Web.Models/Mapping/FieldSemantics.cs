@@ -8,6 +8,8 @@ namespace Sdl.Web.Mvc.Mapping
     /// </summary>
     public class FieldSemantics : SchemaSemantics
     {
+        // TODO implement proper override of Equals() and Operator ==
+
         /// <summary>
         /// Semantic property name.
         /// </summary>
