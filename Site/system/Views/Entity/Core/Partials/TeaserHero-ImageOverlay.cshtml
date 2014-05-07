@@ -1,0 +1,30 @@
+﻿@model Sdl.Web.Mvc.Models.Teaser
+@if (Model.Image!=null)
+{
+    <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 345, true, 3.3)">
+}
+@if (Model.Headline!=null || Model.Text!=null)
+{
+    if (Model.Link != null)
+    {
+    <a href="@Model.Link.Url" title="@Model.Link.AlternateText">
+        <div class="overlay overlay-tl ribbon">
+            <h2 class="">@Model.Headline</h2>
+            @if(Model.Text!=null)
+            {
+                <h3>@Html.Raw(Model.Text.Replace(". ",".<br/>"))</h3>
+            }
+        </div>
+    </a>
+    }
+    else
+    {
+        <div class="overlay overlay-tl ribbon">
+            <h2 class="">@Model.Headline</h2>
+            @if(Model.Text!=null)
+            {
+                <h3>@Html.Raw(Model.Text.Replace(". ",".<br/>"))</h3>
+            }
+        </div>
+    }
+}

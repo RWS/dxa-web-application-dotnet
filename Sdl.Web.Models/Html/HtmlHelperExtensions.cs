@@ -13,7 +13,7 @@ namespace Sdl.Web.Mvc.Html
     {
         public static string ResponsiveImageUrl(this HtmlHelper helper, string url, int baseSize, bool fixHeight = false)
         {
-            double maxWidth = WebRequestContext.MaxMediaWidth * 0.84;
+            double maxWidth = WebRequestContext.MaxMediaWidth;
             int factor = (int)Math.Ceiling(maxWidth / baseSize);
             factor = factor > 4 ? 8 : factor==3 ? 4 : factor;//factor is 1x 2x 4x or 8x our base (small screen) width - as we only want to support 4 versions of an image, and want to cap it at base x 8
             factor = WebRequestContext.ContextEngine.Device.PixelRatio == 1 && factor > 4 ? 4 : factor;//max x4 for pixel ratio of 1 
