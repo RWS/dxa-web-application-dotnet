@@ -65,7 +65,7 @@ namespace Sdl.Web.DD4T
                                 {
                                     if (region.Value.Items.Count > 0)
                                     {
-                                        Teaser headerTeaser = this.CreateEntityModel(region.Value.Items[0]) as Teaser;
+                                        Teaser headerTeaser = this.CreateEntityModel(region.Value.Items[0], typeof(Teaser)) as Teaser;
                                         if (headerTeaser != null)
                                         {
                                             header.Logo = headerTeaser.Image;
@@ -101,7 +101,7 @@ namespace Sdl.Web.DD4T
                                 {
                                     if (region.Value.Items.Count > 0)
                                     {
-                                        LinkList footerLinks = this.CreateEntityModel(region.Value.Items[0]) as LinkList;
+                                        LinkList footerLinks = this.CreateEntityModel(region.Value.Items[0], typeof(LinkList)) as LinkList;
                                         if (footerLinks != null)
                                         {
                                             footer.Copyright = footerLinks.Headline;

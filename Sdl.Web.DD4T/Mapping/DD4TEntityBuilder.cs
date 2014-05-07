@@ -223,6 +223,7 @@ namespace Sdl.Web.DD4T.Mapping
 
         private object GetMultiEmbedded(IField field, Type propertyType, bool multival)
         {
+            //TODO is there some way we can make this more generic using semantics?
             if (propertyType == typeof(Link))
             {
                 var links = GetLinks(field.EmbeddedValues);
@@ -233,6 +234,18 @@ namespace Sdl.Web.DD4T.Mapping
                 else
                 {
                     return links.Count > 0 ? links[0] : null;
+                }
+            }
+            if (propertyType == typeof(Paragraph))
+            {
+                var paras = GetParagraphs(field.EmbeddedValues);
+                if (multival)
+                {
+                    return paras;
+                }
+                else
+                {
+                    return paras.Count > 0 ? paras[0] : null;
                 }
             }
             return null;
@@ -256,7 +269,7 @@ namespace Sdl.Web.DD4T.Mapping
 
         private List<Image> GetImages(IList<IComponent> components)
         {
-            return components.Select(c => new Image { Url = c.Multimedia.Url, Id = c.Id, FileSize = c.Multimedia.Size }).ToList();
+            return components.Select(c => new Image { Url = c.Multimedia.Url, FileSize = c.Multimedia.Size }).ToList();
         }
 
         private List<T> GetCompLinks<T>(IList<IComponent> components, Type linkedItemType)
@@ -287,6 +300,22 @@ namespace Sdl.Web.DD4T.Mapping
                 {
                     result.Add(link);
                 }
+            }
+            return result;
+        }
+
+        private List<Paragraph> GetParagraphs(IList<IFieldSet> list)
+        {
+            var result = new List<Paragraph>();
+            foreach (IFieldSet fs in list)
+            {
+                var para = new Paragraph();
+                para.Subheading = fs.ContainsKey("subheading") ? fs["subheading"].Value : null;
+                para.Content = fs.ContainsKey("content") ? fs["content"].Value : null;
+                //TODO for now we assume its an image - needs generic treatment
+                para.Media = fs.ContainsKey("media") ? GetImages(new List<IComponent> { fs["media"].LinkedComponentValues[0] })[0] : null;
+                para.Caption = fs.ContainsKey("caption") ? fs["caption"].Value : null;
+                result.Add(para);
             }
             return result;
         }

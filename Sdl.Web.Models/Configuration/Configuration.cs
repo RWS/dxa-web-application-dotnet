@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sdl.Web.Mvc.Models;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Compilation;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
 
@@ -26,6 +28,23 @@ namespace Sdl.Web.Mvc
         private static string _currentVersion;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _localConfiguration;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _globalConfiguration;
+
+        private static Dictionary<string, Type> _viewModelRegistry = null;
+        public static Dictionary<string, Type> ViewModelRegistry
+        {
+            get
+            {
+                if (_viewModelRegistry == null)
+                {
+                    _viewModelRegistry = new Dictionary<string, Type>();
+                }
+                return _viewModelRegistry;
+            }
+            set
+            {
+                _viewModelRegistry = value;
+            }
+        }
         private static string _defaultLocalization;
         public static string DefaultLocalization
         {
@@ -340,6 +359,33 @@ namespace Sdl.Web.Mvc
                 return DefaultLocalization + "/" + url;
             }
             return url;
+        }
+
+        public static void AddViewModelToRegistry(string viewName, string viewPath)
+        {
+            if (!ViewModelRegistry.ContainsKey(viewName))
+            {
+                try
+                {
+                    Type type = BuildManager.GetCompiledType(viewPath);
+                    if (type.BaseType.IsGenericType)
+                    {
+                        ViewModelRegistry.Add(viewName, type.BaseType.GetGenericArguments()[0]);
+                    }
+                    else
+                    {
+                        Exception ex = new Exception(String.Format("View {0} is not strongly typed. Please ensure you use the @model directive",viewPath));
+                        Log.Error(ex);
+                        throw ex;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Exception e = new Exception(String.Format("Error adding view model to registry using view path {0}", viewPath),ex);
+                    Log.Error(e);
+                    throw e;
+                }
+            }
         }
     }
 }
