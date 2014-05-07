@@ -82,6 +82,7 @@ namespace Sdl.Web.DD4T.Mapping
                             }
 
                             bool multival = pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
+                            // TODO remove multivalue and image hacks
                             if (multival && !component.Fields.ContainsKey(fieldname))
                             {
                                 // truncate multivalue properties by one character as the Tridion field name is usually singular (eg link instead of links)
@@ -92,6 +93,7 @@ namespace Sdl.Web.DD4T.Mapping
                             {
                                 pi.SetValue(model, GetImages(new List<IComponent>{component})[0]);
                             }
+
                             //TODO check metadata/embedded fields as well!
                             if (component.Fields.ContainsKey(fieldname))
                             {
