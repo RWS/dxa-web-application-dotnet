@@ -159,7 +159,7 @@
     <Content Include="system\Views\Region\Core\Hero.cshtml" />
     <Content Include="system\Views\Page\Core\SectionPage.cshtml" />
     <Content Include="system\Views\Entity\Core\Carousel.cshtml" />
-    <Content Include="system\Views\Entity\Core\Teaser-Carousel.cshtml" />
+    <Content Include="system\Views\Entity\Core\Partials\TeaserHero-ImageOverlay.cshtml" />
     <Content Include="system\Views\Shared\Core\Breadcrumb.cshtml" />
     <Content Include="system\Views\Page\_ViewStart.cshtml" />
     <Content Include="system\Views\Page\Core\ContentPage.cshtml" />
@@ -172,6 +172,7 @@
     <Content Include="system\Views\Entity\Core\HeaderLinks.cshtml" />
     <Content Include="system\Views\Entity\_Error.cshtml" />
     <Content Include="system\Views\Search\SearchResults.cshtml" />
+    <Content Include="system\Views\Entity\Core\TeaserHero-ImageOverlay.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

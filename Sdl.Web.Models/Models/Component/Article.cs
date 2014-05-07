@@ -15,7 +15,7 @@ namespace Sdl.Web.Mvc.Models
         public Image Image { get; set; }
         public string ArticleBody { get; set; }
 
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
         public string Description { get; set; }
         [SemanticProperty("s:articleBody")]
         public List<Paragraph> Paragraphs { get; set; }

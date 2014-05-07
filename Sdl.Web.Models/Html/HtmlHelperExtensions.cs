@@ -29,6 +29,11 @@ namespace Sdl.Web.Mvc.Html
             return String.Format("/cid/scale/{0}x{1}/source/site{2}", width, height, url);
         }
 
+        public static string Date(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
+        {
+            return date!=null ? ((DateTime)date).ToString(format, new CultureInfo(Configuration.GetConfig("site.culture"))) : null;
+        }
+
         public static string Resource(this HtmlHelper htmlHelper, string resourceName)
         {
             return (string)Resource(htmlHelper.ViewContext.HttpContext, resourceName);

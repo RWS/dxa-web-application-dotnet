@@ -5,9 +5,12 @@
 }
 <article class="rich-text" @Markup.Entity(Model)>
     <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
-    <div class="meta">
-        Posted on 1st January 2014 by Joe Bloggs
-    </div>
+    @if (@Model.Date!=null)
+    {
+        <div class="meta">
+            @Html.Date(Model.Date)
+        </div>
+    }
     @if (Model.Image != null)
     {
         <figure>
