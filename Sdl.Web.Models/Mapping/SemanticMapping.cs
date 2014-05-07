@@ -98,6 +98,7 @@ namespace Sdl.Web.Mvc.Mapping
 
             Exception ex = new Exception(string.Format("Semantic vocabulary not found for prefix '{0}'", prefix));
             Log.Error(ex);
+            // TODO should we throw the exception here or return the default vocabulary?
             throw ex;
         }
 
@@ -131,6 +132,7 @@ namespace Sdl.Web.Mvc.Mapping
             }
 
             Log.Error(ex);
+            // TODO should we throw the exception here or return null?
             throw ex;
         }
 

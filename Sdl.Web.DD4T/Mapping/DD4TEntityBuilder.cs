@@ -1,4 +1,5 @@
 ﻿using DD4T.ContentModel;
+using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
 using System;
@@ -40,8 +41,19 @@ namespace Sdl.Web.DD4T.Mapping
                 long schemaId = Convert.ToInt64(uriParts[1]);
 
                 // get schema entity names (indexed by vocabulary)
-                SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaId);
-                ILookup<string, string> entityNames = semanticSchema.GetEntityNames();
+                SemanticSchema semanticSchema = null;
+                ILookup<string, string> entityNames = null;
+                try
+                {
+                    // TODO make sure all schemas are available, so we can remove this try/catch
+                    semanticSchema = SemanticMapping.GetSchema(schemaId);
+                    entityNames = semanticSchema.GetEntityNames();
+                }
+                catch (Exception ex)
+                {
+                    // semantic schema is not there, we'll need to skip semantics
+                    Log.Error(ex);
+                }
 
                 var model = Activator.CreateInstance(type);
                 Dictionary<string, string> vocabularies = GetVocabulariesFromType(type);
@@ -55,21 +67,29 @@ namespace Sdl.Web.DD4T.Mapping
                             // semantic mapping of fields
                             string fieldname;
 
-                            // get vocabulary for prefix (use default vocabulary if prefix is missing)
+                            // get vocabulary for prefix (use default vocabulary if not available)
                             string vocab = SemanticMapping.DefaultVocabulary;
-                            if (!string.IsNullOrEmpty(info.Prefix))
+                            if (!string.IsNullOrEmpty(info.Prefix) && vocabularies.ContainsKey(info.Prefix))
                             {
                                 vocab = vocabularies[info.Prefix];
                             }
+                            else if (string.IsNullOrEmpty(info.Prefix) && vocabularies.ContainsKey(string.Empty))
+                            {
+                                vocab = vocabularies[string.Empty];
+                            }
 
                             // determine field semantics
-                            string prefix = SemanticMapping.GetPrefix(vocab);
-                            string property = info.PropertyName;
-                            string entity = entityNames[vocab].First();
-                            FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
+                            SemanticSchemaField matchingField = null;
+                            if (semanticSchema != null)
+                            {
+                                string prefix = SemanticMapping.GetPrefix(vocab);
+                                string property = info.PropertyName;
+                                string entity = entityNames[vocab].First();
+                                FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
 
-                            // locate semantic schema field
-                            SemanticSchemaField matchingField = semanticSchema.FindFieldBySemantics(fieldSemantics);
+                                // locate semantic schema field
+                                semanticSchema.FindFieldBySemantics(fieldSemantics);                                
+                            }
                             if (matchingField != null)
                             {
                                 // we found a field with given semantics
@@ -133,6 +153,7 @@ namespace Sdl.Web.DD4T.Mapping
                     ((Entity)model).PropertyData = propertyData;
                 }
                 return model;
+
             }
             return null;
         }

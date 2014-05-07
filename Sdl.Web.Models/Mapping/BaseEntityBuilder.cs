@@ -1,16 +1,13 @@
-﻿using Sdl.Web.Mvc.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using Sdl.Web.Mvc.Models;
 
 namespace Sdl.Web.Mvc.Mapping
 {
     public abstract class BaseEntityBuilder : IEntityBuilder
     {
-        private static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> _entityPropertySemantics = null;
+        private static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> _entityPropertySemantics;
         public static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> EntityPropertySemantics 
         {
             get
@@ -30,6 +27,20 @@ namespace Sdl.Web.Mvc.Mapping
         public abstract object Create(object sourceEntity, Type type);
 
         protected virtual Dictionary<string, string> GetVocabulariesFromType(Type type)
+        {
+            Dictionary<string, string> res = new Dictionary<string, string>();
+            foreach (var attr in type.GetCustomAttributes())
+            {
+                if (attr is SemanticEntityAttribute)
+                {
+                    var semantics = (SemanticEntityAttribute)attr;
+                    res.Add(semantics.Prefix, semantics.Vocab);
+                }
+            }
+            return res;
+        }
+
+        protected virtual Dictionary<string, string> GetEntitiesFromType(Type type)
         {
             Dictionary<string,string> res = new Dictionary<string,string>();
             foreach (var attr in type.GetCustomAttributes())
