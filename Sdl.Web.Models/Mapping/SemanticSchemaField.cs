@@ -23,6 +23,7 @@ namespace Sdl.Web.Mvc.Mapping
         /// </summary>
         public bool IsEmbedded
         {
+            // TODO this could also be a linked field, does that matter?
             get 
             {
                 // path of an embedded field contains more than two forward slashes, 
@@ -97,7 +98,6 @@ namespace Sdl.Web.Mvc.Mapping
                 SemanticSchemaField field = embeddedField.FindFieldBySemantics(fieldSemantics);
                 if (field != null)
                 {
-                    // TODO when we return an embedded field, we should indicate that somehow
                     return field;
                 }
             }

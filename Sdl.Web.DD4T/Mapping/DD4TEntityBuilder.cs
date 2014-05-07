@@ -125,11 +125,6 @@ namespace Sdl.Web.DD4T.Mapping
                                 break;
                             }
                         }
-                        object value = null;
-                        if (value != null)
-                        {
-                            pi.SetValue(model, value);
-                        }
                     }
                 }
                 if (model is Entity)
