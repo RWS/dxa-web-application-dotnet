@@ -4,7 +4,7 @@ namespace Sdl.Web.Mvc.Mapping
 {
     /// <summary>
     /// Class for deserialized json schema field.
-    /// {"Name":"headline","IsMultiValue":false,"Semantics":[...],"Fields":[...]}
+    /// {"Name":"headline","Path":"/Article/headline","IsMultiValue":false,"Semantics":[...],"Fields":[...]}
     /// </summary>
     public class SemanticSchemaField
     {
@@ -12,6 +12,32 @@ namespace Sdl.Web.Mvc.Mapping
         /// XML field name.
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// XML field path.
+        /// </summary>
+        public string Path { get; set; }
+
+        /// <summary>
+        /// Is field an embedded field?
+        /// </summary>
+        public bool IsEmbedded
+        {
+            get 
+            {
+                // path of an embedded field contains more than two forward slashes, 
+                // e.g. /Article/articleBody/subheading
+                int count = 0;
+                foreach (char c in Path)
+                {
+                    if (c == '/')
+                    {
+                        count++;
+                    }                    
+                }
+                return count > 2;
+            }
+        }
 
         /// <summary>
         /// Is field multivalued?
@@ -44,7 +70,7 @@ namespace Sdl.Web.Mvc.Mapping
             {
                 // TODO add proper Equals implementation in FieldSemantics
                 if (property.Property.Equals(fieldSemantics.Property) &&
-                    property.Prefix.Equals(fieldSemantics.Prefix) && 
+                    property.Prefix.Equals(fieldSemantics.Prefix) &&
                     property.Entity.Equals(fieldSemantics.Entity))
                 {
                     return true;
