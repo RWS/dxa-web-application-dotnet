@@ -11,6 +11,10 @@
             @Html.Date(Model.Date)
         </div>
     }
+    @if (@Model.Section!=null)
+    {
+        <div class="meta" @Markup.Property(Model, "Section")>@Model.Section</div>
+    }
     @if (Model.Image != null)
     {
         <figure>
