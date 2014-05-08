@@ -126,9 +126,10 @@
     <Content Include="system\assets\css\main.css" />
     <Content Include="system\assets\fonts\fontawesome-webfont.svg" />
     <Content Include="system\assets\fonts\fontawesome-webfont.woff" />
-    <Content Include="system\assets\images\temp\sdl-globe.png" />
+    <Content Include="system\assets\images\wait-spinner.gif" />
     <Content Include="system\assets\scripts\custom.js" />
     <Content Include="system\assets\scripts\discover-min.js" />
+    <Content Include="system\assets\scripts\examples.js" />
     <Content Include="system\assets\scripts\header.js" />
     <Content Include="system\assets\scripts\PIE.htc" />
     <Content Include="system\assets\scripts\plugins.js" />
