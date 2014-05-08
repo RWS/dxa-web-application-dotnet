@@ -1,4 +1,5 @@
-﻿using log4net.Config;
+﻿using Sdl.Web.Mvc.Mapping;
+using log4net.Config;
 using Sdl.Web.Mvc;
 using Sdl.Web.Tridion;
 using System;
@@ -56,6 +57,10 @@ namespace Site
             Configuration.SetLocalizations(TridionConfig.PublicationMap);
             var currentVersion = Configuration.CurrentVersion;
             Configuration.Load(Server.MapPath("~"));
+            
+            // load semantic mappings
+            SemanticMapping.Load(Server.MapPath("~"));
+
             AreaRegistration.RegisterAllAreas();
             RegisterGlobalFilters(GlobalFilters.Filters);
             RegisterRoutes(RouteTable.Routes);

@@ -1,23 +1,56 @@
 ﻿@model Sdl.Web.Mvc.Models.Article
-@{
-    //temp variable for debugging
-    var context = Sdl.Web.Mvc.WebRequestContext.ContextEngine;
-}
 <article class="rich-text" @Markup.Entity(Model)>
-    <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
-    <div class="meta">
-        Posted on 1st January 2014 by Joe Bloggs
-    </div>
     @if (Model.Image != null)
     {
-        <figure>
-            <img class="center-block" @Markup.Property(Model, "Image") src="@Html.FixedSizeImageUrl(Model.Image.Url,500,true)">
-            <figcaption>
-                Browser/Device has display width: @context.Browser.DisplayWidth , pixel ratio: @context.Device.PixelRatio
-            </figcaption>
-        </figure>
+        <div id="carousel-large" class="carousel">
+            <div class="carousel-inner">
+                <div class="item active">
+                    <img class="center-block" @Markup.Property(Model, "Image") src="@Html.FixedSizeImageUrl(Model.Image.Url, 285, true, 3.3)">
+                    <div class="overlay overlay-tl ribbon">
+                        <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
+    }
+    @if (@Model.Date!=null)
+    {
+        <div class="meta">
+            @Html.Date(Model.Date)
+        </div>
     }
     <div class="content" @Markup.Property(Model, "ArticleBody")>
-        @Html.Raw(Model.ArticleBody)
+        @if (Model.Paragraphs!=null)
+        {
+            foreach (var para in Model.Paragraphs)
+            {
+                if (para.Subheading!=null)
+                {
+                    <h3 @Markup.Property(Model, "Subheading")>@para.Subheading</h3>
+                }
+                if (para.Content!=null)
+                {
+                    <div @Markup.Property(Model,"Content")>
+                        @Html.Raw(para.Content)
+                    </div>
+                }
+                if (para.Media!=null && para.Media is Image)
+                {
+                    <figure>
+                        <img @Markup.Property(Model, "Media") src="@Html.FixedSizeImageUrl(((Image)para.Media).Url,460,true,2)">
+                        @if (para.Caption!=null)
+                        {
+                            <figcaption @Markup.Property(Model, "Caption") >
+                                @para.Caption
+                            </figcaption>
+                        }
+                    </figure>
+                }
+            }
+        }
     </div>
 </article>

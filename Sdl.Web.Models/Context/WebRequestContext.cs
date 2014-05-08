@@ -13,6 +13,7 @@ namespace Sdl.Web.Mvc
     /// </summary>
     public class WebRequestContext
     {
+        private static int maxWidth = 940;
         public static Localization Localization
         {
             get
@@ -33,7 +34,7 @@ namespace Sdl.Web.Mvc
         {
             get
             {
-                return (int?)GetFromContextStore("MaxMediaWidth") ?? (int)AddToContextStore("MaxMediaWidth", ContextEngine.Device.PixelRatio * ContextEngine.Browser.DisplayWidth);
+                return (int?)GetFromContextStore("MaxMediaWidth") ?? (int)AddToContextStore("MaxMediaWidth", ContextEngine.Device.PixelRatio * Math.Max(ContextEngine.Browser.DisplayWidth, maxWidth));
             }
         }
 

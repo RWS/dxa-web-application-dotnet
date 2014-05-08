@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
-using DD4T.ContentModel.Contracts.Caching;
 using System.Web;
 using DD4T.ContentModel;
-using DD4T.Utils;
-using System.IO;
-using System.Collections;
-using System.Text.RegularExpressions;
-using DD4T.Factories.Caching;
-using DD4T.ContentModel.Exceptions;
+using DD4T.ContentModel.Contracts.Caching;
 using DD4T.ContentModel.Factories;
 using DD4T.Factories;
+using DD4T.Factories.Caching;
+using DD4T.Utils;
 using Sdl.Web.Mvc;
 
 namespace Sdl.Web.DD4T
@@ -23,7 +18,7 @@ namespace Sdl.Web.DD4T
     public class BinaryFileManager : BaseStaticFileManager, IBinaryFileManager
     {
         #region caching
-        private ICacheAgent _cacheAgent = null;
+        private ICacheAgent _cacheAgent;
         /// <summary>
         /// Get or set the CacheAgent
         /// </summary>  
@@ -66,7 +61,7 @@ namespace Sdl.Web.DD4T
                 DateTime lpb = BinaryFactory.FindLastPublishedDate(urlPath);
                 if (lpb != DateTime.MinValue.AddSeconds(1)) // this is the secret code for 'does not exist'
                 {
-                    lastPublishedDate = new DateTime?(lpb);
+                    lastPublishedDate = lpb;
                     CacheAgent.Store(cacheKey, "Binary", lastPublishedDate);
                 }
             }
@@ -117,13 +112,15 @@ namespace Sdl.Web.DD4T
         #region private
 
 
-        private IBinaryFactory _binaryFactory = null;
+        private IBinaryFactory _binaryFactory;
         public virtual IBinaryFactory BinaryFactory
         {
             get
             {
                 if (_binaryFactory == null)
+                {
                     _binaryFactory = new BinaryFactory();
+                }
                 return _binaryFactory;
             }
             set
@@ -193,7 +190,7 @@ namespace Sdl.Web.DD4T
 
         protected IBinary GetBinaryFromBroker(string urlPath)
         {
-            IBinary binary = null;
+            IBinary binary;
             BinaryFactory.TryFindBinary(urlPath, out binary);
             return binary;
         }
@@ -203,7 +200,7 @@ namespace Sdl.Web.DD4T
         public override string Serialize(string url, string applicationRoot, string suffix, bool returnContents = false)
         {
             IBinary binary = GetBinaryFromBroker(url);
-            string filepath = applicationRoot + url.Replace(Configuration.SYSTEM_FOLDER + "/", Configuration.SYSTEM_FOLDER + suffix + "/");
+            string filepath = applicationRoot + url.Replace(Configuration.SystemFolder + "/", Configuration.SystemFolder + suffix + "/");
             WriteBinaryToFile(binary, filepath, null);
             return returnContents ? Encoding.UTF8.GetString(binary.BinaryData) : null;
         }

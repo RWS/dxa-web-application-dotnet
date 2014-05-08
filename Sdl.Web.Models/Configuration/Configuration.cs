@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sdl.Web.Mvc.Models;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Compilation;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
 
@@ -19,14 +21,31 @@ namespace Sdl.Web.Mvc
     {
         public static IStaticFileManager StaticFileManager { get; set; }
         public static Dictionary<string, Localization> Localizations { get; set; }
-        public const string VERSION_REGEX = "(v\\d*.\\d*)";
-        public const string SYSTEM_FOLDER = "system";
-        public const string CORE_MODULE_NAME = "core";
+        public const string VersionRegex = "(v\\d*.\\d*)";
+        public const string SystemFolder = "system";
+        public const string CoreModuleName = "core";
         
-        private static string _currentVersion = null;
+        private static string _currentVersion;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _localConfiguration;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _globalConfiguration;
-        private static string _defaultLocalization = null;
+
+        private static Dictionary<string, Type> _viewModelRegistry = null;
+        public static Dictionary<string, Type> ViewModelRegistry
+        {
+            get
+            {
+                if (_viewModelRegistry == null)
+                {
+                    _viewModelRegistry = new Dictionary<string, Type>();
+                }
+                return _viewModelRegistry;
+            }
+            set
+            {
+                _viewModelRegistry = value;
+            }
+        }
+        private static string _defaultLocalization;
         public static string DefaultLocalization
         {
             get
@@ -34,7 +53,7 @@ namespace Sdl.Web.Mvc
                 return _defaultLocalization;
             }
         }
-
+        public static bool IsStaging { get; set; }
         public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LocalConfiguration
         {
             get
@@ -65,7 +84,7 @@ namespace Sdl.Web.Mvc
         /// <param name="key">The configuration key, in the format "section.name" (eg "Schema.Article")</param>
         /// <param name="module">The module (eg "Search") - if none specified this defaults to "Core"</param>
         /// <returns>The configuration matching the key for the given module</returns>
-        public static string GetGlobalConfig(string key, string module = CORE_MODULE_NAME)
+        public static string GetGlobalConfig(string key, string module = CoreModuleName)
         {
             return GetConfig(GlobalConfiguration, key, module, true);
         }
@@ -92,7 +111,7 @@ namespace Sdl.Web.Mvc
         
         private static string GetConfig(Dictionary<string, Dictionary<string, Dictionary<string, string>>> config, string key, string type, bool global = false)
         {
-            Exception ex = null;
+            Exception ex;
             if (config.ContainsKey(type))
             {
                 var subConfig = config[type];
@@ -121,12 +140,9 @@ namespace Sdl.Web.Mvc
             {
                 ex = new Exception(String.Format("Configuration for {0} '{1}' does not exist.", global ? "module" : "localization", type));
             }
-            if (ex != null)
-            {
-                Log.Error(ex);
-                throw ex;
-            }
-            return null;
+
+            Log.Error(ex);
+            throw ex;
         }
 
         /// <summary>
@@ -149,16 +165,21 @@ namespace Sdl.Web.Mvc
                     {
                         Log.Debug("Loading config for localization : '{0}'", loc.Path);
                         var config = new Dictionary<string, Dictionary<string, string>>();
-                        var path = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, AddVersionToPath(SYSTEM_FOLDER + "/config/_all.json"));
+                        var path = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, AddVersionToPath(SystemFolder + "/config/_all.json"));
                         if (File.Exists(path))
                         {
                             //The _all.json file contains a reference to all other configuration files
                             Log.Debug("Loading config bootstrap file : '{0}'", path);
                             var bootstrapJson = Json.Decode(File.ReadAllText(path));
-                            if (bootstrapJson.defaultLocalization)
+                            if (bootstrapJson.defaultLocalization!=null && bootstrapJson.defaultLocalization)
                             {
                                 _defaultLocalization = loc.Path;
                                 Log.Info("Set default localization : '{0}'", loc.Path);
+                            }
+                            if (bootstrapJson.staging != null && bootstrapJson.staging)
+                            {
+                                IsStaging = true;
+                                Log.Info("This is site is staging");
                             }
                             foreach (string file in bootstrapJson.files)
                             {
@@ -260,14 +281,13 @@ namespace Sdl.Web.Mvc
         
         public static String AddVersionToPath(string path)
         {
-            return path.Replace(SYSTEM_FOLDER + "/", String.Format("{0}/{1}/", SYSTEM_FOLDER, CurrentVersion));
+            return path.Replace(SystemFolder + "/", String.Format("{0}/{1}/", SystemFolder, CurrentVersion));
         }
 
         public static String RemoveVersionFromPath(string path)
         {
-            return Regex.Replace(path, SYSTEM_FOLDER + "/" + VERSION_REGEX + "/", delegate(Match match)
-            {
-                return SYSTEM_FOLDER + "/";
+            return Regex.Replace(path, SystemFolder + "/" + VersionRegex + "/", delegate {
+                return SystemFolder + "/";
             });
         }
 
@@ -290,7 +310,7 @@ namespace Sdl.Web.Mvc
                     //When a new version is serialized to disk the current version will also be updated accordingly
                     foreach (var loc in Localizations.Values)
                     {
-                        DirectoryInfo di = new DirectoryInfo(String.Format("{0}{1}/{2}", AppDomain.CurrentDomain.BaseDirectory, loc.Path, SYSTEM_FOLDER));
+                        DirectoryInfo di = new DirectoryInfo(String.Format("{0}{1}/{2}", AppDomain.CurrentDomain.BaseDirectory, loc.Path, SystemFolder));
                         if (di.Exists)
                         {
                             foreach (DirectoryInfo dir in di.GetDirectories("v*"))
@@ -320,12 +340,14 @@ namespace Sdl.Web.Mvc
             Localizations = new Dictionary<string, Localization>();
             foreach (var loc in localizations)
             {
-                var localization = new Localization();
-                localization.Protocol = !loc.ContainsKey("Protocol") ? "http" : loc["Protocol"];
-                localization.Domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_link_conf" : loc["Domain"];
-                localization.Port = !loc.ContainsKey("Port") ? "" : loc["Port"];
-                localization.Path = (!loc.ContainsKey("Path") || loc["Path"] == "/") ? "" : loc["Path"];
-                localization.LocalizationId = !loc.ContainsKey("LocalizationId") ? 0 : Int32.Parse(loc["LocalizationId"]);
+                var localization = new Localization
+                    {
+                        Protocol = !loc.ContainsKey("Protocol") ? "http" : loc["Protocol"],
+                        Domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_link_conf" : loc["Domain"],
+                        Port = !loc.ContainsKey("Port") ? "" : loc["Port"],
+                        Path = (!loc.ContainsKey("Path") || loc["Path"] == "/") ? "" : loc["Path"],
+                        LocalizationId = !loc.ContainsKey("LocalizationId") ? 0 : Int32.Parse(loc["LocalizationId"])
+                    };
                 Localizations.Add(localization.GetBaseUrl(), localization);
             }
         }
@@ -337,6 +359,33 @@ namespace Sdl.Web.Mvc
                 return DefaultLocalization + "/" + url;
             }
             return url;
+        }
+
+        public static void AddViewModelToRegistry(string viewName, string viewPath)
+        {
+            if (!ViewModelRegistry.ContainsKey(viewName))
+            {
+                try
+                {
+                    Type type = BuildManager.GetCompiledType(viewPath);
+                    if (type.BaseType.IsGenericType)
+                    {
+                        ViewModelRegistry.Add(viewName, type.BaseType.GetGenericArguments()[0]);
+                    }
+                    else
+                    {
+                        Exception ex = new Exception(String.Format("View {0} is not strongly typed. Please ensure you use the @model directive",viewPath));
+                        Log.Error(ex);
+                        throw ex;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Exception e = new Exception(String.Format("Error adding view model to registry using view path {0}", viewPath),ex);
+                    Log.Error(e);
+                    throw e;
+                }
+            }
         }
     }
 }

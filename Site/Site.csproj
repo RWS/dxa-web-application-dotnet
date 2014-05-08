@@ -160,7 +160,7 @@
     <Content Include="system\Views\Region\Core\Hero.cshtml" />
     <Content Include="system\Views\Page\Core\SectionPage.cshtml" />
     <Content Include="system\Views\Entity\Core\Carousel.cshtml" />
-    <Content Include="system\Views\Entity\Core\Teaser-Carousel.cshtml" />
+    <Content Include="system\Views\Entity\Core\Partials\TeaserHero-ImageOverlay.cshtml" />
     <Content Include="system\Views\Page\_ViewStart.cshtml" />
     <Content Include="system\Views\Page\Core\ContentPage.cshtml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
@@ -176,6 +176,8 @@
     <Content Include="system\Views\Navigation\LeftNavigation.cshtml" />
     <Content Include="system\Views\Navigation\TopNavigation.cshtml" />
     <Content Include="system\Views\Page\Core\LeftNavContentPage.cshtml" />
+    <Content Include="system\Views\Entity\Core\TeaserColored.cshtml" />
+    <Content Include="system\Views\Entity\Core\TeaserHero-ImageOverlay.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
