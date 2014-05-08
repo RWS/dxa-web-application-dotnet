@@ -1,0 +1,1 @@
+!function(){$("#reset-cookiebar").click(function(){return $.removeCookie("seen-cookie-notice",{path:"/"}),setupCookieBar(!1),!1})}($),function(){$("#show-loader").click(function(){return $("#loading-example").addClass("is-loading"),setTimeout(function(){$("#loading-example").removeClass("is-loading")},5e3),!1})}($);
