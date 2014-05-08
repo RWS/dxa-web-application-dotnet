@@ -6,11 +6,10 @@
 <ul class="nav navbar-nav main-nav">
     @foreach (var item in Model.Items)
     {
-            if (item.Title != "Index")
-            {
-                <li class="@(item.Url == Request.Url.LocalPath.ToString() ? "active" : "")">
-                    <a href="@item.Url">@item.Title</a>
-                </li>
-            }
+        SitemapItem sitemapItem = (item.Title == "Index") ? Model : item;
+        var urlStem = item.Url.Substring(0,item.Url.LastIndexOf("/"));
+        <li class="@(Request.Url.LocalPath.ToString().StartsWith(item.Url) ? "active" : "")">
+            <a href="@sitemapItem.Url">@sitemapItem.Title</a>
+        </li>
     }
 </ul>
