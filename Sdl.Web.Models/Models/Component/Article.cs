@@ -12,22 +12,11 @@ namespace Sdl.Web.Mvc.Models
     {
         [SemanticProperty("s:headline")]
         public string Headline { get; set; }
-
-        public Image Image { get; set; }
-        
-        public string ArticleBody { get; set; }
-        
+        public Image Image { get; set; }        
         [SemanticProperty("s:dateCreated")]
-        public DateTime? Date { get; set; }
-        
+        public DateTime? Date { get; set; }        
         public string Description { get; set; }
-
-        [SemanticProperty("s:articleSection")]
-        public string Section { get; set; }
-
         [SemanticProperty("s:articleBody")]
         public List<Paragraph> Paragraphs { get; set; }
-        
-        //TODO author, other meta
     }
 }

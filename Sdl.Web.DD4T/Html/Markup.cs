@@ -25,10 +25,23 @@ namespace Sdl.Web.DD4T
         public static MvcHtmlString Entity(Entity entity)
         {
             StringBuilder data = new StringBuilder();
-            var entityTypes = entity.GetType().GetCustomAttributes(true).Where(a=>a is SemanticEntityAttribute).Select(s=>((SemanticEntityAttribute)s).Prefix + ":" + ((SemanticEntityAttribute)s).EntityName).ToArray();
-            if (entityTypes!=null && entityTypes.Length>0)
+            var prefixes = new Dictionary<string,string>();
+            var entityTypes = new List<string>();
+            foreach(SemanticEntityAttribute attribute in entity.GetType().GetCustomAttributes(true).Where(a=>a is SemanticEntityAttribute).ToList())
             {
-                data.AppendFormat("typeof=\"{0}\"",String.Join(" ",entityTypes));
+                var prefix = attribute.Prefix;
+                if (!String.IsNullOrEmpty(prefix))
+                {
+                    if (!prefixes.ContainsKey(prefix))
+                    {
+                        prefixes.Add(prefix,attribute.Vocab);
+                    }
+                    entityTypes.Add(String.Format("{0}:{1}", prefix, attribute.EntityName));
+                }
+            }
+            if (prefixes != null && prefixes.Count > 0)
+            {
+                data.AppendFormat("prefix=\"{0}\" typeof=\"{1}\"", String.Join(" ", prefixes.Select(p=>String.Format("{0}: {1}",p.Key,p.Value))), String.Join(" ", entityTypes)) ;
             }
             if (Configuration.IsStaging)
             {
