@@ -1,0 +1,15 @@
+﻿@model Sdl.Web.Mvc.Models.Teaser
+<div class="feature teaser-container brand-light-color1" @Markup.Entity(Model)>
+    <h3 @Markup.Property(Model,"Headline")>@Model.Headline</h3>
+    @if (Model.Image != null)
+    {
+    <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 100, true)" style="float:right;">
+	}
+    <p @Markup.Property(Model, "Text")>@Model.Text</p>
+    @if (Model.Link != null)
+    {
+        <p>
+            <a @Markup.Property(Model, "Link.LinkText") href="@Model.Link.Url" title="@Model.Link.AlternateText">@(Model.Link.LinkText ?? Html.Resource("core.readMoreLinkText")) <i class="fa fa-chevron-right"></i></a>
+        </p>
+    }
+</div>
