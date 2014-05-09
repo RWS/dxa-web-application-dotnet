@@ -126,9 +126,10 @@
     <Content Include="system\assets\css\main.css" />
     <Content Include="system\assets\fonts\fontawesome-webfont.svg" />
     <Content Include="system\assets\fonts\fontawesome-webfont.woff" />
-    <Content Include="system\assets\images\temp\sdl-globe.png" />
+    <Content Include="system\assets\images\wait-spinner.gif" />
     <Content Include="system\assets\scripts\custom.js" />
     <Content Include="system\assets\scripts\discover-min.js" />
+    <Content Include="system\assets\scripts\examples.js" />
     <Content Include="system\assets\scripts\header.js" />
     <Content Include="system\assets\scripts\PIE.htc" />
     <Content Include="system\assets\scripts\plugins.js" />
@@ -160,7 +161,7 @@
     <Content Include="system\Views\Region\Core\Hero.cshtml" />
     <Content Include="system\Views\Page\Core\SectionPage.cshtml" />
     <Content Include="system\Views\Entity\Core\Carousel.cshtml" />
-    <Content Include="system\Views\Entity\Core\Teaser-Carousel.cshtml" />
+    <Content Include="system\Views\Entity\Core\Partials\TeaserHero-ImageOverlay.cshtml" />
     <Content Include="system\Views\Page\_ViewStart.cshtml" />
     <Content Include="system\Views\Page\Core\ContentPage.cshtml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
@@ -175,9 +176,8 @@
     <Content Include="system\Views\Navigation\Breadcrumb.cshtml" />
     <Content Include="system\Views\Navigation\LeftNavigation.cshtml" />
     <Content Include="system\Views\Navigation\TopNavigation.cshtml" />
-    <Content Include="system\Views\Page\Core\LeftNavContentPage.cshtml" />
-    <Content Include="system\Views\Navigation\GoogleSitemap.cshtml" />
-  </ItemGroup>
+    <Content Include="system\Views\Page\Core\LeftNavContentPage.cshtml" />    <Content Include="system\Views\Entity\Core\TeaserColored.cshtml" />
+    <Content Include="system\Views\Entity\Core\TeaserHero-ImageOverlay.cshtml" />    <Content Include="system\Views\Navigation\GoogleSitemap.cshtml" />  </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
   </ItemGroup>

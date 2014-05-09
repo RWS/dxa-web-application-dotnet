@@ -1,12 +1,10 @@
 ﻿@model Sdl.Web.Mvc.Models.Teaser
-<div class="jumbotron" @Markup.Entity(Model)>
+<div class="feature teaser-container brand-light-color1" @Markup.Entity(Model)>
+    <h3 @Markup.Property(Model,"Headline")>@Model.Headline</h3>
     @if (Model.Image != null)
     {
-        <div class="feature">
-			<img src="@Html.FixedSizeImageUrl(Model.Image.Url, 350, true)">
-		</div>
-    }
-    <h2 @Markup.Property(Model,"Headline")>@Model.Headline</h2>
+    <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 100, true)" style="float:right;">
+	}
     <p @Markup.Property(Model, "Text")>@Model.Text</p>
     @if (Model.Link != null)
     {
