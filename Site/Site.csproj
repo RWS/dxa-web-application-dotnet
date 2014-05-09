@@ -176,6 +176,7 @@
     <Content Include="system\Views\Navigation\LeftNavigation.cshtml" />
     <Content Include="system\Views\Navigation\TopNavigation.cshtml" />
     <Content Include="system\Views\Page\Core\LeftNavContentPage.cshtml" />
+    <Content Include="system\Views\Navigation\GoogleSitemap.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
