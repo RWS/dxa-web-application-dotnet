@@ -8,7 +8,7 @@
     {
         SitemapItem sitemapItem = (item.Title == "Index") ? Model : item;
         var urlStem = item.Url.Substring(0,item.Url.LastIndexOf("/"));
-        <li class="@(Request.Url.LocalPath.ToString().StartsWith(item.Url) ? "active" : "")">
+        <li class="@(Request.Url.LocalPath.StartsWith(item.Url) ? "active" : "")">
             <a href="@sitemapItem.Url">@sitemapItem.Title</a>
         </li>
     }
