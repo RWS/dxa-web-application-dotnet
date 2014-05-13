@@ -245,9 +245,13 @@ namespace Sdl.Web.Mvc
             return new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(File.ReadAllText(file));
         }
 
+        public static string GetDefaultExtensionLessPageName()
+        {
+            return "index";
+        }
         public static string GetDefaultPageName()
         {
-            return "index.html";
+            return GetDefaultExtensionLessPageName() + ".html";
         }
         public static string GetDefaultExtension()
         {
@@ -355,9 +359,10 @@ namespace Sdl.Web.Mvc
 
         public static string LocalizeUrl(string url)
         {
-            if (!String.IsNullOrEmpty(DefaultLocalization))
+            var localization = WebRequestContext.Localization.Path;
+            if (!String.IsNullOrEmpty(localization))
             {
-                return DefaultLocalization + "/" + url;
+                return localization + "/" + url;
             }
             return url;
         }

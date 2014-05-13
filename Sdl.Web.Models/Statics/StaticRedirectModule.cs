@@ -25,11 +25,17 @@ namespace Sdl.Web.Mvc
             HttpApplication application = (HttpApplication)sender;
             HttpContext context = application.Context;
             var url = context.Request.Url.AbsolutePath;
+            //Strange case : directory requests which exist (eg the root localization folders like /fr/ /de/) are not routed to MVC
+            //So we rewrite the request to a full URL including the default page name to ensure the full MVC pipeline is executed
+            if (url == WebRequestContext.Localization.Path + "/")
+            {
+                context.RewritePath(url + Configuration.GetDefaultExtensionLessPageName());
+            }
             var versionLessUrl = Configuration.RemoveVersionFromPath(url);
             if (url != versionLessUrl)
             {
-                Log.Debug("Redirecting request for non-existent versioned static file {0} to {1}", url, versionLessUrl);
-                context.Server.TransferRequest(versionLessUrl);
+                Log.Debug("Rewriting request for non-existent versioned static file {0} to {1}", url, versionLessUrl);
+                context.RewritePath(versionLessUrl);
             }
         }
 
