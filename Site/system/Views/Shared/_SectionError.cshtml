@@ -1,0 +1,8 @@
+﻿@model HandleErrorInfo
+<div class="alert alert-danger">
+    <strong>@Html.Resource("core.sectionErrorMessage")</strong>
+    @if (WebRequestContext.IsDeveloperMode)
+    {
+         <small>. Check the log files for more details: @Model.Exception.Message</small>
+    }
+</div>

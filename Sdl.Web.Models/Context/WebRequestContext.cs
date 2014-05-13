@@ -38,6 +38,14 @@ namespace Sdl.Web.Mvc
             }
         }
 
+        public static bool IsDeveloperMode
+        {
+            get
+            {
+                return (bool?)GetFromContextStore("IsDeveloperMode") ?? (bool)AddToContextStore("IsDeveloperMode", WebRequestContext.Localization.Domain=="localhost");
+            }
+        }
+
         protected static Localization GetCurrentLocalization()
         {
             //If theres a single localization use that regardless

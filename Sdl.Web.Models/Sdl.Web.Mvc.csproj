@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Configuration\Configuration.cs" />
     <Compile Include="Configuration\Localization.cs" />
+    <Compile Include="Errors\SectionHandleErrorAttribute.cs" />
     <Compile Include="Models\Page\Navigation.cs" />
     <Compile Include="Configuration\ResourceProviderFactory.cs" />
     <Compile Include="Configuration\ResourceProvider.cs" />
