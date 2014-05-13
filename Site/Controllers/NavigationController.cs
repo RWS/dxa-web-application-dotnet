@@ -49,7 +49,10 @@ namespace Site.Controllers
             return View(NavigationModel);
         }
 
-
+        public virtual ActionResult GoogleSitemap()
+        {
+            return View(NavigationModel);
+        }
 
 
 

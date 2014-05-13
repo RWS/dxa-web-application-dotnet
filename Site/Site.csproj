@@ -48,6 +48,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\_references\2013-sp1\netrtsn.dll</HintPath>
     </Reference>
+    <Reference Include="RouteDebugger">
+      <HintPath>..\packages\routedebugger.2.1.4.0\lib\net40\RouteDebugger.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
@@ -179,6 +182,7 @@
     <Content Include="system\Views\Entity\Core\TeaserColored.cshtml" />
     <Content Include="system\Views\Entity\Core\TeaserHero-ImageOverlay.cshtml" />
     <Content Include="system\Views\Shared\_SectionError.cshtml" />
+    <Content Include="system\Views\Navigation\GoogleSitemap.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

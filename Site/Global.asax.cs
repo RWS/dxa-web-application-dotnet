@@ -28,7 +28,11 @@ namespace Site
             
             //routes.IgnoreRoute("{*favicon}", new { favicon = @"(.*/)?favicon.ico(/.*)?" });
             routes.IgnoreRoute("cid/{*pathInfo}");
-
+            routes.MapRoute(
+                            "sitemap",
+                            "sitemap",
+                            new { controller = "Navigation", action = "GoogleSitemap" }
+                        );
             routes.MapRoute(
                             "Navigation",
                             "Navigation/{action}",
