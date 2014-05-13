@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace Sdl.Web.Mvc.Mapping
 {
-    public interface IModelFactory
+    public interface IContentProvider
     {
         object CreateEntityModel(object entity, Type viewModeltype = null);
+        //object CreateRegionModel(object entity, Type viewModeltype = null);
         object CreatePageModel(object page, Dictionary<string, object> subPages = null, string view = null);
         string GetEntityViewName(object entity);
         string GetPageViewName(object entity);

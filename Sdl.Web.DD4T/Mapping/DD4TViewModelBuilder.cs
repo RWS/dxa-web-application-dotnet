@@ -8,11 +8,11 @@ using Sdl.Web.Mvc.Models;
 
 namespace Sdl.Web.DD4T.Mapping
 {
-    public class DD4TEntityBuilder : BaseEntityBuilder
+    public class DD4TViewModelBuilder : BaseViewModelBuilder
     {
         public ExtensionlessLinkFactory LinkFactory { get; set; }
 
-        public DD4TEntityBuilder()
+        public DD4TViewModelBuilder()
         {
             LinkFactory = new ExtensionlessLinkFactory();
         }

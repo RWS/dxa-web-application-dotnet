@@ -9,31 +9,31 @@ using System.Threading.Tasks;
 namespace Sdl.Web.Mvc.Mapping
 {
     /// <summary>
-    /// Default EntityMapper - simply returns the same entity
+    /// Abstract Base Content Provider
     /// </summary>
-    public abstract class BaseModelFactory : IModelFactory
+    public abstract class BaseContentProvider : IContentProvider
     {
         public abstract string GetEntityViewName(object entity);
         public abstract string GetPageViewName(object entity);
 
-        private static Dictionary<Type, IEntityBuilder> _entityBuilders = null;
-        public static Dictionary<Type, IEntityBuilder> EntityBuilders
+        private static Dictionary<Type, IViewModelBuilder> _modelBuilders = null;
+        public static Dictionary<Type, IViewModelBuilder> ModelBuilders
         {
             get
             {
-                if (_entityBuilders == null)
+                if (_modelBuilders == null)
                 {
                     //TODO hardcoded and empty for now
-                    _entityBuilders = new Dictionary<Type, IEntityBuilder>();
+                    _modelBuilders = new Dictionary<Type, IViewModelBuilder>();
                 }
-                return _entityBuilders;
+                return _modelBuilders;
             }
             set
             {
-                _entityBuilders = value;
+                _modelBuilders = value;
             }
         }
-        public IEntityBuilder DefaultEntityBuilder { get; set; }
+        public IViewModelBuilder DefaultModelBuilder { get; set; }
 
         public virtual object CreateEntityModel(object data, Type viewModeltype = null)
         {
@@ -43,10 +43,10 @@ namespace Sdl.Web.Mvc.Mapping
             }
             if (viewModeltype!=null)
             {
-                IEntityBuilder builder = DefaultEntityBuilder;
-                if (EntityBuilders.ContainsKey(viewModeltype))
+                IViewModelBuilder builder = DefaultModelBuilder;
+                if (ModelBuilders.ContainsKey(viewModeltype))
                 {
-                    builder = EntityBuilders[viewModeltype];
+                    builder = ModelBuilders[viewModeltype];
                 }
                 return builder.Create(data, viewModeltype);
             }
@@ -69,28 +69,6 @@ namespace Sdl.Web.Mvc.Mapping
             //in an ideal world, we do not need to map...
             return data;
         }
-
-        /*protected virtual object GetEntity(string entityType)
-        {
-            var semantics = new Semantics { Type = entityType, Vocabulary = GetDefaultVocabulary() };
-            entityType = "Sdl.Web.Mvc.Models." + entityType;
-            //TODO models will not always be in this assembly (modules, third party/custom etc.)
-            try
-            {
-                var entity = Activator.CreateInstance("Sdl.Web.Mvc", entityType).Unwrap();
-                PropertyInfo pi = entity.GetType().GetProperty("Semantics");
-                if (pi != null)
-                {
-                    pi.SetValue(entity, semantics);
-                }
-                return entity;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Could not load entity type {0}", entityType);
-            }
-            return null;
-        }*/
 
     }
 }

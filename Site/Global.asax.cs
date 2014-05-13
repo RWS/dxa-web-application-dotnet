@@ -42,10 +42,18 @@ namespace Site
 
             //Tridion page route
             routes.MapRoute(
-               "TridionPage",
-               "{*pageUrl}",
+               "SpanishTridionPage",
+               "es/{*pageUrl}",
                new { controller = "Page", action = "Page" }, 
                new { pageId = @"^(.*)?$" } 
+            );
+
+            //Tridion page route
+            routes.MapRoute(
+               "TridionPage",
+               "{*pageUrl}",
+               new { controller = "Page", action = "Page" },
+               new { pageId = @"^(.*)?$" }
             );
 
             routes.MapRoute(

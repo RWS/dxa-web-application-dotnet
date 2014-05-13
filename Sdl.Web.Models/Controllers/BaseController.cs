@@ -14,7 +14,7 @@ namespace Sdl.Web.Mvc
 {
     public abstract class BaseController : Controller
     {
-        public virtual IModelFactory ModelFactory { get; set; }
+        public virtual IContentProvider ContentProvider { get; set; }
         public virtual IRenderer Renderer { get; set; }
         
         //These will be implemented by content provider specific implementations of the BaseController
@@ -41,14 +41,15 @@ namespace Sdl.Web.Mvc
             return GetPageView(model);
         }
 
-        [SectionHandleErrorAttribute(View="_SectionError")]
+        [HandleSectionError(View = "_SectionError")]
         public virtual ActionResult Region(Region region)
         {
             ViewBag.Renderer = Renderer;
             return GetRegionView(region);
         }
 
-        [SectionHandleErrorAttribute(View = "_SectionError")]
+        [MapModel]
+        [HandleSectionError(View = "_SectionError")]
         public virtual ActionResult Entity(object entity)
         {
             ViewBag.Renderer = Renderer;
@@ -63,7 +64,7 @@ namespace Sdl.Web.Mvc
 
         protected virtual ViewResult GetPageView(object page)
         {
-            var viewName = ModelFactory.GetPageViewName(page);
+            var viewName = ContentProvider.GetPageViewName(page);
             var subPages = new Dictionary<string, object>();
             var headerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/header")));
             var footerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/footer")));
@@ -77,7 +78,7 @@ namespace Sdl.Web.Mvc
             {
                 subPages.Add("Footer", footerModel);
             }
-            var model = ModelFactory.CreatePageModel(page, subPages, viewName);
+            var model = ContentProvider.CreatePageModel(page, subPages, viewName);
             return base.View(viewName, model);
         }
 
@@ -95,23 +96,7 @@ namespace Sdl.Web.Mvc
 
         protected virtual ViewResult GetEntityView(object entity)
         {
-            var viewName = ModelFactory.GetEntityViewName(entity);
-            var viewEngineResult = ViewEngines.Engines.FindPartialView(this.ControllerContext, viewName);
-            if (viewEngineResult.View == null)
-            {
-                Log.Error("Could not find view {0} in locations: {1}",viewName, String.Join(",", viewEngineResult.SearchedLocations));
-                throw new Exception(String.Format("Missing view: {0}",viewName));
-            }
-            else
-            {
-                if (!Configuration.ViewModelRegistry.ContainsKey(viewName))
-                {
-                    var path = ((BuildManagerCompiledView)viewEngineResult.View).ViewPath;
-                    Configuration.AddViewModelToRegistry(viewName, path);
-                }
-                var model = ModelFactory.CreateEntityModel(entity, Configuration.ViewModelRegistry[viewName]);
-                return View(viewName, model);
-            }
+            return View(entity);
         }
     }
 }

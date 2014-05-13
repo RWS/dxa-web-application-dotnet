@@ -18,17 +18,13 @@ using Sdl.Web.DD4T.Mapping;
 
 namespace Sdl.Web.DD4T
 {
-    /// <summary>
-    /// Default ModelFactory, retrieves model type and sets properties
-    /// according to some generic rules
-    /// </summary>
-    public class DD4TModelFactory : BaseModelFactory
+    public class DD4TModelFactory : BaseContentProvider
     {
         public ExtensionlessLinkFactory LinkFactory { get; set; }
         public DD4TModelFactory()
         {
             this.LinkFactory = new ExtensionlessLinkFactory();
-            DefaultEntityBuilder = new DD4TEntityBuilder();
+            DefaultModelBuilder = new DD4TViewModelBuilder();
         }
 
         public override object CreatePageModel(object data, Dictionary<string,object> subPages = null, string view = null)

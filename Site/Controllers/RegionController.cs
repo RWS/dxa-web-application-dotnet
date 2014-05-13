@@ -9,7 +9,7 @@ namespace Site.Controllers
     {
         public RegionController()
         {
-            this.ModelFactory = new DD4TModelFactory();
+            this.ContentProvider = new DD4TModelFactory();
             this.Renderer = new DD4TRenderer();
         }
     }
