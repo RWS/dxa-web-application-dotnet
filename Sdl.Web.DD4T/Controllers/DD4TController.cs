@@ -46,7 +46,7 @@ namespace Sdl.Web.DD4T
             IPage page;
             if (PageFactory != null)
             {
-                if (PageFactory.TryFindPage(string.Format("/{0}", pageUrl), out page))
+                if (PageFactory.TryFindPage(string.Format("{0}{1}", pageUrl.StartsWith("/") ? "" : "/", pageUrl), out page))
                 {
                     ViewBag.InlineEditingBootstrap = Markup.GetInlineEditingBootstrap(page);
                     return page;
@@ -63,7 +63,7 @@ namespace Sdl.Web.DD4T
             string page;
             if (PageFactory != null)
             {
-                if (PageFactory.TryFindPageContent(string.Format("/{0}", pageUrl), out page))
+                if (PageFactory.TryFindPageContent(string.Format("{0}{1}", pageUrl.StartsWith("/") ? "" : "/", pageUrl), out page))
                 {
                     return page;
                 }
