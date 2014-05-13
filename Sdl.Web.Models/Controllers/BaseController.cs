@@ -16,6 +16,10 @@ namespace Sdl.Web.Mvc
     {
         public virtual IModelFactory ModelFactory { get; set; }
         public virtual IRenderer Renderer { get; set; }
+        
+        //These will be implemented by content provider specific implementations of the BaseController
+        protected abstract object GetModelForPage(string pageUrl);
+        protected abstract string GetContentForPage(string pageUrl);
 
         [HandleError]
         public ActionResult Page(string pageUrl)
@@ -37,13 +41,14 @@ namespace Sdl.Web.Mvc
             return GetPageView(model);
         }
 
-
+        [SectionHandleErrorAttribute(View="_SectionError")]
         public virtual ActionResult Region(Region region)
         {
             ViewBag.Renderer = Renderer;
             return GetRegionView(region);
         }
 
+        [SectionHandleErrorAttribute(View = "_SectionError")]
         public virtual ActionResult Entity(object entity)
         {
             ViewBag.Renderer = Renderer;
@@ -56,9 +61,7 @@ namespace Sdl.Web.Mvc
             return string.IsNullOrEmpty(url) ? defaultPageFileName : (url.EndsWith("/") ? url + defaultPageFileName : url += Configuration.GetDefaultExtension());
         }
 
-        protected abstract object GetModelForPage(string pageUrl);
-        protected abstract string GetContentForPage(string pageUrl);
-        protected ViewResult GetPageView(object page)
+        protected virtual ViewResult GetPageView(object page)
         {
             var viewName = ModelFactory.GetPageViewName(page);
             var subPages = new Dictionary<string, object>();
@@ -90,15 +93,14 @@ namespace Sdl.Web.Mvc
             return String.Format("{0}/{1}", module, viewName); 
         }
 
-        protected ViewResult GetEntityView(object entity)
+        protected virtual ViewResult GetEntityView(object entity)
         {
             var viewName = ModelFactory.GetEntityViewName(entity);
             var viewEngineResult = ViewEngines.Engines.FindPartialView(this.ControllerContext, viewName);
-            //TODO - put this logic in a action filter?
             if (viewEngineResult.View == null)
             {
                 Log.Error("Could not find view {0} in locations: {1}",viewName, String.Join(",", viewEngineResult.SearchedLocations));
-                return View("_Error",String.Format("Missing view: {0}",viewName) as object);
+                throw new Exception(String.Format("Missing view: {0}",viewName));
             }
             else
             {

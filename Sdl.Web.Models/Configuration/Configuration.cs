@@ -54,6 +54,7 @@ namespace Sdl.Web.Mvc
             }
         }
         public static bool IsStaging { get; set; }
+        public static bool IsDeveloperMode { get; set; }
         public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LocalConfiguration
         {
             get

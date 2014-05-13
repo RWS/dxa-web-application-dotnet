@@ -171,7 +171,6 @@
     <Content Include="system\Views\Region\Core\Nav.cshtml" />
     <Content Include="system\Views\Entity\Core\FooterLinkGroup.cshtml" />
     <Content Include="system\Views\Entity\Core\HeaderLinks.cshtml" />
-    <Content Include="system\Views\Entity\_Error.cshtml" />
     <Content Include="system\Views\Search\SearchResults.cshtml" />
     <Content Include="system\Views\Navigation\Breadcrumb.cshtml" />
     <Content Include="system\Views\Navigation\LeftNavigation.cshtml" />
@@ -179,6 +178,7 @@
     <Content Include="system\Views\Page\Core\LeftNavContentPage.cshtml" />
     <Content Include="system\Views\Entity\Core\TeaserColored.cshtml" />
     <Content Include="system\Views\Entity\Core\TeaserHero-ImageOverlay.cshtml" />
+    <Content Include="system\Views\Shared\_SectionError.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
