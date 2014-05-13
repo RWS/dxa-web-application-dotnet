@@ -10,7 +10,7 @@ namespace Sdl.Web.Mvc
     /// <summary>
     /// Handle error attribute for sub-sections of pages (entities/regions) which renders view for the error, but does not prevent the rest of the page being rendered
     /// </summary>
-    public class SectionHandleErrorAttribute : HandleErrorAttribute
+    public class HandleSectionErrorAttribute : HandleErrorAttribute
     {
         public override void OnException(ExceptionContext filterContext)
         {

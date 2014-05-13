@@ -52,7 +52,8 @@
   <ItemGroup>
     <Compile Include="Configuration\Configuration.cs" />
     <Compile Include="Configuration\Localization.cs" />
-    <Compile Include="Errors\SectionHandleErrorAttribute.cs" />
+    <Compile Include="Errors\HandleSectionErrorAttribute.cs" />
+    <Compile Include="Mapping\MapModelAttribute.cs" />
     <Compile Include="Models\Page\Navigation.cs" />
     <Compile Include="Configuration\ResourceProviderFactory.cs" />
     <Compile Include="Configuration\ResourceProvider.cs" />
@@ -67,10 +68,10 @@
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />
     <Compile Include="Logging\Logger.cs" />
-    <Compile Include="Mapping\BaseEntityBuilder.cs" />
-    <Compile Include="Mapping\BaseModelFactory.cs" />
-    <Compile Include="Mapping\IEntityBuilder.cs" />
-    <Compile Include="Mapping\IModelFactory.cs" />
+    <Compile Include="Mapping\BaseViewModelBuilder.cs" />
+    <Compile Include="Mapping\BaseContentProvider.cs" />
+    <Compile Include="Mapping\IViewEntityBuilder.cs" />
+    <Compile Include="Mapping\IContentProvider.cs" />
     <Compile Include="Mapping\SchemaSemantics.cs" />
     <Compile Include="Mapping\FieldSemantics.cs" />
     <Compile Include="Mapping\SemanticMapping.cs" />
@@ -79,17 +80,17 @@
     <Compile Include="Mapping\SemanticSchemaField.cs" />
     <Compile Include="Mapping\SemanticVocabulary.cs" />
     <Compile Include="Models\Attributes.cs" />
-    <Compile Include="Models\Component\Carousel.cs" />
-    <Compile Include="Models\Component\LinkList.cs" />
+    <Compile Include="Models\Entity\Carousel.cs" />
+    <Compile Include="Models\Entity\LinkList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\Common\Image.cs" />
     <Compile Include="Models\Common\Link.cs" />
     <Compile Include="Models\Common\MediaItem.cs" />
     <Compile Include="Models\Common\Semantics.cs" />
-    <Compile Include="Models\Component\Article.cs" />
+    <Compile Include="Models\Entity\Article.cs" />
     <Compile Include="Models\Common\Entity.cs" />
     <Compile Include="Models\Common\Paragraph.cs" />
-    <Compile Include="Models\Component\Teaser.cs" />
+    <Compile Include="Models\Entity\Teaser.cs" />
     <Compile Include="Models\Page\Breadcrumb.cs" />
     <Compile Include="Models\Page\Footer.cs" />
     <Compile Include="Models\Page\Header.cs" />

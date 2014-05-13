@@ -5,7 +5,7 @@ using Sdl.Web.Mvc.Models;
 
 namespace Sdl.Web.Mvc.Mapping
 {
-    public abstract class BaseEntityBuilder : IEntityBuilder
+    public abstract class BaseViewModelBuilder : IViewModelBuilder
     {
         private static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> _entityPropertySemantics;
         public static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> EntityPropertySemantics 
