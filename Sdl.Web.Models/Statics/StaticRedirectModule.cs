@@ -29,7 +29,7 @@ namespace Sdl.Web.Mvc
             if (url != versionLessUrl)
             {
                 Log.Debug("Redirecting request for non-existent versioned static file {0} to {1}", url, versionLessUrl);
-                context.Response.Redirect(versionLessUrl);
+                context.Server.TransferRequest(versionLessUrl);
             }
         }
 
