@@ -47,93 +47,27 @@ namespace Sdl.Web.DD4T.Mapping
                 var propertySemantics = LoadPropertySemantics(type);
                 foreach (var pi in type.GetProperties())
                 {
+                    bool multival = pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
+                    Type propertyType = multival ? pi.PropertyType.GetGenericArguments()[0] : pi.PropertyType;
                     if (propertySemantics.ContainsKey(pi.Name))
                     {
                         foreach (var info in propertySemantics[pi.Name])
                         {
-                            // semantic mapping of fields
-                            string fieldname;
-
-                            // get vocabulary for prefix (use default vocabulary if not available)
-                            string vocab = SemanticMapping.DefaultVocabulary;
-                            if (!string.IsNullOrEmpty(info.Prefix) && vocabularies.ContainsKey(info.Prefix))
+                            //Hack - for mapping images to the Image property - this (and other link fields) should use generic semantic logic
+                            if (pi.Name == "Image" && component.ComponentType == ComponentType.Multimedia)
                             {
-                                vocab = vocabularies[info.Prefix];
-                            }
-                            else if (string.IsNullOrEmpty(info.Prefix) && vocabularies.ContainsKey(string.Empty))
-                            {
-                                vocab = vocabularies[string.Empty];
-                            }
-
-                            // determine field semantics
-                            string prefix = SemanticMapping.GetPrefix(vocab);
-                            string property = info.PropertyName;
-                            string entity = entityNames[vocab].First();
-                            FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
-
-                            // locate semantic schema field
-                            SemanticSchemaField matchingField = semanticSchema.FindFieldBySemantics(fieldSemantics);  
-                            if (matchingField != null)
-                            {
-                                // we found a field with given semantics
-                                fieldname = matchingField.Name;
+                                pi.SetValue(model, GetImages(new List<IComponent> { component })[0]);
                             }
                             else
                             {
-                                // we did not find a field with given semantics, do basic property name -> xml field mapping
-                                fieldname = info.PropertyName;
-                            }
-
-                            bool multival = pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
-                            // TODO remove multivalue and image hacks
-                            if (multival && !component.Fields.ContainsKey(fieldname))
-                            {
-                                // truncate multivalue properties by one character as the Tridion field name is usually singular (eg link instead of links)
-                                fieldname = fieldname.Substring(0, fieldname.Length - 1);
-                            }
-                            //Hack - for mapping images to the Image property - this should use some semantics
-                            if (fieldname=="image" && component.ComponentType == ComponentType.Multimedia)
-                            {
-                                pi.SetValue(model, GetImages(new List<IComponent>{component})[0]);
-                            }
-
-                            // determine type
-                            Type propertyType = multival ? pi.PropertyType.GetGenericArguments()[0] : pi.PropertyType;
-
-                            // try getting value from content fields
-                            if (component.Fields.ContainsKey(fieldname))
-                            {
-                                var field = component.Fields[fieldname];
-                                pi.SetValue(model, GetFieldValues(field, propertyType, multival));
-                                propertyData.Add(pi.Name, GetFieldXPath(field));
-                                // we found a field, we are done - no need to process other semantics for this property
-                                break;
-                            }
-
-                            // try getting value from metadata fields
-                            if (component.MetadataFields.ContainsKey(fieldname))
-                            {
-                                var field = component.MetadataFields[fieldname];
-                                pi.SetValue(model, GetFieldValues(field, propertyType, multival));
-                                propertyData.Add(pi.Name, GetFieldXPath(field));
-                                // we found a field, we are done - no need to process other semantics for this property
-                                break;
-                            }
-                            if (matchingField != null && matchingField.IsEmbedded)
-                            {
-                                // we are dealing with an embedded field
-                                // TODO get embedded value 
-
-
-                                if (matchingField.IsMetadata)
+                                IField field = GetFieldFromSemantics(component, info, vocabularies, semanticSchema, entityNames);
+                                if (field != null && (field.Values.Count>0|| field.EmbeddedValues.Count>0 ))
                                 {
-                                    // we are dealing with an embedded metadata field                                    
-                                    // TODO get embedded metadata value
-
+                                    pi.SetValue(model, GetFieldValues(field, propertyType, multival));
+                                    propertyData.Add(pi.Name, GetFieldXPath(field));
+                                    break;
                                 }
                             }
-                            // TODO if semantic field could not be matched, this could still be an embedded (metadata) field
-
                         }
                     }
                 }
@@ -144,6 +78,71 @@ namespace Sdl.Web.DD4T.Mapping
                 }
                 return model;
 
+            }
+            return null;
+        }
+
+        private IField GetFieldFromSemantics(IComponent component, SemanticProperty info, Dictionary<string, string> vocabularies, SemanticSchema semanticSchema, ILookup<string, string> entityNames)
+        {
+            if (vocabularies.ContainsKey(info.Prefix))
+            {
+                var vocab = vocabularies[info.Prefix];
+                // semantic mapping of fields
+                string fieldname = null;
+
+                // determine field semantics
+                string prefix = SemanticMapping.GetPrefix(vocab);
+                string property = info.PropertyName;
+                string entity = entityNames[vocab].First();
+                FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
+
+                // locate semantic schema field
+                SemanticSchemaField matchingField = semanticSchema.FindFieldBySemantics(fieldSemantics);
+                if (matchingField != null)
+                {
+                    // we found a field with given semantics
+                    fieldname = matchingField.Name;
+                    /*} TODO - not needed?! - the default mapping comes implicit
+                    else
+                    {
+                        // we did not find a field with given semantics, do basic property name -> xml field mapping
+                        fieldname = info.PropertyName;
+                    }*/
+
+
+                    
+
+                    // determine type
+
+
+                    // try getting value from content fields
+                    if (!matchingField.IsMetadata && component.Fields.ContainsKey(fieldname))
+                    {
+                        return component.Fields[fieldname];
+                    }
+                    else
+                    {
+                        // try getting value from metadata fields
+                        if (component.MetadataFields.ContainsKey(fieldname))
+                        {
+                            return component.MetadataFields[fieldname];
+                        }
+                    }
+                    if (matchingField != null && matchingField.IsEmbedded)
+                    {
+                        // we are dealing with an embedded field
+                        // TODO get embedded value 
+
+
+                        if (matchingField.IsMetadata)
+                        {
+                            // we are dealing with an embedded metadata field                                    
+                            // TODO get embedded metadata value
+
+                        }
+                    }
+                    // TODO if semantic field could not be matched, this could still be an embedded (metadata) field
+                }
             }
             return null;
         }

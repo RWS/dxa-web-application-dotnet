@@ -24,7 +24,7 @@ namespace Sdl.Web.Mvc
         public const string VersionRegex = "(v\\d*.\\d*)";
         public const string SystemFolder = "system";
         public const string CoreModuleName = "core";
-        
+        public const string CoreVocabulary = "http://www.sdl.com/web/schemas/core";
         private static string _currentVersion;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _localConfiguration;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _globalConfiguration;

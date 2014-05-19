@@ -10,5 +10,9 @@ namespace Sdl.Web.Mvc.Models
     {
         public string Headline { get; set; }
         public List<Link> Links { get; set; }
+        public LinkList()
+        {
+            Links = new List<Link>();
+        }
     }
 }
