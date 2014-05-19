@@ -9,54 +9,40 @@ namespace Sdl.Web.Mvc
 {
     public class ContextAwareViewEngine : RazorViewEngine
     {
+        //For future addition of context-based view selection
         public ContextAwareViewEngine()
         {
-            var version = Configuration.CurrentVersion;
             AreaViewLocationFormats = new[]
             {
-            "~/system/"+version+"/Areas/{2}/Views/{1}/{0}.cshtml",
-            "~/system/"+version+"/Areas/{2}/Views/Shared/{0}.cshtml",
-            "~/system/Areas/{2}/Views/{1}/{0}.cshtml",
-            "~/system/Areas/{2}/Views/Shared/{0}.cshtml"
+            "~/Areas/{2}/Views/{1}/{0}.cshtml",
+            "~/Areas/{2}/Views/Shared/{0}.cshtml"
             };
             AreaMasterLocationFormats = new[]
              {
-            "~/system/"+version+"/Areas/{2}/Views/{1}/{0}.cshtml",
-            "~/system/"+version+"/Areas/{2}/Views/Shared/{0}.cshtml",
-            "~/system/Areas/{2}/Views/{1}/{0}.cshtml",
-            "~/system/Areas/{2}/Views/Shared/{0}.cshtml"
+            "~/Areas/{2}/Views/{1}/{0}.cshtml",
+            "~/Areas/{2}/Views/Shared/{0}.cshtml"
              };
             AreaPartialViewLocationFormats = new[]
              {
-            "~/system/"+version+"/Areas/{2}/Views/{1}/{0}.cshtml",
-            "~/system/"+version+"/Areas/{2}/Views/Shared/{0}.cshtml",
-            "~/system/Areas/{2}/Views/{1}/{0}.cshtml",
-            "~/system/Areas/{2}/Views/Shared/{0}.cshtml"
+            "~/Areas/{2}/Views/{1}/{0}.cshtml",
+            "~/Areas/{2}/Views/Shared/{0}.cshtml"
              };
             ViewLocationFormats = new[]
              {
-            "~/system/"+version+"/Views/{1}/{0}.cshtml",
-            "~/system/"+version+"/Views/{0}.cshtml",
-            "~/system/"+version+"/Views/Shared/{0}.cshtml",
-            "~/system/Views/{1}/{0}.cshtml",
-            "~/system/Views/{0}.cshtml",
-            "~/system/Views/Shared/{0}.cshtml"
+            "~/Views/{1}/{0}.cshtml",
+            "~/Views/{0}.cshtml",
+            "~/Views/Shared/{0}.cshtml"
              };
             MasterLocationFormats = new[]
              {
-            "~/system/"+version+"/Views/{1}/{0}.cshtml",
-            "~/system/"+version+"/Views/Shared/{0}.cshtml",
-            "~/system/Views/{1}/{0}.cshtml",
-            "~/system/Views/Shared/{0}.cshtml"
+            "~/Views/{1}/{0}.cshtml",
+            "~/Views/Shared/{0}.cshtml"
              };
             PartialViewLocationFormats = new[]
              {
-            "~/system/"+version+"/Views/{1}/{0}.cshtml",
-            "~/system/"+version+"/Views/{0}.cshtml",
-            "~/system/"+version+"/Views/Shared/{0}.cshtml",
-            "~/system/Views/{1}/{0}.cshtml",
-            "~/system/Views/{0}.cshtml",
-            "~/system/Views/Shared/{0}.cshtml"
+            "~/Views/{1}/{0}.cshtml",
+            "~/Views/{0}.cshtml",
+            "~/Views/Shared/{0}.cshtml"
              };
         }
         public override ViewEngineResult FindPartialView(ControllerContext controllerContext, string partialViewName, bool useCache)
