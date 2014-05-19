@@ -47,7 +47,11 @@ namespace Sdl.Web.DD4T
             {
                 if (PageFactory.TryFindPage(string.Format("{0}{1}", pageUrl.StartsWith("/") ? "" : "/", pageUrl), out page))
                 {
-                    ViewBag.InlineEditingBootstrap = Markup.GetInlineEditingBootstrap(page);
+                    // only set InlineEditingBootstrap when it is not set before (else header and footer pages might override it)
+                    if (ViewBag.InlineEditingBootstrap == null)
+                    {
+                        ViewBag.InlineEditingBootstrap = Markup.GetInlineEditingBootstrap(page);                        
+                    }
                     return page;
                 }
             }

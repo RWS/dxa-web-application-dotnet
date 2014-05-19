@@ -17,10 +17,10 @@ namespace Sdl.Web.DD4T
         //TODO - this needs to be abstracted away...
         private static string PAGE_FORMAT = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\"}} -->";
         private static string PAGE_SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" defer=\"defer\" src=\"{0}/WebUI/Editors/SiteEdit/Views/Bootstrap/Bootstrap.aspx?mode=js\" id=\"tridion.siteedit\"></script>";
-        private static string REGION_FORMAT = "<!-- Start Region: {{ 'title': '{0}', 'allowedComponentTypes': [{{ 'schema': '{1}', 'template': '{2}' }}], 'minOccurs': {3}, 'maxOccurs': {4} }} -->";//TODO improve according to https://code.google.com/p/tridion-practice/wiki/TridionUI2012FunctionsForUseInHtmlTemplates#Update
+        private static string REGION_FORMAT = "<!-- Start Region: {{\"title\" : \"{0}\", \"allowedComponentTypes\" : [{{\"schema\" : \"{1}\", \"template\" : \"{2}\"}}], \"minOccurs\" : {3}, \"maxOccurs\" : {4}}} -->";//TODO improve according to https://code.google.com/p/tridion-practice/wiki/TridionUI2012FunctionsForUseInHtmlTemplates#Update
         private static string CP_FORMAT = "<!-- Start Component Presentation: {{\"ComponentID\" : \"{0}\", \"ComponentModified\" : \"{1}\", \"ComponentTemplateID\" : \"{2}\", \"ComponentTemplateModified\" : \"{3}\", \"IsRepositoryPublished\" : false}} -->";
         private static string FIELD_FORMAT = "<!-- Start Component Field: {{\"XPath\":\"{0}\"}} -->";
-        private static string DATE_FORMAT = "s";
+        private static string DATE_FORMAT = "yyyy-MM-ddTHH:mm:ss";
 
         public static MvcHtmlString Entity(Entity entity)
         {
@@ -52,6 +52,7 @@ namespace Sdl.Web.DD4T
             }
             return new MvcHtmlString(data.ToString());
         }
+        
         public static MvcHtmlString Property(Entity entity, string property, int index = 0)
         {
             StringBuilder data = new StringBuilder();
@@ -73,8 +74,9 @@ namespace Sdl.Web.DD4T
                     }
                 }
             }
-            return new MvcHtmlString(data.ToString());
+            return new MvcHtmlString(data.ToString());        
         }
+
         public static MvcHtmlString Region(Region region)
         {
             return new MvcHtmlString(String.Format("typeof=\"{0}\" resource=\"{1}\"", "Region", region.Name));
@@ -84,7 +86,7 @@ namespace Sdl.Web.DD4T
         {
             if (Configuration.IsStaging)
             {
-                var html = String.Format(PAGE_FORMAT, page.Id, page.RevisionDate.ToString("s"), page.PageTemplate.Id, page.PageTemplate.RevisionDate.ToString("s")) + String.Format(PAGE_SCRIPT, Configuration.GetCmsUrl());
+                var html = String.Format(PAGE_FORMAT, page.Id, page.RevisionDate.ToString(DATE_FORMAT), page.PageTemplate.Id, page.PageTemplate.RevisionDate.ToString(DATE_FORMAT)) + String.Format(PAGE_SCRIPT, Configuration.GetCmsUrl());
                 return new MvcHtmlString(html);
             }
             return null;
