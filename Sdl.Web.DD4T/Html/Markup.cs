@@ -84,7 +84,7 @@ namespace Sdl.Web.DD4T
         {
             if (Configuration.IsStaging)
             {
-                var html = String.Format(PAGE_FORMAT, page.Id, page.RevisionDate.ToString("s"), page.PageTemplate.Id, page.PageTemplate.RevisionDate) + String.Format(PAGE_SCRIPT, Configuration.GetCmsUrl());
+                var html = String.Format(PAGE_FORMAT, page.Id, page.RevisionDate.ToString("s"), page.PageTemplate.Id, page.PageTemplate.RevisionDate.ToString("s")) + String.Format(PAGE_SCRIPT, Configuration.GetCmsUrl());
                 return new MvcHtmlString(html);
             }
             return null;
