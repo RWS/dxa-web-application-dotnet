@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Configuration;
 using DD4T.Utils;
-using DD4T.Web.Binaries;
 
 namespace Sdl.Web.DD4T
 {

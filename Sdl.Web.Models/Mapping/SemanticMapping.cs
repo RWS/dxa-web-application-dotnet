@@ -19,7 +19,7 @@ namespace Sdl.Web.Mvc.Mapping
         /// <summary>
         /// Default semantic vocabulary.
         /// </summary>
-        public const string DefaultVocabulary = "http://www.sdl.com/tridion/schemas/core";
+        public const string DefaultVocabulary = "http://www.sdl.com/web/schemas/core";
 
         /// <summary>
         /// List of semantic vocabularies (prefix and name).

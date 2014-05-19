@@ -17,7 +17,7 @@ namespace Sdl.Web.DD4T.Mapping
             LinkFactory = new ExtensionlessLinkFactory();
         }
         
-        public override object Create(object sourceEntity,Type type)
+        public override object Create(object sourceEntity, Type type)
         {
             IComponent component = sourceEntity as IComponent;
             Dictionary<string, string> entityData;
@@ -119,7 +119,6 @@ namespace Sdl.Web.DD4T.Mapping
                                 // we found a field, we are done - no need to process other semantics for this property
                                 break;
                             }
-
                             if (matchingField != null && matchingField.IsEmbedded)
                             {
                                 // we are dealing with an embedded field
