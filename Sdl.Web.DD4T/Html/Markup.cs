@@ -17,8 +17,8 @@ namespace Sdl.Web.DD4T
         //TODO - this needs to be abstracted away...
         private static string PAGE_FORMAT = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\"}} -->";
         private static string PAGE_SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" defer=\"defer\" src=\"{0}/WebUI/Editors/SiteEdit/Views/Bootstrap/Bootstrap.aspx?mode=js\" id=\"tridion.siteedit\"></script>";
-        private static string REGION_FORMAT = "";//TODO
-        private static string CP_FORMAT = "<!-- Start Component Presentation: {{\"ComponentID\" : \"{0}\", \"ComponentModified\" : \"{1}\", \"ComponentTemplateID\" : \"{2}\", \"ComponentTemplateModified\" : \"{2}\", \"IsRepositoryPublished\" : false}} -->";
+        private static string REGION_FORMAT = "<!-- Start Region: {{ 'title': '{0}', 'allowedComponentTypes': [{{ 'schema': '{1}', 'template': '{2}' }}], 'minOccurs': {3}, 'maxOccurs': {4} }} -->";//TODO improve according to https://code.google.com/p/tridion-practice/wiki/TridionUI2012FunctionsForUseInHtmlTemplates#Update
+        private static string CP_FORMAT = "<!-- Start Component Presentation: {{\"ComponentID\" : \"{0}\", \"ComponentModified\" : \"{1}\", \"ComponentTemplateID\" : \"{2}\", \"ComponentTemplateModified\" : \"{3}\", \"IsRepositoryPublished\" : false}} -->";
         private static string FIELD_FORMAT = "<!-- Start Component Field: {{\"XPath\":\"{0}\"}} -->";
         private static string DATE_FORMAT = "s";
 
