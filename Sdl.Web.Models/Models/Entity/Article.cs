@@ -6,7 +6,7 @@ using System.Web;
 
 namespace Sdl.Web.Mvc.Models
 {
-    [SemanticEntity("http://www.sdl.com/tridion/schemas/core", "Article")]
+    [SemanticEntity("http://www.sdl.com/web/schemas/core", "Article")]
     [SemanticEntity("http://schema.org", "Article", "s")]
     public class Article : Entity
     {

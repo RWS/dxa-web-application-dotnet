@@ -48,17 +48,11 @@
     <Reference Include="DD4T.LogWrappers.Log4Net">
       <HintPath>..\packages\DD4TFramework.1.31.0\lib\DD4T.LogWrappers.Log4Net.dll</HintPath>
     </Reference>
-    <Reference Include="DD4T.Mvc">
-      <HintPath>..\packages\DD4T-MVC4.1.31.1\lib\DD4T.Mvc.dll</HintPath>
-    </Reference>
     <Reference Include="DD4T.Providers.SDLTridion2013">
       <HintPath>..\packages\DD4T-Tridion-2013sp1.1.31.1\lib\DD4T.Providers.SDLTridion2013.dll</HintPath>
     </Reference>
     <Reference Include="DD4T.Utils">
       <HintPath>..\packages\DD4TFramework.1.31.0\lib\DD4T.Utils.dll</HintPath>
-    </Reference>
-    <Reference Include="DD4T.Web">
-      <HintPath>..\packages\DD4TFramework.1.31.0\lib\DD4T.Web.dll</HintPath>
     </Reference>
     <Reference Include="HtmlAgilityPack">
       <HintPath>..\packages\HtmlAgilityPack.1.4.6\lib\Net45\HtmlAgilityPack.dll</HintPath>

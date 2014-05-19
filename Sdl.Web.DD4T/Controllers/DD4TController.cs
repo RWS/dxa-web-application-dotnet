@@ -1,5 +1,4 @@
 ﻿using DD4T.ContentModel;
-using DD4T.Mvc.Controllers;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
