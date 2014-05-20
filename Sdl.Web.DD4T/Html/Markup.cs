@@ -1,6 +1,7 @@
 ﻿using DD4T.ContentModel;
 using HtmlAgilityPack;
 using Sdl.Web.Mvc;
+using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,9 @@ namespace Sdl.Web.DD4T
         //TODO - this needs to be abstracted away...
         private static string PAGE_FORMAT = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\"}} -->";
         private static string PAGE_SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" defer=\"defer\" src=\"{0}/WebUI/Editors/SiteEdit/Views/Bootstrap/Bootstrap.aspx?mode=js\" id=\"tridion.siteedit\"></script>";
-        private static string REGION_FORMAT = "<!-- Start Region: {{\"title\" : \"{0}\", \"allowedComponentTypes\" : [{{\"schema\" : \"{1}\", \"template\" : \"{2}\"}}], \"minOccurs\" : {3}, \"maxOccurs\" : {4}}} -->";//TODO improve according to https://code.google.com/p/tridion-practice/wiki/TridionUI2012FunctionsForUseInHtmlTemplates#Update
+        private static string REGION_FORMAT = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], minOccurs: {2}{3}}} -->";
+        private static string COMPONENT_TYPE_FORMAT = "{2}{{schema: \"{0}\", template: \"{1}\"}}";
+        private static string MAXOCCURS_FORMAT = ", maxOccurs: {0}";
         private static string CP_FORMAT = "<!-- Start Component Presentation: {{\"ComponentID\" : \"{0}\", \"ComponentModified\" : \"{1}\", \"ComponentTemplateID\" : \"{2}\", \"ComponentTemplateModified\" : \"{3}\", \"IsRepositoryPublished\" : false}} -->";
         private static string FIELD_FORMAT = "<!-- Start Component Field: {{\"XPath\":\"{0}\"}} -->";
         private static string DATE_FORMAT = "yyyy-MM-ddTHH:mm:ss";
@@ -79,7 +82,13 @@ namespace Sdl.Web.DD4T
 
         public static MvcHtmlString Region(Region region)
         {
-            return new MvcHtmlString(String.Format("typeof=\"{0}\" resource=\"{1}\"", "Region", region.Name));
+            var data = string.Empty;
+            if (Configuration.IsStaging)
+            {
+                data = string.Format(" data-region=\"{0}\"", region.Name);
+            }
+
+            return new MvcHtmlString(String.Format("typeof=\"{0}\" resource=\"{1}\"{2}", "Region", region.Name, data));
         }
 
         public static MvcHtmlString GetInlineEditingBootstrap(IPage page)
@@ -92,11 +101,31 @@ namespace Sdl.Web.DD4T
             return null;
         }
 
+        public static MvcHtmlString Parse(MvcHtmlString result, Region region)
+        {
+            if (Configuration.IsStaging)
+            {
+                HtmlDocument html = new HtmlDocument();
+                html.LoadHtml(string.Format("<html>{0}</html>", result));
+                var entity = html.DocumentNode.SelectSingleNode("//*[@data-region]");
+                if (entity != null)
+                {
+                    string name = ReadAndRemoveAttribute(entity, "data-region");
+
+                    // TODO determine min occurs and max occurs for the region
+                    HtmlCommentNode regionData = html.CreateComment(MarkRegion(name));
+                    entity.ChildNodes.Insert(0, regionData);
+                }
+
+                return new MvcHtmlString(html.DocumentNode.SelectSingleNode("/html").InnerHtml);
+            }
+            return result;
+        }
+
         public static MvcHtmlString Parse(MvcHtmlString result, IComponentPresentation cp)
         {
             if (Configuration.IsStaging)
             {
-
                 //TODO abstract DD4T content model away, only process for preview requests
                 //TODO extend for embedded fields/embedded components
                 HtmlDocument html = new HtmlDocument();
@@ -135,6 +164,7 @@ namespace Sdl.Web.DD4T
                         }
                     }
                 }
+
                 return new MvcHtmlString(html.DocumentNode.SelectSingleNode("/html").InnerHtml);
             }
             return result;
@@ -149,6 +179,31 @@ namespace Sdl.Web.DD4T
                 return attr.Value;
             }
             return null;
+        }
+
+        private static string MarkRegion(string name, int minOccurs = 0, int maxOccurs = 0)
+        {
+            XpmRegion xpmRegion = SemanticMapping.GetXpmRegion(name);
+            StringBuilder allowedComponentTypes = new StringBuilder();
+            string separator = string.Empty;
+            bool first = true;
+            foreach (var componentTypes in xpmRegion.ComponentTypes)
+            {
+                allowedComponentTypes.AppendFormat(COMPONENT_TYPE_FORMAT, componentTypes.Schema, componentTypes.Template, separator);
+                if (first)
+                {
+                    first = false;
+                    separator = ", ";
+                }
+            }
+
+            string maxOccursElement = string.Empty;
+            if (maxOccurs > 0)
+            {
+                maxOccursElement = maxOccurs.ToString();
+            }
+
+            return string.Format(REGION_FORMAT, name, allowedComponentTypes, minOccurs, maxOccursElement);
         }
     }
 }
