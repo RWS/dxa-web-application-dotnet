@@ -10,10 +10,7 @@
     <div class="col-sm-9">
         @foreach (Sdl.Web.Mvc.Models.Region region in Model.Regions.Values)
         {
-            if (region.Name != "Hero")
-            {
-                @ViewBag.Renderer.Render(region, Html)
-            }
+            @ViewBag.Renderer.Render(region, Html, 9, new List<string>{"Hero"})
         }
     </div>
 </div>

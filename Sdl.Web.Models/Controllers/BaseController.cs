@@ -42,17 +42,19 @@ namespace Sdl.Web.Mvc
         }
 
         [HandleSectionError(View = "_SectionError")]
-        public virtual ActionResult Region(Region region)
+        public virtual ActionResult Region(Region region, int containerSize = 0)
         {
             ViewBag.Renderer = Renderer;
+            ViewBag.ContainerSize = containerSize;
             return GetRegionView(region);
         }
 
         [MapModel]
         [HandleSectionError(View = "_SectionError")]
-        public virtual ActionResult Entity(object entity)
+        public virtual ActionResult Entity(object entity, int containerSize = 0)
         {
             ViewBag.Renderer = Renderer;
+            ViewBag.ContainerSize = containerSize;
             return GetEntityView(entity);
         }
 

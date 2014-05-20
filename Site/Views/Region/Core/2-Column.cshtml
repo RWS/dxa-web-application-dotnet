@@ -6,7 +6,7 @@
         @for (int j = 0; j < 2 && (2 * i + j < Model.Items.Count); j++)
         {
         <div class="col-sm-6">
-            @ViewBag.Renderer.Render(Model.Items[i+j],Html)
+            @ViewBag.Renderer.Render(Model.Items[i+j],Html,6)
         </div>
         }
     </div>

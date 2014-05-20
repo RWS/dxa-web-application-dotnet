@@ -15,10 +15,10 @@ namespace Sdl.Web.DD4T
 {
     public class DD4TRenderer : BaseRenderer
     {
-        public override System.Web.Mvc.MvcHtmlString Render(object item, HtmlHelper helper)
+        public override System.Web.Mvc.MvcHtmlString Render(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
             var cp = item as IComponentPresentation;
-            if (cp!=null)
+            if (cp!=null && (excludedItems==null || !excludedItems.Contains(cp.ComponentTemplate.Title)))
             {
                 string controller = Configuration.GetEntityController();
                 string action = Configuration.GetEntityAction();
@@ -30,7 +30,7 @@ namespace Sdl.Web.DD4T
                 {
                     action = cp.ComponentTemplate.MetadataFields["action"].Value;
                 }
-                MvcHtmlString result = helper.Action(action, controller, new { entity = cp });
+                MvcHtmlString result = helper.Action(action, controller, new { entity = cp, containerSize = containerSize });
                 return Markup.Parse(result,cp);
             }
             return null;

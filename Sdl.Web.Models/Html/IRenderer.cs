@@ -10,7 +10,7 @@ namespace Sdl.Web.Mvc.Html
 {
     public interface IRenderer
     {
-        MvcHtmlString Render(object item, HtmlHelper helper);
-        MvcHtmlString Render(Region region, HtmlHelper helper);
+        MvcHtmlString Render(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null);
+        MvcHtmlString Render(Region region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null);
     }
 }
