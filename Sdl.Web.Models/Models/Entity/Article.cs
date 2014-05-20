@@ -6,8 +6,7 @@ using System.Web;
 
 namespace Sdl.Web.Mvc.Models
 {
-    [SemanticEntity("http://www.sdl.com/web/schemas/core", "Article")]
-    [SemanticEntity("http://schema.org", "Article", "s")]
+    [SemanticEntity(Vocab = "http://schema.org", EntityName= "Article", Prefix= "s")]
     public class Article : Entity
     {
         [SemanticProperty("s:headline")]
@@ -18,5 +17,7 @@ namespace Sdl.Web.Mvc.Models
         public string Description { get; set; }
         [SemanticProperty("s:articleBody")]
         public List<Paragraph> Paragraphs { get; set; }
+        [SemanticProperty(IgnoreMapping=true)]
+        public string TestNoMap { get; set; }
     }
 }

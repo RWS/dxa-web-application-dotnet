@@ -19,7 +19,7 @@
     }
     @if (@Model.Date!=null)
     {
-        <div class="meta">
+        <div class="meta" @Markup.Property(Model, "Date")>
             @Html.Date(Model.Date)
         </div>
     }
@@ -30,21 +30,21 @@
             {
                 if (para.Subheading!=null)
                 {
-                    <h3 @Markup.Property(Model, "Subheading")>@para.Subheading</h3>
+                    <h3 @Markup.Property(para, "Subheading")>@para.Subheading</h3>
                 }
                 if (para.Content!=null)
                 {
-                    <div @Markup.Property(Model,"Content")>
+                    <div @Markup.Property(para,"Content")>
                         @Html.Raw(para.Content)
                     </div>
                 }
                 if (para.Media!=null && para.Media is Image)
                 {
                     <figure>
-                        <img @Markup.Property(Model, "Media") src="@Html.FixedSizeImageUrl(((Image)para.Media).Url,460,true,2)">
+                        <img @Markup.Property(para, "Media") src="@Html.FixedSizeImageUrl(((Image)para.Media).Url,460,true,2)">
                         @if (para.Caption!=null)
                         {
-                            <figcaption @Markup.Property(Model, "Caption") >
+                            <figcaption @Markup.Property(para, "Caption") >
                                 @para.Caption
                             </figcaption>
                         }
