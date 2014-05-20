@@ -9,7 +9,7 @@ namespace Sdl.Web.Mvc.Models
     public class SemanticDefaultsAttribute : Attribute
     {
         public SemanticDefaultsAttribute() : this(Configuration.CoreVocabulary) { }
-        public SemanticDefaultsAttribute(string vocab) : this(vocab, "x") { }
+        public SemanticDefaultsAttribute(string vocab) : this(vocab, "") { }
         public SemanticDefaultsAttribute(string vocab, string prefix) : this(vocab, prefix, true) { }
         public SemanticDefaultsAttribute(string vocab, string prefix, bool mapAllProperties)
         {

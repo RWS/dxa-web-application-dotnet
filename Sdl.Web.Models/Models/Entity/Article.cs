@@ -6,7 +6,6 @@ using System.Web;
 
 namespace Sdl.Web.Mvc.Models
 {
-    [SemanticDefaults(Vocab = Configuration.CoreVocabulary, Prefix="x", MapAllProperties = true)]
     [SemanticEntity(Vocab = "http://schema.org", EntityName= "Article", Prefix= "s")]
     public class Article : Entity
     {

@@ -69,12 +69,15 @@ namespace Sdl.Web.Mvc.Mapping
 
         protected virtual Dictionary<string, List<SemanticProperty>> LoadPropertySemantics(Type type)
         {
-            SemanticDefaultsAttribute defaults = new SemanticDefaultsAttribute();
+            //The default prefix is empty - this implies that the prefix should be inherited from the parent object default prefix
+            var defaultPrefix = "";
+            var mapAllProperties = true;
             foreach (var attr in type.GetCustomAttributes())
             {
                 if (attr is SemanticDefaultsAttribute)
                 {
-                    defaults = (SemanticDefaultsAttribute)attr;
+                    defaultPrefix = ((SemanticDefaultsAttribute)attr).Prefix;
+                    mapAllProperties = ((SemanticDefaultsAttribute)attr).MapAllProperties;
                     break;
                 }
             }
@@ -84,48 +87,45 @@ namespace Sdl.Web.Mvc.Mapping
                 foreach (var pi in type.GetProperties())
                 {
                     var name = pi.Name;
-                    if (name != "Semantics")
+                    //flag to indicate we have processed a default mapping, or we explicitly should ignore this property when mapping
+                    bool ignore = false;
+                    foreach (var attr in pi.GetCustomAttributes(true))
                     {
-                        //flag to indicate we have processed a default mapping, or we explicitly should ignore this property when mapping
-                        bool ignore = false;
-                        foreach (var attr in pi.GetCustomAttributes(true))
+                        if (attr is SemanticPropertyAttribute)
                         {
-                            if (attr is SemanticPropertyAttribute)
+                            var propertySemantics = (SemanticPropertyAttribute)attr;
+                            if (!propertySemantics.IgnoreMapping)
                             {
-                                var propertySemantics = (SemanticPropertyAttribute)attr;
-                                if (!propertySemantics.IgnoreMapping)
+                                if (!result.ContainsKey(name))
                                 {
-                                    if (!result.ContainsKey(name))
-                                    {
-                                        result.Add(name, new List<SemanticProperty>());
-                                    }
-                                    var bits = ((SemanticPropertyAttribute)attr).PropertyName.Split(':');
-                                    if (bits.Length > 1)
-                                    {
-                                        result[name].Add(new SemanticProperty(bits[0], bits[1]));
-                                    }
-                                    else
-                                    {
-                                        //Add the default prefix and set the ignore flag - so no need to apply default mapping using property name
-                                        result[name].Add(new SemanticProperty(defaults.Prefix, bits[0]));
-                                        ignore = true;
-                                    }
+                                    result.Add(name, new List<SemanticProperty>());
+                                }
+                                var bits = ((SemanticPropertyAttribute)attr).PropertyName.Split(':');
+                                if (bits.Length > 1)
+                                {
+                                    result[name].Add(new SemanticProperty(bits[0], bits[1]));
                                 }
                                 else
                                 {
+                                    //Add the default prefix and set the ignore flag - so no need to apply default mapping using property name
+                                    result[name].Add(new SemanticProperty(defaultPrefix, bits[0]));
                                     ignore = true;
                                 }
                             }
-                        }
-                        if (!ignore && defaults.MapAllProperties)
-                        {
-                            if (!result.ContainsKey(name))
+                            else
                             {
-                                result.Add(name, new List<SemanticProperty>());
+                                ignore = true;
                             }
-                            //Add default semantics 
-                            result[name].Add(GetDefaultPropertySemantics(pi, defaults.Prefix));
                         }
+                    }
+                    if (!ignore && mapAllProperties)
+                    {
+                        if (!result.ContainsKey(name))
+                        {
+                            result.Add(name, new List<SemanticProperty>());
+                        }
+                        //Add default semantics 
+                        result[name].Add(GetDefaultPropertySemantics(pi, defaultPrefix));
                     }
                 
                 }

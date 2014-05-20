@@ -7,8 +7,9 @@ namespace Sdl.Web.Mvc.Models
 {
     public class Entity
     {
-        public Semantics Semantics { get; set; }
+        [SemanticProperty(IgnoreMapping = true)]
         public Dictionary<string, string> EntityData { get; set; }
+        [SemanticProperty(IgnoreMapping = true)]
         public Dictionary<string, string> PropertyData { get; set; }
     }
 }

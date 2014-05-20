@@ -83,8 +83,8 @@ namespace Sdl.Web.Mvc.Mapping
             {
                 // TODO add proper Equals implementation in FieldSemantics
                 if (property.Property.Equals(fieldSemantics.Property) &&
-                    property.Prefix.Equals(fieldSemantics.Prefix) &&
-                    property.Entity.Equals(fieldSemantics.Entity))
+                    property.Prefix.Equals(fieldSemantics.Prefix) /*&& -- removed as this is breaking on embedded fields where the property.Entity is something like EmbeddedLink
+                    property.Entity.Equals(fieldSemantics.Entity)*/)
                 {
                     return true;
                 }
