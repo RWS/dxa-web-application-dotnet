@@ -23,22 +23,24 @@
             @Html.Date(Model.Date)
         </div>
     }
-    <div class="content" @Markup.Property(Model, "ArticleBody")>
+    <div class="content">
         @if (Model.Paragraphs!=null)
         {
+            int i=0;
             foreach (var para in Model.Paragraphs)
             {
-                if (para.Subheading!=null)
+                <div @Markup.Property(Model, "Paragraphs",i++)>
+                @if (para.Subheading!=null)
                 {
                     <h3 @Markup.Property(para, "Subheading")>@para.Subheading</h3>
                 }
-                if (para.Content!=null)
+                @if (para.Content!=null)
                 {
                     <div @Markup.Property(para,"Content")>
                         @Html.Raw(para.Content)
                     </div>
                 }
-                if (para.Media!=null && para.Media is Image)
+                @if (para.Media!=null && para.Media is Image)
                 {
                     <figure @Markup.Property(para, "Media")>
                         @Html.Image(((Image)para.Media))
@@ -50,6 +52,7 @@
                         }
                     </figure>
                 }
+                </div>
             }
         }
     </div>

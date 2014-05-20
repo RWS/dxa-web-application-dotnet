@@ -48,6 +48,10 @@ namespace Sdl.Web.Mvc.Html
 
         public static MvcHtmlString Image(this HtmlHelper helper, Image image, double aspect = 1.62, double fillFactor = 1, string cssClass = null)//TODO add sizing hint?
         {
+            if (image==null || String.IsNullOrEmpty(image.Url))
+            {
+                return null;
+            }
             //We read the container size (based on 12 column grid) from the view bag
             //This means views can be independent of where they are rendered
             int containerSize = helper.ViewBag.ContainerSize;
@@ -58,7 +62,7 @@ namespace Sdl.Web.Mvc.Html
             switch (WebRequestContext.ScreenWidth)
             {
                 case ScreenWidth.ExtraSmall:
-                    //Extra small screens are only one column
+                     //Extra small screens are only one column
                     containerSize = 12;
                     break;
                 case ScreenWidth.Small:
