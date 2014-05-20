@@ -43,12 +43,13 @@ namespace Sdl.Web.Mvc
             get
             {
                 var val = GetFromContextStore("ScreenWidth");
-                return val == null ? (ScreenWidth)AddToContextStore("ScreenWidth", GetScreenWidth()) : (ScreenWidth)val;
+                return val == null ? (ScreenWidth)AddToContextStore("ScreenWidth", CalculateScreenWidth()) : (ScreenWidth)val;
             }
         }
 
-        protected static ScreenWidth GetScreenWidth()
+        protected static ScreenWidth CalculateScreenWidth()
         {
+            //TODO move these hardcoded values into config published from CMS (which is also used as input for HTML LESS compilation)
             int width = ContextEngine.Browser.DisplayWidth;
             if (width < 480)
             {

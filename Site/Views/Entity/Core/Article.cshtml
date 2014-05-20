@@ -4,8 +4,8 @@
     {
         <div id="carousel-large" class="carousel">
             <div class="carousel-inner">
-                <div class="item active">
-                    <img class="center-block" @Markup.Property(Model, "Image") src="@Html.FixedSizeImageUrl(Model.Image.Url, 285, true, 3.3)">
+                <div class="item active" @Markup.Property(Model, "Image")>
+                    @Html.Image(Model.Image, 3.3, 1, "center-block")
                     <div class="overlay overlay-tl ribbon">
                         <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
                     </div>
@@ -40,8 +40,8 @@
                 }
                 if (para.Media!=null && para.Media is Image)
                 {
-                    <figure>
-                        <img @Markup.Property(para, "Media") src="@Html.FixedSizeImageUrl(((Image)para.Media).Url,460,true,2)">
+                    <figure @Markup.Property(para, "Media")>
+                        @Html.Image(((Image)para.Media))
                         @if (para.Caption!=null)
                         {
                             <figcaption @Markup.Property(para, "Caption") >

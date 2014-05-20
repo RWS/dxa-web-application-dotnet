@@ -16,10 +16,7 @@
             {
                 var item = Model.ItemListElements[i];
                 <div class="item @(i==0?"active":"")" @Markup.Property(Model, "ItemListElements", i)>
-                    @if (item is Teaser)
-                    {
-                        Html.RenderPartial("Core/Partials/TeaserHero-ImageOverlay", item);
-                    }
+                    @Html.Partial("Core/Partials/TeaserHero-ImageOverlay", item)
                 </div>
             }
         }
