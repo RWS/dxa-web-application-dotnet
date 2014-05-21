@@ -1,13 +1,9 @@
-﻿using Sdl.Web.Mvc.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Web;
 using System.Web.Compilation;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
@@ -21,16 +17,24 @@ namespace Sdl.Web.Mvc
     {
         public static IStaticFileManager StaticFileManager { get; set; }
         public static Dictionary<string, Localization> Localizations { get; set; }
+        
+        // page title and meta field mappings
+        public static string StandardMetadataXmlFieldName = "standardMeta";
+        public static string StandardMetadataTitleXmlFieldName = "name";
+        public static string StandardMetadataDescriptionXmlFieldName = "description";
+        public static string RegionForPageTitleComponent = "Main";
+        public static string ComponentXmlFieldNameForPageTitle = "headline";
+
         public const string VersionRegex = "(v\\d*.\\d*)";
         public const string SystemFolder = "system";
         public const string CoreModuleName = "core";
         public const string CoreVocabulary = "http://www.sdl.com/web/schemas/core";
+        
         private static string _currentVersion;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _localConfiguration;
-        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _globalConfiguration;
-
+        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _globalConfiguration;        
         
-        private static Dictionary<string, Type> _viewModelRegistry = null;
+        private static Dictionary<string, Type> _viewModelRegistry;
         public static Dictionary<string, Type> ViewModelRegistry
         {
             get
@@ -78,7 +82,7 @@ namespace Sdl.Web.Mvc
                 return _globalConfiguration;
             }
         }
-        private static object configLock = new object();
+        private static readonly object ConfigLock = new object();
         
         /// <summary>
         /// Gets a (global) configuration setting
@@ -154,7 +158,7 @@ namespace Sdl.Web.Mvc
         public static void Load(string applicationRoot)
         {
             //We are updating a static variable, so need to be thread safe
-            lock (configLock)
+            lock (ConfigLock)
             {
                 //Ensure that the config files have been written to disk
                 StaticFileManager.CreateStaticAssets(applicationRoot);

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Web.Mvc;
 using DD4T.ContentModel;
 using Sdl.Web.DD4T.Mapping;
 using Sdl.Web.Mvc;
@@ -11,6 +13,7 @@ namespace Sdl.Web.DD4T
 {
     public class DD4TContentProvider : BaseContentProvider
     {
+        private ResourceProvider _resourceProvider;
         public ExtensionlessLinkFactory LinkFactory { get; set; }
 
         public DD4TContentProvider()
@@ -28,13 +31,14 @@ namespace Sdl.Web.DD4T
             IPage page = data as IPage;
             if (page != null)
             {
+                string postfix = String.Format(" {0} {1}", GetResource("custom.pageTitleSeparator"), GetResource("custom.pageTitlePostfix"));
+
                 // strip possible numbers from title
                 string title = Regex.Replace(page.Title, @"^\d{3}\s", String.Empty);
-                // Index is not a proper title for an HTML page
-                if (title.ToLowerInvariant().Equals("index"))
+                // Index and Default are not a proper titles for an HTML page
+                if (title.ToLowerInvariant().Equals("index") || title.ToLowerInvariant().Equals("default"))
                 {
-                    // TODO get from configuration somewhere
-                    title = "Saint John";
+                    title = GetResource("custom.defaultPageTitle") + postfix;
                 }
 
                 WebPage model = new WebPage { Id = page.Id, Title = title };
@@ -48,33 +52,30 @@ namespace Sdl.Web.DD4T
                     }
                     model.Regions[regionName].Items.Add(cp);
 
-                    // determine title and description from first component in main region
-                    if (first && regionName.Equals("Main"))
+                    // determine title and description from first component in 'main' region
+                    if (first && regionName.Equals(Configuration.RegionForPageTitleComponent))
                     {
                         first = false;
-
-                        // TODO use semantic mapping
                         IFieldSet metadata = cp.Component.MetadataFields;
                         IFieldSet fields = cp.Component.Fields;
                         // determine title
-                        if (metadata.ContainsKey("standardMeta") && metadata["standardMeta"].EmbeddedValues.Count > 0)
+                        if (metadata.ContainsKey(Configuration.StandardMetadataXmlFieldName) && metadata[Configuration.StandardMetadataXmlFieldName].EmbeddedValues.Count > 0)
                         {
-                            IFieldSet standardMeta = metadata["standardMeta"].EmbeddedValues[0];
-                            if (standardMeta.ContainsKey("name"))
+                            IFieldSet standardMeta = metadata[Configuration.StandardMetadataXmlFieldName].EmbeddedValues[0];
+                            if (standardMeta.ContainsKey(Configuration.StandardMetadataTitleXmlFieldName))
                             {
-                                model.Title = standardMeta["name"].Value;
+                                model.Title = standardMeta[Configuration.StandardMetadataTitleXmlFieldName].Value + postfix;
                             }
 
                             // determine description
-                            if (standardMeta.ContainsKey("description"))
+                            if (standardMeta.ContainsKey(Configuration.StandardMetadataDescriptionXmlFieldName))
                             {
-                                model.Meta.Add("description", standardMeta["description"].Value);
+                                model.Meta.Add("description", standardMeta[Configuration.StandardMetadataDescriptionXmlFieldName].Value);
                             }
                         }
-                        else if (fields.ContainsKey("headline"))
+                        else if (fields.ContainsKey(Configuration.ComponentXmlFieldNameForPageTitle))
                         {
-                            // TODO use semantic mapping
-                            model.Title = fields["headline"].Value;
+                            model.Title = fields[Configuration.ComponentXmlFieldNameForPageTitle].Value + postfix;
                         }
                     }
                 }
@@ -159,6 +160,15 @@ namespace Sdl.Web.DD4T
                 return model;
             }
             throw new Exception(String.Format("Cannot create model for class {0}. Expecting IPage.", data.GetType().FullName));
+        }
+
+        private string GetResource(string name)
+        {
+            if (_resourceProvider == null)
+            {
+                _resourceProvider = new ResourceProvider();  
+            }
+            return _resourceProvider.GetObject(name, CultureInfo.CurrentUICulture).ToString();
         }
 
         private static string GetRegionFromComponentPresentation(IComponentPresentation cp)
