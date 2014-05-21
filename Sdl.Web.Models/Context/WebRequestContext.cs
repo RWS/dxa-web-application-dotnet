@@ -1,4 +1,5 @@
-﻿using Sdl.Web.Tridion.Context;
+﻿using Sdl.Web.Mvc.Context;
+using Sdl.Web.Tridion.Context;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,17 +50,16 @@ namespace Sdl.Web.Mvc
 
         protected static ScreenWidth CalculateScreenWidth()
         {
-            //TODO move these hardcoded values into config published from CMS (which is also used as input for HTML LESS compilation)
             int width = ContextEngine.Browser.DisplayWidth;
-            if (width < 480)
+            if (width < ContextConfiguration.SmallScreenBreakpoint)
             {
                 return ScreenWidth.ExtraSmall;
             }
-            if (width < 940)
+            if (width < ContextConfiguration.MediumScreenBreakpoint)
             {
                 return ScreenWidth.Small;
             }
-            if (width < 1140)
+            if (width < ContextConfiguration.LargeScreenBreakpoint)
             {
                 return ScreenWidth.Medium;
             }
