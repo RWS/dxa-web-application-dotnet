@@ -53,7 +53,9 @@
     <Compile Include="Configuration\Configuration.cs" />
     <Compile Include="Configuration\Localization.cs" />
     <Compile Include="Errors\HandleSectionErrorAttribute.cs" />
+    <Compile Include="Mapping\ComponentType.cs" />
     <Compile Include="Mapping\MapModelAttribute.cs" />
+    <Compile Include="Mapping\XpmRegion.cs" />
     <Compile Include="Models\Page\Navigation.cs" />
     <Compile Include="Configuration\ResourceProviderFactory.cs" />
     <Compile Include="Configuration\ResourceProvider.cs" />

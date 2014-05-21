@@ -1,21 +1,15 @@
-﻿using DD4T.ContentModel;
-using DD4T.Utils;
-using HtmlAgilityPack;
+﻿using System.Web.Mvc;
+using System.Web.Mvc.Html;
+using DD4T.ContentModel;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Html;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Mvc;
-using System.Web.Mvc.Html;
+using Sdl.Web.Mvc.Models;
 
 namespace Sdl.Web.DD4T
 {
     public class DD4TRenderer : BaseRenderer
     {
-        public override System.Web.Mvc.MvcHtmlString Render(object item, HtmlHelper helper)
+        public override MvcHtmlString Render(object item, HtmlHelper helper)
         {
             var cp = item as IComponentPresentation;
             if (cp!=null)
@@ -36,6 +30,17 @@ namespace Sdl.Web.DD4T
             return null;
         }
 
-
+        public override MvcHtmlString Render(Region region, HtmlHelper helper)
+        {
+            if (region != null)
+            {
+                string controller = Configuration.GetRegionController();
+                string action = Configuration.GetRegionAction();
+                MvcHtmlString result = helper.Action(action, controller, new { Region = region });
+                return Markup.Parse(result, region);
+            }
+            return null;
+            
+        }
     }
 }

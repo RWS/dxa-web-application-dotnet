@@ -51,8 +51,21 @@ namespace Sdl.Web.Mvc.Mapping
             }
         }
 
+        public static Dictionary<string, List<XpmRegion>> XpmRegions
+        {
+            get
+            {
+                if (_xpmRegions == null)
+                {
+                    LoadMapping();
+                }
+                return _xpmRegions;
+            }
+        }
+
         private static Dictionary<string, List<SemanticSchema>> _semanticMap;
         private static List<SemanticVocabulary> _semanticVocabularies;
+        private static Dictionary<string, List<XpmRegion>> _xpmRegions; 
         private static readonly object MappingLock = new object();
 
         /// <summary>
@@ -100,6 +113,40 @@ namespace Sdl.Web.Mvc.Mapping
             Log.Error(ex);
             // TODO should we throw the exception here or return the default vocabulary?
             throw ex;
+        }
+
+        /// <summary>
+        /// Gets a XPM region by name.
+        /// </summary>
+        /// <param name="name">The region name</param>
+        /// <param name="module">The module (eg "Search") - if none specified this defaults to "Core"</param>
+        /// <returns>The XPM region matching the name for the given module</returns>
+        public static XpmRegion GetXpmRegion(string name, string module = Configuration.CoreModuleName)
+        {
+            return GetXpmRegion(XpmRegions, name, module);
+        }
+
+        private static XpmRegion GetXpmRegion(IReadOnlyDictionary<string, List<XpmRegion>> regions, string name, string type)
+        {
+            Exception ex;
+            if (regions.ContainsKey(type))
+            {
+                var regionsList = regions[type];
+                XpmRegion region = regionsList.Find(r => r.Region.Equals(name));
+                if (region != null)
+                {
+                    return region;
+                }
+                ex = new Exception(string.Format("XPM Region '{0}' for module '{1}' does not exist.", name, type));
+            }
+            else
+            {
+                ex = new Exception(string.Format("XPM Regions for module '{0}' do not exist.", type));
+            }
+
+            Log.Error(ex);
+            // TODO should we throw the exception here or return null?
+            throw ex;            
         }
 
         /// <summary>
@@ -155,6 +202,7 @@ namespace Sdl.Web.Mvc.Mapping
 
                 _semanticMap = new Dictionary<string, List<SemanticSchema>>();
                 _semanticVocabularies = new List<SemanticVocabulary>();
+                _xpmRegions = new Dictionary<string, List<XpmRegion>>();
 
                 Log.Debug("Loading semantic mappings for default localization");
                 var path = String.Format("{0}{1}/{2}", applicationRoot, Configuration.DefaultLocalization, Configuration.AddVersionToPath(Configuration.SystemFolder + "/mappings/_all.json"));
@@ -178,7 +226,7 @@ namespace Sdl.Web.Mvc.Mapping
                             else
                             {
                                 var bits = type.Split('.');
-                                // we are only interested in schemas at the moment
+                                // we are only interested in schemas and regions at the moment
                                 if (bits[1].Equals("schemas"))
                                 {
                                     if (!_semanticMap.ContainsKey(bits[0]))
@@ -186,6 +234,14 @@ namespace Sdl.Web.Mvc.Mapping
                                         _semanticMap.Add(bits[0], new List<SemanticSchema>());
                                     }
                                     _semanticMap[bits[0]] = GetSchemasFromFile(configPath);
+                                }
+                                else if (bits[1].Equals("regions"))
+                                {
+                                    if (!_xpmRegions.ContainsKey(bits[0]))
+                                    {
+                                        _xpmRegions.Add(bits[0], new List<XpmRegion>());
+                                    }
+                                    _xpmRegions[bits[0]] = GetRegionsFromFile(configPath);
                                 }
                             }
                         }
@@ -201,6 +257,11 @@ namespace Sdl.Web.Mvc.Mapping
                 }
 
             }
+        }
+
+        private static List<XpmRegion> GetRegionsFromFile(string file)
+        {
+            return new JavaScriptSerializer().Deserialize<List<XpmRegion>>(File.ReadAllText(file));
         }
 
         private static List<SemanticSchema> GetSchemasFromFile(string file)
