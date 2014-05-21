@@ -13,7 +13,7 @@ namespace Sdl.Web.Mvc
     /// </summary>
     public class WebRequestContext
     {
-        private static int maxWidth = 940;
+        private static int maxWidth = 1024;
         public static Localization Localization
         {
             get
@@ -29,13 +29,41 @@ namespace Sdl.Web.Mvc
                 return (ContextEngine)GetFromContextStore("ContextEngine") ?? (ContextEngine)AddToContextStore("ContextEngine", new ContextEngine());
             }
         }
-
+        
         public static int MaxMediaWidth
         {
             get
             {
-                return (int?)GetFromContextStore("MaxMediaWidth") ?? (int)AddToContextStore("MaxMediaWidth", ContextEngine.Device.PixelRatio * Math.Max(ContextEngine.Browser.DisplayWidth, maxWidth));
+                return (int?)GetFromContextStore("MaxMediaWidth") ?? (int)AddToContextStore("MaxMediaWidth", ContextEngine.Device.PixelRatio * Math.Min(ContextEngine.Browser.DisplayWidth, maxWidth));
             }
+        }
+
+        public static ScreenWidth ScreenWidth
+        {
+            get
+            {
+                var val = GetFromContextStore("ScreenWidth");
+                return val == null ? (ScreenWidth)AddToContextStore("ScreenWidth", CalculateScreenWidth()) : (ScreenWidth)val;
+            }
+        }
+
+        protected static ScreenWidth CalculateScreenWidth()
+        {
+            //TODO move these hardcoded values into config published from CMS (which is also used as input for HTML LESS compilation)
+            int width = ContextEngine.Browser.DisplayWidth;
+            if (width < 480)
+            {
+                return ScreenWidth.ExtraSmall;
+            }
+            if (width < 940)
+            {
+                return ScreenWidth.Small;
+            }
+            if (width < 1140)
+            {
+                return ScreenWidth.Medium;
+            }
+            return ScreenWidth.Large;
         }
 
         public static bool IsDeveloperMode

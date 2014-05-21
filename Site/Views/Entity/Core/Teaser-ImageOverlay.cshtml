@@ -4,14 +4,14 @@
     {
         <a href="@Model.Link.Url" title="@Model.Link.AlternateText">
             <div @Markup.Property(Model, "Image")>
-                <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 425, true)">
+                @Html.Image(Model.Image)
             </div>
         </a>
     }
     else
     {
         <div @Markup.Property(Model,"Image")>
-            <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 425, true)">
+            @Html.Image(Model.Image)
         </div>
     }
     <h3 class="overlay overlay-top ribbon" @Markup.Property(Model, "Headline")>@Model.Headline</h3>

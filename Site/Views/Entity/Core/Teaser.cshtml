@@ -3,7 +3,7 @@
     @if (Model.Image != null)
     {
         <div class="feature">
-			<img src="@Html.FixedSizeImageUrl(Model.Image.Url, 350, true)">
+			@Html.Image(Model.Image)
 		</div>
     }
     <h2 @Markup.Property(Model,"Headline")>@Model.Headline</h2>

@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.Web;
 using System.Globalization;
+using Sdl.Web.Mvc.Models;
 
 namespace Sdl.Web.Mvc.Html
 {
     public static class HtmlHelperExtensions
     {
-        public static string ResponsiveImageUrl(this HtmlHelper helper, string url, int baseSize, bool fixHeight = false)
+        /*public static string ResponsiveImageUrl(this HtmlHelper helper, string url, int baseSize, bool fixHeight = false)
         {
             double maxWidth = WebRequestContext.MaxMediaWidth;
             int factor = (int)Math.Ceiling(maxWidth / baseSize);
@@ -27,7 +28,7 @@ namespace Sdl.Web.Mvc.Html
             int height = fixHeight ? size : (int) (size / aspect);
             int width = fixHeight ? (int)(size * aspect) : size;
             return String.Format("/cid/scale/{0}x{1}/source/site{2}", width, height, url);
-        }
+        }*/
 
         public static string Date(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
         {
@@ -43,5 +44,7 @@ namespace Sdl.Web.Mvc.Html
         {
             return httpContext.GetGlobalResourceObject(CultureInfo.CurrentUICulture.ToString(), resourceName);
         }
+
+        
     }
 }

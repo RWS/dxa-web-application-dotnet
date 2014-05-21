@@ -1,7 +1,7 @@
 ﻿@model Sdl.Web.Mvc.Models.Teaser
 @if (Model.Image!=null)
 {
-    <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 285, true, 3.3)">
+    @Html.Image(Model.Image, 3.3)
 }
 @if (Model.Headline!=null || Model.Text!=null)
 {

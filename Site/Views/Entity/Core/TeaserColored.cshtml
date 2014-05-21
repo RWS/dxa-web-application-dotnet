@@ -3,7 +3,9 @@
     <h3 @Markup.Property(Model,"Headline")>@Model.Headline</h3>
     @if (Model.Image != null)
     {
-    <img src="@Html.FixedSizeImageUrl(Model.Image.Url, 100, true)" style="float:right;">
+        <div @Markup.Property(Model,"Image") style="float:right;">
+            @Html.Image(Model.Image,"160")
+        </div>
 	}
     <p @Markup.Property(Model, "Text")>@Model.Text</p>
     @if (Model.Link != null)
