@@ -29,6 +29,7 @@ namespace Sdl.Web.Mvc
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _localConfiguration;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _globalConfiguration;
 
+        
         private static Dictionary<string, Type> _viewModelRegistry = null;
         public static Dictionary<string, Type> ViewModelRegistry
         {

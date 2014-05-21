@@ -4,7 +4,7 @@
     @if (Model.Image != null)
     {
         <div @Markup.Property(Model,"Image") style="float:right;">
-            @Html.Image(Model.Image,1.62,0.5)
+            @Html.Image(Model.Image,"160")
         </div>
 	}
     <p @Markup.Property(Model, "Text")>@Model.Text</p>

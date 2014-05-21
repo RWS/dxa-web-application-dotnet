@@ -54,6 +54,8 @@
     <Compile Include="Configuration\Configuration.cs" />
     <Compile Include="Configuration\Enumerations.cs" />
     <Compile Include="Configuration\Localization.cs" />
+    <Compile Include="Context\ContextConfiguration.cs" />
+    <Compile Include="Context\ContextHelper.cs" />
     <Compile Include="Errors\HandleSectionErrorAttribute.cs" />
     <Compile Include="Mapping\MapModelAttribute.cs" />
     <Compile Include="Models\Page\Navigation.cs" />
