@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Web.Compilation;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
+using Sdl.Web.Mvc.Context;
 
 namespace Sdl.Web.Mvc
 {
@@ -242,7 +243,19 @@ namespace Sdl.Web.Mvc
                 }
                 Localizations = relevantLocalizations;
                 Log.Debug("The following localizations are active for this site: {0}", String.Join(", ", Localizations.Select(l=>l.Key).ToArray()));
+                InitializeContextConfiguration();
             }            
+        }
+
+        private static void InitializeContextConfiguration()
+        {
+            //TODO publish from CMS to ensure is in sync with LESS variables etc.
+            ContextConfiguration.ImageWidths =new List<int> {160,320,640,1024,2048};
+            ContextConfiguration.GridSize = 12;
+            ContextConfiguration.LargeScreenBreakpoint = 1140;
+            ContextConfiguration.MediumScreenBreakpoint = 940;
+            ContextConfiguration.SmallScreenBreakpoint = 480;
+            ContextConfiguration.ImageResizeRoute = "cid";
         }
 
         private static Dictionary<string, string> GetConfigFromFile(string file)

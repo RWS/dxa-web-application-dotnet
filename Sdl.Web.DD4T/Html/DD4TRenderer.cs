@@ -5,6 +5,7 @@ using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Html;
 using Sdl.Web.Mvc.Models;
 using System.Collections.Generic;
+using Sdl.Web.Mvc.Context;
 
 namespace Sdl.Web.DD4T
 {
@@ -25,7 +26,16 @@ namespace Sdl.Web.DD4T
                 {
                     action = cp.ComponentTemplate.MetadataFields["action"].Value;
                 }
-                MvcHtmlString result = helper.Action(action, controller, new { entity = cp, containerSize = containerSize });
+                int parentContainerSize = helper.ViewBag.ContainerSize;
+                if (parentContainerSize == 0)
+                {
+                    parentContainerSize = ContextConfiguration.GridSize;
+                }
+                if (containerSize == 0)
+                {
+                    containerSize = ContextConfiguration.GridSize;
+                }
+                MvcHtmlString result = helper.Action(action, controller, new { entity = cp, containerSize = (containerSize*parentContainerSize)/ContextConfiguration.GridSize });
                 return Markup.Parse(result,cp);
             }
             return null;
@@ -37,6 +47,10 @@ namespace Sdl.Web.DD4T
             {
                 string controller = Configuration.GetRegionController();
                 string action = Configuration.GetRegionAction();
+                if (containerSize == 0)
+                {
+                    containerSize = ContextConfiguration.GridSize;
+                }
                 MvcHtmlString result = helper.Action(action, controller, new { Region = region, containerSize = containerSize });
                 return Markup.Parse(result, region);
             }
