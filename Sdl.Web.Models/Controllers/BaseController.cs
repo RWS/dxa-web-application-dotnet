@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
-using System.Web.Script.Serialization;
-using Sdl.Web.Mvc.Models;
 using Sdl.Web.Mvc.Html;
 using Sdl.Web.Mvc.Mapping;
-using System.Web;
+using Sdl.Web.Mvc.Models;
 
 namespace Sdl.Web.Mvc
 {
@@ -26,11 +22,11 @@ namespace Sdl.Web.Mvc
         {
             //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
             //1. Try adding the default extension, so /news becomes /news.html
-            var model = this.GetModelForPage(ParseUrl(pageUrl));
-            if (model == null && !pageUrl.EndsWith("/") && pageUrl.LastIndexOf(".") <= pageUrl.LastIndexOf("/"))
+            var model = GetModelForPage(ParseUrl(pageUrl));
+            if (model == null && !pageUrl.EndsWith("/") && pageUrl.LastIndexOf(".", StringComparison.Ordinal) <= pageUrl.LastIndexOf("/", StringComparison.Ordinal))
             {
                 //2. Try adding the default page, so /news becomes /news/index.html
-                model = this.GetModelForPage(ParseUrl(pageUrl + "/"));
+                model = GetModelForPage(ParseUrl(pageUrl + "/"));
             }
             if (model == null)
             {
@@ -61,15 +57,15 @@ namespace Sdl.Web.Mvc
         public virtual string ParseUrl(string url)
         {
             var defaultPageFileName = Configuration.GetDefaultPageName();
-            return string.IsNullOrEmpty(url) ? defaultPageFileName : (url.EndsWith("/") ? url + defaultPageFileName : url += Configuration.GetDefaultExtension());
+            return String.IsNullOrEmpty(url) ? defaultPageFileName : (url.EndsWith("/") ? url + defaultPageFileName : url += Configuration.GetDefaultExtension());
         }
 
         protected virtual ViewResult GetPageView(object page)
         {
             var viewName = ContentProvider.GetPageViewName(page);
             var subPages = new Dictionary<string, object>();
-            var headerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/header")));
-            var footerModel = this.GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/footer")));
+            var headerModel = GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/header")));
+            var footerModel = GetModelForPage(Configuration.LocalizeUrl(ParseUrl("system/include/footer")));
             
             
             if (headerModel != null)
@@ -81,12 +77,12 @@ namespace Sdl.Web.Mvc
                 subPages.Add("Footer", footerModel);
             }
             var model = ContentProvider.CreatePageModel(page, subPages, viewName);
-            return base.View(viewName, model);
+            return View(viewName, model);
         }
 
         protected virtual ViewResult GetRegionView(Region region)
         {
-            return base.View(GetRegionViewName(region), region);
+            return View(GetRegionViewName(region), region);
         }
 
         protected virtual string GetRegionViewName(Region region)

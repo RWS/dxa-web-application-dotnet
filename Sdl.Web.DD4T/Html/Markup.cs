@@ -1,15 +1,15 @@
-﻿using DD4T.ContentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Web;
+using System.Web.Mvc;
+using DD4T.ContentModel;
 using HtmlAgilityPack;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Web;
-using System.Web.Mvc;
 
 namespace Sdl.Web.DD4T
 {
@@ -17,14 +17,14 @@ namespace Sdl.Web.DD4T
     public static class Markup
     {
         //TODO - this needs to be abstracted away...
-        private static string PAGE_FORMAT = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\"}} -->";
-        private static string PAGE_SCRIPT = "<script type=\"text/javascript\" language=\"javascript\" defer=\"defer\" src=\"{0}/WebUI/Editors/SiteEdit/Views/Bootstrap/Bootstrap.aspx?mode=js\" id=\"tridion.siteedit\"></script>";
-        private static string REGION_FORMAT = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], minOccurs: {2}{3}}} -->";
-        private static string COMPONENT_TYPE_FORMAT = "{2}{{schema: \"{0}\", template: \"{1}\"}}";
-        private static string MAXOCCURS_FORMAT = ", maxOccurs: {0}";
-        private static string CP_FORMAT = "<!-- Start Component Presentation: {{\"ComponentID\" : \"{0}\", \"ComponentModified\" : \"{1}\", \"ComponentTemplateID\" : \"{2}\", \"ComponentTemplateModified\" : \"{3}\", \"IsRepositoryPublished\" : false}} -->";
-        private static string FIELD_FORMAT = "<!-- Start Component Field: {{\"XPath\":\"{0}\"}} -->";
-        private static string DATE_FORMAT = "yyyy-MM-ddTHH:mm:ss";
+        private const string PageFormat = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\"}} -->";
+        private const string PageScript = "<script type=\"text/javascript\" language=\"javascript\" defer=\"defer\" src=\"{0}/WebUI/Editors/SiteEdit/Views/Bootstrap/Bootstrap.aspx?mode=js\" id=\"tridion.siteedit\"></script>";
+        private const string RegionFormat = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], minOccurs: {2}{3}}} -->";
+        private const string ComponentTypeFormat = "{2}{{schema: \"{0}\", template: \"{1}\"}}";
+        private const string MaxOccursFormat = ", maxOccurs: {0}";
+        private const string CpFormat = "<!-- Start Component Presentation: {{\"ComponentID\" : \"{0}\", \"ComponentModified\" : \"{1}\", \"ComponentTemplateID\" : \"{2}\", \"ComponentTemplateModified\" : \"{3}\", \"IsRepositoryPublished\" : false}} -->";
+        private const string FieldFormat = "<!-- Start Component Field: {{\"XPath\":\"{0}\"}} -->";
+        private const string DateFormat = "yyyy-MM-ddTHH:mm:ss";
 
         public static MvcHtmlString Entity(Entity entity)
         {
@@ -83,10 +83,10 @@ namespace Sdl.Web.DD4T
 
         public static MvcHtmlString Region(Region region)
         {
-            var data = string.Empty;
+            var data = String.Empty;
             if (Configuration.IsStaging)
             {
-                data = string.Format(" data-region=\"{0}\"", region.Name);
+                data = String.Format(" data-region=\"{0}\"", region.Name);
             }
 
             return new MvcHtmlString(String.Format("typeof=\"{0}\" resource=\"{1}\"{2}", "Region", region.Name, data));
@@ -96,7 +96,7 @@ namespace Sdl.Web.DD4T
         {
             if (Configuration.IsStaging)
             {
-                var html = String.Format(PAGE_FORMAT, page.Id, page.RevisionDate.ToString(DATE_FORMAT), page.PageTemplate.Id, page.PageTemplate.RevisionDate.ToString(DATE_FORMAT)) + String.Format(PAGE_SCRIPT, Configuration.GetCmsUrl());
+                var html = String.Format(PageFormat, page.Id, page.RevisionDate.ToString(DateFormat), page.PageTemplate.Id, page.PageTemplate.RevisionDate.ToString(DateFormat)) + String.Format(PageScript, Configuration.GetCmsUrl());
                 return new MvcHtmlString(html);
             }
             return null;
@@ -107,7 +107,7 @@ namespace Sdl.Web.DD4T
             if (Configuration.IsStaging)
             {
                 HtmlDocument html = new HtmlDocument();
-                html.LoadHtml(string.Format("<html>{0}</html>", result));
+                html.LoadHtml(String.Format("<html>{0}</html>", result));
                 var entity = html.DocumentNode.SelectSingleNode("//*[@data-region]");
                 if (entity != null)
                 {
@@ -130,7 +130,7 @@ namespace Sdl.Web.DD4T
                 //TODO abstract DD4T content model away, only process for preview requests
                 //TODO extend for embedded fields/embedded components
                 HtmlDocument html = new HtmlDocument();
-                html.LoadHtml(String.Format("<html>{0}</html>", result.ToString()));
+                html.LoadHtml(String.Format("<html>{0}</html>", result));
                 var entity = html.DocumentNode.SelectSingleNode("//*[@data-componentid]");
                 if (entity != null)
                 {
@@ -140,7 +140,7 @@ namespace Sdl.Web.DD4T
                     string compModified = ReadAndRemoveAttribute(entity, "data-componentmodified");
                     string templateId = ReadAndRemoveAttribute(entity, "data-componenttemplateid");
                     string templateModified = ReadAndRemoveAttribute(entity, "data-componenttemplatemodified");
-                    HtmlCommentNode cpData = html.CreateComment(String.Format(CP_FORMAT, compId, compModified, templateId, templateModified));
+                    HtmlCommentNode cpData = html.CreateComment(String.Format(CpFormat, compId, compModified, templateId, templateModified));
                     entity.ChildNodes.Insert(0, cpData);
                     //string lastProperty = "";
                     //int index = 1;
@@ -153,7 +153,7 @@ namespace Sdl.Web.DD4T
                             //TODO index of mv fields
                             //index = propName == lastProperty ? index+1 : 1;
                             //lastProperty = propName;
-                            HtmlCommentNode fieldData = html.CreateComment(String.Format(FIELD_FORMAT, xpath));
+                            HtmlCommentNode fieldData = html.CreateComment(String.Format(FieldFormat, xpath));
                             if (property.HasChildNodes)
                             {
                                 property.ChildNodes.Insert(0, fieldData);
@@ -186,11 +186,11 @@ namespace Sdl.Web.DD4T
         {
             XpmRegion xpmRegion = SemanticMapping.GetXpmRegion(name);
             StringBuilder allowedComponentTypes = new StringBuilder();
-            string separator = string.Empty;
+            string separator = String.Empty;
             bool first = true;
             foreach (var componentTypes in xpmRegion.ComponentTypes)
             {
-                allowedComponentTypes.AppendFormat(COMPONENT_TYPE_FORMAT, componentTypes.Schema, componentTypes.Template, separator);
+                allowedComponentTypes.AppendFormat(ComponentTypeFormat, componentTypes.Schema, componentTypes.Template, separator);
                 if (first)
                 {
                     first = false;
@@ -198,13 +198,13 @@ namespace Sdl.Web.DD4T
                 }
             }
 
-            string maxOccursElement = string.Empty;
+            string maxOccursElement = String.Empty;
             if (maxOccurs > 0)
             {
-                maxOccursElement = maxOccurs.ToString();
+                maxOccursElement = String.Format(MaxOccursFormat, maxOccurs);
             }
 
-            return string.Format(REGION_FORMAT, name, allowedComponentTypes, minOccurs, maxOccursElement);
+            return String.Format(RegionFormat, name, allowedComponentTypes, minOccurs, maxOccursElement);
         }
     }
 }

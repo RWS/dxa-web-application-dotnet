@@ -1,33 +1,25 @@
-﻿using System.Web.Script.Serialization;
-using DD4T.ContentModel;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Sdl.Web.Mvc.Models;
-using Sdl.Web.Mvc.Mapping;
-using Sdl.Web.DD4T.Extensions;
 using System.Text.RegularExpressions;
-using System.Collections;
-using DD4T.ContentModel.Factories;
-using DD4T.Factories;
-using Sdl.Web.Mvc;
+using DD4T.ContentModel;
 using Sdl.Web.DD4T.Mapping;
+using Sdl.Web.Mvc;
+using Sdl.Web.Mvc.Mapping;
+using Sdl.Web.Mvc.Models;
 
 namespace Sdl.Web.DD4T
 {
-    public class DD4TModelFactory : BaseContentProvider
+    public class DD4TContentProvider : BaseContentProvider
     {
         public ExtensionlessLinkFactory LinkFactory { get; set; }
-        public DD4TModelFactory()
+
+        public DD4TContentProvider()
         {
-            this.LinkFactory = new ExtensionlessLinkFactory();
+            LinkFactory = new ExtensionlessLinkFactory();
             DefaultModelBuilder = new DD4TViewModelBuilder();
         }
 
-        public override object CreatePageModel(object data, Dictionary<string,object> subPages = null, string view = null)
+        public override object CreatePageModel(object data, Dictionary<string, object> subPages = null, string view = null)
         {
             if (view == null)
             {
@@ -36,7 +28,17 @@ namespace Sdl.Web.DD4T
             IPage page = data as IPage;
             if (page != null)
             {
-                WebPage model = new WebPage{Id=page.Id,Title=page.Title};
+                // strip possible numbers from title
+                string title = Regex.Replace(page.Title, @"^\d{3}\s", String.Empty);
+                // Index is not a proper title for an HTML page
+                if (title.ToLowerInvariant().Equals("index"))
+                {
+                    // TODO get from configuration somewhere
+                    title = "Saint John";
+                }
+
+                WebPage model = new WebPage { Id = page.Id, Title = title };
+                bool first = true;
                 foreach (var cp in page.ComponentPresentations)
                 {
                     string regionName = GetRegionFromComponentPresentation(cp);
@@ -45,13 +47,44 @@ namespace Sdl.Web.DD4T
                         model.Regions.Add(regionName, new Region { Name = regionName });
                     }
                     model.Regions[regionName].Items.Add(cp);
+
+                    // determine title and description from first component in main region
+                    if (first && regionName.Equals("Main"))
+                    {
+                        first = false;
+
+                        // TODO use semantic mapping
+                        IFieldSet metadata = cp.Component.MetadataFields;
+                        IFieldSet fields = cp.Component.Fields;
+                        // determine title
+                        if (metadata.ContainsKey("standardMeta") && metadata["standardMeta"].EmbeddedValues.Count > 0)
+                        {
+                            IFieldSet standardMeta = metadata["standardMeta"].EmbeddedValues[0];
+                            if (standardMeta.ContainsKey("name"))
+                            {
+                                model.Title = standardMeta["name"].Value;
+                            }
+
+                            // determine description
+                            if (standardMeta.ContainsKey("description"))
+                            {
+                                model.Meta.Add("description", standardMeta["description"].Value);
+                            }
+                        }
+                        else if (fields.ContainsKey("headline"))
+                        {
+                            // TODO use semantic mapping
+                            model.Title = fields["headline"].Value;
+                        }
+                    }
                 }
+
                 //Add header/footer
                 if (subPages != null)
                 {
                     if (subPages.ContainsKey("Header"))
                     {
-                        WebPage headerPage = (WebPage)this.CreatePageModel(subPages["Header"]);
+                        WebPage headerPage = (WebPage)CreatePageModel(subPages["Header"]);
                         if (headerPage != null)
                         {
                             var header = new Header { Regions = new Dictionary<string, Region>() };
@@ -62,7 +95,7 @@ namespace Sdl.Web.DD4T
                                 {
                                     if (region.Value.Items.Count > 0)
                                     {
-                                        Teaser headerTeaser = this.CreateEntityModel(region.Value.Items[0], typeof(Teaser)) as Teaser;
+                                        Teaser headerTeaser = CreateEntityModel(region.Value.Items[0], typeof(Teaser)) as Teaser;
                                         if (headerTeaser != null)
                                         {
                                             header.Logo = headerTeaser.Image;
@@ -88,7 +121,7 @@ namespace Sdl.Web.DD4T
                     }
                     if (subPages.ContainsKey("Footer"))
                     {
-                        WebPage footerPage = (WebPage)this.CreatePageModel(subPages["Footer"]);
+                        WebPage footerPage = (WebPage)CreatePageModel(subPages["Footer"]);
                         if (footerPage != null)
                         {
                             var footer = new Footer { Regions = new Dictionary<string, Region>() };
@@ -99,7 +132,7 @@ namespace Sdl.Web.DD4T
                                 {
                                     if (region.Value.Items.Count > 0)
                                     {
-                                        LinkList footerLinks = this.CreateEntityModel(region.Value.Items[0], typeof(LinkList)) as LinkList;
+                                        LinkList footerLinks = CreateEntityModel(region.Value.Items[0], typeof(LinkList)) as LinkList;
                                         if (footerLinks != null)
                                         {
                                             footer.Copyright = footerLinks.Headline;
@@ -128,9 +161,9 @@ namespace Sdl.Web.DD4T
             throw new Exception(String.Format("Cannot create model for class {0}. Expecting IPage.", data.GetType().FullName));
         }
 
-        private string GetRegionFromComponentPresentation(IComponentPresentation cp)
+        private static string GetRegionFromComponentPresentation(IComponentPresentation cp)
         {
-            var match = Regex.Match(cp.ComponentTemplate.Title,@".*?\[(.*?)\]");
+            var match = Regex.Match(cp.ComponentTemplate.Title, @".*?\[(.*?)\]");
             if (match.Success)
             {
                 return match.Groups[1].Value;
@@ -178,5 +211,5 @@ namespace Sdl.Web.DD4T
             }
             return String.Format("{0}/{1}", module, viewName);
         }
-     }
+    }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Web;
-using System.Web.Mvc;
-using Sdl.Web.DD4T;
+﻿using Sdl.Web.DD4T;
 
 namespace Site.Controllers
 {
@@ -9,8 +6,8 @@ namespace Site.Controllers
     {
         public RegionController()
         {
-            this.ContentProvider = new DD4TModelFactory();
-            this.Renderer = new DD4TRenderer();
+            ContentProvider = new DD4TContentProvider();
+            Renderer = new DD4TRenderer();
         }
     }
 }

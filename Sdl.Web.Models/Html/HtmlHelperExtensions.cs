@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Mvc;
-using System.Web;
 using System.Globalization;
+using System.Text;
+using System.Web;
+using System.Web.Mvc;
 using Sdl.Web.Mvc.Models;
 
 namespace Sdl.Web.Mvc.Html
@@ -45,6 +42,15 @@ namespace Sdl.Web.Mvc.Html
             return httpContext.GetGlobalResourceObject(CultureInfo.CurrentUICulture.ToString(), resourceName);
         }
 
-        
+        public static MvcHtmlString MetaTags(this HtmlHelper htmlHelper, WebPage page)
+        {
+            StringBuilder metaTags = new StringBuilder();
+            foreach (var meta in page.Meta)
+            {
+                metaTags.AppendFormat("<meta name=\"{0}\" content=\"{1}\">", meta.Key, meta.Value);
+            }
+
+            return new MvcHtmlString(metaTags.ToString());
+        }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 
 namespace Sdl.Web.Mvc.Models
 {
@@ -28,6 +25,7 @@ namespace Sdl.Web.Mvc.Models
          */
         public WebPage()
         {
+            Meta = new Dictionary<string, string>();
             Regions = new Dictionary<string, Region>();
         }
     }

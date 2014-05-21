@@ -1,10 +1,8 @@
-﻿using System;
-using System.Web;
+﻿using System.Web;
 using System.Web.Mvc;
 using System.Web.Script.Serialization;
 using Sdl.Web.DD4T;
 using Sdl.Web.Mvc;
-using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
 
 namespace Site.Controllers
@@ -18,7 +16,7 @@ namespace Site.Controllers
                 //This is a temporary measure to cache the navigationModel per request to not retrieve and serialize 3 times per request. Comprehensice caching strategy pending
                 if (HttpContext.Items["navigationModel"] == null) 
                 {
-                    string navigationJsonString = this.GetContentForPage(Configuration.LocalizeUrl("navigation.json"));
+                    string navigationJsonString = GetContentForPage(Configuration.LocalizeUrl("navigation.json"));
                     var navigationModel = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
                     HttpContext.Items["navigationModel"] = navigationModel;
                 }                
@@ -28,8 +26,8 @@ namespace Site.Controllers
 
         public NavigationController()
         {
-            this.ContentProvider = new DD4TModelFactory();
-            this.Renderer = new DD4TRenderer();
+            ContentProvider = new DD4TContentProvider();
+            Renderer = new DD4TRenderer();
         }
 
         public virtual ActionResult TopNavigation()
