@@ -1,4 +1,5 @@
-﻿using Sdl.Web.Mvc.Models;
+﻿using Sdl.Web.Mvc.Context;
+using Sdl.Web.Mvc.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -153,7 +154,7 @@ namespace Sdl.Web.Mvc
         /// <param name="applicationRoot">The root filepath of the application</param>
         public static void Load(string applicationRoot)
         {
-            //We are updating a static variable, so need to be thread safe
+            //We are updating static variables, so need to be thread safe
             lock (configLock)
             {
                 //Ensure that the config files have been written to disk
@@ -238,7 +239,19 @@ namespace Sdl.Web.Mvc
                 }
                 Localizations = relevantLocalizations;
                 Log.Debug("The following localizations are active for this site: {0}", String.Join(", ", Localizations.Select(l=>l.Key).ToArray()));
+                InitializeContextConfiguration();
             }            
+        }
+
+        private static void InitializeContextConfiguration()
+        {
+            //TODO publish from CMS to ensure is in sync with LESS variables etc.
+            ContextConfiguration.ImageWidths =new List<int> {160,320,640,1024,2048};
+            ContextConfiguration.GridSize = 12;
+            ContextConfiguration.LargeScreenBreakpoint = 1140;
+            ContextConfiguration.MediumScreenBreakpoint = 940;
+            ContextConfiguration.SmallScreenBreakpoint = 480;
+            ContextConfiguration.ImageResizeRoute = "cid";
         }
 
         private static Dictionary<string, string> GetConfigFromFile(string file)
