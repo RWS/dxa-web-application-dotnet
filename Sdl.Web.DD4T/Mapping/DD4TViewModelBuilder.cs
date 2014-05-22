@@ -79,12 +79,31 @@ namespace Sdl.Web.DD4T.Mapping
                             propertyData.Add(pi.Name, GetFieldXPath(field));
                             break;
                         }
-                        //TODO make this workaround to assign Multimedia more generic
-                        if (info.PropertyName == "_self" && mapData.SourceEntity!=null && mapData.SourceEntity.Multimedia!=null)
+                        //Special cases, where we want to map for example the whole entity to an image property, or a resolved link to the entity to a Url field
+                        if (info.PropertyName == "_self")
                         {
-                            pi.SetValue(model, GetMultiMediaLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
-                            break;
-                        }
+                            bool processed = false;
+                            switch(pi.Name)
+                            {
+                                case "Image":
+                                    if (mapData.SourceEntity!=null && mapData.SourceEntity.Multimedia!=null)
+                                    {
+                                        pi.SetValue(model, GetMultiMediaLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
+                                        processed = true;
+                                    }
+                                    break;
+                                case "Link":
+                                    if (mapData.SourceEntity != null)
+                                    {
+                                        pi.SetValue(model, GetMultiComponentLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
+                                    }
+                                    break;
+                            }
+                            if (processed)
+                            {
+                                break;
+                            }
+                        }   
                     }
                 }
             }
@@ -252,12 +271,17 @@ namespace Sdl.Web.DD4T.Mapping
 
         private object GetMultiComponentLinks(IField field, Type linkedItemType, bool multival)
         {
+            return GetMultiComponentLinks(field.LinkedComponentValues, linkedItemType, multival);
+        }
+
+        private object GetMultiComponentLinks(IList<IComponent> items, Type linkedItemType, bool multival)
+        {
             //What to do depends on the target type
-            if (linkedItemType == typeof(String))
+            if (linkedItemType == typeof(String) || linkedItemType == typeof(Link))
             {
-                //For strings, we simply resolve the link to a URL
+                //For strings and Links, we simply resolve the link to a URL
                 List<String> urls = new List<String>();
-                foreach (var comp in field.LinkedComponentValues)
+                foreach (var comp in items)
                 {
                     var url = LinkFactory.ResolveExtensionlessLink(comp.Id);
                     if (url != null)
@@ -268,6 +292,14 @@ namespace Sdl.Web.DD4T.Mapping
                 if (urls.Count == 0)
                 {
                     return null;
+                }
+                if (linkedItemType == typeof(Link))
+                {
+                    if (multival)
+                    {
+                        return urls.Select(u => new Link { Url = u }).ToList();
+                    }
+                    return new Link { Url = urls[0] };
                 }
                 else if (multival)
                 {
@@ -283,7 +315,7 @@ namespace Sdl.Web.DD4T.Mapping
                 //TODO is reflection the only way to do this?
                 MethodInfo method = GetType().GetMethod("GetCompLink" + (multival ? "s" : ""), BindingFlags.NonPublic | BindingFlags.Instance);
                 method = method.MakeGenericMethod(new[] { linkedItemType });
-                return method.Invoke(this, new object[] { field.LinkedComponentValues, linkedItemType });
+                return method.Invoke(this, new object[] { items, linkedItemType });
             }
         }
 
