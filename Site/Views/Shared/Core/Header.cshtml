@@ -8,19 +8,19 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            @if (Model.LogoLink!=null)
+            @if (Model.LogoLink != null)
             {
-            <a class="navbar-logo" href="@Model.LogoLink.Url" alt="@Model.LogoLink.LinkText">
-                @if (Model.Logo!=null)
-                {
-                    <img src="@Model.Logo.Url" alt="@Model.Logo.AlternateText" height="80">
-                }
-            </a>
+                <a class="navbar-logo" href="@Model.LogoLink.Url" alt="@Model.LogoLink.LinkText">
+                    @if (Model.Logo != null)
+                    {
+                        <img src="@Model.Logo.Url" alt="@Model.Logo.AlternateText" height="80">
+                    }
+                </a>
             }
         </div>
         @foreach (Region region in Model.Regions.Values)
         {
-            @ViewBag.Renderer.Render(region,Html)
+            @ViewBag.Renderer.Render(region, Html)
         }
     </div>
 </div>
