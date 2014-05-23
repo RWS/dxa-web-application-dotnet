@@ -9,8 +9,9 @@ namespace Sdl.Web.Mvc.Models
     public class Region
     {
         public string Name { get; set; }
-        //Items will most likely be component presentations
+        //Items are the raw entities that make up the page (eg Component Presentations, or other regions)
         public List<object> Items { get; set; }
+        
         public Region()
         {
             Items = new List<object>();

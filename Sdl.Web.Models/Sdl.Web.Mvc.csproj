@@ -93,7 +93,6 @@
     <Compile Include="Models\Common\Image.cs" />
     <Compile Include="Models\Common\Link.cs" />
     <Compile Include="Models\Common\MediaItem.cs" />
-    <Compile Include="Models\Common\Semantics.cs" />
     <Compile Include="Models\Entity\Article.cs" />
     <Compile Include="Models\Common\Entity.cs" />
     <Compile Include="Models\Common\Paragraph.cs" />

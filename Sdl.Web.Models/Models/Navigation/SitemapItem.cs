@@ -31,7 +31,7 @@ namespace Sdl.Web.Mvc.Models
 
         private string RemoveNonRequiredExtensions(string value)
         {
-            return value.Replace(".html", "");
+            return value.Replace(Configuration.GetDefaultExtension(), "");
         }
 
         public string Id { get; set; }
