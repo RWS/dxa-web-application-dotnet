@@ -6,7 +6,7 @@ using System.Web;
 
 namespace Sdl.Web.Mvc.Models
 {
-    [SemanticEntity(Vocab = "http://schema.org", EntityName= "Article", Prefix= "s")]
+    [SemanticEntity(Vocab = "http://schema.org", EntityName= "Article", Prefix= "s", Public=true)]
     public class Article : Entity
     {
         [SemanticProperty("s:headline")]
