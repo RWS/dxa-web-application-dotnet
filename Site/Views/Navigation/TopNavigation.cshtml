@@ -4,7 +4,7 @@
     Layout = null;
 }
 <ul class="nav navbar-nav main-nav">
-    @foreach (var item in Model.Items)
+    @foreach (var item in Model.Items.Where(i=>i.Visible))
     {
         SitemapItem sitemapItem = (item.Title == "Index") ? Model : item;
         var urlStem = item.Url.Substring(0,item.Url.LastIndexOf("/"));

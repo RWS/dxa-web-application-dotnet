@@ -6,16 +6,6 @@ using System.Threading.Tasks;
 
 namespace Sdl.Web.Mvc.Models
 {
-
-    public class Navigation
-    {
-        private SitemapItem rootFolder { get; set; }
-
-        public Navigation()
-        {
-            rootFolder = new SitemapItem("");
-        }
-    }
     public class SitemapItem
     {
         private string _url;
@@ -48,5 +38,6 @@ namespace Sdl.Web.Mvc.Models
         public string Type { get; set; }
         public List<SitemapItem> Items { get; set; }
         public DateTime PublishedDate { get; set; }
+        public bool Visible { get; set; }
     }
 }

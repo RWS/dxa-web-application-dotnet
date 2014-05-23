@@ -57,10 +57,11 @@
     <Compile Include="Context\ContextConfiguration.cs" />
     <Compile Include="Context\ContextHelper.cs" />
     <Compile Include="Errors\HandleSectionErrorAttribute.cs" />
+    <Compile Include="Mapping\NavigationBuilder.cs" />
     <Compile Include="Mapping\ComponentType.cs" />
     <Compile Include="Mapping\MapModelAttribute.cs" />
     <Compile Include="Mapping\XpmRegion.cs" />
-    <Compile Include="Models\Page\Navigation.cs" />
+    <Compile Include="Models\Navigation\SitemapItem.cs" />
     <Compile Include="Configuration\ResourceProviderFactory.cs" />
     <Compile Include="Configuration\ResourceProvider.cs" />
     <Compile Include="Context\ContextAwareViewEngine.cs" />
@@ -97,7 +98,7 @@
     <Compile Include="Models\Common\Entity.cs" />
     <Compile Include="Models\Common\Paragraph.cs" />
     <Compile Include="Models\Entity\Teaser.cs" />
-    <Compile Include="Models\Page\Breadcrumb.cs" />
+    <Compile Include="Models\Navigation\Breadcrumb.cs" />
     <Compile Include="Models\Page\Footer.cs" />
     <Compile Include="Models\Page\Header.cs" />
     <Compile Include="Models\Page\Region.cs" />
