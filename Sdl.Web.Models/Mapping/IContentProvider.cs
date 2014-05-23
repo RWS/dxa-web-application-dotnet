@@ -8,11 +8,15 @@ namespace Sdl.Web.Mvc.Mapping
 {
     public interface IContentProvider
     {
-        object CreateEntityModel(object entity, Type viewModeltype = null);
-        //object CreateRegionModel(object entity, Type viewModeltype = null);
-        object CreatePageModel(object page, Dictionary<string, object> subPages = null, string view = null);
+        object GetPageModel(string url);
+        string GetPageContent(string url);
+        object GetEntityModel(string id);
+        string GetEntityContent(string url);
+
+        object MapModel(object entity, ModelType modelType = ModelType.Entity, Type viewModeltype = null, List<object> includes = null);
+        
         string GetEntityViewName(object entity);
-        string GetPageViewName(object entity);
-        Type GetEntityViewModelType(object entity);
+        string GetRegionViewName(object region);
+        string GetPageViewName(object page);
     }
 }

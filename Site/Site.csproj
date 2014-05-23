@@ -119,7 +119,6 @@
     <Compile Include="Controllers\NavigationController.cs" />
     <Compile Include="Controllers\PageController.cs" />
     <Compile Include="Controllers\RegionController.cs" />
-    <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -174,7 +173,6 @@
     <Content Include="Views\Region\Core\Nav.cshtml" />
     <Content Include="Views\Entity\Core\FooterLinkGroup.cshtml" />
     <Content Include="Views\Entity\Core\HeaderLinks.cshtml" />
-    <Content Include="Views\Search\SearchResults.cshtml" />
     <Content Include="Views\Navigation\Breadcrumb.cshtml" />
     <Content Include="Views\Navigation\LeftNavigation.cshtml" />
     <Content Include="Views\Navigation\TopNavigation.cshtml" />

@@ -9,18 +9,22 @@ namespace Sdl.Web.Mvc.Mapping
 {
     /// <summary>
     /// Custom Action Filter Attribute to enable controller actions to provide Domain model -> View model mapping via a Content Provider
-    /// TODO - currently just for entity models - should we handle Page/Region model mapping too?
     /// </summary>
     public class MapModelAttribute : ActionFilterAttribute
     {
         public IContentProvider ContentProvider { get; set; }
-        
+        public ModelType ModelType { get; set; }
+        public string[] Includes { get; set; }
+
         public override void OnActionExecuted(ActionExecutedContext filterContext)
         {
             var viewResult = (ViewResult)filterContext.Result;
             var sourceModel = filterContext.Controller.ViewData.Model;
-            var contentProvider = ContentProvider ?? ((BaseController)filterContext.Controller).ContentProvider;
-            var viewName = String.IsNullOrEmpty(viewResult.ViewName) ? contentProvider.GetEntityViewName(sourceModel) : viewResult.ViewName;
+            if (ContentProvider == null)
+            {
+                ContentProvider = ((BaseController)filterContext.Controller).ContentProvider;
+            }
+            var viewName = String.IsNullOrEmpty(viewResult.ViewName) ? GetViewName(sourceModel) : viewResult.ViewName;
             var viewEngineResult = ViewEngines.Engines.FindPartialView(filterContext.Controller.ControllerContext, viewName);
             if (viewEngineResult.View == null)
             {
@@ -36,10 +40,65 @@ namespace Sdl.Web.Mvc.Mapping
                     Configuration.AddViewModelToRegistry(viewName, path);
                 }
                 //If the content provider does not return a view model, then we use the source model
-                var model = contentProvider.CreateEntityModel(sourceModel, Configuration.ViewModelRegistry[viewName]) ?? sourceModel;
+                var model = MapModel(sourceModel, Configuration.ViewModelRegistry[viewName]) ?? sourceModel;
                 filterContext.Controller.ViewData.Model = model;
                 viewResult.ViewName = viewName;
             }
         }
+
+        public string GetViewName(object sourceModel)
+        {
+            switch (ModelType)
+            {
+                case ModelType.Page:
+                    return ContentProvider.GetPageViewName(sourceModel);
+                case ModelType.Region:
+                    return ContentProvider.GetRegionViewName(sourceModel);
+                default:
+                    return ContentProvider.GetEntityViewName(sourceModel);
+            }
+        }
+        public object MapModel(object sourceModel, Type type)
+        {
+            List<object> includes = GetIncludes();
+            return ContentProvider.MapModel(sourceModel, ModelType, type, includes);
+        }
+
+        private List<object> GetIncludes()
+        {
+            if (Includes != null && Includes.Length > 0)
+            {
+                List<object> result = new List<object>();
+                foreach (var includeUrl in Includes)
+                {
+                    object include = GetInclude(includeUrl);
+                    if (include != null)
+                    {
+                        result.Add(include);
+                    }
+                }
+                return result;
+            }
+            return null;
+        }
+
+        private object GetInclude(string includeUrl)
+        {
+            switch (ModelType)
+            {
+                case ModelType.Page:
+                    return ContentProvider.GetPageModel(includeUrl);
+                case ModelType.Region:
+                    return null;
+                default:
+                    return ContentProvider.GetEntityModel(includeUrl);
+            }
+        }
+    }
+
+    public enum ModelType{
+        Page,
+        Region,
+        Entity
     }
 }

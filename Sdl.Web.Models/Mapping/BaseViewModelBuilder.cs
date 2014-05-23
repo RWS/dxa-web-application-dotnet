@@ -24,7 +24,7 @@ namespace Sdl.Web.Mvc.Mapping
             }
         }
         
-        public abstract object Create(object sourceEntity, Type type);
+        public abstract object Create(object sourceEntity, Type type, List<object> includes=null);
 
         protected virtual Dictionary<string, string> GetVocabulariesFromType(Type type)
         {
