@@ -1,42 +1,19 @@
-﻿@model Sdl.Web.Mvc.Models.SitemapItem
-
-
-<ol class="breadcrumb">
-    <li><a href="/"><i class="fa fa-home"> <span class='sr-only'>aaa @Model.Title  ss</span></i></a></li>
-    @ShowLevel(Model.Items)        
-</ol>
-
-
-@{
-    
-    
-
-@helper ShowLevel(List<SitemapItem> items)
+﻿@model Sdl.Web.Mvc.Models.Breadcrumb
+@if (Model.Items!=null && Model.Items.Count>0)
 {
-    var currentUrl = Request.Url.LocalPath.ToString().ToLower();
-
-    foreach (var item in items)
+<ol class="breadcrumb">
+    <li>
+       <a href="@Model.Items[0].Url"><i class="fa fa-home"><span class='sr-only'>@Model.Items[0].LinkText</span></i></a>
+    </li>
+    @for(int i=1;i<Model.Items.Count-1;i++)
     {
-
-        if (currentUrl.ToLower().Equals(item.Url))
-        {
-            <li class="active">@item.Title</li>
-            return;
-        }
-        if (currentUrl.Contains(item.Url))
-        {
-            <li><a href="@item.Url">@item.Title</a></li>
-            @ShowLevel(item.Items)
-            return;
-        }
-
+        <li><a href="@Model.Items[i].Url">@Model.Items[i].LinkText</a></li>
     }
-}
-
-
-
-
-
+    @if (Model.Items.Count>1)
+    {      
+        <li class="active">@Model.Items[Model.Items.Count-1].LinkText</li>
+    }
+</ol>
 }
 
 
