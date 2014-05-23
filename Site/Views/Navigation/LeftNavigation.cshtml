@@ -5,7 +5,7 @@
 <div class="col-sm-3">
     <nav>
         <ul class="nav nav-sidebar">
-            @foreach (var item in Model.Items)
+            @foreach (var item in Model.Items.Where(i=>i.Visible))
             {
                  <li class="@(item.Url == Request.Url.LocalPath.ToString() ? "active" : "")">
                     <a href="@item.Url">@item.Title</a>
