@@ -37,6 +37,7 @@ namespace Sdl.Web.Mvc.Models
         public string Vocab { get; set; }
         public string Prefix { get; set; }
         public string EntityName { get; set; }
+        public bool Public { get; set; }
         public override object TypeId
         {
             get

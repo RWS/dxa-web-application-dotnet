@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Web;
@@ -36,14 +35,19 @@ namespace Sdl.Web.DD4T
             var entityTypes = new List<string>();
             foreach (SemanticEntityAttribute attribute in entity.GetType().GetCustomAttributes(true).Where(a => a is SemanticEntityAttribute).ToList())
             {
-                var prefix = attribute.Prefix;
-                if (!String.IsNullOrEmpty(prefix))
+                //We only write out public semantic entities
+                if (attribute.Public)
                 {
-                    if (!prefixes.ContainsKey(prefix))
+                    var prefix = attribute.Prefix;
+                    if (!String.IsNullOrEmpty(prefix))
                     {
                         prefixes.Add(prefix, attribute.Vocab);
+                        if (!prefixes.ContainsKey(prefix))
+                        {
+                            prefixes.Add(prefix, attribute.Vocab);
+                        }
+                        entityTypes.Add(String.Format("{0}:{1}", prefix, attribute.EntityName));
                     }
-                    entityTypes.Add(String.Format("{0}:{1}", prefix, attribute.EntityName));
                 }
             }
             if (prefixes != null && prefixes.Count > 0)
@@ -66,10 +70,30 @@ namespace Sdl.Web.DD4T
             var pi = entity.GetType().GetProperty(property);
             if (pi != null)
             {
-                var propertyTypes = pi.GetCustomAttributes(true).Where(a => a is SemanticPropertyAttribute).Select(s => ((SemanticPropertyAttribute)s).PropertyName).ToArray();
-                if (propertyTypes != null && propertyTypes.Length > 0)
+                var entityTypes = entity.GetType().GetCustomAttributes(true).Where(a => a is SemanticEntityAttribute).ToList();
+                var publicPrefixes = new List<string>();
+                if (entityTypes != null)
                 {
-                    data.AppendFormat("typeof=\"{0}\"", String.Join(" ", propertyTypes));
+                    foreach(SemanticEntityAttribute entityType in entityTypes)
+                    {
+                        if (entityType.Public && !publicPrefixes.Contains(entityType.Prefix))
+                        {
+                            publicPrefixes.Add(entityType.Prefix);
+                        }
+                    }
+                }
+                var propertyTypes = new List<string>();
+                foreach (SemanticPropertyAttribute propertyType in pi.GetCustomAttributes(true).Where(a => a is SemanticPropertyAttribute))
+                {
+                    string prefix = propertyType.PropertyName.Contains(":") ? propertyType.PropertyName.Split(':')[0] : "";
+                    if (!String.IsNullOrEmpty(prefix) && publicPrefixes.Contains(prefix))
+                    {
+                        propertyTypes.Add(propertyType.PropertyName);
+                    }
+                }
+                if (propertyTypes.Count > 0)
+                {
+                    data.AppendFormat("property=\"{0}\"", String.Join(" ", propertyTypes));
                 }
                 if (Configuration.IsStaging)
                 {

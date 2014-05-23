@@ -10,19 +10,16 @@ namespace Sdl.Web.Mvc.Models
         public string Url { get; set; }
         public string Id { get; set; }
         public string Title { get; set; }
-        public Breadcrumb Breadcrumb { get; set; }
-        //TODO: Are dictionaries better than explicit values? Somethings you may always have (description etc.)
         public Dictionary<string, string> Meta { get; set; }
         public Dictionary<string, Region> Regions { get; set; }
-        public Navigation Navigation { get; set; }
         public Header Header { get; set; }
         public Footer Footer { get; set; }
         
         /*Other stuff to consider:
-         1. Specific css/js for the page based on its components/plugins
+         1. Specific css/js for the page based on its components/plugins - currently all pages have the same, but this could become inefficient
          2. Analytics variables
-         3. Parent SG id(s) for building navigation state - could be part of breadcrumb
-         */
+        */
+
         public WebPage()
         {
             Meta = new Dictionary<string, string>();

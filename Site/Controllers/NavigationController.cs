@@ -4,6 +4,7 @@ using System.Web.Script.Serialization;
 using Sdl.Web.DD4T;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Models;
+using Sdl.Web.Mvc.Mapping;
 
 namespace Site.Controllers
 {
@@ -37,14 +38,14 @@ namespace Site.Controllers
 
         public virtual ActionResult LeftNavigation()
         {
-            //TODO: Filtering the Json here would help to pass only the part of the structure required to process. Tried Linq  with Newtonsoft JS.net and SelectToken without luck            
-            //TODO: Caching Strategy
-            return View(NavigationModel);
+            var model = new NavigationBuilder(Request.Url.LocalPath.ToString()).GetParentNode(NavigationModel);
+            return View(model);
         }
 
         public virtual ActionResult Breadcrumb()
         {
-            return View(NavigationModel);
+            var model = new NavigationBuilder(Request.Url.LocalPath.ToString()).BuildBreadcrumb(NavigationModel);
+            return View(model);
         }
 
         public virtual ActionResult GoogleSitemap()
