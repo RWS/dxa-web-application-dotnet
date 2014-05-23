@@ -8,6 +8,6 @@ namespace Sdl.Web.Mvc.Mapping
 {
     public interface IViewModelBuilder
     {
-        object Create(object sourceEntity,Type type);
+        object Create(object sourceEntity, Type type, List<object> includes);
     }
 }

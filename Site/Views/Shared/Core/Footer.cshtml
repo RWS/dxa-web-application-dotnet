@@ -5,18 +5,21 @@
         @ViewBag.Renderer.Render(region,Html)
     }
     <hr />
+    @if (Model.LinkList!=null)
+    {
     <ul class='list-inline text-center'>
-	    @if (Model.Copyright!=null)
+	    @if (Model.LinkList.Headline!=null)
         {
         <li>
-		    <small>@Model.Copyright</small>
+		    <small>@Model.LinkList.Headline</small>
 	    </li>
         }
-        @foreach(var link in Model.Links)
+        @foreach(var link in Model.LinkList.Links)
         {
 	    <li>
 		    <small><a href="@link.Url" title="@link.AlternateText">@link.LinkText</a></small>
 	    </li>
         }
     </ul>
+    }
 </footer>
