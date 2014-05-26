@@ -25,11 +25,12 @@ namespace Sdl.Web.Mvc.Html
             int height = fixHeight ? size : (int) (size / aspect);
             int width = fixHeight ? (int)(size * aspect) : size;
             return String.Format("/cid/scale/{0}x{1}/source/site{2}", width, height, url);
+         * 
         }*/
 
         public static string Date(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
         {
-            return date!=null ? ((DateTime)date).ToString(format, new CultureInfo(Configuration.GetConfig("site.culture"))) : null;
+            return date!=null ? ((DateTime)date).ToString(format, new CultureInfo(Configuration.GetConfig("core.culture"))) : null;
         }
 
         public static string Resource(this HtmlHelper htmlHelper, string resourceName)

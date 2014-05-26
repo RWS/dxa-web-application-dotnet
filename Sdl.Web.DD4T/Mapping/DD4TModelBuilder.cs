@@ -54,7 +54,7 @@ namespace Sdl.Web.DD4T.Mapping
                 long schemaId = Convert.ToInt64(uriParts[1]);
                 MappingData mapData = new MappingData();
                 // get schema entity names (indexed by vocabulary)
-                mapData.SemanticSchema = SemanticMapping.GetSchema(schemaId);
+                mapData.SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString());
                 mapData.EntityNames = mapData.SemanticSchema.GetEntityNames();
             
                 //TODO may need to merge with vocabs from embedded types
@@ -413,14 +413,14 @@ namespace Sdl.Web.DD4T.Mapping
             IPage page = sourceEntity as IPage;
             if (page != null)
             {
-                string postfix = String.Format(" {0} {1}", GetResource("custom.pageTitleSeparator"), GetResource("custom.pageTitlePostfix"));
+                string postfix = String.Format(" {0} {1}", GetResource("core.pageTitleSeparator"), GetResource("core.pageTitlePostfix"));
 
                 // strip possible numbers from title
                 string title = Regex.Replace(page.Title, @"^\d{3}\s", String.Empty);
                 // Index and Default are not a proper titles for an HTML page
                 if (title.ToLowerInvariant().Equals("index") || title.ToLowerInvariant().Equals("default"))
                 {
-                    title = GetResource("custom.defaultPageTitle") + postfix;
+                    title = GetResource("core.defaultPageTitle") + postfix;
                 }
 
                 WebPage model = new WebPage { Title = title };
