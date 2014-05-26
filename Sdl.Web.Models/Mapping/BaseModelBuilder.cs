@@ -5,7 +5,7 @@ using Sdl.Web.Mvc.Models;
 
 namespace Sdl.Web.Mvc.Mapping
 {
-    public abstract class BaseViewModelBuilder : IViewModelBuilder
+    public abstract class BaseModelBuilder : IModelBuilder
     {
         private static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> _entityPropertySemantics;
         public static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> EntityPropertySemantics 
@@ -24,7 +24,7 @@ namespace Sdl.Web.Mvc.Mapping
             }
         }
         
-        public abstract object Create(object sourceEntity, Type type);
+        public abstract object Create(object sourceEntity, Type type, List<object> includes=null);
 
         protected virtual Dictionary<string, string> GetVocabulariesFromType(Type type)
         {

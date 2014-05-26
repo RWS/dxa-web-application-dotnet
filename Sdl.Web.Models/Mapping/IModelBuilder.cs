@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Sdl.Web.Mvc.Mapping
 {
-    public interface IViewModelBuilder
+    public interface IModelBuilder
     {
-        object Create(object sourceEntity,Type type);
+        object Create(object sourceEntity, Type type, List<object> includes);
     }
 }
