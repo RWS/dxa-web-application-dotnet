@@ -2,24 +2,26 @@
 <footer class='page-footer'>
     @foreach (Region region in Model.Regions.Values)
     {
-        @ViewBag.Renderer.Render(region,Html)
+        @ViewBag.Renderer.Render(region, Html)
     }
     <hr />
     @if (Model.LinkList!=null)
     {
-    <ul class='list-inline text-center'>
-	    @if (Model.LinkList.Headline!=null)
-        {
-        <li>
-		    <small>@Model.LinkList.Headline</small>
-	    </li>
-        }
-        @foreach(var link in Model.LinkList.Links)
-        {
-	    <li>
-		    <small><a href="@link.Url" title="@link.AlternateText">@link.LinkText</a></small>
-	    </li>
-        }
-    </ul>
+        <ul class='list-inline text-center' @Markup.Entity(Model.LinkList)>
+	        @if (Model.LinkList.Headline!=null)
+            {
+                <li @Markup.Property(Model.LinkList, "Headline")>
+                    <small>@Model.LinkList.Headline</small>
+                </li>         
+            }
+            @{ int index = 0; }
+            @foreach(var link in Model.LinkList.Links)
+            {
+                <li @Markup.Property(Model.LinkList, "Links", index)>
+                    <small><a href="@link.Url" title="@link.AlternateText">@link.LinkText</a></small>
+                </li>
+                index++;
+            }
+        </ul>
     }
 </footer>

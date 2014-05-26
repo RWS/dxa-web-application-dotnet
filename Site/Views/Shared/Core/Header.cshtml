@@ -11,10 +11,12 @@
             @if (Model.Logo!=null)
             {
                 <div @Markup.Entity(Model.Logo)>
-                    <a class="navbar-logo" href="@Model.Logo.Link.Url" alt="@Model.Logo.Link.LinkText" @Markup.Property(Model.Logo, "Image")>
+                    <a class="navbar-logo" href="@Model.Logo.Link.Url" alt="@Model.Logo.Link.LinkText">
                         @if (Model.Logo!=null)
                         {
-                            <img src="@Model.Logo.Image.Url" alt="@Model.Logo.Image.AlternateText" height="80">
+                            <span @Markup.Property(Model.Logo, "Image")>
+                                <img src="@Model.Logo.Image.Url" alt="@Model.Logo.Image.AlternateText" height="80">                                
+                            </span>
                         }
                     </a>
                 </div>

@@ -1,25 +1,20 @@
 ﻿@model Sdl.Web.Mvc.Models.WebPage
 @using Sdl.Web.Mvc.Html
 <!DOCTYPE html>
-<html class='no-js'>
+<html class="no-js">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     @Html.MetaTags(Model)
     <title>@Model.Title</title>
-
     <!--
       <link rel="stylesheet/less" type="text/css" href="/assets/less/main.less" />
       <script src="/bower_components/less.js/dist/less-1.7.0.min.js"></script>
-    -->
-    
+    -->    
     <link rel="stylesheet" href="@Url.VersionedContent("/assets/css/main.css")">
-   
     <script src="@Url.VersionedContent("/assets/scripts/header.js")"></script>
     <script src="@Url.VersionedContent("/assets/scripts/discover-min.js")"></script>
-
-
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -28,38 +23,33 @@
     <![endif]-->
 </head>
 <body>
-
     @if (Model.Header!=null)
     {
-        @Html.Partial("Core/Header",Model.Header)
+        @* calling Markup.ParseComponentPresentation() on Html.Partial() so XPM markup is properly handled *@
+        @* TODO abstract Markup.ParseComponentPresentation() away *@
+        @Markup.ParseComponentPresentation(Html.Partial("Core/Header", Model.Header))
     }
-
     <div role="main">
-        <div class='container'>
+        <div class="container">
             @RenderBody()
         </div>
-
     </div>
-
     @if (Model.Footer!=null)
     {
-        @Html.Partial("Core/Footer",Model.Footer)
+        @* calling Markup.ParseComponentPresentation() on Html.Partial() so XPM markup is properly handled *@        
+        @* TODO abstract Markup.ParseComponentPresentation() away *@
+        @Markup.ParseComponentPresentation(Html.Partial("Core/Footer", Model.Footer))
     }
-
     <script src="@Url.VersionedContent("/assets/scripts/plugins.js")"></script>
-
     <script src="@Url.VersionedContent("/assets/scripts/custom.js")"></script>
-
     <script src="@Url.VersionedContent("/assets/scripts/theme-customiser.js")"></script>
-
-
     <script>
         (function (b, o, i, l, e, r) {
             b.GoogleAnalyticsObject = l; b[l] || (b[l] =
-            function () { (b[l].q = b[l].q || []).push(arguments) }); b[l].l = +new Date;
+            function () { (b[l].q = b[l].q || []).push(arguments); }); b[l].l = +new Date;
             e = o.createElement(i); r = o.getElementsByTagName(i)[0];
             e.src = '//www.google-analytics.com/analytics.js';
-            r.parentNode.insertBefore(e, r)
+            r.parentNode.insertBefore(e, r);
         }(window, document, 'script', 'ga'));
         ga('create', 'UA-XXXXX-X'); ga('send', 'pageview');
     </script>

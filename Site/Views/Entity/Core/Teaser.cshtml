@@ -2,7 +2,7 @@
 <div class="jumbotron" @Markup.Entity(Model)>
     @if (Model.Image != null)
     {
-        <div class="feature" @Markup.Property(Model,"Image")>
+        <div class="feature" @Markup.Property(Model, "Image")>
 			@Html.Image(Model.Image)
 		</div>
     }

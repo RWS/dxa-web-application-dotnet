@@ -62,7 +62,8 @@ namespace Sdl.Web.DD4T
                     {
                         data.Append(" ");
                     }
-                    data.AppendFormat("data-{0}=\"{1}\"", item.Key, HttpUtility.HtmlAttributeEncode(item.Value));
+                    // add data- attributes using all lowercase chars, since that is what we look for in ParseComponentPresentation
+                    data.AppendFormat("data-{0}=\"{1}\"", item.Key.ToLowerInvariant(), HttpUtility.HtmlAttributeEncode(item.Value));
                 }
             }
             return new MvcHtmlString(data.ToString());
