@@ -1,6 +1,6 @@
 ﻿@model Sdl.Web.Mvc.Models.WebPage
 
-@foreach (Sdl.Web.Mvc.Models.Region region in Model.Regions.Values)
+@foreach (Region region in Model.Regions.Values)
 {
-    @ViewBag.Renderer.Render(region,Html)
+    @ViewBag.Renderer.Render(region, Html)
 }
