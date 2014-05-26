@@ -13,18 +13,38 @@ namespace Sdl.Web.Mvc.Mapping
     /// </summary>
     public abstract class BaseContentProvider : IContentProvider
     {
+        //These need to be implemented by the specific content provider
+        public abstract string GetPageContent(string url);
+        public abstract object GetEntityModel(string id);
+        public abstract string GetEntityContent(string url);
         public abstract string GetEntityViewName(object entity);
-        public abstract string GetPageViewName(object entity);
+        public abstract string GetPageViewName(object page);
+        public abstract string GetRegionViewName(object region);
 
-        private static Dictionary<Type, IViewModelBuilder> _modelBuilders = null;
-        public static Dictionary<Type, IViewModelBuilder> ModelBuilders
+        protected abstract object GetPageModelFromUrl(string url);
+        
+        public object GetPageModel(string url)
+        {
+            //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
+            //1. Try adding the default extension, so /news becomes /news.html
+            var model = GetPageModelFromUrl(ParseUrl(url));
+            if (model == null && !url.EndsWith("/") && url.LastIndexOf(".", StringComparison.Ordinal) <= url.LastIndexOf("/", StringComparison.Ordinal))
+            {
+                //2. Try adding the default page, so /news becomes /news/index.html
+                model = GetPageModelFromUrl(ParseUrl(url + "/"));
+            }
+            return model;
+        }
+
+        private static Dictionary<Type, IModelBuilder> _modelBuilders = null;
+        public static Dictionary<Type, IModelBuilder> ModelBuilders
         {
             get
             {
                 if (_modelBuilders == null)
                 {
                     //TODO hardcoded and empty for now
-                    _modelBuilders = new Dictionary<Type, IViewModelBuilder>();
+                    _modelBuilders = new Dictionary<Type, IModelBuilder>();
                 }
                 return _modelBuilders;
             }
@@ -33,22 +53,41 @@ namespace Sdl.Web.Mvc.Mapping
                 _modelBuilders = value;
             }
         }
-        public IViewModelBuilder DefaultModelBuilder { get; set; }
-
-        public virtual object CreateEntityModel(object data, Type viewModeltype = null)
+        public IModelBuilder DefaultModelBuilder { get; set; }
+        
+        public virtual string ParseUrl(string url)
         {
+            var defaultPageFileName = Configuration.GetDefaultPageName();
+            return String.IsNullOrEmpty(url) ? defaultPageFileName : (url.EndsWith("/") ? url + defaultPageFileName : url += Configuration.GetDefaultExtension());
+        }
+        
+        public virtual object MapModel(object data, ModelType modelType, Type viewModeltype = null, List<object> includes = null)
+        {
+            string viewName = null;
+            switch (modelType)
+            {
+                case ModelType.Page:
+                    viewName = GetPageViewName(data);
+                    break;
+                case ModelType.Region:
+                    viewName = GetRegionViewName(data);
+                    break;
+                default:
+                    viewName = GetEntityViewName(data);
+                    break;
+            }
             if (viewModeltype == null)
             {
-                viewModeltype = GetEntityViewModelType(data);
+                viewModeltype = Configuration.ViewModelRegistry.ContainsKey(viewName) ? Configuration.ViewModelRegistry[viewName] : null;
             }
             if (viewModeltype!=null)
             {
-                IViewModelBuilder builder = DefaultModelBuilder;
+                IModelBuilder builder = DefaultModelBuilder;
                 if (ModelBuilders.ContainsKey(viewModeltype))
                 {
                     builder = ModelBuilders[viewModeltype];
                 }
-                return builder.Create(data, viewModeltype);
+                return builder.Create(data, viewModeltype, includes);
             }
             else
             {
@@ -58,17 +97,6 @@ namespace Sdl.Web.Mvc.Mapping
             }
         }
 
-        public virtual Type GetEntityViewModelType(object data)
-        {
-            var viewName = GetEntityViewName(data);
-            return Configuration.ViewModelRegistry.ContainsKey(viewName) ? Configuration.ViewModelRegistry[viewName] : null;
-        }
-
-        public virtual object CreatePageModel(object data, Dictionary<string, object> subPages = null, string viewName = null)
-        {
-            //in an ideal world, we do not need to map...
-            return data;
-        }
-
+        
     }
 }

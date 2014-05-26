@@ -7,8 +7,9 @@ namespace Sdl.Web.Mvc.Models
     /// </summary>
     public class WebPage
     {
+        //For storing system data (for example page id and modified date for xpm markup)
+        public Dictionary<string, string> PageData { get; set; }
         public string Url { get; set; }
-        public string Id { get; set; }
         public string Title { get; set; }
         public Dictionary<string, string> Meta { get; set; }
         public Dictionary<string, Region> Regions { get; set; }
@@ -22,6 +23,7 @@ namespace Sdl.Web.Mvc.Models
 
         public WebPage()
         {
+            PageData = new Dictionary<string, string>();
             Meta = new Dictionary<string, string>();
             Regions = new Dictionary<string, Region>();
         }

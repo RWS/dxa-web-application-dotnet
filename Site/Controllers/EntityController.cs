@@ -1,8 +1,9 @@
 ﻿using Sdl.Web.DD4T;
+using Sdl.Web.Mvc;
 
 namespace Site.Controllers
 {
-    public class EntityController : DD4TController
+    public class EntityController : BaseController
     {
         public EntityController()
         {

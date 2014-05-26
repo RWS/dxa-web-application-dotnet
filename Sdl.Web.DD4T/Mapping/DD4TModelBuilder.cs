@@ -6,19 +6,34 @@ using DD4T.ContentModel;
 using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
 using System.Collections;
+using Sdl.Web.Mvc;
+using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace Sdl.Web.DD4T.Mapping
 {
-    public class DD4TViewModelBuilder : BaseViewModelBuilder
+    public class DD4TModelBuilder : BaseModelBuilder
     {
         public ExtensionlessLinkFactory LinkFactory { get; set; }
 
-        public DD4TViewModelBuilder()
+        public DD4TModelBuilder()
         {
             LinkFactory = new ExtensionlessLinkFactory();
         }
+
+        public override object Create(object sourceEntity, Type type, List<object> includes = null)
+        {
+            if (sourceEntity is IPage)
+            {
+                return CreatePage(sourceEntity, type, includes);
+            }
+            else
+            {
+                return CreateEntity(sourceEntity, type, includes);
+            }
+        }
         
-        public override object Create(object sourceEntity, Type type)
+        protected virtual object CreateEntity(object sourceEntity, Type type, List<object> includes=null)
         {
             IComponent component = sourceEntity as IComponent;
             Dictionary<string, string> entityData;
@@ -39,7 +54,7 @@ namespace Sdl.Web.DD4T.Mapping
                 long schemaId = Convert.ToInt64(uriParts[1]);
                 MappingData mapData = new MappingData();
                 // get schema entity names (indexed by vocabulary)
-                mapData.SemanticSchema = SemanticMapping.GetSchema(schemaId);
+                mapData.SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString());
                 mapData.EntityNames = mapData.SemanticSchema.GetEntityNames();
             
                 //TODO may need to merge with vocabs from embedded types
@@ -219,6 +234,19 @@ namespace Sdl.Web.DD4T.Mapping
             return new Dictionary<string, string>();
         }
 
+        protected virtual Dictionary<string, string> GetPageData(IPage page)
+        {
+            var res = new Dictionary<string, string>();
+            if (page != null)
+            {
+                res.Add("PageID", page.Id);
+                res.Add("PageModified", page.RevisionDate.ToString("s"));
+                res.Add("PageTemplateID", page.PageTemplate.Id);
+                res.Add("PageTemplateModified", page.PageTemplate.RevisionDate.ToString("s"));
+            }
+            return res;
+        }
+
         private static object GetDates(IField field, Type modelType, bool multival)
         {
             if (modelType.IsAssignableFrom(typeof(DateTime)))
@@ -377,5 +405,180 @@ namespace Sdl.Web.DD4T.Mapping
         {
             return GetCompLinks<T>(components,linkedItemType)[0];
         }
+
+        private ResourceProvider _resourceProvider;
+
+        protected virtual object CreatePage(object sourceEntity, Type type, List<object> includes)
+        {
+            IPage page = sourceEntity as IPage;
+            if (page != null)
+            {
+                string postfix = String.Format(" {0} {1}", GetResource("core.pageTitleSeparator"), GetResource("core.pageTitlePostfix"));
+
+                // strip possible numbers from title
+                string title = Regex.Replace(page.Title, @"^\d{3}\s", String.Empty);
+                // Index and Default are not a proper titles for an HTML page
+                if (title.ToLowerInvariant().Equals("index") || title.ToLowerInvariant().Equals("default"))
+                {
+                    title = GetResource("core.defaultPageTitle") + postfix;
+                }
+
+                WebPage model = new WebPage { Title = title };
+                model.PageData = GetPageData(page);
+                bool first = true;
+                foreach (var cp in page.ComponentPresentations)
+                {
+                    string regionName = GetRegionFromComponentPresentation(cp);
+                    if (!model.Regions.ContainsKey(regionName))
+                    {
+                        model.Regions.Add(regionName, new Region { Name = regionName });
+                    }
+                    model.Regions[regionName].Items.Add(cp);
+
+                    // determine title and description from first component in 'main' region
+                    if (first && regionName.Equals(Configuration.RegionForPageTitleComponent))
+                    {
+                        first = false;
+                        IFieldSet metadata = cp.Component.MetadataFields;
+                        IFieldSet fields = cp.Component.Fields;
+                        // determine title
+                        if (metadata.ContainsKey(Configuration.StandardMetadataXmlFieldName) && metadata[Configuration.StandardMetadataXmlFieldName].EmbeddedValues.Count > 0)
+                        {
+                            IFieldSet standardMeta = metadata[Configuration.StandardMetadataXmlFieldName].EmbeddedValues[0];
+                            if (standardMeta.ContainsKey(Configuration.StandardMetadataTitleXmlFieldName))
+                            {
+                                model.Title = standardMeta[Configuration.StandardMetadataTitleXmlFieldName].Value + postfix;
+                            }
+
+                            // determine description
+                            if (standardMeta.ContainsKey(Configuration.StandardMetadataDescriptionXmlFieldName))
+                            {
+                                model.Meta.Add("description", standardMeta[Configuration.StandardMetadataDescriptionXmlFieldName].Value);
+                            }
+                        }
+                        else if (fields.ContainsKey(Configuration.ComponentXmlFieldNameForPageTitle))
+                        {
+                            model.Title = fields[Configuration.ComponentXmlFieldNameForPageTitle].Value + postfix;
+                        }
+                    }
+                }
+
+                //Add header/footer
+                IPage headerInclude = null;
+                IPage footerInclude = null;
+                if (includes != null)
+                {
+                    foreach (var include in includes)
+                    {
+                        var subPage = include as IPage;
+                        if (subPage != null)
+                        {
+                            switch (subPage.Title)
+                            {
+                                case "Header":
+                                    headerInclude = subPage;
+                                    break;
+                                case "Footer":
+                                    footerInclude = subPage;
+                                    break;
+                            }
+                        }
+                    }
+                }
+                if (headerInclude != null)
+                {
+                    WebPage headerPage = (WebPage)Create(headerInclude, typeof(WebPage), null);
+                    if (headerPage != null)
+                    {
+                        var header = new Header { Regions = new Dictionary<string, Region>() };
+                        foreach (var region in headerPage.Regions)
+                        {
+                            //The main region should contain a Teaser containing the header logo etc.
+                            if (region.Key == "Main")
+                            {
+                                if (region.Value.Items.Count > 0)
+                                {
+                                    Teaser headerTeaser = CreateEntity(region.Value.Items[0], typeof(Teaser)) as Teaser;
+                                    if (headerTeaser != null)
+                                    {
+                                        header.Logo = headerTeaser;
+                                    }
+                                    else
+                                    {
+                                        Log.Warn("Header 'page' does not contain a Teaser in the Main region. Cannot set logo/heading/subheading");
+                                    }
+                                }
+                            }
+                            //Other regions are simply added to the header regions container
+                            else
+                            {
+                                header.Regions.Add(region.Key, region.Value);
+                            }
+
+                        }
+                        model.Header = header;
+                    }
+                }
+                if (footerInclude != null)
+                {
+                    WebPage footerPage = (WebPage)Create(footerInclude, typeof(WebPage), null);
+                    if (footerPage != null)
+                    {
+                        var footer = new Footer { Regions = new Dictionary<string, Region>() };
+                        foreach (var region in footerPage.Regions)
+                        {
+                            //The main region should contain a LinkList containing the footer copyright and links.
+                            if (region.Key == "Main")
+                            {
+                                if (region.Value.Items.Count > 0)
+                                {
+                                    LinkList footerLinks = CreateEntity(region.Value.Items[0], typeof(LinkList)) as LinkList;
+                                    if (footerLinks != null)
+                                    {
+                                        footer.LinkList = footerLinks;
+                                    }
+                                    else
+                                    {
+                                        Log.Warn("Footer 'page' does not contain a Teaser in the Main region. Cannot set logo/copyright");
+                                    }
+                                }
+                            }
+                            //Other regions are simply added to the header regions container
+                            else
+                            {
+                                footer.Regions.Add(region.Key, region.Value);
+                            }
+                        }
+                        model.Footer = footer;
+                    }
+                }
+                return model;
+            }
+            throw new Exception(String.Format("Cannot create model for class {0}. Expecting IPage.", sourceEntity.GetType().FullName));
+
+        }
+
+
+
+        private string GetResource(string name)
+        {
+            if (_resourceProvider == null)
+            {
+                _resourceProvider = new ResourceProvider();
+            }
+            return _resourceProvider.GetObject(name, CultureInfo.CurrentUICulture).ToString();
+        }
+
+        private static string GetRegionFromComponentPresentation(IComponentPresentation cp)
+        {
+            var match = Regex.Match(cp.ComponentTemplate.Title, @".*?\[(.*?)\]");
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+            //default region name
+            return "Main";
+        }
+
     }
 }

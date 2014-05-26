@@ -2,7 +2,7 @@
 <div class="jumbotron" @Markup.Entity(Model)>
     @if (Model.Image != null)
     {
-        <div class="feature">
+        <div class="feature" @Markup.Property(Model, "Image")>
 			@Html.Image(Model.Image)
 		</div>
     }
@@ -10,8 +10,8 @@
     <p @Markup.Property(Model, "Text")>@Model.Text</p>
     @if (Model.Link != null)
     {
-        <p>
-            <a @Markup.Property(Model, "Link.LinkText") href="@Model.Link.Url" title="@Model.Link.AlternateText">@(Model.Link.LinkText ?? Html.Resource("core.readMoreLinkText")) <i class="fa fa-chevron-right"></i></a>
+        <p @Markup.Property(Model, "Link.LinkText")>
+            <a href="@Model.Link.Url" title="@Model.Link.AlternateText">@(Model.Link.LinkText ?? Html.Resource("core.readMoreLinkText")) <i class="fa fa-chevron-right"></i></a>
         </p>
     }
 </div>

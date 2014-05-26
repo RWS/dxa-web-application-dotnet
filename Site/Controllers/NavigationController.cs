@@ -8,7 +8,7 @@ using Sdl.Web.Mvc.Mapping;
 
 namespace Site.Controllers
 {
-    public class NavigationController : DD4TController
+    public class NavigationController : BaseController
     {      
         private SitemapItem NavigationModel
         {
@@ -17,7 +17,7 @@ namespace Site.Controllers
                 //This is a temporary measure to cache the navigationModel per request to not retrieve and serialize 3 times per request. Comprehensice caching strategy pending
                 if (HttpContext.Items["navigationModel"] == null) 
                 {
-                    string navigationJsonString = GetContentForPage(Configuration.LocalizeUrl("navigation.json"));
+                    string navigationJsonString = ContentProvider.GetPageContent(Configuration.LocalizeUrl("navigation.json"));
                     var navigationModel = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
                     HttpContext.Items["navigationModel"] = navigationModel;
                 }                

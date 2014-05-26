@@ -37,9 +37,9 @@ namespace Sdl.Web.Mvc.Mapping
         }
 
         /// <summary>
-        /// Dictionary with semantic schema mappings, indexed by module name.
+        /// Dictionary with semantic schema mappings, indexed by schema identifier.
         /// </summary>
-        public static Dictionary<string, List<SemanticSchema>> SemanticMap
+        public static Dictionary<string, SemanticSchema> SemanticMap
         {
             get
             {
@@ -51,7 +51,7 @@ namespace Sdl.Web.Mvc.Mapping
             }
         }
 
-        public static Dictionary<string, List<XpmRegion>> XpmRegions
+        public static Dictionary<string, XpmRegion> XpmRegions
         {
             get
             {
@@ -63,9 +63,9 @@ namespace Sdl.Web.Mvc.Mapping
             }
         }
 
-        private static Dictionary<string, List<SemanticSchema>> _semanticMap;
+        private static Dictionary<string, SemanticSchema> _semanticMap;
         private static List<SemanticVocabulary> _semanticVocabularies;
-        private static Dictionary<string, List<XpmRegion>> _xpmRegions; 
+        private static Dictionary<string, XpmRegion> _xpmRegions; 
         private static readonly object MappingLock = new object();
 
         /// <summary>
@@ -119,68 +119,51 @@ namespace Sdl.Web.Mvc.Mapping
         /// Gets a XPM region by name.
         /// </summary>
         /// <param name="name">The region name</param>
-        /// <param name="module">The module (eg "Search") - if none specified this defaults to "Core"</param>
         /// <returns>The XPM region matching the name for the given module</returns>
-        public static XpmRegion GetXpmRegion(string name, string module = Configuration.CoreModuleName)
+        public static XpmRegion GetXpmRegion(string name)
         {
-            return GetXpmRegion(XpmRegions, name, module);
+            return GetXpmRegion(XpmRegions, name);
         }
 
-        private static XpmRegion GetXpmRegion(IReadOnlyDictionary<string, List<XpmRegion>> regions, string name, string type)
+        private static XpmRegion GetXpmRegion(IReadOnlyDictionary<string, XpmRegion> regions, string name)
         {
-            Exception ex;
-            if (regions.ContainsKey(type))
+            if (regions.ContainsKey(name))
             {
-                var regionsList = regions[type];
-                XpmRegion region = regionsList.Find(r => r.Region.Equals(name));
-                if (region != null)
-                {
-                    return region;
-                }
-                ex = new Exception(string.Format("XPM Region '{0}' for module '{1}' does not exist.", name, type));
+                return regions[name];
             }
             else
             {
-                ex = new Exception(string.Format("XPM Regions for module '{0}' do not exist.", type));
-            }
-
-            Log.Error(ex);
-            // TODO should we throw the exception here or return null?
-            throw ex;            
+                Exception ex = new Exception(string.Format("XPM Region '{0}' does not exist.", name));
+                //TODO - do we throw an error, or apply some defaults?
+                Log.Error(ex);
+                throw ex;   
+            }        
         }
 
         /// <summary>
         /// Gets a semantic schema by id.
         /// </summary>
         /// <param name="id">The schema ID</param>
-        /// <param name="module">The module (eg "Search") - if none specified this defaults to "Core"</param>
         /// <returns>The semantic schema matching the id for the given module</returns>
-        public static SemanticSchema GetSchema(long id, string module = Configuration.CoreModuleName)
+        public static SemanticSchema GetSchema(string id)
         {
-            return GetSchema(SemanticMap, id, module);
+            return GetSchema(SemanticMap, id);
         }
 
-        private static SemanticSchema GetSchema(IReadOnlyDictionary<string, List<SemanticSchema>> mapping, long id, string type)
+        private static SemanticSchema GetSchema(IReadOnlyDictionary<string, SemanticSchema> mapping, string id)
         {
-            Exception ex;
-            if (mapping.ContainsKey(type))
+            
+            if (mapping.ContainsKey(id))
             {
-                var semanticSchemaList = mapping[type];
-                SemanticSchema schema = semanticSchemaList.Find(s => s.Id.Equals(id));
-                if (schema != null)
-                {
-                    return schema;
-                }
-                ex = new Exception(string.Format("Semantic Schema '{0}' for module '{1}' does not exist.", id, type));
+                return mapping[id];
             }
             else
             {
-                ex = new Exception(string.Format("Semantic mappings for module '{0}' do not exist.", type));
+                Exception ex = new Exception(string.Format("Semantic mappings for schema '{0}' do not exist.", id));
+                //TODO - do we throw an error, or apply some defaults?
+                Log.Error(ex);
+                throw ex;
             }
-
-            Log.Error(ex);
-            // TODO should we throw the exception here or return null?
-            throw ex;
         }
 
         private static void LoadMapping()
@@ -200,9 +183,9 @@ namespace Sdl.Web.Mvc.Mapping
                 // ensure that the config files have been written to disk
                 Configuration.StaticFileManager.CreateStaticAssets(applicationRoot);
 
-                _semanticMap = new Dictionary<string, List<SemanticSchema>>();
+                _semanticMap = new Dictionary<string, SemanticSchema>();
                 _semanticVocabularies = new List<SemanticVocabulary>();
-                _xpmRegions = new Dictionary<string, List<XpmRegion>>();
+                _xpmRegions = new Dictionary<string, XpmRegion>();
 
                 Log.Debug("Loading semantic mappings for default localization");
                 var path = String.Format("{0}{1}/{2}", applicationRoot, Configuration.DefaultLocalization, Configuration.AddVersionToPath(Configuration.SystemFolder + "/mappings/_all.json"));
@@ -225,23 +208,19 @@ namespace Sdl.Web.Mvc.Mapping
                             }
                             else
                             {
-                                var bits = type.Split('.');
-                                // we are only interested in schemas and regions at the moment
-                                if (bits[1].Equals("schemas"))
+                                if (type.Equals("schemas"))
                                 {
-                                    if (!_semanticMap.ContainsKey(bits[0]))
+                                    foreach(var schema in GetSchemasFromFile(configPath))
                                     {
-                                        _semanticMap.Add(bits[0], new List<SemanticSchema>());
+                                        _semanticMap.Add(schema.Id.ToString(), schema);
                                     }
-                                    _semanticMap[bits[0]] = GetSchemasFromFile(configPath);
                                 }
-                                else if (bits[1].Equals("regions"))
+                                else if (type.Equals("regions"))
                                 {
-                                    if (!_xpmRegions.ContainsKey(bits[0]))
+                                    foreach (var region in GetRegionsFromFile(configPath))
                                     {
-                                        _xpmRegions.Add(bits[0], new List<XpmRegion>());
+                                        _xpmRegions.Add(region.Region, region);
                                     }
-                                    _xpmRegions[bits[0]] = GetRegionsFromFile(configPath);
                                 }
                             }
                         }
