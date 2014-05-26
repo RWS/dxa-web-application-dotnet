@@ -20,10 +20,7 @@ namespace Sdl.Web.Mvc.Mapping
         {
             var viewResult = (ViewResult)filterContext.Result;
             var sourceModel = filterContext.Controller.ViewData.Model;
-            if (ContentProvider == null)
-            {
-                ContentProvider = ((BaseController)filterContext.Controller).ContentProvider;
-            }
+            ContentProvider = ((BaseController)filterContext.Controller).ContentProvider;
             var viewName = String.IsNullOrEmpty(viewResult.ViewName) ? GetViewName(sourceModel) : viewResult.ViewName;
             var viewEngineResult = ViewEngines.Engines.FindPartialView(filterContext.Controller.ControllerContext, viewName);
             if (viewEngineResult.View == null)
@@ -87,7 +84,7 @@ namespace Sdl.Web.Mvc.Mapping
             switch (ModelType)
             {
                 case ModelType.Page:
-                    return ContentProvider.GetPageModel(includeUrl);
+                    return ContentProvider.GetPageModel(Configuration.LocalizeUrl(includeUrl));
                 case ModelType.Region:
                     return null;
                 default:
