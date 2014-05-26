@@ -58,6 +58,10 @@ namespace Sdl.Web.DD4T
             {
                 foreach (var item in entity.EntityData)
                 {
+                    if (data.Length > 0)
+                    {
+                        data.Append(" ");
+                    }
                     data.AppendFormat("data-{0}=\"{1}\"", item.Key, HttpUtility.HtmlAttributeEncode(item.Value));
                 }
             }
