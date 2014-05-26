@@ -10,12 +10,14 @@
             </button>
             @if (Model.Logo!=null)
             {
-            <a class="navbar-logo" href="@Model.Logo.Link.Url" alt="@Model.Logo.Link.LinkText">
-                @if (Model.Logo!=null)
-                {
-                    <img src="@Model.Logo.Image.Url" alt="@Model.Logo.Image.AlternateText" height="80">
-                }
-            </a>
+                <div @Markup.Entity(Model.Logo)>
+                    <a class="navbar-logo" href="@Model.Logo.Link.Url" alt="@Model.Logo.Link.LinkText" @Markup.Property(Model.Logo, "Image")>
+                        @if (Model.Logo!=null)
+                        {
+                            <img src="@Model.Logo.Image.Url" alt="@Model.Logo.Image.AlternateText" height="80">
+                        }
+                    </a>
+                </div>
             }
         </div>
         @foreach (Region region in Model.Regions.Values)
