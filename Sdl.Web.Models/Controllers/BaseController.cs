@@ -23,7 +23,6 @@ namespace Sdl.Web.Mvc
                 throw new HttpException(404, "Page cannot be found");
             }
             ViewBag.Renderer = Renderer;
-            //TODO - ViewBag.InlineEditingBootstrap = Markup.GetInlineEditingBootstrap(model);
             return GetPageView(model);
         }
 
