@@ -75,7 +75,7 @@
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />
     <Compile Include="Logging\Logger.cs" />
-    <Compile Include="Mapping\BaseViewModelBuilder.cs" />
+    <Compile Include="Mapping\BaseModelBuilder.cs" />
     <Compile Include="Mapping\BaseContentProvider.cs" />
     <Compile Include="Mapping\IViewModelBuilder.cs" />
     <Compile Include="Mapping\IContentProvider.cs" />

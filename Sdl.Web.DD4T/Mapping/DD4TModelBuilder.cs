@@ -12,11 +12,11 @@ using System.Globalization;
 
 namespace Sdl.Web.DD4T.Mapping
 {
-    public class DD4TViewModelBuilder : BaseViewModelBuilder
+    public class DD4TModelBuilder : BaseModelBuilder
     {
         public ExtensionlessLinkFactory LinkFactory { get; set; }
 
-        public DD4TViewModelBuilder()
+        public DD4TModelBuilder()
         {
             LinkFactory = new ExtensionlessLinkFactory();
         }
@@ -234,6 +234,19 @@ namespace Sdl.Web.DD4T.Mapping
             return new Dictionary<string, string>();
         }
 
+        protected virtual Dictionary<string, string> GetPageData(IPage page)
+        {
+            var res = new Dictionary<string, string>();
+            if (page != null)
+            {
+                res.Add("PageID", page.Id);
+                res.Add("PageModified", page.RevisionDate.ToString("s"));
+                res.Add("PageTemplateID", page.PageTemplate.Id);
+                res.Add("PageTemplateModified", page.PageTemplate.RevisionDate.ToString("s"));
+            }
+            return res;
+        }
+
         private static object GetDates(IField field, Type modelType, bool multival)
         {
             if (modelType.IsAssignableFrom(typeof(DateTime)))
@@ -410,7 +423,8 @@ namespace Sdl.Web.DD4T.Mapping
                     title = GetResource("custom.defaultPageTitle") + postfix;
                 }
 
-                WebPage model = new WebPage { Id = page.Id, Title = title };
+                WebPage model = new WebPage { Title = title };
+                model.PageData = GetPageData(page);
                 bool first = true;
                 foreach (var cp in page.ComponentPresentations)
                 {
