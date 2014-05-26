@@ -23,7 +23,7 @@ namespace Sdl.Web.DD4T
         public DD4TContentProvider()
         {
             LinkFactory = new ExtensionlessLinkFactory();
-            DefaultModelBuilder = new DD4TViewModelBuilder();
+            DefaultModelBuilder = new DD4TModelBuilder();
             this.PageFactory = new PageFactory()
             {
                 PageProvider = new TridionPageProvider(),

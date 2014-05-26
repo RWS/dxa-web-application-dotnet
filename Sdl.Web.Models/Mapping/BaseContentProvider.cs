@@ -36,15 +36,15 @@ namespace Sdl.Web.Mvc.Mapping
             return model;
         }
 
-        private static Dictionary<Type, IViewModelBuilder> _modelBuilders = null;
-        public static Dictionary<Type, IViewModelBuilder> ModelBuilders
+        private static Dictionary<Type, IModelBuilder> _modelBuilders = null;
+        public static Dictionary<Type, IModelBuilder> ModelBuilders
         {
             get
             {
                 if (_modelBuilders == null)
                 {
                     //TODO hardcoded and empty for now
-                    _modelBuilders = new Dictionary<Type, IViewModelBuilder>();
+                    _modelBuilders = new Dictionary<Type, IModelBuilder>();
                 }
                 return _modelBuilders;
             }
@@ -53,7 +53,7 @@ namespace Sdl.Web.Mvc.Mapping
                 _modelBuilders = value;
             }
         }
-        public IViewModelBuilder DefaultModelBuilder { get; set; }
+        public IModelBuilder DefaultModelBuilder { get; set; }
         
         public virtual string ParseUrl(string url)
         {
@@ -82,7 +82,7 @@ namespace Sdl.Web.Mvc.Mapping
             }
             if (viewModeltype!=null)
             {
-                IViewModelBuilder builder = DefaultModelBuilder;
+                IModelBuilder builder = DefaultModelBuilder;
                 if (ModelBuilders.ContainsKey(viewModeltype))
                 {
                     builder = ModelBuilders[viewModeltype];

@@ -119,11 +119,15 @@ namespace Sdl.Web.DD4T
             return new MvcHtmlString(String.Format("typeof=\"{0}\" resource=\"{1}\"{2}", "Region", region.Name, data));
         }
 
-        public static MvcHtmlString GetInlineEditingBootstrap(IPage page)
+        public static MvcHtmlString Page(WebPage page)
         {
             if (Configuration.IsStaging)
             {
-                var html = String.Format(PageFormat, page.Id, page.RevisionDate.ToString(DateFormat), page.PageTemplate.Id, page.PageTemplate.RevisionDate.ToString(DateFormat)) + String.Format(PageScript, Configuration.GetCmsUrl());
+                var pageId = page.PageData.ContainsKey("PageID") ? page.PageData["PageID"] : null;
+                var pageTemplateId = page.PageData.ContainsKey("PageTemplateID") ? page.PageData["PageTemplateID"] : null;
+                var pageDate = page.PageData.ContainsKey("PageModified") ? page.PageData["PageModified"] : null;
+                var pageTemplateDate = page.PageData.ContainsKey("PageTemplateModified") ? page.PageData["PageTemplateModified"] : null;
+                var html = String.Format(PageFormat, pageId, pageDate, pageTemplateId, pageTemplateDate) + String.Format(PageScript, Configuration.GetCmsUrl());
                 return new MvcHtmlString(html);
             }
             return null;
