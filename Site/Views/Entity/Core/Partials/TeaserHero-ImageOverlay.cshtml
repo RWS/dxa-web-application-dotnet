@@ -1,30 +1,34 @@
 ﻿@model Sdl.Web.Mvc.Models.Teaser
-@if (Model.Image!=null)
-{
-    @Html.Image(Model.Image, 3.3)
-}
-@if (Model.Headline!=null || Model.Text!=null)
-{
-    if (Model.Link != null)
+<div @Markup.Entity(Model)>
+    @if (Model.Image!=null)
     {
-    <a href="@Model.Link.Url" title="@Model.Link.AlternateText">
-        <div class="overlay overlay-tl ribbon">
-            <h2 class="">@Model.Headline</h2>
-            @if(Model.Text!=null)
-            {
-                <p class="h3">@Html.Raw(Model.Text.Replace(". ",".<br/>"))</p>
-            }
-        </div>
-    </a>
+        <span @Markup.Property(Model, "Image")>
+            @Html.Image(Model.Image, 3.3)        
+        </span>
     }
-    else
+    @if (Model.Headline!=null || Model.Text!=null)
     {
-        <div class="overlay overlay-tl ribbon">
-            <h2 class="">@Model.Headline</h2>
-            @if(Model.Text!=null)
-            {
-                <p class="h3">@Html.Raw(Model.Text.Replace(". ",".<br/>"))</p>
-            }
-        </div>
+        if (Model.Link != null)
+        {
+        <a href="@Model.Link.Url" title="@Model.Link.AlternateText">
+            <div class="overlay overlay-tl ribbon">
+                <h2 class="" @Markup.Property(Model, "Headline")>@Model.Headline</h2>
+                @if(Model.Text!=null)
+                {
+                    <p class="h3" @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ",".<br/>"))</p>
+                }
+            </div>
+        </a>
+        }
+        else
+        {
+            <div class="overlay overlay-tl ribbon">
+                <h2 class="" @Markup.Property(Model, "Headline")>@Model.Headline</h2>
+                @if(Model.Text!=null)
+                {
+                    <p class="h3" @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ",".<br/>"))</p>
+                }
+            </div>
+        }
     }
-}
+</div>

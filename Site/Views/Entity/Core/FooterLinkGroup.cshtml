@@ -1,16 +1,20 @@
 ﻿@model Sdl.Web.Mvc.Models.LinkList
-@if (!String.IsNullOrEmpty(Model.Headline))
-{
-    <div class="h4">@Model.Headline</div>
-}
-@if (Model.Links!=null && Model.Links.Count>0)
-{
-<ul class="list-unstyled">
-    @foreach(var link in Model.Links)
+<div @Markup.Entity(Model)>
+    @if (!String.IsNullOrEmpty(Model.Headline))
     {
-	<li>
-		<a href="@link.Url" title="@link.AlternateText">@link.LinkText</a>
-	</li>
+        <div class="h4" @Markup.Property(Model, "Headline")>@Model.Headline</div>
     }
-</ul>
-}
+    @if (Model.Links!=null && Model.Links.Count>0)
+    {
+        <ul class="list-unstyled">
+            @{ int index = 0; }
+            @foreach(var link in Model.Links)
+            {                
+                <li @Markup.Property(Model, "Links", index)>
+                    <a href="@link.Url" title="@link.AlternateText">@link.LinkText</a>
+                </li>
+                index++;
+            }
+        </ul>
+    }
+</div>
