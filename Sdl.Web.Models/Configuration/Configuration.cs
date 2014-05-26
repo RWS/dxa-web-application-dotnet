@@ -299,7 +299,7 @@ namespace Sdl.Web.Mvc
 
         public static string GetCmsUrl()
         {
-            return GetConfig("environment.cmsurl");
+            return GetConfig("core.cmsurl");
         }
         
         public static String AddVersionToPath(string path)
