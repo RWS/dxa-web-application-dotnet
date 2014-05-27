@@ -177,11 +177,11 @@
     <Content Include="Views\Navigation\Breadcrumb.cshtml" />
     <Content Include="Views\Navigation\LeftNavigation.cshtml" />
     <Content Include="Views\Navigation\TopNavigation.cshtml" />
-    <Content Include="Views\Page\Core\LeftNavContentPage.cshtml" />
     <Content Include="Views\Entity\Core\TeaserColored.cshtml" />
     <Content Include="Views\Entity\Core\TeaserHero-ImageOverlay.cshtml" />
     <Content Include="Views\Shared\_SectionError.cshtml" />
     <Content Include="Views\Navigation\GoogleSitemap.cshtml" />
+    <Content Include="Views\Page\Core\ContentPageWithoutNavigation.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
