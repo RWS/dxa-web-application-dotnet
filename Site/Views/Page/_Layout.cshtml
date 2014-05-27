@@ -25,9 +25,7 @@
 <body>
     @if (Model.Header!=null)
     {
-        @* calling Markup.ParseComponentPresentation() on Html.Partial() so XPM markup is properly handled *@
-        @* TODO abstract Markup.ParseComponentPresentation() away *@
-        @Markup.ParseComponentPresentation(Html.Partial("Core/Header", Model.Header))
+        @Html.Partial("Core/Header", Model.Header)
     }
     <div role="main">
         <div class="container">
@@ -36,9 +34,7 @@
     </div>
     @if (Model.Footer!=null)
     {
-        @* calling Markup.ParseComponentPresentation() on Html.Partial() so XPM markup is properly handled *@        
-        @* TODO abstract Markup.ParseComponentPresentation() away *@
-        @Markup.ParseComponentPresentation(Html.Partial("Core/Footer", Model.Footer))
+        @Html.Partial("Core/Footer", Model.Footer)
     }
     <script src="@Url.VersionedContent("/assets/scripts/plugins.js")"></script>
     <script src="@Url.VersionedContent("/assets/scripts/custom.js")"></script>
