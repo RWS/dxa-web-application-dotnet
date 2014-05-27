@@ -493,28 +493,7 @@ namespace Sdl.Web.DD4T.Mapping
                         var header = new Header { Regions = new Dictionary<string, Region>() };
                         foreach (var region in headerPage.Regions)
                         {
-                            //The main region should contain a Teaser containing the header logo etc.
-                            if (region.Key == "Main")
-                            {
-                                if (region.Value.Items.Count > 0)
-                                {
-                                    Teaser headerTeaser = CreateEntity(region.Value.Items[0], typeof(Teaser)) as Teaser;
-                                    if (headerTeaser != null)
-                                    {
-                                        header.Logo = headerTeaser;
-                                    }
-                                    else
-                                    {
-                                        Log.Warn("Header 'page' does not contain a Teaser in the Main region. Cannot set logo/heading/subheading");
-                                    }
-                                }
-                            }
-                            //Other regions are simply added to the header regions container
-                            else
-                            {
-                                header.Regions.Add(region.Key, region.Value);
-                            }
-
+                            header.Regions.Add(region.Key, region.Value);
                         }
                         model.Header = header;
                     }
@@ -527,27 +506,7 @@ namespace Sdl.Web.DD4T.Mapping
                         var footer = new Footer { Regions = new Dictionary<string, Region>() };
                         foreach (var region in footerPage.Regions)
                         {
-                            //The main region should contain a LinkList containing the footer copyright and links.
-                            if (region.Key == "Main")
-                            {
-                                if (region.Value.Items.Count > 0)
-                                {
-                                    LinkList footerLinks = CreateEntity(region.Value.Items[0], typeof(LinkList)) as LinkList;
-                                    if (footerLinks != null)
-                                    {
-                                        footer.LinkList = footerLinks;
-                                    }
-                                    else
-                                    {
-                                        Log.Warn("Footer 'page' does not contain a Teaser in the Main region. Cannot set logo/copyright");
-                                    }
-                                }
-                            }
-                            //Other regions are simply added to the header regions container
-                            else
-                            {
-                                footer.Regions.Add(region.Key, region.Value);
-                            }
+                            footer.Regions.Add(region.Key, region.Value);
                         }
                         model.Footer = footer;
                     }

@@ -1,0 +1,11 @@
+﻿@model Teaser
+<div @Markup.Entity(Model)>
+    <a class="navbar-logo" href="@Model.Link.Url" title="@Model.Link.LinkText">
+        @if (Model!=null)
+        {
+            <span @Markup.Property(Model, "Image")>
+                <img src="@Model.Image.Url" alt="@Model.Image.AlternateText" height="80">                                
+            </span>
+        }
+    </a>
+</div>

@@ -8,23 +8,14 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            @if (Model.Logo!=null)
+            @if (Model.Regions.ContainsKey("Logo"))
             {
-                <div @Markup.Entity(Model.Logo)>
-                    <a class="navbar-logo" href="@Model.Logo.Link.Url" alt="@Model.Logo.Link.LinkText">
-                        @if (Model.Logo!=null)
-                        {
-                            <span @Markup.Property(Model.Logo, "Image")>
-                                <img src="@Model.Logo.Image.Url" alt="@Model.Logo.Image.AlternateText" height="80">                                
-                            </span>
-                        }
-                    </a>
-                </div>
+                @ViewBag.Renderer.Render(Model.Regions["Logo"], Html)
             }
         </div>
         @foreach (Region region in Model.Regions.Values)
         {
-            @ViewBag.Renderer.Render(region, Html)
+            @ViewBag.Renderer.Render(region, Html, 12, new List<string> {"Logo"})
         }
     </div>
 </div>

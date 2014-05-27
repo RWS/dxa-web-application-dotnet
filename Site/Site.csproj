@@ -182,6 +182,10 @@
     <Content Include="Views\Shared\_SectionError.cshtml" />
     <Content Include="Views\Navigation\GoogleSitemap.cshtml" />
     <Content Include="Views\Page\Core\ContentPageWithoutNavigation.cshtml" />
+    <Content Include="Views\Region\Core\Logo.cshtml" />
+    <Content Include="Views\Region\Core\Links.cshtml" />
+    <Content Include="Views\Entity\Core\HeaderLogo.cshtml" />
+    <Content Include="Views\Entity\Core\FooterLinks.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
