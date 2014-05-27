@@ -5,10 +5,12 @@
     @ViewBag.Renderer.Render(Model.Regions["Hero"], Html)
 }
 @Html.Action("Breadcrumb", "Navigation")
-@foreach (Region region in Model.Regions.Values)
-{
-    if (region.Name!="Hero")
-    {
-        @ViewBag.Renderer.Render(region, Html)
-    }
-}
+<div class="row">
+    @Html.Action("LeftNavigation", "Navigation")
+    <div class="col-sm-9">
+        @foreach (Region region in Model.Regions.Values)
+        {
+            @ViewBag.Renderer.Render(region, Html, 9, new List<string>{"Hero"})
+        }
+    </div>
+</div>
