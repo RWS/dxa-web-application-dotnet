@@ -7,7 +7,6 @@ namespace Sdl.Web.Mvc.Models
 {
     public class Footer
     {
-        public LinkList LinkList { get; set; }
         public Dictionary<string, Region> Regions { get; set; }
         
         public Footer()

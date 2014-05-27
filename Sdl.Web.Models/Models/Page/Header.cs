@@ -7,7 +7,6 @@ namespace Sdl.Web.Mvc.Models
 {
     public class Header
     {
-        public Teaser Logo { get; set; }
         public Dictionary<string, Region> Regions { get; set; }
 
         public Header()
