@@ -155,6 +155,7 @@
     <Content Include="Views\Page\_Layout.cshtml" />
     <Content Include="Views\Entity\Core\Article.cshtml" />
     <Content Include="Views\Region\Core\Main.cshtml" />
+    <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
     <None Include="Properties\PublishProfiles\Publish to Local Demo Site.pubxml" />
     <Content Include="Views\Region\Core\3-Column.cshtml" />
     <Content Include="Views\Entity\Core\Teaser.cshtml" />
