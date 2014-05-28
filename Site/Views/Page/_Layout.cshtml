@@ -23,12 +23,12 @@
     <![endif]-->
 </head>
 <body>
-    @if (Model.Header!=null)
-    {
-        @Html.Partial("Core/Header", Model.Header)
-    }
-    <div role="main">
-        <div class="container">
+    <div id="page-wrapper">
+        @if (Model.Header!=null)
+        {
+            @Html.Partial("Core/Header", Model.Header)
+        }
+        <div class="container-fluid page-border" role="main">
             @RenderBody()
         </div>
     </div>

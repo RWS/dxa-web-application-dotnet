@@ -1,13 +1,12 @@
 ﻿@model Sdl.Web.Mvc.Models.Header
-<div class="navbar navbar-default" role="navigation">
-    <div class="container">
+<header id="page-header" class="navbar navbar-default">
+  <div class="container-fluid page-border">
+    <div class="row">
+      <div class="col-xs-12" role="navigation">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">@Html.Resource("core.toggleNavigationText")</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <i class="fa fa-bars"></i>
+          </button>
             @if (Model.Regions.ContainsKey("Logo"))
             {
                 @ViewBag.Renderer.Render(Model.Regions["Logo"], Html)
@@ -17,5 +16,7 @@
         {
             @ViewBag.Renderer.Render(region, Html, 12, new List<string> {"Logo"})
         }
+      </div>
     </div>
-</div>
+  </div>
+</header>
