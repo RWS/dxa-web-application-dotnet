@@ -16,7 +16,7 @@ namespace Sdl.Web.Mvc.Models
         public DateTime? Date { get; set; }        
         public string Description { get; set; }
         //[SemanticProperty("s:articleBody")]
-        public List<Paragraph> Paragraphs { get; set; }
+        public List<Paragraph> ArticleBody { get; set; }
         [SemanticProperty(IgnoreMapping=true)]
         public string TestNoMap { get; set; }
     }

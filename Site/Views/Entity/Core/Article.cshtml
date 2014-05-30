@@ -24,10 +24,10 @@
         </div>
     }
     <div class="content">
-        @if (Model.Paragraphs!=null)
+        @if (Model.ArticleBody != null)
         {
             int i=0;
-            foreach (var para in Model.Paragraphs)
+            foreach (var para in Model.ArticleBody)
             {
                 <div @Markup.Property(Model, "Paragraphs",i++)>
                 @if (para.Subheading!=null)
