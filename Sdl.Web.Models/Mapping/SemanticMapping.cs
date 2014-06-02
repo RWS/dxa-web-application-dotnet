@@ -85,10 +85,11 @@ namespace Sdl.Web.Mvc.Mapping
             {
                 return vocabulary.Prefix;
             }
-
-            Exception ex = new Exception(string.Format("Prefix not found for semantic vocabulary '{0}'", vocab));
-            Log.Error(ex);
-            throw ex;
+            else
+            {
+                Log.Warn("Prefix not found for semantic vocabulary '{0}'", vocab);
+            }
+            return null;
         }
 
         /// <summary>

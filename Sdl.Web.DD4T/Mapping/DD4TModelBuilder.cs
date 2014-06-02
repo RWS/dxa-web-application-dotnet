@@ -138,22 +138,22 @@ namespace Sdl.Web.DD4T.Mapping
             }
             if (mapData.Vocabularies.ContainsKey(lookup))
             {
-                //TODO check exists
                 var vocab = mapData.Vocabularies[lookup];
-                // semantic mapping of fields
-                string fieldname = null;
-
+                
                 // determine field semantics
                 string prefix = SemanticMapping.GetPrefix(vocab);
-                string property = info.PropertyName;
-                string entity = mapData.EntityNames[vocab].First();
-                FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
-
-                // locate semantic schema field
-                SemanticSchemaField matchingField = mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics);
-                if (matchingField != null)
+                if (prefix != null)
                 {
-                    return ExtractMatchedField(matchingField, matchingField.IsMetadata ? mapData.Meta : mapData.Content, mapData.EmbedLevel);
+                    string property = info.PropertyName;
+                    string entity = mapData.EntityNames[vocab].First();
+                    FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
+
+                    // locate semantic schema field
+                    SemanticSchemaField matchingField = mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics);
+                    if (matchingField != null)
+                    {
+                        return ExtractMatchedField(matchingField, matchingField.IsMetadata ? mapData.Meta : mapData.Content, mapData.EmbedLevel);
+                    }
                 }
             }
             return null;
