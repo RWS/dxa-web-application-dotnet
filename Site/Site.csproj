@@ -187,6 +187,8 @@
     <Content Include="Views\Region\Core\Links.cshtml" />
     <Content Include="Views\Entity\Core\HeaderLogo.cshtml" />
     <Content Include="Views\Entity\Core\FooterLinks.cshtml" />
+    <Content Include="Views\Region\Core\Info.cshtml" />
+    <Content Include="Views\Entity\Core\CookieBar.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
