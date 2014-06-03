@@ -2,8 +2,8 @@
 
 namespace Sdl.Web.Mvc.Models
 {
-    [SemanticEntity(EntityName = "CookieBar", Prefix = "cb", Vocab = Configuration.CoreVocabulary)]
-    public class Info : Entity
+    [SemanticEntity(EntityName = "NotificationBar", Prefix = "nb", Vocab = Configuration.CoreVocabulary)]
+    public class Notification : Entity
     {
         public string Headline { get; set; }
         public string Text { get; set; }
