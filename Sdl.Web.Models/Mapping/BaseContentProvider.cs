@@ -97,6 +97,17 @@ namespace Sdl.Web.Mvc.Mapping
             }
         }
 
-        
+        public virtual string ProcessUrl(string url)
+        {
+            if (url.EndsWith(Configuration.GetDefaultExtension()))
+            {
+                url = url.Substring(0, url.Length - Configuration.GetDefaultExtension().Length);
+                if (url.EndsWith("/" + Configuration.GetDefaultExtensionLessPageName()))
+                {
+                    url = url.Substring(0, url.Length - Configuration.GetDefaultExtensionLessPageName().Length);
+                }
+            }
+            return url;
+        }
     }
 }

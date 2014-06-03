@@ -15,6 +15,8 @@ namespace Sdl.Web.Mvc.Mapping
 
         object MapModel(object entity, ModelType modelType = ModelType.Entity, Type viewModeltype = null, List<object> includes = null);
         
+        string ProcessUrl(string url);
+
         string GetEntityViewName(object entity);
         string GetRegionViewName(object region);
         string GetPageViewName(object page);

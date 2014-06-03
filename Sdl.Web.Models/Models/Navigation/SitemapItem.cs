@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sdl.Web.Mvc.Models
 {
-    public class SitemapItem
+    public class SitemapItem : Entity
     {
         private string _url;
 
@@ -26,10 +26,10 @@ namespace Sdl.Web.Mvc.Models
         public string Url
         {
             get { return _url; }
-            set { _url = RemoveNonRequiredExtensions(value); }
+            set { _url = ProcessUrl(value); }
         }
 
-        private string RemoveNonRequiredExtensions(string value)
+        private string ProcessUrl(string value)
         {
             return value.Replace(Configuration.GetDefaultExtension(), "");
         }

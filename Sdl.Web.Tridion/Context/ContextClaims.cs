@@ -56,6 +56,20 @@ namespace Sdl.Web.Tridion.Context
             return value;
         }
 
+        protected internal double GetDoubleValue(Uri claimUri)
+        {
+            double value;
+            try
+            {
+                value = Convert.ToDouble(_claims[claimUri].ToString());
+            }
+            catch
+            {
+                return 0.0;
+            }
+            return value;
+        }
+
         protected internal string GetStringValue(Uri claimUri)
         {
             string value;
