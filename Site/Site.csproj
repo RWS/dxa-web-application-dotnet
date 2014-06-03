@@ -190,6 +190,7 @@
     <Content Include="Views\Region\Core\Info.cshtml" />
     <Content Include="Views\Entity\Core\CookieNotificationBar.cshtml" />
     <Content Include="Views\Entity\Core\OldBrowserNotificationBar.cshtml" />
+    <Content Include="Views\Page\Core\RedirectPage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

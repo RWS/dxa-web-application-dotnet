@@ -422,8 +422,8 @@ namespace Sdl.Web.DD4T.Mapping
                 {
                     title = GetResource("core.defaultPageTitle") + postfix;
                 }
-
                 WebPage model = new WebPage { Title = title };
+                model.Meta = ProcessPageMetadata(page);
                 model.PageData = GetPageData(page);
                 bool first = true;
                 foreach (var cp in page.ComponentPresentations)
@@ -462,7 +462,7 @@ namespace Sdl.Web.DD4T.Mapping
                         }
                     }
                 }
-
+                
                 //Add header/footer
                 IPage headerInclude = null;
                 IPage footerInclude = null;
@@ -515,6 +515,51 @@ namespace Sdl.Web.DD4T.Mapping
             }
             throw new Exception(String.Format("Cannot create model for class {0}. Expecting IPage.", sourceEntity.GetType().FullName));
 
+        }
+
+        protected virtual Dictionary<string, string> ProcessPageMetadata(IPage page)
+        {
+            var meta = new Dictionary<string, string>();
+            if (page.MetadataFields != null)
+            {
+                foreach (var field in page.MetadataFields.Values)
+                {
+                    ProcessMetadataField(field, meta);
+                }
+            }
+            return meta;
+        }
+
+        protected virtual void ProcessMetadataField(IField field, Dictionary<string, string> meta)
+        {
+            if (field.FieldType==FieldType.Embedded)
+            {
+                if (field.EmbeddedValues!=null & field.EmbeddedValues.Count>0)
+                {
+                    var subfields = field.EmbeddedValues[0];
+                    foreach (var subfield in subfields.Values)
+                    {
+                        ProcessMetadataField(subfield, meta);
+                    }
+                }
+            }
+            else
+            {
+                string value = null;
+                switch (field.Name)
+                {
+                    case "internalLink":
+                        value = LinkFactory.ResolveExtensionlessLink(field.Value);
+                        break;
+                    default:
+                        value = String.Join(",", field.Values);
+                        break;
+                }
+                if (value != null && !meta.ContainsKey(field.Name))
+                {
+                    meta.Add(field.Name, value);
+                }
+            }
         }
 
 
