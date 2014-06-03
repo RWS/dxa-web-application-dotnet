@@ -5,12 +5,11 @@ using System.Web;
 
 namespace Sdl.Web.Mvc.Models
 {
-    public class Breadcrumb
+    public class NavigationLinks : Entity
     {
-        //TODO: consider logic to exclude default/index page from breadcrumb
         public List<Link> Items { get; set; }
 
-        public Breadcrumb()
+        public NavigationLinks()
         {
             Items = new List<Link>();
         }

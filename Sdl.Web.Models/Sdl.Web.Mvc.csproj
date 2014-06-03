@@ -97,7 +97,7 @@
     <Compile Include="Models\Common\Entity.cs" />
     <Compile Include="Models\Common\Paragraph.cs" />
     <Compile Include="Models\Entity\Teaser.cs" />
-    <Compile Include="Models\Navigation\Breadcrumb.cs" />
+    <Compile Include="Models\Navigation\NavigationLinks.cs" />
     <Compile Include="Models\Page\Footer.cs" />
     <Compile Include="Models\Page\Header.cs" />
     <Compile Include="Models\Page\Region.cs" />

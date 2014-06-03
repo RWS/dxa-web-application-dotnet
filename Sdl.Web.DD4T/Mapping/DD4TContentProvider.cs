@@ -33,6 +33,15 @@ namespace Sdl.Web.DD4T
             };
         }
 
+        public override string ProcessUrl(string url)
+        {
+            if (url.StartsWith("tcm:"))
+            {
+                url = LinkFactory.ResolveExtensionlessLink(url);
+            }
+            return base.ProcessUrl(url);
+        }
+
         public override string GetPageViewName(object pageObject)
         {
             var page = (IPage)pageObject;
