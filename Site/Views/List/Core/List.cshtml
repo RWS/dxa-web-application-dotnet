@@ -1,0 +1,24 @@
+﻿@model Sdl.Web.Mvc.Models.ContentList<Teaser>
+<div @Markup.Entity(Model)>
+    @if (Model.Headline!=null)
+    {
+    <h4 @Markup.Property(Model,"Headline")>@Model.Headline</h4>
+    }
+    <ul>
+    @foreach (var item in Model.ItemListElements)
+    {
+        <li>
+            @if (item.Link.Url!=null)
+            {
+            <a href="@item.Link.Url">
+                @item.Headline
+            </a>
+            }
+            else
+            {
+            @item.Headline
+            }
+        </li>
+    }
+    </ul>
+</div>
