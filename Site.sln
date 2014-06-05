@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Site", "Site\Site.csproj", "{4B9E8878-0810-4CD1-B57A-D06589C49FE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Mvc", "Sdl.Web.Models\Sdl.Web.Mvc.csproj", "{923B2009-9A0B-4425-88A5-BF7AF25C8F8B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Mvc", "Sdl.Web.Mvc\Sdl.Web.Mvc.csproj", "{923B2009-9A0B-4425-88A5-BF7AF25C8F8B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.DD4T", "Sdl.Web.DD4T\Sdl.Web.DD4T.csproj", "{360AEC0A-3367-486A-885F-7931F32234C1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Tridion", "Sdl.Web.Tridion\Sdl.Web.Tridion.csproj", "{AE4651DF-A42F-4863-A0E1-870EACF3D072}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Mvc.Common", "Sdl.Web.Mvc.Models\Sdl.Web.Mvc.Common.csproj", "{21C08F9A-24C2-481A-95C3-A255BE9771A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Mvc.Common", "Sdl.Web.Mvc.Common\Sdl.Web.Mvc.Common.csproj", "{21C08F9A-24C2-481A-95C3-A255BE9771A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

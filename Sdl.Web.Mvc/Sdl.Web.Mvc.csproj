@@ -85,7 +85,7 @@
     <Compile Include="Statics\StaticRedirectModule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sdl.Web.Mvc.Models\Sdl.Web.Mvc.Common.csproj">
+    <ProjectReference Include="..\Sdl.Web.Mvc.Common\Sdl.Web.Mvc.Common.csproj">
       <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
       <Name>Sdl.Web.Mvc.Common</Name>
     </ProjectReference>
