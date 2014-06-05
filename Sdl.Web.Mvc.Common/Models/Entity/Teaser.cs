@@ -12,11 +12,16 @@ namespace Sdl.Web.Mvc.Models
         //A teaser can be mapped from an article, in which case the link should be to the article itself
         [SemanticProperty("a:_self")]
         public Link Link { get; set; }
+        [SemanticProperty("headline")]
+        [SemanticProperty("subheading")]
         public string Headline { get; set; }
         //A teaser can be mapped from an individual image, in which case the image property is set from the source entity itself
         [SemanticProperty("i:_self")]
         public Image Image { get; set; }
+        public MediaItem Media { get; set; }
         [SemanticProperty("a:introText")]
+        [SemanticProperty("content")]
+        [SemanticProperty("text")]
         public string Text { get; set; }
     }
 }
