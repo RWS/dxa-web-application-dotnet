@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Sdl.Web.Mvc.Models;
+using Sdl.Web.Mvc.Common;
 
 namespace Sdl.Web.Mvc.Mapping
 {

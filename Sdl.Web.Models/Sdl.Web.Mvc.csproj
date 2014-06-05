@@ -59,10 +59,7 @@
     <Compile Include="Errors\HandleSectionErrorAttribute.cs" />
     <Compile Include="Mapping\NavigationBuilder.cs" />
     <Compile Include="Mapping\ComponentType.cs" />
-    <Compile Include="Mapping\MapModelAttribute.cs" />
     <Compile Include="Mapping\XpmRegion.cs" />
-    <Compile Include="Models\Entity\Notification.cs" />
-    <Compile Include="Models\Navigation\SitemapItem.cs" />
     <Compile Include="Configuration\ResourceProviderFactory.cs" />
     <Compile Include="Configuration\ResourceProvider.cs" />
     <Compile Include="Context\ContextAwareViewEngine.cs" />
@@ -71,15 +68,11 @@
     <Compile Include="Formatting\FormatFilterAttribute.cs" />
     <Compile Include="Html\BaseRenderer.cs" />
     <Compile Include="Html\HtmlHelperExtensions.cs" />
-    <Compile Include="Html\IRenderer.cs" />
     <Compile Include="Html\UrlHelperExtension.cs" />
-    <Compile Include="Logging\ILogger.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Mapping\BaseModelBuilder.cs" />
     <Compile Include="Mapping\BaseContentProvider.cs" />
-    <Compile Include="Mapping\IModelBuilder.cs" />
-    <Compile Include="Mapping\IContentProvider.cs" />
     <Compile Include="Mapping\SchemaSemantics.cs" />
     <Compile Include="Mapping\FieldSemantics.cs" />
     <Compile Include="Mapping\SemanticMapping.cs" />
@@ -87,27 +80,15 @@
     <Compile Include="Mapping\SemanticSchema.cs" />
     <Compile Include="Mapping\SemanticSchemaField.cs" />
     <Compile Include="Mapping\SemanticVocabulary.cs" />
-    <Compile Include="Models\Attributes.cs" />
-    <Compile Include="Models\Entity\Carousel.cs" />
-    <Compile Include="Models\Entity\LinkList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Models\Common\Image.cs" />
-    <Compile Include="Models\Common\Link.cs" />
-    <Compile Include="Models\Common\MediaItem.cs" />
-    <Compile Include="Models\Entity\Article.cs" />
-    <Compile Include="Models\Common\Entity.cs" />
-    <Compile Include="Models\Common\Paragraph.cs" />
-    <Compile Include="Models\Entity\Teaser.cs" />
-    <Compile Include="Models\Navigation\NavigationLinks.cs" />
-    <Compile Include="Models\Page\Footer.cs" />
-    <Compile Include="Models\Page\Header.cs" />
-    <Compile Include="Models\Page\Region.cs" />
-    <Compile Include="Models\Page\WebPage.cs" />
     <Compile Include="Statics\BaseStaticFileManager.cs" />
-    <Compile Include="Statics\IStaticFileManager.cs" />
     <Compile Include="Statics\StaticRedirectModule.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Sdl.Web.Mvc.Models\Sdl.Web.Mvc.Common.csproj">
+      <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
+      <Name>Sdl.Web.Mvc.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj">
       <Project>{ae4651df-a42f-4863-a0e1-870eacf3d072}</Project>
       <Name>Sdl.Web.Tridion</Name>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Sdl.Web.Mvc.Common;
+using System.Collections.Generic;
 
 namespace Sdl.Web.Mvc.Html
 {

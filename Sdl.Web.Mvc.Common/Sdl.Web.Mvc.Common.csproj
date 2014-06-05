@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{AE4651DF-A42F-4863-A0E1-870EACF3D072}</ProjectGuid>
+    <ProjectGuid>{21C08F9A-24C2-481A-95C3-A255BE9771A7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sdl.Web.Tridion</RootNamespace>
-    <AssemblyName>Sdl.Web.Tridion</AssemblyName>
+    <RootNamespace>Sdl.Web.Mvc.Common</RootNamespace>
+    <AssemblyName>Sdl.Web.Mvc.Common</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -33,49 +33,39 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Tridion.ContentDelivery, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.ContentDelivery.AmbientData, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.Context">
-      <HintPath>..\_references\2013-sp1\Tridion.Context.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.Context.Image">
-      <HintPath>..\_references\2013-sp1\Tridion.Context.Image.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Context\BrowserClaims.cs" />
-    <Compile Include="Context\ClaimUris.cs" />
-    <Compile Include="Context\ContextClaims.cs" />
-    <Compile Include="Context\ContextEngine.cs" />
-    <Compile Include="Context\DeviceClaims.cs" />
-    <Compile Include="Context\OsClaims.cs" />
-    <Compile Include="Config\TridionConfig.cs" />
+    <Compile Include="Models\Attributes.cs" />
+    <Compile Include="Models\Common\Entity.cs" />
+    <Compile Include="Models\Common\Enums.cs" />
+    <Compile Include="Models\Common\Image.cs" />
+    <Compile Include="Models\Common\Link.cs" />
+    <Compile Include="Models\Common\MediaItem.cs" />
+    <Compile Include="Models\Common\Paragraph.cs" />
+    <Compile Include="Models\Entity\Article.cs" />
+    <Compile Include="Models\Entity\Carousel.cs" />
+    <Compile Include="Models\Entity\ContentList.cs" />
+    <Compile Include="Models\Entity\LinkList.cs" />
+    <Compile Include="Models\Entity\Notification.cs" />
+    <Compile Include="Models\Entity\Teaser.cs" />
+    <Compile Include="Interfaces\IContentProvider.cs" />
+    <Compile Include="Interfaces\ILogger.cs" />
+    <Compile Include="Interfaces\IModelBuilder.cs" />
+    <Compile Include="Interfaces\IRenderer.cs" />
+    <Compile Include="Interfaces\IStaticFileManager.cs" />
+    <Compile Include="Models\Navigation\NavigationLinks.cs" />
+    <Compile Include="Models\Navigation\SitemapItem.cs" />
+    <Compile Include="Models\Page\Footer.cs" />
+    <Compile Include="Models\Page\Header.cs" />
+    <Compile Include="Models\Page\Region.cs" />
+    <Compile Include="Models\Page\WebPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Query\ContentQuery.cs" />
-    <Compile Include="Query\Teaser.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Context\Families.xml">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Sdl.Web.Mvc.Models\Sdl.Web.Mvc.Common.csproj">
-      <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
-      <Name>Sdl.Web.Mvc.Common</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

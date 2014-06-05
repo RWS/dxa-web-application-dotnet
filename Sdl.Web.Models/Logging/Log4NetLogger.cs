@@ -1,5 +1,6 @@
 ﻿using log4net;
 using log4net.Config;
+using Sdl.Web.Mvc.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;

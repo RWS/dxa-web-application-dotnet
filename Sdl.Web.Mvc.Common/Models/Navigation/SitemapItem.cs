@@ -31,7 +31,7 @@ namespace Sdl.Web.Mvc.Models
 
         private string ProcessUrl(string value)
         {
-            return value.Replace(Configuration.GetDefaultExtension(), "");
+            return value.Replace(".html", "");
         }
 
         public string Id { get; set; }

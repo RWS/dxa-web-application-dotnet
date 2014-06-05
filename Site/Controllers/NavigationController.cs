@@ -34,24 +34,28 @@ namespace Site.Controllers
             ModelType = ModelType.Entity;
         }
 
+        [HandleSectionError(View = "_SectionError")]
         public virtual ActionResult TopNavigation(object entity)
         {
             ViewBag.NavType = "Top";
             return Entity(entity);
         }
 
+        [HandleSectionError(View = "_SectionError")]
         public virtual ActionResult LeftNavigation()
         {
             var model = new NavigationBuilder() { ContentProvider = this.ContentProvider, Sitemap = NavigationModel }.BuildContextNavigation(Request.Url.LocalPath.ToString());
             return View(model);
         }
 
+        [HandleSectionError(View = "_SectionError")]
         public virtual ActionResult Breadcrumb()
         {
             var model = new NavigationBuilder() { ContentProvider = this.ContentProvider, Sitemap = NavigationModel }.BuildBreadcrumb(Request.Url.LocalPath.ToString());
             return View(model);
         }
-
+        
+        [HandleError]
         public virtual ActionResult GoogleSitemap()
         {
             return View(NavigationModel);

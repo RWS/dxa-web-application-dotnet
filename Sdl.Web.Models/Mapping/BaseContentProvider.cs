@@ -1,4 +1,5 @@
-﻿using Sdl.Web.Mvc.Models;
+﻿using Sdl.Web.Mvc.Common;
+using Sdl.Web.Mvc.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,12 +100,15 @@ namespace Sdl.Web.Mvc.Mapping
 
         public virtual string ProcessUrl(string url)
         {
-            if (url.EndsWith(Configuration.GetDefaultExtension()))
+            if (url != null)
             {
-                url = url.Substring(0, url.Length - Configuration.GetDefaultExtension().Length);
-                if (url.EndsWith("/" + Configuration.GetDefaultExtensionLessPageName()))
+                if (url.EndsWith(Configuration.GetDefaultExtension()))
                 {
-                    url = url.Substring(0, url.Length - Configuration.GetDefaultExtensionLessPageName().Length);
+                    url = url.Substring(0, url.Length - Configuration.GetDefaultExtension().Length);
+                    if (url.EndsWith("/" + Configuration.GetDefaultExtensionLessPageName()))
+                    {
+                        url = url.Substring(0, url.Length - Configuration.GetDefaultExtensionLessPageName().Length);
+                    }
                 }
             }
             return url;

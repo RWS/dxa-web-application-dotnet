@@ -117,6 +117,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\EntityController.cs" />
+    <Compile Include="Controllers\ListController.cs" />
     <Compile Include="Controllers\NavigationController.cs" />
     <Compile Include="Controllers\PageController.cs" />
     <Compile Include="Controllers\RegionController.cs" />
@@ -191,6 +192,7 @@
     <Content Include="Views\Entity\Core\CookieNotificationBar.cshtml" />
     <Content Include="Views\Entity\Core\OldBrowserNotificationBar.cshtml" />
     <Content Include="Views\Page\Core\RedirectPage.cshtml" />
+    <Content Include="Views\List\Core\List.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
@@ -208,6 +210,10 @@
     <ProjectReference Include="..\Sdl.Web.Models\Sdl.Web.Mvc.csproj">
       <Project>{923b2009-9a0b-4425-88a5-bf7af25c8f8b}</Project>
       <Name>Sdl.Web.Mvc</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sdl.Web.Mvc.Models\Sdl.Web.Mvc.Common.csproj">
+      <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
+      <Name>Sdl.Web.Mvc.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj">
       <Project>{ae4651df-a42f-4863-a0e1-870eacf3d072}</Project>

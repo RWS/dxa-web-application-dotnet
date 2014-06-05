@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 
-namespace Sdl.Web.Mvc.Html
+namespace Sdl.Web.Mvc.Common
 {
     public interface IRenderer
     {

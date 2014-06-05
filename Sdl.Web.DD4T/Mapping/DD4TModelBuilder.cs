@@ -272,6 +272,14 @@ namespace Sdl.Web.DD4T.Mapping
 
                 return field.NumericValues[0];
             }
+            if (modelType.IsAssignableFrom(typeof(Int32)))
+            {
+                if (multival)
+                {
+                    return field.NumericValues.Select(d=>(int)Math.Round(d));
+                }
+                return (int)Math.Round(field.NumericValues[0]);
+            }
             return null;
         }
 

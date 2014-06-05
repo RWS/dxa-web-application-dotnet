@@ -5,6 +5,7 @@ using System.Web.Mvc;
 using Sdl.Web.Mvc.Html;
 using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
+using Sdl.Web.Mvc.Common;
 
 namespace Sdl.Web.Mvc
 {
