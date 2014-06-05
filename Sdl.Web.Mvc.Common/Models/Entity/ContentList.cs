@@ -10,6 +10,7 @@ namespace Sdl.Web.Mvc.Models
     {
         public string Headline { get; set; }
         public int PageSize { get; set; }
+        public bool EnablePaging { get; set; }
         public string ContentType { get; set; }
         public int Start { get; set; }
         public List<T> ItemListElements { get; set; }

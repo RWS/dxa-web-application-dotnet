@@ -42,6 +42,7 @@ namespace Site.Controllers
 
         private int MapSchema(string schemaName)
         {
+            //TODO - what if the schema is from a different module?
             int res = 0;
             var schemaId = Configuration.GetGlobalConfig("schemas." + schemaName.Substring(0,1).ToLower() + schemaName.Substring(1));
             Int32.TryParse(schemaId, out res);
