@@ -8,10 +8,11 @@ namespace Sdl.Web.Mvc.Models
 {
     public class ContentList<T> : Entity
     {
+        //TODO add concept of filtering/query (filter options and active filters/query)
         public string Headline { get; set; }
         public int PageSize { get; set; }
         public bool EnablePaging { get; set; }
-        public string ContentType { get; set; }
+        public Tag ContentType { get; set; }
         public int Start { get; set; }
         public List<T> ItemListElements { get; set; }
         public ContentList()

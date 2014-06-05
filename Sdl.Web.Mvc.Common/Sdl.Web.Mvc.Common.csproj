@@ -48,6 +48,7 @@
     <Compile Include="Models\Common\Link.cs" />
     <Compile Include="Models\Common\MediaItem.cs" />
     <Compile Include="Models\Common\Paragraph.cs" />
+    <Compile Include="Models\Common\Tag.cs" />
     <Compile Include="Models\Entity\Article.cs" />
     <Compile Include="Models\Entity\Carousel.cs" />
     <Compile Include="Models\Entity\ContentList.cs" />

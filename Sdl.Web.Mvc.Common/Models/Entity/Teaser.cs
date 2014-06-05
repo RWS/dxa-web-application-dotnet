@@ -19,9 +19,9 @@ namespace Sdl.Web.Mvc.Models
         [SemanticProperty("i:_self")]
         public Image Image { get; set; }
         public MediaItem Media { get; set; }
-        [SemanticProperty("a:introText")]
         [SemanticProperty("content")]
         [SemanticProperty("text")]
+        [SemanticProperty("a:introText")]
         public string Text { get; set; }
     }
 }

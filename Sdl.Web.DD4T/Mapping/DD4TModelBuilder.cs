@@ -318,6 +318,18 @@ namespace Sdl.Web.DD4T.Mapping
         private object GetMultiKeywords(IList<IKeyword> items, Type linkedItemType, bool multival)
         {
             //What to do depends on the target type
+            if (linkedItemType == typeof(Tag))
+            {
+                List<Tag> res = items.Select(k => new Tag(){DisplayText=GetKeywordDisplayText(k),Key=GetKeywordKey(k),TagCategory=k.TaxonomyId}).ToList();
+                if (multival)
+                {
+                    return res;
+                }
+                else
+                {
+                    return res[0];
+                }
+            } 
             if (linkedItemType == typeof(bool))
             {
                 //For booleans we assume the keyword key or value can be converted to bool
@@ -339,7 +351,7 @@ namespace Sdl.Web.DD4T.Mapping
             }
             else if (linkedItemType == typeof(String))
             {
-                List<String> res = items.Select(k=>!String.IsNullOrEmpty(k.Key) ? k.Key : !String.IsNullOrEmpty(k.Description) ? k.Description : k.Title).ToList();
+                List<String> res = items.Select(k=>GetKeywordDisplayText(k)).ToList();
                 if (multival)
                 {
                     return res;
@@ -350,6 +362,16 @@ namespace Sdl.Web.DD4T.Mapping
                 }
             }
             return null;
+        }
+
+        private string GetKeywordKey(IKeyword k)
+        {
+            return !String.IsNullOrEmpty(k.Key) ? k.Key : k.Id;
+        }
+
+        private string GetKeywordDisplayText(IKeyword k)
+        {
+            return !String.IsNullOrEmpty(k.Description) ? k.Description : k.Title;
         }
         
         private object GetMultiComponentLinks(IField field, Type linkedItemType, bool multival)
