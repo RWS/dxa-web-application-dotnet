@@ -32,7 +32,7 @@ namespace Site.Controllers
                     query.PageSize = list.PageSize;
                     query.Start = list.Start;
                     query.ContentProvider = this.ContentProvider;
-                    query.SchemaId = MapSchema(list.ContentType);
+                    query.SchemaId = MapSchema(list.ContentType.Key);
                     list.ItemListElements = query.ExecuteQuery();
                 }
                 model = list;
