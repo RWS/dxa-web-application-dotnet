@@ -193,6 +193,8 @@
     <Content Include="Views\Entity\Core\OldBrowserNotificationBar.cshtml" />
     <Content Include="Views\Page\Core\RedirectPage.cshtml" />
     <Content Include="Views\List\Core\List.cshtml" />
+    <Content Include="Views\List\Core\PagedList.cshtml" />
+    <Content Include="Views\List\Core\Partials\Pager.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

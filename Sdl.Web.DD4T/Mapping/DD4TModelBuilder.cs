@@ -67,6 +67,7 @@ namespace Sdl.Web.DD4T.Mapping
                 if (model is Entity)
                 {
                     ((Entity)model).EntityData = entityData;
+                    ((Entity)model).Id = component.Id.Split('-')[1];
                 }
                 return model;
 

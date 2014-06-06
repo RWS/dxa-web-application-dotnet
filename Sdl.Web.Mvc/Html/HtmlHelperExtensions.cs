@@ -30,7 +30,33 @@ namespace Sdl.Web.Mvc.Html
 
         public static string Date(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
         {
-            return date!=null ? ((DateTime)date).ToString(format, new CultureInfo(Configuration.GetConfig("core.culture"))) : null;
+            return date != null ? ((DateTime)date).ToString(format, new CultureInfo(Configuration.GetConfig("core.culture"))) : null;
+        }
+
+        public static string DateDiff(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
+        {
+            //TODO make the text come from resources
+            if (date!=null)
+            {
+                int dayDiff = (int)(DateTime.Now.Date - ((DateTime)date).Date).TotalDays;
+                if (dayDiff <= 0)
+                {
+                    return htmlHelper.Resource("core.todayText");
+                }
+                if (dayDiff == 1)
+                {
+                    return htmlHelper.Resource("core.yesterdayText");
+                }
+                if (dayDiff <= 7)
+                {
+                    return String.Format(htmlHelper.Resource("core.xDaysAgoText"), dayDiff);
+                }
+                else
+                {
+                    return ((DateTime)date).ToString(format, new CultureInfo(Configuration.GetConfig("core.culture")));
+                }
+            }
+            return null;
         }
 
         public static string Resource(this HtmlHelper htmlHelper, string resourceName)
