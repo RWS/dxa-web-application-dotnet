@@ -193,6 +193,7 @@
     <Content Include="Views\Entity\Core\OldBrowserNotificationBar.cshtml" />
     <Content Include="Views\Page\Core\RedirectPage.cshtml" />
     <Content Include="Views\List\Core\List.cshtml" />
+    <Content Include="Views\Entity\Core\Accordion.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
