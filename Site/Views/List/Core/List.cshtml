@@ -18,6 +18,10 @@
             {
             @item.Headline
             }
+            @if (item.Date != null)
+            {
+                <time class="meta small">[@Html.DateDiff(item.Date)]</time>
+            }
         </li>
     }
     </ul>

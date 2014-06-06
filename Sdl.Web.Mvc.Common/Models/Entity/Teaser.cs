@@ -23,5 +23,6 @@ namespace Sdl.Web.Mvc.Models
         [SemanticProperty("text")]
         [SemanticProperty("a:introText")]
         public string Text { get; set; }
+        public DateTime? Date { get; set; }
     }
 }

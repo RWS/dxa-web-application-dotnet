@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.DynamicContent.Query;
+using Tridion.ContentDelivery.Meta;
 using Tridion.ContentDelivery.Taxonomies;
 
 namespace Sdl.Web.Tridion
@@ -42,14 +43,17 @@ namespace Sdl.Web.Tridion
             }
             try
             {
+                ComponentMetaFactory cmf = new ComponentMetaFactory(this.PublicationId);
                 var items = query.ExecuteQuery();
                 var results = new List<Teaser>();
-                foreach (var item in query.ExecuteEntityQuery())
+                foreach (string compId in query.ExecuteQuery())
                 {
-                    var result = new Teaser();
-                    result.Headline = item.Title;
-                    result.Link = new Link { Url = ContentProvider.ProcessUrl(String.Format("tcm:{0}-{1}", item.PublicationId, item.Id)) };
-                    results.Add(result);
+
+                    var compMeta = cmf.GetMeta(compId);
+                    if (compMeta!=null)
+                    {
+                        results.Add(GetTeaserFromMeta(compMeta));
+                    }
                 }
                 return results;
             }
@@ -57,6 +61,34 @@ namespace Sdl.Web.Tridion
             {
                 throw new Exception(String.Format("Error running broker query: {0}.", ex.Message ), ex);
             }
+        }
+
+        private Teaser GetTeaserFromMeta(IComponentMeta compMeta)
+        {
+            Teaser result = new Teaser();
+            result.Link = new Link { Url = ContentProvider.ProcessUrl(String.Format("tcm:{0}-{1}", compMeta.PublicationId, compMeta.Id)) };
+            result.Date = GetDateFromCustomMeta(compMeta.CustomMeta, "dateCreated") ?? compMeta.LastPublicationDate;
+            result.Headline = GetTextFromCustomMeta(compMeta.CustomMeta, "name") ?? compMeta.Title;
+            result.Text = GetTextFromCustomMeta(compMeta.CustomMeta, "introText");
+            return result;
+        }
+
+        private string GetTextFromCustomMeta(CustomMeta meta, string fieldname)
+        {
+            if (meta.NameValues.Contains(fieldname))
+            {
+                return meta.GetValue(fieldname).ToString();
+            }
+            return null;
+        }
+
+        private DateTime? GetDateFromCustomMeta(CustomMeta meta, string fieldname)
+        {
+            if (meta.NameValues.Contains(fieldname))
+            {
+                return meta.GetValue(fieldname) as DateTime?;
+            }
+            return null;
         }
 
         /// <summary>
