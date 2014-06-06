@@ -41,15 +41,15 @@ namespace Sdl.Web.Mvc.Html
                 int dayDiff = (int)(DateTime.Now.Date - ((DateTime)date).Date).TotalDays;
                 if (dayDiff <= 0)
                 {
-                    return "Today";
+                    return htmlHelper.Resource("core.todayText");
                 }
                 if (dayDiff == 1)
                 {
-                    return "Yesterday";
+                    return htmlHelper.Resource("core.yesterdayText");
                 }
                 if (dayDiff <= 7)
                 {
-                    return dayDiff + " days ago";
+                    return String.Format(htmlHelper.Resource("core.xDaysAgoText"), dayDiff);
                 }
                 else
                 {

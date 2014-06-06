@@ -19,40 +19,48 @@ namespace Sdl.Web.Tridion
         public int SchemaId { get; set; }
         public int PublicationId { get; set; }
         public int MaxResults { get; set; }
-        public string ComponentTemplateUri { get; set; }
         public string Sort { get; set; }
         public int Start { get; set; }
         public int PageSize { get; set; }
         public Dictionary<string, List<string>> KeywordFilters { get; set; }
-
+        public bool HasMore { get; set; }
         public List<Teaser> ExecuteQuery()
         {
             Criteria criteria = BuildCriteria();
             Query query = new Query(criteria);
-            if (!String.IsNullOrEmpty(Sort))
-            {
-                query.AddSorting(GetSortParameter());
-            }
+            Sort = Sort ?? "dateCreated";
+            query.AddSorting(GetSortParameter());
             if (MaxResults > 0)
             {
                 query.SetResultFilter(new LimitFilter(MaxResults));
             }
             if (PageSize > 0)
             {
-                query.SetResultFilter(new PagingFilter(Start, PageSize));
+                //We set the page size to one more than what we need, to see if there are more pages to come...
+                query.SetResultFilter(new PagingFilter(Start, PageSize + 1));
             }
             try
             {
                 ComponentMetaFactory cmf = new ComponentMetaFactory(this.PublicationId);
                 var items = query.ExecuteQuery();
                 var results = new List<Teaser>();
-                foreach (string compId in query.ExecuteQuery())
+                var ids = query.ExecuteQuery();
+                HasMore = ids.Length>PageSize;
+                int count = 0;
+                foreach (string compId in ids)
                 {
-
-                    var compMeta = cmf.GetMeta(compId);
-                    if (compMeta!=null)
+                    if (count < PageSize)
                     {
-                        results.Add(GetTeaserFromMeta(compMeta));
+                        var compMeta = cmf.GetMeta(compId);
+                        if (compMeta != null)
+                        {
+                            results.Add(GetTeaserFromMeta(compMeta));
+                        }
+                        count++;
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
                 return results;
@@ -180,14 +188,6 @@ namespace Sdl.Web.Tridion
                 }
             }
             return new AndCriteria(children.ToArray());
-        }
-
-        private string SerializeQuery()
-        {
-            var sw = new System.IO.StringWriter();
-            var serializer = new XmlSerializer(this.GetType());
-            serializer.Serialize(sw, this);
-            return sw.ToString();
         }
 
         private SortParameter GetSortParameter()
