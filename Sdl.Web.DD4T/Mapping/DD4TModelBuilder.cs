@@ -67,6 +67,7 @@ namespace Sdl.Web.DD4T.Mapping
                 if (model is Entity)
                 {
                     ((Entity)model).EntityData = entityData;
+                    ((Entity)model).Id = component.Id.Split('-')[1];
                 }
                 return model;
 
@@ -138,22 +139,25 @@ namespace Sdl.Web.DD4T.Mapping
             }
             if (mapData.Vocabularies.ContainsKey(lookup))
             {
-                //TODO check exists
                 var vocab = mapData.Vocabularies[lookup];
-                // semantic mapping of fields
-                string fieldname = null;
-
+                
                 // determine field semantics
                 string prefix = SemanticMapping.GetPrefix(vocab);
-                string property = info.PropertyName;
-                string entity = mapData.EntityNames[vocab].First();
-                FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
-
-                // locate semantic schema field
-                SemanticSchemaField matchingField = mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics);
-                if (matchingField != null)
+                if (prefix != null)
                 {
-                    return ExtractMatchedField(matchingField, matchingField.IsMetadata ? mapData.Meta : mapData.Content, mapData.EmbedLevel);
+                    string property = info.PropertyName;
+                    string entity = mapData.EntityNames[vocab].FirstOrDefault();
+                    if (entity != null)
+                    {
+                        FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
+
+                        // locate semantic schema field
+                        SemanticSchemaField matchingField = mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics);
+                        if (matchingField != null)
+                        {
+                            return ExtractMatchedField(matchingField, matchingField.IsMetadata ? mapData.Meta : mapData.Content, mapData.EmbedLevel);
+                        }
+                    }
                 }
             }
             return null;
@@ -201,6 +205,8 @@ namespace Sdl.Web.DD4T.Mapping
                     return GetMultiComponentLinks(field, propertyType, multival);
                 case (FieldType.Embedded):
                     return GetMultiEmbedded(field, propertyType, multival, mapData);
+                case (FieldType.Keyword):
+                    return GetMultiKeywords(field, propertyType, multival);
                 default:
                     return GetStrings(field, propertyType, multival);
             }
@@ -272,6 +278,14 @@ namespace Sdl.Web.DD4T.Mapping
 
                 return field.NumericValues[0];
             }
+            if (modelType.IsAssignableFrom(typeof(Int32)))
+            {
+                if (multival)
+                {
+                    return field.NumericValues.Select(d=>(int)Math.Round(d));
+                }
+                return (int)Math.Round(field.NumericValues[0]);
+            }
             return null;
         }
 
@@ -297,6 +311,70 @@ namespace Sdl.Web.DD4T.Mapping
         }
 
 
+        private object GetMultiKeywords(IField field, Type linkedItemType, bool multival)
+        {
+            return GetMultiKeywords(field.Keywords, linkedItemType, multival);
+        }
+
+        private object GetMultiKeywords(IList<IKeyword> items, Type linkedItemType, bool multival)
+        {
+            //What to do depends on the target type
+            if (linkedItemType == typeof(Tag))
+            {
+                List<Tag> res = items.Select(k => new Tag(){DisplayText=GetKeywordDisplayText(k),Key=GetKeywordKey(k),TagCategory=k.TaxonomyId}).ToList();
+                if (multival)
+                {
+                    return res;
+                }
+                else
+                {
+                    return res[0];
+                }
+            } 
+            if (linkedItemType == typeof(bool))
+            {
+                //For booleans we assume the keyword key or value can be converted to bool
+                List<bool> res = new List<bool>();
+                foreach (var kw in items)
+                {
+                    bool val = false;
+                    Boolean.TryParse(String.IsNullOrEmpty(kw.Key) ? kw.Title : kw.Key, out val);
+                    res.Add(val);
+                }
+                if (multival)
+                {
+                    return res;
+                }
+                else
+                {
+                    return res[0];
+                }
+            }
+            else if (linkedItemType == typeof(String))
+            {
+                List<String> res = items.Select(k=>GetKeywordDisplayText(k)).ToList();
+                if (multival)
+                {
+                    return res;
+                }
+                else
+                {
+                    return res[0];
+                }
+            }
+            return null;
+        }
+
+        private string GetKeywordKey(IKeyword k)
+        {
+            return !String.IsNullOrEmpty(k.Key) ? k.Key : k.Id;
+        }
+
+        private string GetKeywordDisplayText(IKeyword k)
+        {
+            return !String.IsNullOrEmpty(k.Description) ? k.Description : k.Title;
+        }
+        
         private object GetMultiComponentLinks(IField field, Type linkedItemType, bool multival)
         {
             return GetMultiComponentLinks(field.LinkedComponentValues, linkedItemType, multival);
@@ -422,8 +500,8 @@ namespace Sdl.Web.DD4T.Mapping
                 {
                     title = GetResource("core.defaultPageTitle") + postfix;
                 }
-
                 WebPage model = new WebPage { Title = title };
+                model.Meta = ProcessPageMetadata(page);
                 model.PageData = GetPageData(page);
                 bool first = true;
                 foreach (var cp in page.ComponentPresentations)
@@ -462,7 +540,7 @@ namespace Sdl.Web.DD4T.Mapping
                         }
                     }
                 }
-
+                
                 //Add header/footer
                 IPage headerInclude = null;
                 IPage footerInclude = null;
@@ -515,6 +593,51 @@ namespace Sdl.Web.DD4T.Mapping
             }
             throw new Exception(String.Format("Cannot create model for class {0}. Expecting IPage.", sourceEntity.GetType().FullName));
 
+        }
+
+        protected virtual Dictionary<string, string> ProcessPageMetadata(IPage page)
+        {
+            var meta = new Dictionary<string, string>();
+            if (page.MetadataFields != null)
+            {
+                foreach (var field in page.MetadataFields.Values)
+                {
+                    ProcessMetadataField(field, meta);
+                }
+            }
+            return meta;
+        }
+
+        protected virtual void ProcessMetadataField(IField field, Dictionary<string, string> meta)
+        {
+            if (field.FieldType==FieldType.Embedded)
+            {
+                if (field.EmbeddedValues!=null & field.EmbeddedValues.Count>0)
+                {
+                    var subfields = field.EmbeddedValues[0];
+                    foreach (var subfield in subfields.Values)
+                    {
+                        ProcessMetadataField(subfield, meta);
+                    }
+                }
+            }
+            else
+            {
+                string value = null;
+                switch (field.Name)
+                {
+                    case "internalLink":
+                        value = LinkFactory.ResolveExtensionlessLink(field.Value);
+                        break;
+                    default:
+                        value = String.Join(",", field.Values);
+                        break;
+                }
+                if (value != null && !meta.ContainsKey(field.Name))
+                {
+                    meta.Add(field.Name, value);
+                }
+            }
         }
 
 

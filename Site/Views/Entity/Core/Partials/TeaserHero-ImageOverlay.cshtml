@@ -1,9 +1,9 @@
 ﻿@model Sdl.Web.Mvc.Models.Teaser
 <div @Markup.Entity(Model)>
-    @if (Model.Image!=null)
+    @if (Model.Image!=null || Model.Media!=null)
     {
-        <span @Markup.Property(Model, "Image")>
-            @Html.Image(Model.Image, 3.3)        
+        <span @Markup.Property(Model, Model.Image!=null ? "Image" : "Media")>
+            @Html.Image(Model.Image ?? (Image)Model.Media, 3.3)        
         </span>
     }
     @if (Model.Headline!=null || Model.Text!=null)

@@ -1,5 +1,6 @@
 ﻿@model Footer
-<footer class="page-footer">
+<footer id="page-footer">
+    <div class="container-fluid page-border">
     @foreach (Region region in Model.Regions.Values)
     {
         @ViewBag.Renderer.Render(region, Html, 12, new List<string>{"Links"})
@@ -9,4 +10,5 @@
     {
         @ViewBag.Renderer.Render(Model.Regions["Links"], Html)
     }
+    </div>
 </footer>

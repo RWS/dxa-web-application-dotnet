@@ -22,7 +22,7 @@ namespace Sdl.Web.Tridion.Context
         public bool IsMobile { get { return GetBooleanValue(ClaimUris.UriMobile); } }
         public string Model { get { return GetStringValue(ClaimUris.UriDeviceModel); } }
         public int PixelDensity{get { return GetIntValue(ClaimUris.UriPixelDensity); }}
-        public int PixelRatio { get { return GetIntValue(ClaimUris.UriPixelRatio); }}
+        public double PixelRatio { get { return GetDoubleValue(ClaimUris.UriPixelRatio); }}
         public bool IsRobot { get { return GetBooleanValue(ClaimUris.UriRobot); } }
         public bool IsTablet { get { return GetBooleanValue(ClaimUris.UriTablet); } }
         public string Variant { get { return GetStringValue(ClaimUris.UriDeviceVariant); } }

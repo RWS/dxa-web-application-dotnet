@@ -1,14 +1,11 @@
-﻿@model Sdl.Web.Mvc.Models.SitemapItem
-@{
-    Layout = null;
-}
+﻿@model NavigationLinks
 <div class="col-sm-3">
     <nav>
         <ul class="nav nav-sidebar">
-            @foreach (var item in Model.Items.Where(i=>i.Visible))
+            @foreach (var item in Model.Items)
             {
-                 <li class="@(item.Url == Request.Url.LocalPath.ToString() ? "active" : "")">
-                    <a href="@item.Url">@item.Title</a>
+                <li class="@(item.Url == Request.Url.LocalPath.ToString() ? "active" : "")">
+                    <a href="@item.Url" title="@item.AlternateText">@item.LinkText</a>
                 </li>
             }
         </ul>

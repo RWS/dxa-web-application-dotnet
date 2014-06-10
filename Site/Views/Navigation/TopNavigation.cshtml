@@ -1,15 +1,14 @@
-﻿@model Sdl.Web.Mvc.Models.SitemapItem
-
-@{
-    Layout = null;
-}
-<ul class="nav navbar-nav main-nav">
-    @foreach (var item in Model.Items.Where(i=>i.Visible))
+﻿@model NavigationLinks
+<ul class="nav navbar-nav main-nav" @Markup.Entity(Model)>
+    @foreach (Link item in Model.Items)
     {
-        SitemapItem sitemapItem = (item.Title == "Index") ? Model : item;
         var urlStem = item.Url.Substring(0,item.Url.LastIndexOf("/"));
         <li class="@(Request.Url.LocalPath.StartsWith(item.Url) ? "active" : "")">
-            <a href="@sitemapItem.Url">@sitemapItem.Title</a>
+            <a href="@item.Url" title="@item.AlternateText">@item.LinkText</a>
         </li>
+    }
+    @if (Configuration.IsStaging)
+    {
+        <li><a href="#">[XPM]</a></li>
     }
 </ul>

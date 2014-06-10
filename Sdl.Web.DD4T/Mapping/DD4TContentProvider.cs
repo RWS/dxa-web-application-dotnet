@@ -12,6 +12,7 @@ using DD4T.Factories;
 using DD4T.ContentModel.Exceptions;
 //TODO  - abstract this dependency
 using DD4T.Providers.SDLTridion2013;
+using Sdl.Web.Tridion;
 
 namespace Sdl.Web.DD4T
 {
@@ -31,6 +32,15 @@ namespace Sdl.Web.DD4T
                 ComponentFactory = new ComponentFactory() { PublicationResolver = new PublicationResolver() },
                 LinkFactory = new ExtensionlessLinkFactory() { PublicationResolver = new PublicationResolver() }
             };
+        }
+
+        public override string ProcessUrl(string url)
+        {
+            if (url.StartsWith("tcm:"))
+            {
+                url = LinkFactory.ResolveExtensionlessLink(url);
+            }
+            return base.ProcessUrl(url);
         }
 
         public override string GetPageViewName(object pageObject)
@@ -126,5 +136,31 @@ namespace Sdl.Web.DD4T
             throw new NotImplementedException();
         }
 
+
+        public override void PopulateDynamicList(ContentList<Teaser> list)
+        {
+            BrokerQuery query = new BrokerQuery();
+            query.Start = list.Start;
+            query.PublicationId = WebRequestContext.Localization.LocalizationId;
+            query.PageSize = list.PageSize;
+            query.SchemaId = MapSchema(list.ContentType.Key);
+            list.ItemListElements = query.ExecuteQuery();
+            foreach (var item in list.ItemListElements)
+            {
+                item.Link.Url = this.ProcessUrl(item.Link.Url);
+            }
+            list.HasMore = query.HasMore;
+        }
+
+        protected virtual int MapSchema(string schemaKey)
+        {
+            var bits = schemaKey.Split('.');
+            string moduleName = bits.Length > 1 ? bits[0] : Configuration.CoreModuleName;
+            schemaKey = bits.Length > 1 ? bits[1] : bits[0];
+            int res = 0;
+            var schemaId = Configuration.GetGlobalConfig("schemas." + schemaKey, moduleName);
+            Int32.TryParse(schemaId, out res);
+            return res;
+        }
     }
 }

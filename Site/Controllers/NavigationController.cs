@@ -5,6 +5,8 @@ using Sdl.Web.DD4T;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Models;
 using Sdl.Web.Mvc.Mapping;
+using System;
+using System.Collections.Generic;
 
 namespace Site.Controllers
 {
@@ -29,31 +31,55 @@ namespace Site.Controllers
         {
             ContentProvider = new DD4TContentProvider();
             Renderer = new DD4TRenderer();
+            ModelType = ModelType.Entity;
         }
 
-        public virtual ActionResult TopNavigation()
+        [HandleSectionError(View = "_SectionError")]
+        public virtual ActionResult TopNavigation(object entity)
         {
-            return View(NavigationModel);
+            ViewBag.NavType = "Top";
+            return Entity(entity);
         }
 
+        [HandleSectionError(View = "_SectionError")]
         public virtual ActionResult LeftNavigation()
         {
-            var model = new NavigationBuilder(Request.Url.LocalPath.ToString()).GetParentNode(NavigationModel);
+            var model = new NavigationBuilder() { ContentProvider = this.ContentProvider, Sitemap = NavigationModel }.BuildContextNavigation(Request.Url.LocalPath.ToString());
             return View(model);
         }
 
+        [HandleSectionError(View = "_SectionError")]
         public virtual ActionResult Breadcrumb()
         {
-            var model = new NavigationBuilder(Request.Url.LocalPath.ToString()).BuildBreadcrumb(NavigationModel);
+            var model = new NavigationBuilder() { ContentProvider = this.ContentProvider, Sitemap = NavigationModel }.BuildBreadcrumb(Request.Url.LocalPath.ToString());
             return View(model);
         }
-
+        
+        [HandleError]
         public virtual ActionResult GoogleSitemap()
         {
             return View(NavigationModel);
         }
 
-
-
+        protected override object ProcessModel(object sourceModel, Type type, List<string> includes = null)
+        {
+            var model = base.ProcessModel(sourceModel, type, includes);
+            var nav = model as NavigationLinks;
+            string navType = ViewBag.NavType;
+            NavigationLinks links = new NavigationLinks();
+            switch (navType)
+            {
+                case "Top":
+                    links = new NavigationBuilder() { ContentProvider = this.ContentProvider, Sitemap = NavigationModel }.BuildTopNavigation(Request.Url.LocalPath.ToString());
+                    break;
+            }
+            if (nav!=null)
+            {
+                
+                links.EntityData = nav.EntityData;
+                links.PropertyData = nav.PropertyData;
+            }
+            return links;
+        }
     }
 }

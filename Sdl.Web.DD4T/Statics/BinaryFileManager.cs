@@ -191,6 +191,16 @@ namespace Sdl.Web.DD4T
         protected IBinary GetBinaryFromBroker(string urlPath)
         {
             IBinary binary;
+            int pubid = 0;
+            foreach (var loc in Configuration.Localizations.Values)
+            {
+                if (urlPath.StartsWith(loc.Path))
+                {
+                    pubid = loc.LocalizationId;
+                    break;
+                }
+            }
+            BinaryFactory.BinaryProvider.PublicationId = pubid;
             BinaryFactory.TryFindBinary(urlPath, out binary);
             return binary;
         }

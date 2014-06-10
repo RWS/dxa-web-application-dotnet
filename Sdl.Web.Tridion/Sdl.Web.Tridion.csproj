@@ -38,6 +38,10 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Tridion.ContentDelivery, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.dll</HintPath>
+    </Reference>
     <Reference Include="Tridion.ContentDelivery.AmbientData, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
@@ -58,12 +62,19 @@
     <Compile Include="Context\OsClaims.cs" />
     <Compile Include="Config\TridionConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Query\BrokerQuery.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Context\Families.xml">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sdl.Web.Mvc.Common\Sdl.Web.Mvc.Common.csproj">
+      <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
+      <Name>Sdl.Web.Mvc.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
