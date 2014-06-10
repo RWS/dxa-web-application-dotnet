@@ -1,10 +1,10 @@
 ﻿@model Sdl.Web.Mvc.Models.Teaser
 <div class="feature teaser-container brand-light-color1" @Markup.Entity(Model)>
     <h3 @Markup.Property(Model, "Headline")>@Model.Headline</h3>
-    @if (Model.Image != null)
+    @if (Model.Media != null && Model.Media is Image)
     {
-        <div @Markup.Property(Model, "Image") style="float:right;">
-            @Html.Image(Model.Image, "160")
+        <div @Markup.Property(Model, "Media") style="float:right;">
+            @Html.Image((Image)Model.Media, "160")
         </div>
 	}
     <p @Markup.Property(Model, "Text")>@Model.Text</p>
