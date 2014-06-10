@@ -1,0 +1,4 @@
+﻿@model Sdl.Web.Mvc.Models.YouTubeVideo
+<div class="video" @Markup.Entity(Model)>
+    @Html.Raw(Model.Embed)
+</div>

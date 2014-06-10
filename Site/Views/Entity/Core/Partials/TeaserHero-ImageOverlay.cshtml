@@ -6,6 +6,12 @@
             @Html.Image((Image)Model.Media, 3.3)        
         </span>
     }
+    @if (Model.Media != null && Model.Media is YouTubeVideo)
+    {
+        <span @Markup.Property(Model, "Media")>            
+            @Html.Image((YouTubeVideo)Model.Media, 3.3)
+        </span>
+    }
     @if (Model.Headline!=null || Model.Text!=null)
     {
         if (Model.Link != null)

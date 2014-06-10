@@ -45,6 +45,26 @@ namespace Sdl.Web.Mvc.Context
             }
             return new MvcHtmlString(builder.ToString(TagRenderMode.SelfClosing));
         }
+        // youtube video overload
+        public static MvcHtmlString Image(this HtmlHelper helper, YouTubeVideo video, string widthFactor, double aspect, string cssClass = null)
+        {
+            if (video == null || String.IsNullOrEmpty(video.Url))
+            {
+                return null;
+            }
+            //We read the container size (based on bootstrap grid) from the view bag
+            //This means views can be independent of where they are rendered and do not
+            //need to know their width
+            int containerSize = helper.ViewBag.ContainerSize;
+            TagBuilder builder = new TagBuilder("img");
+            builder.Attributes.Add("src", ContextHelper.GetResponsiveImageUrl(video.Url, aspect, widthFactor, containerSize));
+            //builder.Attributes.Add("alt", video.AlternateText);
+            if (!String.IsNullOrEmpty(cssClass))
+            {
+                builder.Attributes.Add("class", cssClass);
+            }
+            return new MvcHtmlString(builder.ToString(TagRenderMode.SelfClosing));
+        }        
         //Variations for more concise usage in Views
         public static MvcHtmlString Image(this HtmlHelper helper, Image image)
         {
@@ -57,6 +77,19 @@ namespace Sdl.Web.Mvc.Context
         public static MvcHtmlString Image(this HtmlHelper helper, Image image, double aspect, string cssClass = null)
         {
             return Image(helper, image, DEFAULT_MEDIA_FILL, aspect, cssClass);
+        }
+        // youtube video variations
+        public static MvcHtmlString Image(this HtmlHelper helper, YouTubeVideo video)
+        {
+            return Image(helper, video, DEFAULT_MEDIA_FILL);
+        }
+        public static MvcHtmlString Image(this HtmlHelper helper, YouTubeVideo video, string widthFactor, string cssClass = null)
+        {
+            return Image(helper, video, widthFactor, DEFAULT_MEDIA_ASPECT, cssClass);
+        }
+        public static MvcHtmlString Image(this HtmlHelper helper, YouTubeVideo video, double aspect, string cssClass = null)
+        {
+            return Image(helper, video, DEFAULT_MEDIA_FILL, aspect, cssClass);
         }
         #endregion
 
