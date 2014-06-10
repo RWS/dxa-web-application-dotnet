@@ -7,6 +7,12 @@
             @Html.Image((Image)Model.Media, "160")
         </div>
 	}
+    @if (Model.Media != null && Model.Media is YouTubeVideo)
+    {
+        <div @Markup.Property(Model, "Media") style="float:right;">            
+            @Html.Image((YouTubeVideo)Model.Media, "160")
+        </div>
+    }
     <p @Markup.Property(Model, "Text")>@Model.Text</p>
     @if (Model.Link != null)
     {
