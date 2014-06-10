@@ -56,14 +56,17 @@ namespace Sdl.Web.DD4T
             }
             if (Configuration.IsStaging)
             {
-                foreach (var item in entity.EntityData)
+                if (entity.EntityData != null)
                 {
-                    if (data.Length > 0)
+                    foreach (var item in entity.EntityData)
                     {
-                        data.Append(" ");
+                        if (data.Length > 0)
+                        {
+                            data.Append(" ");
+                        }
+                        // add data- attributes using all lowercase chars, since that is what we look for in ParseComponentPresentation
+                        data.AppendFormat("data-{0}=\"{1}\"", item.Key.ToLowerInvariant(), HttpUtility.HtmlAttributeEncode(item.Value));
                     }
-                    // add data- attributes using all lowercase chars, since that is what we look for in ParseComponentPresentation
-                    data.AppendFormat("data-{0}=\"{1}\"", item.Key.ToLowerInvariant(), HttpUtility.HtmlAttributeEncode(item.Value));
                 }
             }
             return new MvcHtmlString(data.ToString());

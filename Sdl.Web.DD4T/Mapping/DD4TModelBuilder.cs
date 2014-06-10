@@ -64,6 +64,7 @@ namespace Sdl.Web.DD4T.Mapping
                 if (model is Entity)
                 {
                     ((Entity)model).EntityData = entityData;
+                    ((Entity)model).Id = component.Id.Split('-')[1];
                 }
                 return model;
 
@@ -142,14 +143,17 @@ namespace Sdl.Web.DD4T.Mapping
                 if (prefix != null)
                 {
                     string property = info.PropertyName;
-                    string entity = mapData.EntityNames[vocab].First();
-                    FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
-
-                    // locate semantic schema field
-                    SemanticSchemaField matchingField = mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics);
-                    if (matchingField != null)
+                    string entity = mapData.EntityNames[vocab].FirstOrDefault();
+                    if (entity != null)
                     {
-                        return ExtractMatchedField(matchingField, matchingField.IsMetadata ? mapData.Meta : mapData.Content, mapData.EmbedLevel);
+                        FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
+
+                        // locate semantic schema field
+                        SemanticSchemaField matchingField = mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics);
+                        if (matchingField != null)
+                        {
+                            return ExtractMatchedField(matchingField, matchingField.IsMetadata ? mapData.Meta : mapData.Content, mapData.EmbedLevel);
+                        }
                     }
                 }
             }
@@ -196,6 +200,8 @@ namespace Sdl.Web.DD4T.Mapping
                     return GetMultiComponentLinks(field, propertyType, multival);
                 case (FieldType.Embedded):
                     return GetMultiEmbedded(field, propertyType, multival, mapData);
+                case (FieldType.Keyword):
+                    return GetMultiKeywords(field, propertyType, multival);
                 default:
                     return GetStrings(field, propertyType, multival);
             }
@@ -267,6 +273,14 @@ namespace Sdl.Web.DD4T.Mapping
 
                 return field.NumericValues[0];
             }
+            if (modelType.IsAssignableFrom(typeof(Int32)))
+            {
+                if (multival)
+                {
+                    return field.NumericValues.Select(d=>(int)Math.Round(d));
+                }
+                return (int)Math.Round(field.NumericValues[0]);
+            }
             return null;
         }
 
@@ -301,6 +315,70 @@ namespace Sdl.Web.DD4T.Mapping
         }
 
 
+        private object GetMultiKeywords(IField field, Type linkedItemType, bool multival)
+        {
+            return GetMultiKeywords(field.Keywords, linkedItemType, multival);
+        }
+
+        private object GetMultiKeywords(IList<IKeyword> items, Type linkedItemType, bool multival)
+        {
+            //What to do depends on the target type
+            if (linkedItemType == typeof(Tag))
+            {
+                List<Tag> res = items.Select(k => new Tag(){DisplayText=GetKeywordDisplayText(k),Key=GetKeywordKey(k),TagCategory=k.TaxonomyId}).ToList();
+                if (multival)
+                {
+                    return res;
+                }
+                else
+                {
+                    return res[0];
+                }
+            } 
+            if (linkedItemType == typeof(bool))
+            {
+                //For booleans we assume the keyword key or value can be converted to bool
+                List<bool> res = new List<bool>();
+                foreach (var kw in items)
+                {
+                    bool val = false;
+                    Boolean.TryParse(String.IsNullOrEmpty(kw.Key) ? kw.Title : kw.Key, out val);
+                    res.Add(val);
+                }
+                if (multival)
+                {
+                    return res;
+                }
+                else
+                {
+                    return res[0];
+                }
+            }
+            else if (linkedItemType == typeof(String))
+            {
+                List<String> res = items.Select(k=>GetKeywordDisplayText(k)).ToList();
+                if (multival)
+                {
+                    return res;
+                }
+                else
+                {
+                    return res[0];
+                }
+            }
+            return null;
+        }
+
+        private string GetKeywordKey(IKeyword k)
+        {
+            return !String.IsNullOrEmpty(k.Key) ? k.Key : k.Id;
+        }
+
+        private string GetKeywordDisplayText(IKeyword k)
+        {
+            return !String.IsNullOrEmpty(k.Description) ? k.Description : k.Title;
+        }
+        
         private object GetMultiComponentLinks(IField field, Type linkedItemType, bool multival)
         {
             return GetMultiComponentLinks(field.LinkedComponentValues, linkedItemType, multival);
