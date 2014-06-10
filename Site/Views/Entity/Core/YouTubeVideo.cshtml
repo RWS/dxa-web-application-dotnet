@@ -1,4 +1,43 @@
 ﻿@model Sdl.Web.Mvc.Models.YouTubeVideo
-<div class="video" @Markup.Entity(Model)>
+<div class="video" @Markup.Entity(Model)>    
     @Html.Raw(Model.Embed)
+    <img src="@Model.Url" id="image-@Model.InstanceId" onclick="showVideo('@Model.InstanceId')" width="640" height="390">
+    <script type="text/javascript" src="http://www.youtube.com/player_api"></script>
+    <script>
+        var player;
+        function onYouTubePlayerAPIReady() {
+            player = new YT.Player('video-@Model.InstanceId');
+            console.log('player for video-@Model.InstanceId ready.');
+        }
+        function showVideo(id) {
+            var image = document.getElementById("image-" + id);
+            var frame = document.getElementById("video-" + id);
+            
+            image.style.display = 'none';
+            frame.style.visibility = 'visible';
+            frame.style.opacity = 1;
+            
+            player.playVideo();
+        }
+    </script>
+    <style>
+       .video {
+            position: relative;
+       }
+       #video-@Model.InstanceId {
+            opacity: 0;
+            visibility:hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #image-@Model.InstanceId {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+    </style>
 </div>
