@@ -105,13 +105,6 @@ namespace Sdl.Web.DD4T.Mapping
                                         processed = true;
                                     }
                                     break;
-                                case "YouTubeVideo":
-                                    if (mapData.SourceEntity != null && mapData.SourceEntity.Multimedia != null)
-                                    {
-                                        pi.SetValue(model, GetMultiMediaLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
-                                        processed = true;
-                                    }
-                                    break;
                                 case "Link":
                                     if (mapData.SourceEntity != null)
                                     {
