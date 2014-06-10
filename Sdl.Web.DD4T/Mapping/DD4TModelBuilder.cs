@@ -1,18 +1,18 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using DD4T.ContentModel;
+using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
-using System.Collections;
-using Sdl.Web.Mvc;
-using System.Text.RegularExpressions;
-using System.Globalization;
 
 namespace Sdl.Web.DD4T.Mapping
 {
-    public class DD4TModelBuilder : BaseModelBuilder
+    public partial class DD4TModelBuilder : BaseModelBuilder
     {
         public ExtensionlessLinkFactory LinkFactory { get; set; }
 
