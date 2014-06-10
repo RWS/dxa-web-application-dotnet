@@ -99,7 +99,14 @@ namespace Sdl.Web.DD4T.Mapping
                             switch(pi.Name)
                             {
                                 case "Image":
-                                    if (mapData.SourceEntity!=null && mapData.SourceEntity.Multimedia!=null)
+                                    if (mapData.SourceEntity != null && mapData.SourceEntity.Multimedia != null)
+                                    {
+                                        pi.SetValue(model, GetMultiMediaLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
+                                        processed = true;
+                                    }
+                                    break;
+                                case "YouTubeVideo":
+                                    if (mapData.SourceEntity != null && mapData.SourceEntity.Multimedia != null)
                                     {
                                         pi.SetValue(model, GetMultiMediaLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
                                         processed = true;
@@ -292,24 +299,30 @@ namespace Sdl.Web.DD4T.Mapping
 
         private static object GetMultiMediaLinks(IEnumerable<IComponent> items, Type modelType, bool multival)
         {
-            //TODO, handle other types
-            if (modelType.IsAssignableFrom(typeof(Image)))
+            var components = items as IList<IComponent> ?? items.ToList();
+            if (components.Any())
             {
-                if (multival)
+                // TODO find better way to determine image or video
+                string schemaTitle = components.First().Schema.Title;
+                if (modelType.IsAssignableFrom(typeof(YouTubeVideo)) && schemaTitle.ToLower().Contains("youtube"))
                 {
-                    return GetImages(items);
-                }
+                    if (multival)
+                    {
+                        return GetYouTubeVideos(components);
+                    }
 
-                return GetImages(items)[0];
-            }
-            if (modelType.IsAssignableFrom(typeof(YouTubeVideo)))
-            {
-                if (multival)
+                    return GetYouTubeVideos(components)[0];
+                }
+                if (modelType.IsAssignableFrom(typeof(Image)))
                 {
-                    return GetYouTubeVideos(items);
-                }
+                    if (multival)
+                    {
+                        return GetImages(components);
+                    }
 
-                return GetYouTubeVideos(items)[0];
+                    return GetImages(components)[0];
+                }
+                // TODO handle other types
             }
             return null;
         }
