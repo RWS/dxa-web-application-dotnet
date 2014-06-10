@@ -17,12 +17,12 @@ namespace Sdl.Web.Mvc.Models
         public string Headline { get; set; }
         //A teaser can be mapped from an individual image, in which case the image property is set from the source entity itself
         [SemanticProperty("i:_self")]
-        public Image Image { get; set; }
+        [SemanticProperty("a:image")]
         public MediaItem Media { get; set; }
         [SemanticProperty("content")]
-        [SemanticProperty("text")]
-        [SemanticProperty("introText")]
+        [SemanticProperty("a:introText")]
         public string Text { get; set; }
         public DateTime? Date { get; set; }
+        public Location Location { get; set; }
     }
 }
