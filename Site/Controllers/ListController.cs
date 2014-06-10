@@ -60,11 +60,13 @@ namespace Site.Controllers
             return res;
         }
 
-        private int MapSchema(string schemaName)
+        private int MapSchema(string schemaKey)
         {
-            //TODO - what if the schema is from a different module?
+            var bits = schemaKey.Split('.');
+            string moduleName = bits.Length > 1 ? bits[0] : Configuration.CoreModuleName;
+            schemaKey = bits.Length > 1 ? bits[1] : bits[0];
             int res = 0;
-            var schemaId = Configuration.GetGlobalConfig("schemas." + schemaName.Substring(0,1).ToLower() + schemaName.Substring(1));
+            var schemaId = Configuration.GetGlobalConfig("schemas." + schemaKey, moduleName);
             Int32.TryParse(schemaId, out res);
             return res;
         }
