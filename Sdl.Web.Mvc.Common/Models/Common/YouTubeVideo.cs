@@ -19,7 +19,7 @@ namespace Sdl.Web.Mvc.Models
             get
             {
                 //return String.Format("<iframe id=\"{3}\" width=\"{1}\" height=\"{2}\" src=\"//www.youtube.com/embed/{0}\" allowfullscreen></iframe>", YouTubeId, Width, Height, InstanceId);
-                return String.Format("<iframe id=\"video-{1}\" src=\"//www.youtube.com/embed/{0}?version=3&enablejsapi=1 \" allowfullscreen></iframe>", YouTubeId, InstanceId);
+                return String.Format("<iframe id=\"video-{1}\" src=\"//www.youtube.com/embed/{0}?version=3&enablejsapi=1\" allowfullscreen></iframe>", YouTubeId, InstanceId);
             }
         }
 
