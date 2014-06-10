@@ -21,7 +21,7 @@ namespace Sdl.Web.Mvc.Models
         public MediaItem Media { get; set; }
         [SemanticProperty("content")]
         [SemanticProperty("text")]
-        [SemanticProperty("a:introText")]
+        [SemanticProperty("introText")]
         public string Text { get; set; }
         public DateTime? Date { get; set; }
     }

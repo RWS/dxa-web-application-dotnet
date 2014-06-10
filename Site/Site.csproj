@@ -195,6 +195,7 @@
     <Content Include="Views\List\Core\List.cshtml" />
     <Content Include="Views\List\Core\PagedList.cshtml" />
     <Content Include="Views\List\Core\Partials\Pager.cshtml" />
+    <Content Include="Views\List\Core\ThumbnailList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

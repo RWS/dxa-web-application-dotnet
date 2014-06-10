@@ -113,5 +113,7 @@ namespace Sdl.Web.Mvc.Mapping
             }
             return url;
         }
+
+        public abstract void PopulateDynamicList(ContentList<Teaser> list);
     }
 }

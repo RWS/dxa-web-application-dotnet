@@ -26,7 +26,7 @@ namespace Sdl.Web.Mvc.Context
         /// <param name="widthFactor">The factor to apply to the width - can be % (eg "100%") or absolute (eg "120")</param>
         /// <param name="cssClass">Css class to apply to img tag</param>
         /// <returns>Complete img tag with all required attributes</returns>
-        public static MvcHtmlString Image(this HtmlHelper helper, Image image, double aspect, string widthFactor, string cssClass = null)
+        public static MvcHtmlString Image(this HtmlHelper helper, Image image, string widthFactor, double aspect, string cssClass = null)
         {
             if (image == null || String.IsNullOrEmpty(image.Url))
             {
@@ -52,11 +52,11 @@ namespace Sdl.Web.Mvc.Context
         }
         public static MvcHtmlString Image(this HtmlHelper helper, Image image, string widthFactor, string cssClass = null)
         {
-            return Image(helper, image, DEFAULT_MEDIA_ASPECT, widthFactor, cssClass);
+            return Image(helper, image, widthFactor, DEFAULT_MEDIA_ASPECT, cssClass);
         }
         public static MvcHtmlString Image(this HtmlHelper helper, Image image, double aspect, string cssClass = null)
         {
-            return Image(helper, image, aspect, DEFAULT_MEDIA_FILL, cssClass);
+            return Image(helper, image, DEFAULT_MEDIA_FILL, aspect, cssClass);
         }
         #endregion
 
