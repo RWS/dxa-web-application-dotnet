@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿﻿using System;
 
 namespace Sdl.Web.Mvc.Models
 {
-    [SemanticEntity(EntityName = "Image", Prefix = "i", Vocab = Entity.CoreVocabulary)]
-    [SemanticEntity(EntityName = "Article", Prefix = "a", Vocab = Entity.CoreVocabulary)]
+    [SemanticEntity(EntityName = "Image", Prefix = "i", Vocab = CoreVocabulary)]
+    [SemanticEntity(EntityName = "Article", Prefix = "a", Vocab = CoreVocabulary)]
     public class Teaser : Entity
     {
         //A teaser can be mapped from an article, in which case the link should be to the article itself

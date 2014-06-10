@@ -40,6 +40,18 @@
                         @Html.Raw(para.Content)
                     </div>
                 }
+                @if (para.Media!=null && para.Media is YouTubeVideo)
+                {
+                    <figure @Markup.Property(para, "Media")>
+                        @((YouTubeVideo)para.Media).Embed
+                        @if (para.Caption!=null)
+                        {
+                            <figcaption @Markup.Property(para, "Caption") >
+                                @para.Caption
+                            </figcaption>
+                        }
+                    </figure>
+                }
                 @if (para.Media!=null && para.Media is Image)
                 {
                     <figure @Markup.Property(para, "Media")>
