@@ -13,9 +13,8 @@ using Tridion.ContentDelivery.Taxonomies;
 
 namespace Sdl.Web.Tridion
 {
-    public class ContentQuery
+    public class BrokerQuery
     {
-        public IContentProvider ContentProvider{ get; set; }
         public int SchemaId { get; set; }
         public int PublicationId { get; set; }
         public int MaxResults { get; set; }
@@ -74,7 +73,7 @@ namespace Sdl.Web.Tridion
         private Teaser GetTeaserFromMeta(IComponentMeta compMeta)
         {
             Teaser result = new Teaser();
-            result.Link = new Link { Url = ContentProvider.ProcessUrl(String.Format("tcm:{0}-{1}", compMeta.PublicationId, compMeta.Id)) };
+            result.Link = new Link { Url = String.Format("tcm:{0}-{1}", compMeta.PublicationId, compMeta.Id) };
             result.Date = GetDateFromCustomMeta(compMeta.CustomMeta, "dateCreated") ?? compMeta.LastPublicationDate;
             result.Headline = GetTextFromCustomMeta(compMeta.CustomMeta, "name") ?? compMeta.Title;
             result.Text = GetTextFromCustomMeta(compMeta.CustomMeta, "introText");
