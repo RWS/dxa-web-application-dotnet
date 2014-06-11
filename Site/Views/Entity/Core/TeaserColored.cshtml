@@ -1,18 +1,12 @@
 ﻿@model Sdl.Web.Mvc.Models.Teaser
 <div class="feature teaser-container brand-light-color1" @Markup.Entity(Model)>
     <h3 @Markup.Property(Model, "Headline")>@Model.Headline</h3>
-    @if (Model.Media != null && Model.Media is Image)
+    @if (Model.Media!=null)
     {
         <div @Markup.Property(Model, "Media") style="float:right;">
-            @Html.Image((Image)Model.Media, "160")
+            @Html.Media(Model.Media, "160")
         </div>
 	}
-    @if (Model.Media != null && Model.Media is YouTubeVideo)
-    {
-        <div @Markup.Property(Model, "Media") style="float:right;">            
-            @Html.Image((YouTubeVideo)Model.Media, "160")
-        </div>
-    }
     <p @Markup.Property(Model, "Text")>@Model.Text</p>
     @if (Model.Link != null)
     {

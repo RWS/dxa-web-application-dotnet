@@ -7,6 +7,6 @@ namespace Sdl.Web.Mvc.Models
 {
     public class MediaItem : Entity
     {
-        
+        public string Url { get; set; }
     }
 }

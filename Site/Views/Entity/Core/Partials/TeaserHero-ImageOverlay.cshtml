@@ -1,15 +1,9 @@
 ﻿@model Sdl.Web.Mvc.Models.Teaser
 <div @Markup.Entity(Model)>
-    @if (Model.Media!=null && Model.Media is Image)
-    {
-        <span @Markup.Property(Model, "Media")>
-            @Html.Image((Image)Model.Media, 3.3)        
-        </span>
-    }
-    @if (Model.Media != null && Model.Media is YouTubeVideo)
+    @if (Model.Media != null)
     {
         <span @Markup.Property(Model, "Media")>            
-            @Html.Image((YouTubeVideo)Model.Media, 3.3)
+            @Html.Media(Model.Media, 3.3)
         </span>
     }
     @if (Model.Headline!=null || Model.Text!=null)

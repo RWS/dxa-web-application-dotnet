@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using System.Web.Mvc.Html;
 
 namespace Sdl.Web.Mvc.Context
 {
@@ -26,7 +27,7 @@ namespace Sdl.Web.Mvc.Context
         /// <param name="widthFactor">The factor to apply to the width - can be % (eg "100%") or absolute (eg "120")</param>
         /// <param name="cssClass">Css class to apply to img tag</param>
         /// <returns>Complete img tag with all required attributes</returns>
-        public static MvcHtmlString Image(this HtmlHelper helper, Image image, string widthFactor, double aspect, string cssClass = null)
+        public static MvcHtmlString Image(this HtmlHelper helper, Image image, string widthFactor, double aspect, string cssClass = null, int containerSize = 0)
         {
             if (image == null || String.IsNullOrEmpty(image.Url))
             {
@@ -35,7 +36,6 @@ namespace Sdl.Web.Mvc.Context
             //We read the container size (based on bootstrap grid) from the view bag
             //This means views can be independent of where they are rendered and do not
             //need to know their width
-            int containerSize = helper.ViewBag.ContainerSize;
             TagBuilder builder = new TagBuilder("img");
             builder.Attributes.Add("src", ContextHelper.GetResponsiveImageUrl(image.Url, aspect, widthFactor, containerSize));
             builder.Attributes.Add("alt", image.AlternateText);
@@ -45,10 +45,10 @@ namespace Sdl.Web.Mvc.Context
             }
             return new MvcHtmlString(builder.ToString(TagRenderMode.SelfClosing));
         }
-        // youtube video overload
-        public static MvcHtmlString Image(this HtmlHelper helper, YouTubeVideo video, string widthFactor, double aspect, string cssClass = null)
+
+        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, string widthFactor, double aspect, string cssClass = null)
         {
-            if (video == null || String.IsNullOrEmpty(video.Url))
+            if (media == null)
             {
                 return null;
             }
@@ -56,40 +56,46 @@ namespace Sdl.Web.Mvc.Context
             //This means views can be independent of where they are rendered and do not
             //need to know their width
             int containerSize = helper.ViewBag.ContainerSize;
-            TagBuilder builder = new TagBuilder("img");
-            builder.Attributes.Add("src", ContextHelper.GetResponsiveImageUrl(video.Url, aspect, widthFactor, containerSize));
-            //builder.Attributes.Add("alt", video.AlternateText);
+            if (media is Image)
+            {
+                return Image(helper, (Image)media, widthFactor, aspect, cssClass, containerSize);
+            }
+            else if (media is YouTubeVideo)
+            {
+                return YouTubeVideo(helper, (YouTubeVideo)media, widthFactor, aspect, cssClass, containerSize);
+            }
+            return null;
+        }
+
+        public static MvcHtmlString YouTubeVideo(HtmlHelper helper, YouTubeVideo video, string widthFactor, double aspect, string cssClass, int containerSize)
+        {
+            if (video == null || String.IsNullOrEmpty(video.YouTubeId))
+            {
+                return null;
+            }
+            TagBuilder builder = new TagBuilder("iframe");
+            builder.Attributes.Add("src", ContextHelper.GetYouTubeUrl(video.YouTubeId));
+            builder.Attributes.Add("id", Configuration.GetUniqueId("video"));
+            builder.Attributes.Add("allowfullscreen", "true");
+            builder.Attributes.Add("frameborder", "0");
             if (!String.IsNullOrEmpty(cssClass))
             {
                 builder.Attributes.Add("class", cssClass);
             }
             return new MvcHtmlString(builder.ToString(TagRenderMode.SelfClosing));
-        }        
-        //Variations for more concise usage in Views
-        public static MvcHtmlString Image(this HtmlHelper helper, Image image)
-        {
-            return Image(helper, image, DEFAULT_MEDIA_FILL);
         }
-        public static MvcHtmlString Image(this HtmlHelper helper, Image image, string widthFactor, string cssClass = null)
+
+        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media)
         {
-            return Image(helper, image, widthFactor, DEFAULT_MEDIA_ASPECT, cssClass);
+            return Media(helper, media, DEFAULT_MEDIA_FILL);
         }
-        public static MvcHtmlString Image(this HtmlHelper helper, Image image, double aspect, string cssClass = null)
+        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, string widthFactor, string cssClass = null)
         {
-            return Image(helper, image, DEFAULT_MEDIA_FILL, aspect, cssClass);
+            return Media(helper, media, widthFactor, DEFAULT_MEDIA_ASPECT, cssClass);
         }
-        // youtube video variations
-        public static MvcHtmlString Image(this HtmlHelper helper, YouTubeVideo video)
+        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, double aspect, string cssClass = null)
         {
-            return Image(helper, video, DEFAULT_MEDIA_FILL);
-        }
-        public static MvcHtmlString Image(this HtmlHelper helper, YouTubeVideo video, string widthFactor, string cssClass = null)
-        {
-            return Image(helper, video, widthFactor, DEFAULT_MEDIA_ASPECT, cssClass);
-        }
-        public static MvcHtmlString Image(this HtmlHelper helper, YouTubeVideo video, double aspect, string cssClass = null)
-        {
-            return Image(helper, video, DEFAULT_MEDIA_FILL, aspect, cssClass);
+            return Media(helper, media, DEFAULT_MEDIA_FILL, aspect, cssClass);
         }
         #endregion
 
@@ -166,6 +172,14 @@ namespace Sdl.Web.Mvc.Context
             //Build the URL
             return String.Format(ContextConfiguration.ImageResizeUrl, ContextConfiguration.ImageResizeRoute, Math.Ceiling(width), Math.Ceiling(height), url);
         }
+
+        public static string GetYouTubeUrl(string videoId)
+        {
+            return String.Format("https://www.youtube.com/embed/{0}?version=3&enablejsapi=1", videoId);
+        }     
+   
+        
+
         public static string GetResponsiveImageUrl(string url)
         {
             return GetResponsiveImageUrl(url, DEFAULT_MEDIA_FILL);

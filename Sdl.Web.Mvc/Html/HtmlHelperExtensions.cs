@@ -79,5 +79,6 @@ namespace Sdl.Web.Mvc.Html
 
             return new MvcHtmlString(metaTags.ToString());
         }
+
     }
 }

@@ -9,7 +9,7 @@
     {
         queryString = String.Format("key={0}", queryString);
     }
-    var divId = "map" + Guid.NewGuid().ToString("N");
+    var divId = Configuration.GetUniqueId("map");
     var name = (ViewData["MarkerName"] ?? "").ToString();
     var heightString = (ViewData["MapHeight"] ?? "300px").ToString();
     
