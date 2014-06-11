@@ -1,0 +1,57 @@
+﻿@model Place
+@{
+    var width = Model.Location != null ? "6" : "12";
+}
+<div @Markup.Entity(Model)>
+@if (Model.Image != null)
+{
+    <div id="carousel-large" class="carousel">
+        <div class="carousel-inner">
+            <div class="item active" @Markup.Property(Model, "Image")>
+                @Html.Image(Model.Image, 3.3, "center-block")
+                @if (Model.Name!=null)
+                {
+                <div class="overlay overlay-tl ribbon">
+                    <h1 @Markup.Property(Model, "Name")>@Model.Name</h1>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+else if (Model.Name!=null)
+{
+    <h1 @Markup.Property(Model, "Name")>@Model.Name</h1>
+}
+    <div class="container-fluid">
+	    <div class="row">
+            @if (Model.Location!=null)
+            {
+		    <div class="col-sm-6">
+                @Html.Partial("Core/Partials/GoogleMap", Model.Location, new ViewDataDictionary { {"MarkerName", Model.Name} })
+		    </div>
+            }
+		    <div class="col-sm-@width">
+			    <div class="tile">
+                    @if(Model.Address!=null)
+                    {
+                    <h4><i class="fa fa-map-marker"></i>@Html.Resource("core.addressHeadingText")</h4>
+				    <div class="h-card" @Markup.Property(Model, "Address")>
+					    @Html.Raw(Model.Address)
+				    </div>
+				    <br>
+                    }
+                    @if (Model.Telephone!=null || Model.FaxNumber!=null || Model.Email!=null)
+                    {
+				    <h4><i class="fa fa-envelope"></i>@Html.Resource("core.placeContactHeadingText")</h4>
+				    <div class="h-card">
+					    @if (Model.Telephone!=null){<p>Telephone: <a href="tel:@Model.Telephone" @Markup.Property(Model, "Telephone")>@Model.Telephone</a></p>}
+					    @if (Model.FaxNumber!=null){<p>Fax: <a href="fax:@Model.FaxNumber" @Markup.Property(Model, "FaxNumber")>@Model.FaxNumber</a></p>}
+					    @if (Model.Email!=null){<p>Email: <a href="mailto:@Model.Email" @Markup.Property(Model, "Email")>@Model.Email</a></p>}
+				    </div>
+                    }
+			    </div>
+		    </div>
+	    </div>
+    </div>
+</div>

@@ -197,6 +197,9 @@
     <Content Include="Views\List\Core\Partials\Pager.cshtml" />
     <Content Include="Views\List\Core\ThumbnailList.cshtml" />
     <Content Include="Views\Entity\Core\YouTubeVideo.cshtml" />
+    <Content Include="Views\Entity\Core\Place.cshtml" />
+    <Content Include="Views\Entity\Core\Partials\GoogleMap.cshtml" />
+    <Content Include="Views\Entity\Core\TeaserMap.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

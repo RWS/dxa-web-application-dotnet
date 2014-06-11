@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Sdl.Web.Mvc.Models;
 using Sdl.Web.Mvc.Common;
+using System.Linq;
 
 namespace Sdl.Web.Mvc.Mapping
 {
@@ -27,21 +28,21 @@ namespace Sdl.Web.Mvc.Mapping
         
         public abstract object Create(object sourceEntity, Type type, List<object> includes=null);
 
-        protected virtual Dictionary<string, string> GetVocabulariesFromType(Type type)
+        protected virtual Dictionary<string, KeyValuePair<string,string>> GetEntityDataFromType(Type type)
         {
             bool addedDefaults = false;
-            Dictionary<string, string> res = new Dictionary<string, string>();
+            Dictionary<string, KeyValuePair<string, string>> res = new Dictionary<string, KeyValuePair<string, string>>();
             foreach (var attr in type.GetCustomAttributes())
             {
                 if (attr is SemanticEntityAttribute)
                 {
                     var semantics = (SemanticEntityAttribute)attr;
-                    res.Add(semantics.Prefix, semantics.Vocab);
+                    res.Add(semantics.Prefix, new KeyValuePair<string,string>(semantics.Vocab,semantics.EntityName));
                 }
                 if (attr is SemanticDefaultsAttribute)
                 {
                     var semantics = (SemanticDefaultsAttribute)attr;
-                    res.Add(semantics.Prefix, semantics.Vocab);
+                    res.Add(semantics.Prefix, new KeyValuePair<string,string>(semantics.Vocab,""));
                     addedDefaults = true;
                 }
             }
@@ -49,7 +50,7 @@ namespace Sdl.Web.Mvc.Mapping
             if (!addedDefaults)
             {
                 var semantics = new SemanticDefaultsAttribute();
-                res.Add(semantics.Prefix, semantics.Vocab);
+                res.Add(semantics.Prefix, new KeyValuePair<string, string>(semantics.Vocab, ""));
             }
             return res;
         }
@@ -134,6 +135,8 @@ namespace Sdl.Web.Mvc.Mapping
             }
             return EntityPropertySemantics[type];
         }
+
+
 
         protected virtual SemanticProperty GetDefaultPropertySemantics(PropertyInfo pi, string defaultPrefix)
         {

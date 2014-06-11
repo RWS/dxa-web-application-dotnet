@@ -55,7 +55,7 @@ namespace Sdl.Web.DD4T.Mapping
                 mapData.EntityNames = mapData.SemanticSchema.GetEntityNames();
             
                 //TODO may need to merge with vocabs from embedded types
-                mapData.Vocabularies = GetVocabulariesFromType(type);
+                mapData.TargetEntitiesByPrefix = GetEntityDataFromType(type);
                 mapData.Content = component.Fields;
                 mapData.Meta = component.MetadataFields;
                 mapData.TargetType = type;
@@ -76,7 +76,7 @@ namespace Sdl.Web.DD4T.Mapping
         {
             var model = Activator.CreateInstance(mapData.TargetType);
             Dictionary<string, string> propertyData = new Dictionary<string, string>();
-            var propertySemantics = LoadPropertySemantics(mapData.TargetType);
+            var propertySemantics = FilterPropertySematicsByEntity(LoadPropertySemantics(mapData.TargetType),mapData);
             foreach (var pi in mapData.TargetType.GetProperties())
             {
                 bool multival = pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
@@ -127,18 +127,46 @@ namespace Sdl.Web.DD4T.Mapping
             return model;
         }
 
+        protected virtual Dictionary<string, List<SemanticProperty>> FilterPropertySematicsByEntity(Dictionary<string, List<SemanticProperty>> semantics, MappingData mapData)
+        {
+            Dictionary<string, List<SemanticProperty>> filtered = new Dictionary<string, List<SemanticProperty>>();
+            foreach (var item in semantics)
+            {
+                filtered.Add(item.Key, new List<SemanticProperty>());
+                foreach (var prop in item.Value)
+                {
+                    //Default prefix is always OK
+                    if (String.IsNullOrEmpty(prop.Prefix))
+                    {
+                        filtered[item.Key].Add(prop);
+                    }
+                    else
+                    {
+                        //Filter out any properties belonging to other entities than the source entity
+                        var entityData = GetEntityData(prop.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
+                        if (entityData != null)
+                        {
+                            if (mapData.EntityNames.Contains(entityData.Value.Key))
+                            {
+                                if (mapData.EntityNames[entityData.Value.Key].First() == entityData.Value.Value)
+                                {
+                                    filtered[item.Key].Add(prop);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return filtered;
+        }
+
         private IField GetFieldFromSemantics(MappingData mapData, SemanticProperty info)
         {
-            string lookup = info.Prefix;
-            if (mapData.ParentDefaultPrefix != null && String.IsNullOrEmpty(info.Prefix))
+            var entityData = GetEntityData(info.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
+            if (entityData != null)
             {
-                lookup = mapData.ParentDefaultPrefix;
-            }
-            if (mapData.Vocabularies.ContainsKey(lookup))
-            {
-                var vocab = mapData.Vocabularies[lookup];
-                
                 // determine field semantics
+                var vocab = entityData.Value.Key;
                 string prefix = SemanticMapping.GetPrefix(vocab);
                 if (prefix != null)
                 {
@@ -147,18 +175,31 @@ namespace Sdl.Web.DD4T.Mapping
                     if (entity != null)
                     {
                         FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
-
                         // locate semantic schema field
                         SemanticSchemaField matchingField = mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics);
                         if (matchingField != null)
                         {
-                            return ExtractMatchedField(matchingField, matchingField.IsMetadata ? mapData.Meta : mapData.Content, mapData.EmbedLevel);
+                            return ExtractMatchedField(matchingField, (matchingField.IsMetadata && mapData.Meta!=null) ? mapData.Meta : mapData.Content, mapData.EmbedLevel);
                         }
                     }
                 }
             }
             return null;
         }
+
+        private KeyValuePair<string,string>? GetEntityData(string prefix, Dictionary<string,KeyValuePair<string,string>> entityData, string defaultPrefix)
+        {
+            if (defaultPrefix != null && String.IsNullOrEmpty(prefix))
+            {
+                prefix = defaultPrefix;
+            }
+            if (entityData.ContainsKey(prefix))
+            {
+                return entityData[prefix];
+            }
+            return null;
+        }
+
 
         private IField ExtractMatchedField(SemanticSchemaField matchingField, IFieldSet fields, int embedLevel, string path = null)
         {
@@ -439,7 +480,7 @@ namespace Sdl.Web.DD4T.Mapping
                     Meta = null,
                     EntityNames = mapData.EntityNames,
                     ParentDefaultPrefix = mapData.ParentDefaultPrefix,
-                    Vocabularies = mapData.Vocabularies,
+                    TargetEntitiesByPrefix = mapData.TargetEntitiesByPrefix,
                     SemanticSchema = mapData.SemanticSchema,
                     EmbedLevel = mapData.EmbedLevel + 1
                 };
