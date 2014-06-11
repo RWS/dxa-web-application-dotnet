@@ -411,5 +411,10 @@ namespace Sdl.Web.Mvc
                 }
             }
         }
+
+        public static string GetUniqueId(string prefix)
+        {
+            return prefix + Guid.NewGuid().ToString("N");
+        }
     }
 }

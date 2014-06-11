@@ -8,7 +8,7 @@
     <div id="carousel-large" class="carousel">
         <div class="carousel-inner">
             <div class="item active" @Markup.Property(Model, "Image")>
-                @Html.Image(Model.Image, 3.3, "center-block")
+                @Html.Media(Model.Image, 3.3, "center-block")
                 @if (Model.Name!=null)
                 {
                 <div class="overlay overlay-tl ribbon">

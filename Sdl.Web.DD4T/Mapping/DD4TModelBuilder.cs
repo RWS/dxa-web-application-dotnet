@@ -133,12 +133,13 @@ namespace Sdl.Web.DD4T.Mapping
             foreach (var item in semantics)
             {
                 filtered.Add(item.Key, new List<SemanticProperty>());
+                List<SemanticProperty> defaultProperties = new List<SemanticProperty>();
                 foreach (var prop in item.Value)
                 {
-                    //Default prefix is always OK
+                    //Default prefix is always OK, but should be added last
                     if (String.IsNullOrEmpty(prop.Prefix))
                     {
-                        filtered[item.Key].Add(prop);
+                        defaultProperties.Add(prop);
                     }
                     else
                     {
@@ -156,6 +157,7 @@ namespace Sdl.Web.DD4T.Mapping
                         }
                     }
                 }
+                filtered[item.Key].AddRange(defaultProperties);
             }
             return filtered;
         }
