@@ -2,7 +2,7 @@
 <div @Markup.Entity(Model)>
     @if (Model.Headline!=null)
     {
-    <h4 @Markup.Property(Model,"Headline")>@Model.Headline</h4>
+    <h3 @Markup.Property(Model,"Headline")>@Model.Headline</h3>
     }
     <ul>
     @foreach (var item in Model.ItemListElements)

@@ -56,6 +56,7 @@
     <Compile Include="Models\Entity\ContentList.cs" />
     <Compile Include="Models\Entity\LinkList.cs" />
     <Compile Include="Models\Entity\Notification.cs" />
+    <Compile Include="Models\Entity\Place.cs" />
     <Compile Include="Models\Entity\Teaser.cs" />
     <Compile Include="Interfaces\IContentProvider.cs" />
     <Compile Include="Interfaces\ILogger.cs" />
