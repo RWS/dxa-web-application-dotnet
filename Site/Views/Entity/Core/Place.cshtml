@@ -1,6 +1,7 @@
 ﻿@model Place
 @{
     var width = Model.Location != null ? "6" : "12";
+    var daddr = Model.Location != null ? (Model.Location.Query ?? String.Format("{0},{1}",Model.Location.Latitude,Model.Location.Longitude)): null;
 }
 <div @Markup.Entity(Model)>
 @if (Model.Image != null)
@@ -33,23 +34,29 @@ else if (Model.Name!=null)
             }
 		    <div class="col-sm-@width">
 			    <div class="tile">
-                    @if(Model.Address!=null)
-                    {
-                    <h4><i class="fa fa-map-marker"></i>@Html.Resource("core.addressHeadingText")</h4>
-				    <div class="h-card" @Markup.Property(Model, "Address")>
-					    @Html.Raw(Model.Address)
-				    </div>
-				    <br>
-                    }
-                    @if (Model.Telephone!=null || Model.FaxNumber!=null || Model.Email!=null)
-                    {
-				    <h4><i class="fa fa-envelope"></i>@Html.Resource("core.placeContactHeadingText")</h4>
-				    <div class="h-card">
-					    @if (Model.Telephone!=null){<p>Telephone: <a href="tel:@Model.Telephone" @Markup.Property(Model, "Telephone")>@Model.Telephone</a></p>}
-					    @if (Model.FaxNumber!=null){<p>Fax: <a href="fax:@Model.FaxNumber" @Markup.Property(Model, "FaxNumber")>@Model.FaxNumber</a></p>}
-					    @if (Model.Email!=null){<p>Email: <a href="mailto:@Model.Email" @Markup.Property(Model, "Email")>@Model.Email</a></p>}
-				    </div>
-                    }
+                    <div class="vcard">
+						@if(Model.Address!=null)
+                        {
+                            <h4><i class="fa fa-map-marker"></i>@Html.Resource("core.addressHeadingText")</h4>
+				            <div class="adr" @Markup.Property(Model, "Address")>
+					            @Html.Raw(Model.Address)
+				            </div>
+                            if (daddr!=null)
+                            {
+                                <a class="popup-iframe popup-mobile-ignore)" href="http://maps.google.com/maps?saddr=My+Location&amp;daddr=@daddr">@Html.Resource("core.directionsLinkText")</a><br />
+                                <a class="popup-iframe popup-mobile-ignore)" href="http://maps.google.com/maps?daddr=@daddr">@Html.Resource("core.largeMapLinkText")</a>
+                            }
+                        }
+                        @if (Model.Telephone!=null || Model.FaxNumber!=null || Model.Email!=null)
+                        {
+				        <h4><i class="fa fa-envelope"></i>@Html.Resource("core.placeContactHeadingText")</h4>
+				        <div class="h-card">
+					        @if (Model.Telephone!=null){<p>Telephone: <a class="tel" href="tel:@Model.Telephone" @Markup.Property(Model, "Telephone")>@Model.Telephone</a></p>}
+					        @if (Model.FaxNumber!=null){<p>Fax: <a class="fax" href="fax:@Model.FaxNumber" @Markup.Property(Model, "FaxNumber")>@Model.FaxNumber</a></p>}
+					        @if (Model.Email!=null){<p>Email: <a class="email" href="mailto:@Model.Email" @Markup.Property(Model, "Email")>@Model.Email</a></p>}
+				        </div>
+                        }
+					</div>
 			    </div>
 		    </div>
 	    </div>
