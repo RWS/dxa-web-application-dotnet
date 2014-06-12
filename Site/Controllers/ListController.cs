@@ -1,6 +1,5 @@
 ﻿using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Models;
-using Sdl.Web.Tridion;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,26 +25,29 @@ namespace Site.Controllers
                 if (list.ItemListElements.Count == 0)
                 {
                     //we need to run a query to populate the list
-                    //todo - we introduce a dependency on Tridion here - perhaps get the query object from the ContentProvider?
-                    ContentQuery query = new ContentQuery();
-                    query.PublicationId = WebRequestContext.Localization.LocalizationId;
-                    query.PageSize = list.PageSize;
-                    query.Start = list.Start;
-                    query.ContentProvider = this.ContentProvider;
-                    query.SchemaId = MapSchema(list.ContentType.Key);
-                    list.ItemListElements = query.ExecuteQuery();
+                    int start = GetStart();
+                    if (list.Id == Request.Params["id"])
+                    {
+                        //we only take the start from the query string if there is also an id parameter matching the model entity id
+                        //this means that we are sure that the paging is coming from the right entity (if there is more than one paged list on the page)
+                        list.CurrentPage = (start / list.PageSize) + 1;
+                        list.Start = start;
+                    }
+                    this.ContentProvider.PopulateDynamicList(list);
                 }
                 model = list;
             }
             return model;
         }
 
-        private int MapSchema(string schemaName)
+        private int GetStart()
         {
-            //TODO - what if the schema is from a different module?
             int res = 0;
-            var schemaId = Configuration.GetGlobalConfig("schemas." + schemaName.Substring(0,1).ToLower() + schemaName.Substring(1));
-            Int32.TryParse(schemaId, out res);
+            var start = Request.Params["start"];
+            if (!String.IsNullOrEmpty(start))
+            {
+                Int32.TryParse(start, out res);
+            }
             return res;
         }
     }

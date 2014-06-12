@@ -3,15 +3,15 @@
     @if (Model.Link!=null)
     {
         <a href="@Model.Link.Url" title="@Model.Link.AlternateText">
-            <span @Markup.Property(Model, "Image")>
-                @Html.Image(Model.Image)
+            <span @Markup.Property(Model, "Media")>
+                @Html.Media(Model.Media)
             </span>
         </a>
     }
     else
     {
-        <span @Markup.Property(Model, "Image")>
-            @Html.Image(Model.Image)
+        <span @Markup.Property(Model, "Media")>
+            @Html.Media(Model.Media)
         </span>
     }
     <h3 class="overlay overlay-top ribbon" @Markup.Property(Model, "Headline")>@Model.Headline</h3>

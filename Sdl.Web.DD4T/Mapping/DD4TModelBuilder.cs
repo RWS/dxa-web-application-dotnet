@@ -27,10 +27,8 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 return CreatePage(sourceEntity, type, includes);
             }
-            else
-            {
-                return CreateEntity(sourceEntity, type, includes);
-            }
+            
+            return CreateEntity(sourceEntity, type, includes);
         }
         
         protected virtual object CreateEntity(object sourceEntity, Type type, List<object> includes=null)
@@ -52,13 +50,12 @@ namespace Sdl.Web.DD4T.Mapping
                 // get schema item id from tcmuri -> tcm:1-2-8
                 string[] uriParts = component.Schema.Id.Split('-');
                 long schemaId = Convert.ToInt64(uriParts[1]);
-                MappingData mapData = new MappingData();
+                MappingData mapData = new MappingData {SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString())};
                 // get schema entity names (indexed by vocabulary)
-                mapData.SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString());
                 mapData.EntityNames = mapData.SemanticSchema.GetEntityNames();
             
                 //TODO may need to merge with vocabs from embedded types
-                mapData.Vocabularies = GetVocabulariesFromType(type);
+                mapData.TargetEntitiesByPrefix = GetEntityDataFromType(type);
                 mapData.Content = component.Fields;
                 mapData.Meta = component.MetadataFields;
                 mapData.TargetType = type;
@@ -67,6 +64,7 @@ namespace Sdl.Web.DD4T.Mapping
                 if (model is Entity)
                 {
                     ((Entity)model).EntityData = entityData;
+                    ((Entity)model).Id = component.Id.Split('-')[1];
                 }
                 return model;
 
@@ -78,7 +76,7 @@ namespace Sdl.Web.DD4T.Mapping
         {
             var model = Activator.CreateInstance(mapData.TargetType);
             Dictionary<string, string> propertyData = new Dictionary<string, string>();
-            var propertySemantics = LoadPropertySemantics(mapData.TargetType);
+            var propertySemantics = FilterPropertySematicsByEntity(LoadPropertySemantics(mapData.TargetType),mapData);
             foreach (var pi in mapData.TargetType.GetProperties())
             {
                 bool multival = pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
@@ -101,7 +99,7 @@ namespace Sdl.Web.DD4T.Mapping
                             switch(pi.Name)
                             {
                                 case "Image":
-                                    if (mapData.SourceEntity!=null && mapData.SourceEntity.Multimedia!=null)
+                                    if (mapData.SourceEntity != null && mapData.SourceEntity.Multimedia != null)
                                     {
                                         pi.SetValue(model, GetMultiMediaLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
                                         processed = true;
@@ -129,18 +127,48 @@ namespace Sdl.Web.DD4T.Mapping
             return model;
         }
 
+        protected virtual Dictionary<string, List<SemanticProperty>> FilterPropertySematicsByEntity(Dictionary<string, List<SemanticProperty>> semantics, MappingData mapData)
+        {
+            Dictionary<string, List<SemanticProperty>> filtered = new Dictionary<string, List<SemanticProperty>>();
+            foreach (var item in semantics)
+            {
+                filtered.Add(item.Key, new List<SemanticProperty>());
+                List<SemanticProperty> defaultProperties = new List<SemanticProperty>();
+                foreach (var prop in item.Value)
+                {
+                    //Default prefix is always OK, but should be added last
+                    if (String.IsNullOrEmpty(prop.Prefix))
+                    {
+                        defaultProperties.Add(prop);
+                    }
+                    else
+                    {
+                        //Filter out any properties belonging to other entities than the source entity
+                        var entityData = GetEntityData(prop.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
+                        if (entityData != null)
+                        {
+                            if (mapData.EntityNames.Contains(entityData.Value.Key))
+                            {
+                                if (mapData.EntityNames[entityData.Value.Key].First() == entityData.Value.Value)
+                                {
+                                    filtered[item.Key].Add(prop);
+                                }
+                            }
+                        }
+                    }
+                }
+                filtered[item.Key].AddRange(defaultProperties);
+            }
+            return filtered;
+        }
+
         private IField GetFieldFromSemantics(MappingData mapData, SemanticProperty info)
         {
-            string lookup = info.Prefix;
-            if (mapData.ParentDefaultPrefix != null && String.IsNullOrEmpty(info.Prefix))
+            var entityData = GetEntityData(info.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
+            if (entityData != null)
             {
-                lookup = mapData.ParentDefaultPrefix;
-            }
-            if (mapData.Vocabularies.ContainsKey(lookup))
-            {
-                var vocab = mapData.Vocabularies[lookup];
-                
                 // determine field semantics
+                var vocab = entityData.Value.Key;
                 string prefix = SemanticMapping.GetPrefix(vocab);
                 if (prefix != null)
                 {
@@ -149,18 +177,31 @@ namespace Sdl.Web.DD4T.Mapping
                     if (entity != null)
                     {
                         FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
-
                         // locate semantic schema field
                         SemanticSchemaField matchingField = mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics);
                         if (matchingField != null)
                         {
-                            return ExtractMatchedField(matchingField, matchingField.IsMetadata ? mapData.Meta : mapData.Content, mapData.EmbedLevel);
+                            return ExtractMatchedField(matchingField, (matchingField.IsMetadata && mapData.Meta!=null) ? mapData.Meta : mapData.Content, mapData.EmbedLevel);
                         }
                     }
                 }
             }
             return null;
         }
+
+        private KeyValuePair<string,string>? GetEntityData(string prefix, Dictionary<string,KeyValuePair<string,string>> entityData, string defaultPrefix)
+        {
+            if (defaultPrefix != null && String.IsNullOrEmpty(prefix))
+            {
+                prefix = defaultPrefix;
+            }
+            if (entityData.ContainsKey(prefix))
+            {
+                return entityData[prefix];
+            }
+            return null;
+        }
+
 
         private IField ExtractMatchedField(SemanticSchemaField matchingField, IFieldSet fields, int embedLevel, string path = null)
         {
@@ -182,10 +223,8 @@ namespace Sdl.Web.DD4T.Mapping
                     int pos = path.IndexOf("/");
                     return ExtractMatchedField(matchingField, fields[bits[0]].EmbeddedValues[0], embedLevel, path.Substring(pos + 1));
                 }
-                else
-                {
-                    return fields[bits[0]];
-                }
+
+                return fields[bits[0]];
             }
             return null;
         }
@@ -294,17 +333,32 @@ namespace Sdl.Web.DD4T.Mapping
         }
 
 
-        private static object GetMultiMediaLinks(IList<IComponent> items, Type modelType, bool multival)
+        private static object GetMultiMediaLinks(IEnumerable<IComponent> items, Type modelType, bool multival)
         {
-            //TODO, handle other types
-            if (modelType.IsAssignableFrom(typeof(Image)))
+            var components = items as IList<IComponent> ?? items.ToList();
+            if (components.Any())
             {
-                if (multival)
+                // TODO find better way to determine image or video
+                string schemaTitle = components.First().Schema.Title;
+                if (modelType.IsAssignableFrom(typeof(YouTubeVideo)) && schemaTitle.ToLower().Contains("youtube"))
                 {
-                    return GetImages(items);
-                }
+                    if (multival)
+                    {
+                        return GetYouTubeVideos(components);
+                    }
 
-                return GetImages(items)[0];
+                    return GetYouTubeVideos(components)[0];
+                }
+                if (modelType.IsAssignableFrom(typeof(Image)))
+                {
+                    if (multival)
+                    {
+                        return GetImages(components);
+                    }
+
+                    return GetImages(components)[0];
+                }
+                // TODO handle other types
             }
             return null;
         }
@@ -379,7 +433,7 @@ namespace Sdl.Web.DD4T.Mapping
             return GetMultiComponentLinks(field.LinkedComponentValues, linkedItemType, multival);
         }
 
-        private object GetMultiComponentLinks(IList<IComponent> items, Type linkedItemType, bool multival)
+        private object GetMultiComponentLinks(IEnumerable<IComponent> items, Type linkedItemType, bool multival)
         {
             //What to do depends on the target type
             if (linkedItemType == typeof(String) || linkedItemType == typeof(Link))
@@ -406,34 +460,32 @@ namespace Sdl.Web.DD4T.Mapping
                     }
                     return new Link { Url = urls[0] };
                 }
-                else if (multival)
+                if (multival)
                 {
                     return urls;
                 }
-                else
-                {
-                    return urls[0];
-                }
+                
+                return urls[0];
             }
-            else
-            {
-                //TODO is reflection the only way to do this?
-                MethodInfo method = GetType().GetMethod("GetCompLink" + (multival ? "s" : ""), BindingFlags.NonPublic | BindingFlags.Instance);
-                method = method.MakeGenericMethod(new[] { linkedItemType });
-                return method.Invoke(this, new object[] { items, linkedItemType });
-            }
+
+            //TODO is reflection the only way to do this?
+            MethodInfo method = GetType().GetMethod("GetCompLink" + (multival ? "s" : ""), BindingFlags.NonPublic | BindingFlags.Instance);
+            method = method.MakeGenericMethod(new[] { linkedItemType });
+            return method.Invoke(this, new object[] { items, linkedItemType });
         }
 
         private object GetMultiEmbedded(IField field, Type propertyType, bool multival, MappingData mapData)
         {
-            MappingData embedMapData = new MappingData();
-            embedMapData.TargetType = propertyType;
-            embedMapData.Meta = null;
-            embedMapData.EntityNames = mapData.EntityNames;
-            embedMapData.ParentDefaultPrefix = mapData.ParentDefaultPrefix;
-            embedMapData.Vocabularies = mapData.Vocabularies;
-            embedMapData.SemanticSchema = mapData.SemanticSchema;
-            embedMapData.EmbedLevel = mapData.EmbedLevel + 1;
+            MappingData embedMapData = new MappingData
+                {
+                    TargetType = propertyType,
+                    Meta = null,
+                    EntityNames = mapData.EntityNames,
+                    ParentDefaultPrefix = mapData.ParentDefaultPrefix,
+                    TargetEntitiesByPrefix = mapData.TargetEntitiesByPrefix,
+                    SemanticSchema = mapData.SemanticSchema,
+                    EmbedLevel = mapData.EmbedLevel + 1
+                };
             //This is a bit weird, but necessary as we cannot return List<object>, we need to get the right type
             var result = (IList)typeof(List<>).MakeGenericType(propertyType).GetConstructor(Type.EmptyTypes).Invoke(null);
             foreach (IFieldSet fields in field.EmbeddedValues)
@@ -468,20 +520,25 @@ namespace Sdl.Web.DD4T.Mapping
             return components.Select(c => new Image { Url = c.Multimedia.Url, FileSize = c.Multimedia.Size }).ToList();
         }
 
-        private List<T> GetCompLinks<T>(IEnumerable<IComponent> components, Type linkedItemType)
+        private static List<YouTubeVideo> GetYouTubeVideos(IEnumerable<IComponent> components)
         {
-            List<T> list = new List<T>();
-            foreach (var comp in components)
-            {
-                list.Add((T)Create(comp, linkedItemType));
-            }
-            return list;
+            return components.Select(c => new YouTubeVideo { Url = c.Multimedia.Url, FileSize = c.Multimedia.Size, YouTubeId = c.MetadataFields["youTubeId"].Value }).ToList();
         }
 
-        private T GetCompLink<T>(IEnumerable<IComponent> components, Type linkedItemType)
-        {
-            return GetCompLinks<T>(components,linkedItemType)[0];
-        }
+        //private List<T> GetCompLinks<T>(IEnumerable<IComponent> components, Type linkedItemType)
+        //{
+        //    List<T> list = new List<T>();
+        //    foreach (var comp in components)
+        //    {
+        //        list.Add((T)Create(comp, linkedItemType));
+        //    }
+        //    return list;
+        //}
+
+        //private T GetCompLink<T>(IEnumerable<IComponent> components, Type linkedItemType)
+        //{
+        //    return GetCompLinks<T>(components,linkedItemType)[0];
+        //}
 
         private ResourceProvider _resourceProvider;
 
@@ -499,9 +556,12 @@ namespace Sdl.Web.DD4T.Mapping
                 {
                     title = GetResource("core.defaultPageTitle") + postfix;
                 }
-                WebPage model = new WebPage { Title = title };
-                model.Meta = ProcessPageMetadata(page);
-                model.PageData = GetPageData(page);
+                WebPage model = new WebPage
+                    {
+                        Title = title,
+                        Meta = ProcessPageMetadata(page),
+                        PageData = GetPageData(page)
+                    };
                 bool first = true;
                 foreach (var cp in page.ComponentPresentations)
                 {
@@ -564,7 +624,7 @@ namespace Sdl.Web.DD4T.Mapping
                 }
                 if (headerInclude != null)
                 {
-                    WebPage headerPage = (WebPage)Create(headerInclude, typeof(WebPage), null);
+                    WebPage headerPage = (WebPage)Create(headerInclude, typeof(WebPage));
                     if (headerPage != null)
                     {
                         var header = new Header { Regions = new Dictionary<string, Region>() };
@@ -577,7 +637,7 @@ namespace Sdl.Web.DD4T.Mapping
                 }
                 if (footerInclude != null)
                 {
-                    WebPage footerPage = (WebPage)Create(footerInclude, typeof(WebPage), null);
+                    WebPage footerPage = (WebPage)Create(footerInclude, typeof(WebPage));
                     if (footerPage != null)
                     {
                         var footer = new Footer { Regions = new Dictionary<string, Region>() };
@@ -622,7 +682,7 @@ namespace Sdl.Web.DD4T.Mapping
             }
             else
             {
-                string value = null;
+                string value;
                 switch (field.Name)
                 {
                     case "internalLink":
