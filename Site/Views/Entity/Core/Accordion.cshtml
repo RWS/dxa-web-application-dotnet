@@ -24,9 +24,11 @@
                         }
                         @if (element.Text!= null)
                         {
-                            <div id="@collapseId" class="panel-collapse collapse @(i==1?"in":"")" @Markup.Property(element, "Text")>
+                            <div id="@collapseId" class="panel-collapse collapse @(i==1?"in":"")">
                                 <div class="panel-body">
-                                    @Html.Raw(element.Text)
+                                    <div @Markup.Property(element, "Text")>
+                                        @Html.Raw(element.Text)    
+                                    </div>
 
                                     @if (element.Media != null)
                                     {
