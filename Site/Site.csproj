@@ -202,6 +202,7 @@
     <Content Include="Views\Entity\Core\Partials\GoogleMap.cshtml" />
     <Content Include="Views\Entity\Core\TeaserMap.cshtml" />
     <Content Include="Views\Entity\GoogleAnalytics\GoogleAnalytics.cshtml" />
+    <Content Include="Views\Entity\Core\Tab.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
