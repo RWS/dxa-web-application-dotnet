@@ -1,14 +1,14 @@
-﻿using Sdl.Web.DD4T;
-using Sdl.Web.Mvc;
+﻿using Sdl.Web.Mvc;
+using Sdl.Web.Mvc.Common;
 
 namespace Site.Controllers
 {
     public class RegionController : BaseController
     {
-        public RegionController()
+        public RegionController(IContentProvider contentProvider, IRenderer renderer)
         {
-            ContentProvider = new DD4TContentProvider();
-            Renderer = new DD4TRenderer();
+            ContentProvider = contentProvider;
+            Renderer = renderer;
         }
     }
 }

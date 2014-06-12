@@ -1,17 +1,10 @@
-﻿using Sdl.Web.Mvc.Mapping;
-using log4net.Config;
-using Sdl.Web.Mvc;
-using Sdl.Web.Tridion;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http.Formatting;
-using System.Reflection;
+﻿using System;
 using System.Web;
-using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Sdl.Web.Mvc;
+using Sdl.Web.Mvc.Mapping;
+using Sdl.Web.Tridion;
 
 namespace Site
 {
@@ -64,6 +57,7 @@ namespace Site
             AreaRegistration.RegisterAllAreas();
             RegisterGlobalFilters(GlobalFilters.Filters);
             RegisterRoutes(RouteTable.Routes);
+            Bootstrapper.Initialise();
             ViewEngines.Engines.Clear();
             //Register Custom Razor View Engine
             ViewEngines.Engines.Add(new ContextAwareViewEngine());

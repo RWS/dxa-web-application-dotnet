@@ -9,16 +9,19 @@ using DD4T.ContentModel;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
+using SDL.Web.Helpers;
 
 namespace Sdl.Web.DD4T.Mapping
 {
     public partial class DD4TModelBuilder : BaseModelBuilder
     {
-        public ExtensionlessLinkFactory LinkFactory { get; set; }
-
-        public DD4TModelBuilder()
+        readonly public ExtensionlessLinkFactory LinkFactory;
+        readonly RichTextHelper RtfHelper;
+        
+        public DD4TModelBuilder(ExtensionlessLinkFactory linkFactory, RichTextHelper rtfHelper)
         {
-            LinkFactory = new ExtensionlessLinkFactory();
+            LinkFactory = linkFactory;
+            RtfHelper = rtfHelper;
         }
 
         public override object Create(object sourceEntity, Type type, List<object> includes = null)
@@ -501,16 +504,16 @@ namespace Sdl.Web.DD4T.Mapping
 
         }
 
-        private static object GetStrings(IField field, Type modelType, bool multival)
+        object GetStrings(IField field, Type modelType, bool multival)
         {
             if (modelType.IsAssignableFrom(typeof(String)))
             {
                 if (multival)
                 {
-                    return field.Values;
+                    return field.Values.Select(RtfHelper.ResolveRichText);
                 }
 
-                return field.Value;
+                return RtfHelper.ResolveRichText(field.Value);
             }
             return null;
         }

@@ -1,37 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
-using Sdl.Web.DD4T.Mapping;
-using Sdl.Web.Mvc;
-using Sdl.Web.Mvc.Mapping;
-using Sdl.Web.Mvc.Models;
+using DD4T.ContentModel.Exceptions;
 using DD4T.ContentModel.Factories;
 using DD4T.Factories;
-using DD4T.ContentModel.Exceptions;
 //TODO  - abstract this dependency
-using DD4T.Providers.SDLTridion2013;
+using Sdl.Web.Mvc;
+using Sdl.Web.Mvc.Common;
+using Sdl.Web.Mvc.Mapping;
+using Sdl.Web.Mvc.Models;
 using Sdl.Web.Tridion;
 
 namespace Sdl.Web.DD4T
 {
     public class DD4TContentProvider : BaseContentProvider
     {
-        public ExtensionlessLinkFactory LinkFactory { get; set; }
-        public IPageFactory PageFactory { get; set; }
+        readonly ExtensionlessLinkFactory LinkFactory;
+        readonly IPageFactory PageFactory;
 
-        public DD4TContentProvider()
+        public DD4TContentProvider(ExtensionlessLinkFactory linkFactory, IModelBuilder modelBuilder, IPageFactory pageFactory)
         {
-            LinkFactory = new ExtensionlessLinkFactory();
-            DefaultModelBuilder = new DD4TModelBuilder();
-            this.PageFactory = new PageFactory()
-            {
-                PageProvider = new TridionPageProvider(),
-                PublicationResolver = new PublicationResolver(),
-                ComponentFactory = new ComponentFactory() { PublicationResolver = new PublicationResolver() },
-                LinkFactory = new ExtensionlessLinkFactory() { PublicationResolver = new PublicationResolver() }
-            };
+            LinkFactory = linkFactory;
+            DefaultModelBuilder = modelBuilder;
+            this.PageFactory = pageFactory;
         }
 
         public override string ProcessUrl(string url)
