@@ -1,65 +1,47 @@
-﻿@model Sdl.Web.Mvc.Models.Article
+﻿@model Sdl.Web.Mvc.Models.ItemList
 <article class="rich-text" @Markup.Entity(Model)>
-    @if (Model.Image != null)
-    {
-        <div id="carousel-large" class="carousel">
-            <div class="carousel-inner">
-                <div class="item active" @Markup.Property(Model, "Image")>
-                    @Html.Image(Model.Image, 3.3, "center-block")
-                    <div class="overlay overlay-tl ribbon">
-                        <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-    else
-    {
-        <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
-    }
-    @if (@Model.Date != null)
-    {
-        <div class="meta" @Markup.Property(Model, "Date")>
-            @Html.Date(Model.Date)
-        </div>
-    }
     <div class="content">
-        @if (Model.ArticleBody != null)
+        @if (Model.Headline != null)
+        {
+            <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
+        }
+        @if (Model.ItemListElements.Count > 0)
         {
             int i = 0;
             string accordionId = Guid.NewGuid().ToString();
             <div class="panel-group responsive-accordion" id="@accordionId">
-                @foreach (var para in Model.ArticleBody)
+                @foreach (Teaser element in Model.ItemListElements)
                 {
                     string collapseId = Guid.NewGuid().ToString();
-                    <div class="panel panel-default" @Markup.Property(Model, "Paragraphs", i++)>
-                        @if (para.Subheading != null)
+                    <div class="panel panel-default" @Markup.Property(Model, "itemListElement", i++)>
+                        @if (element.Headline != null)
                         {
                             <div class="panel-heading">
-                                <h4 class="panel-title" @Markup.Property(para, "Subheading")>
-                                    <a data-toggle="collapse" data-parent="#@accordionId" href="#@collapseId">@para.Subheading</a>
+                                <h4 class="panel-title" @Markup.Property(element, "Headline")>
+                                    <a data-toggle="collapse" data-parent="#@accordionId" href="#@collapseId">@element.Headline</a>
                                 </h4>
                             </div>
                         }
-                        @if (para.Content != null)
+                        @if (element.Text!= null)
                         {
-
-                            <div id="@collapseId" class="panel-collapse collapse @(i==1?"in":"")" @Markup.Property(para, "Content")>
+                            <div id="@collapseId" class="panel-collapse collapse @(i==1?"in":"")" @Markup.Property(element, "Text")>
                                 <div class="panel-body">
-                                    @Html.Raw(para.Content)
+                                    @Html.Raw(element.Text)
+
+                                    @if (element.Media != null)
+                                    {
+                                        <figure @Markup.Property(element, "Media")>
+                                            @Html.Media(element.Media)
+                                        </figure>
+                                    }
+                                    
+                                    @if (element.Link != null)
+                                    {
+                                        <p @Markup.Property(element, "Link.LinkText")>
+                                            <a href="@element.Link.Url" title="@element.Link.AlternateText" class="btn btn-primary">@(element.Link.LinkText ?? Html.Resource("core.readMoreLinkText"))</a>
+                                        </p>
+                                    }    
                                 </div>
-                                @if (para.Media != null && para.Media is Image)
-                                {
-                                    <figure @Markup.Property(para, "Media")>
-                                        @Html.Image(((Image)para.Media))
-                                        @if (para.Caption != null)
-                                        {
-                                            <figcaption @Markup.Property(para, "Caption")>
-                                                @para.Caption
-                                            </figcaption>
-                                        }
-                                    </figure>
-                                }
                             </div>
                         }
                     </div>
