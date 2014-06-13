@@ -11,40 +11,30 @@
             string panelId = Guid.NewGuid().ToString();
             <div class="panel panel-default">
                 <div class="panel-body">
-                    
+                    <!-- Tab dropdown -->
                     <div class="dropdown visible-xs">
                         <select class="form-control tab-select" data-toggle="tab">
                             @{i=0;}
                             @foreach (Teaser element in Model.ItemListElements)
                             {
-                                string tabId = "tab" + panelId + ":" + i;
+                                string tabId = "tab" + panelId + "-" + i;
                                 <option data-target="#@tabId">@element.Headline</option>
                                 i++;
                             }
                         </select>
                     </div>
-
+                    <!-- Tab tips -->
                     <ul class="nav nav-tabs hidden-xs">
                         @{i = 0;}
                         @foreach (Teaser element in Model.ItemListElements)
                         {
-                            string tabId = "tab" + panelId + ":" + i;
-                            if (i == 0)
-                            {
-                                <li class="active">
-                                    <a href="#@tabId" data-toggle="tab" @Markup.Property(element, "Headline")>@element.Headline</a>
-                                </li>
-                            }
-                            else
-                            {
-                                <li>
-                                    <a href="#@tabId" data-toggle="tab" @Markup.Property(element, "Headline")>@element.Headline</a>
-                                </li>
-                            }
+                            string tabId = "tab" + panelId + "-" + i;
+                            <li class="@(i==0?"active":"")">
+                                <a href="#@tabId" data-toggle="tab" @Markup.Property(element, "Headline")>@element.Headline</a>
+                            </li>
                             i++;
                         }
                     </ul>
-
                     <!-- Tab panes -->
                     <div class="tab-content">
                         @{i=0;}
