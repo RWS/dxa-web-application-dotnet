@@ -263,18 +263,11 @@ namespace Sdl.Web.Mvc
             return new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(File.ReadAllText(file));
         }
 
-        public static string GetDefaultExtensionLessPageName()
+        public static string GetDefaultDocument()
         {
             return "index";
         }
-        public static string GetDefaultPageName()
-        {
-            return GetDefaultExtensionLessPageName() + ".html";
-        }
-        public static string GetDefaultExtension()
-        {
-            return ".html";
-        }
+
         public static string GetRegionController()
         {
             return "Region";
@@ -295,11 +288,6 @@ namespace Sdl.Web.Mvc
         public static string GetDefaultModuleName()
         {
             return "Core";
-        }
-
-        public static string GetCmsUrl()
-        {
-            return GetConfig("core.cmsurl");
         }
         
         public static String AddVersionToPath(string path)

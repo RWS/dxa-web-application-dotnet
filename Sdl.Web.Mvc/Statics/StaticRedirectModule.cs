@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Configuration;
 
 namespace Sdl.Web.Mvc
 {
@@ -29,7 +31,7 @@ namespace Sdl.Web.Mvc
             //So we rewrite the request to a full URL including the default page name to ensure the full MVC pipeline is executed
             if (url == WebRequestContext.Localization.Path + "/")
             {
-                context.RewritePath(url + Configuration.GetDefaultExtensionLessPageName());
+                context.RewritePath(url + Configuration.GetDefaultDocument());
             }
             var versionLessUrl = Configuration.RemoveVersionFromPath(url);
             if (url != versionLessUrl)

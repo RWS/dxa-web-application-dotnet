@@ -135,7 +135,7 @@ namespace Sdl.Web.DD4T
                 var pageTemplateId = page.PageData.ContainsKey("PageTemplateID") ? page.PageData["PageTemplateID"] : null;
                 var pageDate = page.PageData.ContainsKey("PageModified") ? page.PageData["PageModified"] : null;
                 var pageTemplateDate = page.PageData.ContainsKey("PageTemplateModified") ? page.PageData["PageTemplateModified"] : null;
-                var html = String.Format(PageFormat, pageId, pageDate, pageTemplateId, pageTemplateDate) + String.Format(PageScript, Configuration.GetCmsUrl());
+                var html = String.Format(PageFormat, pageId, pageDate, pageTemplateId, pageTemplateDate) + String.Format(PageScript, Configuration.GetConfig("core.cmsurl"));
                 return new MvcHtmlString(html);
             }
             return null;
