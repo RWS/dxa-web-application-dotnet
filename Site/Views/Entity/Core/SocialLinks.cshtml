@@ -1,8 +1,11 @@
 ﻿@model LinkList<TagLink>
-<div class='icon-list'>
+@{
+    int i = 0;
+}
+<div class='icon-list' @Markup.Entity(Model)>
     @foreach(var link in Model.Links)
     {
-	<a href="@link.Url" class="fa-stack fa-lg" title="@Html.FormatResource("core.VisitUsSocialLinkTitle",link.Tag.DisplayText))">
+	<a href="@link.Url" class="fa-stack fa-lg" title="@Html.FormatResource("core.VisitUsSocialLinkTitle",link.Tag.DisplayText))" @Markup.Property(Model,"Links")>
 		<i class="fa fa-circle fa-stack-2x"></i>
 		<i class="fa fa-@link.Tag.Key fa-stack-1x"></i>
 	</a>

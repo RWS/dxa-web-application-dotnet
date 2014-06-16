@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Sdl.Web.Mvc.Models
 {
-    public class TagLink
+    public class TagLink : Entity
     {
         [SemanticProperty(PropertyName = "internalLink")]
         [SemanticProperty(PropertyName = "externalLink")]
         public string Url { get; set; }
-        public Tag Tag { get; set; } 
+        public Tag Tag { get; set; }
     }
 }
