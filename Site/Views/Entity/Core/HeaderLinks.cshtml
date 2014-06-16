@@ -1,4 +1,4 @@
-﻿@model Sdl.Web.Mvc.Models.LinkList
+﻿@model LinkList<Link>
 @if (Model.Links!=null && Model.Links.Count>0)
 {
     <ul class="nav navbar-nav utility-nav" @Markup.Entity(Model)>

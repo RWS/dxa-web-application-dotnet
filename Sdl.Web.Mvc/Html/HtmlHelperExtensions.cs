@@ -59,9 +59,19 @@ namespace Sdl.Web.Mvc.Html
             return null;
         }
 
+        public static string FormatResource(this HtmlHelper htmlHelper, string resourceName, params object[] parameters)
+        {
+            return String.Format((string)htmlHelper.Resource(resourceName),parameters);
+        }
+
         public static string Resource(this HtmlHelper htmlHelper, string resourceName)
         {
             return (string)Resource(htmlHelper.ViewContext.HttpContext, resourceName);
+        }
+
+        public static object FormatResource(this HttpContextBase httpContext, string resourceName, params object[] parameters)
+        {
+            return String.Format((string)httpContext.Resource(resourceName), parameters);
         }
 
         public static object Resource(this HttpContextBase httpContext, string resourceName)
