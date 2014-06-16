@@ -72,16 +72,5 @@ namespace Site
             //Register Custom Razor View Engine
             ViewEngines.Engines.Add(new ContextAwareViewEngine());
         }
-
-        protected void Application_BeginRequest()
-        {
-            //TODO this is an attempt to determin if the request is coming from XPM
-            var referrer = HttpContext.Current.Request.UrlReferrer;
-            if (referrer != null && referrer.Host == new Uri(Configuration.GetCmsUrl()).Host)
-            {
-                var cookie = new HttpCookie("cms-edit-mode", "edit");
-                Response.Cookies.Add(cookie);
-            }
-        }
     }
 }

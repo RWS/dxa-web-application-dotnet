@@ -14,6 +14,13 @@ namespace Sdl.Web.Mvc.Mapping
     /// </summary>
     public abstract class BaseContentProvider : IContentProvider
     {
+        public BaseContentProvider()
+        {
+            DefaultExtension = ".html";
+            DefaultExtensionLessPageName = Configuration.GetDefaultDocument();
+            DefaultPageName = DefaultExtensionLessPageName + DefaultExtension;
+        }
+
         //These need to be implemented by the specific content provider
         public abstract string GetPageContent(string url);
         public abstract object GetEntityModel(string id);
@@ -58,8 +65,8 @@ namespace Sdl.Web.Mvc.Mapping
         
         public virtual string ParseUrl(string url)
         {
-            var defaultPageFileName = Configuration.GetDefaultPageName();
-            return String.IsNullOrEmpty(url) ? defaultPageFileName : (url.EndsWith("/") ? url + defaultPageFileName : url += Configuration.GetDefaultExtension());
+            var defaultPageFileName = DefaultPageName;
+            return String.IsNullOrEmpty(url) ? defaultPageFileName : (url.EndsWith("/") ? url + defaultPageFileName : url += DefaultExtension);
         }
         
         public virtual object MapModel(object data, ModelType modelType, Type viewModeltype = null, List<object> includes = null)
@@ -98,16 +105,21 @@ namespace Sdl.Web.Mvc.Mapping
             }
         }
 
+        /// <summary>
+        /// Used to post process URLs - for example to remove extensions and default document from resolved links, so for example /news/index.html becomes /news/
+        /// </summary>
+        /// <param name="url">The URL to process</param>
+        /// <returns>The processed URL</returns>
         public virtual string ProcessUrl(string url)
         {
             if (url != null)
             {
-                if (url.EndsWith(Configuration.GetDefaultExtension()))
+                if (url.EndsWith(DefaultExtension))
                 {
-                    url = url.Substring(0, url.Length - Configuration.GetDefaultExtension().Length);
-                    if (url.EndsWith("/" + Configuration.GetDefaultExtensionLessPageName()))
+                    url = url.Substring(0, url.Length - DefaultExtension.Length);
+                    if (url.EndsWith("/" + DefaultExtensionLessPageName))
                     {
-                        url = url.Substring(0, url.Length - Configuration.GetDefaultExtensionLessPageName().Length);
+                        url = url.Substring(0, url.Length - DefaultExtensionLessPageName.Length);
                     }
                 }
             }
@@ -115,5 +127,9 @@ namespace Sdl.Web.Mvc.Mapping
         }
 
         public abstract void PopulateDynamicList(ContentList<Teaser> list);
+
+        protected static string DefaultExtensionLessPageName{get;set;}
+        protected static string DefaultPageName{get;set;}
+        protected static string DefaultExtension{get;set;}
     }
 }
