@@ -8,7 +8,7 @@
     @foreach (var item in Model.ItemListElements)
     {
         <li>
-            @if (item.Link.Url!=null)
+            @if (item.Link != null && item.Link.Url != null)
             {
             <a href="@item.Link.Url">
                 @item.Headline
