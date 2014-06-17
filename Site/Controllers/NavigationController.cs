@@ -61,9 +61,9 @@ namespace Site.Controllers
             return View(NavigationModel);
         }
 
-        protected override object ProcessModel(object sourceModel, Type type, List<string> includes = null)
+        protected override object ProcessModel(object sourceModel, Type type)
         {
-            var model = base.ProcessModel(sourceModel, type, includes);
+            var model = base.ProcessModel(sourceModel, type);
             var nav = model as NavigationLinks;
             string navType = ViewBag.NavType;
             NavigationLinks links = new NavigationLinks();

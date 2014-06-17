@@ -16,9 +16,9 @@ namespace Site.Controllers
             return Entity(entity, containerSize);
         }
 
-        protected override object ProcessModel(object sourceModel, Type type, List<string> includes = null)
+        protected override object ProcessModel(object sourceModel, Type type)
         {
-            var model = base.ProcessModel(sourceModel, type, includes);
+            var model = base.ProcessModel(sourceModel, type);
             var list = model as ContentList<Teaser>;
             if (list!=null)
             {

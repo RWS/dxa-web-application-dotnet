@@ -69,8 +69,9 @@ namespace Sdl.Web.Mvc.Mapping
             return String.IsNullOrEmpty(url) ? defaultPageFileName : (url.EndsWith("/") ? url + defaultPageFileName : url += DefaultExtension);
         }
         
-        public virtual object MapModel(object data, ModelType modelType, Type viewModeltype = null, List<object> includes = null)
+        public virtual object MapModel(object data, ModelType modelType, Type viewModeltype = null)
         {
+            List<object> includes = GetIncludesFromModel(data, modelType);
             string viewName = null;
             switch (modelType)
             {
@@ -104,6 +105,8 @@ namespace Sdl.Web.Mvc.Mapping
                 throw ex;
             }
         }
+
+        protected abstract List<object> GetIncludesFromModel(object data, ModelType modelType);
 
         /// <summary>
         /// Used to post process URLs - for example to remove extensions and default document from resolved links, so for example /news/index.html becomes /news/

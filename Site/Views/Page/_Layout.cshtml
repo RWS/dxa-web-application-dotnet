@@ -6,12 +6,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    @Html.MetaTags(Model)
     <title>@Model.Title</title>
-    <!--
-      <link rel="stylesheet/less" type="text/css" href="/assets/less/main.less" />
-      <script src="/bower_components/less.js/dist/less-1.7.0.min.js"></script>
-    -->    
+    @foreach (var meta in Model.Meta)
+    {
+        <meta name="@meta.Key" content="@meta.Value">
+    }
     <link rel="stylesheet" href="@Url.VersionedContent("/assets/css/main.css")">
     <script src="@Url.VersionedContent("/assets/scripts/header.js")"></script>
     <script src="@Url.VersionedContent("/assets/scripts/discover-min.js")"></script>
@@ -24,17 +23,17 @@
 </head>
 <body>
     <div id="page-wrapper">
-        @if (Model.Header!=null)
+        @if (Model.Includes.ContainsKey("Header"))
         {
-            @Html.Partial("Core/Header", Model.Header)
+            @Html.Partial("Core/Header", Model.Includes["Header"])
         }
         <div class="container-fluid page-border" role="main">
             @RenderBody()
         </div>
     </div>
-    @if (Model.Footer!=null)
+    @if (Model.Includes.ContainsKey("Footer"))
     {
-        @Html.Partial("Core/Footer", Model.Footer)
+        @Html.Partial("Core/Footer", Model.Includes["Footer"])
     }
     <script src="@Url.VersionedContent("/assets/scripts/plugins.js")"></script>
     <script src="@Url.VersionedContent("/assets/scripts/custom.js")"></script>

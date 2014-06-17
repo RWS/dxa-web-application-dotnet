@@ -65,7 +65,8 @@ namespace Sdl.Web.Mvc.Mapping
 
         private static Dictionary<string, SemanticSchema> _semanticMap;
         private static List<SemanticVocabulary> _semanticVocabularies;
-        private static Dictionary<string, XpmRegion> _xpmRegions; 
+        private static Dictionary<string, XpmRegion> _xpmRegions;
+        private static Dictionary<string, List<string>> _includes;
         private static readonly object MappingLock = new object();
 
         /// <summary>
@@ -114,6 +115,20 @@ namespace Sdl.Web.Mvc.Mapping
             Log.Error(ex);
             // TODO should we throw the exception here or return the default vocabulary?
             throw ex;
+        }
+
+        /// <summary>
+        /// Gets a XPM region by name.
+        /// </summary>
+        /// <param name="name">The region name</param>
+        /// <returns>The XPM region matching the name for the given module</returns>
+        public static List<string> GetIncludes(string pageTypeIdentifier)
+        {
+            if (_includes.ContainsKey(pageTypeIdentifier))
+            {
+                return _includes[pageTypeIdentifier];
+            }
+            return null;
         }
 
         /// <summary>
@@ -223,6 +238,10 @@ namespace Sdl.Web.Mvc.Mapping
                                         _xpmRegions.Add(region.Region, region);
                                     }
                                 }
+                                else if (type.Equals("includes"))
+                                {
+                                    _includes = GetIncludesFromFile(configPath);
+                                }
                             }
                         }
                         else
@@ -242,6 +261,11 @@ namespace Sdl.Web.Mvc.Mapping
         private static List<XpmRegion> GetRegionsFromFile(string file)
         {
             return new JavaScriptSerializer().Deserialize<List<XpmRegion>>(File.ReadAllText(file));
+        }
+
+        private static Dictionary<string, List<string>> GetIncludesFromFile(string file)
+        {
+            return new JavaScriptSerializer().Deserialize<Dictionary<string,List<string>>>(File.ReadAllText(file));
         }
 
         private static List<SemanticSchema> GetSchemasFromFile(string file)

@@ -59,25 +59,24 @@ namespace Sdl.Web.Mvc.Html
             return null;
         }
 
+        public static string FormatResource(this HtmlHelper htmlHelper, string resourceName, params object[] parameters)
+        {
+            return String.Format((string)htmlHelper.Resource(resourceName),parameters);
+        }
+
         public static string Resource(this HtmlHelper htmlHelper, string resourceName)
         {
             return (string)Resource(htmlHelper.ViewContext.HttpContext, resourceName);
         }
 
+        public static object FormatResource(this HttpContextBase httpContext, string resourceName, params object[] parameters)
+        {
+            return String.Format((string)httpContext.Resource(resourceName), parameters);
+        }
+
         public static object Resource(this HttpContextBase httpContext, string resourceName)
         {
             return httpContext.GetGlobalResourceObject(CultureInfo.CurrentUICulture.ToString(), resourceName);
-        }
-
-        public static MvcHtmlString MetaTags(this HtmlHelper htmlHelper, WebPage page)
-        {
-            StringBuilder metaTags = new StringBuilder();
-            foreach (var meta in page.Meta)
-            {
-                metaTags.AppendFormat("<meta name=\"{0}\" content=\"{1}\">", meta.Key, meta.Value);
-            }
-
-            return new MvcHtmlString(metaTags.ToString());
         }
 
     }

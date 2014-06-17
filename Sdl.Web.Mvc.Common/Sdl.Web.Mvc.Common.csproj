@@ -50,6 +50,7 @@
     <Compile Include="Models\Common\MediaItem.cs" />
     <Compile Include="Models\Common\Paragraph.cs" />
     <Compile Include="Models\Common\Tag.cs" />
+    <Compile Include="Models\Common\TagLink.cs" />
     <Compile Include="Models\Common\YouTubeVideo.cs" />
     <Compile Include="Models\Entity\Article.cs" />
     <Compile Include="Models\Entity\ItemList.cs" />
@@ -65,8 +66,7 @@
     <Compile Include="Interfaces\IStaticFileManager.cs" />
     <Compile Include="Models\Navigation\NavigationLinks.cs" />
     <Compile Include="Models\Navigation\SitemapItem.cs" />
-    <Compile Include="Models\Page\Footer.cs" />
-    <Compile Include="Models\Page\Header.cs" />
+    <Compile Include="Models\Page\BasePage.cs" />
     <Compile Include="Models\Page\Region.cs" />
     <Compile Include="Models\Page\WebPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
