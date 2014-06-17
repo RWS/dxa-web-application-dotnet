@@ -31,7 +31,7 @@ namespace Sdl.Web.Mvc
             }
             SetupViewBag();
             var viewName = GetViewName(page);
-            var model = this.ProcessModel(page, GetViewType(viewName),new List<string>{"system/include/header","system/include/footer"} ) ?? page;
+            var model = this.ProcessModel(page, GetViewType(viewName)) ?? page;
             return View(viewName, model);
         }
 
@@ -63,22 +63,22 @@ namespace Sdl.Web.Mvc
 
         protected virtual Type GetViewType(string viewName)
         {
-            var viewEngineResult = ViewEngines.Engines.FindPartialView(this.ControllerContext, viewName);
-            if (viewEngineResult.View == null)
+            if (!Configuration.ViewModelRegistry.ContainsKey(viewName))
             {
-                Log.Error("Could not find view {0} in locations: {1}", viewName, String.Join(",", viewEngineResult.SearchedLocations));
-                throw new Exception(String.Format("Missing view: {0}", viewName));
-            }
-            else
-            {
-                if (!Configuration.ViewModelRegistry.ContainsKey(viewName))
+                var viewEngineResult = ViewEngines.Engines.FindPartialView(this.ControllerContext, viewName);
+                if (viewEngineResult.View == null)
+                {
+                    Log.Error("Could not find view {0} in locations: {1}", viewName, String.Join(",", viewEngineResult.SearchedLocations));
+                    throw new Exception(String.Format("Missing view: {0}", viewName));
+                }
+                else
                 {
                     //This is the only way to get the view model type from the view and thus prevent the need to configure this somewhere
                     var path = ((BuildManagerCompiledView)viewEngineResult.View).ViewPath;
                     Configuration.AddViewModelToRegistry(viewName, path);
                 }
-                return Configuration.ViewModelRegistry[viewName];
             }
+            return Configuration.ViewModelRegistry[viewName];
         }
 
         protected virtual string GetViewName(object sourceModel)
@@ -95,41 +95,9 @@ namespace Sdl.Web.Mvc
         }
 
         //This is the method to override if you need to add custom model population logic, first calling the base class and then adding your own logic
-        protected virtual object ProcessModel(object sourceModel, Type type, List<string> includes = null)
+        protected virtual object ProcessModel(object sourceModel, Type type)
         {
-            List<object> includedItems = GetIncludes(includes);
-            return ContentProvider.MapModel(sourceModel, ModelType, type, includedItems);
-        }
-
-        protected virtual List<object> GetIncludes(List<string> includes)
-        {
-            if (includes != null && includes.Count > 0)
-            {
-                List<object> result = new List<object>();
-                foreach (var includeUrl in includes)
-                {
-                    object include = GetInclude(includeUrl);
-                    if (include != null)
-                    {
-                        result.Add(include);
-                    }
-                }
-                return result;
-            }
-            return null;
-        }
-
-        protected virtual object GetInclude(string includeUrl)
-        {
-            switch (ModelType)
-            {
-                case ModelType.Page:
-                    return ContentProvider.GetPageModel(Configuration.LocalizeUrl(includeUrl));
-                case ModelType.Region:
-                    return null;
-                default:
-                    return ContentProvider.GetEntityModel(includeUrl);
-            }
+            return ContentProvider.MapModel(sourceModel, ModelType, type);
         }
 
     }

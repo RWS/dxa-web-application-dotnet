@@ -547,22 +547,15 @@ namespace Sdl.Web.DD4T.Mapping
             IPage page = sourceEntity as IPage;
             if (page != null)
             {
-                string postfix = String.Format(" {0} {1}", GetResource("core.pageTitleSeparator"), GetResource("core.pageTitlePostfix"));
-
-                // strip possible numbers from title
-                string title = Regex.Replace(page.Title, @"^\d{3}\s", String.Empty);
-                // Index and Default are not a proper titles for an HTML page
-                if (title.ToLowerInvariant().Equals("index") || title.ToLowerInvariant().Equals("default"))
+                BasePage model = new BasePage();
+                //default title - will be overridden later if appropriate
+                model.Title = page.Title;
+                bool isInclude = true;
+                if (type == typeof(WebPage))
                 {
-                    title = GetResource("core.defaultPageTitle") + postfix;
+                    model = new WebPage();
+                    isInclude = false;
                 }
-                WebPage model = new WebPage
-                    {
-                        Title = title,
-                        Meta = ProcessPageMetadata(page),
-                        PageData = GetPageData(page)
-                    };
-                bool first = true;
                 foreach (var cp in page.ComponentPresentations)
                 {
                     string regionName = GetRegionFromComponentPresentation(cp);
@@ -571,92 +564,30 @@ namespace Sdl.Web.DD4T.Mapping
                         model.Regions.Add(regionName, new Region { Name = regionName });
                     }
                     model.Regions[regionName].Items.Add(cp);
-
-                    // determine title and description from first component in 'main' region
-                    if (first && regionName.Equals(Configuration.RegionForPageTitleComponent))
-                    {
-                        first = false;
-                        IFieldSet metadata = cp.Component.MetadataFields;
-                        IFieldSet fields = cp.Component.Fields;
-                        // determine title
-                        if (metadata.ContainsKey(Configuration.StandardMetadataXmlFieldName) && metadata[Configuration.StandardMetadataXmlFieldName].EmbeddedValues.Count > 0)
-                        {
-                            IFieldSet standardMeta = metadata[Configuration.StandardMetadataXmlFieldName].EmbeddedValues[0];
-                            if (standardMeta.ContainsKey(Configuration.StandardMetadataTitleXmlFieldName))
-                            {
-                                model.Title = standardMeta[Configuration.StandardMetadataTitleXmlFieldName].Value + postfix;
-                            }
-
-                            // determine description
-                            if (standardMeta.ContainsKey(Configuration.StandardMetadataDescriptionXmlFieldName))
-                            {
-                                model.Meta.Add("description", standardMeta[Configuration.StandardMetadataDescriptionXmlFieldName].Value);
-                            }
-                        }
-                        else if (fields.ContainsKey(Configuration.ComponentXmlFieldNameForPageTitle))
-                        {
-                            model.Title = fields[Configuration.ComponentXmlFieldNameForPageTitle].Value + postfix;
-                        }
-                    }
                 }
-                
-                //Add header/footer
-                IPage headerInclude = null;
-                IPage footerInclude = null;
-                if (includes != null)
+                if (!isInclude)
                 {
+                    var webpageModel = (WebPage)model;
                     foreach (var include in includes)
                     {
-                        var subPage = include as IPage;
-                        if (subPage != null)
+                        var includePage = (BasePage)Create(include, typeof(BasePage));
+                        if (includePage != null)
                         {
-                            switch (subPage.Title)
-                            {
-                                case "Header":
-                                    headerInclude = subPage;
-                                    break;
-                                case "Footer":
-                                    footerInclude = subPage;
-                                    break;
-                            }
+                            webpageModel.Includes.Add(includePage.Title, includePage);
                         }
                     }
-                }
-                if (headerInclude != null)
-                {
-                    WebPage headerPage = (WebPage)Create(headerInclude, typeof(WebPage));
-                    if (headerPage != null)
-                    {
-                        var header = new Header { Regions = new Dictionary<string, Region>() };
-                        foreach (var region in headerPage.Regions)
-                        {
-                            header.Regions.Add(region.Key, region.Value);
-                        }
-                        model.Header = header;
-                    }
-                }
-                if (footerInclude != null)
-                {
-                    WebPage footerPage = (WebPage)Create(footerInclude, typeof(WebPage));
-                    if (footerPage != null)
-                    {
-                        var footer = new Footer { Regions = new Dictionary<string, Region>() };
-                        foreach (var region in footerPage.Regions)
-                        {
-                            footer.Regions.Add(region.Key, region.Value);
-                        }
-                        model.Footer = footer;
-                    }
+                    webpageModel.PageData = GetPageData(page);
+                    webpageModel.Title = ProcessPageMetadata(page, webpageModel.Meta);
+                    model = webpageModel;
                 }
                 return model;
             }
             throw new Exception(String.Format("Cannot create model for class {0}. Expecting IPage.", sourceEntity.GetType().FullName));
-
         }
 
-        protected virtual Dictionary<string, string> ProcessPageMetadata(IPage page)
+        protected virtual string ProcessPageMetadata(IPage page, Dictionary<string,string> meta)
         {
-            var meta = new Dictionary<string, string>();
+            //First grab metadata from the page
             if (page.MetadataFields != null)
             {
                 foreach (var field in page.MetadataFields.Values)
@@ -664,7 +595,78 @@ namespace Sdl.Web.DD4T.Mapping
                     ProcessMetadataField(field, meta);
                 }
             }
-            return meta;
+            string description = meta.ContainsKey("description") ? meta["description"] : null;
+            string title = meta.ContainsKey("title") ? meta["title"] : null;
+            string image = meta.ContainsKey("image") ? meta["image"] : null;
+
+            //If we don't have a title or description - go hunting for a title and/or description from the first component in the main region on the page
+            if (title == null || description == null)
+            {
+                bool first = true;
+                foreach (var cp in page.ComponentPresentations)
+                {
+                    string regionName = GetRegionFromComponentPresentation(cp);
+                    // determine title and description from first component in 'main' region
+                    if (first && regionName.Equals(Configuration.RegionForPageTitleComponent))
+                    {
+                        first = false;
+                        IFieldSet metadata = cp.Component.MetadataFields;
+                        IFieldSet fields = cp.Component.Fields;
+                        if (metadata.ContainsKey(Configuration.StandardMetadataXmlFieldName) && metadata[Configuration.StandardMetadataXmlFieldName].EmbeddedValues.Count > 0)
+                        {
+                            IFieldSet standardMeta = metadata[Configuration.StandardMetadataXmlFieldName].EmbeddedValues[0];
+                            if (title==null && standardMeta.ContainsKey(Configuration.StandardMetadataTitleXmlFieldName))
+                            {
+                                title = standardMeta[Configuration.StandardMetadataTitleXmlFieldName].Value;
+                            }
+                            if (description==null && standardMeta.ContainsKey(Configuration.StandardMetadataDescriptionXmlFieldName))
+                            {
+                                description = standardMeta[Configuration.StandardMetadataDescriptionXmlFieldName].Value;
+                            }
+                        }
+                        if (title == null && fields.ContainsKey(Configuration.ComponentXmlFieldNameForPageTitle))
+                        {
+                            title = fields[Configuration.ComponentXmlFieldNameForPageTitle].Value;
+                        }
+                        //Try to find an image
+                        if (image == null && fields.ContainsKey("image"))
+                        {
+                            image = fields["image"].LinkedComponentValues[0].Multimedia.Url;
+                        }
+                    }
+                }
+            }
+            string titlePostfix = String.Format(" {0} {1}", GetResource("core.pageTitleSeparator"), GetResource("core.pageTitlePostfix"));
+            //if we still dont have a title, use the page title
+            if (title == null)
+            {
+                title = Regex.Replace(page.Title, @"^\d{3}\s", String.Empty);
+                // Index and Default are not a proper titles for an HTML page
+                if (title.ToLowerInvariant().Equals("index") || title.ToLowerInvariant().Equals("default"))
+                {
+                    title = GetResource("core.defaultPageTitle") + titlePostfix;
+                }
+            }
+            meta.Add("og:title", title);
+            meta.Add("og:url", WebRequestContext.GetRequestUrl());
+            //TODO is this always article?
+            meta.Add("og:type", "article");
+            meta.Add("og:locale", Configuration.GetConfig("core.culture"));
+            if (description != null)
+            {
+                meta.Add("og:description", description);
+            }
+            if (image != null)
+            {
+                image = WebRequestContext.Localization.GetBaseUrl() + image;
+                meta.Add("og:image", image);
+            }
+            if (!meta.ContainsKey("description"))
+            {
+                meta.Add("description", description ?? title);
+            }
+            //TODO meta.Add("fb:admins", Configuration.GetConfig("core.fbadmins");
+            return title + titlePostfix;
         }
 
         protected virtual void ProcessMetadataField(IField field, Dictionary<string, string> meta)
@@ -688,6 +690,9 @@ namespace Sdl.Web.DD4T.Mapping
                     case "internalLink":
                         value = LinkFactory.ResolveExtensionlessLink(field.Value);
                         break;
+                    case "image":
+                        value = field.LinkedComponentValues[0].Multimedia.Url;
+                        break;
                     default:
                         value = String.Join(",", field.Values);
                         break;
@@ -698,9 +703,7 @@ namespace Sdl.Web.DD4T.Mapping
                 }
             }
         }
-
-
-
+                
         private string GetResource(string name)
         {
             if (_resourceProvider == null)

@@ -162,5 +162,28 @@ namespace Sdl.Web.DD4T
             Int32.TryParse(schemaId, out res);
             return res;
         }
+
+        protected override List<object> GetIncludesFromModel(object model, ModelType modelType)
+        {
+            List<object> res = new List<object>();
+            if (modelType == ModelType.Page)
+            {
+                var page = (IPage)model;
+                var bits = page.PageTemplate.Id.Split('-');
+                var includes = SemanticMapping.GetIncludes(bits[1]);
+                if (includes != null)
+                {
+                    foreach (var include in includes)
+                    {
+                        var item = GetPageModel(Configuration.LocalizeUrl(include));
+                        if (item != null)
+                        {
+                            res.Add(item);
+                        }
+                    }
+                }
+            }
+            return res;
+        }
     }
 }

@@ -202,6 +202,10 @@
     <Content Include="Views\Entity\Core\TeaserMap.cshtml" />
     <Content Include="Views\Entity\GoogleAnalytics\GoogleAnalytics.cshtml" />
     <Content Include="Views\Entity\Core\SocialLinks.cshtml" />
+    <Content Include="Views\Page\Core\GeneralPage.cshtml" />
+    <Content Include="Views\Entity\Core\SocialSharing.cshtml" />
+    <Content Include="Views\Region\Core\Left.cshtml" />
+    <Content Include="Views\Region\Core\Tools.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

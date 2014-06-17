@@ -2,22 +2,19 @@
 <article class="rich-text" @Markup.Entity(Model)>
     @if (Model.Image != null)
     {
-        <div id="carousel-large" class="carousel">
-            <div class="carousel-inner">
-                <div class="item active" @Markup.Property(Model, "Image")>
-                    @Html.Media(Model.Image, 3.3, "center-block")
-                    <div class="overlay overlay-tl ribbon">
-                        <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="hero image-loading" @Markup.Property(Model, "Image")>
+            @Html.Media(Model.Image, 3.3)
+		    <div class="loading-panel"></div>
+		    <div class="overlay overlay-tl ribbon">
+    	        <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
+    		</div>
+		</div>
     }
     else
     {
         <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
     }
-    @if (@Model.Date!=null)
+    @if (Model.Date!=null)
     {
         <div class="meta" @Markup.Property(Model, "Date")>
             @Html.Date(Model.Date)

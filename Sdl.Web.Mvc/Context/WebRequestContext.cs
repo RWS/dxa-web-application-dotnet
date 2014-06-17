@@ -49,6 +49,11 @@ namespace Sdl.Web.Mvc
             }
         }
 
+        public static string GetRequestUrl()
+        {
+            return HttpContext.Current.Request.Url.ToString();
+        }
+
         protected static ScreenWidth CalculateScreenWidth()
         {
             int width = ContextEngine.Browser.DisplayWidth;

@@ -66,8 +66,7 @@
     <Compile Include="Interfaces\IStaticFileManager.cs" />
     <Compile Include="Models\Navigation\NavigationLinks.cs" />
     <Compile Include="Models\Navigation\SitemapItem.cs" />
-    <Compile Include="Models\Page\Footer.cs" />
-    <Compile Include="Models\Page\Header.cs" />
+    <Compile Include="Models\Page\BasePage.cs" />
     <Compile Include="Models\Page\Region.cs" />
     <Compile Include="Models\Page\WebPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

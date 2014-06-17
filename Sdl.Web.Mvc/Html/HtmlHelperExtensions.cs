@@ -79,16 +79,5 @@ namespace Sdl.Web.Mvc.Html
             return httpContext.GetGlobalResourceObject(CultureInfo.CurrentUICulture.ToString(), resourceName);
         }
 
-        public static MvcHtmlString MetaTags(this HtmlHelper htmlHelper, WebPage page)
-        {
-            StringBuilder metaTags = new StringBuilder();
-            foreach (var meta in page.Meta)
-            {
-                metaTags.AppendFormat("<meta name=\"{0}\" content=\"{1}\">", meta.Key, meta.Value);
-            }
-
-            return new MvcHtmlString(metaTags.ToString());
-        }
-
     }
 }

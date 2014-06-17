@@ -19,7 +19,7 @@ namespace Sdl.Web.Mvc.Common
         void PopulateDynamicList(ContentList<Teaser> list);
 
         //Map the domain model to the presentation model
-        object MapModel(object entity, ModelType modelType = ModelType.Entity, Type viewModeltype = null, List<object> includes = null);
+        object MapModel(object entity, ModelType modelType = ModelType.Entity, Type viewModeltype = null);
         
         //Process a url
         string ProcessUrl(string url);
