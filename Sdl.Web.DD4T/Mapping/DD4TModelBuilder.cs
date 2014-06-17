@@ -647,6 +647,7 @@ namespace Sdl.Web.DD4T.Mapping
                     title = GetResource("core.defaultPageTitle") + titlePostfix;
                 }
             }
+            meta.Add("twitter:card", "summary");
             meta.Add("og:title", title);
             meta.Add("og:url", WebRequestContext.GetRequestUrl());
             //TODO is this always article?
