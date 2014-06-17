@@ -193,6 +193,7 @@
     <Content Include="Views\Entity\Core\OldBrowserNotificationBar.cshtml" />
     <Content Include="Views\Page\Core\RedirectPage.cshtml" />
     <Content Include="Views\List\Core\List.cshtml" />
+    <Content Include="Views\Entity\Core\Accordion.cshtml" />
     <Content Include="Views\List\Core\PagedList.cshtml" />
     <Content Include="Views\List\Core\Partials\Pager.cshtml" />
     <Content Include="Views\List\Core\ThumbnailList.cshtml" />
@@ -201,6 +202,7 @@
     <Content Include="Views\Entity\Core\Partials\GoogleMap.cshtml" />
     <Content Include="Views\Entity\Core\TeaserMap.cshtml" />
     <Content Include="Views\Entity\GoogleAnalytics\GoogleAnalytics.cshtml" />
+    <Content Include="Views\Entity\Core\Tab.cshtml" />
     <Content Include="Views\Entity\Core\SocialLinks.cshtml" />
     <Content Include="Views\Page\Core\GeneralPage.cshtml" />
     <Content Include="Views\Entity\Core\SocialSharing.cshtml" />

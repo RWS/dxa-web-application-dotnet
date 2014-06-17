@@ -53,7 +53,7 @@
     <Compile Include="Models\Common\TagLink.cs" />
     <Compile Include="Models\Common\YouTubeVideo.cs" />
     <Compile Include="Models\Entity\Article.cs" />
-    <Compile Include="Models\Entity\Carousel.cs" />
+    <Compile Include="Models\Entity\ItemList.cs" />
     <Compile Include="Models\Entity\ContentList.cs" />
     <Compile Include="Models\Entity\LinkList.cs" />
     <Compile Include="Models\Entity\Notification.cs" />
