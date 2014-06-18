@@ -3,7 +3,7 @@
     @if (Model.Media != null)
     {
         <span @Markup.Property(Model, "Media")>            
-            @Html.Media(Model.Media, 3.3)
+            @Html.Media(Model.Media, "100%", 3.3)
         </span>
     }
     @if (Model.Headline!=null || Model.Text!=null)

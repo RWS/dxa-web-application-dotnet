@@ -24,21 +24,23 @@ namespace Sdl.Web.Mvc.Context
         /// <param name="helper"></param>
         /// <param name="image">The image to write out</param>
         /// <param name="aspect">The aspect ratio for the image</param>
-        /// <param name="widthFactor">The factor to apply to the width - can be % (eg "100%") or absolute (eg "120")</param>
+        /// <param name="imgWidth">The CSS width of the image- can be % (eg "100%") or absolute (eg "120")</param>
         /// <param name="cssClass">Css class to apply to img tag</param>
         /// <returns>Complete img tag with all required attributes</returns>
-        public static MvcHtmlString Image(this HtmlHelper helper, Image image, string widthFactor, double aspect, string cssClass = null, int containerSize = 0)
+        public static MvcHtmlString Image(this HtmlHelper helper, Image image, string imgWidth, double aspect, string cssClass = null, int containerSize = 0)
         {
             if (image == null || String.IsNullOrEmpty(image.Url))
             {
                 return null;
             }
+            string widthFactor = imgWidth ?? DEFAULT_MEDIA_FILL;
+
             //We read the container size (based on bootstrap grid) from the view bag
             //This means views can be independent of where they are rendered and do not
             //need to know their width
             TagBuilder builder = new TagBuilder("img");
             builder.Attributes.Add("src", ContextHelper.GetResponsiveImageUrl(image.Url, aspect, widthFactor, containerSize));
-            builder.Attributes.Add("width", widthFactor);
+            builder.Attributes.Add("width", imgWidth);
             builder.Attributes.Add("alt", image.AlternateText);
             if (!String.IsNullOrEmpty(cssClass))
             {
@@ -70,6 +72,10 @@ namespace Sdl.Web.Mvc.Context
 
         public static MvcHtmlString YouTubeVideo(HtmlHelper helper, YouTubeVideo video, string widthFactor, double aspect, string cssClass, int containerSize)
         {
+            if (widthFactor == null)
+            {
+                widthFactor = DEFAULT_MEDIA_FILL;
+            }
             if (video == null || String.IsNullOrEmpty(video.YouTubeId))
             {
                 return null;
@@ -88,7 +94,7 @@ namespace Sdl.Web.Mvc.Context
 
         public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media)
         {
-            return Media(helper, media, DEFAULT_MEDIA_FILL);
+            return Media(helper, media, null);
         }
         public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, string widthFactor, string cssClass = null)
         {
@@ -96,7 +102,7 @@ namespace Sdl.Web.Mvc.Context
         }
         public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, double aspect, string cssClass = null)
         {
-            return Media(helper, media, DEFAULT_MEDIA_FILL, aspect, cssClass);
+            return Media(helper, media, null, aspect, cssClass);
         }
         #endregion
 
