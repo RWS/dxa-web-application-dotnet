@@ -1,5 +1,5 @@
 ﻿@model NavigationLinks
-<nav>
+<nav @Markup.Entity(Model)>
     <ul class="nav nav-sidebar">
         @foreach (var item in Model.Items)
         {

@@ -1,7 +1,7 @@
 ﻿@model NavigationLinks
 @if (Model.Items!=null && Model.Items.Count>0)
 {
-<ol class="breadcrumb">
+<ol class="breadcrumb" @Markup.Entity(Model)>
     <li>
        <a href="@Model.Items[0].Url"><i class="fa fa-home"><span class='sr-only'>@Model.Items[0].LinkText</span></i></a>
     </li>

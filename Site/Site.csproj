@@ -161,14 +161,11 @@
     <Content Include="Views\Region\Core\3-Column.cshtml" />
     <Content Include="Views\Entity\Core\Teaser.cshtml" />
     <Content Include="Views\Entity\Core\Teaser-ImageOverlay.cshtml" />
-    <Content Include="Views\Page\Core\HomePage.cshtml" />
     <Content Include="Views\Region\Core\2-Column.cshtml" />
     <Content Include="Views\Region\Core\Hero.cshtml" />
-    <Content Include="Views\Page\Core\SectionPage.cshtml" />
     <Content Include="Views\Entity\Core\Carousel.cshtml" />
     <Content Include="Views\Entity\Core\Partials\TeaserHero-ImageOverlay.cshtml" />
     <Content Include="Views\Page\_ViewStart.cshtml" />
-    <Content Include="Views\Page\Core\ContentPage.cshtml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
     <Content Include="Views\Region\Core\4-Column.cshtml" />
     <Content Include="Views\Shared\Core\Footer.cshtml" />
@@ -183,7 +180,6 @@
     <Content Include="Views\Entity\Core\TeaserHero-ImageOverlay.cshtml" />
     <Content Include="Views\Shared\_SectionError.cshtml" />
     <Content Include="Views\Navigation\GoogleSitemap.cshtml" />
-    <Content Include="Views\Page\Core\ContentPageWithoutNavigation.cshtml" />
     <Content Include="Views\Region\Core\Logo.cshtml" />
     <Content Include="Views\Region\Core\Links.cshtml" />
     <Content Include="Views\Entity\Core\HeaderLogo.cshtml" />
@@ -208,6 +204,7 @@
     <Content Include="Views\Entity\Core\SocialSharing.cshtml" />
     <Content Include="Views\Region\Core\Left.cshtml" />
     <Content Include="Views\Region\Core\Tools.cshtml" />
+    <Content Include="Views\Page\Core\IncludePage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
