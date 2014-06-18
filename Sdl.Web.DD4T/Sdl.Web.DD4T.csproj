@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="Html\DD4TRenderer.cs" />
     <Compile Include="Html\Markup.cs" />
+    <Compile Include="Html\RichTextHelper.cs" />
     <Compile Include="Mapping\DD4TModelBuilder.cs" />
     <Compile Include="Mapping\DD4TContentProvider.cs" />
     <Compile Include="Mapping\ExtensionlessLinkFactory.cs" />
@@ -82,6 +83,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Statics\IBinaryFileManager.cs" />
+    <Compile Include="Utils\ObjectExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sdl.Web.Mvc\Sdl.Web.Mvc.csproj">

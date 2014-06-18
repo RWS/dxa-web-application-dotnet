@@ -1,17 +1,15 @@
-﻿using DD4T.Factories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using DD4T.ContentModel.Factories;
+using DD4T.Factories;
 
 namespace Sdl.Web.DD4T
 {
-    public class ExtensionlessLinkFactory : LinkFactory
+    public class ExtensionlessLinkFactory : LinkFactory, ILinkFactory
     {
+        [Obsolete]
         public string ResolveExtensionlessLink(string componentUri)
         {
-            return RemoveExtension(base.ResolveLink(componentUri));
+            return ((ILinkFactory)this).ResolveLink(componentUri);
         }
 
         protected virtual string RemoveExtension(string url)
@@ -25,6 +23,16 @@ namespace Sdl.Web.DD4T
                 }
             }
             return url;
+        }
+        
+        string ILinkFactory.ResolveLink(string sourcePageUri, string componentUri, string excludeComponentTemplateUri)
+        {
+            return  RemoveExtension(base.ResolveLink(sourcePageUri, componentUri, excludeComponentTemplateUri));
+        }
+        
+        string ILinkFactory.ResolveLink(string componentUri)
+        {
+            return  RemoveExtension(base.ResolveLink(componentUri));
         }
     }
 }

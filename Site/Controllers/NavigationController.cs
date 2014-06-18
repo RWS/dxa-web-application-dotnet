@@ -1,12 +1,12 @@
-﻿using System.Web;
+﻿using System;
+using System.Collections.Generic;
+using System.Web;
 using System.Web.Mvc;
 using System.Web.Script.Serialization;
-using Sdl.Web.DD4T;
 using Sdl.Web.Mvc;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Mvc.Common;
 using Sdl.Web.Mvc.Mapping;
-using System;
-using System.Collections.Generic;
+using Sdl.Web.Mvc.Models;
 
 namespace Site.Controllers
 {
@@ -27,10 +27,10 @@ namespace Site.Controllers
             }
         }
 
-        public NavigationController()
+        public NavigationController(IContentProvider contentProvider, IRenderer renderer)
         {
-            ContentProvider = new DD4TContentProvider();
-            Renderer = new DD4TRenderer();
+            ContentProvider = contentProvider;
+            Renderer = renderer;
             ModelType = ModelType.Entity;
         }
 

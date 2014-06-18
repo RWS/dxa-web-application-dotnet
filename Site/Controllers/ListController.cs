@@ -1,15 +1,17 @@
-﻿using Sdl.Web.Mvc;
-using Sdl.Web.Mvc.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
+using Sdl.Web.Mvc;
+using Sdl.Web.Mvc.Common;
+using Sdl.Web.Mvc.Models;
+using Sdl.Web.Tridion;
 
 namespace Site.Controllers
 {
     public class ListController : EntityController
     {
+        public ListController(IContentProvider contentProvider, IRenderer renderer) : base(contentProvider, renderer) { }
+        
         [HandleSectionError(View = "_SectionError")]
         public ActionResult List(object entity, int containerSize = 0)
         {
