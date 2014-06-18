@@ -38,6 +38,7 @@ namespace Sdl.Web.Mvc.Context
             //need to know their width
             TagBuilder builder = new TagBuilder("img");
             builder.Attributes.Add("src", ContextHelper.GetResponsiveImageUrl(image.Url, aspect, widthFactor, containerSize));
+            builder.Attributes.Add("width", widthFactor);
             builder.Attributes.Add("alt", image.AlternateText);
             if (!String.IsNullOrEmpty(cssClass))
             {
@@ -132,10 +133,14 @@ namespace Sdl.Web.Mvc.Context
             //For percentage fill factors, we need to do some calculation of container size etc.
             if (widthFactor.EndsWith("%"))
             {
-                int fillFactor = Int32.Parse(DEFAULT_MEDIA_FILL.Substring(0,widthFactor.Length-1));
+                int fillFactor;
                 if (!Int32.TryParse(widthFactor.Substring(0, widthFactor.Length - 1), out fillFactor))
                 {
                     Log.Warn("Invalid width factor (\"{0}\") when resizing image, defaulting to {1}", widthFactor, DEFAULT_MEDIA_FILL);
+                }
+                if (fillFactor == 0)
+                {
+                    fillFactor = Int32.Parse(DEFAULT_MEDIA_FILL.Substring(0, DEFAULT_MEDIA_FILL.Length - 1));
                 }
                 //TODO make the screen width behaviour configurable?
                 switch (WebRequestContext.ScreenWidth)
@@ -176,9 +181,7 @@ namespace Sdl.Web.Mvc.Context
         public static string GetYouTubeUrl(string videoId)
         {
             return String.Format("https://www.youtube.com/embed/{0}?version=3&enablejsapi=1", videoId);
-        }     
-   
-        
+        }
 
         public static string GetResponsiveImageUrl(string url)
         {
@@ -192,6 +195,6 @@ namespace Sdl.Web.Mvc.Context
         {
             return GetResponsiveImageUrl(url, DEFAULT_MEDIA_ASPECT, widthFactor, containerSize);
         }
-        
+
     }
 }
