@@ -38,6 +38,7 @@ namespace Sdl.Web.Mvc.Context
             //need to know their width
             TagBuilder builder = new TagBuilder("img");
             builder.Attributes.Add("src", ContextHelper.GetResponsiveImageUrl(image.Url, aspect, widthFactor, containerSize));
+            builder.Attributes.Add("width", widthFactor);
             builder.Attributes.Add("alt", image.AlternateText);
             if (!String.IsNullOrEmpty(cssClass))
             {
@@ -178,8 +179,6 @@ namespace Sdl.Web.Mvc.Context
             return String.Format("https://www.youtube.com/embed/{0}?version=3&enablejsapi=1", videoId);
         }     
    
-        
-
         public static string GetResponsiveImageUrl(string url)
         {
             return GetResponsiveImageUrl(url, DEFAULT_MEDIA_FILL);
