@@ -4,21 +4,15 @@
     var daddr = Model.Location != null ? (Model.Location.Query ?? String.Format("{0},{1}",Model.Location.Latitude,Model.Location.Longitude)): null;
 }
 <div @Markup.Entity(Model)>
-@if (Model.Image != null)
+@if (Model.Image != null && WebRequestContext.ScreenWidth != ScreenWidth.ExtraSmall)
 {
-    <div id="carousel-large" class="carousel">
-        <div class="carousel-inner">
-            <div class="item active" @Markup.Property(Model, "Image")>
-                @Html.Media(Model.Image, 3.3, "center-block")
-                @if (Model.Name!=null)
-                {
-                <div class="overlay overlay-tl ribbon">
-                    <h1 @Markup.Property(Model, "Name")>@Model.Name</h1>
-                </div>
-                }
-            </div>
-        </div>
-    </div>
+    <div class="hero image-loading" @Markup.Property(Model, "Image")>
+        @Html.Media(Model.Image, 3.3)
+		<div class="loading-panel"></div>
+		<div class="overlay overlay-tl ribbon">
+    	    <h1 @Markup.Property(Model, "Name")>@Model.Name</h1>
+    	</div>
+	</div>
 }
 else if (Model.Name!=null)
 {

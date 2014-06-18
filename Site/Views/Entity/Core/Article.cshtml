@@ -1,6 +1,6 @@
 ﻿@model Sdl.Web.Mvc.Models.Article
 <article class="rich-text" @Markup.Entity(Model)>
-    @if (Model.Image != null)
+    @if (Model.Image != null && WebRequestContext.ScreenWidth!=ScreenWidth.ExtraSmall)
     {
         <div class="hero image-loading" @Markup.Property(Model, "Image")>
             @Html.Media(Model.Image, 3.3)
