@@ -26,21 +26,16 @@ namespace Site
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
             
-            //routes.IgnoreRoute("{*favicon}", new { favicon = @"(.*/)?favicon.ico(/.*)?" });
             routes.IgnoreRoute("cid/{*pathInfo}");
-            routes.MapRoute(
-                            "sitemap",
-                            "sitemap",
-                            new { controller = "Navigation", action = "GoogleSitemap" }
-                        );
-            routes.MapRoute(
-                            "Navigation",
-                            "Navigation/{action}",
-                            new { controller = "Navigation", action = "TopNavigation" } 
-                        );
 
+            //Google Site Map
+            routes.MapRoute(
+                "sitemap",
+                "sitemap",
+                new { controller = "Navigation", action = "GoogleSitemap" }
+            );
 
-            //Tridion page route
+            //Tridion Page Route
             routes.MapRoute(
                "TridionPage",
                "{*pageUrl}",
@@ -48,6 +43,7 @@ namespace Site
                new { pageId = @"^(.*)?$" }
             );
 
+            //Default Route - required for sub actions (region/entity/navigation etc.)
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",

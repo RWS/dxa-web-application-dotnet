@@ -118,7 +118,9 @@
   <ItemGroup>
     <Compile Include="Controllers\EntityController.cs" />
     <Compile Include="Controllers\ListController.cs" />
-    <Compile Include="Controllers\NavigationController.cs" />
+    <Compile Include="Controllers\NavigationController.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Controllers\PageController.cs" />
     <Compile Include="Controllers\RegionController.cs" />
     <Compile Include="Global.asax.cs">
