@@ -42,17 +42,17 @@ namespace Site.Controllers
         }
 
         [HandleSectionError(View = "_SectionError")]
-        public virtual ActionResult LeftNavigation()
+        public virtual ActionResult LeftNavigation(object entity)
         {
-            var model = new NavigationBuilder() { ContentProvider = this.ContentProvider, Sitemap = NavigationModel }.BuildContextNavigation(Request.Url.LocalPath.ToString());
-            return View(model);
+            ViewBag.NavType = "Left";
+            return Entity(entity);
         }
 
         [HandleSectionError(View = "_SectionError")]
-        public virtual ActionResult Breadcrumb()
+        public virtual ActionResult Breadcrumb(object entity)
         {
-            var model = new NavigationBuilder() { ContentProvider = this.ContentProvider, Sitemap = NavigationModel }.BuildBreadcrumb(Request.Url.LocalPath.ToString());
-            return View(model);
+            ViewBag.NavType = "Breadcrumb";
+            return Entity(entity);
         }
         
         [HandleError]
@@ -71,6 +71,12 @@ namespace Site.Controllers
             {
                 case "Top":
                     links = new NavigationBuilder() { ContentProvider = this.ContentProvider, Sitemap = NavigationModel }.BuildTopNavigation(Request.Url.LocalPath.ToString());
+                    break;
+                case "Left":
+                    links = new NavigationBuilder() { ContentProvider = this.ContentProvider, Sitemap = NavigationModel }.BuildContextNavigation(Request.Url.LocalPath.ToString());
+                    break;
+                case "Breadcrumb":
+                    links = new NavigationBuilder() { ContentProvider = this.ContentProvider, Sitemap = NavigationModel }.BuildBreadcrumb(Request.Url.LocalPath.ToString());
                     break;
             }
             if (nav!=null)
