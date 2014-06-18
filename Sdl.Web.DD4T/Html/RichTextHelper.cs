@@ -16,6 +16,20 @@ namespace SDL.Web.Helpers
             ComponentLinkProvider = componentLinkProvider;
             ComponentFactory = componentFactory;
         }
+
+        public string ResolveRichText(string xml)
+        {
+            try
+            {
+                var doc = new XmlDocument();
+                doc.LoadXml(string.Format("<xhtml>{0}</xhtml>", xml));
+                return ResolveRichText(doc);
+            }
+            catch (XmlException)
+            {
+                return xml;
+            }
+        }
         
         /// <summary>
         /// Extension method on String to resolve rich text. 
@@ -25,11 +39,9 @@ namespace SDL.Web.Helpers
         ///  - resolve links
         ///  - post-process "anchored" links to include #hash
         /// </summary>
-        public String ResolveRichText(string xml)
+        public string ResolveRichText(XmlDocument doc)
         {
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(string.Format("<xhtml>{0}</xhtml>", xml));
-            XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
+            var nsmgr = new XmlNamespaceManager(doc.NameTable);
             nsmgr.AddNamespace("xhtml", "http://www.w3.org/1999/xhtml");
             nsmgr.AddNamespace("xlink", "http://www.w3.org/1999/xlink");
 

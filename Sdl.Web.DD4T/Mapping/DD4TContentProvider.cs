@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
 using DD4T.ContentModel.Exceptions;
