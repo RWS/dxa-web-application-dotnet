@@ -15,7 +15,7 @@ namespace Sdl.Web.Mvc.Html
             {
                 path = "/" + path;
             }
-            string version = Configuration.CurrentVersion;
+            string version = Configuration.SiteVersion;
             if (!String.IsNullOrEmpty(version))
             {
                 version = "/" + version;

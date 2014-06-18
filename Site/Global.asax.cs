@@ -46,9 +46,9 @@ namespace Site
 
         protected void Application_Start()
         {
+            Configuration.LastApplicationStart = DateTime.Now;
             Configuration.StaticFileManager = new Sdl.Web.DD4T.BinaryFileManager();
             Configuration.SetLocalizations(TridionConfig.PublicationMap);
-            var currentVersion = Configuration.CurrentVersion;
             Configuration.Load(Server.MapPath("~"));
             
             // load semantic mappings

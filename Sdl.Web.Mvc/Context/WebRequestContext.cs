@@ -87,19 +87,25 @@ namespace Sdl.Web.Mvc
             {
                 return Configuration.Localizations.SingleOrDefault().Value;
             }
-            if (HttpContext.Current != null && HttpContext.Current.Request != null)
+            try
             {
-                var uri = HttpContext.Current.Request.Url.AbsoluteUri;
-                foreach (var key in Configuration.Localizations.Keys)
+                if (HttpContext.Current != null)
                 {
-                    if (uri.StartsWith(key))
+                    var uri = HttpContext.Current.Request.Url.AbsoluteUri;
+                    foreach (var key in Configuration.Localizations.Keys)
                     {
-                        Log.Debug("Request for {0} is from localization '{1}'", uri, Configuration.Localizations[key].Path);
-                        return Configuration.Localizations[key];
+                        if (uri.StartsWith(key))
+                        {
+                            Log.Debug("Request for {0} is from localization '{1}'", uri, Configuration.Localizations[key].Path);
+                            return Configuration.Localizations[key];
+                        }
                     }
                 }
             }
-            //TODO - should we throw an error instead?
+            catch (Exception ex)
+            {
+                //Do nothing - In some cases we do not have a request (loading config on app start etc.) - we fallback on a default localization
+            }
             return new Localization { LocalizationId = 0, Culture = "en-US", Path = "" };
         }
         
