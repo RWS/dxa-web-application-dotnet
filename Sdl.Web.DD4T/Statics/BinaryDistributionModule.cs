@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Configuration;
 using DD4T.Utils;
+using Sdl.Web.Mvc;
 
 namespace Sdl.Web.DD4T
 {
@@ -14,8 +15,6 @@ namespace Sdl.Web.DD4T
 	/// </summary>
 	public class BinaryDistributionModule : IHttpModule
     {
-
-        private static string BINARY_ROOT = "BinaryData";
         #region IHttpModule
         /// <summary>
 		/// Initialize this module. Attach the worker method to the BeginRequest event.
@@ -39,7 +38,7 @@ namespace Sdl.Web.DD4T
             HttpRequest request = context.Request;
             HttpResponse response = context.Response;
             string urlPath = request.Url.AbsolutePath;
-            urlPath = urlPath.StartsWith("/" + BINARY_ROOT) ? urlPath.Substring(BINARY_ROOT.Length+1) : urlPath;
+            urlPath = urlPath.StartsWith("/" + Configuration.StaticsFolder) ? urlPath.Substring(Configuration.StaticsFolder.Length + 1) : urlPath;
             if (! IsBinaryUrl.IsMatch(urlPath))
             {
                 LoggerService.Debug("url {0} does not match binary url pattern, ignoring it", urlPath);
@@ -97,8 +96,8 @@ namespace Sdl.Web.DD4T
                 return;
             }
 
-            string realPath = request.PhysicalApplicationPath + BINARY_ROOT + request.Path.Replace("/", "\\"); // request.PhysicalPath;
-            context.RewritePath("/" + BINARY_ROOT + request.Path);
+            string realPath = request.PhysicalApplicationPath + Configuration.StaticsFolder + request.Path.Replace("/", "\\"); // request.PhysicalPath;
+            context.RewritePath("/" + Configuration.StaticsFolder + request.Path);
 
             if (!File.Exists(realPath))
             {

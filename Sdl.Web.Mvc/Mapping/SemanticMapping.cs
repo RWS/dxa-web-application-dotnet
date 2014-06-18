@@ -124,6 +124,10 @@ namespace Sdl.Web.Mvc.Mapping
         /// <returns>The XPM region matching the name for the given module</returns>
         public static List<string> GetIncludes(string pageTypeIdentifier)
         {
+            if (_includes == null)
+            {
+                LoadMapping();
+            }
             if (_includes.ContainsKey(pageTypeIdentifier))
             {
                 return _includes[pageTypeIdentifier];
@@ -202,9 +206,9 @@ namespace Sdl.Web.Mvc.Mapping
                 _semanticMap = new Dictionary<string, SemanticSchema>();
                 _semanticVocabularies = new List<SemanticVocabulary>();
                 _xpmRegions = new Dictionary<string, XpmRegion>();
-
+                _includes = new Dictionary<string, List<string>>();
                 Log.Debug("Loading semantic mappings for default localization");
-                var path = String.Format("{0}{1}/{2}", applicationRoot, Configuration.DefaultLocalization, Configuration.AddVersionToPath(Configuration.SystemFolder + "/mappings/_all.json"));
+                var path = String.Format("{0}/{1}/{2}/{3}", applicationRoot, Configuration.StaticsFolder, Configuration.DefaultLocalization, Configuration.SystemFolder + "/mappings/_all.json");
                 if (File.Exists(path))
                 {
                     // the _all.json file contains a reference to all other configuration files
@@ -214,7 +218,7 @@ namespace Sdl.Web.Mvc.Mapping
                     {
                         var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
                         type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                        var configPath = applicationRoot + Configuration.AddVersionToPath(file);
+                        var configPath = String.Format("{0}/{1}/{2}", applicationRoot, Configuration.StaticsFolder, file);
                         if (File.Exists(configPath))
                         {
                             Log.Debug("Loading mapping from file: {0}", configPath);

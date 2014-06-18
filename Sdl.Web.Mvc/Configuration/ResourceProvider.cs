@@ -68,7 +68,7 @@ namespace Sdl.Web.Mvc
                     {
                         Log.Debug("Loading resources for localization : '{0}'", loc.Path);
                         var resources = new Dictionary<string, object>();
-                        var path = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, Configuration.AddVersionToPath(Configuration.SystemFolder + "/resources/_all.json"));
+                        var path = String.Format("{0}/{1}/{2}/{3}", applicationRoot, Configuration.StaticsFolder, loc.Path, Configuration.SystemFolder + "/resources/_all.json");
                         if (File.Exists(path))
                         {
                             //The _all.json file contains a list of all other resources files to load
@@ -78,7 +78,7 @@ namespace Sdl.Web.Mvc
                             {
                                 var type = file.Substring(file.LastIndexOf("/") + 1);
                                 type = type.Substring(0, type.LastIndexOf(".")).ToLower();
-                                var filePath = applicationRoot + Configuration.AddVersionToPath(file);
+                                var filePath = String.Format("{0}/{1}/{2}",applicationRoot, Configuration.StaticsFolder,file);
                                 if (File.Exists(filePath))
                                 {
                                     Log.Debug("Loading resources from file: {0}", filePath);

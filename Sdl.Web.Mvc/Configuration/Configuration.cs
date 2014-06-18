@@ -30,7 +30,8 @@ namespace Sdl.Web.Mvc
         public const string VersionRegex = "(v\\d*.\\d*)";
         public const string SystemFolder = "system";
         public const string CoreModuleName = "core";
-        
+        public const string StaticsFolder = "BinaryData";
+
         private static string _currentVersion;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _localConfiguration;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _globalConfiguration;        
@@ -83,6 +84,9 @@ namespace Sdl.Web.Mvc
                 return _globalConfiguration;
             }
         }
+
+        public static DateTime LastApplicationStart { get; set; }
+
         private static readonly object ConfigLock = new object();
         
         /// <summary>
@@ -172,7 +176,7 @@ namespace Sdl.Web.Mvc
                     {
                         Log.Debug("Loading config for localization : '{0}'", loc.Path);
                         var config = new Dictionary<string, Dictionary<string, string>>();
-                        var path = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, AddVersionToPath(SystemFolder + "/config/_all.json"));
+                        var path = String.Format("{0}/{1}/{2}/{3}", applicationRoot, StaticsFolder, loc.Path, SystemFolder + "/config/_all.json");
                         if (File.Exists(path))
                         {
                             //The _all.json file contains a reference to all other configuration files
@@ -192,7 +196,7 @@ namespace Sdl.Web.Mvc
                             {
                                 var type = file.Substring(file.LastIndexOf("/") + 1);
                                 type = type.Substring(0, type.LastIndexOf(".")).ToLower();
-                                var configPath = applicationRoot + AddVersionToPath(file);
+                                var configPath = String.Format("{0}/{1}/{2}", applicationRoot, StaticsFolder, file);
                                 if (File.Exists(configPath))
                                 {
                                     Log.Debug("Loading config from file: {0}", configPath);
@@ -290,18 +294,6 @@ namespace Sdl.Web.Mvc
             return "Core";
         }
         
-        public static String AddVersionToPath(string path)
-        {
-            return path.Replace(SystemFolder + "/", String.Format("{0}/{1}/", SystemFolder, CurrentVersion));
-        }
-
-        public static String RemoveVersionFromPath(string path)
-        {
-            return Regex.Replace(path, SystemFolder + "/" + VersionRegex + "/", delegate {
-                return SystemFolder + "/";
-            });
-        }
-
         public static string SiteVersion
         {
             get
@@ -310,40 +302,12 @@ namespace Sdl.Web.Mvc
             }
         }
 
-        public static string CurrentVersion
+        public static String RemoveVersionFromPath(string path)
         {
-            get
+            return Regex.Replace(path, SystemFolder + "/" + VersionRegex + "/", delegate
             {
-                if (_currentVersion == null)
-                {
-                    //The current version is the the latest version that exists on disk in one or more localizations
-                    //UNLESS an earlier version is specified in web.config (Sdl.Web.SiteVersion) for rollback purposes
-                    //When a new version is serialized to disk the current version will also be updated accordingly
-                    foreach (var loc in Localizations.Values)
-                    {
-                        DirectoryInfo di = new DirectoryInfo(String.Format("{0}{1}/{2}", AppDomain.CurrentDomain.BaseDirectory, loc.Path, SystemFolder));
-                        if (di.Exists)
-                        {
-                            foreach (DirectoryInfo dir in di.GetDirectories("v*"))
-                            {
-                                if (_currentVersion == null || dir.Name.CompareTo(_currentVersion) > 0)
-                                {
-                                    _currentVersion = dir.Name;
-                                }
-                            }
-                        }
-                    }
-                    if (_currentVersion == null || _currentVersion.CompareTo(SiteVersion) > 0)
-                    {
-                        _currentVersion = SiteVersion;
-                    }
-                }
-                return _currentVersion;
-            }
-            set
-            {
-                _currentVersion = value;
-            }
+                return SystemFolder + "/";
+            });
         }
 
         public static void SetLocalizations(List<Dictionary<string, string>> localizations)

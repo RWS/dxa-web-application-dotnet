@@ -17,8 +17,6 @@ namespace Sdl.Web.Mvc
     /// </summary>
     public abstract class BaseStaticFileManager : IStaticFileManager
     {
-        protected const string TEMP_DIR_SUFFIX = "_temp";
-        
         public virtual void CreateStaticAssets(string applicationRoot)
         {
             List<string> folders = new List<string>();
@@ -26,77 +24,37 @@ namespace Sdl.Web.Mvc
             {
                 foreach (var loc in Configuration.Localizations.Values)
                 {
-                    var versionRoot = String.Format("{0}{1}/{2}/{3}", applicationRoot, loc.Path, Configuration.SystemFolder, Configuration.SiteVersion);
-                    if (!folders.Contains(versionRoot))
+                    var localizationRoot = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, Configuration.SystemFolder);
+                    if (!folders.Contains(localizationRoot))
                     {
-                        //If the version already exists, we do nothing
-                        if (!Directory.Exists(versionRoot))
-                        {
-                            //Create a temp dir - if everything succeeds we rename this
-                            var tempVersionRoot = versionRoot + TEMP_DIR_SUFFIX;
-                            var di = Directory.CreateDirectory(tempVersionRoot);
-                            Log.Debug("Created temp version root: {0}", tempVersionRoot);
-                            //Find bootstrap file and take it from there.
-                            var url = String.Format("{0}/{1}/_all.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, Configuration.SystemFolder);
-                            SerializeFile(url, applicationRoot, String.Format("/{0}{1}", Configuration.SiteVersion, TEMP_DIR_SUFFIX), 2);
-                            folders.Add(versionRoot);
-                        }
-                        else
-                        {
-                            Log.Debug("Version root {0} already exists. Nothing to do", versionRoot);
-                        }
+                        var url = String.Format("{0}/{1}/_all.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, Configuration.SystemFolder);
+                        SerializeFile(url, 2);
+                        folders.Add(localizationRoot);
                     }
                 }
-                //If all temp folders were created OK, rename them to be the real version folder
-                foreach (var folder in folders)
-                {
-                    Directory.Move(folder + TEMP_DIR_SUFFIX, folder);
-                    Log.Debug("Renamed temp version root to : {0}", folder);
-                }
-                //finally update the current version - we only do this if everything worked!
-                Configuration.CurrentVersion = Configuration.SiteVersion;
-                Log.Debug("Current version is now {0}", Configuration.CurrentVersion);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error creating files on disk.");
-                //If something goes wrong we need to delete all temp and newly created version folders, to ensure we don't have a partial version
-                foreach (var folder in folders)
-                {
-                    if (Directory.Exists(folder + TEMP_DIR_SUFFIX))
-                    {
-                        Directory.Delete(folder + TEMP_DIR_SUFFIX);
-                    }
-                    else if (Directory.Exists(folder))
-                    {
-                        Directory.Delete(folder);
-                    }
-                }
-            }
-            finally
-            {
-                //TODO Delete old versions
             }
         }
 
-        public abstract string Serialize(string url, string applicationRoot, string suffix, bool returnContents = false);
+        public abstract string Serialize(string url, bool returnContents = false);
 
         /// <summary>
         /// Recursively serialize a file (which may contain just a list of further files to recursively process)
         /// </summary>
         /// <param name="url">The url of the file</param>
-        /// <param name="applicationRoot">The root file path of the application</param>
-        /// <param name="suffix">An optional suffix that can be injected into the file url - to enable version numbers and temp directories to be used in the real file path</param>
         /// <param name="bootstrapLevel">Level of recursion expected 0=none (the file contains data to serialize rather than a list of other files)</param>
-        protected virtual void SerializeFile(string url, string applicationRoot, string suffix, int bootstrapLevel = 0)
+        protected virtual void SerializeFile(string url, int bootstrapLevel = 0)
         {
-            string fileContents = this.Serialize(url, applicationRoot, suffix, bootstrapLevel != 0);
+            string fileContents = this.Serialize(url, bootstrapLevel != 0);
             if (bootstrapLevel != 0)
             {
                 var bootstrapJson = Json.Decode(fileContents);
                 foreach (string file in bootstrapJson.files)
                 {
-                    SerializeFile(file, applicationRoot, suffix, bootstrapLevel - 1);
+                    SerializeFile(file, bootstrapLevel - 1);
                 }
             }
         }

@@ -49,11 +49,33 @@ namespace Sdl.Web.DD4T
         /// <returns></returns>
         public bool ProcessRequest(HttpRequest request)
         {
-            string urlPath = request.Url.AbsolutePath.Replace("/BinaryData", "");
+            string urlPath = request.Url.AbsolutePath.Replace("/" + Configuration.StaticsFolder, "");
             LoggerService.Debug("Start processing " + urlPath);
-            Dimensions dimensions = null;
+            return ProcessUrl(urlPath);
+        }
 
-            String physicalPath = request.PhysicalPath;
+
+        public string GetStaticContent(string urlPath, bool cacheSinceAppStart = false)
+        {
+            if (ProcessUrl(urlPath, cacheSinceAppStart))
+            {
+                var filePath = GetFilePathFromUrl(urlPath);
+                return Encoding.UTF8.GetString(File.ReadAllBytes(filePath));
+            }
+            else
+            {
+                return null;
+            }
+        }
+            
+        /// <summary>
+        /// Main worker method reads binary from Broker and stores it in file-system
+        /// </summary>
+        /// <returns></returns>
+        public bool ProcessUrl(string urlPath, bool cacheSinceAppStart = false)
+        {
+            Dimensions dimensions = null;
+            String physicalPath = GetFilePathFromUrl(urlPath); 
             string cacheKey = GetCacheKey(urlPath);
             DateTime? lastPublishedDate = CacheAgent.Load(cacheKey) as DateTime?;
             if (lastPublishedDate == null)
@@ -69,10 +91,15 @@ namespace Sdl.Web.DD4T
             {
                 if (File.Exists(physicalPath))
                 {
+                    if (cacheSinceAppStart && Configuration.LastApplicationStart.CompareTo(lastPublishedDate) < 0)
+                    {
+                        //File has been modified since last application start but we don't care
+                        LoggerService.Debug("binary {0} is modified, but only since last application restart, so no action required", urlPath);
+                        return true;
+                    }
                     FileInfo fi = new FileInfo(physicalPath);
                     if (fi.Length > 0)
                     {
-
                         DateTime fileModifiedDate = File.GetLastWriteTime(physicalPath);
                         if (fileModifiedDate.CompareTo(lastPublishedDate) >= 0)
                         {
@@ -99,6 +126,11 @@ namespace Sdl.Web.DD4T
             }
             return WriteBinaryToFile(binary, physicalPath, dimensions);
 
+        }
+
+        private string GetFilePathFromUrl(string urlPath)
+        {
+            return HttpContext.Current.Server.MapPath("~/" + Configuration.StaticsFolder + urlPath);
         }
         #endregion
 
@@ -191,13 +223,20 @@ namespace Sdl.Web.DD4T
         protected IBinary GetBinaryFromBroker(string urlPath)
         {
             IBinary binary;
-            int pubid = 0;
-            foreach (var loc in Configuration.Localizations.Values)
+            int pubid = WebRequestContext.Localization.LocalizationId;
+            if (pubid == 0)
             {
-                if (urlPath.StartsWith(loc.Path))
+                //When we are reading in config on application start, we cannot rely
+                //On the publication resolver to get the right publication id, as there
+                //is no HttpRequest to determine it from, so we match the binary url
+                //with the configured localizations
+                foreach (var loc in Configuration.Localizations.Values)
                 {
-                    pubid = loc.LocalizationId;
-                    break;
+                    if (urlPath.StartsWith(loc.Path))
+                    {
+                        pubid = loc.LocalizationId;
+                        break;
+                    }
                 }
             }
             BinaryFactory.BinaryProvider.PublicationId = pubid;
@@ -207,12 +246,17 @@ namespace Sdl.Web.DD4T
 
         #endregion
 
-        public override string Serialize(string url, string applicationRoot, string suffix, bool returnContents = false)
+        public override string Serialize(string url, bool returnContents = false)
         {
-            IBinary binary = GetBinaryFromBroker(url);
-            string filepath = applicationRoot + url.Replace(Configuration.SystemFolder + "/", Configuration.SystemFolder + suffix + "/");
-            WriteBinaryToFile(binary, filepath, null);
-            return returnContents ? Encoding.UTF8.GetString(binary.BinaryData) : null;
+            if (returnContents)
+            {
+                return GetStaticContent(url, true);
+            }
+            else
+            {
+                ProcessUrl(url, true);
+                return null;
+            }
         }
     }
 }

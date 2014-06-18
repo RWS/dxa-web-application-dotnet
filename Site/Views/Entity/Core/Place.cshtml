@@ -31,7 +31,7 @@ else if (Model.Name!=null)
                     <div class="vcard">
 						@if(Model.Address!=null)
                         {
-                            <h4><i class="fa fa-map-marker"></i>@Html.Resource("core.addressHeadingText")</h4>
+                            <h4><i class="fa fa-map-marker"></i> @Html.Resource("core.addressHeadingText")</h4>
 				            <div class="adr" @Markup.Property(Model, "Address")>
 					            @Html.Raw(Model.Address)
 				            </div>
@@ -43,7 +43,7 @@ else if (Model.Name!=null)
                         }
                         @if (Model.Telephone!=null || Model.FaxNumber!=null || Model.Email!=null)
                         {
-				        <h4><i class="fa fa-envelope"></i>@Html.Resource("core.placeContactHeadingText")</h4>
+				        <h4><i class="fa fa-envelope"></i> @Html.Resource("core.placeContactHeadingText")</h4>
 				        <div class="h-card">
 					        @if (Model.Telephone!=null){<p>Telephone: <a class="tel" href="tel:@Model.Telephone" @Markup.Property(Model, "Telephone")>@Model.Telephone</a></p>}
 					        @if (Model.FaxNumber!=null){<p>Fax: <a class="fax" href="fax:@Model.FaxNumber" @Markup.Property(Model, "FaxNumber")>@Model.FaxNumber</a></p>}
