@@ -145,20 +145,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="system\assets\css\main.css" />
-    <Content Include="system\assets\fonts\fontawesome-webfont.svg" />
-    <Content Include="system\assets\fonts\fontawesome-webfont.woff" />
-    <Content Include="system\assets\images\wait-spinner.gif" />
-    <Content Include="system\assets\scripts\custom.js" />
-    <Content Include="system\assets\scripts\discover-min.js" />
-    <Content Include="system\assets\scripts\examples.js" />
-    <Content Include="system\assets\scripts\header.js" />
-    <Content Include="system\assets\scripts\PIE.htc" />
-    <Content Include="system\assets\scripts\plugins.js" />
-    <Content Include="system\assets\scripts\theme-customiser.js" />
-    <Content Include="system\assets\fonts\fontawesome-webfont.eot" />
-    <Content Include="system\assets\fonts\fontawesome-webfont.ttf" />
-    <Content Include="system\assets\fonts\FontAwesome.otf" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Unity.Mvc4.README.txt" />
