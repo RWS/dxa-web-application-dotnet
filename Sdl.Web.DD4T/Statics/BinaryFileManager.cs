@@ -80,6 +80,7 @@ namespace Sdl.Web.DD4T
             DateTime? lastPublishedDate = CacheAgent.Load(cacheKey) as DateTime?;
             if (lastPublishedDate == null)
             {
+                BinaryFactory.BinaryProvider.PublicationId = GetLocalizationId(urlPath);
                 DateTime lpb = BinaryFactory.FindLastPublishedDate(urlPath);
                 if (lpb != DateTime.MinValue.AddSeconds(1)) // this is the secret code for 'does not exist'
                 {
@@ -220,11 +221,10 @@ namespace Sdl.Web.DD4T
             }
         }
 
-        protected IBinary GetBinaryFromBroker(string urlPath)
+        protected int GetLocalizationId(string urlPath)
         {
-            IBinary binary;
-            int pubid = WebRequestContext.Localization.LocalizationId;
-            if (pubid == 0)
+            int localizationId = WebRequestContext.Localization.LocalizationId;
+            if (localizationId == 0)
             {
                 //When we are reading in config on application start, we cannot rely
                 //On the publication resolver to get the right publication id, as there
@@ -234,12 +234,18 @@ namespace Sdl.Web.DD4T
                 {
                     if (urlPath.StartsWith(loc.Path))
                     {
-                        pubid = loc.LocalizationId;
+                        localizationId = loc.LocalizationId;
                         break;
                     }
                 }
             }
-            BinaryFactory.BinaryProvider.PublicationId = pubid;
+            return localizationId;
+        }
+
+        protected IBinary GetBinaryFromBroker(string urlPath)
+        {
+            IBinary binary;
+            BinaryFactory.BinaryProvider.PublicationId = GetLocalizationId(urlPath);
             BinaryFactory.TryFindBinary(urlPath, out binary);
             return binary;
         }

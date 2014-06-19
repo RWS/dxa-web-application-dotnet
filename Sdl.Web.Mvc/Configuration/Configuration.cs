@@ -31,8 +31,8 @@ namespace Sdl.Web.Mvc
         public const string SystemFolder = "system";
         public const string CoreModuleName = "core";
         public const string StaticsFolder = "BinaryData";
+        public const string DefaultVersion = "v1.00";
 
-        private static string _currentVersion;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _localConfiguration;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _globalConfiguration;        
         
@@ -165,8 +165,9 @@ namespace Sdl.Web.Mvc
             //We are updating a static variable, so need to be thread safe
             lock (ConfigLock)
             {
-                //Ensure that the config files have been written to disk
-                StaticFileManager.CreateStaticAssets(applicationRoot);
+                //Ensure that the config files have been written to disk and HTML Design version is 
+                var version = StaticFileManager.CreateStaticAssets(applicationRoot) ?? DefaultVersion;
+                Configuration.SiteVersion = version;
 
                 _localConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
                 _globalConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
@@ -247,8 +248,14 @@ namespace Sdl.Web.Mvc
                 }
                 Localizations = relevantLocalizations;
                 Log.Debug("The following localizations are active for this site: {0}", String.Join(", ", Localizations.Select(l=>l.Key).ToArray()));
+                SetVersion();
                 InitializeContextConfiguration();
             }            
+        }
+
+        private static void SetVersion()
+        {
+            
         }
 
         private static void InitializeContextConfiguration()
@@ -294,13 +301,7 @@ namespace Sdl.Web.Mvc
             return "Core";
         }
         
-        public static string SiteVersion
-        {
-            get
-            {
-                return ConfigurationManager.AppSettings["Sdl.Web.SiteVersion"];
-            }
-        }
+        public static string SiteVersion{get;set;}
 
         public static String RemoveVersionFromPath(string path)
         {

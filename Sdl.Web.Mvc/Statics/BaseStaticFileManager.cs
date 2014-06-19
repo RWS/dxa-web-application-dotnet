@@ -17,9 +17,10 @@ namespace Sdl.Web.Mvc
     /// </summary>
     public abstract class BaseStaticFileManager : IStaticFileManager
     {
-        public virtual void CreateStaticAssets(string applicationRoot)
+        public virtual string CreateStaticAssets(string applicationRoot)
         {
             List<string> folders = new List<string>();
+            string version = null;
             try
             {
                 foreach (var loc in Configuration.Localizations.Values)
@@ -27,9 +28,24 @@ namespace Sdl.Web.Mvc
                     var localizationRoot = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, Configuration.SystemFolder);
                     if (!folders.Contains(localizationRoot))
                     {
-                        var url = String.Format("{0}/{1}/_all.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, Configuration.SystemFolder);
-                        SerializeFile(url, 2);
-                        folders.Add(localizationRoot);
+                        try
+                        {
+                            //The HTML Design version is published in /version.json
+                            var versionUrl = String.Format("{0}/version.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path);
+                            var versionJson = Serialize(versionUrl,true);
+                            if (versionJson != null)
+                            {       
+                                version = Json.Decode(versionJson).version;
+                            }
+                            //The other config etc files are bootstrapped from /system/_all.json
+                            var url = String.Format("{0}/{1}/_all.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, Configuration.SystemFolder);
+                            SerializeFile(url, 2);
+                            folders.Add(localizationRoot);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "Error serializing localization {0}", localizationRoot);
+                        }
                     }
                 }
             }
@@ -37,6 +53,7 @@ namespace Sdl.Web.Mvc
             {
                 Log.Error(ex, "Error creating files on disk.");
             }
+            return version;
         }
 
         public abstract string Serialize(string url, bool returnContents = false);
@@ -54,7 +71,14 @@ namespace Sdl.Web.Mvc
                 var bootstrapJson = Json.Decode(fileContents);
                 foreach (string file in bootstrapJson.files)
                 {
-                    SerializeFile(file, bootstrapLevel - 1);
+                    try
+                    {
+                        SerializeFile(file, bootstrapLevel - 1);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Error serializing file {0}", file);
+                    }
                 }
             }
         }
