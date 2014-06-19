@@ -154,7 +154,7 @@ namespace Sdl.Web.DD4T
             get
             {
                 if (_isBinaryUrl == null)
-                    _isBinaryUrl = new Regex(ConfigurationHelper.BinaryUrlPattern);
+                    _isBinaryUrl = new Regex(Configuration.MediaUrlRegex);
                 return _isBinaryUrl;
             }
         }

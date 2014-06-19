@@ -86,7 +86,7 @@ namespace Sdl.Web.Mvc
         }
 
         public static DateTime LastApplicationStart { get; set; }
-
+        public static string MediaUrlRegex { get; set; }
         private static readonly object ConfigLock = new object();
         
         /// <summary>
@@ -168,7 +168,7 @@ namespace Sdl.Web.Mvc
                 //Ensure that the config files have been written to disk and HTML Design version is 
                 var version = StaticFileManager.CreateStaticAssets(applicationRoot) ?? DefaultVersion;
                 Configuration.SiteVersion = version;
-
+                var mediaPatterns = new List<string>{"^/favicon.ico"};
                 _localConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
                 _globalConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
                 foreach (var loc in Localizations.Values)
@@ -193,6 +193,17 @@ namespace Sdl.Web.Mvc
                                 IsStaging = true;
                                 Log.Info("This is site is staging");
                             }
+                            if (bootstrapJson.mediaRoot != null)
+                            {
+                                string mediaRoot = bootstrapJson.mediaRoot;
+                                if (!mediaRoot.EndsWith("/"))
+                                {
+                                    mediaRoot +="/";
+                                }
+                                Log.Debug("This is site is has media root: " + mediaRoot);
+                                mediaPatterns.Add(String.Format("^{0}{1}.*", mediaRoot, mediaRoot.EndsWith("/") ? "" : "/"));
+                            }
+                            mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*",loc.Path, SystemFolder));
                             foreach (string file in bootstrapJson.files)
                             {
                                 var type = file.Substring(file.LastIndexOf("/") + 1);
@@ -229,6 +240,8 @@ namespace Sdl.Web.Mvc
                         }
                     }
                 }
+                MediaUrlRegex = String.Join("|", mediaPatterns);
+                Log.Debug("MediaUrlRegex: " + MediaUrlRegex);
                 //Filter out localizations that were not found on disk, and add culture/set default localization from config
                 Dictionary<string, Localization> relevantLocalizations = new Dictionary<string, Localization>();
                 foreach (var loc in Localizations)
