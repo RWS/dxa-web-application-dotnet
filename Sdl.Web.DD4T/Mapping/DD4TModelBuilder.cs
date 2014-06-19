@@ -69,6 +69,12 @@ namespace Sdl.Web.DD4T.Mapping
                     ((Entity)model).EntityData = entityData;
                     ((Entity)model).Id = component.Id.Split('-')[1];
                 }
+                if (model is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
+                {
+                    ((MediaItem)model).Url = component.Multimedia.Url;
+                    ((MediaItem)model).FileName= component.Multimedia.FileName;
+                    ((MediaItem)model).FileSize = component.Multimedia.Size;
+                }
                 return model;
 
             }
@@ -520,7 +526,7 @@ namespace Sdl.Web.DD4T.Mapping
 
         private static List<Image> GetImages(IEnumerable<IComponent> components)
         {
-            return components.Select(c => new Image { Url = c.Multimedia.Url, FileSize = c.Multimedia.Size }).ToList();
+            return components.Select(c => new Image { Url = c.Multimedia.Url, FileName = c.Multimedia.FileName, FileSize = c.Multimedia.Size }).ToList();
         }
 
         private static List<YouTubeVideo> GetYouTubeVideos(IEnumerable<IComponent> components)

@@ -1,0 +1,17 @@
+﻿@model Sdl.Web.Mvc.Models.Download
+<article class="rich-text" @Markup.Entity(Model)>
+    <div class="content">
+        <ul class="download-list">
+            <li>
+                <i class="fa fa-file"></i>
+                <div>
+                    <a href="@Model.Url">@Model.FileName</a> (@Html.FriendlyFileSize(@Model.FileSize))
+                    @if (Model.Description != null)
+                    {
+                        <small @Markup.Property(Model, "Description")>@Model.Description</small> 
+                    }
+                </div>
+            </li>
+       </ul>
+    </div>
+</article>
