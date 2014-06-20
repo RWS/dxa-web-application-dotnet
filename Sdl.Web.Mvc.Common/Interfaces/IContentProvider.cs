@@ -22,7 +22,7 @@ namespace Sdl.Web.Mvc.Common
         object MapModel(object entity, ModelType modelType = ModelType.Entity, Type viewModeltype = null);
         
         //Process a url
-        string ProcessUrl(string url);
+        string ProcessUrl(string url, string localizationId = null);
 
         //Get view names from the domain model
         string GetEntityViewName(object entity);

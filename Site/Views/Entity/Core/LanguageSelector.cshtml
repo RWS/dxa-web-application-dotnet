@@ -1,10 +1,13 @@
 ﻿@model Entity
-@if (Configuration.Localizations.Count > 1)
+@{
+    var pageId = @WebRequestContext.PageId;
+}
+@if (pageId!=null && Configuration.Localizations.Count > 1)
 {
 <select class="selectpicker" data-width="auto">
     @foreach(var loc in Configuration.Localizations.Values)
     {
-        <option @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>@Configuration.GetConfig("core.language",loc.Path)</option>
+        <option value="/resolve/@(pageId)?localization=@loc.LocalizationId" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>@Configuration.GetConfig("core.language",loc.Path)</option>
     }
 </select>
 }

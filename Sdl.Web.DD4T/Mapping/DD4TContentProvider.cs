@@ -5,7 +5,6 @@ using DD4T.ContentModel;
 using DD4T.ContentModel.Exceptions;
 using DD4T.ContentModel.Factories;
 using DD4T.Factories;
-//TODO  - abstract this dependency
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Common;
 using Sdl.Web.Mvc.Mapping;
@@ -26,11 +25,16 @@ namespace Sdl.Web.DD4T
             this.PageFactory = pageFactory;
         }
 
-        public override string ProcessUrl(string url)
+        public override string ProcessUrl(string url, string localizationId = null)
         {
             if (url.StartsWith("tcm:"))
             {
-                url = LinkFactory.ResolveExtensionlessLink(url);
+                int pubid = 0;
+                if (localizationId != null)
+                {
+                    Int32.TryParse(localizationId, out pubid);
+                }
+                url = TridionHelper.ResolveLink(url, pubid);
             }
             return base.ProcessUrl(url);
         }
