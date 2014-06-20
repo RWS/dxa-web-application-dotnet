@@ -24,16 +24,22 @@ namespace Sdl.Web.Mvc.Context
         /// <param name="helper"></param>
         /// <param name="image">The image to write out</param>
         /// <param name="aspect">The aspect ratio for the image</param>
-        /// <param name="imgWidth">The CSS width of the image- can be % (eg "100%") or absolute (eg "120")</param>
+        /// <param name="widthFactor">The factor to apply to the width - can be % (eg "100%") or absolute (eg "120")</param>
         /// <param name="cssClass">Css class to apply to img tag</param>
+        /// <param name="containerSize">The size (in grid column units) of the containing element</param>
         /// <returns>Complete img tag with all required attributes</returns>
-        public static MvcHtmlString Image(this HtmlHelper helper, Image image, string imgWidth, double aspect, string cssClass = null, int containerSize = 0)
+        public static MvcHtmlString Image(this HtmlHelper helper, Image image, string widthFactor, double aspect, string cssClass = null, int containerSize = 0)
         {
             if (image == null || String.IsNullOrEmpty(image.Url))
             {
                 return null;
             }
-            string widthFactor = imgWidth ?? DEFAULT_MEDIA_FILL;
+            
+            string imgWidth = widthFactor;
+            if (widthFactor == null)
+            {
+                widthFactor = DEFAULT_MEDIA_FILL;
+            }
 
             //We read the container size (based on bootstrap grid) from the view bag
             //This means views can be independent of where they are rendered and do not
@@ -72,10 +78,6 @@ namespace Sdl.Web.Mvc.Context
 
         public static MvcHtmlString YouTubeVideo(HtmlHelper helper, YouTubeVideo video, string widthFactor, double aspect, string cssClass, int containerSize)
         {
-            if (widthFactor == null)
-            {
-                widthFactor = DEFAULT_MEDIA_FILL;
-            }
             if (video == null || String.IsNullOrEmpty(video.YouTubeId))
             {
                 return null;
