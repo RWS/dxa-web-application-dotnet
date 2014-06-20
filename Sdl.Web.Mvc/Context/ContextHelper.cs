@@ -46,7 +46,10 @@ namespace Sdl.Web.Mvc.Context
             //need to know their width
             TagBuilder builder = new TagBuilder("img");
             builder.Attributes.Add("src", ContextHelper.GetResponsiveImageUrl(image.Url, aspect, widthFactor, containerSize));
-            builder.Attributes.Add("width", imgWidth);
+            if (!String.IsNullOrEmpty(imgWidth))
+            {
+                builder.Attributes.Add("width", imgWidth);
+            }
             builder.Attributes.Add("alt", image.AlternateText);
             if (!String.IsNullOrEmpty(cssClass))
             {
