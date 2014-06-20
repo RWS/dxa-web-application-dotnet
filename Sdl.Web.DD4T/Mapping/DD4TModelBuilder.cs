@@ -358,6 +358,15 @@ namespace Sdl.Web.DD4T.Mapping
 
                     return GetYouTubeVideos(components)[0];
                 }
+                if (modelType.IsAssignableFrom(typeof(Download)) && schemaTitle.ToLower().Contains("download"))
+                {
+                    if (multival)
+                    {
+                        return GetDownloads(components);
+                    }
+
+                    return GetDownloads(components)[0];
+                }
                 if (modelType.IsAssignableFrom(typeof(Image)))
                 {
                     if (multival)
@@ -532,6 +541,12 @@ namespace Sdl.Web.DD4T.Mapping
         private static List<YouTubeVideo> GetYouTubeVideos(IEnumerable<IComponent> components)
         {
             return components.Select(c => new YouTubeVideo { Url = c.Multimedia.Url, FileSize = c.Multimedia.Size, YouTubeId = c.MetadataFields["youTubeId"].Value }).ToList();
+        }
+
+        private static List<Download> GetDownloads(IEnumerable<IComponent> components)
+        {
+            //todo this contains hardcoded metadata while we would expect this to semantiaclly ma
+            return components.Select(c => new Download { Url = c.Multimedia.Url, FileName = c.Multimedia.FileName, FileSize = c.Multimedia.Size, Description = (c.MetadataFields.ContainsKey("description") ? c.MetadataFields["description"].Value : null) }).ToList();
         }
 
         //private List<T> GetCompLinks<T>(IEnumerable<IComponent> components, Type linkedItemType)

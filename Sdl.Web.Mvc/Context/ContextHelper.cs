@@ -61,9 +61,13 @@ namespace Sdl.Web.Mvc.Context
             {
                 return Image(helper, (Image)media, widthFactor, aspect, cssClass, containerSize);
             }
-            else if (media is YouTubeVideo)
+            if (media is YouTubeVideo)
             {
                 return YouTubeVideo(helper, (YouTubeVideo)media, widthFactor, aspect, cssClass, containerSize);
+            }
+            if (media is Download)
+            {
+                return Download(helper, (Download)media);
             }
             return null;
         }
@@ -84,6 +88,18 @@ namespace Sdl.Web.Mvc.Context
                 builder.Attributes.Add("class", cssClass);
             }
             return new MvcHtmlString(builder.ToString(TagRenderMode.SelfClosing));
+        }
+
+        public static MvcHtmlString Download(this HtmlHelper helper, Download download)
+        {
+            if (download == null || String.IsNullOrEmpty(download.Url))
+            {
+                return null;
+            }
+            TagBuilder builder = new TagBuilder("a");
+            builder.Attributes.Add("href", download.Url);
+            builder.SetInnerText((download.Description ?? "download"));
+            return new MvcHtmlString(builder.ToString());
         }
 
         public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media)
