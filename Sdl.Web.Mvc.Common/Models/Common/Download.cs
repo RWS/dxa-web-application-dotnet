@@ -6,9 +6,12 @@ using System.Web;
 namespace Sdl.Web.Mvc.Models
 {
     [SemanticEntity("http://schema.org", "Thing", "s")]
-    public class Image : MediaItem
+    public class Download : MediaItem
     {
         [SemanticProperty("s:name")]
-        public string AlternateText { get; set; }
+        [SemanticProperty("s:description")]
+        public string Description { get; set; }
     }
 }
+
+ 

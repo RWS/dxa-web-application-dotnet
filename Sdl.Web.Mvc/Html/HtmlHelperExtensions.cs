@@ -79,5 +79,18 @@ namespace Sdl.Web.Mvc.Html
             return httpContext.GetGlobalResourceObject(CultureInfo.CurrentUICulture.ToString(), resourceName);
         }
 
+        public static object FriendlyFileSize(this HtmlHelper httpContext, long sizeInBytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
+            double len = sizeInBytes;
+            int order = 0;
+            while (len >= 1024 && order + 1 < sizes.Length)
+            {
+                order++;
+                len = len / 1024;
+            }
+
+            return String.Format("{0} {1}", Math.Ceiling(len), sizes[order]);
+        }
     }
 }

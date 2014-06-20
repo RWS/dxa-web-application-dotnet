@@ -213,6 +213,7 @@
     <Content Include="Views\Region\Core\Left.cshtml" />
     <Content Include="Views\Region\Core\Tools.cshtml" />
     <Content Include="Views\Page\Core\IncludePage.cshtml" />
+    <Content Include="Views\Entity\Core\Download.cshtml" />
     <Content Include="Views\Entity\Core\LanguageSelector.cshtml" />
   </ItemGroup>
   <ItemGroup>

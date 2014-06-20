@@ -1,4 +1,5 @@
-﻿using Sdl.Web.Mvc.Models;
+﻿using Sdl.Web.Mvc.Html;
+using Sdl.Web.Mvc.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,9 +73,13 @@ namespace Sdl.Web.Mvc.Context
             {
                 return Image(helper, (Image)media, widthFactor, aspect, cssClass, containerSize);
             }
-            else if (media is YouTubeVideo)
+            if (media is YouTubeVideo)
             {
                 return YouTubeVideo(helper, (YouTubeVideo)media, widthFactor, aspect, cssClass, containerSize);
+            }
+            if (media is Download)
+            {
+                return Download(helper, (Download)media);
             }
             return null;
         }
@@ -95,6 +100,27 @@ namespace Sdl.Web.Mvc.Context
                 builder.Attributes.Add("class", cssClass);
             }
             return new MvcHtmlString(builder.ToString(TagRenderMode.SelfClosing));
+        }
+
+        public static MvcHtmlString Download(this HtmlHelper helper, Download download)
+        {
+            if (download == null || String.IsNullOrEmpty(download.Url))
+            {
+                return null;
+            }
+
+            //todo this does not contain any XPM markup
+            string friendlyFileSize = helper.FriendlyFileSize(download.FileSize).ToString();
+            string descriptionHtml = (!String.IsNullOrEmpty(download.Description) ? String.Format("<small>{0}</small>", download.Description) : "");
+            string downloadHtml = String.Format(@"
+                <div class=""download-list"">
+                    <i class=""fa fa-file""></i>
+                    <div>
+                        <a href=""{0}"">{1}</a> <small class=""size"">({2})</small>
+                        {3}
+                    </div>
+                </div>", download.Url, download.FileName, friendlyFileSize, descriptionHtml);
+            return new MvcHtmlString(downloadHtml);
         }
 
         public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media)
