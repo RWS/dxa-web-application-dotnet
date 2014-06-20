@@ -7,8 +7,6 @@ namespace Sdl.Web.Mvc.Models
     /// </summary>
     public class WebPage : BasePage
     {
-        //For storing system data (for example page id and modified date for xpm markup)
-        public Dictionary<string, string> PageData { get; set; }
         public string Url { get; set; }
         public Dictionary<string, string> Meta { get; set; }
         

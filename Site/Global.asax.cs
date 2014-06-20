@@ -28,6 +28,14 @@ namespace Site
                 new { controller = "Navigation", action = "GoogleSitemap" }
             );
 
+            //For resolving ids to urls
+            routes.MapRoute(
+               "Resolve",
+               "resolve/{*itemId}",
+               new { controller = "Resolver", action = "Resolve" },
+               new { itemId = @"^(.*)?$" }
+            );
+            
             //Tridion Page Route
             routes.MapRoute(
                "TridionPage",

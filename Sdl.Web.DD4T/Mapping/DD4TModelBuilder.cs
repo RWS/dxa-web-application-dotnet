@@ -572,14 +572,15 @@ namespace Sdl.Web.DD4T.Mapping
             if (page != null)
             {
                 BasePage model = new BasePage();
-                //default title - will be overridden later if appropriate
-                model.Title = page.Title;
                 bool isInclude = true;
                 if (type == typeof(WebPage))
                 {
                     model = new WebPage();
                     isInclude = false;
                 }
+                //default title - will be overridden later if appropriate
+                model.Title = page.Title;
+                model.Id = page.Id.Substring(4);
                 foreach (var cp in page.ComponentPresentations)
                 {
                     string regionName = GetRegionFromComponentPresentation(cp);

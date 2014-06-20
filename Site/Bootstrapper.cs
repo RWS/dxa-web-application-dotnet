@@ -22,10 +22,7 @@ namespace Site
       var section = (UnityConfigurationSection)System.Configuration.ConfigurationManager.GetSection("unity");
       var container = section.Configure(new UnityContainer(), "main");
       ServiceLocator.SetLocatorProvider(() => new UnityServiceLocator(container));
-      return container;
-
       RegisterTypes(container);
-
       return container;
     }
 

@@ -31,8 +31,8 @@ namespace Sdl.Web.Mvc
         public const string SystemFolder = "system";
         public const string CoreModuleName = "core";
         public const string StaticsFolder = "BinaryData";
+        public const string DefaultVersion = "v1.00";
 
-        private static string _currentVersion;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _localConfiguration;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _globalConfiguration;        
         
@@ -86,7 +86,7 @@ namespace Sdl.Web.Mvc
         }
 
         public static DateTime LastApplicationStart { get; set; }
-
+        public static string MediaUrlRegex { get; set; }
         private static readonly object ConfigLock = new object();
         
         /// <summary>
@@ -165,9 +165,10 @@ namespace Sdl.Web.Mvc
             //We are updating a static variable, so need to be thread safe
             lock (ConfigLock)
             {
-                //Ensure that the config files have been written to disk
-                StaticFileManager.CreateStaticAssets(applicationRoot);
-
+                //Ensure that the config files have been written to disk and HTML Design version is 
+                var version = StaticFileManager.CreateStaticAssets(applicationRoot) ?? DefaultVersion;
+                Configuration.SiteVersion = version;
+                var mediaPatterns = new List<string>{"^/favicon.ico"};
                 _localConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
                 _globalConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
                 foreach (var loc in Localizations.Values)
@@ -192,6 +193,17 @@ namespace Sdl.Web.Mvc
                                 IsStaging = true;
                                 Log.Info("This is site is staging");
                             }
+                            if (bootstrapJson.mediaRoot != null)
+                            {
+                                string mediaRoot = bootstrapJson.mediaRoot;
+                                if (!mediaRoot.EndsWith("/"))
+                                {
+                                    mediaRoot +="/";
+                                }
+                                Log.Debug("This is site is has media root: " + mediaRoot);
+                                mediaPatterns.Add(String.Format("^{0}{1}.*", mediaRoot, mediaRoot.EndsWith("/") ? "" : "/"));
+                            }
+                            mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*",loc.Path, SystemFolder));
                             foreach (string file in bootstrapJson.files)
                             {
                                 var type = file.Substring(file.LastIndexOf("/") + 1);
@@ -228,6 +240,8 @@ namespace Sdl.Web.Mvc
                         }
                     }
                 }
+                MediaUrlRegex = String.Join("|", mediaPatterns);
+                Log.Debug("MediaUrlRegex: " + MediaUrlRegex);
                 //Filter out localizations that were not found on disk, and add culture/set default localization from config
                 Dictionary<string, Localization> relevantLocalizations = new Dictionary<string, Localization>();
                 foreach (var loc in Localizations)
@@ -247,8 +261,14 @@ namespace Sdl.Web.Mvc
                 }
                 Localizations = relevantLocalizations;
                 Log.Debug("The following localizations are active for this site: {0}", String.Join(", ", Localizations.Select(l=>l.Key).ToArray()));
+                SetVersion();
                 InitializeContextConfiguration();
             }            
+        }
+
+        private static void SetVersion()
+        {
+            
         }
 
         private static void InitializeContextConfiguration()
@@ -294,13 +314,7 @@ namespace Sdl.Web.Mvc
             return "Core";
         }
         
-        public static string SiteVersion
-        {
-            get
-            {
-                return ConfigurationManager.AppSettings["Sdl.Web.SiteVersion"];
-            }
-        }
+        public static string SiteVersion{get;set;}
 
         public static String RemoveVersionFromPath(string path)
         {

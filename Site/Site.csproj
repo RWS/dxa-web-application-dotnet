@@ -139,26 +139,13 @@
     </Compile>
     <Compile Include="Controllers\PageController.cs" />
     <Compile Include="Controllers\RegionController.cs" />
+    <Compile Include="Controllers\ResolverController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="system\assets\css\main.css" />
-    <Content Include="system\assets\fonts\fontawesome-webfont.svg" />
-    <Content Include="system\assets\fonts\fontawesome-webfont.woff" />
-    <Content Include="system\assets\images\wait-spinner.gif" />
-    <Content Include="system\assets\scripts\custom.js" />
-    <Content Include="system\assets\scripts\discover-min.js" />
-    <Content Include="system\assets\scripts\examples.js" />
-    <Content Include="system\assets\scripts\header.js" />
-    <Content Include="system\assets\scripts\PIE.htc" />
-    <Content Include="system\assets\scripts\plugins.js" />
-    <Content Include="system\assets\scripts\theme-customiser.js" />
-    <Content Include="system\assets\fonts\fontawesome-webfont.eot" />
-    <Content Include="system\assets\fonts\fontawesome-webfont.ttf" />
-    <Content Include="system\assets\fonts\FontAwesome.otf" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Unity.Mvc4.README.txt" />
@@ -175,6 +162,7 @@
     <Content Include="Views\Page\_Layout.cshtml" />
     <Content Include="Views\Entity\Core\Article.cshtml" />
     <Content Include="Views\Region\Core\Main.cshtml" />
+    <Content Include="Log.config" />
     <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
     <None Include="Properties\PublishProfiles\Publish to Local Demo Site.pubxml" />
     <Content Include="Views\Region\Core\3-Column.cshtml" />
@@ -226,6 +214,7 @@
     <Content Include="Views\Region\Core\Tools.cshtml" />
     <Content Include="Views\Page\Core\IncludePage.cshtml" />
     <Content Include="Views\Entity\Core\Download.cshtml" />
+    <Content Include="Views\Entity\Core\LanguageSelector.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

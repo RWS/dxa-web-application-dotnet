@@ -32,6 +32,10 @@ namespace Sdl.Web.Mvc
             SetupViewBag();
             var viewName = GetViewName(page);
             var model = this.ProcessModel(page, GetViewType(viewName)) ?? page;
+            if (model is WebPage)
+            {
+                WebRequestContext.PageId = ((WebPage)model).Id;
+            }
             return View(viewName, model);
         }
 
