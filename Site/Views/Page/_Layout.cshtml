@@ -36,6 +36,24 @@
         @Html.Partial("Core/Footer", Model.Includes["Footer"])
     }
     <script src="@Url.VersionedContent("/assets/scripts/main.js")"></script>
+    <script>
+        $(document).ready(function () {
+            $('.selectpicker').selectpicker();
+
+            $(function () {
+                var footerHeight = $("#page-footer").height();
+                $("#page-wrapper").css("padding-bottom", footerHeight);
+                $("#page-footer").css("margin-top", -footerHeight);
+            });
+
+            $('.image-loading').each(function (e) {
+                $(this).addClass('is-loading');
+                $(this).find('img').on('load', function () {
+                    $(this).closest('.image-loading').removeClass('is-loading');
+                });
+            });
+        });
+    </script>
     <script src="@Url.VersionedContent("/assets/scripts/custom.js")"></script>
     @Markup.Page(Model)
 </body>

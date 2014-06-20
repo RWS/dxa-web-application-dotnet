@@ -113,7 +113,7 @@ namespace Sdl.Web.Mvc.Mapping
         /// </summary>
         /// <param name="url">The URL to process</param>
         /// <returns>The processed URL</returns>
-        public virtual string ProcessUrl(string url)
+        public virtual string ProcessUrl(string url, string localizationId = null)
         {
             if (url != null)
             {

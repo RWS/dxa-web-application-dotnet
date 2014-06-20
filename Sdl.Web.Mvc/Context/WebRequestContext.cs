@@ -54,6 +54,18 @@ namespace Sdl.Web.Mvc
             return HttpContext.Current.Request.Url.ToString();
         }
 
+        public static string PageId
+        {
+            get
+            {
+                return (string)GetFromContextStore("PageId");
+            }
+            set
+            {
+                AddToContextStore("PageId", value);
+            }
+        }
+
         protected static ScreenWidth CalculateScreenWidth()
         {
             int width = ContextEngine.Browser.DisplayWidth;

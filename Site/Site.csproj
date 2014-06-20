@@ -139,6 +139,7 @@
     </Compile>
     <Compile Include="Controllers\PageController.cs" />
     <Compile Include="Controllers\RegionController.cs" />
+    <Compile Include="Controllers\ResolverController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -212,6 +213,7 @@
     <Content Include="Views\Region\Core\Left.cshtml" />
     <Content Include="Views\Region\Core\Tools.cshtml" />
     <Content Include="Views\Page\Core\IncludePage.cshtml" />
+    <Content Include="Views\Entity\Core\LanguageSelector.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
