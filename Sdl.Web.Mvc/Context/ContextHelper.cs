@@ -79,6 +79,8 @@ namespace Sdl.Web.Mvc.Context
             builder.Attributes.Add("id", Configuration.GetUniqueId("video"));
             builder.Attributes.Add("allowfullscreen", "true");
             builder.Attributes.Add("frameborder", "0");
+            builder.Attributes.Add("width", widthFactor);
+            builder.Attributes.Add("height", Math.Max(ContextHelper.GetResponsiveHeight(widthFactor,1.78, containerSize),175).ToString());
             if (!String.IsNullOrEmpty(cssClass))
             {
                 builder.Attributes.Add("class", cssClass);
@@ -109,6 +111,25 @@ namespace Sdl.Web.Mvc.Context
         /// <param name="containerSize">The size (in grid column units) of the containing element</param>
         /// <returns></returns>
         public static string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0)
+        {
+            int width = GetResponsiveWidth(widthFactor, containerSize);
+            //Round the width to the nearest set limit point - important as we do not want 
+            //to swamp the cache with lots of different sized versions of the same image
+            for (int i = 0; i < ContextConfiguration.ImageWidths.Count; i++)
+            {
+                if (width <= ContextConfiguration.ImageWidths[i])
+                {
+                    width = ContextConfiguration.ImageWidths[i];
+                    break;
+                }
+            }
+            //Height is calculated from the aspect ratio
+            int height = (int)Math.Ceiling(width / aspect);
+            //Build the URL
+            return String.Format(ContextConfiguration.ImageResizeUrl, ContextConfiguration.ImageResizeRoute, width, height, url);
+        }
+
+        public static int GetResponsiveWidth(string widthFactor, int containerSize=0)
         {
             if (containerSize == 0)
             {
@@ -161,21 +182,14 @@ namespace Sdl.Web.Mvc.Context
                 width = WebRequestContext.MaxMediaWidth;
                 //Factor the max possible width by the fill factor and container size and remove padding
                 width = (fillFactor * containerSize * width / (ContextConfiguration.GridSize * 100)) - padding;
-                //Round the width to the nearest set limit point - important as we do not want 
-                //to swamp the cache with lots of different sized versions of the same image
-                for (int i = 0; i < ContextConfiguration.ImageWidths.Count; i++)
-                {
-                    if (width <= ContextConfiguration.ImageWidths[i])
-                    {
-                        width = ContextConfiguration.ImageWidths[i];
-                        break;
-                    }
-                }
             }
-            //Height is calculated from the aspect ratio
-            double height = width / aspect;
-            //Build the URL
-            return String.Format(ContextConfiguration.ImageResizeUrl, ContextConfiguration.ImageResizeRoute, Math.Ceiling(width), Math.Ceiling(height), url);
+            return (int)Math.Ceiling(width);
+        }
+
+        public static int GetResponsiveHeight(string widthFactor, double aspect, int containerSize = 0)
+        {
+            int width = GetResponsiveWidth(widthFactor, containerSize);
+            return (int)Math.Ceiling(width / aspect);
         }
 
         public static string GetYouTubeUrl(string videoId)

@@ -20,7 +20,7 @@
             }
             @if (item.Date != null)
             {
-                <time class="meta small">[@Html.DateDiff(item.Date)]</time>
+                <time class="meta small">[@Html.DateDiff(item.Date,"d MMM yyyy")]</time>
             }
         </li>
     }
