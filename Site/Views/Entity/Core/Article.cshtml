@@ -40,7 +40,7 @@
                 @if (para.Media!=null)
                 {
                     <figure @Markup.Property(para, "Media")>
-                        @Html.Media(para.Media) 
+                        @Html.Media(para.Media,"100%") 
                         @if (para.Caption!=null)
                         {
                             <figcaption @Markup.Property(para, "Caption") >
