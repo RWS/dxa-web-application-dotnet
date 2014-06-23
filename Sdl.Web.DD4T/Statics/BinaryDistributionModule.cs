@@ -41,7 +41,8 @@ namespace Sdl.Web.DD4T
             urlPath = urlPath.StartsWith("/" + Configuration.StaticsFolder) ? urlPath.Substring(Configuration.StaticsFolder.Length + 1) : urlPath;
             if (! IsBinaryUrl.IsMatch(urlPath))
             {
-                LoggerService.Debug("url {0} does not match binary url pattern, ignoring it", urlPath);
+                LoggerService.Debug("url {0} does not match binary url pattern, ignoring it", "");
+                Log.Trace(start, "binary-ignored", response.StatusCode.ToString());
                 return;
             }
             
@@ -51,6 +52,7 @@ namespace Sdl.Web.DD4T
                 response.StatusCode = 404;
                 response.SuppressContent = true;
                 application.CompleteRequest();
+                Log.Trace(start, "binary-not-found", response.StatusCode.ToString());
                 return;
             }
             // if we got here, the file was successfully created on file-system
@@ -66,6 +68,8 @@ namespace Sdl.Web.DD4T
                 response.StatusCode = 304;
                 response.SuppressContent = true;
                 application.CompleteRequest();
+                Log.Trace(start, "binary-not-modified", response.StatusCode.ToString());
+                return;
             }
 
             // Note: if the file was just created, an empty dummy might still be served by IIS
@@ -75,13 +79,18 @@ namespace Sdl.Web.DD4T
                 LoggerService.Debug("file was created less than 1 second ago, transmitting content directly");
                 response.Clear();
                 response.TransmitFile(request.PhysicalPath);
+                Log.Trace(start, "binary-direct", response.StatusCode.ToString());
+                return;
             }
+
+            Log.Trace(start, "binary-processed", response.StatusCode.ToString());
         }
 
 
         public static void DistributionModule_OnBeginRequest(Object source, EventArgs e)
         {
-
+            DateTime timer = DateTime.Now;
+            
             HttpContext context = HttpContext.Current;
             HttpRequest request = context.Request;
             HttpResponse response = context.Response;
@@ -93,6 +102,7 @@ namespace Sdl.Web.DD4T
             {
                 LoggerService.Debug("url {0} does not match binary url pattern, ignoring it", urlPath);
                 LoggerService.Information("<<DistributionModule_OnBeginRequest ({0})", urlPath);
+                Log.Trace(timer, "binary-skip", "");
                 return;
             }
 

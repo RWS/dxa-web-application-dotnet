@@ -6,12 +6,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Sdl.Web.Mvc
 {
     public class Log4NetLogger : ILogger
     {
         private static bool _configured = false;
+        private static string traceFormat = "url:{0},type:{1},time:{2},details:{3}";
+        
+        /// <summary>
+        /// Used to log performance metrics to a separate log file
+        /// </summary>
+        /// <param name="time">Time (in milliseconds) to execute the action</param>
+        /// <param name="type">Type of action</param>
+        /// <param name="messageFormat">Detailed message format string</param>
+        /// <param name="parameters">Message format string parameters</param>
+        public void Trace(DateTime start, string type, string messageFormat, params object[] parameters)
+        {
+            ILog log = LogManager.GetLogger("Trace");
+            if (log.IsInfoEnabled)
+            {
+                var url = "[none]";
+                try
+                {
+                    url = HttpContext.Current.Request.RawUrl;
+                }
+                catch (Exception ex)
+                {
+                    //ignore - we are in a non request context
+                }
+                var message = String.Format(messageFormat, parameters);
+                log.InfoFormat(traceFormat, url, type, (DateTime.Now - start).TotalMilliseconds, message);
+            }
+        }
 
         public void Debug(string messageFormat, params object[] parameters)
         {

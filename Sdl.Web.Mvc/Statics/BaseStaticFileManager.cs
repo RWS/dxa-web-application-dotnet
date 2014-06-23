@@ -19,6 +19,7 @@ namespace Sdl.Web.Mvc
     {
         public virtual string CreateStaticAssets(string applicationRoot)
         {
+            DateTime timer = DateTime.Now;
             List<string> folders = new List<string>();
             string version = null;
             try
@@ -34,7 +35,6 @@ namespace Sdl.Web.Mvc
                             var url = String.Format("{0}/{1}/_all.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, Configuration.SystemFolder);
                             SerializeFile(url, 2);
                             folders.Add(localizationRoot);
-
                             //The HTML Design version is published in /version.json
                             var versionUrl = String.Format("{0}/version.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path);
                             var versionJson = Serialize(versionUrl, true);
@@ -54,6 +54,7 @@ namespace Sdl.Web.Mvc
             {
                 Log.Error(ex, "Error creating files on disk.");
             }
+            Log.Trace(timer, "serialize-config", applicationRoot);
             return version;
         }
 

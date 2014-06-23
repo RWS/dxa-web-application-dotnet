@@ -1,4 +1,7 @@
 ﻿@model BasePage
+@{
+    var timer = DateTime.Now;
+}
 <footer id="page-footer">
     <div class="container-fluid page-border">
     @foreach (Region region in Model.Regions.Values)
@@ -11,4 +14,6 @@
         @ViewBag.Renderer.Render(Model.Regions["Links"], Html)
     }
     </div>
-</footer>
+</footer>@{
+    Log.Trace(timer, "footer-render", Model.Title);
+}

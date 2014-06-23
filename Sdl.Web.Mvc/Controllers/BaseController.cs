@@ -23,6 +23,7 @@ namespace Sdl.Web.Mvc
         [HandleError]
         public virtual ActionResult Page(string pageUrl)
         {
+            DateTime timerStart = DateTime.Now;
             ModelType = ModelType.Page;
             var page = ContentProvider.GetPageModel(pageUrl);
             if (page == null)
@@ -36,6 +37,7 @@ namespace Sdl.Web.Mvc
             {
                 WebRequestContext.PageId = ((WebPage)model).Id;
             }
+            Log.Trace(timerStart, "page-mapped", pageUrl);
             return View(viewName, model);
         }
 
@@ -52,10 +54,12 @@ namespace Sdl.Web.Mvc
         [HandleSectionError(View = "_SectionError")]
         public virtual ActionResult Entity(object entity, int containerSize = 0)
         {
+            DateTime timerStart = DateTime.Now;
             ModelType = ModelType.Entity;
             SetupViewBag(containerSize);
             var viewName = GetViewName(entity);
             var model = this.ProcessModel(entity, GetViewType(viewName)) ?? entity;
+            Log.Trace(timerStart, "entity-mapped", viewName);
             return View(viewName, model);
         }
 
