@@ -8,6 +8,7 @@ namespace Sdl.Web.Mvc.Common
 {
     public interface ILogger
     {
+        void Trace(DateTime start, string type, string messageFormat, params object[] parameters);
         void Debug(string messageFormat, params object[] parameters);
         void Info(string messageFormat, params object[] parameters);
         void Warn(string messageFormat, params object[] parameters);

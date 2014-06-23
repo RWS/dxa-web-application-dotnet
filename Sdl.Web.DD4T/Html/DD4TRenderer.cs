@@ -6,6 +6,7 @@ using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Context;
 using Sdl.Web.Mvc.Html;
 using Sdl.Web.Mvc.Models;
+using System;
 
 namespace Sdl.Web.DD4T
 {
@@ -16,6 +17,7 @@ namespace Sdl.Web.DD4T
             var cp = item as IComponentPresentation;
             if (cp != null && (excludedItems == null || !excludedItems.Contains(cp.ComponentTemplate.Title)))
             {
+                DateTime timerStart = DateTime.Now;
                 string controller = Configuration.GetEntityController();
                 string action = Configuration.GetEntityAction();
                 if (cp.ComponentTemplate.MetadataFields != null && cp.ComponentTemplate.MetadataFields.ContainsKey("controller"))
@@ -36,7 +38,11 @@ namespace Sdl.Web.DD4T
                     containerSize = ContextConfiguration.GridSize;
                 }
                 MvcHtmlString result = helper.Action(action, controller, new { entity = cp, containerSize = (containerSize * parentContainerSize) / ContextConfiguration.GridSize });
-                return Markup.ParseComponentPresentation(result);
+                Log.Trace(timerStart, "entity-render", cp.Component.Title);
+                timerStart = DateTime.Now;
+                var res = Markup.ParseComponentPresentation(result);
+                Log.Trace(timerStart, "entity-parse", cp.Component.Title);
+                return res;
             }
             return null;
         }
@@ -45,6 +51,7 @@ namespace Sdl.Web.DD4T
         {
             if (region != null && (excludedItems == null || !excludedItems.Contains(region.Name)))
             {
+                DateTime timerStart = DateTime.Now;
                 string controller = Configuration.GetRegionController();
                 string action = Configuration.GetRegionAction();
                 if (containerSize == 0)
@@ -52,7 +59,11 @@ namespace Sdl.Web.DD4T
                     containerSize = ContextConfiguration.GridSize;
                 }
                 MvcHtmlString result = helper.Action(action, controller, new { Region = region, containerSize = containerSize });
-                return Markup.ParseRegion(result);
+                Log.Trace(timerStart, "region-render", region.Name);
+                timerStart = DateTime.Now;
+                var res = Markup.ParseRegion(result);
+                Log.Trace(timerStart, "region-parse", region.Name);
+                return res;
             }
             return null;
 

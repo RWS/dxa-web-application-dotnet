@@ -91,9 +91,11 @@ namespace Sdl.Web.DD4T
         {
             if (PageFactory != null)
             {
+                DateTime timerStart = DateTime.Now;
                 IPage page = null;
                 if (PageFactory.TryFindPage(string.Format("{0}{1}", url.StartsWith("/") ? "" : "/", url), out page))
                 {
+                    Log.Trace(timerStart, "page-load", url);
                     return page;
                 }
             }
@@ -108,8 +110,10 @@ namespace Sdl.Web.DD4T
             string page;
             if (PageFactory != null)
             {
+                DateTime timerStart = DateTime.Now;
                 if (PageFactory.TryFindPageContent(string.Format("{0}{1}", url.StartsWith("/") ? "" : "/", url), out page))
                 {
+                    Log.Trace(timerStart, "page-load", url);
                     return page;
                 }
             }
@@ -135,6 +139,7 @@ namespace Sdl.Web.DD4T
 
         public override void PopulateDynamicList(ContentList<Teaser> list)
         {
+            DateTime timerStart = DateTime.Now;
             BrokerQuery query = new BrokerQuery();
             query.Start = list.Start;
             query.PublicationId = WebRequestContext.Localization.LocalizationId;
@@ -146,6 +151,7 @@ namespace Sdl.Web.DD4T
                 item.Link.Url = this.ProcessUrl(item.Link.Url);
             }
             list.HasMore = query.HasMore;
+            Log.Trace(timerStart, "list-load", list.Headline ?? "List");
         }
 
         protected virtual int MapSchema(string schemaKey)

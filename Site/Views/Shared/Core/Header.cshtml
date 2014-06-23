@@ -1,4 +1,7 @@
 ﻿@model BasePage
+@{
+    var timer = DateTime.Now;
+}
 @if (Model.Regions.ContainsKey("Info"))
 {
     @ViewBag.Renderer.Render(Model.Regions["Info"], Html)
@@ -23,4 +26,6 @@
       </div>
     </div>
   </div>
-</header>
+</header>@{
+    Log.Trace(timer, "header-render", Model.Title);
+}
