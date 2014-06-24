@@ -43,19 +43,14 @@ namespace Sdl.Web.DD4T
         {
             var page = (IPage)pageObject;
             var viewName = page.PageTemplate.Title.Replace(" ", "");
-            var module = Configuration.GetDefaultModuleName();
             if (page.PageTemplate.MetadataFields != null)
             {
                 if (page.PageTemplate.MetadataFields.ContainsKey("view"))
                 {
                     viewName = page.PageTemplate.MetadataFields["view"].Value;
                 }
-                if (page.PageTemplate.MetadataFields.ContainsKey("module"))
-                {
-                    module = page.PageTemplate.MetadataFields["module"].Value;
-                }
             }
-            return String.Format("{0}/{1}", module, viewName);
+            return viewName;
         }
 
         public override string GetEntityViewName(object entity)
@@ -64,27 +59,21 @@ namespace Sdl.Web.DD4T
             var template = componentPresentation.ComponentTemplate;
             //strip region and whitespace
             string viewName = Regex.Replace(template.Title, @"\[.*\]|\s", "");
-            var module = Configuration.GetDefaultModuleName();
             if (template.MetadataFields != null)
             {
                 if (template.MetadataFields.ContainsKey("view"))
                 {
                     viewName = componentPresentation.ComponentTemplate.MetadataFields["view"].Value;
                 }
-                if (template.MetadataFields.ContainsKey("module"))
-                {
-                    module = componentPresentation.ComponentTemplate.MetadataFields["module"].Value;
-                }
             }
-            return String.Format("{0}/{1}", module, viewName);
+            return viewName;
         }
 
         public override string GetRegionViewName(object region)
         {
             var model = (Region)region;
             var viewName = model.Name.Replace(" ", "");
-            var module = Configuration.GetDefaultModuleName();
-            return String.Format("{0}/{1}", module, viewName); 
+            return viewName; 
         }
 
         protected override object GetPageModelFromUrl(string url)
@@ -186,6 +175,21 @@ namespace Sdl.Web.DD4T
                 }
             }
             return res;
+        }
+
+        public override string GetEntityModuleName(object entity)
+        {
+            var componentPresentation = (ComponentPresentation)entity;
+            var template = componentPresentation.ComponentTemplate;
+            var module = Configuration.GetDefaultModuleName();
+            if (template.MetadataFields != null)
+            {
+                if (template.MetadataFields.ContainsKey("module"))
+                {
+                    module = componentPresentation.ComponentTemplate.MetadataFields["module"].Value;
+                }
+            }
+            return module;
         }
     }
 }

@@ -25,7 +25,7 @@
     <div id="page-wrapper">
         @if (Model.Includes.ContainsKey("Header"))
         {
-            @Html.Partial("Core/Header", Model.Includes["Header"])
+            @Html.Partial("Header", Model.Includes["Header"])
         }
         <div class="container-fluid page-border" role="main">
             @RenderBody()
@@ -33,7 +33,7 @@
     </div>
     @if (Model.Includes.ContainsKey("Footer"))
     {
-        @Html.Partial("Core/Footer", Model.Includes["Footer"])
+        @Html.Partial("Footer", Model.Includes["Footer"])
     }
     <script src="@Url.VersionedContent("/assets/scripts/main.js")"></script>
     <script>

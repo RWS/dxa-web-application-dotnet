@@ -20,6 +20,7 @@ namespace Sdl.Web.DD4T
                 DateTime timerStart = DateTime.Now;
                 string controller = Configuration.GetEntityController();
                 string action = Configuration.GetEntityAction();
+                string area = Configuration.GetDefaultModuleName();
                 if (cp.ComponentTemplate.MetadataFields != null && cp.ComponentTemplate.MetadataFields.ContainsKey("controller"))
                 {
                     controller = cp.ComponentTemplate.MetadataFields["controller"].Value;
@@ -27,6 +28,10 @@ namespace Sdl.Web.DD4T
                 if (cp.ComponentTemplate.MetadataFields != null && cp.ComponentTemplate.MetadataFields.ContainsKey("action"))
                 {
                     action = cp.ComponentTemplate.MetadataFields["action"].Value;
+                }
+                if (cp.ComponentTemplate.MetadataFields != null && cp.ComponentTemplate.MetadataFields.ContainsKey("module"))
+                {
+                    area = cp.ComponentTemplate.MetadataFields["module"].Value;
                 }
                 int parentContainerSize = helper.ViewBag.ContainerSize;
                 if (parentContainerSize == 0)
@@ -58,7 +63,7 @@ namespace Sdl.Web.DD4T
                 {
                     containerSize = ContextConfiguration.GridSize;
                 }
-                MvcHtmlString result = helper.Action(action, controller, new { Region = region, containerSize = containerSize });
+                MvcHtmlString result = helper.Action(action, controller, new {Region = region, containerSize = containerSize });
                 Log.Trace(timerStart, "region-render", region.Name);
                 timerStart = DateTime.Now;
                 var res = Markup.ParseRegion(result);
