@@ -88,6 +88,7 @@ namespace Sdl.Web.Mvc
         public static DateTime LastApplicationStart { get; set; }
         public static string MediaUrlRegex { get; set; }
         private static readonly object ConfigLock = new object();
+        private static readonly object ViewRegistryLock = new object();
         
         /// <summary>
         /// Gets a (global) configuration setting
@@ -353,27 +354,30 @@ namespace Sdl.Web.Mvc
 
         public static void AddViewModelToRegistry(string viewName, string viewPath)
         {
-            if (!ViewModelRegistry.ContainsKey(viewName))
+            lock (ViewRegistryLock)
             {
-                try
+                if (!ViewModelRegistry.ContainsKey(viewName))
                 {
-                    Type type = BuildManager.GetCompiledType(viewPath);
-                    if (type.BaseType.IsGenericType)
+                    try
                     {
-                        ViewModelRegistry.Add(viewName, type.BaseType.GetGenericArguments()[0]);
+                        Type type = BuildManager.GetCompiledType(viewPath);
+                        if (type.BaseType.IsGenericType)
+                        {
+                            ViewModelRegistry.Add(viewName, type.BaseType.GetGenericArguments()[0]);
+                        }
+                        else
+                        {
+                            Exception ex = new Exception(String.Format("View {0} is not strongly typed. Please ensure you use the @model directive", viewPath));
+                            Log.Error(ex);
+                            throw ex;
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Exception ex = new Exception(String.Format("View {0} is not strongly typed. Please ensure you use the @model directive",viewPath));
-                        Log.Error(ex);
-                        throw ex;
+                        Exception e = new Exception(String.Format("Error adding view model to registry using view path {0}", viewPath), ex);
+                        Log.Error(e);
+                        throw e;
                     }
-                }
-                catch (Exception ex)
-                {
-                    Exception e = new Exception(String.Format("Error adding view model to registry using view path {0}", viewPath),ex);
-                    Log.Error(e);
-                    throw e;
                 }
             }
         }
