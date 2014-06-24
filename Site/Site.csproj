@@ -145,15 +145,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Areas\Core\CoreAreaRegistration.cs" />
     <Compile Include="Bootstrapper.cs" />
-    <Compile Include="Controllers\EntityController.cs" />
-    <Compile Include="Controllers\ListController.cs" />
-    <Compile Include="Controllers\NavigationController.cs">
+    <Compile Include="Areas\Core\Controllers\EntityController.cs" />
+    <Compile Include="Areas\Core\Controllers\ListController.cs" />
+    <Compile Include="Areas\Core\Controllers\NavigationController.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Controllers\PageController.cs" />
-    <Compile Include="Controllers\RegionController.cs" />
-    <Compile Include="Controllers\ResolverController.cs" />
+    <Compile Include="Areas\Core\Controllers\PageController.cs" />
+    <Compile Include="Areas\Core\Controllers\RegionController.cs" />
+    <Compile Include="Areas\Core\Controllers\ResolverController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -171,66 +172,68 @@
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
-    <Content Include="Views\Web.config" />
-    <Content Include="Views\Page\_Layout.cshtml" />
-    <Content Include="Views\Entity\Core\Article.cshtml" />
-    <Content Include="Views\Region\Core\Main.cshtml" />
     <Content Include="Log.config" />
+    <Content Include="Areas\Core\Views\web.config" />
+    <Content Include="Areas\Core\Views\Entity\Accordion.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Article.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Carousel.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\CookieNotificationBar.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Download.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\FooterLinkGroup.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\FooterLinks.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\HeaderLinks.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\HeaderLogo.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\LanguageSelector.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\OldBrowserNotificationBar.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Partials\GoogleMap.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Partials\TeaserHero-ImageOverlay.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Place.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\SocialLinks.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\SocialSharing.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Tab.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Teaser-ImageOverlay.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Teaser.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\TeaserColored.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\TeaserHero-ImageOverlay.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\TeaserMap.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\YouTubeVideo.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\GoogleAnalytics\GoogleAnalytics.cshtml" />
+    <Content Include="Areas\Core\Views\List\List.cshtml" />
+    <Content Include="Areas\Core\Views\List\PagedList.cshtml" />
+    <Content Include="Areas\Core\Views\List\Partials\Pager.cshtml" />
+    <Content Include="Areas\Core\Views\List\ThumbnailList.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\Breadcrumb.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\GoogleSitemap.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\LeftNavigation.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\TopNavigation.cshtml" />
+    <Content Include="Areas\Core\Views\Page\GeneralPage.cshtml" />
+    <Content Include="Areas\Core\Views\Page\IncludePage.cshtml" />
+    <Content Include="Areas\Core\Views\Page\RedirectPage.cshtml" />
+    <Content Include="Areas\Core\Views\Page\_Layout.cshtml" />
+    <Content Include="Areas\Core\Views\Page\_ViewStart.cshtml" />
+    <Content Include="Areas\Core\Views\Region\2-Column.cshtml" />
+    <Content Include="Areas\Core\Views\Region\3-Column.cshtml" />
+    <Content Include="Areas\Core\Views\Region\4-Column.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Hero.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Info.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Left.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Links.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Logo.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Main.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Nav.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Tools.cshtml" />
+    <Content Include="Areas\Core\Views\Shared\Footer.cshtml" />
+    <Content Include="Areas\Core\Views\Shared\Header.cshtml" />
+    <Content Include="Areas\Core\Views\Shared\_SectionError.cshtml" />
     <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
     <None Include="Properties\PublishProfiles\Publish to Local Demo Site.pubxml" />
-    <Content Include="Views\Region\Core\3-Column.cshtml" />
-    <Content Include="Views\Entity\Core\Teaser.cshtml" />
-    <Content Include="Views\Entity\Core\Teaser-ImageOverlay.cshtml" />
-    <Content Include="Views\Region\Core\2-Column.cshtml" />
-    <Content Include="Views\Region\Core\Hero.cshtml" />
-    <Content Include="Views\Entity\Core\Carousel.cshtml" />
-    <Content Include="Views\Entity\Core\Partials\TeaserHero-ImageOverlay.cshtml" />
-    <Content Include="Views\Page\_ViewStart.cshtml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
-    <Content Include="Views\Region\Core\4-Column.cshtml" />
-    <Content Include="Views\Shared\Core\Footer.cshtml" />
-    <Content Include="Views\Shared\Core\Header.cshtml" />
-    <Content Include="Views\Region\Core\Nav.cshtml" />
-    <Content Include="Views\Entity\Core\FooterLinkGroup.cshtml" />
-    <Content Include="Views\Entity\Core\HeaderLinks.cshtml" />
-    <Content Include="Views\Navigation\Breadcrumb.cshtml" />
-    <Content Include="Views\Navigation\LeftNavigation.cshtml" />
-    <Content Include="Views\Navigation\TopNavigation.cshtml" />
-    <Content Include="Views\Entity\Core\TeaserColored.cshtml" />
-    <Content Include="Views\Entity\Core\TeaserHero-ImageOverlay.cshtml" />
-    <Content Include="Views\Shared\_SectionError.cshtml" />
-    <Content Include="Views\Navigation\GoogleSitemap.cshtml" />
-    <Content Include="Views\Region\Core\Logo.cshtml" />
-    <Content Include="Views\Region\Core\Links.cshtml" />
-    <Content Include="Views\Entity\Core\HeaderLogo.cshtml" />
-    <Content Include="Views\Entity\Core\FooterLinks.cshtml" />
-    <Content Include="Views\Region\Core\Info.cshtml" />
-    <Content Include="Views\Entity\Core\CookieNotificationBar.cshtml" />
-    <Content Include="Views\Entity\Core\OldBrowserNotificationBar.cshtml" />
-    <Content Include="Views\Page\Core\RedirectPage.cshtml" />
-    <Content Include="Views\List\Core\List.cshtml" />
-    <Content Include="Views\Entity\Core\Accordion.cshtml" />
-    <Content Include="Views\List\Core\PagedList.cshtml" />
-    <Content Include="Views\List\Core\Partials\Pager.cshtml" />
     <Content Include="Unity.config" />
-    <Content Include="Views\List\Core\ThumbnailList.cshtml" />
-    <Content Include="Views\Entity\Core\YouTubeVideo.cshtml" />
-    <Content Include="Views\Entity\Core\Place.cshtml" />
-    <Content Include="Views\Entity\Core\Partials\GoogleMap.cshtml" />
-    <Content Include="Views\Entity\Core\TeaserMap.cshtml" />
-    <Content Include="Views\Entity\GoogleAnalytics\GoogleAnalytics.cshtml" />
-    <Content Include="Views\Entity\Core\Tab.cshtml" />
-    <Content Include="Views\Entity\Core\SocialLinks.cshtml" />
-    <Content Include="Views\Page\Core\GeneralPage.cshtml" />
-    <Content Include="Views\Entity\Core\SocialSharing.cshtml" />
-    <Content Include="Views\Region\Core\Left.cshtml" />
-    <Content Include="Views\Region\Core\Tools.cshtml" />
-    <Content Include="Views\Page\Core\IncludePage.cshtml" />
-    <Content Include="Views\Entity\Core\Download.cshtml" />
-    <Content Include="Views\Entity\Core\LanguageSelector.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Areas\Core\Models\" />
     <Folder Include="bin\" />
+    <Folder Include="Controllers\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config">

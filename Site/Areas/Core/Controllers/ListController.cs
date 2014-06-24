@@ -6,7 +6,7 @@ using Sdl.Web.Mvc.Common;
 using Sdl.Web.Mvc.Models;
 using Sdl.Web.Tridion;
 
-namespace Site.Controllers
+namespace Site.Areas.Core.Controllers
 {
     public class ListController : EntityController
     {

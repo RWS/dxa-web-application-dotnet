@@ -9,7 +9,7 @@
     @if (Model.ItemListElements.Count>0)
     {
     <div class="pull-right">@String.Format(Html.Resource("core.showingItemsText"),Model.Start+1,Model.Start+Model.ItemListElements.Count)</div>
-    @Html.Partial("Core/Partials/Pager")
+    @Html.Partial("Partials/Pager")
 	<div class="list-group">
         @foreach(var item in Model.ItemListElements)
         {
@@ -28,6 +28,6 @@
 		</a>
         }
 	</div>
-	@Html.Partial("Core/Partials/Pager")
+	@Html.Partial("Partials/Pager")
     }
 </div>

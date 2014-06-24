@@ -55,7 +55,8 @@ namespace Sdl.Web.DD4T
                     module = page.PageTemplate.MetadataFields["module"].Value;
                 }
             }
-            return String.Format("{0}/{1}", module, viewName);
+            //TODO remove module
+            return String.Format("{1}", module, viewName);
         }
 
         public override string GetEntityViewName(object entity)
@@ -76,7 +77,8 @@ namespace Sdl.Web.DD4T
                     module = componentPresentation.ComponentTemplate.MetadataFields["module"].Value;
                 }
             }
-            return String.Format("{0}/{1}", module, viewName);
+            //TODO remove module
+            return String.Format("{1}", module, viewName);
         }
 
         public override string GetRegionViewName(object region)
@@ -84,7 +86,8 @@ namespace Sdl.Web.DD4T
             var model = (Region)region;
             var viewName = model.Name.Replace(" ", "");
             var module = Configuration.GetDefaultModuleName();
-            return String.Format("{0}/{1}", module, viewName); 
+            //TODO remove module
+            return String.Format("{1}", module, viewName); 
         }
 
         protected override object GetPageModelFromUrl(string url)

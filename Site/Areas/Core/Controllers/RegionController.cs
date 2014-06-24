@@ -1,7 +1,7 @@
 ﻿using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Common;
 
-namespace Site.Controllers
+namespace Site.Areas.Core.Controllers
 {
     public class RegionController : BaseController
     {

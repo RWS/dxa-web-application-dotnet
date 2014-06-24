@@ -18,38 +18,10 @@ namespace Site
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-            
             routes.IgnoreRoute("cid/{*pathInfo}");
 
-            //Google Site Map
-            routes.MapRoute(
-                "sitemap",
-                "sitemap",
-                new { controller = "Navigation", action = "GoogleSitemap" }
-            );
-
-            //For resolving ids to urls
-            routes.MapRoute(
-               "Resolve",
-               "resolve/{*itemId}",
-               new { controller = "Resolver", action = "Resolve" },
-               new { itemId = @"^(.*)?$" }
-            );
             
-            //Tridion Page Route
-            routes.MapRoute(
-               "TridionPage",
-               "{*pageUrl}",
-               new { controller = "Page", action = "Page" },
-               new { pageId = @"^(.*)?$" }
-            );
-
-            //Default Route - required for sub actions (region/entity/navigation etc.)
-            routes.MapRoute(
-                name: "Default",
-                url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
-            );
+            
         }
 
         protected void Application_Start()
@@ -62,9 +34,9 @@ namespace Site
             // load semantic mappings
             SemanticMapping.Load(Server.MapPath("~"));
 
+            RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
             RegisterGlobalFilters(GlobalFilters.Filters);
-            RegisterRoutes(RouteTable.Routes);
             Bootstrapper.Initialise();
             ViewEngines.Engines.Clear();
             //Register Custom Razor View Engine

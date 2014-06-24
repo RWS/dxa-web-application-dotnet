@@ -8,7 +8,7 @@ using Sdl.Web.Mvc.Common;
 using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
 
-namespace Site.Controllers
+namespace Site.Areas.Core.Controllers
 {
     public class NavigationController : BaseController
     {      

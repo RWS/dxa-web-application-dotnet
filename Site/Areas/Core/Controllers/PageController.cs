@@ -2,7 +2,7 @@
 using Sdl.Web.Mvc.Common;
 using System;
 
-namespace Site.Controllers
+namespace Site.Areas.Core.Controllers
 {
     public class PageController : BaseController
     {

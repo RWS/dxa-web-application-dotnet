@@ -23,7 +23,7 @@ else if (Model.Name!=null)
             @if (Model.Location!=null)
             {
 		    <div class="col-sm-6">
-                @Html.Partial("Core/Partials/GoogleMap", Model.Location, new ViewDataDictionary { {"MarkerName", Model.Name} })
+                @Html.Partial("Partials/GoogleMap", Model.Location, new ViewDataDictionary { {"MarkerName", Model.Name} })
 		    </div>
             }
 		    <div class="col-sm-@width">
