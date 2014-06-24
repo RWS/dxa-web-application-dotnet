@@ -134,5 +134,8 @@ namespace Sdl.Web.Mvc.Mapping
         protected static string DefaultExtensionLessPageName{get;set;}
         protected static string DefaultPageName{get;set;}
         protected static string DefaultExtension{get;set;}
+
+
+        public abstract string GetEntityModuleName(object entity);
     }
 }

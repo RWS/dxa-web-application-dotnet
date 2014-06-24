@@ -233,7 +233,6 @@
     <Content Include="Unity.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Areas\Core\Models\" />
     <Folder Include="Areas\Core\Views\Entity\GoogleAnalytics\" />
     <Folder Include="bin\" />
   </ItemGroup>

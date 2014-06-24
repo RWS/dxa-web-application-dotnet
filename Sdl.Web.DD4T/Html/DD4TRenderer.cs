@@ -42,7 +42,7 @@ namespace Sdl.Web.DD4T
                 {
                     containerSize = ContextConfiguration.GridSize;
                 }
-                MvcHtmlString result = helper.Action(action, controller, new { area = area, entity = cp, containerSize = (containerSize * parentContainerSize) / ContextConfiguration.GridSize });
+                MvcHtmlString result = helper.Action(action, controller, new { entity = cp, containerSize = (containerSize * parentContainerSize) / ContextConfiguration.GridSize });
                 Log.Trace(timerStart, "entity-render", cp.Component.Title);
                 timerStart = DateTime.Now;
                 var res = Markup.ParseComponentPresentation(result);
@@ -63,7 +63,7 @@ namespace Sdl.Web.DD4T
                 {
                     containerSize = ContextConfiguration.GridSize;
                 }
-                MvcHtmlString result = helper.Action(action, controller, new { Region = region, containerSize = containerSize });
+                MvcHtmlString result = helper.Action(action, controller, new {Region = region, containerSize = containerSize });
                 Log.Trace(timerStart, "region-render", region.Name);
                 timerStart = DateTime.Now;
                 var res = Markup.ParseRegion(result);

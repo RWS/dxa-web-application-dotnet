@@ -17,11 +17,8 @@ namespace Site
 
         public static void RegisterRoutes(RouteCollection routes)
         {
-            routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-            routes.IgnoreRoute("cid/{*pathInfo}");
-
-            
-            
+            RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+            RouteTable.Routes.IgnoreRoute("cid/{*pathInfo}");
         }
 
         protected void Application_Start()
@@ -33,6 +30,7 @@ namespace Site
             
             // load semantic mappings
             SemanticMapping.Load(Server.MapPath("~"));
+
 
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();

@@ -36,9 +36,10 @@ namespace Site.Areas.Core
                new { controller = "Page", action = "Page" },
                new { pageId = @"^(.*)?$" }
             );
+            
             //Default Route - required for sub actions (region/entity/navigation etc.)
             context.MapRoute(
-                name: "Default",
+                name: "Default_Core",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             );

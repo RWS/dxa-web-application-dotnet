@@ -28,5 +28,8 @@ namespace Sdl.Web.Mvc.Common
         string GetEntityViewName(object entity);
         string GetRegionViewName(object region);
         string GetPageViewName(object page);
+
+        //Get module names from the domain model
+        string GetEntityModuleName(object entity);
     }
 }

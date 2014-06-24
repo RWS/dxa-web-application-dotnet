@@ -57,6 +57,7 @@ namespace Sdl.Web.Mvc
             DateTime timerStart = DateTime.Now;
             ModelType = ModelType.Entity;
             SetupViewBag(containerSize);
+            this.ControllerContext.RouteData.DataTokens["area"] = ContentProvider.GetEntityModuleName(entity);
             var viewName = GetViewName(entity);
             var model = this.ProcessModel(entity, GetViewType(viewName)) ?? entity;
             Log.Trace(timerStart, "entity-mapped", viewName);
