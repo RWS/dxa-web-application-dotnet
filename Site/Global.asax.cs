@@ -5,8 +5,12 @@ using System.Web.Routing;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Tridion;
+using Microsoft.Practices.Unity;
+using Unity.Mvc5;
+using Microsoft.Practices.Unity.Configuration;
+using Microsoft.Practices.ServiceLocation;
 
-namespace Site
+namespace Sdl.Web.Site
 {
     public class MvcApplication : HttpApplication
     {
@@ -23,22 +27,28 @@ namespace Site
 
         protected void Application_Start()
         {
-            Configuration.LastApplicationStart = DateTime.Now;
+            InitializeDI();
+            //TODO -can this be handled by DI?
             Configuration.StaticFileManager = new Sdl.Web.DD4T.BinaryFileManager();
-            Configuration.SetLocalizations(TridionConfig.PublicationMap);
-            Configuration.Load(Server.MapPath("~"));
-            
-            // load semantic mappings
-            SemanticMapping.Load(Server.MapPath("~"));
-
-
+            Configuration.Initialize(Server.MapPath("~"), TridionConfig.PublicationMap);
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
             RegisterGlobalFilters(GlobalFilters.Filters);
-            Bootstrapper.Initialise();
-            ViewEngines.Engines.Clear();
-            //Register Custom Razor View Engine
-            ViewEngines.Engines.Add(new ContextAwareViewEngine());
+        }
+
+        protected IUnityContainer InitializeDI()
+        {
+            var container = BuildUnityContainer();
+            DependencyResolver.SetResolver(new UnityDependencyResolver(container));
+            return container;
+        }
+
+        protected IUnityContainer BuildUnityContainer()
+        {
+            var section = (UnityConfigurationSection)System.Configuration.ConfigurationManager.GetSection("unity");
+            var container = section.Configure(new UnityContainer(), "main");
+            ServiceLocator.SetLocatorProvider(() => new UnityServiceLocator(container));
+            return container;
         }
     }
 }
