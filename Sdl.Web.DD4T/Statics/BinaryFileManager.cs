@@ -9,6 +9,10 @@ using DD4T.Factories;
 using DD4T.Factories.Caching;
 using DD4T.Utils;
 using Sdl.Web.Mvc;
+using System.Drawing.Imaging;
+using System.Text.RegularExpressions;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace Sdl.Web.DD4T
 {
@@ -50,7 +54,7 @@ namespace Sdl.Web.DD4T
         public bool ProcessRequest(HttpRequest request)
         {
             string urlPath = request.Url.AbsolutePath.Replace("/" + Configuration.StaticsFolder, "");
-            LoggerService.Debug("Start processing " + urlPath);
+            Log.Debug("Start processing " + urlPath);
             return ProcessUrl(urlPath);
         }
 
@@ -75,7 +79,9 @@ namespace Sdl.Web.DD4T
         public bool ProcessUrl(string urlPath, bool cacheSinceAppStart = false)
         {
             Dimensions dimensions = null;
-            String physicalPath = GetFilePathFromUrl(urlPath); 
+            
+            String physicalPath = GetFilePathFromUrl(urlPath);
+            urlPath = StripDimensions(urlPath, out dimensions);
             string cacheKey = GetCacheKey(urlPath);
             DateTime? lastPublishedDate = CacheAgent.Load(cacheKey) as DateTime?;
             if (lastPublishedDate == null)
@@ -95,7 +101,7 @@ namespace Sdl.Web.DD4T
                     if (cacheSinceAppStart && Configuration.LastApplicationStart.CompareTo(lastPublishedDate) < 0)
                     {
                         //File has been modified since last application start but we don't care
-                        LoggerService.Debug("binary {0} is modified, but only since last application restart, so no action required", urlPath);
+                        Log.Debug("binary {0} is modified, but only since last application restart, so no action required", urlPath);
                         return true;
                     }
                     FileInfo fi = new FileInfo(physicalPath);
@@ -104,7 +110,7 @@ namespace Sdl.Web.DD4T
                         DateTime fileModifiedDate = File.GetLastWriteTime(physicalPath);
                         if (fileModifiedDate.CompareTo(lastPublishedDate) >= 0)
                         {
-                            LoggerService.Debug("binary {0} is still up to date, no action required", urlPath);
+                            Log.Debug("binary {0} is still up to date, no action required", urlPath);
                             return true;
                         }
                     }
@@ -116,7 +122,7 @@ namespace Sdl.Web.DD4T
             IBinary binary = GetBinaryFromBroker(urlPath);
             if (binary==null)
             {
-                LoggerService.Debug("Binary with url {0} not found", urlPath);
+                Log.Debug("Binary with url {0} not found", urlPath);
                 // binary does not exist in Tridion, it should be removed from the local file system too
                 if (File.Exists(physicalPath))
                 {
@@ -190,14 +196,17 @@ namespace Sdl.Web.DD4T
                         }
                         fileStream = File.Create(physicalPath);
                     }
-
                     byte[] buffer = binary.BinaryData;
+
+                    if (dimensions != null)
+                        buffer = ResizeImageFile(buffer, dimensions, GetImageFormat(physicalPath));
+
                     fileStream.Write(buffer, 0, buffer.Length);
                 }
             }
             catch (Exception e)
             {
-                LoggerService.Error("Exception occurred {0}\r\n{1}", e.Message, e.StackTrace);
+                Log.Error("Exception occurred {0}\r\n{1}", e.Message, e.StackTrace);
                 result = false;
             }
             finally
@@ -215,9 +224,9 @@ namespace Sdl.Web.DD4T
         {
             if (File.Exists(physicalPath))
             {
-                LoggerService.Debug("requested binary {0} no longer exists in broker. Removing...", physicalPath);
+                Log.Debug("requested binary {0} no longer exists in broker. Removing...", physicalPath);
                 File.Delete(physicalPath); // file got unpublished
-                LoggerService.Debug("done ({0})", physicalPath);
+                Log.Debug("done ({0})", physicalPath);
             }
         }
 
@@ -263,6 +272,125 @@ namespace Sdl.Web.DD4T
                 ProcessUrl(url, true);
                 return null;
             }
+        }
+
+        internal static byte[] ResizeImageFile(byte[] imageFile, Dimensions dimensions, ImageFormat imageFormat)
+        {
+            Image original = Image.FromStream(new MemoryStream(imageFile));
+            //Defaults for crop position, width and target size
+            int cropX = 0, cropY = 0;
+            int width = original.Width, height = original.Height;
+            int targetW = original.Width, targetH = original.Height;
+            //Most complex case is if a height AND width is specified - as we will have to crop
+            if (dimensions.Width > 0 && dimensions.Height > 0)
+            {
+                float originalAspect = (float)original.Width / (float)original.Height;
+                float targetAspect = (float)dimensions.Width / (float)dimensions.Height;
+                if (targetAspect < originalAspect)
+                {
+                    //We crop the width, but only if the required height is smaller than that of the original image
+                    if (dimensions.Height <= original.Height)
+                    {
+                        targetH = dimensions.Height;
+                        targetW = (int)Math.Ceiling(targetH * targetAspect);
+                        cropX = (int)Math.Ceiling((original.Width - (original.Height * targetAspect)) / 2);
+                        width = width - 2 * cropX;
+                    }
+                }
+                else
+                {
+                    //We crop the height, but only if the required width is smaller than that of the original image
+                    if (dimensions.Width <= original.Width)
+                    {
+                        targetW = dimensions.Width;
+                        targetH = (int)Math.Ceiling(targetW / targetAspect);
+                        cropY = (int)Math.Ceiling((original.Height - (original.Width / targetAspect)) / 2);
+                        height = height - 2 * cropY;
+                    }
+                }
+            }
+            else if (dimensions.Width > 0)
+            {
+                targetW = dimensions.Width > original.Width ? original.Width : dimensions.Width;
+                targetH = (int)(original.Height * ((float)targetW / (float)original.Width));
+            }
+            else
+            {
+                targetH = dimensions.Height > original.Height ? original.Height : dimensions.Height;
+                targetW = (int)(original.Width * ((float)targetH / (float)original.Height));
+            }
+            Image imgPhoto = null;
+            using (MemoryStream memoryStream = new MemoryStream(imageFile))
+            {
+                imgPhoto = Image.FromStream(memoryStream);
+            }
+            if (imgPhoto == null)
+            {
+                throw new Exception("cannot read image, binary data may not represent an image");
+            }
+            // Create a new blank canvas.  The resized image will be drawn on this canvas.
+            Bitmap bmPhoto = new Bitmap(targetW, targetH, PixelFormat.Format24bppRgb);
+            Bitmap bmOriginal = new Bitmap(original);
+            bmPhoto.SetResolution(72, 72);
+            bmPhoto.MakeTransparent(bmOriginal.GetPixel(0, 0));
+            Graphics grPhoto = Graphics.FromImage(bmPhoto);
+            grPhoto.SmoothingMode = SmoothingMode.AntiAlias;
+            grPhoto.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            grPhoto.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            grPhoto.DrawImage(imgPhoto, new Rectangle(0, 0, targetW, targetH), cropX, cropY, width, height, GraphicsUnit.Pixel);
+            // Save out to memory and then to a file.  We dispose of all objects to make sure the files don't stay locked.
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                bmPhoto.Save(memoryStream, imageFormat);
+                original.Dispose();
+                imgPhoto.Dispose();
+                bmPhoto.Dispose();
+                grPhoto.Dispose();
+                return memoryStream.GetBuffer();
+            }
+        }
+        private ImageFormat GetImageFormat(string path)
+        {
+            switch (Path.GetExtension(path).ToLower())
+            {
+                case ".jpg":
+                case ".jpeg":
+                    return ImageFormat.Jpeg;
+                case ".png":
+                    return ImageFormat.Png;
+                case ".gif":
+                    return ImageFormat.Gif;
+            }
+            return ImageFormat.Png; // use png as default
+        }
+
+        private string StripDimensions(string path, out Dimensions dimensions)
+        {
+            dimensions = new Dimensions();
+            int dim = 0;
+            path = StripDimensions(path, out dim, "h");
+            if (dim > 0)
+            {
+                dimensions.Height = dim;
+            }
+            path = StripDimensions(path, out dim, "w");
+            if (dim > 0)
+            {
+                dimensions.Width = dim;
+            }
+            return path;
+        }
+
+        private string StripDimensions(string path, out int dimension, string type = "h")
+        {
+            Regex re = new Regex(@"_" + type + @"(\d+)\.");
+            if (re.IsMatch(path))
+            {
+                dimension = Convert.ToInt32(re.Match(path).Groups[1].ToString());
+                return re.Replace(path, ".");
+            }
+            dimension = 0;
+            return path;
         }
     }
 }

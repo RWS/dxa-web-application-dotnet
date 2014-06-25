@@ -41,14 +41,14 @@ namespace Sdl.Web.DD4T
             urlPath = urlPath.StartsWith("/" + Configuration.StaticsFolder) ? urlPath.Substring(Configuration.StaticsFolder.Length + 1) : urlPath;
             if (! IsBinaryUrl.IsMatch(urlPath))
             {
-                LoggerService.Debug("url {0} does not match binary url pattern, ignoring it", "");
+                Log.Debug("url {0} does not match binary url pattern, ignoring it", "");
                 Log.Trace(start, "binary-ignored", response.StatusCode.ToString());
                 return;
             }
             
             if (! BinaryFileManager.ProcessRequest(request))
             {
-                LoggerService.Debug("Url {0} not found. Returning 404 Not Found.", urlPath);
+                Log.Debug("Url {0} not found. Returning 404 Not Found.", urlPath);
                 response.StatusCode = 404;
                 response.SuppressContent = true;
                 application.CompleteRequest();
@@ -57,14 +57,14 @@ namespace Sdl.Web.DD4T
             }
             // if we got here, the file was successfully created on file-system
             DateTime ifModifiedSince = Convert.ToDateTime(request.Headers["If-Modified-Since"]);
-            LoggerService.Debug("If-Modified-Since: " + ifModifiedSince);
+            Log.Debug("If-Modified-Since: " + ifModifiedSince);
 
             DateTime fileLastModified = File.GetLastWriteTime(request.PhysicalPath);
-            LoggerService.Debug("File last modified: " + fileLastModified);
+            Log.Debug("File last modified: " + fileLastModified);
 
             if (fileLastModified.Subtract(ifModifiedSince).TotalSeconds < 1)
             {
-                LoggerService.Debug("Sending 304 Not Modified");
+                Log.Debug("Sending 304 Not Modified");
                 response.StatusCode = 304;
                 response.SuppressContent = true;
                 application.CompleteRequest();
@@ -76,7 +76,7 @@ namespace Sdl.Web.DD4T
             // To make sure the right file is sent, we will transmit the file directly within the first second of the creation
             if (fileLastModified.AddSeconds(1).CompareTo(DateTime.Now) > 0) 
             {
-                LoggerService.Debug("file was created less than 1 second ago, transmitting content directly");
+                Log.Debug("file was created less than 1 second ago, transmitting content directly");
                 response.Clear();
                 response.TransmitFile(request.PhysicalPath);
                 Log.Trace(start, "binary-direct", response.StatusCode.ToString());
@@ -96,12 +96,12 @@ namespace Sdl.Web.DD4T
             HttpResponse response = context.Response;
 
             string urlPath = request.Url.AbsolutePath;
-            LoggerService.Information(">>DistributionModule_OnBeginRequest ({0})", urlPath);
+            Log.Debug(">>DistributionModule_OnBeginRequest ({0})", urlPath);
             
             if (!IsBinaryUrl.IsMatch(urlPath))
             {
-                LoggerService.Debug("url {0} does not match binary url pattern, ignoring it", urlPath);
-                LoggerService.Information("<<DistributionModule_OnBeginRequest ({0})", urlPath);
+                Log.Debug("url {0} does not match binary url pattern, ignoring it", urlPath);
+                Log.Debug("<<DistributionModule_OnBeginRequest ({0})", urlPath);
                 Log.Trace(timer, "binary-skip", "");
                 return;
             }
@@ -111,7 +111,7 @@ namespace Sdl.Web.DD4T
 
             if (!File.Exists(realPath))
             {
-                LoggerService.Debug("Dir path: " + realPath.Substring(0, realPath.LastIndexOf("\\")));
+                Log.Debug("Dir path: " + realPath.Substring(0, realPath.LastIndexOf("\\")));
                 try
                 {
                     string dir = realPath.Substring(0, realPath.LastIndexOf("\\"));
@@ -128,11 +128,11 @@ namespace Sdl.Web.DD4T
                 }
                 catch (Exception exception)
                 {
-                    LoggerService.Information("IIS empty file could not be created." + exception.Message);
+                    Log.Warn("IIS empty file could not be created." + exception.Message);
                 }
             }
 
-            LoggerService.Information("<<DistributionModule_OnBeginRequest ({0})", urlPath);
+            Log.Debug("<<DistributionModule_OnBeginRequest ({0})", urlPath);
         }
 
 		/// <summary>

@@ -64,6 +64,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interfaces\IMediaHelper.cs" />
     <Compile Include="Models\Attributes.cs" />
     <Compile Include="Models\Common\Download.cs" />
     <Compile Include="Models\Common\Entity.cs" />
