@@ -9,6 +9,7 @@ using System.Web.Helpers;
 using System.Web.Script.Serialization;
 using Sdl.Web.Mvc.Context;
 using Sdl.Web.Mvc.Common;
+using Sdl.Web.Mvc.Models;
 
 namespace Sdl.Web.Mvc
 {
@@ -352,18 +353,19 @@ namespace Sdl.Web.Mvc
             return url;
         }
 
-        public static void AddViewModelToRegistry(string viewName, string viewPath)
+        public static void AddViewModelToRegistry(ViewData viewData, string viewPath)
         {
             lock (ViewRegistryLock)
             {
-                if (!ViewModelRegistry.ContainsKey(viewName))
+                var key = String.Format("{0}:{1}", viewData.AreaName, viewData.ViewName);
+                if (!ViewModelRegistry.ContainsKey(key))
                 {
                     try
                     {
                         Type type = BuildManager.GetCompiledType(viewPath);
                         if (type.BaseType.IsGenericType)
                         {
-                            ViewModelRegistry.Add(viewName, type.BaseType.GetGenericArguments()[0]);
+                            ViewModelRegistry.Add(key, type.BaseType.GetGenericArguments()[0]);
                         }
                         else
                         {

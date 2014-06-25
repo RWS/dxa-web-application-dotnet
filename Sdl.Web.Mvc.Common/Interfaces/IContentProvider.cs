@@ -26,11 +26,8 @@ namespace Sdl.Web.Mvc.Common
         string ProcessUrl(string url, string localizationId = null);
 
         //Get view names from the domain model
-        string GetEntityViewName(object entity);
-        string GetRegionViewName(object region);
-        string GetPageViewName(object page);
-
-        //Get module names from the domain model
-        string GetEntityModuleName(object entity);
+        ViewData GetEntityViewData(object entity);
+        ViewData GetRegionViewData(object region);
+        ViewData GetPageViewData(object page);
     }
 }

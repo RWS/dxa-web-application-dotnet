@@ -146,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Areas\Core\CoreAreaRegistration.cs" />
+    <Compile Include="Areas\Custom1\Custom1AreaRegistration.cs" />
     <Compile Include="Areas\GoogleAnalytics\GoogleAnalyticsAreaRegistration.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Areas\Core\Controllers\EntityController.cs" />
@@ -224,15 +225,22 @@
     <Content Include="Areas\Core\Views\Region\Tools.cshtml" />
     <Content Include="Areas\Core\Views\Shared\Footer.cshtml" />
     <Content Include="Areas\Core\Views\Shared\Header.cshtml" />
-    <Content Include="Areas\Core\Views\Shared\_SectionError.cshtml" />
+    <Content Include="Views\Shared\_SectionError.cshtml" />
     <Content Include="Areas\GoogleAnalytics\Views\web.config" />
+    <Content Include="Areas\Custom1\Views\web.config" />
+    <Content Include="Areas\Custom1\Views\Region\6-Column.cshtml" />
+    <Content Include="Areas\Custom1\Views\Page\PopupPage.cshtml" />
     <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
     <None Include="Properties\PublishProfiles\Publish to Local Demo Site.pubxml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
     <Content Include="Unity.config" />
+    <Content Include="Views\web.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\Core\Views\Entity\GoogleAnalytics\" />
+    <Folder Include="Areas\Custom1\Controllers\" />
+    <Folder Include="Areas\Custom1\Models\" />
+    <Folder Include="Areas\Custom1\Views\Shared\" />
     <Folder Include="bin\" />
   </ItemGroup>
   <ItemGroup>

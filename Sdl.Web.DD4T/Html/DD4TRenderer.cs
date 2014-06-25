@@ -34,30 +34,39 @@ namespace Sdl.Web.DD4T
                 }
                 parameters["containerSize"] = (containerSize * parentContainerSize) / ContextConfiguration.GridSize;
                 parameters["entity"] = cp;
-                if (cp.ComponentTemplate.MetadataFields != null && cp.ComponentTemplate.MetadataFields.ContainsKey("controller"))
+                if (cp.ComponentTemplate.MetadataFields != null)
                 {
-                    controller = cp.ComponentTemplate.MetadataFields["controller"].Value;
-                }
-                if (cp.ComponentTemplate.MetadataFields != null && cp.ComponentTemplate.MetadataFields.ContainsKey("action"))
-                {
-                    action = cp.ComponentTemplate.MetadataFields["action"].Value;
-                }
-                if (cp.ComponentTemplate.MetadataFields != null && cp.ComponentTemplate.MetadataFields.ContainsKey("module"))
-                {
-                    area = cp.ComponentTemplate.MetadataFields["module"].Value;
-                }
-                if (cp.ComponentTemplate.MetadataFields != null && cp.ComponentTemplate.MetadataFields.ContainsKey("routeValues"))
-                {
-                    var bits = cp.ComponentTemplate.MetadataFields["routeValues"].Value.Split(',');
-                    foreach(string bit in bits)
+                    if (cp.ComponentTemplate.MetadataFields.ContainsKey("controller"))
                     {
-                        var parameter = bit.Trim().Split(':');
-                        if (parameter.Length > 1)
+                        var bits = cp.ComponentTemplate.MetadataFields["controller"].Value.Split(':');
+                        if (bits.Length > 1)
                         {
-                            parameters[parameter[0]] = parameter[1];
+                            controller = bits[1];
+                            area = bits[0];
+                        }
+                        else
+                        {
+                            controller = bits[0];
+                        }
+                    }
+                    if (cp.ComponentTemplate.MetadataFields.ContainsKey("action"))
+                    {
+                        action = cp.ComponentTemplate.MetadataFields["action"].Value;
+                    }
+                    if (cp.ComponentTemplate.MetadataFields.ContainsKey("routeValues"))
+                    {
+                        var bits = cp.ComponentTemplate.MetadataFields["routeValues"].Value.Split(',');
+                        foreach (string bit in bits)
+                        {
+                            var parameter = bit.Trim().Split(':');
+                            if (parameter.Length > 1)
+                            {
+                                parameters[parameter[0]] = parameter[1];
+                            }
                         }
                     }
                 }
+                parameters["area"] = area;
                 MvcHtmlString result = helper.Action(action, controller, parameters);
                 Log.Trace(timerStart, "entity-render", cp.Component.Title);
                 timerStart = DateTime.Now;
@@ -75,11 +84,12 @@ namespace Sdl.Web.DD4T
                 DateTime timerStart = DateTime.Now;
                 string controller = Configuration.GetRegionController();
                 string action = Configuration.GetRegionAction();
+                string area = region.Module;
                 if (containerSize == 0)
                 {
                     containerSize = ContextConfiguration.GridSize;
                 }
-                MvcHtmlString result = helper.Action(action, controller, new {Region = region, containerSize = containerSize });
+                MvcHtmlString result = helper.Action(action, controller, new {Region = region, containerSize = containerSize, area=area });
                 Log.Trace(timerStart, "region-render", region.Name);
                 timerStart = DateTime.Now;
                 var res = Markup.ParseRegion(result);
