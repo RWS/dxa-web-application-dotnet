@@ -79,7 +79,6 @@ namespace Sdl.Web.DD4T
         public bool ProcessUrl(string urlPath, bool cacheSinceAppStart = false)
         {
             Dimensions dimensions = null;
-            
             String physicalPath = GetFilePathFromUrl(urlPath);
             urlPath = StripDimensions(urlPath, out dimensions);
             string cacheKey = GetCacheKey(urlPath);
@@ -198,7 +197,7 @@ namespace Sdl.Web.DD4T
                     }
                     byte[] buffer = binary.BinaryData;
 
-                    if (dimensions != null)
+                    if (dimensions != null && (dimensions.Width>0 || dimensions.Height>0))
                         buffer = ResizeImageFile(buffer, dimensions, GetImageFormat(physicalPath));
 
                     fileStream.Write(buffer, 0, buffer.Length);

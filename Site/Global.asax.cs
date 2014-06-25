@@ -31,7 +31,8 @@ namespace Sdl.Web.Site
             InitializeDI();
             //TODO -can this be handled by DI?
             Configuration.StaticFileManager = new Sdl.Web.DD4T.BinaryFileManager();
-            ContextHelper.MediaHelper = new Sdl.Web.DD4T.Html.DD4TMediaHelper();
+            //ContextHelper.MediaHelper = new Sdl.Web.DD4T.Html.DD4TMediaHelper();
+            ContextHelper.MediaHelper = new Sdl.Web.Mvc.Html.ContextualMediaHelper();
             Configuration.Initialize(Server.MapPath("~"), TridionConfig.PublicationMap);
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
