@@ -83,6 +83,8 @@
     <Compile Include="Context\ContextConfiguration.cs" />
     <Compile Include="Context\ContextHelper.cs" />
     <Compile Include="Errors\HandleSectionErrorAttribute.cs" />
+    <Compile Include="Html\BaseMediaHelper.cs" />
+    <Compile Include="Html\ContextualMediaHelper.cs" />
     <Compile Include="Mapping\NavigationBuilder.cs" />
     <Compile Include="Mapping\ComponentType.cs" />
     <Compile Include="Mapping\XpmRegion.cs" />

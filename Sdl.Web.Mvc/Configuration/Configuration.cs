@@ -286,12 +286,10 @@ namespace Sdl.Web.Mvc
         private static void InitializeContextConfiguration()
         {
             //TODO publish from CMS to ensure is in sync with LESS variables etc.
-            ContextConfiguration.ImageWidths =new List<int> {160,320,640,1024,2048};
             ContextConfiguration.GridSize = 12;
             ContextConfiguration.LargeScreenBreakpoint = 1140;
             ContextConfiguration.MediumScreenBreakpoint = 940;
             ContextConfiguration.SmallScreenBreakpoint = 480;
-            ContextConfiguration.ImageResizeRoute = "cid";
         }
 
         private static Dictionary<string, string> GetConfigFromFile(string file)
