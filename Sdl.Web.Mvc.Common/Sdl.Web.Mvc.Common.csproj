@@ -75,6 +75,7 @@
     <Compile Include="Models\Common\Paragraph.cs" />
     <Compile Include="Models\Common\Tag.cs" />
     <Compile Include="Models\Common\TagLink.cs" />
+    <Compile Include="Models\Common\ViewData.cs" />
     <Compile Include="Models\Common\YouTubeVideo.cs" />
     <Compile Include="Models\Entity\Article.cs" />
     <Compile Include="Models\Entity\ItemList.cs" />

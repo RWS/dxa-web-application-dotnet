@@ -27,9 +27,9 @@ namespace Sdl.Web.Mvc.Mapping
         public abstract string GetPageContent(string url);
         public abstract object GetEntityModel(string id);
         public abstract string GetEntityContent(string url);
-        public abstract string GetEntityViewName(object entity);
-        public abstract string GetPageViewName(object page);
-        public abstract string GetRegionViewName(object region);
+        public abstract ViewData GetEntityViewData(object entity);
+        public abstract ViewData GetPageViewData(object page);
+        public abstract ViewData GetRegionViewData(object region);
 
         protected abstract object GetPageModelFromUrl(string url);
         
@@ -74,22 +74,23 @@ namespace Sdl.Web.Mvc.Mapping
         public virtual object MapModel(object data, ModelType modelType, Type viewModeltype = null)
         {
             List<object> includes = GetIncludesFromModel(data, modelType);
-            string viewName = null;
+            ViewData viewData = null;
             switch (modelType)
             {
                 case ModelType.Page:
-                    viewName = GetPageViewName(data);
+                    viewData = GetPageViewData(data);
                     break;
                 case ModelType.Region:
-                    viewName = GetRegionViewName(data);
+                    viewData = GetRegionViewData(data);
                     break;
                 default:
-                    viewName = GetEntityViewName(data);
+                    viewData = GetEntityViewData(data);
                     break;
             }
             if (viewModeltype == null)
             {
-                viewModeltype = Configuration.ViewModelRegistry.ContainsKey(viewName) ? Configuration.ViewModelRegistry[viewName] : null;
+                var key = String.Format("{0}:{1}", viewData.AreaName, viewData.ViewName);
+                viewModeltype = Configuration.ViewModelRegistry.ContainsKey(key) ? Configuration.ViewModelRegistry[key] : null;
             }
             if (viewModeltype!=null)
             {
@@ -138,7 +139,6 @@ namespace Sdl.Web.Mvc.Mapping
         protected static string DefaultExtension{get;set;}
 
 
-        public abstract string GetEntityModuleName(object entity);
 
         public virtual object GetNavigationModel(string url)
         {

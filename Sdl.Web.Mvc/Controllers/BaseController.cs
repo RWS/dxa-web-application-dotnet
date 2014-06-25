@@ -31,25 +31,25 @@ namespace Sdl.Web.Mvc
             {
                 throw new HttpException(404, "Page cannot be found");
             }
-            SetupViewData();
-            var viewName = GetViewName(page);
-            var model = this.ProcessModel(page, GetViewType(viewName)) ?? page;
+            var viewData = GetViewData(page);
+            SetupViewData(0,viewData.AreaName);
+            var model = this.ProcessModel(page, GetViewType(viewData)) ?? page;
             if (model is WebPage)
             {
                 WebRequestContext.PageId = ((WebPage)model).Id;
             }
             Log.Trace(timerStart, "page-mapped", pageUrl);
-            return View(viewName, model);
+            return View(viewData.ViewName, model);
         }
 
         [HandleSectionError(View = "_SectionError")]
         public virtual ActionResult Region(Region region, int containerSize = 0)
         {
             ModelType = ModelType.Region;
-            SetupViewData(containerSize);
-            var viewName = GetViewName(region);
-            var model = this.ProcessModel(region, GetViewType(viewName)) ?? region;
-            return View(viewName, model);
+            SetupViewData(containerSize, region.Module);
+            var viewData = GetViewData(region);
+            var model = this.ProcessModel(region, GetViewType(viewData)) ?? region;
+            return View(viewData.ViewName, model);
         }
 
         [HandleSectionError(View = "_SectionError")]
@@ -57,11 +57,11 @@ namespace Sdl.Web.Mvc
         {
             DateTime timerStart = DateTime.Now;
             ModelType = ModelType.Entity;
-            SetupViewData(containerSize, ContentProvider.GetEntityModuleName(entity));
-            var viewName = GetViewName(entity);
-            var model = this.ProcessModel(entity, GetViewType(viewName)) ?? entity;
-            Log.Trace(timerStart, "entity-mapped", viewName);
-            return View(viewName, model);
+            var viewData = GetViewData(entity);
+            SetupViewData(containerSize, viewData.AreaName);
+            var model = this.ProcessModel(entity, GetViewType(viewData)) ?? entity;
+            Log.Trace(timerStart, "entity-mapped", viewData.ViewName);
+            return View(viewData.ViewName, model);
         }
 
         [HandleSectionError(View = "_SectionError")]
@@ -69,11 +69,11 @@ namespace Sdl.Web.Mvc
         {
             DateTime timerStart = DateTime.Now;
             ModelType = ModelType.Entity;
-            SetupViewData(containerSize, ContentProvider.GetEntityModuleName(entity));
-            var viewName = GetViewName(entity);
-            var model = this.ProcessList(entity, GetViewType(viewName)) ?? entity;
-            Log.Trace(timerStart, "list-processed", viewName);
-            return View(viewName, model);
+            var viewData = GetViewData(entity);
+            SetupViewData(containerSize, viewData.AreaName);
+            var model = this.ProcessList(entity, GetViewType(viewData)) ?? entity;
+            Log.Trace(timerStart, "list-processed", viewData.ViewName);
+            return View(viewData.ViewName, model);
         }
 
         [HandleSectionError(View = "_SectionError")]
@@ -81,11 +81,11 @@ namespace Sdl.Web.Mvc
         {
             DateTime timerStart = DateTime.Now;
             ModelType = ModelType.Entity;
-            SetupViewData(containerSize, ContentProvider.GetEntityModuleName(entity));
-            var viewName = GetViewName(entity);
-            var model = this.ProcessNavigation(entity, GetViewType(viewName), navType) ?? entity;
-            Log.Trace(timerStart, "navigation-processed", viewName);
-            return View(viewName, model);
+            var viewData = GetViewData(entity);
+            SetupViewData(containerSize, viewData.AreaName);
+            var model = this.ProcessNavigation(entity, GetViewType(viewData), navType) ?? entity;
+            Log.Trace(timerStart, "navigation-processed", viewData.ViewName);
+            return View(viewData.ViewName, model);
         }
 
         [HandleError]
@@ -149,36 +149,38 @@ namespace Sdl.Web.Mvc
             }
         }
 
-        protected virtual Type GetViewType(string viewName)
+        protected virtual Type GetViewType(ViewData viewData)
         {
-            if (!Configuration.ViewModelRegistry.ContainsKey(viewName))
+            var key = String.Format("{0}:{1}", viewData.AreaName, viewData.ViewName);
+            if (!Configuration.ViewModelRegistry.ContainsKey(key))
             {
-                var viewEngineResult = ViewEngines.Engines.FindPartialView(this.ControllerContext, viewName);
+                //TODO - take into account area?
+                var viewEngineResult = ViewEngines.Engines.FindPartialView(this.ControllerContext, viewData.ViewName);
                 if (viewEngineResult.View == null)
                 {
-                    Log.Error("Could not find view {0} in locations: {1}", viewName, String.Join(",", viewEngineResult.SearchedLocations));
-                    throw new Exception(String.Format("Missing view: {0}", viewName));
+                    Log.Error("Could not find view {0} in locations: {1}", viewData.ViewName, String.Join(",", viewEngineResult.SearchedLocations));
+                    throw new Exception(String.Format("Missing view: {0}", viewData.ViewName));
                 }
                 else
                 {
                     //This is the only way to get the view model type from the view and thus prevent the need to configure this somewhere
                     var path = ((BuildManagerCompiledView)viewEngineResult.View).ViewPath;
-                    Configuration.AddViewModelToRegistry(viewName, path);
+                    Configuration.AddViewModelToRegistry(viewData, path);
                 }
             }
-            return Configuration.ViewModelRegistry[viewName];
+            return Configuration.ViewModelRegistry[key];
         }
 
-        protected virtual string GetViewName(object sourceModel)
+        protected virtual ViewData GetViewData(object sourceModel)
         {
             switch (ModelType)
             {
                 case ModelType.Page:
-                    return ContentProvider.GetPageViewName(sourceModel);
+                    return ContentProvider.GetPageViewData(sourceModel);
                 case ModelType.Region:
-                    return ContentProvider.GetRegionViewName(sourceModel);
+                    return ContentProvider.GetRegionViewData(sourceModel);
                 default:
-                    return ContentProvider.GetEntityViewName(sourceModel);
+                    return ContentProvider.GetEntityViewData(sourceModel);
             }
         }
 

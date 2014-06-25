@@ -39,7 +39,7 @@ namespace Sdl.Web.DD4T
             return base.ProcessUrl(url);
         }
 
-        public override string GetPageViewName(object pageObject)
+        public override ViewData GetPageViewData(object pageObject)
         {
             var page = (IPage)pageObject;
             var viewName = page.PageTemplate.Title.Replace(" ", "");
@@ -50,10 +50,10 @@ namespace Sdl.Web.DD4T
                     viewName = page.PageTemplate.MetadataFields["view"].Value;
                 }
             }
-            return viewName;
+            return BuildViewData(viewName); 
         }
 
-        public override string GetEntityViewName(object entity)
+        public override ViewData GetEntityViewData(object entity)
         {
             var componentPresentation = (ComponentPresentation)entity;
             var template = componentPresentation.ComponentTemplate;
@@ -66,16 +66,32 @@ namespace Sdl.Web.DD4T
                     viewName = componentPresentation.ComponentTemplate.MetadataFields["view"].Value;
                 }
             }
-            return viewName;
+            return BuildViewData(viewName); 
         }
 
-        public override string GetRegionViewName(object region)
+        public override ViewData GetRegionViewData(object region)
         {
             var model = (Region)region;
             var viewName = model.Name.Replace(" ", "");
-            return viewName; 
+            return BuildViewData(viewName); 
         }
 
+        protected virtual ViewData BuildViewData(string viewName)
+        {
+            var bits = viewName.Split(':');
+            var areaName = Configuration.GetDefaultModuleName();
+            if (bits.Length > 1)
+            {
+                areaName = bits[0].Trim();
+                viewName = bits[1].Trim();
+            }
+            else
+            {
+                viewName = bits[0].Trim();
+            }
+            return new ViewData() { ViewName = viewName, AreaName = areaName };
+        }
+        
         protected override object GetPageModelFromUrl(string url)
         {
             if (PageFactory != null)
@@ -175,21 +191,6 @@ namespace Sdl.Web.DD4T
                 }
             }
             return res;
-        }
-
-        public override string GetEntityModuleName(object entity)
-        {
-            var componentPresentation = (ComponentPresentation)entity;
-            var template = componentPresentation.ComponentTemplate;
-            var module = Configuration.GetDefaultModuleName();
-            if (template.MetadataFields != null)
-            {
-                if (template.MetadataFields.ContainsKey("module"))
-                {
-                    module = componentPresentation.ComponentTemplate.MetadataFields["module"].Value;
-                }
-            }
-            return module;
         }
     }
 }

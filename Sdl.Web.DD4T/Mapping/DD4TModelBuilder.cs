@@ -583,12 +583,12 @@ namespace Sdl.Web.DD4T.Mapping
                 model.Id = page.Id.Substring(4);
                 foreach (var cp in page.ComponentPresentations)
                 {
-                    string regionName = GetRegionFromComponentPresentation(cp);
-                    if (!model.Regions.ContainsKey(regionName))
+                    var region = GetRegionFromComponentPresentation(cp);
+                    if (!model.Regions.ContainsKey(region.Name))
                     {
-                        model.Regions.Add(regionName, new Region { Name = regionName });
+                        model.Regions.Add(region.Name, region);
                     }
-                    model.Regions[regionName].Items.Add(cp);
+                    model.Regions[region.Name].Items.Add(cp);
                 }
                 if (!isInclude)
                 {
@@ -630,9 +630,9 @@ namespace Sdl.Web.DD4T.Mapping
                 bool first = true;
                 foreach (var cp in page.ComponentPresentations)
                 {
-                    string regionName = GetRegionFromComponentPresentation(cp);
+                    var region = GetRegionFromComponentPresentation(cp);
                     // determine title and description from first component in 'main' region
-                    if (first && regionName.Equals(Configuration.RegionForPageTitleComponent))
+                    if (first && region.Name.Equals(Configuration.RegionForPageTitleComponent))
                     {
                         first = false;
                         IFieldSet metadata = cp.Component.MetadataFields;
@@ -739,15 +739,37 @@ namespace Sdl.Web.DD4T.Mapping
             return _resourceProvider.GetObject(name, CultureInfo.CurrentUICulture).ToString();
         }
 
-        private static string GetRegionFromComponentPresentation(IComponentPresentation cp)
+        private static Region GetRegionFromComponentPresentation(IComponentPresentation cp)
         {
-            var match = Regex.Match(cp.ComponentTemplate.Title, @".*?\[(.*?)\]");
-            if (match.Success)
+            string name = null;
+            var module = Configuration.GetDefaultModuleName();//Default module
+            if (cp.ComponentTemplate.MetadataFields != null)
             {
-                return match.Groups[1].Value;
+                if (cp.ComponentTemplate.MetadataFields.ContainsKey("regionView"))
+                {
+                    var bits = cp.ComponentTemplate.MetadataFields["regionView"].Value.Split(':');
+                    if (bits.Length > 1)
+                    {
+                        module = bits[0].Trim();
+                        name = bits[1].Trim();
+                    }
+                    else
+                    {
+                        name = bits[0].Trim();
+                    }
+                }
             }
-            //default region name
-            return "Main";
+            //Fallback if no meta - use the CT title
+            if (name == null)
+            {
+                var match = Regex.Match(cp.ComponentTemplate.Title, @".*?\[(.*?)\]");
+                if (match.Success)
+                {
+                    name = match.Groups[1].Value;
+                }
+            }
+            name = name ?? "Main";//default region name
+            return new Region() { Name = name, Module = module };
         }
 
     }
