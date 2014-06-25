@@ -14,6 +14,7 @@ namespace Sdl.Web.Mvc.Common
         string GetPageContent(string url);
         object GetEntityModel(string id);
         string GetEntityContent(string url);
+        object GetNavigationModel(string url);
 
         //Execute a query to get content
         void PopulateDynamicList(ContentList<Teaser> list);

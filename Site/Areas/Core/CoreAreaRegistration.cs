@@ -14,24 +14,24 @@ namespace Site.Areas.Core
 
         public override void RegisterArea(AreaRegistrationContext context) 
         {
-
             //Google Site Map
             context.MapRoute(
+                "Core_Sitemap",
                 "sitemap",
-                "sitemap",
-                new { controller = "Navigation", action = "GoogleSitemap" }
+                new { controller = "Navigation", action = "SiteMap" }
             );
 
             //For resolving ids to urls
             context.MapRoute(
-               "Resolve",
+               "Core_Resolve",
                "resolve/{*itemId}",
-               new { controller = "Resolver", action = "Resolve" },
+               new { controller = "Page", action = "Resolve" },
                new { itemId = @"^(.*)?$" }
             );
+
             //Tridion Page Route
             context.MapRoute(
-               "TridionPage",
+               "Core_Page",
                "{*pageUrl}",
                new { controller = "Page", action = "Page" },
                new { pageId = @"^(.*)?$" }
@@ -39,7 +39,7 @@ namespace Site.Areas.Core
             
             //Default Route - required for sub actions (region/entity/navigation etc.)
             context.MapRoute(
-                name: "Default_Core",
+                name: "Core_Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             );

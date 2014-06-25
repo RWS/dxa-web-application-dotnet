@@ -11,12 +11,12 @@ namespace Sdl.Web.Mvc.Mapping
     public class NavigationBuilder
     {
         public IContentProvider ContentProvider { get; set; }
-        public SitemapItem Sitemap { get; set; }
+        public string NavigationUrl { get; set; }
 
         public NavigationLinks BuildContextNavigation(string requestUrl)
         {
             NavigationLinks links = new NavigationLinks();
-            SitemapItem parent = Sitemap;
+            SitemapItem parent = (SitemapItem)ContentProvider.GetNavigationModel(NavigationUrl);
             int levels = requestUrl.Split('/').Length;
             while (levels > 1 && parent.Items != null)
             {
@@ -38,9 +38,9 @@ namespace Sdl.Web.Mvc.Mapping
         {
             NavigationLinks breadcrumb = new NavigationLinks();
             int levels = requestUrl.Split('/').Length;
-            breadcrumb.Items.Add(GetLink(Sitemap));
-            SitemapItem parent = Sitemap;
-            while (levels > 1 && parent.Items!=null)
+            SitemapItem parent = (SitemapItem)ContentProvider.GetNavigationModel(NavigationUrl);
+            breadcrumb.Items.Add(GetLink(parent));
+            while (levels > 1 && parent.Items != null)
             {
                 parent = parent.Items.Where(i => requestUrl.StartsWith(i.Url.ToLower())).FirstOrDefault();
                 if (parent != null)
@@ -59,9 +59,10 @@ namespace Sdl.Web.Mvc.Mapping
         public NavigationLinks BuildTopNavigation(string requestUrl)
         {
             NavigationLinks links = new NavigationLinks();
-            foreach (var item in Sitemap.Items.Where(i => i.Visible))
+            SitemapItem parent = (SitemapItem)ContentProvider.GetNavigationModel(NavigationUrl);
+            foreach (var item in parent.Items.Where(i => i.Visible))
             {
-                links.Items.Add(GetLink((item.Title == "Index") ? Sitemap : item));
+                links.Items.Add(GetLink((item.Title == "Index") ? parent : item));
             }
             return links;
         }
