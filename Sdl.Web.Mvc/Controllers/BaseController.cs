@@ -197,7 +197,7 @@ namespace Sdl.Web.Mvc
             {
                 try
                 {
-                    Convert.ChangeType(val,typeof(T));
+                    return (T)Convert.ChangeType(val,typeof(T));
                 }
                 catch (Exception ex)
                 {

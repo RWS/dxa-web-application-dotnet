@@ -88,7 +88,6 @@
     <Compile Include="Mapping\XpmRegion.cs" />
     <Compile Include="Configuration\ResourceProviderFactory.cs" />
     <Compile Include="Configuration\ResourceProvider.cs" />
-    <Compile Include="Context\ContextAwareViewEngine.cs" />
     <Compile Include="Context\WebRequestContext.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Formatting\FormatFilterAttribute.cs" />

@@ -10,6 +10,7 @@ using System.Web.Script.Serialization;
 using Sdl.Web.Mvc.Context;
 using Sdl.Web.Mvc.Common;
 using Sdl.Web.Mvc.Models;
+using Sdl.Web.Mvc.Mapping;
 
 namespace Sdl.Web.Mvc
 {
@@ -158,6 +159,15 @@ namespace Sdl.Web.Mvc
             throw ex;
         }
 
+        public static void Initialize(string applicationRoot, List<Dictionary<string,string>> localizationList )
+        {
+            LastApplicationStart = DateTime.Now;
+            Configuration.SetLocalizations(localizationList);
+            Load(applicationRoot);
+            // load semantic mappings
+            SemanticMapping.Load(applicationRoot);
+        }
+            
         /// <summary>
         /// Loads configuration into memory from database/disk
         /// </summary>
