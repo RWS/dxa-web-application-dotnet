@@ -6,6 +6,7 @@ using Sdl.Web.Mvc.Html;
 using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
 using Sdl.Web.Mvc.Common;
+using System.Linq;
 
 namespace Sdl.Web.Mvc
 {
@@ -30,7 +31,7 @@ namespace Sdl.Web.Mvc
             {
                 throw new HttpException(404, "Page cannot be found");
             }
-            SetupViewBag();
+            SetupViewData();
             var viewName = GetViewName(page);
             var model = this.ProcessModel(page, GetViewType(viewName)) ?? page;
             if (model is WebPage)
@@ -45,7 +46,7 @@ namespace Sdl.Web.Mvc
         public virtual ActionResult Region(Region region, int containerSize = 0)
         {
             ModelType = ModelType.Region;
-            SetupViewBag(containerSize);
+            SetupViewData(containerSize);
             var viewName = GetViewName(region);
             var model = this.ProcessModel(region, GetViewType(viewName)) ?? region;
             return View(viewName, model);
@@ -56,18 +57,96 @@ namespace Sdl.Web.Mvc
         {
             DateTime timerStart = DateTime.Now;
             ModelType = ModelType.Entity;
-            SetupViewBag(containerSize);
-            this.ControllerContext.RouteData.DataTokens["area"] = ContentProvider.GetEntityModuleName(entity);
+            SetupViewData(containerSize, ContentProvider.GetEntityModuleName(entity));
             var viewName = GetViewName(entity);
             var model = this.ProcessModel(entity, GetViewType(viewName)) ?? entity;
             Log.Trace(timerStart, "entity-mapped", viewName);
             return View(viewName, model);
         }
 
-        protected virtual void SetupViewBag(int containerSize = 0)
+        [HandleSectionError(View = "_SectionError")]
+        public ActionResult List(object entity, int containerSize = 0)
+        {
+            DateTime timerStart = DateTime.Now;
+            ModelType = ModelType.Entity;
+            SetupViewData(containerSize, ContentProvider.GetEntityModuleName(entity));
+            var viewName = GetViewName(entity);
+            var model = this.ProcessList(entity, GetViewType(viewName)) ?? entity;
+            Log.Trace(timerStart, "list-processed", viewName);
+            return View(viewName, model);
+        }
+
+        [HandleSectionError(View = "_SectionError")]
+        public virtual ActionResult Navigation(object entity, string navType, int containerSize = 0)
+        {
+            DateTime timerStart = DateTime.Now;
+            ModelType = ModelType.Entity;
+            SetupViewData(containerSize, ContentProvider.GetEntityModuleName(entity));
+            var viewName = GetViewName(entity);
+            var model = this.ProcessNavigation(entity, GetViewType(viewName), navType) ?? entity;
+            Log.Trace(timerStart, "navigation-processed", viewName);
+            return View(viewName, model);
+        }
+
+        [HandleError]
+        public virtual ActionResult SiteMap()
+        {
+            var model = ContentProvider.GetNavigationModel(Configuration.LocalizeUrl("navigation.json"));
+            return View(model);
+        }
+
+        [HandleError]
+        public ActionResult Resolve(string itemId, string localization)
+        {
+            //TODO remove this tcm specific code here
+            var url = ContentProvider.ProcessUrl("tcm:" + itemId, localization);
+            if (url == null)
+            {
+                var bits = itemId.Split(':');
+                if (bits.Length > 1)
+                {
+                    bits = bits[1].Split('-');
+                    int pubid = 0;
+                    if (Int32.TryParse(bits[0], out pubid))
+                    {
+                        foreach (var loc in Configuration.Localizations.Values)
+                        {
+                            if (loc.LocalizationId == pubid)
+                            {
+                                url = loc.Path;
+                            }
+                        }
+                    }
+                }
+            }
+            if (url == null)
+            {
+                if (localization == null)
+                {
+                    url = Configuration.DefaultLocalization;
+                }
+                else
+                {
+                    var loc = Configuration.Localizations.Values.Where(l => l.LocalizationId.ToString() == localization).FirstOrDefault();
+                    if (loc != null)
+                    {
+                        url = loc.Path;
+                    }
+                }
+            }
+            Response.Redirect(url, true);
+            return null;
+        }
+
+        protected virtual void SetupViewData(int containerSize = 0, string areaName = null)
         {
             ViewBag.Renderer = Renderer;
             ViewBag.ContainerSize = containerSize;
+            if (areaName != null)
+            {
+                //This enables us to jump areas when rendering sub-views - for example from rendering a region in Core to an entity in ModuleX
+                this.ControllerContext.RouteData.DataTokens["area"] = areaName;
+            }
         }
 
         protected virtual Type GetViewType(string viewName)
@@ -107,6 +186,76 @@ namespace Sdl.Web.Mvc
         protected virtual object ProcessModel(object sourceModel, Type type)
         {
             return ContentProvider.MapModel(sourceModel, ModelType, type);
+        }
+
+        private T GetRequestParameter<T>(string name)
+        {
+            var val = Request.Params[name];
+            if (!String.IsNullOrEmpty(val))
+            {
+                try
+                {
+                    Convert.ChangeType(val,typeof(T));
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("Could not convert request parameter {0} into type {1}, using type default.", val, typeof(T));
+                }
+            }
+            return default(T);
+        }
+
+
+        protected virtual object ProcessList(object sourceModel, Type type)
+        {
+            var model = ProcessModel(sourceModel, type);
+            var list = model as ContentList<Teaser>;
+            if (list != null)
+            {
+                if (list.ItemListElements.Count == 0)
+                {
+                    //we need to run a query to populate the list
+                    int start = GetRequestParameter<int>("start");
+                    if (list.Id == Request.Params["id"])
+                    {
+                        //we only take the start from the query string if there is also an id parameter matching the model entity id
+                        //this means that we are sure that the paging is coming from the right entity (if there is more than one paged list on the page)
+                        list.CurrentPage = (start / list.PageSize) + 1;
+                        list.Start = start;
+                    }
+                    this.ContentProvider.PopulateDynamicList(list);
+                }
+                model = list;
+            }
+            return model;
+        }
+
+
+        protected virtual object ProcessNavigation(object sourceModel, Type type, string navType)
+        {
+            var navigationUrl = Configuration.LocalizeUrl("navigation.json");
+            var model = ProcessModel(sourceModel, type);
+            var nav = model as NavigationLinks;
+            NavigationLinks links = new NavigationLinks();
+            switch (navType)
+            {
+                case "Top":
+                    links = new NavigationBuilder() { ContentProvider = this.ContentProvider, NavigationUrl = navigationUrl }.BuildTopNavigation(Request.Url.LocalPath.ToString());
+                    break;
+                case "Left":
+                    links = new NavigationBuilder() { ContentProvider = this.ContentProvider, NavigationUrl = navigationUrl }.BuildContextNavigation(Request.Url.LocalPath.ToString());
+                    break;
+                case "Breadcrumb":
+                    links = new NavigationBuilder() { ContentProvider = this.ContentProvider, NavigationUrl = navigationUrl }.BuildBreadcrumb(Request.Url.LocalPath.ToString());
+                    break;
+            }
+            if (nav != null)
+            {
+
+                links.EntityData = nav.EntityData;
+                links.PropertyData = nav.PropertyData;
+            }
+            return links;
         }
 
     }

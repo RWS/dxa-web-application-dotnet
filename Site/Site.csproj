@@ -155,7 +155,6 @@
     </Compile>
     <Compile Include="Areas\Core\Controllers\PageController.cs" />
     <Compile Include="Areas\Core\Controllers\RegionController.cs" />
-    <Compile Include="Areas\Core\Controllers\ResolverController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

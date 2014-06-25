@@ -7,6 +7,7 @@ using Sdl.Web.Mvc.Context;
 using Sdl.Web.Mvc.Html;
 using Sdl.Web.Mvc.Models;
 using System;
+using System.Web.Routing;
 
 namespace Sdl.Web.DD4T
 {
@@ -21,6 +22,18 @@ namespace Sdl.Web.DD4T
                 string controller = Configuration.GetEntityController();
                 string action = Configuration.GetEntityAction();
                 string area = Configuration.GetDefaultModuleName();
+                var parameters = new RouteValueDictionary();
+                int parentContainerSize = helper.ViewBag.ContainerSize;
+                if (parentContainerSize == 0)
+                {
+                    parentContainerSize = ContextConfiguration.GridSize;
+                }
+                if (containerSize == 0)
+                {
+                    containerSize = ContextConfiguration.GridSize;
+                }
+                parameters["containerSize"] = (containerSize * parentContainerSize) / ContextConfiguration.GridSize;
+                parameters["entity"] = cp;
                 if (cp.ComponentTemplate.MetadataFields != null && cp.ComponentTemplate.MetadataFields.ContainsKey("controller"))
                 {
                     controller = cp.ComponentTemplate.MetadataFields["controller"].Value;
@@ -33,16 +46,19 @@ namespace Sdl.Web.DD4T
                 {
                     area = cp.ComponentTemplate.MetadataFields["module"].Value;
                 }
-                int parentContainerSize = helper.ViewBag.ContainerSize;
-                if (parentContainerSize == 0)
+                if (cp.ComponentTemplate.MetadataFields != null && cp.ComponentTemplate.MetadataFields.ContainsKey("routeValues"))
                 {
-                    parentContainerSize = ContextConfiguration.GridSize;
+                    var bits = cp.ComponentTemplate.MetadataFields["routeValues"].Value.Split(',');
+                    foreach(string bit in bits)
+                    {
+                        var parameter = bit.Trim().Split(':');
+                        if (parameter.Length > 1)
+                        {
+                            parameters[parameter[0]] = parameter[1];
+                        }
+                    }
                 }
-                if (containerSize == 0)
-                {
-                    containerSize = ContextConfiguration.GridSize;
-                }
-                MvcHtmlString result = helper.Action(action, controller, new { entity = cp, containerSize = (containerSize * parentContainerSize) / ContextConfiguration.GridSize });
+                MvcHtmlString result = helper.Action(action, controller, parameters);
                 Log.Trace(timerStart, "entity-render", cp.Component.Title);
                 timerStart = DateTime.Now;
                 var res = Markup.ParseComponentPresentation(result);

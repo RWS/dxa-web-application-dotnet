@@ -6,6 +6,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
+using System.Web.Script.Serialization;
 
 namespace Sdl.Web.Mvc.Mapping
 {
@@ -137,5 +139,18 @@ namespace Sdl.Web.Mvc.Mapping
 
 
         public abstract string GetEntityModuleName(object entity);
+
+        public virtual object GetNavigationModel(string url)
+        {
+            string key = "navigation-" + url;
+            //This is a temporary measure to cache the navigationModel per request to not retrieve and serialize 3 times per request. Comprehensive caching strategy pending
+            if (HttpContext.Current.Items[key] == null)
+            {
+                string navigationJsonString = GetPageContent(url);
+                var navigationModel = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
+                HttpContext.Current.Items[key] = navigationModel;
+            }
+            return HttpContext.Current.Items[key] as SitemapItem;
+        }
     }
 }
