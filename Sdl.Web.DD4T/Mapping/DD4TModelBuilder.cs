@@ -74,6 +74,7 @@ namespace Sdl.Web.DD4T.Mapping
                     ((MediaItem)model).Url = component.Multimedia.Url;
                     ((MediaItem)model).FileName= component.Multimedia.FileName;
                     ((MediaItem)model).FileSize = component.Multimedia.Size;
+                    ((MediaItem)model).MimeType = component.Multimedia.MimeType;
                 }
                 return model;
 
@@ -535,18 +536,18 @@ namespace Sdl.Web.DD4T.Mapping
 
         private static List<Image> GetImages(IEnumerable<IComponent> components)
         {
-            return components.Select(c => new Image { Url = c.Multimedia.Url, FileName = c.Multimedia.FileName, FileSize = c.Multimedia.Size }).ToList();
+            return components.Select(c => new Image { Url = c.Multimedia.Url, FileName = c.Multimedia.FileName, FileSize = c.Multimedia.Size, MimeType = c.Multimedia.MimeType}).ToList();
         }
 
         private static List<YouTubeVideo> GetYouTubeVideos(IEnumerable<IComponent> components)
         {
-            return components.Select(c => new YouTubeVideo { Url = c.Multimedia.Url, FileSize = c.Multimedia.Size, YouTubeId = c.MetadataFields["youTubeId"].Value }).ToList();
+            return components.Select(c => new YouTubeVideo { Url = c.Multimedia.Url, FileSize = c.Multimedia.Size, MimeType = c.Multimedia.MimeType, YouTubeId = c.MetadataFields["youTubeId"].Value }).ToList();
         }
 
         private static List<Download> GetDownloads(IEnumerable<IComponent> components)
         {
             //todo this contains hardcoded metadata while we would expect this to semantiaclly ma
-            return components.Select(c => new Download { Url = c.Multimedia.Url, FileName = c.Multimedia.FileName, FileSize = c.Multimedia.Size, Description = (c.MetadataFields.ContainsKey("description") ? c.MetadataFields["description"].Value : null) }).ToList();
+            return components.Select(c => new Download { Url = c.Multimedia.Url, FileName = c.Multimedia.FileName, FileSize = c.Multimedia.Size, MimeType = c.Multimedia.MimeType, Description = (c.MetadataFields.ContainsKey("description") ? c.MetadataFields["description"].Value : null) }).ToList();
         }
 
         //private List<T> GetCompLinks<T>(IEnumerable<IComponent> components, Type linkedItemType)
