@@ -36,7 +36,8 @@ namespace Sdl.Web.DD4T.Html
                 h = String.Format("_h{0}",(int)Math.Ceiling(width / aspect));
             }
             //Build the URL
-            string extension = Path.GetExtension(url).Substring(1);
+            string extension = Path.GetExtension(url);
+            url = url.Substring(0, url.LastIndexOf("."));
             return String.Format(ImageResizeUrlFormat, url, w, h, extension);
         }
     }
