@@ -6,7 +6,7 @@ using System.Web.Script.Serialization;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Common;
 using Sdl.Web.Mvc.Mapping;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models;
 
 namespace Site.Areas.Core.Controllers
 {

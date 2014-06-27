@@ -8,7 +8,7 @@ using DD4T.Factories;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Common;
 using Sdl.Web.Mvc.Mapping;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models;
 using Sdl.Web.Tridion;
 using interfaces = Sdl.Web.Models.Interfaces;
 

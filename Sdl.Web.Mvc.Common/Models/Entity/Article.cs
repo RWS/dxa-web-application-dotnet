@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace Sdl.Web.Mvc.Models
+namespace Sdl.Web.Models
 {
     [SemanticEntity(Vocab = "http://schema.org", EntityName= "Article", Prefix= "s", Public=true)]
     public class Article : EntityBase

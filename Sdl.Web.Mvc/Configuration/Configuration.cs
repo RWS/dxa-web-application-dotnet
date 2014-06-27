@@ -9,7 +9,7 @@ using System.Web.Helpers;
 using System.Web.Script.Serialization;
 using Sdl.Web.Mvc.Context;
 using Sdl.Web.Mvc.Common;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models;
 using Sdl.Web.Mvc.Mapping;
 
 namespace Sdl.Web.Mvc

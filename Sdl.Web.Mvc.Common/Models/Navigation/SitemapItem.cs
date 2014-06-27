@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sdl.Web.Mvc.Models
+namespace Sdl.Web.Models
 {
     public class SitemapItem : EntityBase
     {

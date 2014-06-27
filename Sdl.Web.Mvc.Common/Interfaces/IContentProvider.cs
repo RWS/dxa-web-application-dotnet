@@ -1,4 +1,4 @@
-﻿using Sdl.Web.Mvc.Models;
+﻿using Sdl.Web.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

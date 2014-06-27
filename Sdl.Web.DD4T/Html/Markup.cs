@@ -8,7 +8,7 @@ using DD4T.ContentModel;
 using HtmlAgilityPack;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Mapping;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models;
 using Sdl.Web.Models.Interfaces;
 
 namespace Sdl.Web.DD4T

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sdl.Web.Mvc.Models
+namespace Sdl.Web.Models
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class SemanticDefaultsAttribute : Attribute

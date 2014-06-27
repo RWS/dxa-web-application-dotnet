@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sdl.Web.Mvc.Models
+namespace Sdl.Web.Models
 {
     public class YouTubeVideo : MediaItem
     {

@@ -5,7 +5,7 @@ using DD4T.ContentModel;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Context;
 using Sdl.Web.Mvc.Html;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models;
 using System;
 using System.Web.Routing;
 using interfaces = Sdl.Web.Models.Interfaces;

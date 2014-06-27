@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models;
 
 namespace Sdl.Web.Mvc.Html
 {

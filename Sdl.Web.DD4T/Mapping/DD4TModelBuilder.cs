@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using DD4T.ContentModel;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Mapping;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models;
 using SDL.Web.Helpers;
 using interfaces = Sdl.Web.Models.Interfaces;
 

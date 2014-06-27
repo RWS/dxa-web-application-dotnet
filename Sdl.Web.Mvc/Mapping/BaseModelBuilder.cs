@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models;
 using Sdl.Web.Mvc.Common;
 using System.Linq;
 
