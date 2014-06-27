@@ -10,6 +10,7 @@ using Unity.Mvc5;
 using Microsoft.Practices.Unity.Configuration;
 using Microsoft.Practices.ServiceLocation;
 using Sdl.Web.Mvc.Html;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Site
 {
@@ -29,10 +30,8 @@ namespace Sdl.Web.Site
         protected void Application_Start()
         {
             InitializeDI();
-            //TODO -can this be handled by DI?
-            Configuration.StaticFileManager = new Sdl.Web.DD4T.BinaryFileManager();
-            //Configuration.MediaHelper = new Sdl.Web.DD4T.Html.DD4TMediaHelper();
-            Configuration.MediaHelper = new Sdl.Web.Mvc.Html.ContextualMediaHelper();
+            Configuration.StaticFileManager = (IStaticFileManager)DependencyResolver.Current.GetService(typeof(IStaticFileManager));
+            Configuration.MediaHelper = (IMediaHelper)DependencyResolver.Current.GetService(typeof(IMediaHelper));
             Configuration.Initialize(Server.MapPath("~"), TridionConfig.PublicationMap);
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();

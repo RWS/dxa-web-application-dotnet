@@ -24,6 +24,7 @@ namespace Sdl.Web.Mvc.Html
             LargeScreenBreakpoint = 1140;
             MediumScreenBreakpoint = 940;
             SmallScreenBreakpoint = 480;
+            ShowVideoPlaceholders = true;
         }
 
         //The grid size used (bootstrap default @grid-columns = 12)
@@ -32,7 +33,7 @@ namespace Sdl.Web.Mvc.Html
         public int LargeScreenBreakpoint { get; set; }
         public int MediumScreenBreakpoint { get; set; }
         public int SmallScreenBreakpoint { get; set; }
-        
+        public bool ShowVideoPlaceholders { get; set; }
         public double DefaultMediaAspect{ get; set; }
         public string DefaultMediaFill { get; set; }
         public string ImageResizeUrlFormat { get; set; }
@@ -104,5 +105,8 @@ namespace Sdl.Web.Mvc.Html
         }
 
         public abstract string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0);
+
+
+        
     }
 }

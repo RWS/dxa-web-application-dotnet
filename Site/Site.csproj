@@ -223,12 +223,16 @@
     <Content Include="Areas\Core\Views\Shared\Footer.cshtml" />
     <Content Include="Areas\Core\Views\Shared\Header.cshtml" />
     <Content Include="Views\Shared\_SectionError.cshtml" />
-    <Content Include="Areas\GoogleAnalytics\Views\web.config" />
+    <Content Include="Areas\GoogleAnalytics\Views\web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
     <None Include="Properties\PublishProfiles\Publish to Local Demo Site.pubxml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
     <Content Include="Unity.config" />
-    <Content Include="Views\web.config" />
+    <Content Include="Views\web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\Core\Views\Entity\GoogleAnalytics\" />

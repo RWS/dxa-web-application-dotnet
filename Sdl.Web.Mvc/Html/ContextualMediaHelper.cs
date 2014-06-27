@@ -30,8 +30,8 @@ namespace Sdl.Web.Mvc.Html
                     break;
                 }
             }
-            //Height is calculated from the aspect ratio
-            int height = (int)Math.Ceiling(width / aspect);
+            //Height is calculated from the aspect ratio (0 means preserve aspect ratio)
+            string height = aspect==0 ? "" : ((int)Math.Ceiling(width / aspect)).ToString();
             //Build the URL
             return String.Format(ImageResizeUrlFormat, ImageResizeRoute, width, height, url);
         }
