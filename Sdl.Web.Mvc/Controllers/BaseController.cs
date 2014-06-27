@@ -4,9 +4,10 @@ using System.Web;
 using System.Web.Mvc;
 using Sdl.Web.Mvc.Html;
 using Sdl.Web.Mvc.Mapping;
-using Sdl.Web.Mvc.Models;
-using Sdl.Web.Mvc.Common;
+using Sdl.Web.Models;
+using Sdl.Web.Common.Interfaces;
 using System.Linq;
+using Sdl.Web.Models.Interfaces;
 
 namespace Sdl.Web.Mvc
 {
@@ -43,7 +44,7 @@ namespace Sdl.Web.Mvc
         }
 
         [HandleSectionError(View = "_SectionError")]
-        public virtual ActionResult Region(Region region, int containerSize = 0)
+        public virtual ActionResult Region(IRegion region, int containerSize = 0)
         {
             ModelType = ModelType.Region;
             SetupViewData(containerSize, region.Module);
@@ -106,15 +107,11 @@ namespace Sdl.Web.Mvc
                 if (bits.Length > 1)
                 {
                     bits = bits[1].Split('-');
-                    int pubid = 0;
-                    if (Int32.TryParse(bits[0], out pubid))
+                    foreach (var loc in Configuration.Localizations.Values)
                     {
-                        foreach (var loc in Configuration.Localizations.Values)
+                        if (loc.LocalizationId == bits[0])
                         {
-                            if (loc.LocalizationId == pubid)
-                            {
-                                url = loc.Path;
-                            }
+                            url = loc.Path;
                         }
                     }
                 }

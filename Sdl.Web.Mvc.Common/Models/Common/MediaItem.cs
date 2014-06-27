@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace Sdl.Web.Mvc.Models
+namespace Sdl.Web.Models
 {
-    public class MediaItem : Entity
+    public class MediaItem : EntityBase
     {
         public string Url { get; set; }
         public string FileName { get; set; }

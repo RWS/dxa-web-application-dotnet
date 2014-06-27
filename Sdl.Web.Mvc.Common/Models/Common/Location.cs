@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sdl.Web.Mvc.Models
+namespace Sdl.Web.Models
 {
-    public class Location : Entity
+    public class Location : EntityBase
     {
         public double Longitude { get; set; }
         public double Latitude { get; set; }

@@ -8,8 +8,9 @@ using System.Text.RegularExpressions;
 using DD4T.ContentModel;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Mapping;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models;
 using SDL.Web.Helpers;
+using interfaces = Sdl.Web.Models.Interfaces;
 
 namespace Sdl.Web.DD4T.Mapping
 {
@@ -64,10 +65,10 @@ namespace Sdl.Web.DD4T.Mapping
                 mapData.TargetType = type;
                 mapData.SourceEntity = component;
                 var model = CreateModelFromMapData(mapData);
-                if (model is Entity)
+                if (model is interfaces.IEntity)
                 {
-                    ((Entity)model).EntityData = entityData;
-                    ((Entity)model).Id = component.Id.Split('-')[1];
+                    ((interfaces.IEntity)model).EntityData = entityData;
+                    ((interfaces.IEntity)model).Id = component.Id.Split('-')[1];
                 }
                 if (model is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
                 {
@@ -130,9 +131,9 @@ namespace Sdl.Web.DD4T.Mapping
                     }
                 }
             }
-            if (model is Entity)
+            if (model is interfaces.IEntity)
             {
-                ((Entity)model).PropertyData = propertyData;
+                ((interfaces.IEntity)model).PropertyData = propertyData;
             }
             return model;
         }
@@ -572,7 +573,7 @@ namespace Sdl.Web.DD4T.Mapping
             IPage page = sourceEntity as IPage;
             if (page != null)
             {
-                BasePage model = new BasePage();
+                PageBase model = new PageBase();
                 bool isInclude = true;
                 if (type == typeof(WebPage))
                 {
@@ -596,7 +597,7 @@ namespace Sdl.Web.DD4T.Mapping
                     var webpageModel = (WebPage)model;
                     foreach (var include in includes)
                     {
-                        var includePage = (BasePage)Create(include, typeof(BasePage));
+                        var includePage = (PageBase)Create(include, typeof(PageBase));
                         if (includePage != null)
                         {
                             webpageModel.Includes.Add(includePage.Title, includePage);

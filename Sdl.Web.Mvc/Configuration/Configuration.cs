@@ -7,18 +7,25 @@ using System.Text.RegularExpressions;
 using System.Web.Compilation;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
-using Sdl.Web.Mvc.Context;
-using Sdl.Web.Mvc.Common;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Models;
 using Sdl.Web.Mvc.Mapping;
 
 namespace Sdl.Web.Mvc
 {
+    public enum ScreenWidth
+    {
+        ExtraSmall,
+        Small,
+        Medium,
+        Large
+    }
     /// <summary>
     /// General Configuration Class which reads configuration from json files on disk
     /// </summary>
     public static class Configuration
     {
+        public static IMediaHelper MediaHelper {get;set;}
         public static IStaticFileManager StaticFileManager { get; set; }
         public static Dictionary<string, Localization> Localizations { get; set; }
         
@@ -274,22 +281,12 @@ namespace Sdl.Web.Mvc
                 Localizations = relevantLocalizations;
                 Log.Debug("The following localizations are active for this site: {0}", String.Join(", ", Localizations.Select(l=>l.Key).ToArray()));
                 SetVersion();
-                InitializeContextConfiguration();
             }            
         }
 
         private static void SetVersion()
         {
             
-        }
-
-        private static void InitializeContextConfiguration()
-        {
-            //TODO publish from CMS to ensure is in sync with LESS variables etc.
-            ContextConfiguration.GridSize = 12;
-            ContextConfiguration.LargeScreenBreakpoint = 1140;
-            ContextConfiguration.MediumScreenBreakpoint = 940;
-            ContextConfiguration.SmallScreenBreakpoint = 480;
         }
 
         private static Dictionary<string, string> GetConfigFromFile(string file)
@@ -340,13 +337,13 @@ namespace Sdl.Web.Mvc
             foreach (var loc in localizations)
             {
                 var localization = new Localization
-                    {
-                        Protocol = !loc.ContainsKey("Protocol") ? "http" : loc["Protocol"],
-                        Domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_link_conf" : loc["Domain"],
-                        Port = !loc.ContainsKey("Port") ? "" : loc["Port"],
-                        Path = (!loc.ContainsKey("Path") || loc["Path"] == "/") ? "" : loc["Path"],
-                        LocalizationId = !loc.ContainsKey("LocalizationId") ? 0 : Int32.Parse(loc["LocalizationId"])
-                    };
+                {
+                    Protocol = !loc.ContainsKey("Protocol") ? "http" : loc["Protocol"],
+                    Domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_link_conf" : loc["Domain"],
+                    Port = !loc.ContainsKey("Port") ? "" : loc["Port"],
+                    Path = (!loc.ContainsKey("Path") || loc["Path"] == "/") ? "" : loc["Path"],
+                    LocalizationId = !loc.ContainsKey("LocalizationId") ? "0" : loc["LocalizationId"]
+                };
                 Localizations.Add(localization.GetBaseUrl(), localization);
             }
         }

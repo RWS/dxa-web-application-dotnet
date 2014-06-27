@@ -6,10 +6,11 @@ using DD4T.ContentModel.Exceptions;
 using DD4T.ContentModel.Factories;
 using DD4T.Factories;
 using Sdl.Web.Mvc;
-using Sdl.Web.Mvc.Common;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Mvc.Mapping;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models;
 using Sdl.Web.Tridion;
+using interfaces = Sdl.Web.Models.Interfaces;
 
 namespace Sdl.Web.DD4T
 {
@@ -71,7 +72,7 @@ namespace Sdl.Web.DD4T
 
         public override ViewData GetRegionViewData(object region)
         {
-            var model = (Region)region;
+            var model = (interfaces.IRegion)region;
             var viewName = model.Name.Replace(" ", "");
             return BuildViewData(viewName); 
         }
@@ -147,7 +148,7 @@ namespace Sdl.Web.DD4T
             DateTime timerStart = DateTime.Now;
             BrokerQuery query = new BrokerQuery();
             query.Start = list.Start;
-            query.PublicationId = WebRequestContext.Localization.LocalizationId;
+            query.PublicationId = Int32.Parse(WebRequestContext.Localization.LocalizationId);
             query.PageSize = list.PageSize;
             query.SchemaId = MapSchema(list.ContentType.Key);
             list.ItemListElements = query.ExecuteQuery();

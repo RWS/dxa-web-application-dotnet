@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace Sdl.Web.Mvc.Models
+namespace Sdl.Web.Models
 {
-    public class Paragraph : Entity
+    public class Paragraph : EntityBase
     {
         public string Subheading { get; set; }
         public string Content { get; set; }

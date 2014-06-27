@@ -7,7 +7,7 @@ using System.Web.Mvc;
 
 namespace Sdl.Web.Mvc.Html
 {
-    public static class UrlHelperExtension
+    public static class UrlHelperExtensions
     {
         public static string VersionedContent(this UrlHelper helper, string path, string localization = "")
         {

@@ -3,17 +3,17 @@ using System.Web.Mvc;
 using System.Web.Mvc.Html;
 using DD4T.ContentModel;
 using Sdl.Web.Mvc;
-using Sdl.Web.Mvc.Context;
 using Sdl.Web.Mvc.Html;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models;
 using System;
 using System.Web.Routing;
+using interfaces = Sdl.Web.Models.Interfaces;
 
 namespace Sdl.Web.DD4T
 {
     public class DD4TRenderer : BaseRenderer
     {
-        public override MvcHtmlString Render(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
+        public override MvcHtmlString RenderEntity(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
             var cp = item as IComponentPresentation;
             if (cp != null && (excludedItems == null || !excludedItems.Contains(cp.ComponentTemplate.Title)))
@@ -26,13 +26,13 @@ namespace Sdl.Web.DD4T
                 int parentContainerSize = helper.ViewBag.ContainerSize;
                 if (parentContainerSize == 0)
                 {
-                    parentContainerSize = ContextConfiguration.GridSize;
+                    parentContainerSize = Configuration.MediaHelper.GridSize;
                 }
                 if (containerSize == 0)
                 {
-                    containerSize = ContextConfiguration.GridSize;
+                    containerSize = Configuration.MediaHelper.GridSize;
                 }
-                parameters["containerSize"] = (containerSize * parentContainerSize) / ContextConfiguration.GridSize;
+                parameters["containerSize"] = (containerSize * parentContainerSize) / Configuration.MediaHelper.GridSize;
                 parameters["entity"] = cp;
                 if (cp.ComponentTemplate.MetadataFields != null)
                 {
@@ -77,7 +77,7 @@ namespace Sdl.Web.DD4T
             return null;
         }
 
-        public override MvcHtmlString Render(Region region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
+        public override MvcHtmlString RenderRegion(interfaces.IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
             if (region != null && (excludedItems == null || !excludedItems.Contains(region.Name)))
             {
@@ -87,7 +87,7 @@ namespace Sdl.Web.DD4T
                 string area = region.Module;
                 if (containerSize == 0)
                 {
-                    containerSize = ContextConfiguration.GridSize;
+                    containerSize = Configuration.MediaHelper.GridSize;
                 }
                 MvcHtmlString result = helper.Action(action, controller, new {Region = region, containerSize = containerSize, area=area });
                 Log.Trace(timerStart, "region-render", region.Name);

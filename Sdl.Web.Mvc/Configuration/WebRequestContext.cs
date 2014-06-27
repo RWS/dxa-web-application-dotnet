@@ -1,5 +1,4 @@
-﻿using Sdl.Web.Mvc.Context;
-using Sdl.Web.Tridion.Context;
+﻿using Sdl.Web.Tridion.Context;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,15 +68,15 @@ namespace Sdl.Web.Mvc
         protected static ScreenWidth CalculateScreenWidth()
         {
             int width = ContextEngine.Browser.DisplayWidth;
-            if (width < ContextConfiguration.SmallScreenBreakpoint)
+            if (width < Configuration.MediaHelper.SmallScreenBreakpoint)
             {
                 return ScreenWidth.ExtraSmall;
             }
-            if (width < ContextConfiguration.MediumScreenBreakpoint)
+            if (width < Configuration.MediaHelper.MediumScreenBreakpoint)
             {
                 return ScreenWidth.Small;
             }
-            if (width < ContextConfiguration.LargeScreenBreakpoint)
+            if (width < Configuration.MediaHelper.LargeScreenBreakpoint)
             {
                 return ScreenWidth.Medium;
             }
@@ -118,7 +117,7 @@ namespace Sdl.Web.Mvc
             {
                 //Do nothing - In some cases we do not have a request (loading config on app start etc.) - we fallback on a default localization
             }
-            return new Localization { LocalizationId = 0, Culture = "en-US", Path = "" };
+            return new Localization { LocalizationId = "0", Culture = "en-US", Path = "" };
         }
         
         protected static object GetFromContextStore(string key)

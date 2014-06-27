@@ -1,5 +1,5 @@
 ﻿using Sdl.Web.Mvc;
-using Sdl.Web.Mvc.Common;
+using Sdl.Web.Common.Interfaces;
 
 namespace Site.Areas.Core.Controllers
 {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Sdl.Web.Mvc.Models;
-using Sdl.Web.Mvc.Common;
+using Sdl.Web.Models;
+using Sdl.Web.Common.Interfaces;
 using System.Linq;
 
 namespace Sdl.Web.Mvc.Mapping

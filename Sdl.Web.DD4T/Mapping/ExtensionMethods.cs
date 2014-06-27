@@ -1,5 +1,5 @@
 ﻿using DD4T.ContentModel;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;

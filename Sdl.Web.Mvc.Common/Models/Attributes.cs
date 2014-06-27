@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sdl.Web.Mvc.Models
+namespace Sdl.Web.Models
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class SemanticDefaultsAttribute : Attribute
     {
-        public SemanticDefaultsAttribute() : this(Entity.CoreVocabulary) { }
+        public SemanticDefaultsAttribute() : this(EntityBase.CoreVocabulary) { }
         public SemanticDefaultsAttribute(string vocab) : this(vocab, "") { }
         public SemanticDefaultsAttribute(string vocab, string prefix) : this(vocab, prefix, true) { }
         public SemanticDefaultsAttribute(string vocab, string prefix, bool mapAllProperties)

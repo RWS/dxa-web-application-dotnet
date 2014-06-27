@@ -1,5 +1,4 @@
-﻿using Sdl.Web.Mvc.Common;
-using Sdl.Web.Mvc.Context;
+﻿using Sdl.Web.Common.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +15,23 @@ namespace Sdl.Web.Mvc.Html
             DefaultMediaAspect = 1.62;
             //The default fill for media is 100% of containing element
             DefaultMediaFill = "100%";
-            //Sensible defaults for image widths
+
+            //TODO publish from CMS to ensure is in sync with LESS variables etc.
+
+            //Sensible defaults for image widths to optimize caching
             ImageWidths = new List<int> { 160, 320, 640, 1024, 2048 };
+            GridSize = 12;
+            LargeScreenBreakpoint = 1140;
+            MediumScreenBreakpoint = 940;
+            SmallScreenBreakpoint = 480;
         }
+
+        //The grid size used (bootstrap default @grid-columns = 12)
+        public int GridSize { get; set; }
+        //Screen size breakpoints 
+        public int LargeScreenBreakpoint { get; set; }
+        public int MediumScreenBreakpoint { get; set; }
+        public int SmallScreenBreakpoint { get; set; }
         
         public double DefaultMediaAspect{ get; set; }
         public string DefaultMediaFill { get; set; }
@@ -32,7 +45,7 @@ namespace Sdl.Web.Mvc.Html
             if (containerSize == 0)
             {
                 //default is full width
-                containerSize = ContextConfiguration.GridSize;
+                containerSize = Configuration.MediaHelper.GridSize;
             }
             double width = 0;
             //For absolute fill factors, we should have a number
@@ -66,20 +79,20 @@ namespace Sdl.Web.Mvc.Html
                 {
                     case ScreenWidth.ExtraSmall:
                         //Extra small screens are only one column
-                        containerSize = ContextConfiguration.GridSize;
+                        containerSize = Configuration.MediaHelper.GridSize;
                         break;
                     case ScreenWidth.Small:
                         //Small screens are max 2 columns
-                        containerSize = (containerSize <= ContextConfiguration.GridSize / 2 ? ContextConfiguration.GridSize / 2 : ContextConfiguration.GridSize);
+                        containerSize = (containerSize <= Configuration.MediaHelper.GridSize / 2 ? Configuration.MediaHelper.GridSize / 2 : Configuration.MediaHelper.GridSize);
                         break;
                 }
-                int cols = ContextConfiguration.GridSize / containerSize;
+                int cols = Configuration.MediaHelper.GridSize / containerSize;
                 //TODO - should we make padding configurable?
                 int padding = (cols - 1) * 20;
                 //Get the max possible width
                 width = WebRequestContext.MaxMediaWidth;
                 //Factor the max possible width by the fill factor and container size and remove padding
-                width = (fillFactor * containerSize * width / (ContextConfiguration.GridSize * 100)) - padding;
+                width = (fillFactor * containerSize * width / (Configuration.MediaHelper.GridSize * 100)) - padding;
             }
             return (int)Math.Ceiling(width);
         }

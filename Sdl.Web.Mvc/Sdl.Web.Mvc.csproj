@@ -78,11 +78,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\Configuration.cs" />
-    <Compile Include="Configuration\Enumerations.cs" />
     <Compile Include="Configuration\Localization.cs" />
-    <Compile Include="Context\ContextConfiguration.cs" />
-    <Compile Include="Context\ContextHelper.cs" />
-    <Compile Include="Errors\HandleSectionErrorAttribute.cs" />
+    <Compile Include="Controllers\HandleSectionErrorAttribute.cs" />
     <Compile Include="Html\BaseMediaHelper.cs" />
     <Compile Include="Html\ContextualMediaHelper.cs" />
     <Compile Include="Mapping\NavigationBuilder.cs" />
@@ -90,12 +87,11 @@
     <Compile Include="Mapping\XpmRegion.cs" />
     <Compile Include="Configuration\ResourceProviderFactory.cs" />
     <Compile Include="Configuration\ResourceProvider.cs" />
-    <Compile Include="Context\WebRequestContext.cs" />
+    <Compile Include="Configuration\WebRequestContext.cs" />
     <Compile Include="Controllers\BaseController.cs" />
-    <Compile Include="Formatting\FormatFilterAttribute.cs" />
     <Compile Include="Html\BaseRenderer.cs" />
     <Compile Include="Html\HtmlHelperExtensions.cs" />
-    <Compile Include="Html\UrlHelperExtension.cs" />
+    <Compile Include="Html\UrlHelperExtensions.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Mapping\BaseModelBuilder.cs" />
@@ -112,9 +108,9 @@
     <Compile Include="Statics\StaticRedirectModule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sdl.Web.Mvc.Common\Sdl.Web.Mvc.Common.csproj">
+    <ProjectReference Include="..\Sdl.Web.Mvc.Common\Sdl.Web.Common.csproj">
       <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
-      <Name>Sdl.Web.Mvc.Common</Name>
+      <Name>Sdl.Web.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj">
       <Project>{ae4651df-a42f-4863-a0e1-870eacf3d072}</Project>

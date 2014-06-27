@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace Sdl.Web.Mvc.Models
+namespace Sdl.Web.Models
 {
-    public class Link : Entity
+    public class Link : EntityBase
     {
         [SemanticProperty(PropertyName = "internalLink")]
         [SemanticProperty(PropertyName = "externalLink")]

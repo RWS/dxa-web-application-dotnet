@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sdl.Web.Mvc.Models
+namespace Sdl.Web.Models
 {
     [SemanticEntity(Vocab = "http://schema.org", EntityName = "Place", Prefix = "s", Public = true)]
-    public class Place : Entity
+    public class Place : EntityBase
     {
         [SemanticProperty("s:name")]
         public string Name { get; set; }

@@ -1,6 +1,6 @@
 ﻿using DD4T.ContentModel;
 using Sdl.Web.Mvc.Mapping;
-using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

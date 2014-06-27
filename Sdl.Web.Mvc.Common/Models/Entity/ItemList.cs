@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sdl.Web.Mvc.Models
+namespace Sdl.Web.Models
 {
     [SemanticEntity(Vocab = "http://schema.org", EntityName = "ItemList", Prefix = "s", Public = true)]
-    public class ItemList : Entity
+    public class ItemList : EntityBase
     {
         [SemanticProperty("s:headline")]
         public string Headline { get; set; }

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Sdl.Web.Models.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace Sdl.Web.Mvc.Models
+namespace Sdl.Web.Models
 {
-    public class Entity
+    public class EntityBase : IEntity
     {
         [SemanticProperty(IgnoreMapping = true)]
         public Dictionary<string, string> EntityData { get; set; }

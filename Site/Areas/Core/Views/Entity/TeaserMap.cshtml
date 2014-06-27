@@ -1,4 +1,4 @@
-﻿@model Sdl.Web.Mvc.Models.Teaser
+﻿@model Sdl.Web.Models.Teaser
 <div @Markup.Entity(Model)>
     <h3 @Markup.Property(Model,"Headline")><a href="@Model.Link.Url">@Model.Headline</a></h3>
     @if (Model.Location != null)

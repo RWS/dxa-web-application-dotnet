@@ -1,11 +1,11 @@
-﻿using Sdl.Web.Mvc.Models;
+﻿using Sdl.Web.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sdl.Web.Mvc.Common
+namespace Sdl.Web.Common.Interfaces
 {
     public interface IContentProvider
     {
