@@ -4,7 +4,7 @@
 }
 @if (Model.Regions.ContainsKey("Hero"))
 {
-    @ViewBag.Renderer.RenderEntity(Model.Regions["Hero"], Html)
+    @ViewBag.Renderer.RenderRegion(Model.Regions["Hero"], Html)
 }
 @if (Model.Includes.ContainsKey("Content Tools"))
 {
