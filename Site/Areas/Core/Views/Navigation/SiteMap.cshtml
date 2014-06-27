@@ -12,7 +12,7 @@
 {
     foreach (var item in folder)
     {
-        if (item.Type == "Page")
+        if (item.Type == "Page" && item.Url.StartsWith("/"))
         {
             <url>
                 <loc>@item.Url</loc>
