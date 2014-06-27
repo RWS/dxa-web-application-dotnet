@@ -7,6 +7,7 @@ using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
 using Sdl.Web.Mvc.Common;
 using System.Linq;
+using Sdl.Web.Models.Interfaces;
 
 namespace Sdl.Web.Mvc
 {
@@ -43,7 +44,7 @@ namespace Sdl.Web.Mvc
         }
 
         [HandleSectionError(View = "_SectionError")]
-        public virtual ActionResult Region(Region region, int containerSize = 0)
+        public virtual ActionResult Region(IRegion region, int containerSize = 0)
         {
             ModelType = ModelType.Region;
             SetupViewData(containerSize, region.Module);

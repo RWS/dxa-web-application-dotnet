@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Sdl.Web.Mvc.Models
 {
     [SemanticEntity(Vocab = "http://schema.org", EntityName = "ItemList", Prefix = "s", Public = true)]
-    public class ContentList<T> : Entity
+    public class ContentList<T> : EntityBase
     {
         //TODO add concept of filtering/query (filter options and active filters/query)
         [SemanticProperty("s:headline")]

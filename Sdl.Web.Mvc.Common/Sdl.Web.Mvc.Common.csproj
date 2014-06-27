@@ -64,10 +64,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Interfaces\IPage.cs" />
+    <Compile Include="Models\Interfaces\IEntity.cs" />
     <Compile Include="Interfaces\IMediaHelper.cs" />
+    <Compile Include="Models\Interfaces\IRegion.cs" />
     <Compile Include="Models\Attributes.cs" />
     <Compile Include="Models\Common\Download.cs" />
-    <Compile Include="Models\Common\Entity.cs" />
+    <Compile Include="Models\Common\EntityBase.cs" />
     <Compile Include="Models\Common\Enums.cs" />
     <Compile Include="Models\Common\Image.cs" />
     <Compile Include="Models\Common\Link.cs" />
@@ -92,7 +95,7 @@
     <Compile Include="Interfaces\IStaticFileManager.cs" />
     <Compile Include="Models\Navigation\NavigationLinks.cs" />
     <Compile Include="Models\Navigation\SitemapItem.cs" />
-    <Compile Include="Models\Page\BasePage.cs" />
+    <Compile Include="Models\Page\PageBase.cs" />
     <Compile Include="Models\Page\Region.cs" />
     <Compile Include="Models\Page\WebPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

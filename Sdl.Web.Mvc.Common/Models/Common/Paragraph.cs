@@ -5,7 +5,7 @@ using System.Web;
 
 namespace Sdl.Web.Mvc.Models
 {
-    public class Paragraph : Entity
+    public class Paragraph : EntityBase
     {
         public string Subheading { get; set; }
         public string Content { get; set; }

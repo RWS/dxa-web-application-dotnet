@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sdl.Web.Mvc.Models
 {
-    public class SitemapItem : Entity
+    public class SitemapItem : EntityBase
     {
         private string _url;
 

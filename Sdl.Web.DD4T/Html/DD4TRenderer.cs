@@ -8,6 +8,7 @@ using Sdl.Web.Mvc.Html;
 using Sdl.Web.Mvc.Models;
 using System;
 using System.Web.Routing;
+using interfaces = Sdl.Web.Models.Interfaces;
 
 namespace Sdl.Web.DD4T
 {
@@ -77,7 +78,7 @@ namespace Sdl.Web.DD4T
             return null;
         }
 
-        public override MvcHtmlString Render(Region region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
+        public override MvcHtmlString Render(interfaces.IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
             if (region != null && (excludedItems == null || !excludedItems.Contains(region.Name)))
             {

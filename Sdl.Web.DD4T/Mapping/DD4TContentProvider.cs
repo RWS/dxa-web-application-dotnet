@@ -10,6 +10,7 @@ using Sdl.Web.Mvc.Common;
 using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
 using Sdl.Web.Tridion;
+using interfaces = Sdl.Web.Models.Interfaces;
 
 namespace Sdl.Web.DD4T
 {
@@ -71,7 +72,7 @@ namespace Sdl.Web.DD4T
 
         public override ViewData GetRegionViewData(object region)
         {
-            var model = (Region)region;
+            var model = (interfaces.IRegion)region;
             var viewName = model.Name.Replace(" ", "");
             return BuildViewData(viewName); 
         }

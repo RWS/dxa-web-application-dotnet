@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Sdl.Web.Mvc.Models
 {
     [SemanticEntity(Vocab = "http://schema.org", EntityName = "Place", Prefix = "s", Public = true)]
-    public class Place : Entity
+    public class Place : EntityBase
     {
         [SemanticProperty("s:name")]
         public string Name { get; set; }

@@ -5,7 +5,7 @@ using System.Web;
 
 namespace Sdl.Web.Mvc.Models
 {
-    public class Link : Entity
+    public class Link : EntityBase
     {
         [SemanticProperty(PropertyName = "internalLink")]
         [SemanticProperty(PropertyName = "externalLink")]

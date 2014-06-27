@@ -1,4 +1,5 @@
-﻿using Sdl.Web.Mvc.Models;
+﻿using Sdl.Web.Models.Interfaces;
+using Sdl.Web.Mvc.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,6 @@ namespace Sdl.Web.Mvc.Common
     public interface IRenderer
     {
         MvcHtmlString Render(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null);
-        MvcHtmlString Render(Region region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null);
+        MvcHtmlString Render(IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null);
     }
 }

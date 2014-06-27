@@ -9,6 +9,7 @@ using HtmlAgilityPack;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Mvc.Models;
+using Sdl.Web.Models.Interfaces;
 
 namespace Sdl.Web.DD4T
 {
@@ -28,7 +29,7 @@ namespace Sdl.Web.DD4T
         private const string NullUri = "tcm:0-0-0";
         private const string Epoch = "1970-01-01T00:00:00";
 
-        public static MvcHtmlString Entity(Entity entity)
+        public static MvcHtmlString Entity(IEntity entity)
         {
             StringBuilder data = new StringBuilder();
             var prefixes = new Dictionary<string, string>();
@@ -72,7 +73,7 @@ namespace Sdl.Web.DD4T
             return new MvcHtmlString(data.ToString());
         }
 
-        public static MvcHtmlString Property(Entity entity, string property, int index = 0)
+        public static MvcHtmlString Property(IEntity entity, string property, int index = 0)
         {
             StringBuilder data = new StringBuilder();
             var pi = entity.GetType().GetProperty(property);
@@ -116,7 +117,7 @@ namespace Sdl.Web.DD4T
             return new MvcHtmlString(data.ToString());
         }
 
-        public static MvcHtmlString Region(Region region)
+        public static MvcHtmlString Region(IRegion region)
         {
             var data = String.Empty;
             if (Configuration.IsStaging)

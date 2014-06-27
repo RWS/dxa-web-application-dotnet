@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sdl.Web.Mvc.Models
 {
-    public class TagLink : Entity
+    public class TagLink : EntityBase
     {
         [SemanticProperty(PropertyName = "internalLink")]
         [SemanticProperty(PropertyName = "externalLink")]

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sdl.Web.Mvc.Models
 {
-    public class LinkList<T> : Entity
+    public class LinkList<T> : EntityBase
     {
         public string Headline { get; set; }
         public List<T> Links { get; set; }

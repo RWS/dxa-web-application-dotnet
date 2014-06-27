@@ -5,7 +5,7 @@ using System.Web;
 
 namespace Sdl.Web.Mvc.Models
 {
-    public class NavigationLinks : Entity
+    public class NavigationLinks : EntityBase
     {
         public List<Link> Items { get; set; }
 
