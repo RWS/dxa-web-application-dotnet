@@ -12,11 +12,12 @@ namespace Sdl.Web.DD4T.Html
     {
         public DD4TMediaHelper() : base()
         {
-            ImageResizeUrlFormat = "{0}_w{1}_h{2}.{3}";
+            ImageResizeUrlFormat = "{0}{1}{2}{3}";
         }
 
         public override string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0)
         {
+            string w, h = null;
             int width = GetResponsiveWidth(widthFactor, containerSize);
             //Round the width to the nearest set limit point - important as we do not want 
             //to swamp the cache with lots of different sized versions of the same image
@@ -28,12 +29,15 @@ namespace Sdl.Web.DD4T.Html
                     break;
                 }
             }
-            //Height is calculated from the aspect ratio
-            int height = (int)Math.Ceiling(width / aspect);
+            w = String.Format("_w{0}",width);
+            //Height is calculated from the aspect ratio (0 means preserve aspect ratio)
+            if (aspect != 0)
+            {
+                h = String.Format("_h{0}",(int)Math.Ceiling(width / aspect));
+            }
             //Build the URL
             string extension = Path.GetExtension(url).Substring(1);
-            url = url.Substring(0, url.LastIndexOf("."));
-            return String.Format(ImageResizeUrlFormat, url, width, height, extension);
+            return String.Format(ImageResizeUrlFormat, url, w, h, extension);
         }
     }
 }

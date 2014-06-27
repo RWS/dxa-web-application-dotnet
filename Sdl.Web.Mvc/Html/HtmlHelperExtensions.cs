@@ -149,16 +149,25 @@ namespace Sdl.Web.Mvc.Html
             {
                 return null;
             }
-            TagBuilder builder = new TagBuilder("iframe");
-            builder.Attributes.Add("src", GetYouTubeUrl(video.YouTubeId));
-            builder.Attributes.Add("id", Configuration.GetUniqueId("video"));
-            builder.Attributes.Add("allowfullscreen", "true");
-            builder.Attributes.Add("frameborder", "0");
-            if (!String.IsNullOrEmpty(cssClass))
+            if (video.Url != null && Configuration.MediaHelper.ShowVideoPlaceholders)
             {
-                builder.Attributes.Add("class", cssClass);
+                //we have a placeholder image
+                var placeholderImgUrl = Configuration.MediaHelper.GetResponsiveImageUrl(video.Url, aspect, widthFactor, containerSize);
+                return new MvcHtmlString(GetYouTubePlaceholder(video.YouTubeId,placeholderImgUrl,video.Headline,cssClass));
             }
-            return new MvcHtmlString(builder.ToString(TagRenderMode.SelfClosing));
+            else
+            {
+                TagBuilder builder = new TagBuilder("iframe");
+                builder.Attributes.Add("src", GetYouTubeUrl(video.YouTubeId));
+                builder.Attributes.Add("id", Configuration.GetUniqueId("video"));
+                builder.Attributes.Add("allowfullscreen", "true");
+                builder.Attributes.Add("frameborder", "0");
+                if (!String.IsNullOrEmpty(cssClass))
+                {
+                    builder.Attributes.Add("class", cssClass);
+                }
+                return new MvcHtmlString(builder.ToString(TagRenderMode.SelfClosing));
+            }
         }
 
         public static MvcHtmlString Download(this HtmlHelper helper, Download download)
@@ -198,6 +207,11 @@ namespace Sdl.Web.Mvc.Html
         public static string GetYouTubeUrl(string videoId)
         {
             return String.Format("https://www.youtube.com/embed/{0}?version=3&enablejsapi=1", videoId);
+        }
+
+        public static string GetYouTubePlaceholder(string videoId, string imageUrl, string altText = null, string cssClass = null)
+        {
+            return String.Format("<div class=\"embed-video\"><img src=\"{1}\" alt=\"{2}\"><button type=\"button\" data-video=\"{0}\" class=\"{3}\"><i class=\"fa fa-play-circle\"></i></button></div>", videoId, imageUrl, altText, cssClass);
         }
 
         public static string GetResponsiveImageUrl(string url)
