@@ -14,7 +14,7 @@ namespace Sdl.Web.DD4T
 {
     public class DD4TRenderer : BaseRenderer
     {
-        public override MvcHtmlString Render(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
+        public override MvcHtmlString RenderEntity(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
             var cp = item as IComponentPresentation;
             if (cp != null && (excludedItems == null || !excludedItems.Contains(cp.ComponentTemplate.Title)))
@@ -78,7 +78,7 @@ namespace Sdl.Web.DD4T
             return null;
         }
 
-        public override MvcHtmlString Render(interfaces.IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
+        public override MvcHtmlString RenderRegion(interfaces.IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
             if (region != null && (excludedItems == null || !excludedItems.Contains(region.Name)))
             {

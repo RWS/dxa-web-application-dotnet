@@ -2,6 +2,6 @@
 <div id="info-bar" @Markup.Region(Model)>
     @foreach (var item in Model.Items)
     {
-        @ViewBag.Renderer.Render(item, Html)
+        @ViewBag.Renderer.RenderEntity(item, Html)
     }
 </div>

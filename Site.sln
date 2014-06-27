@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.DD4T", "Sdl.Web.DD4
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Tridion", "Sdl.Web.Tridion\Sdl.Web.Tridion.csproj", "{AE4651DF-A42F-4863-A0E1-870EACF3D072}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Mvc.Common", "Sdl.Web.Mvc.Common\Sdl.Web.Mvc.Common.csproj", "{21C08F9A-24C2-481A-95C3-A255BE9771A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Common", "Sdl.Web.Mvc.Common\Sdl.Web.Common.csproj", "{21C08F9A-24C2-481A-95C3-A255BE9771A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

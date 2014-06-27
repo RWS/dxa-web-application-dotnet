@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sdl.Web.Mvc.Common
+namespace Sdl.Web.Common.Interfaces
 {
     public interface ILogger
     {

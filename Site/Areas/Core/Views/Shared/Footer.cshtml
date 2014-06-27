@@ -6,14 +6,15 @@
     <div class="container-fluid page-border">
     @foreach (Region region in Model.Regions.Values)
     {
-        @ViewBag.Renderer.Render(region, Html, 12, new List<string>{"Links"})
+        @ViewBag.Renderer.RenderRegion(region, Html, 12, new List<string>{"Links"})
     }
     <hr />
     @if (Model.Regions.ContainsKey("Links"))
     {
-        @ViewBag.Renderer.Render(Model.Regions["Links"], Html)
+        @ViewBag.Renderer.RenderEntity(Model.Regions["Links"], Html)
     }
     </div>
-</footer>@{
+</footer>
+@{
     Log.Trace(timer, "footer-render", Model.Title);
 }

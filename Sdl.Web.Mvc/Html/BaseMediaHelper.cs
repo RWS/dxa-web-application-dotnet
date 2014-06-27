@@ -1,4 +1,4 @@
-﻿using Sdl.Web.Mvc.Common;
+﻿using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Mvc.Context;
 using System;
 using System.Collections.Generic;

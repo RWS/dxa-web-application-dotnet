@@ -6,7 +6,7 @@ using DD4T.ContentModel.Exceptions;
 using DD4T.ContentModel.Factories;
 using DD4T.Factories;
 using Sdl.Web.Mvc;
-using Sdl.Web.Mvc.Common;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Models;
 using Sdl.Web.Tridion;

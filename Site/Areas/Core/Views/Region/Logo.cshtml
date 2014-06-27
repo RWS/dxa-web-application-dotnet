@@ -1,5 +1,5 @@
 ﻿@model Sdl.Web.Models.Region
 @foreach (var item in Model.Items)
 {
-    @ViewBag.Renderer.Render(item,Html)
+    @ViewBag.Renderer.RenderEntity(item,Html)
 }
