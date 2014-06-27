@@ -107,15 +107,11 @@ namespace Sdl.Web.Mvc
                 if (bits.Length > 1)
                 {
                     bits = bits[1].Split('-');
-                    int pubid = 0;
-                    if (Int32.TryParse(bits[0], out pubid))
+                    foreach (var loc in Configuration.Localizations.Values)
                     {
-                        foreach (var loc in Configuration.Localizations.Values)
+                        if (loc.LocalizationId == bits[0])
                         {
-                            if (loc.LocalizationId == pubid)
-                            {
-                                url = loc.Path;
-                            }
+                            url = loc.Path;
                         }
                     }
                 }

@@ -148,7 +148,7 @@ namespace Sdl.Web.DD4T
             DateTime timerStart = DateTime.Now;
             BrokerQuery query = new BrokerQuery();
             query.Start = list.Start;
-            query.PublicationId = WebRequestContext.Localization.LocalizationId;
+            query.PublicationId = Int32.Parse(WebRequestContext.Localization.LocalizationId);
             query.PageSize = list.PageSize;
             query.SchemaId = MapSchema(list.ContentType.Key);
             list.ItemListElements = query.ExecuteQuery();

@@ -231,7 +231,7 @@ namespace Sdl.Web.DD4T
 
         protected int GetLocalizationId(string urlPath)
         {
-            int localizationId = WebRequestContext.Localization.LocalizationId;
+            int localizationId = Int32.Parse(WebRequestContext.Localization.LocalizationId);
             if (localizationId == 0)
             {
                 //When we are reading in config on application start, we cannot rely
@@ -242,7 +242,7 @@ namespace Sdl.Web.DD4T
                 {
                     if (urlPath.StartsWith(loc.Path))
                     {
-                        localizationId = loc.LocalizationId;
+                        localizationId = Int32.Parse(loc.LocalizationId);
                         break;
                     }
                 }

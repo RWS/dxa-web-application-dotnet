@@ -15,7 +15,7 @@ namespace Sdl.Web.DD4T
     {
         public int ResolvePublicationId()
         {
-            return WebRequestContext.Localization.LocalizationId;
+            return Int32.Parse(WebRequestContext.Localization.LocalizationId);
         }
     }
 }
