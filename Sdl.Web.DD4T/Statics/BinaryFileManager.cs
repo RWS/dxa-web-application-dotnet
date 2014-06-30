@@ -143,7 +143,7 @@ namespace Sdl.Web.DD4T
         #region inner class Dimensions
         internal class Dimensions
         {
-            internal int Width; internal int Height;
+            internal int Width; internal int Height; internal bool NoStretch;
         }
         #endregion
 
@@ -276,10 +276,12 @@ namespace Sdl.Web.DD4T
         internal static byte[] ResizeImageFile(byte[] imageFile, Dimensions dimensions, ImageFormat imageFormat)
         {
             Image original = Image.FromStream(new MemoryStream(imageFile));
+            
             //Defaults for crop position, width and target size
             int cropX = 0, cropY = 0;
-            int width = original.Width, height = original.Height;
+            int sourceW = original.Width, sourceH = original.Height;
             int targetW = original.Width, targetH = original.Height;
+            
             //Most complex case is if a height AND width is specified - as we will have to crop
             if (dimensions.Width > 0 && dimensions.Height > 0)
             {
@@ -288,34 +290,39 @@ namespace Sdl.Web.DD4T
                 if (targetAspect < originalAspect)
                 {
                     //We crop the width, but only if the required height is smaller than that of the original image
-                    if (dimensions.Height <= original.Height)
+                    //Or we don't mind stretching the image to fit
+                    if (dimensions.NoStretch == false || dimensions.Height <= original.Height)
                     {
                         targetH = dimensions.Height;
                         targetW = (int)Math.Ceiling(targetH * targetAspect);
                         cropX = (int)Math.Ceiling((original.Width - (original.Height * targetAspect)) / 2);
-                        width = width - 2 * cropX;
+                        sourceW = sourceW - 2 * cropX;
                     }
                 }
                 else
                 {
                     //We crop the height, but only if the required width is smaller than that of the original image
-                    if (dimensions.Width <= original.Width)
+                    //Or we don't mind stretching the image to fit
+                    if (dimensions.NoStretch == false || dimensions.Width <= original.Width)
                     {
                         targetW = dimensions.Width;
                         targetH = (int)Math.Ceiling(targetW / targetAspect);
                         cropY = (int)Math.Ceiling((original.Height - (original.Width / targetAspect)) / 2);
-                        height = height - 2 * cropY;
+                        sourceH = sourceH - 2 * cropY;
                     }
                 }
             }
+            //If we simply have a certain width or height, its simple: We just use that and derive the other
+            //dimension from the original image aspect ratio. We also check if the target size is bigger than
+            //the original, and if we allow stretching.
             else if (dimensions.Width > 0)
             {
-                targetW = dimensions.Width > original.Width ? original.Width : dimensions.Width;
+                targetW = (dimensions.NoStretch && dimensions.Width > original.Width) ? original.Width : dimensions.Width;
                 targetH = (int)(original.Height * ((float)targetW / (float)original.Width));
             }
             else
             {
-                targetH = dimensions.Height > original.Height ? original.Height : dimensions.Height;
+                targetH = (dimensions.NoStretch && dimensions.Height > original.Height) ? original.Height : dimensions.Height;
                 targetW = (int)(original.Width * ((float)targetH / (float)original.Height));
             }
             Image imgPhoto = null;
@@ -336,7 +343,7 @@ namespace Sdl.Web.DD4T
             grPhoto.SmoothingMode = SmoothingMode.AntiAlias;
             grPhoto.InterpolationMode = InterpolationMode.HighQualityBicubic;
             grPhoto.PixelOffsetMode = PixelOffsetMode.HighQuality;
-            grPhoto.DrawImage(imgPhoto, new Rectangle(0, 0, targetW, targetH), cropX, cropY, width, height, GraphicsUnit.Pixel);
+            grPhoto.DrawImage(imgPhoto, new Rectangle(0, 0, targetW, targetH), cropX, cropY, sourceW, sourceH, GraphicsUnit.Pixel);
             // Save out to memory and then to a file.  We dispose of all objects to make sure the files don't stay locked.
             using (MemoryStream memoryStream = new MemoryStream())
             {
@@ -366,29 +373,26 @@ namespace Sdl.Web.DD4T
         private string StripDimensions(string path, out Dimensions dimensions)
         {
             dimensions = new Dimensions();
-            int dim = 0;
-            path = StripDimensions(path, out dim, "h");
-            if (dim > 0)
-            {
-                dimensions.Height = dim;
-            }
-            path = StripDimensions(path, out dim, "w");
-            if (dim > 0)
-            {
-                dimensions.Width = dim;
-            }
-            return path;
-        }
-
-        private string StripDimensions(string path, out int dimension, string type = "h")
-        {
-            Regex re = new Regex(@"_" + type + @"(\d+)\.");
+            Regex re = new Regex(@"_(w(\d+))?(_h(\d+))?(_n)?\.");
             if (re.IsMatch(path))
             {
-                dimension = Convert.ToInt32(re.Match(path).Groups[1].ToString());
+                var match = re.Match(path);
+                var dim = match.Groups[2].ToString();
+                if (!String.IsNullOrEmpty(dim))
+                {
+                    dimensions.Width = Convert.ToInt32(dim);
+                }
+                dim = match.Groups[4].ToString();
+                if (!String.IsNullOrEmpty(dim))
+                {
+                    dimensions.Height = Convert.ToInt32(dim);
+                }
+                if(!String.IsNullOrEmpty(match.Groups[5].ToString()))
+                {
+                    dimensions.NoStretch = true;
+                }
                 return re.Replace(path, ".");
             }
-            dimension = 0;
             return path;
         }
     }

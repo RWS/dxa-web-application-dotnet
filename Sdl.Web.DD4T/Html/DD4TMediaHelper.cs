@@ -12,7 +12,7 @@ namespace Sdl.Web.DD4T.Html
     {
         public DD4TMediaHelper() : base()
         {
-            ImageResizeUrlFormat = "{0}{1}{2}{3}";
+            ImageResizeUrlFormat = "{0}{1}{2}_n{3}";
         }
 
         public override string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0)
