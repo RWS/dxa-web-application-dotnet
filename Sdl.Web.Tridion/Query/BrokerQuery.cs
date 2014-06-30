@@ -27,8 +27,10 @@ namespace Sdl.Web.Tridion
         {
             Criteria criteria = BuildCriteria();
             Query query = new Query(criteria);
-            Sort = Sort ?? "dateCreated";
-            query.AddSorting(GetSortParameter());
+            if (!String.IsNullOrEmpty(Sort) && Sort.ToLower()!="none")
+            {
+                query.AddSorting(GetSortParameter());
+            }
             if (MaxResults > 0)
             {
                 query.SetResultFilter(new LimitFilter(MaxResults));

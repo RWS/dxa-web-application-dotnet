@@ -14,6 +14,7 @@ namespace Sdl.Web.Models
         public string Headline { get; set; }
         public int PageSize { get; set; }
         public Tag ContentType { get; set; }
+        public Tag Sort { get; set; }
         public int Start { get; set; }
         public int CurrentPage { get; set; }
         public bool HasMore { get; set; }
