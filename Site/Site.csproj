@@ -201,7 +201,7 @@
     <Content Include="Areas\Core\Views\List\Partials\Pager.cshtml" />
     <Content Include="Areas\Core\Views\List\ThumbnailList.cshtml" />
     <Content Include="Areas\Core\Views\Navigation\Breadcrumb.cshtml" />
-    <Content Include="Areas\Core\Views\Navigation\GoogleSitemap.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\SiteMap.cshtml" />
     <Content Include="Areas\Core\Views\Navigation\LeftNavigation.cshtml" />
     <Content Include="Areas\Core\Views\Navigation\TopNavigation.cshtml" />
     <Content Include="Areas\Core\Views\Page\GeneralPage.cshtml" />
