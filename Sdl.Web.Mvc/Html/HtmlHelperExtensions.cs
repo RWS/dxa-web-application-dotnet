@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Web;
@@ -178,18 +179,45 @@ namespace Sdl.Web.Mvc.Html
             }
 
             //todo this does not contain any XPM markup
+            //todo configurize the mime type to Font Awesome mapping
+            var mimeTypes = new Dictionary<string, string>(); // filetypes supported by http://fortawesome.github.io/Font-Awesome/icons/#file-type
+            mimeTypes.Add("application/ms-excel", "excel");
+            mimeTypes.Add("application/pdf", "pdf");
+            mimeTypes.Add("application/x-wav", "audio");
+            mimeTypes.Add("audio/x-mpeg", "audio");
+            mimeTypes.Add("application/msword", "word");
+            mimeTypes.Add("text/rtf", "word");
+            mimeTypes.Add("application/zip", "archive");
+            mimeTypes.Add("image/gif", "image");
+            mimeTypes.Add("image/jpeg", "image");
+            mimeTypes.Add("image/png", "image");
+            mimeTypes.Add("image/x-bmp", "image");
+            mimeTypes.Add("text/plain", "text");
+            mimeTypes.Add("text/css", "code");
+            mimeTypes.Add("application/x-javascript", "code");
+            mimeTypes.Add("application/ms-powerpoint", "powerpoint");
+            mimeTypes.Add("video/vnd.rn-realmedia", "video");
+            mimeTypes.Add("video/quicktime", "video");
+            mimeTypes.Add("video/mpeg", "video");
+            string fileType = null;
+            if (mimeTypes.ContainsKey(download.MimeType))
+            {
+                fileType = mimeTypes[download.MimeType];
+            }
+            string iconClass = (fileType == null ? "fa-file" : String.Format("fa-file-{0}-o", fileType));
             string friendlyFileSize = helper.FriendlyFileSize(download.FileSize).ToString();
             string descriptionHtml = (!String.IsNullOrEmpty(download.Description) ? String.Format("<small>{0}</small>", download.Description) : "");
             string downloadHtml = String.Format(@"
                 <div class=""download-list"">
-                    <i class=""fa fa-file""></i>
+                    <i class=""fa {0}""></i>
                     <div>
-                        <a href=""{0}"">{1}</a> <small class=""size"">({2})</small>
-                        {3}
+                        <a href=""{1}"">{2}</a> <small class=""size"">({3})</small>
+                        {4}
                     </div>
-                </div>", download.Url, download.FileName, friendlyFileSize, descriptionHtml);
+                </div>", iconClass, download.Url, download.FileName, friendlyFileSize, descriptionHtml);
             return new MvcHtmlString(downloadHtml);
         }
+
 
         public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media)
         {
