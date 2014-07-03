@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Sdl.Web.Mvc.Mapping
+namespace Sdl.Web.Common.Mapping
 {
     /// <summary>
     /// Class for deserialized json schema.

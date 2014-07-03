@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sdl.Web.Mvc.Mapping
+namespace Sdl.Web.Tridion
 {
     /// <summary>
     /// Class for deserialized json region.

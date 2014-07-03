@@ -8,10 +8,10 @@ using DD4T.Factories;
 using Sdl.Web.Mvc;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Models;
 using Sdl.Web.Tridion;
 using interfaces = Sdl.Web.Models.Interfaces;
+using Sdl.Web.Common.Mapping;
 
 namespace Sdl.Web.DD4T
 {
@@ -185,7 +185,7 @@ namespace Sdl.Web.DD4T
                 {
                     foreach (var include in includes)
                     {
-                        var item = GetPageModel(Configuration.LocalizeUrl(include));
+                        var item = GetPageModel(Configuration.LocalizeUrl(include, WebRequestContext.Localization));
                         if (item != null)
                         {
                             res.Add(item);

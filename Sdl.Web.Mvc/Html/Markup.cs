@@ -7,7 +7,7 @@ using System.Web.Mvc;
 using Sdl.Web.Models;
 using Sdl.Web.Models.Interfaces;
 
-namespace Sdl.Web.Mvc
+namespace Sdl.Web.Mvc.Html
 {
     public static class Markup
     {

@@ -7,10 +7,11 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
 using Sdl.Web.Mvc;
-using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Models;
 using SDL.Web.Helpers;
 using interfaces = Sdl.Web.Models.Interfaces;
+using Sdl.Web.Common.Mapping;
+using Sdl.Web.Common;
 
 namespace Sdl.Web.DD4T.Mapping
 {
@@ -673,7 +674,7 @@ namespace Sdl.Web.DD4T.Mapping
             meta.Add("og:url", WebRequestContext.GetRequestUrl());
             //TODO is this always article?
             meta.Add("og:type", "article");
-            meta.Add("og:locale", Configuration.GetConfig("core.culture"));
+            meta.Add("og:locale", Configuration.GetConfig("core.culture", WebRequestContext.Localization.Path));
             if (description != null)
             {
                 meta.Add("og:description", description);

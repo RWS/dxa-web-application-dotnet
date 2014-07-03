@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sdl.Web.Mvc.Mapping
+namespace Sdl.Web.Mvc
 {
     public class NavigationBuilder
     {

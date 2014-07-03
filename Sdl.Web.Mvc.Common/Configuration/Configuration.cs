@@ -10,9 +10,9 @@ using System.Web.Script.Serialization;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Models;
-using Sdl.Web.Mvc.Mapping;
+using Sdl.Web.Common.Mapping;
 
-namespace Sdl.Web.Mvc
+namespace Sdl.Web.Common
 {
     public enum ScreenWidth
     {
@@ -115,13 +115,13 @@ namespace Sdl.Web.Mvc
         /// Gets a (localized) configuration setting
         /// </summary>
         /// <param name="key">The configuration key, in the format "section.name" (eg "Environment.CmsUrl")</param>
-        /// <param name="localization">The localization (eg "en", "fr") - if none specified this is inferred from the request context</param>
+        /// <param name="localization">The localization (eg "en", "fr") - if none specified the default is used</param>
         /// <returns>The configuration matching the key for the given localization</returns>
         public static string GetConfig(string key, string localization = null)
         {
             if (localization == null)
             {
-                localization = WebRequestContext.Localization.Path;
+                localization = DefaultLocalization;
             }
             return GetConfig(LocalConfiguration, key, localization);
         }
@@ -172,7 +172,7 @@ namespace Sdl.Web.Mvc
             LastApplicationStart = DateTime.Now;
             Configuration.SetLocalizations(localizationList);
             Load(applicationRoot);
-            // load semantic mappings
+            // TODO load semantic mappings
             SemanticMapping.Load(applicationRoot);
         }
             
@@ -349,12 +349,12 @@ namespace Sdl.Web.Mvc
             }
         }
 
-        public static string LocalizeUrl(string url)
+        public static string LocalizeUrl(string url, Localization localization = null)
         {
-            var localization = WebRequestContext.Localization.Path;
-            if (!String.IsNullOrEmpty(localization))
+            string path = (localization==null) ? DefaultLocalization : localization.Path;
+            if (!String.IsNullOrEmpty(path))
             {
-                return localization + "/" + url;
+                return path + "/" + url;
             }
             return url;
         }

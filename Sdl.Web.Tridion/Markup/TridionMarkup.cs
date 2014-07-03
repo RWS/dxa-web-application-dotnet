@@ -116,10 +116,9 @@ namespace Sdl.Web.Tridion
         private static string MarkRegion(string name, int minOccurs = 0, int maxOccurs = 0)
         {
             StringBuilder allowedComponentTypes = new StringBuilder(); 
-            //TODO refactor region mapping out semantics
-            /*string separator = String.Empty;
+            string separator = String.Empty;
             bool first = true;
-            XpmRegion xpmRegion = SemanticMapping.GetXpmRegion(name);
+            XpmRegion xpmRegion = TridionConfig.GetXpmRegion(name);
             foreach (var componentTypes in xpmRegion.ComponentTypes)
             {
                 allowedComponentTypes.AppendFormat(ComponentTypeFormat, componentTypes.Schema, componentTypes.Template, separator);
@@ -128,7 +127,7 @@ namespace Sdl.Web.Tridion
                     first = false;
                     separator = ", ";
                 }
-            }*/
+            }
 
             string maxOccursElement = String.Empty;
             if (maxOccurs > 0)

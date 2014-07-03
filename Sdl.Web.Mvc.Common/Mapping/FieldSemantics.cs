@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sdl.Web.Mvc.Mapping
+namespace Sdl.Web.Common.Mapping
 {
     /// <summary>
     /// Class for deserialized json field semantics.

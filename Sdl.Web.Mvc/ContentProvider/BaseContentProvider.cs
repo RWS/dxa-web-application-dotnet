@@ -11,7 +11,7 @@ using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 
 
-namespace Sdl.Web.Mvc.Mapping
+namespace Sdl.Web.Mvc
 {
     /// <summary>
     /// Abstract Base Content Provider

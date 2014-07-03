@@ -5,7 +5,7 @@ using Sdl.Web.Models;
 using Sdl.Web.Common.Interfaces;
 using System.Linq;
 
-namespace Sdl.Web.Mvc.Mapping
+namespace Sdl.Web.Common.Mapping
 {
     public abstract class BaseModelBuilder : IModelBuilder
     {
