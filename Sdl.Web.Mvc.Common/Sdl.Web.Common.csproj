@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="Configuration\Configuration.cs" />
     <Compile Include="Configuration\Localization.cs" />
+    <Compile Include="Interfaces\IContentResolver.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Mapping\BaseModelBuilder.cs" />

@@ -69,7 +69,7 @@ namespace Sdl.Web.Mvc
 
         private Link GetLink(SitemapItem sitemapItem)
         {
-            return new Link { Url = ContentProvider.ProcessUrl(sitemapItem.Url), LinkText = sitemapItem.Title };
+            return new Link { Url = ContentProvider.ContentResolver.ResolveLink(sitemapItem.Url), LinkText = sitemapItem.Title };
         }
     }
 }

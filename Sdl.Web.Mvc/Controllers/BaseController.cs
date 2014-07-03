@@ -100,7 +100,7 @@ namespace Sdl.Web.Mvc
         public ActionResult Resolve(string itemId, string localization)
         {
             //TODO remove this tcm specific code here
-            var url = ContentProvider.ProcessUrl("tcm:" + itemId, localization);
+            var url = ContentProvider.ContentResolver.ResolveLink("tcm:" + itemId, localization);
             if (url == null)
             {
                 var bits = itemId.Split(':');

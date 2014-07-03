@@ -20,27 +20,14 @@ namespace Sdl.Web.DD4T
         readonly ExtensionlessLinkFactory LinkFactory;
         readonly IPageFactory PageFactory;
 
-        public DD4TContentProvider(ExtensionlessLinkFactory linkFactory, IModelBuilder modelBuilder, IPageFactory pageFactory)
+        public DD4TContentProvider(ExtensionlessLinkFactory linkFactory, IModelBuilder modelBuilder, IPageFactory pageFactory, IContentResolver resolver)
         {
+            ContentResolver = resolver;
             LinkFactory = linkFactory;
             DefaultModelBuilder = modelBuilder;
             this.PageFactory = pageFactory;
         }
-
-        public override string ProcessUrl(string url, string localizationId = null)
-        {
-            if (url.StartsWith("tcm:"))
-            {
-                int pubid = 0;
-                if (localizationId != null)
-                {
-                    Int32.TryParse(localizationId, out pubid);
-                }
-                url = TridionHelper.ResolveLink(url, pubid);
-            }
-            return base.ProcessUrl(url);
-        }
-
+        
         public override ViewData GetPageViewData(object pageObject)
         {
             var page = (IPage)pageObject;
@@ -156,7 +143,7 @@ namespace Sdl.Web.DD4T
             list.ItemListElements = query.ExecuteQuery();
             foreach (var item in list.ItemListElements)
             {
-                item.Link.Url = this.ProcessUrl(item.Link.Url);
+                item.Link.Url = this.ContentResolver.ResolveLink(item.Link.Url);
             }
             list.HasMore = query.HasMore;
             Log.Trace(timerStart, "list-load", list.Headline ?? "List");

@@ -92,7 +92,7 @@
   <ItemGroup>
     <Compile Include="Html\DD4TMediaHelper.cs" />
     <Compile Include="Html\DD4TRenderer.cs" />
-    <Compile Include="Html\RichTextHelper.cs" />
+    <Compile Include="Mapping\DD4TContentResolver.cs" />
     <Compile Include="Mapping\DD4TModelBuilder.cs" />
     <Compile Include="Mapping\DD4TContentProvider.cs" />
     <Compile Include="Mapping\ExtensionlessLinkFactory.cs" />
