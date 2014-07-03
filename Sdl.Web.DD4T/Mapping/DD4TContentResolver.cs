@@ -3,31 +3,76 @@ using System.Linq;
 using System.Web;
 using System.Xml;
 using DD4T.ContentModel.Factories;
+using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Tridion;
+using Sdl.Web.Common;
 
-namespace SDL.Web.Helpers
+namespace Sdl.Web.DD4T
 {
-    public class RichTextHelper
+    public class DD4TContentResolver : IContentResolver
     {
         readonly IComponentFactory ComponentFactory;
         readonly ILinkFactory ComponentLinkProvider;
 
-        public RichTextHelper(ILinkFactory componentLinkProvider, IComponentFactory componentFactory)
+        public string DefaultExtensionLessPageName { get; set; }
+        public string DefaultPageName { get; set; }
+        public string DefaultExtension { get; set; }
+
+        public DD4TContentResolver(ILinkFactory componentLinkProvider, IComponentFactory componentFactory)
         {
             ComponentLinkProvider = componentLinkProvider;
             ComponentFactory = componentFactory;
+            DefaultExtension = ".html";
+            DefaultExtensionLessPageName = Configuration.GetDefaultDocument();
+            DefaultPageName = DefaultExtensionLessPageName + DefaultExtension;
         }
 
-        public string ResolveRichText(string xml)
+        public string ResolveLink(object linkData, object resolveInstruction = null)
         {
-            try
+            var url = linkData as String;
+            var localizationId = resolveInstruction as String;
+            if (url != null)
             {
-                var doc = new XmlDocument();
-                doc.LoadXml(string.Format("<xhtml>{0}</xhtml>", xml));
-                return ResolveRichText(doc);
+                if (url.StartsWith("tcm:"))
+                {
+                    int pubid = 0;
+                    if (localizationId != null)
+                    {
+                        Int32.TryParse(localizationId, out pubid);
+                    }
+                    url = TridionHelper.ResolveLink(url, pubid);
+                }
+                if (url.EndsWith(DefaultExtension))
+                {
+                    url = url.Substring(0, url.Length - DefaultExtension.Length);
+                    if (url.EndsWith("/" + DefaultExtensionLessPageName))
+                    {
+                        url = url.Substring(0, url.Length - DefaultExtensionLessPageName.Length);
+                    }
+                }
             }
-            catch (XmlException)
+            return url;
+        }
+
+        public object ResolveContent(object xml, object resolveInstruction = null)
+        {
+            if (xml is XmlDocument)
             {
-                return xml;
+                return ResolveRichText(xml as XmlDocument);
+            }
+            else
+            {
+                string content = xml.ToString();
+                try
+                {
+                    var doc = new XmlDocument();
+                    doc.LoadXml(string.Format("<xhtml>{0}</xhtml>", xml));
+                    return ResolveRichText(doc);
+                }
+                catch (XmlException)
+                {
+                    return xml;
+                }
             }
         }
         
@@ -111,5 +156,5 @@ namespace SDL.Web.Helpers
             return this.ComponentFactory.GetComponent(componentUri).IfNotNull(c => c.Title)
                 ?? link.Attributes["title"].IfNotNull(attr => attr.Value);
         }
-    }
+    }   
 }

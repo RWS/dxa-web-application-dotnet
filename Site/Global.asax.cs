@@ -3,7 +3,6 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using Sdl.Web.Mvc;
-using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Tridion;
 using Microsoft.Practices.Unity;
 using Unity.Mvc5;
@@ -11,6 +10,7 @@ using Microsoft.Practices.Unity.Configuration;
 using Microsoft.Practices.ServiceLocation;
 using Sdl.Web.Mvc.Html;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common;
 
 namespace Sdl.Web.Site
 {

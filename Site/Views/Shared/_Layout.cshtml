@@ -53,6 +53,6 @@
         });
     </script>
     <script src="@Url.VersionedContent("/assets/scripts/custom.js")"></script>
-    @Markup.Page(Model)
+    @ViewBag.Renderer.RenderPageData(Model, Html)
 </body>
 </html>

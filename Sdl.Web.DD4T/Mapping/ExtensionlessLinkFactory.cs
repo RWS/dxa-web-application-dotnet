@@ -6,12 +6,6 @@ namespace Sdl.Web.DD4T
 {
     public class ExtensionlessLinkFactory : LinkFactory, ILinkFactory
     {
-        [Obsolete]
-        public string ResolveExtensionlessLink(string componentUri)
-        {
-            return ((ILinkFactory)this).ResolveLink(componentUri);
-        }
-
         protected virtual string RemoveExtension(string url)
         {
             if (url != null)

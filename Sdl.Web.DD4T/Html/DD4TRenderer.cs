@@ -8,6 +8,8 @@ using Sdl.Web.Models;
 using System;
 using System.Web.Routing;
 using interfaces = Sdl.Web.Models.Interfaces;
+using Sdl.Web.Tridion;
+using Sdl.Web.Common;
 
 namespace Sdl.Web.DD4T
 {
@@ -70,9 +72,12 @@ namespace Sdl.Web.DD4T
                 MvcHtmlString result = helper.Action(action, controller, parameters);
                 Log.Trace(timerStart, "entity-render", cp.Component.Title);
                 timerStart = DateTime.Now;
-                var res = Markup.ParseComponentPresentation(result);
+                if (WebRequestContext.IsPreview)
+                {
+                    result = new MvcHtmlString(TridionMarkup.ParseEntity(result.ToString()));
+                }
                 Log.Trace(timerStart, "entity-parse", cp.Component.Title);
-                return res;
+                return result;
             }
             return null;
         }
@@ -92,12 +97,29 @@ namespace Sdl.Web.DD4T
                 MvcHtmlString result = helper.Action(action, controller, new {Region = region, containerSize = containerSize, area=area });
                 Log.Trace(timerStart, "region-render", region.Name);
                 timerStart = DateTime.Now;
-                var res = Markup.ParseRegion(result);
+
+                if (WebRequestContext.IsPreview)
+                {
+                    result = new MvcHtmlString(TridionMarkup.ParseRegion(result.ToString()));
+                }
                 Log.Trace(timerStart, "region-parse", region.Name);
-                return res;
+                return result;
             }
             return null;
-
         }
+
+        public override MvcHtmlString RenderPageData(interfaces.IPage page, HtmlHelper helper)
+        {
+            if (WebRequestContext.IsPreview)
+            {
+                if (!page.PageData.ContainsKey("CmsUrl"))
+                {
+                    page.PageData.Add("CmsUrl", Configuration.GetConfig("core.cmsurl"));
+                }
+                return new MvcHtmlString(TridionMarkup.PageMarkup(page.PageData));
+            }
+            return null;
+        }
+        
     }
 }

@@ -6,6 +6,7 @@ using System.Web;
 using System.Web.Mvc;
 using Sdl.Web.Models;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common;
 
 namespace Sdl.Web.Mvc.Html
 {
@@ -13,7 +14,7 @@ namespace Sdl.Web.Mvc.Html
     {
         public static string Date(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
         {
-            return date != null ? ((DateTime)date).ToString(format, new CultureInfo(Configuration.GetConfig("core.culture"))) : null;
+            return date != null ? ((DateTime)date).ToString(format, new CultureInfo(Configuration.GetConfig("core.culture", WebRequestContext.Localization.Path))) : null;
         }
 
         public static string DateDiff(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
@@ -36,7 +37,7 @@ namespace Sdl.Web.Mvc.Html
                 }
                 else
                 {
-                    return ((DateTime)date).ToString(format, new CultureInfo(Configuration.GetConfig("core.culture")));
+                    return ((DateTime)date).ToString(format, new CultureInfo(Configuration.GetConfig("core.culture",WebRequestContext.Localization.Path)));
                 }
             }
             return null;

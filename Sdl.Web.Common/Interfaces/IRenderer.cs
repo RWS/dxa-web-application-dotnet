@@ -13,5 +13,6 @@ namespace Sdl.Web.Common.Interfaces
     {
         MvcHtmlString RenderEntity(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null);
         MvcHtmlString RenderRegion(IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null);
+        MvcHtmlString RenderPageData(IPage page, HtmlHelper helper);
     }
 }

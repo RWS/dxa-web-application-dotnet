@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
+using Sdl.Web.Common;
 
-namespace Sdl.Web.Mvc.Mapping
+namespace Sdl.Web.Common.Mapping
 {
     /// <summary>
     /// General Semantic Mapping Class which reads schema mapping from json files on disk
@@ -51,21 +52,8 @@ namespace Sdl.Web.Mvc.Mapping
             }
         }
 
-        public static Dictionary<string, XpmRegion> XpmRegions
-        {
-            get
-            {
-                if (_xpmRegions == null)
-                {
-                    LoadMapping();
-                }
-                return _xpmRegions;
-            }
-        }
-
         private static Dictionary<string, SemanticSchema> _semanticMap;
         private static List<SemanticVocabulary> _semanticVocabularies;
-        private static Dictionary<string, XpmRegion> _xpmRegions;
         private static Dictionary<string, List<string>> _includes;
         private static readonly object MappingLock = new object();
 
@@ -135,30 +123,6 @@ namespace Sdl.Web.Mvc.Mapping
             return null;
         }
 
-        /// <summary>
-        /// Gets a XPM region by name.
-        /// </summary>
-        /// <param name="name">The region name</param>
-        /// <returns>The XPM region matching the name for the given module</returns>
-        public static XpmRegion GetXpmRegion(string name)
-        {
-            return GetXpmRegion(XpmRegions, name);
-        }
-
-        private static XpmRegion GetXpmRegion(IReadOnlyDictionary<string, XpmRegion> regions, string name)
-        {
-            if (regions.ContainsKey(name))
-            {
-                return regions[name];
-            }
-            else
-            {
-                Exception ex = new Exception(string.Format("XPM Region '{0}' does not exist.", name));
-                //TODO - do we throw an error, or apply some defaults?
-                Log.Error(ex);
-                throw ex;   
-            }        
-        }
 
         /// <summary>
         /// Gets a semantic schema by id.
@@ -205,7 +169,6 @@ namespace Sdl.Web.Mvc.Mapping
 
                 _semanticMap = new Dictionary<string, SemanticSchema>();
                 _semanticVocabularies = new List<SemanticVocabulary>();
-                _xpmRegions = new Dictionary<string, XpmRegion>();
                 _includes = new Dictionary<string, List<string>>();
                 Log.Debug("Loading semantic mappings for default localization");
                 var path = String.Format("{0}/{1}/{2}/{3}", applicationRoot, Configuration.StaticsFolder, Configuration.DefaultLocalization, Configuration.SystemFolder + "/mappings/_all.json");
@@ -235,13 +198,6 @@ namespace Sdl.Web.Mvc.Mapping
                                         _semanticMap.Add(schema.Id.ToString(), schema);
                                     }
                                 }
-                                else if (type.Equals("regions"))
-                                {
-                                    foreach (var region in GetRegionsFromFile(configPath))
-                                    {
-                                        _xpmRegions.Add(region.Region, region);
-                                    }
-                                }
                                 else if (type.Equals("includes"))
                                 {
                                     _includes = GetIncludesFromFile(configPath);
@@ -260,11 +216,6 @@ namespace Sdl.Web.Mvc.Mapping
                 }
 
             }
-        }
-
-        private static List<XpmRegion> GetRegionsFromFile(string file)
-        {
-            return new JavaScriptSerializer().Deserialize<List<XpmRegion>>(File.ReadAllText(file));
         }
 
         private static Dictionary<string, List<string>> GetIncludesFromFile(string file)

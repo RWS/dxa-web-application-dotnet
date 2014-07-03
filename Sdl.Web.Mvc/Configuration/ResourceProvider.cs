@@ -7,6 +7,7 @@ using System.Resources;
 using System.Web.Compilation;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
+using Sdl.Web.Common;
 
 namespace Sdl.Web.Mvc
 {

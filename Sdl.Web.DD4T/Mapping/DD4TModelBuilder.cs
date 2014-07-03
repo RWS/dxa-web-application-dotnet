@@ -7,22 +7,25 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
 using Sdl.Web.Mvc;
-using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Models;
-using SDL.Web.Helpers;
 using interfaces = Sdl.Web.Models.Interfaces;
+using Sdl.Web.Common.Mapping;
+using Sdl.Web.Common;
+using Sdl.Web.DD4T;
+using Sdl.Web.Common.Interfaces;
+using DD4T.ContentModel.Factories;
 
 namespace Sdl.Web.DD4T.Mapping
 {
     public partial class DD4TModelBuilder : BaseModelBuilder
     {
-        readonly public ExtensionlessLinkFactory LinkFactory;
-        readonly RichTextHelper RtfHelper;
-        
-        public DD4TModelBuilder(ExtensionlessLinkFactory linkFactory, RichTextHelper rtfHelper)
+        readonly public ILinkFactory LinkFactory;
+        readonly IContentResolver ContentResolver;
+
+        public DD4TModelBuilder(ILinkFactory linkFactory, IContentResolver contentResolver)
         {
             LinkFactory = linkFactory;
-            RtfHelper = rtfHelper;
+            ContentResolver = contentResolver;
         }
 
         public override object Create(object sourceEntity, Type type, List<object> includes = null)
@@ -456,7 +459,7 @@ namespace Sdl.Web.DD4T.Mapping
                 List<String> urls = new List<String>();
                 foreach (var comp in items)
                 {
-                    var url = LinkFactory.ResolveExtensionlessLink(comp.Id);
+                    var url = LinkFactory.ResolveLink(comp.Id);
                     if (url != null)
                     {
                         urls.Add(url);
@@ -521,10 +524,9 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 if (multival)
                 {
-                    return field.Values.Select(RtfHelper.ResolveRichText);
+                    return field.Values.Select(v=>ContentResolver.ResolveContent(v).ToString());
                 }
-
-                return RtfHelper.ResolveRichText(field.Value);
+                return ContentResolver.ResolveContent(field.Value).ToString();
             }
             return null;
         }
@@ -673,7 +675,7 @@ namespace Sdl.Web.DD4T.Mapping
             meta.Add("og:url", WebRequestContext.GetRequestUrl());
             //TODO is this always article?
             meta.Add("og:type", "article");
-            meta.Add("og:locale", Configuration.GetConfig("core.culture"));
+            meta.Add("og:locale", Configuration.GetConfig("core.culture", WebRequestContext.Localization.Path));
             if (description != null)
             {
                 meta.Add("og:description", description);
@@ -710,7 +712,7 @@ namespace Sdl.Web.DD4T.Mapping
                 switch (field.Name)
                 {
                     case "internalLink":
-                        value = LinkFactory.ResolveExtensionlessLink(field.Value);
+                        value = LinkFactory.ResolveLink(field.Value);
                         break;
                     case "image":
                         value = field.LinkedComponentValues[0].Multimedia.Url;

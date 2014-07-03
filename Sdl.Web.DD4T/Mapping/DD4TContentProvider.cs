@@ -6,40 +6,28 @@ using DD4T.ContentModel.Exceptions;
 using DD4T.ContentModel.Factories;
 using DD4T.Factories;
 using Sdl.Web.Mvc;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Models;
 using Sdl.Web.Tridion;
 using interfaces = Sdl.Web.Models.Interfaces;
+using Sdl.Web.Common.Mapping;
 
 namespace Sdl.Web.DD4T
 {
     public class DD4TContentProvider : BaseContentProvider
     {
-        readonly ExtensionlessLinkFactory LinkFactory;
+        readonly ILinkFactory LinkFactory;
         readonly IPageFactory PageFactory;
 
-        public DD4TContentProvider(ExtensionlessLinkFactory linkFactory, IModelBuilder modelBuilder, IPageFactory pageFactory)
+        public DD4TContentProvider(ILinkFactory linkFactory, IModelBuilder modelBuilder, IPageFactory pageFactory, IContentResolver resolver)
         {
+            ContentResolver = resolver;
             LinkFactory = linkFactory;
             DefaultModelBuilder = modelBuilder;
             this.PageFactory = pageFactory;
         }
-
-        public override string ProcessUrl(string url, string localizationId = null)
-        {
-            if (url.StartsWith("tcm:"))
-            {
-                int pubid = 0;
-                if (localizationId != null)
-                {
-                    Int32.TryParse(localizationId, out pubid);
-                }
-                url = TridionHelper.ResolveLink(url, pubid);
-            }
-            return base.ProcessUrl(url);
-        }
-
+        
         public override ViewData GetPageViewData(object pageObject)
         {
             var page = (IPage)pageObject;
@@ -155,7 +143,7 @@ namespace Sdl.Web.DD4T
             list.ItemListElements = query.ExecuteQuery();
             foreach (var item in list.ItemListElements)
             {
-                item.Link.Url = this.ProcessUrl(item.Link.Url);
+                item.Link.Url = this.ContentResolver.ResolveLink(item.Link.Url);
             }
             list.HasMore = query.HasMore;
             Log.Trace(timerStart, "list-load", list.Headline ?? "List");
@@ -184,7 +172,7 @@ namespace Sdl.Web.DD4T
                 {
                     foreach (var include in includes)
                     {
-                        var item = GetPageModel(Configuration.LocalizeUrl(include));
+                        var item = GetPageModel(Configuration.LocalizeUrl(include, WebRequestContext.Localization));
                         if (item != null)
                         {
                             res.Add(item);

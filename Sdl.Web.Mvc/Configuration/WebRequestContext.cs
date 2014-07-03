@@ -1,10 +1,11 @@
-﻿using Sdl.Web.Tridion.Context;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Sdl.Web.Common;
+using Sdl.Web.Tridion.Context;
 
 namespace Sdl.Web.Mvc
 {
@@ -88,6 +89,15 @@ namespace Sdl.Web.Mvc
             get
             {
                 return (bool?)GetFromContextStore("IsDeveloperMode") ?? (bool)AddToContextStore("IsDeveloperMode", WebRequestContext.Localization.Domain=="localhost");
+            }
+        }
+
+        public static bool IsPreview
+        {
+            //For now we cannot reliably detect when we are in experience manager, so we set this to be true whenever we are in staging
+            get
+            {
+                return (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", Configuration.IsStaging);
             }
         }
 

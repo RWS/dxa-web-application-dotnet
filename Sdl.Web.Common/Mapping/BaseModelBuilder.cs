@@ -5,7 +5,7 @@ using Sdl.Web.Models;
 using Sdl.Web.Common.Interfaces;
 using System.Linq;
 
-namespace Sdl.Web.Mvc.Mapping
+namespace Sdl.Web.Common.Mapping
 {
     public abstract class BaseModelBuilder : IModelBuilder
     {
@@ -84,9 +84,9 @@ namespace Sdl.Web.Mvc.Mapping
                     break;
                 }
             }
-            if (!EntityPropertySemantics.ContainsKey(type))
+            lock (semanticsLock)
             {
-                lock (semanticsLock)
+                if (!EntityPropertySemantics.ContainsKey(type))
                 {
                     var result = new Dictionary<string, List<SemanticProperty>>();
                     foreach (var pi in type.GetProperties())

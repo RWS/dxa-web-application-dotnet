@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Web;
 using System.Web.Mvc;
 using Sdl.Web.Mvc.Html;
-using Sdl.Web.Mvc.Mapping;
 using Sdl.Web.Models;
 using Sdl.Web.Common.Interfaces;
 using System.Linq;
 using Sdl.Web.Models.Interfaces;
+using Sdl.Web.Common;
 
 namespace Sdl.Web.Mvc
 {
@@ -92,7 +92,7 @@ namespace Sdl.Web.Mvc
         [HandleError]
         public virtual ActionResult SiteMap()
         {
-            var model = ContentProvider.GetNavigationModel(Configuration.LocalizeUrl("navigation.json"));
+            var model = ContentProvider.GetNavigationModel(Configuration.LocalizeUrl("navigation.json", WebRequestContext.Localization));
             return View(model);
         }
 
@@ -100,7 +100,7 @@ namespace Sdl.Web.Mvc
         public ActionResult Resolve(string itemId, string localization)
         {
             //TODO remove this tcm specific code here
-            var url = ContentProvider.ProcessUrl("tcm:" + itemId, localization);
+            var url = ContentProvider.ContentResolver.ResolveLink("tcm:" + itemId, localization);
             if (url == null)
             {
                 var bits = itemId.Split(':');
@@ -232,7 +232,7 @@ namespace Sdl.Web.Mvc
 
         protected virtual object ProcessNavigation(object sourceModel, Type type, string navType)
         {
-            var navigationUrl = Configuration.LocalizeUrl("navigation.json");
+            var navigationUrl = Configuration.LocalizeUrl("navigation.json", WebRequestContext.Localization);
             var model = ProcessModel(sourceModel, type);
             var nav = model as NavigationLinks;
             NavigationLinks links = new NavigationLinks();

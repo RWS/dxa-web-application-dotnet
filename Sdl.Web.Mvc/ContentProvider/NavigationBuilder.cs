@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sdl.Web.Mvc.Mapping
+namespace Sdl.Web.Mvc
 {
     public class NavigationBuilder
     {
@@ -69,7 +69,7 @@ namespace Sdl.Web.Mvc.Mapping
 
         private Link GetLink(SitemapItem sitemapItem)
         {
-            return new Link { Url = ContentProvider.ProcessUrl(sitemapItem.Url), LinkText = sitemapItem.Title };
+            return new Link { Url = ContentProvider.ContentResolver.ResolveLink(sitemapItem.Url), LinkText = sitemapItem.Title };
         }
     }
 }

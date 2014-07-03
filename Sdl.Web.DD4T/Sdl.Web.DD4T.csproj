@@ -54,9 +54,6 @@
     <Reference Include="DD4T.Utils">
       <HintPath>..\packages\DD4TFramework.1.31.0\lib\DD4T.Utils.dll</HintPath>
     </Reference>
-    <Reference Include="HtmlAgilityPack">
-      <HintPath>..\packages\HtmlAgilityPack.1.4.6\lib\Net45\HtmlAgilityPack.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -95,8 +92,7 @@
   <ItemGroup>
     <Compile Include="Html\DD4TMediaHelper.cs" />
     <Compile Include="Html\DD4TRenderer.cs" />
-    <Compile Include="Html\Markup.cs" />
-    <Compile Include="Html\RichTextHelper.cs" />
+    <Compile Include="Mapping\DD4TContentResolver.cs" />
     <Compile Include="Mapping\DD4TModelBuilder.cs" />
     <Compile Include="Mapping\DD4TContentProvider.cs" />
     <Compile Include="Mapping\ExtensionlessLinkFactory.cs" />
@@ -117,7 +113,7 @@
       <Project>{923b2009-9a0b-4425-88a5-bf7af25c8f8b}</Project>
       <Name>Sdl.Web.Mvc</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Sdl.Web.Mvc.Common\Sdl.Web.Common.csproj">
+    <ProjectReference Include="..\Sdl.Web.Common\Sdl.Web.Common.csproj">
       <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
       <Name>Sdl.Web.Common</Name>
     </ProjectReference>

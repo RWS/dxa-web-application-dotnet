@@ -1,5 +1,4 @@
-﻿using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Models;
+﻿using Sdl.Web.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,19 +7,20 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Script.Serialization;
+using Sdl.Web.Common;
+using Sdl.Web.Common.Interfaces;
 
-namespace Sdl.Web.Mvc.Mapping
+
+namespace Sdl.Web.Mvc
 {
     /// <summary>
     /// Abstract Base Content Provider
     /// </summary>
     public abstract class BaseContentProvider : IContentProvider
     {
+        public IContentResolver ContentResolver { get; set; }
         public BaseContentProvider()
         {
-            DefaultExtension = ".html";
-            DefaultExtensionLessPageName = Configuration.GetDefaultDocument();
-            DefaultPageName = DefaultExtensionLessPageName + DefaultExtension;
         }
 
         //These need to be implemented by the specific content provider
@@ -67,8 +67,8 @@ namespace Sdl.Web.Mvc.Mapping
         
         public virtual string ParseUrl(string url)
         {
-            var defaultPageFileName = DefaultPageName;
-            return String.IsNullOrEmpty(url) ? defaultPageFileName : (url.EndsWith("/") ? url + defaultPageFileName : url += DefaultExtension);
+            var defaultPageFileName = ContentResolver.DefaultPageName;
+            return String.IsNullOrEmpty(url) ? defaultPageFileName : (url.EndsWith("/") ? url + defaultPageFileName : url += ContentResolver.DefaultExtension);
         }
         
         public virtual object MapModel(object data, ModelType modelType, Type viewModeltype = null)
@@ -111,32 +111,8 @@ namespace Sdl.Web.Mvc.Mapping
 
         protected abstract List<object> GetIncludesFromModel(object data, ModelType modelType);
 
-        /// <summary>
-        /// Used to post process URLs - for example to remove extensions and default document from resolved links, so for example /news/index.html becomes /news/
-        /// </summary>
-        /// <param name="url">The URL to process</param>
-        /// <returns>The processed URL</returns>
-        public virtual string ProcessUrl(string url, string localizationId = null)
-        {
-            if (url != null)
-            {
-                if (url.EndsWith(DefaultExtension))
-                {
-                    url = url.Substring(0, url.Length - DefaultExtension.Length);
-                    if (url.EndsWith("/" + DefaultExtensionLessPageName))
-                    {
-                        url = url.Substring(0, url.Length - DefaultExtensionLessPageName.Length);
-                    }
-                }
-            }
-            return url;
-        }
-
+        
         public abstract void PopulateDynamicList(ContentList<Teaser> list);
-
-        protected static string DefaultExtensionLessPageName{get;set;}
-        protected static string DefaultPageName{get;set;}
-        protected static string DefaultExtension{get;set;}
 
 
 
