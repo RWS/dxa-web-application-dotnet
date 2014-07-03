@@ -151,6 +151,7 @@ namespace Sdl.Web.DD4T
             query.PublicationId = Int32.Parse(WebRequestContext.Localization.LocalizationId);
             query.PageSize = list.PageSize;
             query.SchemaId = MapSchema(list.ContentType.Key);
+            query.Sort = list.Sort.Key;
             list.ItemListElements = query.ExecuteQuery();
             foreach (var item in list.ItemListElements)
             {

@@ -1,6 +1,7 @@
 ﻿@model Sdl.Web.Models.WebPage
 @{
     bool hasLeftBar = Model.Includes.ContainsKey("Left Navigation") || Model.Regions.Keys.Contains("Left");
+    int mainContainerSize = hasLeftBar ? 9 : 12;
 }
 @if (Model.Regions.ContainsKey("Hero"))
 {
@@ -30,10 +31,10 @@
         }
     </div>
     }
-    <div class="col-sm-@(hasLeftBar ? "9" : "12")">
+    <div class="col-sm-@(mainContainerSize)">
         @foreach (Region region in Model.Regions.Values)
         {
-            @ViewBag.Renderer.RenderRegion(region, Html, 9, new List<string>{"Hero", "Left"})
+            @ViewBag.Renderer.RenderRegion(region, Html, mainContainerSize, new List<string>{"Hero", "Left"})
         }
     </div>
 </div>

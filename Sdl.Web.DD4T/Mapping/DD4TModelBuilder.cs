@@ -104,24 +104,18 @@ namespace Sdl.Web.DD4T.Mapping
                             break;
                         }
                         //Special cases, where we want to map for example the whole entity to an image property, or a resolved link to the entity to a Url field
-                        if (info.PropertyName == "_self")
+                        if (info.PropertyName == "_self" && mapData.SourceEntity!=null)
                         {
                             bool processed = false;
-                            switch(pi.Name)
+                            if (propertyType == typeof(MediaItem) && mapData.SourceEntity.Multimedia != null)
                             {
-                                case "Image":
-                                    if (mapData.SourceEntity != null && mapData.SourceEntity.Multimedia != null)
-                                    {
-                                        pi.SetValue(model, GetMultiMediaLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
-                                        processed = true;
-                                    }
-                                    break;
-                                case "Link":
-                                    if (mapData.SourceEntity != null)
-                                    {
-                                        pi.SetValue(model, GetMultiComponentLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
-                                    }
-                                    break;
+                                 pi.SetValue(model, GetMultiMediaLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
+                                 processed = true;
+                            }
+                            else if (propertyType == typeof(Link) || propertyType == typeof(String))
+                            {
+                                pi.SetValue(model, GetMultiComponentLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
+                                processed = true;    
                             }
                             if (processed)
                             {
