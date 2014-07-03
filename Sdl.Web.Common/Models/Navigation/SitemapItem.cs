@@ -34,7 +34,6 @@ namespace Sdl.Web.Models
             return value.Replace(".html", "");
         }
 
-        public string Id { get; set; }
         public string Type { get; set; }
         public List<SitemapItem> Items { get; set; }
         public DateTime PublishedDate { get; set; }

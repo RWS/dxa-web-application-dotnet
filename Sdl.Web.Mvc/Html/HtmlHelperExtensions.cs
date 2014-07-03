@@ -120,7 +120,7 @@ namespace Sdl.Web.Mvc.Html
             return new MvcHtmlString(builder.ToString(TagRenderMode.SelfClosing));
         }
 
-        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, string widthFactor, double aspect, string cssClass = null)
+        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, string widthFactor, double aspect, string cssClass = null, int containerSize = 0)
         {
             if (media == null)
             {
@@ -129,7 +129,10 @@ namespace Sdl.Web.Mvc.Html
             //We read the container size (based on bootstrap grid) from the view bag
             //This means views can be independent of where they are rendered and do not
             //need to know their width
-            int containerSize = helper.ViewBag.ContainerSize;
+            if (containerSize==0)
+            {
+                containerSize = helper.ViewBag.ContainerSize;
+            }
             if (media is Image)
             {
                 return Image(helper, (Image)media, widthFactor, aspect, cssClass, containerSize);
