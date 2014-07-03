@@ -6,6 +6,11 @@ using DD4T.ContentModel.Factories;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Tridion;
 using Sdl.Web.Common;
+using Sdl.Web.Models;
+using DD4T.ContentModel;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using interfaces = Sdl.Web.Models.Interfaces;
 
 namespace Sdl.Web.DD4T
 {
@@ -27,7 +32,7 @@ namespace Sdl.Web.DD4T
             DefaultPageName = DefaultExtensionLessPageName + DefaultExtension;
         }
 
-        public string ResolveLink(object linkData, object resolveInstruction = null)
+        public virtual string ResolveLink(object linkData, object resolveInstruction = null)
         {
             var url = linkData as String;
             var localizationId = resolveInstruction as String;
@@ -74,6 +79,107 @@ namespace Sdl.Web.DD4T
                     return xml;
                 }
             }
+        }
+
+        public MvcData ResolveMvcData(object data)
+        {
+            var res = new MvcData();
+            if (data is IComponentPresentation)
+            {
+                var cp = data as IComponentPresentation;
+                var template = cp.ComponentTemplate;
+                var viewName = Regex.Replace(template.Title, @"\[.*\]|\s", "");
+                    
+                if (template.MetadataFields != null)
+                {
+                    if (template.MetadataFields.ContainsKey("view"))
+                    {
+                        viewName = template.MetadataFields["view"].Value;
+                    }
+                }
+                res = BuildViewData(viewName);
+                //Defaults
+                res.ControllerName = Configuration.GetEntityController();
+                res.ControllerAreaName = Configuration.GetDefaultModuleName();
+                res.ActionName = Configuration.GetEntityAction();
+                res.RouteValues = new Dictionary<string, string>(); 
+                
+                if (template.MetadataFields !=null)
+                {
+                    if (template.MetadataFields.ContainsKey("controller"))
+                    {
+                        var bits = template.MetadataFields["controller"].Value.Split(':');
+                        if (bits.Length > 1)
+                        {
+                            res.ControllerName = bits[1];
+                            res.ControllerAreaName = bits[0];
+                        }
+                        else
+                        {
+                            res.ControllerName = bits[0];
+                        }
+                    }
+                    if (template.MetadataFields.ContainsKey("action"))
+                    {
+                        res.ActionName = template.MetadataFields["action"].Value;
+                    }
+                    if (template.MetadataFields.ContainsKey("routeValues"))
+                    {
+                        var bits = template.MetadataFields["routeValues"].Value.Split(',');
+                        foreach (string bit in bits)
+                        {
+                            var parameter = bit.Trim().Split(':');
+                            if (parameter.Length > 1 && !res.RouteValues.ContainsKey(parameter[0]))
+                            {
+                                res.RouteValues.Add(parameter[0],parameter[1]);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (data is IPage)
+            {
+                var page = data as IPage;
+                var viewName = page.PageTemplate.Title.Replace(" ", "");
+                if (page.PageTemplate.MetadataFields != null)
+                {
+                    if (page.PageTemplate.MetadataFields.ContainsKey("view"))
+                    {
+                        viewName = page.PageTemplate.MetadataFields["view"].Value;
+                    }
+                }
+                res = BuildViewData(viewName);
+                res.ControllerName = Configuration.GetPageController();
+                res.ControllerAreaName = Configuration.GetDefaultModuleName();
+                res.ActionName = Configuration.GetPageController();
+            }
+            else if (data is interfaces.IRegion)
+            {
+                var region = data as interfaces.IRegion;
+                var viewName = region.Name.Replace(" ", "");
+                res = BuildViewData(viewName);
+                res.ControllerName = Configuration.GetRegionController();
+                res.ActionName = Configuration.GetRegionAction();
+                res.ControllerAreaName = Configuration.GetDefaultModuleName();
+                res.AreaName = region.Module;
+            }
+            return res;
+        }
+
+        protected virtual MvcData BuildViewData(string viewName)
+        {
+            var bits = viewName.Split(':');
+            var areaName = Configuration.GetDefaultModuleName();
+            if (bits.Length > 1)
+            {
+                areaName = bits[0].Trim();
+                viewName = bits[1].Trim();
+            }
+            else
+            {
+                viewName = bits[0].Trim();
+            }
+            return new MvcData() { ViewName = viewName, AreaName = areaName };
         }
         
         /// <summary>

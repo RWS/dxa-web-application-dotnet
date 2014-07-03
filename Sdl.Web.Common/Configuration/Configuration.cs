@@ -288,6 +288,15 @@ namespace Sdl.Web.Common
             return "index";
         }
 
+        public static string GetPageController()
+        {
+            return "Page";
+        }
+        public static string GetPageAction()
+        {
+            return "Page";
+        }
+
         public static string GetRegionController()
         {
             return "Region";
@@ -347,7 +356,7 @@ namespace Sdl.Web.Common
             return url;
         }
 
-        public static void AddViewModelToRegistry(ViewData viewData, string viewPath)
+        public static void AddViewModelToRegistry(MvcData viewData, string viewPath)
         {
             lock (ViewRegistryLock)
             {

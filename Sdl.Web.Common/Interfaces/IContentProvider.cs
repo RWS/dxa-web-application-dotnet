@@ -21,11 +21,6 @@ namespace Sdl.Web.Common.Interfaces
         //Map the domain model to the presentation model
         object MapModel(object entity, ModelType modelType = ModelType.Entity, Type viewModeltype = null);
         
-        //Get view data from the domain model
-        ViewData GetEntityViewData(object entity);
-        ViewData GetRegionViewData(object region);
-        ViewData GetPageViewData(object page);
-
         //Execute a query to get content
         void PopulateDynamicList(ContentList<Teaser> list);
         
