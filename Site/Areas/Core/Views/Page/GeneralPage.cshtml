@@ -17,7 +17,7 @@
 <div class="row">
     @if (hasLeftBar)
     {
-    <div class="col-sm-3">
+    <div class="col-sm-12 col-md-3">
         @if (Model.Includes.ContainsKey("Left Navigation"))
         {
             foreach (var region in Model.Includes["Left Navigation"].Regions.Values)
@@ -31,7 +31,7 @@
         }
     </div>
     }
-    <div class="col-sm-@(mainContainerSize)">
+    <div class="col-sm-12 col-md-@(mainContainerSize)">
         @foreach (Region region in Model.Regions.Values)
         {
             @ViewBag.Renderer.RenderRegion(region, Html, mainContainerSize, new List<string>{"Hero", "Left"})

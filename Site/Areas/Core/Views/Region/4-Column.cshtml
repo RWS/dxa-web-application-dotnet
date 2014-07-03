@@ -5,7 +5,7 @@
     <div class="row">
         @for (int j = 0; j < 4 && (4*i + j < Model.Items.Count) ; j++)
         {
-            <div class="col-sm-3">
+            <div class="col-sm-6 col-md-3">
                 @ViewBag.Renderer.RenderEntity(Model.Items[4*i + j], Html, 3)
             </div>
         }
