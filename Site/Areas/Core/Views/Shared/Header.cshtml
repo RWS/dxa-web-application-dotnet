@@ -4,7 +4,7 @@
 }
 @if (Model.Regions.ContainsKey("Info"))
 {
-    @ViewBag.Renderer.RenderEntity(Model.Regions["Info"], Html)
+    @ViewBag.Renderer.RenderRegion(Model.Regions["Info"], Html)
 }
 <header id="page-header" class="navbar navbar-default">
   <div class="container-fluid page-border">
@@ -16,7 +16,7 @@
           </button>
             @if (Model.Regions.ContainsKey("Logo"))
             {
-                @ViewBag.Renderer.RenderEntity(Model.Regions["Logo"], Html)
+                @ViewBag.Renderer.RenderRegion(Model.Regions["Logo"], Html)
             }
         </div>
         @foreach (Region region in Model.Regions.Values)
