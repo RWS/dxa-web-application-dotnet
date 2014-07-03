@@ -7,7 +7,7 @@
 <select class="selectpicker" data-width="auto">
     @foreach(var loc in Configuration.Localizations.Values)
     {
-        <option value="/resolve/@(pageId)?localization=@loc.LocalizationId" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>@Configuration.GetConfig("core.language",loc.Path)</option>
+        <option value="@loc.LocalizationId" data-href="/resolve/@(pageId)?localization=@loc.LocalizationId" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>@Configuration.GetConfig("core.language",loc.Path)</option>
     }
 </select>
 }
