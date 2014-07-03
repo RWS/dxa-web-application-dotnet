@@ -54,8 +54,9 @@ namespace Sdl.Web.DD4T
         public bool ProcessRequest(HttpRequest request)
         {
             string urlPath = request.Url.AbsolutePath.Replace("/" + Configuration.StaticsFolder, "");
+            string physicalPath = request.PhysicalPath;
             Log.Debug("Start processing " + urlPath);
-            return ProcessUrl(urlPath);
+            return ProcessUrl(urlPath, false, physicalPath);
         }
 
 
@@ -76,10 +77,13 @@ namespace Sdl.Web.DD4T
         /// Main worker method reads binary from Broker and stores it in file-system
         /// </summary>
         /// <returns></returns>
-        public bool ProcessUrl(string urlPath, bool cacheSinceAppStart = false)
+        public bool ProcessUrl(string urlPath, bool cacheSinceAppStart = false, string physicalPath = null)
         {
             Dimensions dimensions = null;
-            String physicalPath = GetFilePathFromUrl(urlPath);
+            if (physicalPath == null)
+            {
+                physicalPath = GetFilePathFromUrl(urlPath);
+            }
             urlPath = StripDimensions(urlPath, out dimensions);
             string cacheKey = GetCacheKey(urlPath);
             DateTime? lastPublishedDate = CacheAgent.Load(cacheKey) as DateTime?;
