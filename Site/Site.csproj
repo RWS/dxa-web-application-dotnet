@@ -146,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Areas\Core\CoreAreaRegistration.cs" />
+    <Compile Include="Areas\MyCompany_Examples\Models\SpecialOffer.cs" />
     <Compile Include="Areas\GoogleAnalytics\GoogleAnalyticsAreaRegistration.cs" />
     <Compile Include="Areas\Core\Controllers\EntityController.cs" />
     <Compile Include="Areas\Core\Controllers\ListController.cs" />
@@ -154,6 +155,7 @@
     </Compile>
     <Compile Include="Areas\Core\Controllers\PageController.cs" />
     <Compile Include="Areas\Core\Controllers\RegionController.cs" />
+    <Compile Include="Areas\MyCompany_Examples\MyCompany_ExamplesAreaRegistration.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -161,6 +163,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
+    <Content Include="Areas\MyCompany_Examples\Views\Entity\SpecialOffer.cshtml" />
+    <Content Include="Areas\MyCompany_Examples\Views\web.config" />
+    <None Include="Scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="Scripts\jquery-1.10.2.js" />
+    <Content Include="Scripts\jquery-1.10.2.min.js" />
+    <None Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery.validate.js" />
+    <Content Include="Scripts\jquery.validate.min.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -233,9 +245,12 @@
     <Content Include="Views\web.config">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Scripts\jquery-1.10.2.min.map" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\Core\Views\Entity\GoogleAnalytics\" />
+    <Folder Include="Areas\MyCompany_Examples\Controllers\" />
+    <Folder Include="Areas\MyCompany_Examples\Views\Shared\" />
     <Folder Include="bin\" />
   </ItemGroup>
   <ItemGroup>
