@@ -13,6 +13,7 @@ using System.Drawing.Imaging;
 using System.Text.RegularExpressions;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using Sdl.Web.Common;
 
 namespace Sdl.Web.DD4T
 {

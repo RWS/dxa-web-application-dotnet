@@ -6,6 +6,7 @@ using System.Web;
 using System.Configuration;
 using DD4T.Utils;
 using Sdl.Web.Mvc;
+using Sdl.Web.Common;
 
 namespace Sdl.Web.DD4T
 {

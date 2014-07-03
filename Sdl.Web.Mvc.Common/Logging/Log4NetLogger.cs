@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace Sdl.Web.Mvc
+namespace Sdl.Web.Common
 {
     public class Log4NetLogger : ILogger
     {

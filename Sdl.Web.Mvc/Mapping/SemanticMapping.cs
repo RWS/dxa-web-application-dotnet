@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
+using Sdl.Web.Common;
 
 namespace Sdl.Web.Mvc.Mapping
 {

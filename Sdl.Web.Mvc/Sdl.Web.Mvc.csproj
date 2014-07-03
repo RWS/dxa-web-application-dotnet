@@ -30,9 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net">
-      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
@@ -93,8 +90,6 @@
     <Compile Include="Html\BaseRenderer.cs" />
     <Compile Include="Html\HtmlHelperExtensions.cs" />
     <Compile Include="Html\UrlHelperExtensions.cs" />
-    <Compile Include="Logging\Log4NetLogger.cs" />
-    <Compile Include="Logging\Logger.cs" />
     <Compile Include="Mapping\BaseModelBuilder.cs" />
     <Compile Include="Mapping\BaseContentProvider.cs" />
     <Compile Include="Mapping\SchemaSemantics.cs" />

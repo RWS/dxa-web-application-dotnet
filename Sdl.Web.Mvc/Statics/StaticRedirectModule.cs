@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Configuration;
+using Sdl.Web.Common;
 
 namespace Sdl.Web.Mvc
 {

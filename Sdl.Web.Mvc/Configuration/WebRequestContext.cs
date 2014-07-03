@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Sdl.Web.Common;
 
 namespace Sdl.Web.Mvc
 {

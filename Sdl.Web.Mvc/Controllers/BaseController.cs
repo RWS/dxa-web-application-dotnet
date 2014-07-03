@@ -8,7 +8,7 @@ using Sdl.Web.Models;
 using Sdl.Web.Common.Interfaces;
 using System.Linq;
 using Sdl.Web.Models.Interfaces;
-
+using Sdl.Web.Common;
 namespace Sdl.Web.Mvc
 {
     public abstract class BaseController : Controller

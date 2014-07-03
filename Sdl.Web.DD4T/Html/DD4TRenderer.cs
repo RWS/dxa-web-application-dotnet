@@ -9,6 +9,7 @@ using System;
 using System.Web.Routing;
 using interfaces = Sdl.Web.Models.Interfaces;
 using Sdl.Web.Tridion;
+using Sdl.Web.Common;
 
 namespace Sdl.Web.DD4T
 {
