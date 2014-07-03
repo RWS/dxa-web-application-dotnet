@@ -17,10 +17,10 @@ namespace Sdl.Web.DD4T
 {
     public class DD4TContentProvider : BaseContentProvider
     {
-        readonly ExtensionlessLinkFactory LinkFactory;
+        readonly ILinkFactory LinkFactory;
         readonly IPageFactory PageFactory;
 
-        public DD4TContentProvider(ExtensionlessLinkFactory linkFactory, IModelBuilder modelBuilder, IPageFactory pageFactory, IContentResolver resolver)
+        public DD4TContentProvider(ILinkFactory linkFactory, IModelBuilder modelBuilder, IPageFactory pageFactory, IContentResolver resolver)
         {
             ContentResolver = resolver;
             LinkFactory = linkFactory;

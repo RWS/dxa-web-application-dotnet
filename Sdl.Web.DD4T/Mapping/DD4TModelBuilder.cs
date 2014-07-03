@@ -13,15 +13,16 @@ using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common;
 using Sdl.Web.DD4T;
 using Sdl.Web.Common.Interfaces;
+using DD4T.ContentModel.Factories;
 
 namespace Sdl.Web.DD4T.Mapping
 {
     public partial class DD4TModelBuilder : BaseModelBuilder
     {
-        readonly public ExtensionlessLinkFactory LinkFactory;
+        readonly public ILinkFactory LinkFactory;
         readonly IContentResolver ContentResolver;
 
-        public DD4TModelBuilder(ExtensionlessLinkFactory linkFactory, IContentResolver contentResolver)
+        public DD4TModelBuilder(ILinkFactory linkFactory, IContentResolver contentResolver)
         {
             LinkFactory = linkFactory;
             ContentResolver = contentResolver;
@@ -458,7 +459,7 @@ namespace Sdl.Web.DD4T.Mapping
                 List<String> urls = new List<String>();
                 foreach (var comp in items)
                 {
-                    var url = LinkFactory.ResolveExtensionlessLink(comp.Id);
+                    var url = LinkFactory.ResolveLink(comp.Id);
                     if (url != null)
                     {
                         urls.Add(url);
@@ -711,7 +712,7 @@ namespace Sdl.Web.DD4T.Mapping
                 switch (field.Name)
                 {
                     case "internalLink":
-                        value = LinkFactory.ResolveExtensionlessLink(field.Value);
+                        value = LinkFactory.ResolveLink(field.Value);
                         break;
                     case "image":
                         value = field.LinkedComponentValues[0].Multimedia.Url;

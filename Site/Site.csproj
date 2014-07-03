@@ -71,9 +71,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="RouteDebugger">
-      <HintPath>..\packages\routedebugger.2.1.4.0\lib\net40\RouteDebugger.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
@@ -252,7 +249,7 @@
       <Project>{923b2009-9a0b-4425-88a5-bf7af25c8f8b}</Project>
       <Name>Sdl.Web.Mvc</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Sdl.Web.Mvc.Common\Sdl.Web.Common.csproj">
+    <ProjectReference Include="..\Sdl.Web.Common\Sdl.Web.Common.csproj">
       <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
       <Name>Sdl.Web.Common</Name>
     </ProjectReference>
