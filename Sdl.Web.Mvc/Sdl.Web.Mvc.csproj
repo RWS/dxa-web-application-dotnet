@@ -82,6 +82,7 @@
     <Compile Include="Controllers\HandleSectionErrorAttribute.cs" />
     <Compile Include="Html\BaseMediaHelper.cs" />
     <Compile Include="Html\ContextualMediaHelper.cs" />
+    <Compile Include="Html\Markup.cs" />
     <Compile Include="Mapping\NavigationBuilder.cs" />
     <Compile Include="Mapping\ComponentType.cs" />
     <Compile Include="Mapping\XpmRegion.cs" />

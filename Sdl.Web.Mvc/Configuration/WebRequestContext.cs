@@ -91,6 +91,15 @@ namespace Sdl.Web.Mvc
             }
         }
 
+        public static bool IsPreview
+        {
+            //For now we cannot reliably detect when we are in experience manager, so we set this to be true whenever we are in staging
+            get
+            {
+                return (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", Configuration.IsStaging);
+            }
+        }
+
         protected static Localization GetCurrentLocalization()
         {
             //If theres a single localization use that regardless

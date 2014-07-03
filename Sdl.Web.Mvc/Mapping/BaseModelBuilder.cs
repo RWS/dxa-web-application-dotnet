@@ -84,9 +84,9 @@ namespace Sdl.Web.Mvc.Mapping
                     break;
                 }
             }
-            if (!EntityPropertySemantics.ContainsKey(type))
+            lock (semanticsLock)
             {
-                lock (semanticsLock)
+                if (!EntityPropertySemantics.ContainsKey(type))
                 {
                     var result = new Dictionary<string, List<SemanticProperty>>();
                     foreach (var pi in type.GetProperties())
