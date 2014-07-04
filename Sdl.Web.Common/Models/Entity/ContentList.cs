@@ -12,6 +12,7 @@ namespace Sdl.Web.Models
         //TODO add concept of filtering/query (filter options and active filters/query)
         [SemanticProperty("s:headline")]
         public string Headline { get; set; }
+        public Link Link { get; set; }
         public int PageSize { get; set; }
         public Tag ContentType { get; set; }
         public Tag Sort { get; set; }

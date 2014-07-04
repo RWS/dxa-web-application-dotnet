@@ -25,4 +25,10 @@
         </li>
     }
     </ul>
+    @if (Model.Link != null)
+    {
+        <p @Markup.Property(Model, "Link.LinkText")>
+            <a href="@Model.Link.Url" title="@Model.Link.AlternateText">@(Model.Link.LinkText ?? Html.Resource("core.readMoreLinkText")) <i class="fa fa-chevron-right"></i></a>
+        </p>
+    }
 </div>
