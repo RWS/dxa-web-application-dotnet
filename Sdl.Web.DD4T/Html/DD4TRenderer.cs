@@ -10,6 +10,7 @@ using System.Web.Routing;
 using interfaces = Sdl.Web.Models.Interfaces;
 using Sdl.Web.Tridion;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.DD4T
 {
@@ -18,12 +19,10 @@ namespace Sdl.Web.DD4T
         public override MvcHtmlString RenderEntity(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
             var cp = item as IComponentPresentation;
-            if (cp != null && (excludedItems == null || !excludedItems.Contains(cp.ComponentTemplate.Title)))
+            var mvcData = ContentResolver.ResolveMvcData(cp);
+            if (cp != null && (excludedItems == null || !excludedItems.Contains(mvcData.ViewName)))
             {
                 DateTime timerStart = DateTime.Now;
-                string controller = Configuration.GetEntityController();
-                string action = Configuration.GetEntityAction();
-                string area = Configuration.GetDefaultModuleName();
                 var parameters = new RouteValueDictionary();
                 int parentContainerSize = helper.ViewBag.ContainerSize;
                 if (parentContainerSize == 0)
@@ -36,40 +35,12 @@ namespace Sdl.Web.DD4T
                 }
                 parameters["containerSize"] = (containerSize * parentContainerSize) / Configuration.MediaHelper.GridSize;
                 parameters["entity"] = cp;
-                if (cp.ComponentTemplate.MetadataFields != null)
+                parameters["area"] = mvcData.ControllerAreaName;
+                foreach (var key in mvcData.RouteValues.Keys)
                 {
-                    if (cp.ComponentTemplate.MetadataFields.ContainsKey("controller"))
-                    {
-                        var bits = cp.ComponentTemplate.MetadataFields["controller"].Value.Split(':');
-                        if (bits.Length > 1)
-                        {
-                            controller = bits[1];
-                            area = bits[0];
-                        }
-                        else
-                        {
-                            controller = bits[0];
-                        }
-                    }
-                    if (cp.ComponentTemplate.MetadataFields.ContainsKey("action"))
-                    {
-                        action = cp.ComponentTemplate.MetadataFields["action"].Value;
-                    }
-                    if (cp.ComponentTemplate.MetadataFields.ContainsKey("routeValues"))
-                    {
-                        var bits = cp.ComponentTemplate.MetadataFields["routeValues"].Value.Split(',');
-                        foreach (string bit in bits)
-                        {
-                            var parameter = bit.Trim().Split(':');
-                            if (parameter.Length > 1)
-                            {
-                                parameters[parameter[0]] = parameter[1];
-                            }
-                        }
-                    }
+                    parameters[key] = mvcData.RouteValues[key];
                 }
-                parameters["area"] = area;
-                MvcHtmlString result = helper.Action(action, controller, parameters);
+                MvcHtmlString result = helper.Action(mvcData.ActionName, mvcData.ControllerName, parameters);
                 Log.Trace(timerStart, "entity-render", cp.Component.Title);
                 timerStart = DateTime.Now;
                 if (WebRequestContext.IsPreview)
@@ -84,17 +55,15 @@ namespace Sdl.Web.DD4T
 
         public override MvcHtmlString RenderRegion(interfaces.IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
+            var mvcData = ContentResolver.ResolveMvcData(region);
             if (region != null && (excludedItems == null || !excludedItems.Contains(region.Name)))
             {
                 DateTime timerStart = DateTime.Now;
-                string controller = Configuration.GetRegionController();
-                string action = Configuration.GetRegionAction();
-                string area = region.Module;
                 if (containerSize == 0)
                 {
                     containerSize = Configuration.MediaHelper.GridSize;
                 }
-                MvcHtmlString result = helper.Action(action, controller, new {Region = region, containerSize = containerSize, area=area });
+                MvcHtmlString result = helper.Action(mvcData.ActionName, mvcData.ControllerName, new { Region = region, containerSize = containerSize, area = mvcData.ControllerAreaName });
                 Log.Trace(timerStart, "region-render", region.Name);
                 timerStart = DateTime.Now;
 

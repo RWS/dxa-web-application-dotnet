@@ -146,7 +146,7 @@ namespace Sdl.Web.Mvc
             }
         }
 
-        protected virtual Type GetViewType(ViewData viewData)
+        protected virtual Type GetViewType(MvcData viewData)
         {
             var key = String.Format("{0}:{1}", viewData.AreaName, viewData.ViewName);
             if (!Configuration.ViewModelRegistry.ContainsKey(key))
@@ -168,17 +168,9 @@ namespace Sdl.Web.Mvc
             return Configuration.ViewModelRegistry[key];
         }
 
-        protected virtual ViewData GetViewData(object sourceModel)
+        protected virtual MvcData GetViewData(object sourceModel)
         {
-            switch (ModelType)
-            {
-                case ModelType.Page:
-                    return ContentProvider.GetPageViewData(sourceModel);
-                case ModelType.Region:
-                    return ContentProvider.GetRegionViewData(sourceModel);
-                default:
-                    return ContentProvider.GetEntityViewData(sourceModel);
-            }
+            return ContentProvider.ContentResolver.ResolveMvcData(sourceModel);
         }
 
         //This is the method to override if you need to add custom model population logic, first calling the base class and then adding your own logic

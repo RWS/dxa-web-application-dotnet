@@ -14,6 +14,7 @@ using Sdl.Web.Common;
 using Sdl.Web.DD4T;
 using Sdl.Web.Common.Interfaces;
 using DD4T.ContentModel.Factories;
+using Sdl.Web.Tridion;
 
 namespace Sdl.Web.DD4T.Mapping
 {
@@ -630,26 +631,26 @@ namespace Sdl.Web.DD4T.Mapping
                 {
                     var region = GetRegionFromComponentPresentation(cp);
                     // determine title and description from first component in 'main' region
-                    if (first && region.Name.Equals(Configuration.RegionForPageTitleComponent))
+                    if (first && region.Name.Equals(TridionConfig.RegionForPageTitleComponent))
                     {
                         first = false;
                         IFieldSet metadata = cp.Component.MetadataFields;
                         IFieldSet fields = cp.Component.Fields;
-                        if (metadata.ContainsKey(Configuration.StandardMetadataXmlFieldName) && metadata[Configuration.StandardMetadataXmlFieldName].EmbeddedValues.Count > 0)
+                        if (metadata.ContainsKey(TridionConfig.StandardMetadataXmlFieldName) && metadata[TridionConfig.StandardMetadataXmlFieldName].EmbeddedValues.Count > 0)
                         {
-                            IFieldSet standardMeta = metadata[Configuration.StandardMetadataXmlFieldName].EmbeddedValues[0];
-                            if (title==null && standardMeta.ContainsKey(Configuration.StandardMetadataTitleXmlFieldName))
+                            IFieldSet standardMeta = metadata[TridionConfig.StandardMetadataXmlFieldName].EmbeddedValues[0];
+                            if (title == null && standardMeta.ContainsKey(TridionConfig.StandardMetadataTitleXmlFieldName))
                             {
-                                title = standardMeta[Configuration.StandardMetadataTitleXmlFieldName].Value;
+                                title = standardMeta[TridionConfig.StandardMetadataTitleXmlFieldName].Value;
                             }
-                            if (description==null && standardMeta.ContainsKey(Configuration.StandardMetadataDescriptionXmlFieldName))
+                            if (description == null && standardMeta.ContainsKey(TridionConfig.StandardMetadataDescriptionXmlFieldName))
                             {
-                                description = standardMeta[Configuration.StandardMetadataDescriptionXmlFieldName].Value;
+                                description = standardMeta[TridionConfig.StandardMetadataDescriptionXmlFieldName].Value;
                             }
                         }
-                        if (title == null && fields.ContainsKey(Configuration.ComponentXmlFieldNameForPageTitle))
+                        if (title == null && fields.ContainsKey(TridionConfig.ComponentXmlFieldNameForPageTitle))
                         {
-                            title = fields[Configuration.ComponentXmlFieldNameForPageTitle].Value;
+                            title = fields[TridionConfig.ComponentXmlFieldNameForPageTitle].Value;
                         }
                         //Try to find an image
                         if (image == null && fields.ContainsKey("image"))

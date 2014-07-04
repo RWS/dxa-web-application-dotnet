@@ -27,9 +27,6 @@ namespace Sdl.Web.Mvc
         public abstract string GetPageContent(string url);
         public abstract object GetEntityModel(string id);
         public abstract string GetEntityContent(string url);
-        public abstract ViewData GetEntityViewData(object entity);
-        public abstract ViewData GetPageViewData(object page);
-        public abstract ViewData GetRegionViewData(object region);
 
         protected abstract object GetPageModelFromUrl(string url);
         
@@ -74,19 +71,8 @@ namespace Sdl.Web.Mvc
         public virtual object MapModel(object data, ModelType modelType, Type viewModeltype = null)
         {
             List<object> includes = GetIncludesFromModel(data, modelType);
-            ViewData viewData = null;
-            switch (modelType)
-            {
-                case ModelType.Page:
-                    viewData = GetPageViewData(data);
-                    break;
-                case ModelType.Region:
-                    viewData = GetRegionViewData(data);
-                    break;
-                default:
-                    viewData = GetEntityViewData(data);
-                    break;
-            }
+            MvcData viewData = null;
+            viewData = ContentResolver.ResolveMvcData(data);
             if (viewModeltype == null)
             {
                 var key = String.Format("{0}:{1}", viewData.AreaName, viewData.ViewName);

@@ -30,13 +30,6 @@ namespace Sdl.Web.Common
         public static IStaticFileManager StaticFileManager { get; set; }
         public static Dictionary<string, Localization> Localizations { get; set; }
         
-        // page title and meta field mappings
-        public static string StandardMetadataXmlFieldName = "standardMeta";
-        public static string StandardMetadataTitleXmlFieldName = "name";
-        public static string StandardMetadataDescriptionXmlFieldName = "description";
-        public static string RegionForPageTitleComponent = "Main";
-        public static string ComponentXmlFieldNameForPageTitle = "headline";
-
         public const string VersionRegex = "(v\\d*.\\d*)";
         public const string SystemFolder = "system";
         public const string CoreModuleName = "core";
@@ -281,13 +274,8 @@ namespace Sdl.Web.Common
                 }
                 Localizations = relevantLocalizations;
                 Log.Debug("The following localizations are active for this site: {0}", String.Join(", ", Localizations.Select(l=>l.Key).ToArray()));
-                SetVersion();
+                
             }            
-        }
-
-        private static void SetVersion()
-        {
-            
         }
 
         private static Dictionary<string, string> GetConfigFromFile(string file)
@@ -298,6 +286,15 @@ namespace Sdl.Web.Common
         public static string GetDefaultDocument()
         {
             return "index";
+        }
+
+        public static string GetPageController()
+        {
+            return "Page";
+        }
+        public static string GetPageAction()
+        {
+            return "Page";
         }
 
         public static string GetRegionController()
@@ -359,7 +356,7 @@ namespace Sdl.Web.Common
             return url;
         }
 
-        public static void AddViewModelToRegistry(ViewData viewData, string viewPath)
+        public static void AddViewModelToRegistry(MvcData viewData, string viewPath)
         {
             lock (ViewRegistryLock)
             {

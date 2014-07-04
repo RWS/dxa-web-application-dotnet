@@ -20,7 +20,16 @@ namespace Sdl.Web.Tridion
         private static object localizationLock = new object();
         private static object regionLock = new object();
         private static Dictionary<string, XpmRegion> _xpmRegions;
+
+        // page title and meta field mappings
+        public static string StandardMetadataXmlFieldName = "standardMeta";
+        public static string StandardMetadataTitleXmlFieldName = "name";
+        public static string StandardMetadataDescriptionXmlFieldName = "description";
+        public static string RegionForPageTitleComponent = "Main";
+        public static string ComponentXmlFieldNameForPageTitle = "headline";
+
         
+
         public static Dictionary<string, XpmRegion> XpmRegions
         {
             get

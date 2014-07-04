@@ -28,44 +28,11 @@ namespace Sdl.Web.DD4T
             this.PageFactory = pageFactory;
         }
         
-        public override ViewData GetPageViewData(object pageObject)
-        {
-            var page = (IPage)pageObject;
-            var viewName = page.PageTemplate.Title.Replace(" ", "");
-            if (page.PageTemplate.MetadataFields != null)
-            {
-                if (page.PageTemplate.MetadataFields.ContainsKey("view"))
-                {
-                    viewName = page.PageTemplate.MetadataFields["view"].Value;
-                }
-            }
-            return BuildViewData(viewName); 
-        }
+        
 
-        public override ViewData GetEntityViewData(object entity)
-        {
-            var componentPresentation = (ComponentPresentation)entity;
-            var template = componentPresentation.ComponentTemplate;
-            //strip region and whitespace
-            string viewName = Regex.Replace(template.Title, @"\[.*\]|\s", "");
-            if (template.MetadataFields != null)
-            {
-                if (template.MetadataFields.ContainsKey("view"))
-                {
-                    viewName = componentPresentation.ComponentTemplate.MetadataFields["view"].Value;
-                }
-            }
-            return BuildViewData(viewName); 
-        }
+        
 
-        public override ViewData GetRegionViewData(object region)
-        {
-            var model = (interfaces.IRegion)region;
-            var viewName = model.Name.Replace(" ", "");
-            return BuildViewData(viewName); 
-        }
-
-        protected virtual ViewData BuildViewData(string viewName)
+        protected virtual MvcData BuildViewData(string viewName)
         {
             var bits = viewName.Split(':');
             var areaName = Configuration.GetDefaultModuleName();
@@ -78,7 +45,7 @@ namespace Sdl.Web.DD4T
             {
                 viewName = bits[0].Trim();
             }
-            return new ViewData() { ViewName = viewName, AreaName = areaName };
+            return new MvcData() { ViewName = viewName, AreaName = areaName };
         }
         
         protected override object GetPageModelFromUrl(string url)
