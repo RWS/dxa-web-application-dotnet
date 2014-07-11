@@ -38,7 +38,7 @@
         $(document).ready(function () {
             $('.selectpicker').selectpicker();
 
-            $(function () {
+            $(window).resize(function () {
                 var footerHeight = $("#page-footer").height();
                 $("#page-wrapper").css("padding-bottom", footerHeight);
                 $("#page-footer").css("margin-top", -footerHeight);
