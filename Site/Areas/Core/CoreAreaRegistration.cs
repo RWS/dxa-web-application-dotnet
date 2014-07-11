@@ -20,6 +20,11 @@ namespace Site.Areas.Core
                 "sitemap",
                 new { controller = "Navigation", action = "SiteMap" }
             );
+            context.MapRoute(
+                "Core_Sitemap_Xml",
+                "sitemap.xml",
+                new { controller = "Navigation", action = "SiteMap" }
+            );
 
             //For resolving ids to urls
             context.MapRoute(
