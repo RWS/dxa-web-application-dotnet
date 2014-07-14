@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("SDL Tridion B.V.")]
 [assembly: AssemblyProduct("SDL Web Reference Implementation")]
-[assembly: AssemblyCopyright("Copyright ©  2014 SDL Tridion Development Lab B.V.")]
+[assembly: AssemblyCopyright("Copyright © 2014 SDL Tridion Development Lab B.V.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("7.1.0.*")]
+[assembly: AssemblyVersion("7.1.*")]
 //[assembly: AssemblyFileVersion("7.1.0.0")]
