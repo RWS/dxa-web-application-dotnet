@@ -1,0 +1,23 @@
+﻿@model Sdl.Web.Models.Location
+@{
+    var queryString = Configuration.GetConfig("core.mapsApiKey");
+    if (String.IsNullOrEmpty(queryString) || queryString=="xxx")
+    {
+        queryString = "";
+    }
+    else
+    {
+        queryString = String.Format("&key={0}", queryString);
+    }
+    var divId = Configuration.GetUniqueId("map");
+    var name = (ViewData["MarkerName"] ?? "").ToString();
+    var heightString = (ViewData["MapHeight"] ?? "160").ToString();
+    var widthString = (ViewData["MapWidth"] ?? "311").ToString();
+    var lat = Model.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    var lng = Model.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    var marker = String.Format("&markers={0},{1}", lat, lng);
+    queryString = String.Format("?center={0},{1}&zoom=15&size={2}x{3}{4}{5}", lat, lng, widthString, heightString, marker, queryString);
+}
+<div id="@divId" style="height:@heightString">
+    <img src="//maps.googleapis.com/maps/api/staticmap@(queryString)" alt="@name">
+</div>
