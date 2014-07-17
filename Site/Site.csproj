@@ -143,6 +143,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Areas\Core\Controllers\AdminController.cs" />
     <Compile Include="Areas\Core\CoreAreaRegistration.cs" />
     <Compile Include="Areas\GoogleAnalytics\GoogleAnalyticsAreaRegistration.cs" />
     <Compile Include="Areas\Core\Controllers\EntityController.cs" />
@@ -236,6 +237,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Areas\Core\Views\Admin\" />
     <Folder Include="Areas\Core\Views\Entity\GoogleAnalytics\" />
     <Folder Include="bin\" />
   </ItemGroup>
@@ -283,7 +285,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>59860</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>

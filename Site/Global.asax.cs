@@ -25,6 +25,7 @@ namespace Sdl.Web.Site
         {
             RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
             RouteTable.Routes.IgnoreRoute("cid/{*pathInfo}");
+            RouteTable.Routes.MapMvcAttributeRoutes();
         }
 
         protected void Application_Start()
