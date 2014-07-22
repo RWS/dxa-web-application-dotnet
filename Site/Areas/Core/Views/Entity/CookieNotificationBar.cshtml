@@ -1,5 +1,5 @@
 ﻿@model Sdl.Web.Models.Notification
-<div id="cookiebar" class="container-fluid page-border" @Markup.Entity(Model)>
+<div id="cookie" class="container-fluid page-border" @Markup.Entity(Model)>
     <div class="row">
         <div class="col-sm-9">
             <div class="h4" @Markup.Property(Model, "Headline")>@Model.Headline</div>
@@ -8,7 +8,7 @@
         <div class="col-sm-3">
             <ul class="nav nav-cookie">
                 <li @Markup.Property(Model, "Continue")>
-                    <a id="cookiebar-hide" href="#"><i class="fa fa-check-circle"></i> @Model.Continue</a>
+                    <a id="cookie-hide" href="#"><i class="fa fa-check-circle"></i> @Model.Continue</a>
                 </li>
                 @if (Model.Link != null)
                 {

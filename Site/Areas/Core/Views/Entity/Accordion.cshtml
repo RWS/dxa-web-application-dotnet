@@ -14,10 +14,8 @@
                 {
                     string collapseId = Guid.NewGuid().ToString();
                     <div class="panel panel-default" @Markup.Property(Model, "itemListElement", i++)>
-                        <div class="panel-heading">
-                            <h4 class="panel-title" @Markup.Property(element, "Headline")>
-                                <a data-toggle="collapse" data-parent="#@accordionId" href="#@collapseId">@element.Headline</a>
-                            </h4>
+                        <div class="panel-heading" data-toggle="collapse" data-target="#@collapseId" data-parent="#@accordionId">
+                            <h4 class="panel-title" @Markup.Property(element, "Headline")>@element.Headline</h4>
                         </div>
                         <div id="@collapseId" class="panel-collapse collapse @(i==1?"in":"")">
                             <div class="panel-body">

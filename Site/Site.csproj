@@ -143,6 +143,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Areas\Core\Controllers\AdminController.cs" />
     <Compile Include="Areas\Core\CoreAreaRegistration.cs" />
     <Compile Include="Areas\GoogleAnalytics\GoogleAnalyticsAreaRegistration.cs" />
     <Compile Include="Areas\Core\Controllers\EntityController.cs" />
@@ -225,6 +226,7 @@
     <Content Include="Areas\GoogleAnalytics\Views\web.config">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Areas\Core\Views\Entity\Partials\GoogleStaticMap.cshtml" />
     <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
     <None Include="Properties\PublishProfiles\Distribution.pubxml" />
     <None Include="Properties\PublishProfiles\Publish to Local Demo Site.pubxml" />
@@ -235,7 +237,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Areas\Core\Views\Entity\GoogleAnalytics\" />
+    <Folder Include="Areas\Core\Views\Admin\" />
     <Folder Include="bin\" />
   </ItemGroup>
   <ItemGroup>
