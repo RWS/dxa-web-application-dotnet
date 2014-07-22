@@ -23,15 +23,15 @@
     <![endif]-->
 </head>
 <body>
-    <div id="page-wrapper">
-        @if (Model.Includes.ContainsKey("Header"))
-        {
-            @Html.Partial("Header", Model.Includes["Header"])
-        }
-        <div class="container-fluid page-border" role="main">
-            @RenderBody()
-        </div>
-    </div>
+    @if (Model.Includes.ContainsKey("Header"))
+    {
+        @Html.Partial("Header", Model.Includes["Header"])
+    }
+    <main class="page-row page-row-expanded" role="main">
+		<div class="container-fluid page-border">
+			@RenderBody()
+		</div>
+    </main>
     @if (Model.Includes.ContainsKey("Footer"))
     {
         @Html.Partial("Footer", Model.Includes["Footer"])
@@ -40,12 +40,6 @@
     <script>
         $(document).ready(function () {
             $('.selectpicker').selectpicker();
-
-            $(window).resize(function () {
-                var footerHeight = $("#page-footer").height();
-                $("#page-wrapper").css("padding-bottom", footerHeight);
-                $("#page-footer").css("margin-top", -footerHeight);
-            });
 
             $('.image-loading').each(function (e) {
                 $(this).addClass('is-loading');

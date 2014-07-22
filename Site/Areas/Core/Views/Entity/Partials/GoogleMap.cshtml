@@ -14,7 +14,7 @@
     var heightString = (ViewData["MapHeight"] ?? "300px").ToString();
     
 }
-<div id="@divId" style="height:@heightString"></div>
+<div id="@divId" class="static-map" style="height:@heightString"></div>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?@(queryString)"></script>
 <script type="text/javascript">
 	function initialize() {
