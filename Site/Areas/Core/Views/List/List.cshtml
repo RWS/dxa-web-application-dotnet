@@ -10,13 +10,13 @@
         <li>
             @if (item.Link != null && item.Link.Url != null)
             {
-            <a href="@item.Link.Url">
-                @item.Headline
-            </a>
+                <a href="@item.Link.Url" title="@item.Link.AlternateText">
+                    @(item.Headline != null ? item.Headline : item.Link.Url)
+                </a>
             }
             else
             {
-            @item.Headline
+                @item.Headline
             }
             @if (item.Date != null)
             {
@@ -25,7 +25,7 @@
         </li>
     }
     </ul>
-    @if (Model.Link != null)
+    @if (Model.Link != null && Model.Link.Url != null)
     {
         <p @Markup.Property(Model, "Link.LinkText")>
             <a href="@Model.Link.Url" title="@Model.Link.AlternateText">@(Model.Link.LinkText ?? Html.Resource("core.readMoreLinkText")) <i class="fa fa-chevron-right"></i></a>
