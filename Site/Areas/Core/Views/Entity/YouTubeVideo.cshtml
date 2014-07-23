@@ -2,7 +2,7 @@
 <div class="video" @Markup.Entity(Model)> 
     @if (Model.Headline!=null)
     {
-    <h3 @Markup.Property(Model, "Headline")>@Model.Headline</h3>
+        <h3 @Markup.Property(Model, "Headline")>@Model.Headline</h3>
     }   
     @Html.Media(Model,"100%")
 </div>

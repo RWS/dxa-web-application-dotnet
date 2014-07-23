@@ -12,6 +12,7 @@
     </h3>
     @if (Model.Location != null)
     {
-    @Html.Partial("Partials/GoogleStaticMap", Model.Location, new ViewDataDictionary { { "MarkerName", Model.Headline},{ "MapHeight", "160"},{ "MapWidth", "311"} })
+        @* TODO: set MapWidth dynamicly in Partials/GoogleStaticMap based on aspect ratio *@
+        @Html.Partial("Partials/GoogleStaticMap", Model.Location, new ViewDataDictionary { { "MarkerName", Model.Headline},{ "MapHeight", "160"},{ "MapWidth", "311"} })
     }
 </div>
