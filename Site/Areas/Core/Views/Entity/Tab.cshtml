@@ -1,4 +1,8 @@
 ﻿@model Sdl.Web.Models.ItemList
+@helper TabId(string panelId, int index)
+{
+    @("tab" + panelId + "_" + index)
+}
 <article class="rich-text" @Markup.Entity(Model)>
     <div class="content">
         @if (Model.Headline != null)
@@ -7,18 +11,18 @@
         }
         @if (Model.ItemListElements.Count > 0)
         {
-            int i;
-            string panelId = Guid.NewGuid().ToString();
+            string panelId = Guid.NewGuid().ToString("N");
             <div class="panel panel-default">
                 <div class="panel-body">
                     <!-- Tab dropdown -->
                     <div class="dropdown visible-xs">
                         <select class="form-control tab-select" data-toggle="tab">
-                            @{i=0;}
+                            @{
+                                int i = 0;
+                            }
                             @foreach (Teaser element in Model.ItemListElements)
                             {
-                                string tabId = "tab" + panelId + "-" + i;
-                                <option data-target="#@tabId">@element.Headline</option>
+                                <option data-target="#@TabId(panelId, i)" data-toggle="tab">@element.Headline</option>
                                 i++;
                             }
                         </select>
@@ -28,31 +32,27 @@
                         @{i = 0;}
                         @foreach (Teaser element in Model.ItemListElements)
                         {
-                            string tabId = "tab" + panelId + "-" + i;
                             <li class="@(i==0?"active":"")">
-                                <a href="#@tabId" data-toggle="tab" @Markup.Property(element, "Headline")>@element.Headline</a>
+                                <a href="#@TabId(panelId, i)" data-toggle="tab" @Markup.Property(element, "Headline")>@element.Headline</a>
                             </li>
                             i++;
                         }
                     </ul>
                     <!-- Tab panes -->
                     <div class="tab-content">
-                        @{i=0;}
+                        @{i = 0;}
                         @foreach (Teaser element in Model.ItemListElements)
                         {
-                            string tabId = "tab" + panelId + ":" + i;
-                            <div class="tab-pane @(i == 0 ? "active" : "")" id="@tabId">
+                            <div class="tab-pane @(i == 0 ? "active" : "")" id="@TabId(panelId, i)">
                                 <div @Markup.Property(element, "Text")>
                                     @Html.Raw(element.Text)
                                 </div>
-
                                 @if (element.Media != null)
                                 {
                                     <figure @Markup.Property(element, "Media")>
                                         @Html.Media(element.Media)
                                     </figure>
                                 }
-
                                 @if (element.Link != null)
                                 {
                                     <p @Markup.Property(element, "Link.LinkText")>
