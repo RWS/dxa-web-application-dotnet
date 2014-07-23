@@ -1,24 +1,20 @@
-﻿using log4net;
+﻿using System;
+using System.Web;
+using log4net;
 using log4net.Config;
 using Sdl.Web.Common.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 
 namespace Sdl.Web.Common
 {
     public class Log4NetLogger : ILogger
     {
-        private static bool _configured = false;
-        private static string traceFormat = "url:{0},type:{1},time:{2},details:{3}";
-        
+        //private const bool Configured = false;
+        private const string TraceFormat = "url:{0},type:{1},time:{2},details:{3}";
+
         /// <summary>
         /// Used to log performance metrics to a separate log file
         /// </summary>
-        /// <param name="time">Time (in milliseconds) to execute the action</param>
+        /// <param name="start">Date and time to execute the action</param>
         /// <param name="type">Type of action</param>
         /// <param name="messageFormat">Detailed message format string</param>
         /// <param name="parameters">Message format string parameters</param>
@@ -32,12 +28,12 @@ namespace Sdl.Web.Common
                 {
                     url = HttpContext.Current.Request.RawUrl;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     //ignore - we are in a non request context
                 }
                 var message = String.Format(messageFormat, parameters);
-                log.InfoFormat(traceFormat, url, type, (DateTime.Now - start).TotalMilliseconds, message);
+                log.InfoFormat(TraceFormat, url, type, (DateTime.Now - start).TotalMilliseconds, message);
             }
         }
 
@@ -85,10 +81,7 @@ namespace Sdl.Web.Common
 
         public static void Configure()
         {
-            if (!_configured)
-            {
-                XmlConfigurator.Configure();
-            }
+            XmlConfigurator.Configure();
         }
     }
 }

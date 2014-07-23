@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 using Sdl.Web.Common;
 using Sdl.Web.Tridion.Context;
@@ -14,7 +11,8 @@ namespace Sdl.Web.Mvc
     /// </summary>
     public class WebRequestContext
     {
-        private static int maxWidth = 1024;
+        private const int maxWidth = 1024;
+
         public static Localization Localization
         {
             get
@@ -88,7 +86,7 @@ namespace Sdl.Web.Mvc
         {
             get
             {
-                return (bool?)GetFromContextStore("IsDeveloperMode") ?? (bool)AddToContextStore("IsDeveloperMode", WebRequestContext.Localization.Domain=="localhost");
+                return (bool?)GetFromContextStore("IsDeveloperMode") ?? (bool)AddToContextStore("IsDeveloperMode", Localization.Domain=="localhost");
             }
         }
 
@@ -123,7 +121,7 @@ namespace Sdl.Web.Mvc
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //Do nothing - In some cases we do not have a request (loading config on app start etc.) - we fallback on a default localization
             }

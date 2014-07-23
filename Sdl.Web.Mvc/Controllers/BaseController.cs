@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Sdl.Web.Mvc.Html;
-using Sdl.Web.Models;
-using Sdl.Web.Common.Interfaces;
-using System.Linq;
-using Sdl.Web.Models.Interfaces;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Models;
+using Sdl.Web.Models.Interfaces;
 
 namespace Sdl.Web.Mvc
 {
@@ -17,7 +16,7 @@ namespace Sdl.Web.Mvc
         public virtual IRenderer Renderer { get; set; }
         public virtual ModelType ModelType { get; set; }
 
-        public BaseController()
+        protected BaseController()
         {
             ModelType = ModelType.Entity;
         }
@@ -34,7 +33,7 @@ namespace Sdl.Web.Mvc
             }
             var viewData = GetViewData(page);
             SetupViewData(0,viewData.AreaName);
-            var model = this.ProcessModel(page, GetViewType(viewData)) ?? page;
+            var model = ProcessModel(page, GetViewType(viewData)) ?? page;
             if (model is WebPage)
             {
                 WebRequestContext.PageId = ((WebPage)model).Id;
@@ -49,7 +48,7 @@ namespace Sdl.Web.Mvc
             ModelType = ModelType.Region;
             SetupViewData(containerSize, region.Module);
             var viewData = GetViewData(region);
-            var model = this.ProcessModel(region, GetViewType(viewData)) ?? region;
+            var model = ProcessModel(region, GetViewType(viewData)) ?? region;
             return View(viewData.ViewName, model);
         }
 
@@ -60,7 +59,7 @@ namespace Sdl.Web.Mvc
             ModelType = ModelType.Entity;
             var viewData = GetViewData(entity);
             SetupViewData(containerSize, viewData.AreaName);
-            var model = this.ProcessModel(entity, GetViewType(viewData)) ?? entity;
+            var model = ProcessModel(entity, GetViewType(viewData)) ?? entity;
             Log.Trace(timerStart, "entity-mapped", viewData.ViewName);
             return View(viewData.ViewName, model);
         }
@@ -72,7 +71,7 @@ namespace Sdl.Web.Mvc
             ModelType = ModelType.Entity;
             var viewData = GetViewData(entity);
             SetupViewData(containerSize, viewData.AreaName);
-            var model = this.ProcessList(entity, GetViewType(viewData)) ?? entity;
+            var model = ProcessList(entity, GetViewType(viewData)) ?? entity;
             Log.Trace(timerStart, "list-processed", viewData.ViewName);
             return View(viewData.ViewName, model);
         }
@@ -84,7 +83,7 @@ namespace Sdl.Web.Mvc
             ModelType = ModelType.Entity;
             var viewData = GetViewData(entity);
             SetupViewData(containerSize, viewData.AreaName);
-            var model = this.ProcessNavigation(entity, GetViewType(viewData), navType) ?? entity;
+            var model = ProcessNavigation(entity, GetViewType(viewData), navType) ?? entity;
             Log.Trace(timerStart, "navigation-processed", viewData.ViewName);
             return View(viewData.ViewName, model);
         }
@@ -124,7 +123,8 @@ namespace Sdl.Web.Mvc
                 }
                 else
                 {
-                    var loc = Configuration.Localizations.Values.Where(l => l.LocalizationId.ToString() == localization).FirstOrDefault();
+                    //var loc = Configuration.Localizations.Values.Where(l => l.LocalizationId.ToString() == localization).FirstOrDefault();
+                    var loc = Configuration.Localizations.Values.FirstOrDefault(l => l.LocalizationId.ToString(CultureInfo.InvariantCulture) == localization);
                     if (loc != null)
                     {
                         url = loc.Path;
@@ -142,7 +142,7 @@ namespace Sdl.Web.Mvc
             if (areaName != null)
             {
                 //This enables us to jump areas when rendering sub-views - for example from rendering a region in Core to an entity in ModuleX
-                this.ControllerContext.RouteData.DataTokens["area"] = areaName;
+                ControllerContext.RouteData.DataTokens["area"] = areaName;
             }
         }
 
@@ -152,18 +152,16 @@ namespace Sdl.Web.Mvc
             if (!Configuration.ViewModelRegistry.ContainsKey(key))
             {
                 //TODO - take into account area?
-                var viewEngineResult = ViewEngines.Engines.FindPartialView(this.ControllerContext, viewData.ViewName);
+                var viewEngineResult = ViewEngines.Engines.FindPartialView(ControllerContext, viewData.ViewName);
                 if (viewEngineResult.View == null)
                 {
                     Log.Error("Could not find view {0} in locations: {1}", viewData.ViewName, String.Join(",", viewEngineResult.SearchedLocations));
                     throw new Exception(String.Format("Missing view: {0}", viewData.ViewName));
                 }
-                else
-                {
-                    //This is the only way to get the view model type from the view and thus prevent the need to configure this somewhere
-                    var path = ((BuildManagerCompiledView)viewEngineResult.View).ViewPath;
-                    Configuration.AddViewModelToRegistry(viewData, path);
-                }
+
+                //This is the only way to get the view model type from the view and thus prevent the need to configure this somewhere
+                var path = ((BuildManagerCompiledView)viewEngineResult.View).ViewPath;
+                Configuration.AddViewModelToRegistry(viewData, path);
             }
             return Configuration.ViewModelRegistry[key];
         }
@@ -188,7 +186,7 @@ namespace Sdl.Web.Mvc
                 {
                     return (T)Convert.ChangeType(val,typeof(T));
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     Log.Warn("Could not convert request parameter {0} into type {1}, using type default.", val, typeof(T));
                 }
@@ -214,7 +212,7 @@ namespace Sdl.Web.Mvc
                         list.CurrentPage = (start / list.PageSize) + 1;
                         list.Start = start;
                     }
-                    this.ContentProvider.PopulateDynamicList(list);
+                    ContentProvider.PopulateDynamicList(list);
                 }
                 model = list;
             }
@@ -231,13 +229,13 @@ namespace Sdl.Web.Mvc
             switch (navType)
             {
                 case "Top":
-                    links = new NavigationBuilder() { ContentProvider = this.ContentProvider, NavigationUrl = navigationUrl }.BuildTopNavigation(Request.Url.LocalPath.ToString());
+                    links = new NavigationBuilder { ContentProvider = ContentProvider, NavigationUrl = navigationUrl }.BuildTopNavigation(Request.Url.LocalPath);
                     break;
                 case "Left":
-                    links = new NavigationBuilder() { ContentProvider = this.ContentProvider, NavigationUrl = navigationUrl }.BuildContextNavigation(Request.Url.LocalPath.ToString());
+                    links = new NavigationBuilder { ContentProvider = ContentProvider, NavigationUrl = navigationUrl }.BuildContextNavigation(Request.Url.LocalPath);
                     break;
                 case "Breadcrumb":
-                    links = new NavigationBuilder() { ContentProvider = this.ContentProvider, NavigationUrl = navigationUrl }.BuildBreadcrumb(Request.Url.LocalPath.ToString());
+                    links = new NavigationBuilder { ContentProvider = ContentProvider, NavigationUrl = navigationUrl }.BuildBreadcrumb(Request.Url.LocalPath);
                     break;
             }
             if (nav != null)
