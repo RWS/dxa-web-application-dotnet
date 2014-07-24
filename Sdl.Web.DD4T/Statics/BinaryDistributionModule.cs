@@ -76,6 +76,7 @@ namespace Sdl.Web.DD4T
             {
                 Log.Debug("File was created less than 1 second ago, transmitting content directly.");
                 response.Clear();
+                // TODO: check if file is not in use, it could still be accessed/written by a different thread
                 response.TransmitFile(request.PhysicalPath);
                 Log.Trace(start, "binary-direct", response.StatusCode.ToString(CultureInfo.InvariantCulture));
                 return;
@@ -111,14 +112,7 @@ namespace Sdl.Web.DD4T
                     {
                         Directory.CreateDirectory(dir);
                     }
-
-                    using (FileStream file = File.Create(realPath))
-                    using (StreamWriter sw = new StreamWriter(file))
-                    {
-                        sw.Write(String.Empty);
-                        sw.Close();
-                        file.Close();
-                    }
+                    CreateEmptyFile(realPath);
                 }
                 catch (Exception ex)
                 {
@@ -137,6 +131,18 @@ namespace Sdl.Web.DD4T
         #endregion
 
         #region private
+        private static void CreateEmptyFile(string filename)
+        {
+            //using (FileStream file = File.Create(filename))
+            //using (StreamWriter sw = new StreamWriter(file))
+            //{
+            //    sw.Write(String.Empty);
+            //    sw.Close();
+            //    file.Close();
+            //}
+            File.Create(filename).Dispose();
+        }
+
         private IBinaryFileManager _binaryFileManager;
         public virtual IBinaryFileManager BinaryFileManager 
         {
@@ -149,6 +155,7 @@ namespace Sdl.Web.DD4T
                 _binaryFileManager = value;
             }
         }
+
         private static Regex _isBinaryUrl;
         private static Regex IsBinaryUrl
         {
