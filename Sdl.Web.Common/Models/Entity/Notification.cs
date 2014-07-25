@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Sdl.Web.Common.Models.Common;
 
-namespace Sdl.Web.Models
+namespace Sdl.Web.Common.Models.Entity
 {
-    [SemanticEntity(EntityName = "NotificationBar", Prefix = "nb", Vocab = EntityBase.CoreVocabulary)]
+    [SemanticEntity(EntityName = "NotificationBar", Prefix = "nb", Vocab = CoreVocabulary)]
     public class Notification : EntityBase
     {
         public string Headline { get; set; }

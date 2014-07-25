@@ -1,10 +1,5 @@
-﻿using Sdl.Web.Mvc.Html;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using System.Globalization;
 
 namespace Sdl.Web.Mvc.Html
 {
@@ -31,7 +26,7 @@ namespace Sdl.Web.Mvc.Html
                 }
             }
             //Height is calculated from the aspect ratio (0 means preserve aspect ratio)
-            string height = aspect==0 ? "" : ((int)Math.Ceiling(width / aspect)).ToString();
+            string height = aspect == 0 ? String.Empty : ((int)Math.Ceiling(width / aspect)).ToString(CultureInfo.InvariantCulture);
             //Build the URL
             return String.Format(ImageResizeUrlFormat, ImageResizeRoute, width, height, url);
         }

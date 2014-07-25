@@ -1,4 +1,5 @@
-﻿using DD4T.ContentModel.Factories;
+﻿using System;
+using DD4T.ContentModel.Factories;
 using DD4T.Factories;
 
 namespace Sdl.Web.DD4T.Mapping
@@ -9,8 +10,8 @@ namespace Sdl.Web.DD4T.Mapping
         {
             if (url != null)
             {
-                var pos = url.LastIndexOf(".", System.StringComparison.Ordinal);
-                if (pos > url.LastIndexOf("/", System.StringComparison.Ordinal))
+                var pos = url.LastIndexOf(".", StringComparison.Ordinal);
+                if (pos > url.LastIndexOf("/", StringComparison.Ordinal))
                 {
                     url = url.Substring(0, pos);
                 }

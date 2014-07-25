@@ -43,12 +43,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Tridion.ContentDelivery, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -57,12 +53,6 @@
     <Reference Include="Tridion.ContentDelivery.AmbientData, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.Context">
-      <HintPath>..\_references\2013-sp1\Tridion.Context.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.Context.Image">
-      <HintPath>..\_references\2013-sp1\Tridion.Context.Image.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

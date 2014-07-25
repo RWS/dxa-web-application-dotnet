@@ -1,29 +1,29 @@
-﻿@model Sdl.Web.Models.ContentList<Teaser>
+﻿@model ContentList<Teaser>
 <div @Markup.Entity(Model)>
     @if (Model.Headline!=null)
     {
-    <h3 @Markup.Property(Model,"Headline")>@Model.Headline</h3>
+        <h3 @Markup.Property(Model,"Headline")>@Model.Headline</h3>
     }
     <ul>
-    @foreach (var item in Model.ItemListElements)
-    {
-        <li>
-            @if (item.Link != null && item.Link.Url != null)
-            {
-                <a href="@item.Link.Url" title="@item.Link.AlternateText">
-                    @(item.Headline != null ? item.Headline : item.Link.Url)
-                </a>
-            }
-            else
-            {
-                @item.Headline
-            }
-            @if (item.Date != null)
-            {
-                <time class="meta small">[@Html.DateDiff(item.Date,"d MMM yyyy")]</time>
-            }
-        </li>
-    }
+        @foreach (var item in Model.ItemListElements)
+        {
+            <li>
+                @if (item.Link != null && item.Link.Url != null)
+                {
+                    <a href="@item.Link.Url" title="@item.Link.AlternateText">
+                        @(item.Headline ?? item.Link.Url)
+                    </a>
+                }
+                else
+                {
+                    @item.Headline
+                }
+                @if (item.Date != null)
+                {
+                    <time class="meta small">[@Html.DateDiff(item.Date,"d MMM yyyy")]</time>
+                }
+            </li>
+        }
     </ul>
     @if (Model.Link != null && Model.Link.Url != null)
     {

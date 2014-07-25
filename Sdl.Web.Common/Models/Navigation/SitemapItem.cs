@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sdl.Web.Common.Models.Common;
 
-namespace Sdl.Web.Models
+namespace Sdl.Web.Common.Models.Navigation
 {
     public class SitemapItem : EntityBase
     {
@@ -29,9 +27,9 @@ namespace Sdl.Web.Models
             set { _url = ProcessUrl(value); }
         }
 
-        private string ProcessUrl(string value)
+        private static string ProcessUrl(string value)
         {
-            return value.Replace(".html", "");
+            return value.Replace(".html", String.Empty);
         }
 
         public string Type { get; set; }

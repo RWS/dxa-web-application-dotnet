@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Sdl.Web.Common.Models.Common;
 
-namespace Sdl.Web.Models
+namespace Sdl.Web.Common.Models.Entity
 {
     [SemanticEntity(Vocab = "http://schema.org", EntityName = "ItemList", Prefix = "s", Public = true)]
     public class ContentList<T> : EntityBase

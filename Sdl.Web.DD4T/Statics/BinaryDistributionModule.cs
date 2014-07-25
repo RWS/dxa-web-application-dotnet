@@ -3,7 +3,8 @@ using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Web;
-using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.DD4T.Statics
 {
@@ -36,7 +37,7 @@ namespace Sdl.Web.DD4T.Statics
             HttpRequest request = context.Request;
             HttpResponse response = context.Response;
             string urlPath = request.Url.AbsolutePath;
-            urlPath = urlPath.StartsWith("/" + Configuration.StaticsFolder) ? urlPath.Substring(Configuration.StaticsFolder.Length + 1) : urlPath;
+            urlPath = urlPath.StartsWith("/" + SiteConfiguration.StaticsFolder) ? urlPath.Substring(SiteConfiguration.StaticsFolder.Length + 1) : urlPath;
             if (!IsBinaryUrl.IsMatch(urlPath))
             {
                 Log.Debug("Url {0} does not match binary url pattern, ignoring it.", urlPath);
@@ -112,8 +113,8 @@ namespace Sdl.Web.DD4T.Statics
                 return;
             }
 
-            string realPath = request.PhysicalApplicationPath + Configuration.StaticsFolder + request.Path.Replace("/", "\\"); // request.PhysicalPath;
-            context.RewritePath("/" + Configuration.StaticsFolder + request.Path);
+            string realPath = request.PhysicalApplicationPath + SiteConfiguration.StaticsFolder + request.Path.Replace("/", "\\"); // request.PhysicalPath;
+            context.RewritePath("/" + SiteConfiguration.StaticsFolder + request.Path);
             if (!File.Exists(realPath))
             {
                 string dir = realPath.Substring(0, realPath.LastIndexOf("\\", StringComparison.Ordinal));
@@ -173,7 +174,7 @@ namespace Sdl.Web.DD4T.Statics
         {
             get
             {
-                return _isBinaryUrl ?? (_isBinaryUrl = new Regex(Configuration.MediaUrlRegex));
+                return _isBinaryUrl ?? (_isBinaryUrl = new Regex(SiteConfiguration.MediaUrlRegex));
             }
         }
 

@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
-using Sdl.Web.Models;
-using Sdl.Web.Models.Interfaces;
+using Sdl.Web.Common.Models;
+using Sdl.Web.Common.Models.Interfaces;
+using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Html
 {
@@ -33,7 +34,7 @@ namespace Sdl.Web.Mvc.Html
                     }
                 }
             }
-            if (prefixes != null && prefixes.Count > 0)
+            if (prefixes.Count > 0)
             {
                 data.AppendFormat("prefix=\"{0}\" typeof=\"{1}\"", String.Join(" ", prefixes.Select(p => String.Format("{0}: {1}", p.Key, p.Value))), String.Join(" ", entityTypes));
             }
@@ -63,14 +64,11 @@ namespace Sdl.Web.Mvc.Html
             {
                 var entityTypes = entity.GetType().GetCustomAttributes(true).Where(a => a is SemanticEntityAttribute).ToList();
                 var publicPrefixes = new List<string>();
-                if (entityTypes != null)
+                foreach(SemanticEntityAttribute entityType in entityTypes)
                 {
-                    foreach(SemanticEntityAttribute entityType in entityTypes)
+                    if (entityType.Public && !publicPrefixes.Contains(entityType.Prefix))
                     {
-                        if (entityType.Public && !publicPrefixes.Contains(entityType.Prefix))
-                        {
-                            publicPrefixes.Add(entityType.Prefix);
-                        }
+                        publicPrefixes.Add(entityType.Prefix);
                     }
                 }
                 var propertyTypes = new List<string>();

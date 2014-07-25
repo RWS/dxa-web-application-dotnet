@@ -46,6 +46,5 @@ namespace Sdl.Web.Tridion.Context
         public static Uri UriOsVariant = new Uri(UriOs + "variant");
         public static Uri UriOsVendor = new Uri(UriOs + "vendor");
         public static Uri UriOsVersion = new Uri(UriOs + "version");
-
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Web;
 using System.Web.Mvc;
-using Sdl.Web.Models;
-using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Models.Common;
+using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Html
 {
@@ -14,13 +13,12 @@ namespace Sdl.Web.Mvc.Html
     {
         public static string Date(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
         {
-            return date != null ? ((DateTime)date).ToString(format, new CultureInfo(Configuration.GetConfig("core.culture", WebRequestContext.Localization.Path))) : null;
+            return date != null ? ((DateTime)date).ToString(format, new CultureInfo(SiteConfiguration.GetConfig("core.culture", WebRequestContext.Localization.Path))) : null;
         }
 
         public static string DateDiff(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
         {
-            //TODO make the text come from resources
-            if (date!=null)
+            if (date != null)
             {
                 int dayDiff = (int)(DateTime.Now.Date - ((DateTime)date).Date).TotalDays;
                 if (dayDiff <= 0)
@@ -35,17 +33,15 @@ namespace Sdl.Web.Mvc.Html
                 {
                     return String.Format(htmlHelper.Resource("core.xDaysAgoText"), dayDiff);
                 }
-                else
-                {
-                    return ((DateTime)date).ToString(format, new CultureInfo(Configuration.GetConfig("core.culture",WebRequestContext.Localization.Path)));
-                }
+
+                return ((DateTime)date).ToString(format, new CultureInfo(SiteConfiguration.GetConfig("core.culture", WebRequestContext.Localization.Path)));
             }
             return null;
         }
 
         public static string FormatResource(this HtmlHelper htmlHelper, string resourceName, params object[] parameters)
         {
-            return String.Format((string)htmlHelper.Resource(resourceName),parameters);
+            return String.Format(htmlHelper.Resource(resourceName), parameters);
         }
 
         public static string Resource(this HtmlHelper htmlHelper, string resourceName)
@@ -76,10 +72,17 @@ namespace Sdl.Web.Mvc.Html
 
             return String.Format("{0} {1}", Math.Ceiling(len), sizes[order]);
         }
-                //The Golden Ratio is our default aspect
-        public const double DEFAULT_MEDIA_ASPECT = 1.62;
-        //The default fill for media is 100% of containing element
-        public const string DEFAULT_MEDIA_FILL = "100%";
+        
+        /// <summary>
+        /// The Golden Ratio is our default aspect.
+        /// </summary>
+        public const double DefaultMediaAspect = 1.62;
+        
+        /// <summary>
+        /// The default fill for media is 100% of containing element.
+        /// </summary>
+        public const string DefaultMediaFill = "100%";
+
         /// <summary>
         /// Write out an img tag with a responsive image url
         /// </summary>
@@ -96,18 +99,18 @@ namespace Sdl.Web.Mvc.Html
             {
                 return null;
             }
-            
+
             string imgWidth = widthFactor;
             if (widthFactor == null)
             {
-                widthFactor = DEFAULT_MEDIA_FILL;
+                widthFactor = DefaultMediaFill;
             }
 
             //We read the container size (based on bootstrap grid) from the view bag
             //This means views can be independent of where they are rendered and do not
             //need to know their width
             TagBuilder builder = new TagBuilder("img");
-            builder.Attributes.Add("src", Configuration.MediaHelper.GetResponsiveImageUrl(image.Url, aspect, widthFactor, containerSize));
+            builder.Attributes.Add("src", SiteConfiguration.MediaHelper.GetResponsiveImageUrl(image.Url, aspect, widthFactor, containerSize));
             if (!String.IsNullOrEmpty(imgWidth))
             {
                 builder.Attributes.Add("width", imgWidth);
@@ -129,7 +132,7 @@ namespace Sdl.Web.Mvc.Html
             //We read the container size (based on bootstrap grid) from the view bag
             //This means views can be independent of where they are rendered and do not
             //need to know their width
-            if (containerSize==0)
+            if (containerSize == 0)
             {
                 containerSize = helper.ViewBag.ContainerSize;
             }
@@ -154,25 +157,26 @@ namespace Sdl.Web.Mvc.Html
             {
                 return null;
             }
-            if (video.Url != null && Configuration.MediaHelper.ShowVideoPlaceholders)
+
+            if (video.Url != null && SiteConfiguration.MediaHelper.ShowVideoPlaceholders)
             {
                 //we have a placeholder image
-                var placeholderImgUrl = Configuration.MediaHelper.GetResponsiveImageUrl(video.Url, aspect, widthFactor, containerSize);
-                return new MvcHtmlString(GetYouTubePlaceholder(video.YouTubeId,placeholderImgUrl,video.Headline,cssClass));
+                var placeholderImgUrl = SiteConfiguration.MediaHelper.GetResponsiveImageUrl(video.Url, aspect, widthFactor, containerSize);
+                return new MvcHtmlString(GetYouTubePlaceholder(video.YouTubeId, placeholderImgUrl, video.Headline, cssClass));
             }
-            else
+
+            TagBuilder builder = new TagBuilder("iframe");
+            builder.Attributes.Add("src", GetYouTubeUrl(video.YouTubeId));
+            builder.Attributes.Add("id", SiteConfiguration.GetUniqueId("video"));
+            builder.Attributes.Add("allowfullscreen", "true");
+            builder.Attributes.Add("frameborder", "0");
+            
+            if (!String.IsNullOrEmpty(cssClass))
             {
-                TagBuilder builder = new TagBuilder("iframe");
-                builder.Attributes.Add("src", GetYouTubeUrl(video.YouTubeId));
-                builder.Attributes.Add("id", Configuration.GetUniqueId("video"));
-                builder.Attributes.Add("allowfullscreen", "true");
-                builder.Attributes.Add("frameborder", "0");
-                if (!String.IsNullOrEmpty(cssClass))
-                {
-                    builder.Attributes.Add("class", cssClass);
-                }
-                return new MvcHtmlString(builder.ToString(TagRenderMode.SelfClosing));
+                builder.Attributes.Add("class", cssClass);
             }
+
+            return new MvcHtmlString(builder.ToString(TagRenderMode.SelfClosing));
         }
 
         public static MvcHtmlString Download(this HtmlHelper helper, Download download)
@@ -182,27 +186,30 @@ namespace Sdl.Web.Mvc.Html
                 return null;
             }
 
-            //todo this does not contain any XPM markup
-            //todo configurize the mime type to Font Awesome mapping
-            var mimeTypes = new Dictionary<string, string>(); // filetypes supported by http://fortawesome.github.io/Font-Awesome/icons/#file-type
-            mimeTypes.Add("application/ms-excel", "excel");
-            mimeTypes.Add("application/pdf", "pdf");
-            mimeTypes.Add("application/x-wav", "audio");
-            mimeTypes.Add("audio/x-mpeg", "audio");
-            mimeTypes.Add("application/msword", "word");
-            mimeTypes.Add("text/rtf", "word");
-            mimeTypes.Add("application/zip", "archive");
-            mimeTypes.Add("image/gif", "image");
-            mimeTypes.Add("image/jpeg", "image");
-            mimeTypes.Add("image/png", "image");
-            mimeTypes.Add("image/x-bmp", "image");
-            mimeTypes.Add("text/plain", "text");
-            mimeTypes.Add("text/css", "code");
-            mimeTypes.Add("application/x-javascript", "code");
-            mimeTypes.Add("application/ms-powerpoint", "powerpoint");
-            mimeTypes.Add("video/vnd.rn-realmedia", "video");
-            mimeTypes.Add("video/quicktime", "video");
-            mimeTypes.Add("video/mpeg", "video");
+            // TODO: this does not contain any XPM markup
+            // TODO: configurize the mime type to Font Awesome mapping
+            // filetypes supported by http://fortawesome.github.io/Font-Awesome/icons/#file-type
+            var mimeTypes = new Dictionary<string, string>
+                {
+                    {"application/ms-excel", "excel"},
+                    {"application/pdf", "pdf"},
+                    {"application/x-wav", "audio"},
+                    {"audio/x-mpeg", "audio"},
+                    {"application/msword", "word"},
+                    {"text/rtf", "word"},
+                    {"application/zip", "archive"},
+                    {"image/gif", "image"},
+                    {"image/jpeg", "image"},
+                    {"image/png", "image"},
+                    {"image/x-bmp", "image"},
+                    {"text/plain", "text"},
+                    {"text/css", "code"},
+                    {"application/x-javascript", "code"},
+                    {"application/ms-powerpoint", "powerpoint"},
+                    {"video/vnd.rn-realmedia", "video"},
+                    {"video/quicktime", "video"},
+                    {"video/mpeg", "video"}
+                }; 
             string fileType = null;
             if (mimeTypes.ContainsKey(download.MimeType))
             {
@@ -211,6 +218,7 @@ namespace Sdl.Web.Mvc.Html
             string iconClass = (fileType == null ? "fa-file" : String.Format("fa-file-{0}-o", fileType));
             string friendlyFileSize = helper.FriendlyFileSize(download.FileSize).ToString();
             string descriptionHtml = (!String.IsNullOrEmpty(download.Description) ? String.Format("<small>{0}</small>", download.Description) : "");
+            // TODO: use partial view instead of hardcoding HTML
             string downloadHtml = String.Format(@"
                 <div class=""download-list"">
                     <i class=""fa {0}""></i>
@@ -222,15 +230,16 @@ namespace Sdl.Web.Mvc.Html
             return new MvcHtmlString(downloadHtml);
         }
 
-
         public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media)
         {
             return Media(helper, media, null);
         }
+
         public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, string widthFactor, string cssClass = null)
         {
-            return Media(helper, media, widthFactor, DEFAULT_MEDIA_ASPECT, cssClass);
+            return Media(helper, media, widthFactor, DefaultMediaAspect, cssClass);
         }
+        
         public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, double aspect, string cssClass = null)
         {
             return Media(helper, media, null, aspect, cssClass);
@@ -243,22 +252,23 @@ namespace Sdl.Web.Mvc.Html
 
         public static string GetYouTubePlaceholder(string videoId, string imageUrl, string altText = null, string cssClass = null)
         {
+            // TODO: consider using partial view
             return String.Format("<div class=\"embed-video\"><img src=\"{1}\" alt=\"{2}\"><button type=\"button\" data-video=\"{0}\" class=\"{3}\"><i class=\"fa fa-play-circle\"></i></button></div>", videoId, imageUrl, altText, cssClass);
         }
 
         public static string GetResponsiveImageUrl(string url)
         {
-            return GetResponsiveImageUrl(url, DEFAULT_MEDIA_FILL);
+            return GetResponsiveImageUrl(url, DefaultMediaFill);
         }
+
         public static string GetResponsiveImageUrl(string url, double aspect, int containerSize = 0)
         {
-            return Configuration.MediaHelper.GetResponsiveImageUrl(url, aspect, DEFAULT_MEDIA_FILL, containerSize);
+            return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(url, aspect, DefaultMediaFill, containerSize);
         }
+
         public static string GetResponsiveImageUrl(string url, string widthFactor, int containerSize = 0)
         {
-            return Configuration.MediaHelper.GetResponsiveImageUrl(url, DEFAULT_MEDIA_ASPECT, widthFactor, containerSize);
+            return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(url, DefaultMediaAspect, widthFactor, containerSize);
         }
-
-
     }
 }

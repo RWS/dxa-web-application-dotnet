@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace Sdl.Web.Models
+﻿namespace Sdl.Web.Common.Models.Common
 {
     public class Link : EntityBase
     {

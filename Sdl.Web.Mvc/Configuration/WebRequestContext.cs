@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Linq;
 using System.Web;
-using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
 using Sdl.Web.Tridion.Context;
 
-namespace Sdl.Web.Mvc
+namespace Sdl.Web.Mvc.Configuration
 {
     /// <summary>
     /// Container for request level context data, wraps the HttpContext.Items dictionary, which is used for this purpose
     /// </summary>
     public class WebRequestContext
     {
-        private const int maxWidth = 1024;
+        private const int MaxWidth = 1024;
 
         public static Localization Localization
         {
@@ -34,7 +35,7 @@ namespace Sdl.Web.Mvc
             get
             {
                 //Pixel Ratio can be non-integer value (if zoom is applied to browser) - so we use a min of 1, and otherwise round when calculating max width
-                return (int?)GetFromContextStore("MaxMediaWidth") ?? (int)AddToContextStore("MaxMediaWidth", Math.Max(1, Math.Min(1, Convert.ToInt32(ContextEngine.Device.PixelRatio))) * Math.Min(ContextEngine.Browser.DisplayWidth, maxWidth));
+                return (int?)GetFromContextStore("MaxMediaWidth") ?? (int)AddToContextStore("MaxMediaWidth", Math.Max(1, Math.Min(1, Convert.ToInt32(ContextEngine.Device.PixelRatio))) * Math.Min(ContextEngine.Browser.DisplayWidth, MaxWidth));
             }
         }
 
@@ -67,15 +68,15 @@ namespace Sdl.Web.Mvc
         protected static ScreenWidth CalculateScreenWidth()
         {
             int width = ContextEngine.Browser.DisplayWidth;
-            if (width < Configuration.MediaHelper.SmallScreenBreakpoint)
+            if (width < SiteConfiguration.MediaHelper.SmallScreenBreakpoint)
             {
                 return ScreenWidth.ExtraSmall;
             }
-            if (width < Configuration.MediaHelper.MediumScreenBreakpoint)
+            if (width < SiteConfiguration.MediaHelper.MediumScreenBreakpoint)
             {
                 return ScreenWidth.Small;
             }
-            if (width < Configuration.MediaHelper.LargeScreenBreakpoint)
+            if (width < SiteConfiguration.MediaHelper.LargeScreenBreakpoint)
             {
                 return ScreenWidth.Medium;
             }
@@ -86,7 +87,7 @@ namespace Sdl.Web.Mvc
         {
             get
             {
-                return (bool?)GetFromContextStore("IsDeveloperMode") ?? (bool)AddToContextStore("IsDeveloperMode", Localization.Domain=="localhost");
+                return (bool?)GetFromContextStore("IsDeveloperMode") ?? (bool)AddToContextStore("IsDeveloperMode", Localization.Domain.Equals("localhost"));
             }
         }
 
@@ -95,28 +96,28 @@ namespace Sdl.Web.Mvc
             //For now we cannot reliably detect when we are in experience manager, so we set this to be true whenever we are in staging
             get
             {
-                return (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", Configuration.IsStaging);
+                return (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", SiteConfiguration.IsStaging);
             }
         }
 
         protected static Localization GetCurrentLocalization()
         {
             //If theres a single localization use that regardless
-            if (Configuration.Localizations.Count == 1)
+            if (SiteConfiguration.Localizations.Count == 1)
             {
-                return Configuration.Localizations.SingleOrDefault().Value;
+                return SiteConfiguration.Localizations.SingleOrDefault().Value;
             }
             try
             {
                 if (HttpContext.Current != null)
                 {
                     var uri = HttpContext.Current.Request.Url.AbsoluteUri;
-                    foreach (var key in Configuration.Localizations.Keys)
+                    foreach (var key in SiteConfiguration.Localizations.Keys)
                     {
                         if (uri.StartsWith(key))
                         {
-                            Log.Debug("Request for {0} is from localization '{1}'", uri, Configuration.Localizations[key].Path);
-                            return Configuration.Localizations[key];
+                            Log.Debug("Request for {0} is from localization '{1}'", uri, SiteConfiguration.Localizations[key].Path);
+                            return SiteConfiguration.Localizations[key];
                         }
                     }
                 }
@@ -125,7 +126,7 @@ namespace Sdl.Web.Mvc
             {
                 //Do nothing - In some cases we do not have a request (loading config on app start etc.) - we fallback on a default localization
             }
-            return new Localization { LocalizationId = "0", Culture = "en-US", Path = "" };
+            return new Localization { LocalizationId = "0", Culture = "en-US", Path = String.Empty };
         }
         
         protected static object GetFromContextStore(string key)

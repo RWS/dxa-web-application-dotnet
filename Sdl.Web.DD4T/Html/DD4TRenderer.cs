@@ -1,13 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
 using System.Web.Mvc.Html;
-using DD4T.ContentModel;
-using Sdl.Web.Mvc;
-using Sdl.Web.Mvc.Html;
-using System;
 using System.Web.Routing;
-using Sdl.Web.Tridion;
-using Sdl.Web.Common;
+using DD4T.ContentModel;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Models.Interfaces;
+using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Mvc.Html;
+using Sdl.Web.Tridion.Markup;
+using IPage = Sdl.Web.Common.Models.Interfaces.IPage;
 
 namespace Sdl.Web.DD4T.Html
 {
@@ -24,13 +27,13 @@ namespace Sdl.Web.DD4T.Html
                 int parentContainerSize = helper.ViewBag.ContainerSize;
                 if (parentContainerSize == 0)
                 {
-                    parentContainerSize = Configuration.MediaHelper.GridSize;
+                    parentContainerSize = SiteConfiguration.MediaHelper.GridSize;
                 }
                 if (containerSize == 0)
                 {
-                    containerSize = Configuration.MediaHelper.GridSize;
+                    containerSize = SiteConfiguration.MediaHelper.GridSize;
                 }
-                parameters["containerSize"] = (containerSize * parentContainerSize) / Configuration.MediaHelper.GridSize;
+                parameters["containerSize"] = (containerSize * parentContainerSize) / SiteConfiguration.MediaHelper.GridSize;
                 parameters["entity"] = cp;
                 parameters["area"] = mvcData.ControllerAreaName;
                 foreach (var key in mvcData.RouteValues.Keys)
@@ -50,7 +53,7 @@ namespace Sdl.Web.DD4T.Html
             return null;
         }
 
-        public override MvcHtmlString RenderRegion(Models.Interfaces.IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
+        public override MvcHtmlString RenderRegion(IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
             var mvcData = ContentResolver.ResolveMvcData(region);
             if (region != null && (excludedItems == null || !excludedItems.Contains(region.Name)))
@@ -58,7 +61,7 @@ namespace Sdl.Web.DD4T.Html
                 DateTime timerStart = DateTime.Now;
                 if (containerSize == 0)
                 {
-                    containerSize = Configuration.MediaHelper.GridSize;
+                    containerSize = SiteConfiguration.MediaHelper.GridSize;
                 }
                 MvcHtmlString result = helper.Action(mvcData.ActionName, mvcData.ControllerName, new { Region = region, containerSize = containerSize, area = mvcData.ControllerAreaName });
                 Log.Trace(timerStart, "region-render", region.Name);
@@ -74,18 +77,17 @@ namespace Sdl.Web.DD4T.Html
             return null;
         }
 
-        public override MvcHtmlString RenderPageData(Models.Interfaces.IPage page, HtmlHelper helper)
+        public override MvcHtmlString RenderPageData(IPage page, HtmlHelper helper)
         {
             if (WebRequestContext.IsPreview)
             {
                 if (!page.PageData.ContainsKey("CmsUrl"))
                 {
-                    page.PageData.Add("CmsUrl", Configuration.GetConfig("core.cmsurl"));
+                    page.PageData.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl"));
                 }
                 return new MvcHtmlString(TridionMarkup.PageMarkup(page.PageData));
             }
             return null;
-        }
-        
+        }        
     }
 }

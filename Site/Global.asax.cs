@@ -1,16 +1,13 @@
-﻿using System;
-using System.Web;
+﻿using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
-using Sdl.Web.Mvc;
-using Sdl.Web.Tridion;
-using Microsoft.Practices.Unity;
-using Unity.Mvc5;
-using Microsoft.Practices.Unity.Configuration;
 using Microsoft.Practices.ServiceLocation;
-using Sdl.Web.Mvc.Html;
+using Microsoft.Practices.Unity;
+using Microsoft.Practices.Unity.Configuration;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common;
+using Sdl.Web.Tridion.Config;
+using Unity.Mvc5;
 
 namespace Sdl.Web.Site
 {
@@ -30,16 +27,16 @@ namespace Sdl.Web.Site
 
         protected void Application_Start()
         {
-            InitializeDI();
-            Configuration.StaticFileManager = (IStaticFileManager)DependencyResolver.Current.GetService(typeof(IStaticFileManager));
-            Configuration.MediaHelper = (IMediaHelper)DependencyResolver.Current.GetService(typeof(IMediaHelper));
-            Configuration.Initialize(Server.MapPath("~"), TridionConfig.PublicationMap);
+            InitializeDependencyInjection();
+            SiteConfiguration.StaticFileManager = (IStaticFileManager)DependencyResolver.Current.GetService(typeof(IStaticFileManager));
+            SiteConfiguration.MediaHelper = (IMediaHelper)DependencyResolver.Current.GetService(typeof(IMediaHelper));
+            SiteConfiguration.Initialize(Server.MapPath("~"), TridionConfig.PublicationMap);
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
             RegisterGlobalFilters(GlobalFilters.Filters);
         }
 
-        protected IUnityContainer InitializeDI()
+        protected IUnityContainer InitializeDependencyInjection()
         {
             var container = BuildUnityContainer();
             DependencyResolver.SetResolver(new UnityDependencyResolver(container));

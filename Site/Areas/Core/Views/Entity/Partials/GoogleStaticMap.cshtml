@@ -1,6 +1,6 @@
-﻿@model Sdl.Web.Models.Location
+﻿@model Location
 @{
-    var queryString = Configuration.GetConfig("core.mapsApiKey");
+    var queryString = SiteConfiguration.GetConfig("core.mapsApiKey");
     if (String.IsNullOrEmpty(queryString) || queryString=="xxx")
     {
         queryString = "";
@@ -9,7 +9,7 @@
     {
         queryString = String.Format("&key={0}", queryString);
     }
-    var divId = Configuration.GetUniqueId("map");
+    var divId = SiteConfiguration.GetUniqueId("map");
     var name = (ViewData["MarkerName"] ?? "").ToString();
     var lat = Model.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
     var lng = Model.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);

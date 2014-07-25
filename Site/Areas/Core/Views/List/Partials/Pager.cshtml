@@ -5,21 +5,13 @@
 <ul class="pagination">
     @if (Model.Start>1)
     {
-	<li>
-		<a href="@String.Format(urlFormat,(Model.Start-Model.PageSize))">
-			<i class="fa fa-angle-left"></i>
-		</a>
-	</li>
-    <li><a href="@String.Format(urlFormat,(Model.Start-Model.PageSize))">@(Model.CurrentPage - 1)</a></li>
+	    <li><a href="@String.Format(urlFormat,(Model.Start-Model.PageSize))"><i class="fa fa-angle-left"></i></a></li>
+        <li><a href="@String.Format(urlFormat,(Model.Start-Model.PageSize))">@(Model.CurrentPage - 1)</a></li>
     }
 	<li class='active'><a href="@String.Format(urlFormat,Model.Start)">@Model.CurrentPage</a></li>
 	@if (Model.HasMore)
     {
-	<li><a href="@String.Format(urlFormat,(Model.Start+Model.PageSize))">@(Model.CurrentPage + 1)</a></li>
-    <li>
-		<a href="@String.Format(urlFormat,(Model.Start+Model.PageSize))">
-			<i class="fa fa-angle-right"></i>
-		</a>
-	</li>
+	    <li><a href="@String.Format(urlFormat,(Model.Start+Model.PageSize))">@(Model.CurrentPage + 1)</a></li>
+        <li><a href="@String.Format(urlFormat,(Model.Start+Model.PageSize))"><i class="fa fa-angle-right"></i></a></li>
     }
 </ul>

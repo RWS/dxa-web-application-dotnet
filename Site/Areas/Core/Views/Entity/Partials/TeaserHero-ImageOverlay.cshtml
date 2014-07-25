@@ -1,4 +1,4 @@
-﻿@model Sdl.Web.Models.Teaser
+﻿@model Teaser
 <div @Markup.Entity(Model)>
     @if (Model.Media != null)
     {
@@ -6,29 +6,29 @@
             @Html.Media(Model.Media, "100%", 3.3)
         </span>
     }
-    @if (Model.Headline!=null || Model.Text!=null)
+    @if (Model.Headline != null || Model.Text != null)
     {
-        if (Model.Link != null && Model.Link.LinkText==null)
-        { 
-        <a href="@Model.Link.Url" title="@Model.Link.AlternateText">
-            <div class="overlay overlay-tl ribbon">
-                <h2 class="" @Markup.Property(Model, "Headline")>@Model.Headline</h2>
-                @if(Model.Text!=null)
-                {
-                    <p class="h3" @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ",".<br/>"))</p>
-                }
-            </div>
-        </a>
+        if (Model.Link != null && Model.Link.LinkText == null)
+        {
+            <a href="@Model.Link.Url" title="@Model.Link.AlternateText">
+                <div class="overlay overlay-tl ribbon">
+                    <h2 class="" @Markup.Property(Model, "Headline")>@Model.Headline</h2>
+                    @if(Model.Text!=null)
+                    {
+                        <p class="h3" @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", ".<br/>"))</p>
+                    }
+                </div>
+            </a>
         }
         else
         {
             <div class="overlay overlay-tl ribbon">
                 <h2 class="" @Markup.Property(Model, "Headline")>@Model.Headline</h2>
-                @if(Model.Text!=null)
+                @if(Model.Text != null)
                 {
-                    <p class="h3" @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ",".<br/>"))</p>
+                    <p class="h3" @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", ".<br/>"))</p>
                 }
-                @if(Model.Link!=null && Model.Link.LinkText!=null)
+                @if(Model.Link != null && Model.Link.LinkText != null)
                 {
                     <a href="@Model.Link.Url" title="@Model.Link.AlternateText" class="btn btn-primary" @Markup.Property(Model, "Link")>@Model.Link.LinkText</a>
                 }

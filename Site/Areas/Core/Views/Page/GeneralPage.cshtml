@@ -1,4 +1,4 @@
-﻿@model Sdl.Web.Models.WebPage
+﻿@model Sdl.Web.Common.Models.Page.WebPage
 @{
     bool hasLeftBar = Model.Includes.ContainsKey("Left Navigation") || Model.Regions.Keys.Contains("Left");
     int mainContainerSize = hasLeftBar ? 9 : 12;

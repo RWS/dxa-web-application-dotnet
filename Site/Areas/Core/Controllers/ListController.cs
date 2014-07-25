@@ -1,7 +1,7 @@
-﻿using Sdl.Web.Mvc;
-using Sdl.Web.Common.Interfaces;
+﻿using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Mvc.Controllers;
 
-namespace Site.Areas.Core.Controllers
+namespace Sdl.Web.Site.Areas.Core.Controllers
 {
     public class ListController : BaseController
     {

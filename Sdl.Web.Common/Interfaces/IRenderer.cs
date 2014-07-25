@@ -1,11 +1,6 @@
-﻿using Sdl.Web.Models.Interfaces;
-using Sdl.Web.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Web.Mvc;
+using Sdl.Web.Common.Models.Interfaces;
 
 namespace Sdl.Web.Common.Interfaces
 {

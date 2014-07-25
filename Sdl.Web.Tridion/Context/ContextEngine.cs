@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Tridion.ContentDelivery.AmbientData;
 using System.Xml.Linq;
+using Tridion.ContentDelivery.AmbientData;
 
 namespace Sdl.Web.Tridion.Context
 {
@@ -39,8 +39,7 @@ namespace Sdl.Web.Tridion.Context
             get { return GetDeviceFamily(); }
         }
 
-
-        private string _deviceFamily = null;
+        private string _deviceFamily;
 
         private string GetDeviceFamily()
         {
@@ -109,8 +108,6 @@ namespace Sdl.Web.Tridion.Context
             }
 
             return _deviceFamily;
-
         }
-
     }
 }

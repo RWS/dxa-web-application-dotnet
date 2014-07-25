@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Sdl.Web.Common.Mapping
 {
     /// <summary>

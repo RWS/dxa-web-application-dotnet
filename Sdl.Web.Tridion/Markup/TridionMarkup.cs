@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Web;
 using HtmlAgilityPack;
-using Sdl.Web.Models;
-using Sdl.Web.Models.Interfaces;
+using Sdl.Web.Tridion.Config;
 
-namespace Sdl.Web.Tridion
+namespace Sdl.Web.Tridion.Markup
 {
     public static class TridionMarkup
     {
@@ -19,7 +16,7 @@ namespace Sdl.Web.Tridion
         private const string ComponentPresentationFormat = "<!-- Start Component Presentation: {{\"ComponentID\" : \"{0}\", \"ComponentModified\" : \"{1}\", \"ComponentTemplateID\" : \"{2}\", \"ComponentTemplateModified\" : \"{3}\", \"IsRepositoryPublished\" : {4}}} -->";
         private const string IsQueryBased = "true, \"IsQueryBased\" : true";
         private const string FieldFormat = "<!-- Start Component Field: {{\"XPath\":\"{0}\"}} -->";
-        private const string DateFormat = "yyyy-MM-ddTHH:mm:ss";
+        //private const string DateFormat = "yyyy-MM-ddTHH:mm:ss";
         private const string NullUri = "tcm:0-0-0";
         private const string Epoch = "1970-01-01T00:00:00";
 

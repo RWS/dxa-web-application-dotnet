@@ -1,10 +1,8 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using Sdl.Web.Common.Models.Common;
 
-namespace Sdl.Web.Models
+namespace Sdl.Web.Common.Models.Entity
 {
     [SemanticEntity(Vocab = "http://schema.org", EntityName= "Article", Prefix= "s", Public=true)]
     public class Article : EntityBase

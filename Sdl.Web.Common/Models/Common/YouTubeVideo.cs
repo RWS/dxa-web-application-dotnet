@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Sdl.Web.Models
+﻿namespace Sdl.Web.Common.Models.Common
 {
     public class YouTubeVideo : MediaItem
     {

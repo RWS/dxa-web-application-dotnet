@@ -1,11 +1,6 @@
-﻿using Sdl.Web.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace Sdl.Web.Models.Interfaces
+namespace Sdl.Web.Common.Models.Interfaces
 {
     public interface IEntity
     {

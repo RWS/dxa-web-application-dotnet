@@ -7,9 +7,10 @@ using System.Resources;
 using System.Web.Compilation;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
-using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
 
-namespace Sdl.Web.Mvc
+namespace Sdl.Web.Mvc.Configuration
 {
     /// <summary>
     /// Resource Provider to read resources from JSON files on disk
@@ -48,28 +49,28 @@ namespace Sdl.Web.Mvc
             }
             if (!_resources.ContainsKey(localization))
             {
-                var ex = new Exception(String.Format("No resources can be found for localization {0}. Check that the localization path is correct and the resources have been published.",localization));
+                var ex = new Exception(String.Format("No resources can be found for localization {0}. Check that the localization path is correct and the resources have been published.", localization));
                 Log.Error(ex);
                 throw ex;
             }
             return _resources[localization];
         }
 
-        private void LoadResources()
+        private static void LoadResources()
         {
             //We are reading into a static variable, so need to be thread safe
             lock (ResourceLock)
             {
                 var applicationRoot = AppDomain.CurrentDomain.BaseDirectory;
                 _resources = new Dictionary<string, Dictionary<string, object>>();
-                foreach (var loc in Configuration.Localizations.Values)
+                foreach (var loc in SiteConfiguration.Localizations.Values)
                 {
                     //Just in case the same localization is in there more than once
                     if (!_resources.ContainsKey(loc.Path))
                     {
                         Log.Debug("Loading resources for localization : '{0}'", loc.Path);
                         var resources = new Dictionary<string, object>();
-                        var path = String.Format("{0}/{1}/{2}/{3}", applicationRoot, Configuration.StaticsFolder, loc.Path, Configuration.SystemFolder + "/resources/_all.json");
+                        var path = String.Format("{0}/{1}/{2}/{3}", applicationRoot, SiteConfiguration.StaticsFolder, loc.Path, SiteConfiguration.SystemFolder + "/resources/_all.json");
                         if (File.Exists(path))
                         {
                             //The _all.json file contains a list of all other resources files to load
@@ -77,9 +78,9 @@ namespace Sdl.Web.Mvc
                             var bootstrapJson = Json.Decode(File.ReadAllText(path));
                             foreach (string file in bootstrapJson.files)
                             {
-                                var type = file.Substring(file.LastIndexOf("/") + 1);
-                                type = type.Substring(0, type.LastIndexOf(".")).ToLower();
-                                var filePath = String.Format("{0}/{1}/{2}",applicationRoot, Configuration.StaticsFolder,file);
+                                var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                                type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
+                                var filePath = String.Format("{0}/{1}/{2}", applicationRoot, SiteConfiguration.StaticsFolder, file);
                                 if (File.Exists(filePath))
                                 {
                                     Log.Debug("Loading resources from file: {0}", filePath);
@@ -105,7 +106,7 @@ namespace Sdl.Web.Mvc
             }     
         }
 
-        private Dictionary<string, object> GetResourcesFromFile(string filePath)
+        private static Dictionary<string, object> GetResourcesFromFile(string filePath)
         {
             return new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(File.ReadAllText(filePath));
         }

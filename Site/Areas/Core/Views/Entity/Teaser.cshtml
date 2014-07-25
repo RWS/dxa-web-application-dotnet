@@ -1,12 +1,12 @@
-﻿@model Sdl.Web.Models.Teaser
+﻿@model Teaser
 <div class="feature teaser-container" @Markup.Entity(Model)>
     @if (Model.Media != null)
     {
         <div class="feature" @Markup.Property(Model, "Media")>
-			@Html.Media(Model.Media)
-		</div>
+            @Html.Media(Model.Media)
+        </div>
     }
-    <h3 @Markup.Property(Model,"Headline")>@Model.Headline</h3>
+    <h3 @Markup.Property(Model, "Headline")>@Model.Headline</h3>
     <p @Markup.Property(Model, "Text")>@Model.Text</p>
     @if (Model.Link != null)
     {

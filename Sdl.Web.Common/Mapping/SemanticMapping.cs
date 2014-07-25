@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
-using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Common.Mapping
 {
@@ -74,10 +76,8 @@ namespace Sdl.Web.Common.Mapping
             {
                 return vocabulary.Prefix;
             }
-            else
-            {
-                Log.Warn("Prefix not found for semantic vocabulary '{0}'", vocab);
-            }
+
+            Log.Warn("Prefix not found for semantic vocabulary '{0}'", vocab);
             return null;
         }
 
@@ -108,7 +108,7 @@ namespace Sdl.Web.Common.Mapping
         /// <summary>
         /// Gets a XPM region by name.
         /// </summary>
-        /// <param name="name">The region name</param>
+        /// <param name="pageTypeIdentifier">The region name</param>
         /// <returns>The XPM region matching the name for the given module</returns>
         public static List<string> GetIncludes(string pageTypeIdentifier)
         {
@@ -123,7 +123,6 @@ namespace Sdl.Web.Common.Mapping
             return null;
         }
 
-
         /// <summary>
         /// Gets a semantic schema by id.
         /// </summary>
@@ -135,19 +134,16 @@ namespace Sdl.Web.Common.Mapping
         }
 
         private static SemanticSchema GetSchema(IReadOnlyDictionary<string, SemanticSchema> mapping, string id)
-        {
-            
+        {            
             if (mapping.ContainsKey(id))
             {
                 return mapping[id];
             }
-            else
-            {
-                Exception ex = new Exception(string.Format("Semantic mappings for schema '{0}' do not exist.", id));
-                //TODO - do we throw an error, or apply some defaults?
-                Log.Error(ex);
-                throw ex;
-            }
+
+            Exception ex = new Exception(string.Format("Semantic mappings for schema '{0}' do not exist.", id));
+            //TODO - do we throw an error, or apply some defaults?
+            Log.Error(ex);
+            throw ex;
         }
 
         private static void LoadMapping()
@@ -165,13 +161,13 @@ namespace Sdl.Web.Common.Mapping
             lock (MappingLock)
             {
                 // ensure that the config files have been written to disk
-                Configuration.StaticFileManager.CreateStaticAssets(applicationRoot);
+                SiteConfiguration.StaticFileManager.CreateStaticAssets(applicationRoot);
 
                 _semanticMap = new Dictionary<string, SemanticSchema>();
                 _semanticVocabularies = new List<SemanticVocabulary>();
                 _includes = new Dictionary<string, List<string>>();
                 Log.Debug("Loading semantic mappings for default localization");
-                var path = String.Format("{0}/{1}/{2}/{3}", applicationRoot, Configuration.StaticsFolder, Configuration.DefaultLocalization, Configuration.SystemFolder + "/mappings/_all.json");
+                var path = String.Format("{0}/{1}/{2}/{3}", applicationRoot, SiteConfiguration.StaticsFolder, SiteConfiguration.DefaultLocalization, SiteConfiguration.SystemFolder + "/mappings/_all.json");
                 if (File.Exists(path))
                 {
                     // the _all.json file contains a reference to all other configuration files
@@ -181,7 +177,7 @@ namespace Sdl.Web.Common.Mapping
                     {
                         var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
                         type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                        var configPath = String.Format("{0}/{1}/{2}", applicationRoot, Configuration.StaticsFolder, file);
+                        var configPath = String.Format("{0}/{1}/{2}", applicationRoot, SiteConfiguration.StaticsFolder, file);
                         if (File.Exists(configPath))
                         {
                             Log.Debug("Loading mapping from file: {0}", configPath);
@@ -195,7 +191,7 @@ namespace Sdl.Web.Common.Mapping
                                 {
                                     foreach(var schema in GetSchemasFromFile(configPath))
                                     {
-                                        _semanticMap.Add(schema.Id.ToString(), schema);
+                                        _semanticMap.Add(schema.Id.ToString(CultureInfo.InvariantCulture), schema);
                                     }
                                 }
                                 else if (type.Equals("includes"))
@@ -223,7 +219,7 @@ namespace Sdl.Web.Common.Mapping
             return new JavaScriptSerializer().Deserialize<Dictionary<string,List<string>>>(File.ReadAllText(file));
         }
 
-        private static List<SemanticSchema> GetSchemasFromFile(string file)
+        private static IEnumerable<SemanticSchema> GetSchemasFromFile(string file)
         {
             return new JavaScriptSerializer().Deserialize<List<SemanticSchema>>(File.ReadAllText(file));
         }

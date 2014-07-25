@@ -1,7 +1,7 @@
-﻿@model Sdl.Web.Models.Teaser
+﻿@model Teaser
 <div @Markup.Entity(Model)>
     <h3 @Markup.Property(Model,"Headline")>
-        @if (Model.Link.Url!=null)
+        @if (Model.Link.Url != null)
         {
             <a href="@Model.Link.Url">@Model.Headline</a>
         }
@@ -13,6 +13,6 @@
     @if (Model.Location != null)
     {
         @* TODO: set MapWidth dynamicly in Partials/GoogleStaticMap based on aspect ratio *@
-        @Html.Partial("Partials/GoogleStaticMap", Model.Location, new ViewDataDictionary { { "MarkerName", Model.Headline},{ "MapHeight", "160"},{ "MapWidth", "311"} })
+        @Html.Partial("Partials/GoogleStaticMap", Model.Location, new ViewDataDictionary { { "MarkerName", Model.Headline}, { "MapHeight", "160"}, { "MapWidth", "311"} })
     }
 </div>

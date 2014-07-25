@@ -1,9 +1,6 @@
-﻿using Sdl.Web.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using Sdl.Web.Common.Models.Common;
+using Sdl.Web.Common.Models.Entity;
 
 namespace Sdl.Web.Common.Interfaces
 {
@@ -22,7 +19,6 @@ namespace Sdl.Web.Common.Interfaces
         object MapModel(object entity, ModelType modelType = ModelType.Entity, Type viewModeltype = null);
         
         //Execute a query to get content
-        void PopulateDynamicList(ContentList<Teaser> list);
-        
+        void PopulateDynamicList(ContentList<Teaser> list);        
     }
 }

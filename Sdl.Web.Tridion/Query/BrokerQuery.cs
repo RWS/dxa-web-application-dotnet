@@ -1,17 +1,12 @@
-﻿using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using Tridion.ContentDelivery.DynamicContent;
+using Sdl.Web.Common.Models.Common;
+using Sdl.Web.Common.Models.Entity;
 using Tridion.ContentDelivery.DynamicContent.Query;
 using Tridion.ContentDelivery.Meta;
 using Tridion.ContentDelivery.Taxonomies;
 
-namespace Sdl.Web.Tridion
+namespace Sdl.Web.Tridion.Query
 {
     public class BrokerQuery
     {
@@ -23,11 +18,12 @@ namespace Sdl.Web.Tridion
         public int PageSize { get; set; }
         public Dictionary<string, List<string>> KeywordFilters { get; set; }
         public bool HasMore { get; set; }
+
         public List<Teaser> ExecuteQuery()
         {
             Criteria criteria = BuildCriteria();
-            Query query = new Query(criteria);
-            if (!String.IsNullOrEmpty(Sort) && Sort.ToLower()!="none")
+            global::Tridion.ContentDelivery.DynamicContent.Query.Query query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(criteria);
+            if (!String.IsNullOrEmpty(Sort) && Sort.ToLower() != "none")
             {
                 query.AddSorting(GetSortParameter());
             }
@@ -42,11 +38,10 @@ namespace Sdl.Web.Tridion
             }
             try
             {
-                ComponentMetaFactory cmf = new ComponentMetaFactory(this.PublicationId);
-                var items = query.ExecuteQuery();
+                ComponentMetaFactory cmf = new ComponentMetaFactory(PublicationId);
                 var results = new List<Teaser>();
                 var ids = query.ExecuteQuery();
-                HasMore = ids.Length>PageSize;
+                HasMore = ids.Length > PageSize;
                 int count = 0;
                 foreach (string compId in ids)
                 {
@@ -68,21 +63,23 @@ namespace Sdl.Web.Tridion
             }
             catch (Exception ex)
             {
-                throw new Exception(String.Format("Error running broker query: {0}.", ex.Message ), ex);
+                throw new Exception(String.Format("Error running Broker query: {0}.", ex.Message), ex);
             }
         }
 
-        private Teaser GetTeaserFromMeta(IComponentMeta compMeta)
+        private static Teaser GetTeaserFromMeta(IComponentMeta compMeta)
         {
-            Teaser result = new Teaser();
-            result.Link = new Link { Url = String.Format("tcm:{0}-{1}", compMeta.PublicationId, compMeta.Id) };
-            result.Date = GetDateFromCustomMeta(compMeta.CustomMeta, "dateCreated") ?? compMeta.LastPublicationDate;
-            result.Headline = GetTextFromCustomMeta(compMeta.CustomMeta, "name") ?? compMeta.Title;
-            result.Text = GetTextFromCustomMeta(compMeta.CustomMeta, "introText");
+            Teaser result = new Teaser
+                {
+                    Link = new Link { Url = String.Format("tcm:{0}-{1}", compMeta.PublicationId, compMeta.Id) },
+                    Date = GetDateFromCustomMeta(compMeta.CustomMeta, "dateCreated") ?? compMeta.LastPublicationDate,
+                    Headline = GetTextFromCustomMeta(compMeta.CustomMeta, "name") ?? compMeta.Title,
+                    Text = GetTextFromCustomMeta(compMeta.CustomMeta, "introText")
+                };
             return result;
         }
 
-        private string GetTextFromCustomMeta(CustomMeta meta, string fieldname)
+        private static string GetTextFromCustomMeta(CustomMeta meta, string fieldname)
         {
             if (meta.NameValues.Contains(fieldname))
             {
@@ -91,7 +88,7 @@ namespace Sdl.Web.Tridion
             return null;
         }
 
-        private DateTime? GetDateFromCustomMeta(CustomMeta meta, string fieldname)
+        private static DateTime? GetDateFromCustomMeta(CustomMeta meta, string fieldname)
         {
             if (meta.NameValues.Contains(fieldname))
             {
@@ -103,7 +100,7 @@ namespace Sdl.Web.Tridion
         /// <summary>
         /// Sets the keyword filters using a list of keyword uri strings
         /// </summary>
-        /// <param name="encodedFilters"></param>
+        /// <param name="keywordUris"></param>
         public void SetKeywordFilters(List<String> keywordUris)
         {
             var taxonomyFactory = new TaxonomyFactory();
@@ -122,7 +119,7 @@ namespace Sdl.Web.Tridion
         /// <summary>
         /// Sets the keyword filters using a list of keyword objects
         /// </summary>
-        /// <param name="encodedFilters"></param>
+        /// <param name="keywords"></param>
         public void SetKeywordFilters(List<Keyword> keywords)
         {
             if (KeywordFilters == null)
@@ -168,8 +165,7 @@ namespace Sdl.Web.Tridion
 
         private Criteria BuildCriteria()
         {
-            var children = new List<Criteria>();
-            children.Add(new ItemTypeCriteria(16));
+            var children = new List<Criteria> { new ItemTypeCriteria(16) };
             if (SchemaId > 0)
             {
                 children.Add(new ItemSchemaCriteria(SchemaId));
@@ -200,9 +196,8 @@ namespace Sdl.Web.Tridion
         private SortColumn GetSortColumn()
         {
             //TODO add more options if required
-            var sort = Sort.ToLower().Trim();
-            var pos = Sort.Trim().IndexOf(" ");
-            sort = pos > 0 ? Sort.Trim().Substring(0, pos) : Sort.Trim();
+            int pos = Sort.Trim().IndexOf(" ", StringComparison.Ordinal);
+            string sort = pos > 0 ? Sort.Trim().Substring(0, pos) : Sort.Trim();
             switch (sort.ToLower())
             {
                 case "title":

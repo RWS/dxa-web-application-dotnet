@@ -3,12 +3,18 @@ using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Models;
-using Sdl.Web.Models.Interfaces;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Models.Common;
+using Sdl.Web.Common.Models.Entity;
+using Sdl.Web.Common.Models.Interfaces;
+using Sdl.Web.Common.Models.Navigation;
+using Sdl.Web.Common.Models.Page;
+using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Mvc.ContentProvider;
 
-namespace Sdl.Web.Mvc
+namespace Sdl.Web.Mvc.Controllers
 {
     public abstract class BaseController : Controller
     {
@@ -91,7 +97,7 @@ namespace Sdl.Web.Mvc
         [HandleError]
         public virtual ActionResult SiteMap()
         {
-            var model = ContentProvider.GetNavigationModel(Configuration.LocalizeUrl("navigation.json", WebRequestContext.Localization));
+            var model = ContentProvider.GetNavigationModel(SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization));
             return View(model);
         }
 
@@ -106,7 +112,7 @@ namespace Sdl.Web.Mvc
                 if (bits.Length > 1)
                 {
                     bits = bits[1].Split('-');
-                    foreach (var loc in Configuration.Localizations.Values)
+                    foreach (var loc in SiteConfiguration.Localizations.Values)
                     {
                         if (loc.LocalizationId == bits[0])
                         {
@@ -119,19 +125,22 @@ namespace Sdl.Web.Mvc
             {
                 if (localization == null)
                 {
-                    url = Configuration.DefaultLocalization;
+                    url = SiteConfiguration.DefaultLocalization;
                 }
                 else
                 {
-                    //var loc = Configuration.Localizations.Values.Where(l => l.LocalizationId.ToString() == localization).FirstOrDefault();
-                    var loc = Configuration.Localizations.Values.FirstOrDefault(l => l.LocalizationId.ToString(CultureInfo.InvariantCulture) == localization);
+                    //var loc = SiteConfiguration.Localizations.Values.Where(l => l.LocalizationId.ToString() == localization).FirstOrDefault();
+                    var loc = SiteConfiguration.Localizations.Values.FirstOrDefault(l => l.LocalizationId.ToString(CultureInfo.InvariantCulture) == localization);
                     if (loc != null)
                     {
                         url = loc.Path;
                     }
                 }
             }
-            Response.Redirect(url, true);
+            if (url != null)
+            {
+                Response.Redirect(url, true);
+            }
             return null;
         }
 
@@ -149,7 +158,7 @@ namespace Sdl.Web.Mvc
         protected virtual Type GetViewType(MvcData viewData)
         {
             var key = String.Format("{0}:{1}", viewData.AreaName, viewData.ViewName);
-            if (!Configuration.ViewModelRegistry.ContainsKey(key))
+            if (!SiteConfiguration.ViewModelRegistry.ContainsKey(key))
             {
                 //TODO - take into account area?
                 var viewEngineResult = ViewEngines.Engines.FindPartialView(ControllerContext, viewData.ViewName);
@@ -161,9 +170,9 @@ namespace Sdl.Web.Mvc
 
                 //This is the only way to get the view model type from the view and thus prevent the need to configure this somewhere
                 var path = ((BuildManagerCompiledView)viewEngineResult.View).ViewPath;
-                Configuration.AddViewModelToRegistry(viewData, path);
+                SiteConfiguration.AddViewModelToRegistry(viewData, path);
             }
-            return Configuration.ViewModelRegistry[key];
+            return SiteConfiguration.ViewModelRegistry[key];
         }
 
         protected virtual MvcData GetViewData(object sourceModel)
@@ -194,7 +203,6 @@ namespace Sdl.Web.Mvc
             return default(T);
         }
 
-
         protected virtual object ProcessList(object sourceModel, Type type)
         {
             var model = ProcessModel(sourceModel, type);
@@ -219,10 +227,9 @@ namespace Sdl.Web.Mvc
             return model;
         }
 
-
         protected virtual object ProcessNavigation(object sourceModel, Type type, string navType)
         {
-            var navigationUrl = Configuration.LocalizeUrl("navigation.json", WebRequestContext.Localization);
+            var navigationUrl = SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization);
             var model = ProcessModel(sourceModel, type);
             var nav = model as NavigationLinks;
             NavigationLinks links = new NavigationLinks();
@@ -240,7 +247,6 @@ namespace Sdl.Web.Mvc
             }
             if (nav != null)
             {
-
                 links.EntityData = nav.EntityData;
                 links.PropertyData = nav.PropertyData;
             }

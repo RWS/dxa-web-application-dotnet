@@ -7,13 +7,15 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
 using DD4T.ContentModel.Factories;
-using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Mapping;
-using Sdl.Web.Models;
-using Sdl.Web.Mvc;
-using Sdl.Web.Tridion;
-using interfaces = Sdl.Web.Models.Interfaces;
+using Sdl.Web.Common.Models.Common;
+using Sdl.Web.Common.Models.Interfaces;
+using Sdl.Web.Common.Models.Page;
+using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Tridion.Config;
+using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.DD4T.Mapping
 {
@@ -68,10 +70,10 @@ namespace Sdl.Web.DD4T.Mapping
                 mapData.TargetType = type;
                 mapData.SourceEntity = component;
                 var model = CreateModelFromMapData(mapData);
-                if (model is interfaces.IEntity)
+                if (model is IEntity)
                 {
-                    ((interfaces.IEntity)model).EntityData = entityData;
-                    ((interfaces.IEntity)model).Id = component.Id.Split('-')[1];
+                    ((IEntity)model).EntityData = entityData;
+                    ((IEntity)model).Id = component.Id.Split('-')[1];
                 }
                 if (model is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
                 {
@@ -128,9 +130,9 @@ namespace Sdl.Web.DD4T.Mapping
                     }
                 }
             }
-            if (model is interfaces.IEntity)
+            if (model is IEntity)
             {
-                ((interfaces.IEntity)model).PropertyData = propertyData;
+                ((IEntity)model).PropertyData = propertyData;
             }
             return model;
         }
@@ -170,7 +172,7 @@ namespace Sdl.Web.DD4T.Mapping
             return filtered;
         }
 
-        private IField GetFieldFromSemantics(MappingData mapData, SemanticProperty info)
+        private static IField GetFieldFromSemantics(MappingData mapData, SemanticProperty info)
         {
             var entityData = GetEntityData(info.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
             if (entityData != null)
@@ -340,7 +342,6 @@ namespace Sdl.Web.DD4T.Mapping
             return GetMultiMediaLinks(field.LinkedComponentValues, modelType, multival);
         }
 
-
         private static object GetMultiMediaLinks(IEnumerable<IComponent> items, Type modelType, bool multival)
         {
             var components = items as IList<IComponent> ?? items.ToList();
@@ -380,7 +381,6 @@ namespace Sdl.Web.DD4T.Mapping
             return null;
         }
 
-
         private object GetMultiKeywords(IField field, Type linkedItemType, bool multival)
         {
             return GetMultiKeywords(field.Keywords, linkedItemType, multival);
@@ -419,7 +419,8 @@ namespace Sdl.Web.DD4T.Mapping
 
             if (linkedItemType == typeof(String))
             {
-                List<String> res = items.Select(k=>GetKeywordDisplayText(k)).ToList();
+                //List<String> res = items.Select(k=>GetKeywordDisplayText(k)).ToList();
+                List<String> res = items.Select(GetKeywordDisplayText).ToList();
                 if (multival)
                 {
                     return res;
@@ -481,7 +482,7 @@ namespace Sdl.Web.DD4T.Mapping
             }
 
             //TODO is reflection the only way to do this?
-            MethodInfo method = GetType().GetMethod("GetCompLink" + (multival ? "s" : ""), BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo method = GetType().GetMethod("GetCompLink" + (multival ? "s" : String.Empty), BindingFlags.NonPublic | BindingFlags.Instance);
             method = method.MakeGenericMethod(new[] { linkedItemType });
             return method.Invoke(this, new object[] { items, linkedItemType });
         }
@@ -670,7 +671,7 @@ namespace Sdl.Web.DD4T.Mapping
             meta.Add("og:url", WebRequestContext.GetRequestUrl());
             //TODO is this always article?
             meta.Add("og:type", "article");
-            meta.Add("og:locale", Configuration.GetConfig("core.culture", WebRequestContext.Localization.Path));
+            meta.Add("og:locale", SiteConfiguration.GetConfig("core.culture", WebRequestContext.Localization.Path));
             if (description != null)
             {
                 meta.Add("og:description", description);
@@ -735,7 +736,7 @@ namespace Sdl.Web.DD4T.Mapping
         private static Region GetRegionFromComponentPresentation(IComponentPresentation cp)
         {
             string name = null;
-            var module = Configuration.GetDefaultModuleName();//Default module
+            var module = SiteConfiguration.GetDefaultModuleName();//Default module
             if (cp.ComponentTemplate.MetadataFields != null)
             {
                 if (cp.ComponentTemplate.MetadataFields.ContainsKey("regionView"))

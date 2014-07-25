@@ -1,17 +1,15 @@
-﻿using Sdl.Web.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 using System.Web.Script.Serialization;
-using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Models.Common;
+using Sdl.Web.Common.Models.Entity;
+using Sdl.Web.Common.Models.Navigation;
 
-
-namespace Sdl.Web.Mvc
+namespace Sdl.Web.Mvc.ContentProvider
 {
     /// <summary>
     /// Abstract Base Content Provider
@@ -19,9 +17,6 @@ namespace Sdl.Web.Mvc
     public abstract class BaseContentProvider : IContentProvider
     {
         public IContentResolver ContentResolver { get; set; }
-        public BaseContentProvider()
-        {
-        }
 
         //These need to be implemented by the specific content provider
         public abstract string GetPageContent(string url);
@@ -43,7 +38,7 @@ namespace Sdl.Web.Mvc
             return model;
         }
 
-        private static Dictionary<Type, IModelBuilder> _modelBuilders = null;
+        private static Dictionary<Type, IModelBuilder> _modelBuilders;
         public static Dictionary<Type, IModelBuilder> ModelBuilders
         {
             get
@@ -65,18 +60,26 @@ namespace Sdl.Web.Mvc
         public virtual string ParseUrl(string url)
         {
             var defaultPageFileName = ContentResolver.DefaultPageName;
-            return String.IsNullOrEmpty(url) ? defaultPageFileName : (url.EndsWith("/") ? url + defaultPageFileName : url += ContentResolver.DefaultExtension);
+            if (String.IsNullOrEmpty(url))
+            {
+                return defaultPageFileName;
+            }
+            if (url.EndsWith("/"))
+            {
+                return url + defaultPageFileName;
+            }
+
+            return url + ContentResolver.DefaultExtension;
         }
         
         public virtual object MapModel(object data, ModelType modelType, Type viewModeltype = null)
         {
             List<object> includes = GetIncludesFromModel(data, modelType);
-            MvcData viewData = null;
-            viewData = ContentResolver.ResolveMvcData(data);
+            MvcData viewData = ContentResolver.ResolveMvcData(data);
             if (viewModeltype == null)
             {
                 var key = String.Format("{0}:{1}", viewData.AreaName, viewData.ViewName);
-                viewModeltype = Configuration.ViewModelRegistry.ContainsKey(key) ? Configuration.ViewModelRegistry[key] : null;
+                viewModeltype = SiteConfiguration.ViewModelRegistry.ContainsKey(key) ? SiteConfiguration.ViewModelRegistry[key] : null;
             }
             if (viewModeltype!=null)
             {
@@ -87,20 +90,15 @@ namespace Sdl.Web.Mvc
                 }
                 return builder.Create(data, viewModeltype, includes);
             }
-            else
-            {
-                var ex = new Exception(String.Format("Cannot find view model for entity in ViewModelRegistry. Check the view is strongly typed using the @model statement"));
-                Log.Error(ex);
-                throw ex;
-            }
+
+            var ex = new Exception(String.Format("Cannot find view model for entity in ViewModelRegistry. Check the view is strongly typed using the @model statement"));
+            Log.Error(ex);
+            throw ex;
         }
 
         protected abstract List<object> GetIncludesFromModel(object data, ModelType modelType);
-
         
         public abstract void PopulateDynamicList(ContentList<Teaser> list);
-
-
 
         public virtual object GetNavigationModel(string url)
         {

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Helpers;
-using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Logging;
 
-namespace Sdl.Web.Mvc
+namespace Sdl.Web.Mvc.Statics
 {
     /// <summary>
     /// Class to manage static assets such as config and resources. This contains generic methods to serialize assets
@@ -25,15 +22,15 @@ namespace Sdl.Web.Mvc
             string version = null;
             try
             {
-                foreach (var loc in Configuration.Localizations.Values)
+                foreach (var loc in SiteConfiguration.Localizations.Values)
                 {
-                    var localizationRoot = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, Configuration.SystemFolder);
+                    var localizationRoot = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, SiteConfiguration.SystemFolder);
                     if (!folders.Contains(localizationRoot))
                     {
                         try
                         {
                             //The other config etc files are bootstrapped from /system/_all.json
-                            var url = String.Format("{0}/{1}/_all.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, Configuration.SystemFolder);
+                            var url = String.Format("{0}/{1}/_all.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, SiteConfiguration.SystemFolder);                            
                             SerializeFile(url, 2);
                             folders.Add(localizationRoot);
                             //The HTML Design version is published in /version.json
@@ -68,7 +65,7 @@ namespace Sdl.Web.Mvc
         /// <param name="bootstrapLevel">Level of recursion expected 0=none (the file contains data to serialize rather than a list of other files)</param>
         protected virtual void SerializeFile(string url, int bootstrapLevel = 0)
         {
-            string fileContents = this.Serialize(url, bootstrapLevel != 0);
+            string fileContents = Serialize(url, bootstrapLevel != 0);
             if (bootstrapLevel != 0)
             {
                 var bootstrapJson = Json.Decode(fileContents);

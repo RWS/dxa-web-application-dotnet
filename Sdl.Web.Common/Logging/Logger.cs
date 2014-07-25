@@ -1,15 +1,11 @@
-﻿using Sdl.Web.Common.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using Sdl.Web.Common.Interfaces;
 
-namespace Sdl.Web.Common
+namespace Sdl.Web.Common.Logging
 {
     public static class Log
     {
-        public static ILogger _logger;
+        private static ILogger _logger;
         public static ILogger Logger
         {
             get
@@ -26,6 +22,7 @@ namespace Sdl.Web.Common
                 _logger = value;
             }
         }
+
         public static void Trace(DateTime start, string type, string messageFormat, params object[] parameters)
         {
             Logger.Trace(start, type, messageFormat, parameters);

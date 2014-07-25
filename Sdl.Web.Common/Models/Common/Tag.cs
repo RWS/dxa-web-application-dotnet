@@ -1,18 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Sdl.Web.Models
+﻿namespace Sdl.Web.Common.Models.Common
 {
     public class Tag
     {
-        //Text to display
+        /// <summary>
+        /// Text to display.
+        /// </summary>
         public string DisplayText { get; set; }
-        //Unique identifier for the tag (within the given domain)
+        
+        /// <summary>
+        /// Unique identifier for the tag (within the given domain).
+        /// </summary>
         public string Key { get; set; }
-        //The domain/category/taxonomy identifier for the tag
+        
+        /// <summary>
+        /// The domain/category/taxonomy identifier for the tag.
+        /// </summary>
         public string TagCategory { get; set; }
     }
 }

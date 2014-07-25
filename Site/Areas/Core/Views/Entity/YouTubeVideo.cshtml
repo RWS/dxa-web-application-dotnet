@@ -1,8 +1,8 @@
-﻿@model Sdl.Web.Models.YouTubeVideo
+﻿@model YouTubeVideo
 <div class="video" @Markup.Entity(Model)> 
     @if (Model.Headline!=null)
     {
         <h3 @Markup.Property(Model, "Headline")>@Model.Headline</h3>
     }   
-    @Html.Media(Model,"100%")
+    @Html.Media(Model, "100%")
 </div>

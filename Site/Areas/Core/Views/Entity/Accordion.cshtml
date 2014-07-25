@@ -1,4 +1,4 @@
-﻿@model Sdl.Web.Models.ItemList
+﻿@model ItemList
 <article class="rich-text" @Markup.Entity(Model)>
     <div class="content">
         @if (Model.Headline != null)
@@ -30,8 +30,7 @@
                                     <figure @Markup.Property(element, "Media")>
                                         @Html.Media(element.Media)
                                     </figure>
-                                }
-                                    
+                                }                                    
                                 @if (element.Link != null)
                                 {
                                     <p @Markup.Property(element, "Link.LinkText")>

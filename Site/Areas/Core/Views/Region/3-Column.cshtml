@@ -1,14 +1,14 @@
-﻿@model Sdl.Web.Models.Region
+﻿@model Region
 <div @Markup.Region(Model)>
-@for (int i = 0; i < Math.Ceiling(Model.Items.Count / 3.0); i++)
-{
-    <div class="row">
-        @for (int j = 0; j < 3 && (3 * i + j < Model.Items.Count); j++)
-        {
-            <div class="col-sm-6 col-md-4">
-                @ViewBag.Renderer.RenderEntity(Model.Items[3 * i + j], Html,4)
-            </div>
-        }
-    </div>
-}
+    @for (int i = 0; i < Math.Ceiling(Model.Items.Count / 3.0); i++)
+    {
+        <div class="row">
+            @for (int j = 0; j < 3 && (3 * i + j < Model.Items.Count); j++)
+            {
+                <div class="col-sm-6 col-md-4">
+                    @ViewBag.Renderer.RenderEntity(Model.Items[3 * i + j], Html,4)
+                </div>
+            }
+        </div>
+    }
 </div>

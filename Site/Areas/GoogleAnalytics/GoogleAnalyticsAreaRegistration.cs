@@ -1,6 +1,6 @@
 ﻿using System.Web.Mvc;
 
-namespace Site.Areas.GoogleAnalytics
+namespace Sdl.Web.Site.Areas.GoogleAnalytics
 {
     public class GoogleAnalyticsAreaRegistration : AreaRegistration 
     {
@@ -16,9 +16,9 @@ namespace Site.Areas.GoogleAnalytics
         {
             //Default Route - required for sub actions (region/entity/navigation etc.)
             context.MapRoute(
-                name: "Default_GoogleAnalytics",
-                url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
+                "Default_GoogleAnalytics", 
+                "{controller}/{action}/{id}", 
+                new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             );
         }
     }

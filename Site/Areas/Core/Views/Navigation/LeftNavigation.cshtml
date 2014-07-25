@@ -3,7 +3,7 @@
     <ul class="nav nav-sidebar">
         @foreach (var item in Model.Items)
         {
-            <li class="@(item.Url == Request.Url.LocalPath.ToString() ? "active" : "")">
+            <li class="@(item.Url == Request.Url.LocalPath ? "active" : "")">
                 <a href="@item.Url" title="@item.AlternateText">@item.LinkText</a>
             </li>
         }

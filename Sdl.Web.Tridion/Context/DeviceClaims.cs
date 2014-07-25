@@ -7,8 +7,7 @@ namespace Sdl.Web.Tridion.Context
     /// Based on https://github.com/NunoLinhares/TridionContextEngineWrapper/tree/master/Sdl.Tridion.Context
     /// </summary>
     public class DeviceClaims : ContextClaims
-    {
-        
+    {        
         public DeviceClaims(Dictionary<Uri, object> claims) : base(claims)
         {
         }
@@ -28,6 +27,5 @@ namespace Sdl.Web.Tridion.Context
         public string Variant { get { return GetStringValue(ClaimUris.UriDeviceVariant); } }
         public string Vendor { get { return GetStringValue(ClaimUris.UriDeviceVendor); } }
         public string Version { get { return GetStringValue(ClaimUris.UriDeviceVendor); } }
-
     }
 }

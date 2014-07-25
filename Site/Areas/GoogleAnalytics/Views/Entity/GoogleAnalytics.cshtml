@@ -1,4 +1,4 @@
-﻿@model Sdl.Web.Models.EntityBase
+﻿@model EntityBase
 <script>
     (function (b, o, i, l, e, r) {
         b.GoogleAnalyticsObject = l; b[l] || (b[l] =
@@ -7,5 +7,5 @@
         e.src = '//www.google-analytics.com/analytics.js';
         r.parentNode.insertBefore(e, r);
     }(window, document, 'script', 'ga'));
-    ga('create', '@Configuration.GetConfig("googleanalytics.siteKey",WebRequestContext.Localization.Path)'); ga('send', 'pageview');
+    ga('create', '@SiteConfiguration.GetConfig("googleanalytics.siteKey", WebRequestContext.Localization.Path)'); ga('send', 'pageview');
 </script>

@@ -1,6 +1,6 @@
 ﻿using System;
 using DD4T.ContentModel.Contracts.Resolvers;
-using Sdl.Web.Mvc;
+using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.DD4T.Mapping
 {

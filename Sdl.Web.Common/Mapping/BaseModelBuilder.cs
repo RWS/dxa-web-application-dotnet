@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Sdl.Web.Models;
 using Sdl.Web.Common.Interfaces;
-using System.Linq;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Mapping
 {
     public abstract class BaseModelBuilder : IModelBuilder
     {
+        private static readonly object SemanticsLock = new object();
+
         private static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> _entityPropertySemantics;
-        private static readonly object semanticsLock = new object();
         public static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> EntityPropertySemantics 
         {
             get
@@ -84,7 +84,7 @@ namespace Sdl.Web.Common.Mapping
                     break;
                 }
             }
-            lock (semanticsLock)
+            lock (SemanticsLock)
             {
                 if (!EntityPropertySemantics.ContainsKey(type))
                 {
@@ -139,8 +139,6 @@ namespace Sdl.Web.Common.Mapping
             }
             return EntityPropertySemantics[type];
         }
-
-
 
         protected virtual SemanticProperty GetDefaultPropertySemantics(PropertyInfo pi, string defaultPrefix)
         {

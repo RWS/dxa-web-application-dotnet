@@ -1,10 +1,7 @@
-﻿using Sdl.Web.Models.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
+using Sdl.Web.Common.Models.Interfaces;
 
-namespace Sdl.Web.Models
+namespace Sdl.Web.Common.Models.Common
 {
     public class EntityBase : IEntity
     {

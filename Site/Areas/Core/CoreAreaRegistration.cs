@@ -1,6 +1,6 @@
 ﻿using System.Web.Mvc;
 
-namespace Site.Areas.Core
+namespace Sdl.Web.Site.Areas.Core
 {
     public class CoreAreaRegistration : AreaRegistration 
     {
@@ -44,9 +44,9 @@ namespace Site.Areas.Core
             
             //Default Route - required for sub actions (region/entity/navigation etc.)
             context.MapRoute(
-                name: "Core_Default",
-                url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
+                "Core_Default", 
+                "{controller}/{action}/{id}", 
+                new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             );
         }
     }

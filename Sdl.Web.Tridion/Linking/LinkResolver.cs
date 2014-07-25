@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tridion.ContentDelivery.Web.Linking;
 
-namespace Sdl.Web.Tridion
+namespace Sdl.Web.Tridion.Linking
 {
     public static class TridionHelper
     {
@@ -28,10 +24,8 @@ namespace Sdl.Web.Tridion
                         return null;
                 }
             }
-            else
-            {
-                return isBinary ? ResolveBinaryLink(uri, localizationId) : ResolveComponentLink(uri, localizationId);
-            }
+
+            return isBinary ? ResolveBinaryLink(uri, localizationId) : ResolveComponentLink(uri, localizationId);
         }
 
         private static string ResolveComponentLink(string uri, int localizationId = 0)
@@ -64,52 +58,44 @@ namespace Sdl.Web.Tridion
             {
                 uri = uri.Substring(4);
             }
-            int res = 0;
+            int res;
             var bits = uri.Split('-');
             if (Int32.TryParse(bits[0], out res))
             {
                 return res;
             }
-            else
-            {
-                throw new Exception("Invalid URI: " + uri);
-            }
 
+            throw new Exception("Invalid URI: " + uri);
         }
 
         public static int GetItemIdFromUri(string uri)
         {
             var bits = uri.Split('-');
-            int res = 0;
-            if (Int32.TryParse(bits[1],out res))
+            int res;
+            if (Int32.TryParse(bits[1], out res))
             {
                 return res;
             }
-            else
-            {
-                throw new Exception("Invalid URI: " + uri);
-            }
+
+            throw new Exception("Invalid URI: " + uri);
         }
 
         public static int GetItemTypeFromUri(string uri)
         {
             var bits = uri.Split('-');
-            int res = 0;
             if (bits.Length > 2)
             {
+                int res;
                 if (Int32.TryParse(bits[2], out res))
                 {
                     return res;
                 }
-                else
-                {
-                    throw new Exception("Invalid URI: " + uri);
-                }
+
+                throw new Exception("Invalid URI: " + uri);
             }
             {
                 return 16;
             }
         }
-
     }
 }

@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web.Compilation;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
-using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Models;
+using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
+using Sdl.Web.Common.Models.Common;
 
-namespace Sdl.Web.Common
+namespace Sdl.Web.Common.Configuration
 {
     public enum ScreenWidth
     {
@@ -21,10 +20,11 @@ namespace Sdl.Web.Common
         Medium,
         Large
     }
+
     /// <summary>
     /// General Configuration Class which reads configuration from json files on disk
     /// </summary>
-    public static class Configuration
+    public static class SiteConfiguration
     {
         public static IMediaHelper MediaHelper {get;set;}
         public static IStaticFileManager StaticFileManager { get; set; }
@@ -55,16 +55,9 @@ namespace Sdl.Web.Common
                 _viewModelRegistry = value;
             }
         }
-        private static string _defaultLocalization;
-        public static string DefaultLocalization
-        {
-            get
-            {
-                return _defaultLocalization;
-            }
-        }
+        public static string DefaultLocalization { get; private set; }
         public static bool IsStaging { get; set; }
-        public static bool IsDeveloperMode { get; set; }
+        public static bool IsDeveloperMode { get; set; }        
         public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LocalConfiguration
         {
             get
@@ -87,7 +80,6 @@ namespace Sdl.Web.Common
                 return _globalConfiguration;
             }
         }
-
         public static DateTime LastApplicationStart { get; set; }
         public static string MediaUrlRegex { get; set; }
         private static readonly object ConfigLock = new object();
@@ -124,7 +116,7 @@ namespace Sdl.Web.Common
             Load(AppDomain.CurrentDomain.BaseDirectory);
         }
         
-        private static string GetConfig(Dictionary<string, Dictionary<string, Dictionary<string, string>>> config, string key, string type, bool global = false)
+        private static string GetConfig(IReadOnlyDictionary<string, Dictionary<string, Dictionary<string, string>>> config, string key, string type, bool global = false)
         {
             Exception ex;
             if (config.ContainsKey(type))
@@ -163,7 +155,7 @@ namespace Sdl.Web.Common
         public static void Initialize(string applicationRoot, List<Dictionary<string,string>> localizationList )
         {
             LastApplicationStart = DateTime.Now;
-            Configuration.SetLocalizations(localizationList);
+            SetLocalizations(localizationList);
             Load(applicationRoot);
             // TODO load semantic mappings
             SemanticMapping.Load(applicationRoot);
@@ -180,7 +172,7 @@ namespace Sdl.Web.Common
             {
                 //Ensure that the config files have been written to disk and HTML Design version is 
                 var version = StaticFileManager.CreateStaticAssets(applicationRoot) ?? DefaultVersion;
-                Configuration.SiteVersion = version;
+                SiteVersion = version;
                 var mediaPatterns = new List<string>{"^/favicon.ico"};
                 _localConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
                 _globalConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
@@ -198,7 +190,7 @@ namespace Sdl.Web.Common
                             var bootstrapJson = Json.Decode(File.ReadAllText(path));
                             if (bootstrapJson.defaultLocalization!=null && bootstrapJson.defaultLocalization)
                             {
-                                _defaultLocalization = loc.Path;
+                                DefaultLocalization = loc.Path;
                                 Log.Info("Set default localization : '{0}'", loc.Path);
                             }
                             if (bootstrapJson.staging != null && bootstrapJson.staging)
@@ -211,22 +203,22 @@ namespace Sdl.Web.Common
                                 string mediaRoot = bootstrapJson.mediaRoot;
                                 if (!mediaRoot.EndsWith("/"))
                                 {
-                                    mediaRoot +="/";
+                                    mediaRoot += "/";
                                 }
                                 Log.Debug("This is site is has media root: " + mediaRoot);
-                                mediaPatterns.Add(String.Format("^{0}{1}.*", mediaRoot, mediaRoot.EndsWith("/") ? "" : "/"));
+                                mediaPatterns.Add(String.Format("^{0}{1}.*", mediaRoot, mediaRoot.EndsWith("/") ? String.Empty : "/"));
                             }
                             mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*",loc.Path, SystemFolder));
                             foreach (string file in bootstrapJson.files)
                             {
-                                var type = file.Substring(file.LastIndexOf("/") + 1);
-                                type = type.Substring(0, type.LastIndexOf(".")).ToLower();
+                                var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                                type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
                                 var configPath = String.Format("{0}/{1}/{2}", applicationRoot, StaticsFolder, file);
                                 if (File.Exists(configPath))
                                 {
                                     Log.Debug("Loading config from file: {0}", configPath);
                                     //For the default localization we load in global configuration
-                                    if (type.Contains(".") && loc.Path==_defaultLocalization)
+                                    if (type.Contains(".") && loc.Path==DefaultLocalization)
                                     {
                                         var bits = type.Split('.');
                                         if (!_globalConfiguration.ContainsKey(bits[0]))

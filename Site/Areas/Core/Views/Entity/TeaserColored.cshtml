@@ -1,7 +1,7 @@
-﻿@model Sdl.Web.Models.Teaser
+﻿@model Teaser
 <div class="feature teaser-container brand-light-color1" @Markup.Entity(Model)>
     <h3 @Markup.Property(Model, "Headline")>@Model.Headline</h3>
-    @if (Model.Media!=null)
+    @if (Model.Media != null)
     {
         <div @Markup.Property(Model, "Media") style="float:right;">
             @Html.Media(Model.Media, "160")

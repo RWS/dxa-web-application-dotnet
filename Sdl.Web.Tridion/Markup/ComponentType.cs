@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Sdl.Web.Tridion
+﻿namespace Sdl.Web.Tridion.Markup
 {
     /// <summary>
     /// Class for deserialized json component type.

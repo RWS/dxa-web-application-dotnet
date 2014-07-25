@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Html
 {
     public abstract class BaseMediaHelper : IMediaHelper
     {
-        public BaseMediaHelper()
+        protected BaseMediaHelper()
         {
             //The Golden Ratio is our default aspect
             DefaultMediaAspect = 1.62;
@@ -47,7 +46,7 @@ namespace Sdl.Web.Mvc.Html
             if (containerSize == 0)
             {
                 //default is full width
-                containerSize = Configuration.MediaHelper.GridSize;
+                containerSize = SiteConfiguration.MediaHelper.GridSize;
             }
             double width = 0;
             //For absolute fill factors, we should have a number
@@ -81,20 +80,20 @@ namespace Sdl.Web.Mvc.Html
                 {
                     case ScreenWidth.ExtraSmall:
                         //Extra small screens are only one column
-                        containerSize = Configuration.MediaHelper.GridSize;
+                        containerSize = SiteConfiguration.MediaHelper.GridSize;
                         break;
                     case ScreenWidth.Small:
                         //Small screens are max 2 columns
-                        containerSize = (containerSize <= Configuration.MediaHelper.GridSize / 2 ? Configuration.MediaHelper.GridSize / 2 : Configuration.MediaHelper.GridSize);
+                        containerSize = (containerSize <= SiteConfiguration.MediaHelper.GridSize / 2 ? SiteConfiguration.MediaHelper.GridSize / 2 : SiteConfiguration.MediaHelper.GridSize);
                         break;
                 }
-                int cols = Configuration.MediaHelper.GridSize / containerSize;
+                int cols = SiteConfiguration.MediaHelper.GridSize / containerSize;
                 //TODO - should we make padding configurable?
                 int padding = (cols - 1) * 20;
                 //Get the max possible width
                 width = WebRequestContext.MaxMediaWidth;
                 //Factor the max possible width by the fill factor and container size and remove padding
-                width = (fillFactor * containerSize * width / (Configuration.MediaHelper.GridSize * 100)) - padding;
+                width = (fillFactor * containerSize * width / (SiteConfiguration.MediaHelper.GridSize * 100)) - padding;
             }
             return (int)Math.Ceiling(width);
         }
@@ -105,9 +104,6 @@ namespace Sdl.Web.Mvc.Html
             return (int)Math.Ceiling(width / aspect);
         }
 
-        public abstract string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0);
-
-
-        
+        public abstract string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0);        
     }
 }

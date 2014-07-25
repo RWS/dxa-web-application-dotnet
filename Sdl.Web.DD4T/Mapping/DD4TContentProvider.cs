@@ -2,33 +2,36 @@
 using System.Collections.Generic;
 using DD4T.ContentModel.Exceptions;
 using DD4T.ContentModel.Factories;
-using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
-using Sdl.Web.Models;
-using Sdl.Web.Mvc;
-using Sdl.Web.Tridion;
+using Sdl.Web.Common.Models.Common;
+using Sdl.Web.Common.Models.Entity;
+using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Mvc.ContentProvider;
+using Sdl.Web.Tridion.Query;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.DD4T.Mapping
 {
     public class DD4TContentProvider : BaseContentProvider
     {
-        readonly ILinkFactory _linkFactory;
-        readonly IPageFactory _pageFactory;
+        private readonly ILinkFactory _linkFactory;
+        private readonly IPageFactory _pageFactory;
 
         public DD4TContentProvider(ILinkFactory linkFactory, IModelBuilder modelBuilder, IPageFactory pageFactory, IContentResolver resolver)
         {
-            ContentResolver = resolver;
             _linkFactory = linkFactory;
             DefaultModelBuilder = modelBuilder;
             _pageFactory = pageFactory;
+            ContentResolver = resolver;
         }
 
         protected virtual MvcData BuildViewData(string viewName)
         {
             var bits = viewName.Split(':');
-            var areaName = Configuration.GetDefaultModuleName();
+            var areaName = SiteConfiguration.GetDefaultModuleName();
             if (bits.Length > 1)
             {
                 areaName = bits[0].Trim();
@@ -54,7 +57,9 @@ namespace Sdl.Web.DD4T.Mapping
                 }
             }
             else
+            {
                 throw new ConfigurationException("No PageFactory configured");
+            }
 
             return null;
         }
@@ -72,7 +77,9 @@ namespace Sdl.Web.DD4T.Mapping
                 }
             }
             else
+            {
                 throw new ConfigurationException("No PageFactory configured");
+            }
 
             return page;
         }
@@ -114,10 +121,10 @@ namespace Sdl.Web.DD4T.Mapping
         protected virtual int MapSchema(string schemaKey)
         {
             var bits = schemaKey.Split('.');
-            string moduleName = bits.Length > 1 ? bits[0] : Configuration.CoreModuleName;
+            string moduleName = bits.Length > 1 ? bits[0] : SiteConfiguration.CoreModuleName;
             schemaKey = bits.Length > 1 ? bits[1] : bits[0];
             int res;
-            var schemaId = Configuration.GetGlobalConfig("schemas." + schemaKey, moduleName);
+            var schemaId = SiteConfiguration.GetGlobalConfig("schemas." + schemaKey, moduleName);
             Int32.TryParse(schemaId, out res);
             return res;
         }
@@ -134,7 +141,7 @@ namespace Sdl.Web.DD4T.Mapping
                 {
                     foreach (var include in includes)
                     {
-                        var item = GetPageModel(Configuration.LocalizeUrl(include, WebRequestContext.Localization));
+                        var item = GetPageModel(SiteConfiguration.LocalizeUrl(include, WebRequestContext.Localization));
                         if (item != null)
                         {
                             res.Add(item);

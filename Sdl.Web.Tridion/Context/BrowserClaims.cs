@@ -9,9 +9,7 @@ namespace Sdl.Web.Tridion.Context
     /// </summary>
     public class BrowserClaims : ContextClaims
     {
-
-        public BrowserClaims(Dictionary<Uri, object> claims)
-            : base(claims)
+        public BrowserClaims(Dictionary<Uri, object> claims) : base(claims)
         {
         }
 
@@ -84,7 +82,5 @@ namespace Sdl.Web.Tridion.Context
         public string Vendor { get { return GetStringValue(ClaimUris.UriBrowserVendor); } }
 
         public string Version { get { return GetStringValue(ClaimUris.UriBrowserVersion); } }
-
-
     }
 }

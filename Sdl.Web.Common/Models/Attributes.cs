@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Sdl.Web.Common.Models.Common;
 
-namespace Sdl.Web.Models
+namespace Sdl.Web.Common.Models
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class SemanticDefaultsAttribute : Attribute
     {
         public SemanticDefaultsAttribute() : this(EntityBase.CoreVocabulary) { }
-        public SemanticDefaultsAttribute(string vocab) : this(vocab, "") { }
+        public SemanticDefaultsAttribute(string vocab) : this(vocab, String.Empty) { }
         public SemanticDefaultsAttribute(string vocab, string prefix) : this(vocab, prefix, true) { }
         public SemanticDefaultsAttribute(string vocab, string prefix, bool mapAllProperties)
         {
@@ -27,7 +25,7 @@ namespace Sdl.Web.Models
     {
         public SemanticEntityAttribute() { }
         public SemanticEntityAttribute(string vocab) : this(vocab, null) { }
-        public SemanticEntityAttribute(string vocab, string entityName) : this(vocab, entityName, "") { }
+        public SemanticEntityAttribute(string vocab, string entityName) : this(vocab, entityName, String.Empty) { }
         public SemanticEntityAttribute(string vocab, string entityName, string prefix)
         {
             Vocab = vocab;

@@ -1,12 +1,9 @@
-﻿using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
+using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Models.Common;
+using Sdl.Web.Common.Models.Navigation;
 
-namespace Sdl.Web.Mvc
+namespace Sdl.Web.Mvc.ContentProvider
 {
     public class NavigationBuilder
     {
@@ -20,17 +17,22 @@ namespace Sdl.Web.Mvc
             int levels = requestUrl.Split('/').Length;
             while (levels > 1 && parent.Items != null)
             {
-                var newParent = parent.Items.Where(i => i.Type=="StructureGroup" && requestUrl.StartsWith(i.Url.ToLower())).FirstOrDefault();
+                var newParent = parent.Items.FirstOrDefault(i => i.Type == "StructureGroup" && requestUrl.StartsWith(i.Url.ToLower()));
                 if (newParent == null)
                 {
                     break;
                 }
                 parent = newParent;
             }
-            foreach (var item in parent.Items.Where(i => i.Visible))
+
+            if (parent != null && parent.Items != null)
             {
-                links.Items.Add(GetLink(item));
+                foreach (var item in parent.Items.Where(i => i.Visible))
+                {
+                    links.Items.Add(GetLink(item));
+                }
             }
+
             return links;
         }
 
@@ -42,7 +44,7 @@ namespace Sdl.Web.Mvc
             breadcrumb.Items.Add(GetLink(parent));
             while (levels > 1 && parent.Items != null)
             {
-                parent = parent.Items.Where(i => requestUrl.StartsWith(i.Url.ToLower())).FirstOrDefault();
+                parent = parent.Items.FirstOrDefault(i => requestUrl.StartsWith(i.Url.ToLower()));
                 if (parent != null)
                 {
                     breadcrumb.Items.Add(GetLink(parent));

@@ -2,12 +2,12 @@
 @{
     var pageId = @WebRequestContext.PageId;
 }
-@if (pageId!=null && Configuration.Localizations.Count > 1)
+@if (pageId!=null && SiteConfiguration.Localizations.Count > 1)
 {
-<select class="selectpicker" data-width="auto">
-    @foreach(var loc in Configuration.Localizations.Values)
-    {
-        <option value="@loc.LocalizationId" data-href="/resolve/@(pageId)?localization=@loc.LocalizationId" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>@Configuration.GetConfig("core.language",loc.Path)</option>
-    }
-</select>
+    <select class="selectpicker" data-width="auto">
+        @foreach(var loc in SiteConfiguration.Localizations.Values)
+        {
+            <option value="@loc.LocalizationId" data-href="/resolve/@(pageId)?localization=@loc.LocalizationId" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>@SiteConfiguration.GetConfig("core.language",loc.Path)</option>
+        }
+    </select>
 }

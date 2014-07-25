@@ -1,17 +1,19 @@
-﻿using Sdl.Web.Models.Interfaces;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Sdl.Web.Common.Models.Interfaces;
 
-namespace Sdl.Web.Models
+namespace Sdl.Web.Common.Models.Page
 {
     /// <summary>
-    /// Model for the data that is used to render a web page
+    /// Model for the data that is used to render a web page.
     /// </summary>
     public class WebPage : PageBase
     {
         public string Url { get; set; }
         public Dictionary<string, string> Meta { get; set; }
         
-        //Included content not explicitly added to the page but required for rendering (header, footer, nav etc.)
+        /// <summary>
+        /// Included content not explicitly added to the page but required for rendering (header, footer, nav etc.).
+        /// </summary>
         public Dictionary<string, IPage> Includes { get; set; }
         
         public WebPage()

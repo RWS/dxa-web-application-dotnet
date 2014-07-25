@@ -6,11 +6,13 @@ using System.Web;
 using System.Xml;
 using DD4T.ContentModel;
 using DD4T.ContentModel.Factories;
-using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Models.Common;
+using Sdl.Web.Common.Models.Interfaces;
 using Sdl.Web.DD4T.Utils;
-using Sdl.Web.Models;
-using Sdl.Web.Tridion;
+using Sdl.Web.Tridion.Linking;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.DD4T.Mapping
@@ -29,7 +31,7 @@ namespace Sdl.Web.DD4T.Mapping
             _componentLinkProvider = componentLinkProvider;
             _componentFactory = componentFactory;
             DefaultExtension = ".html";
-            DefaultExtensionLessPageName = Configuration.GetDefaultDocument();
+            DefaultExtensionLessPageName = SiteConfiguration.GetDefaultDocument();
             DefaultPageName = DefaultExtensionLessPageName + DefaultExtension;
         }
 
@@ -87,7 +89,7 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 var cp = data as IComponentPresentation;
                 var template = cp.ComponentTemplate;
-                var viewName = Regex.Replace(template.Title, @"\[.*\]|\s", "");
+                var viewName = Regex.Replace(template.Title, @"\[.*\]|\s", String.Empty);
                     
                 if (template.MetadataFields != null)
                 {
@@ -98,9 +100,9 @@ namespace Sdl.Web.DD4T.Mapping
                 }
                 res = BuildViewData(viewName);
                 //Defaults
-                res.ControllerName = Configuration.GetEntityController();
-                res.ControllerAreaName = Configuration.GetDefaultModuleName();
-                res.ActionName = Configuration.GetEntityAction();
+                res.ControllerName = SiteConfiguration.GetEntityController();
+                res.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
+                res.ActionName = SiteConfiguration.GetEntityAction();
                 res.RouteValues = new Dictionary<string, string>(); 
                 
                 if (template.MetadataFields !=null)
@@ -139,7 +141,7 @@ namespace Sdl.Web.DD4T.Mapping
             else if (data is IPage)
             {
                 var page = data as IPage;
-                var viewName = page.PageTemplate.Title.Replace(" ", "");
+                var viewName = page.PageTemplate.Title.RemoveSpaces();
                 if (page.PageTemplate.MetadataFields != null)
                 {
                     if (page.PageTemplate.MetadataFields.ContainsKey("view"))
@@ -148,18 +150,18 @@ namespace Sdl.Web.DD4T.Mapping
                     }
                 }
                 res = BuildViewData(viewName);
-                res.ControllerName = Configuration.GetPageController();
-                res.ControllerAreaName = Configuration.GetDefaultModuleName();
-                res.ActionName = Configuration.GetPageController();
+                res.ControllerName = SiteConfiguration.GetPageController();
+                res.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
+                res.ActionName = SiteConfiguration.GetPageController();
             }
-            else if (data is Models.Interfaces.IRegion)
+            else if (data is IRegion)
             {
-                var region = data as Models.Interfaces.IRegion;
-                var viewName = region.Name.Replace(" ", "");
+                var region = data as IRegion;
+                var viewName = region.Name.RemoveSpaces();
                 res = BuildViewData(viewName);
-                res.ControllerName = Configuration.GetRegionController();
-                res.ActionName = Configuration.GetRegionAction();
-                res.ControllerAreaName = Configuration.GetDefaultModuleName();
+                res.ControllerName = SiteConfiguration.GetRegionController();
+                res.ActionName = SiteConfiguration.GetRegionAction();
+                res.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
                 res.AreaName = region.Module;
             }
             return res;
@@ -168,7 +170,7 @@ namespace Sdl.Web.DD4T.Mapping
         protected virtual MvcData BuildViewData(string viewName)
         {
             var bits = viewName.Split(':');
-            var areaName = Configuration.GetDefaultModuleName();
+            var areaName = SiteConfiguration.GetDefaultModuleName();
             if (bits.Length > 1)
             {
                 areaName = bits[0].Trim();
@@ -239,8 +241,8 @@ namespace Sdl.Web.DD4T.Mapping
         {
             var target = link.Attributes["target"].IfNotNull(attr => attr.Value.ToLower());
 
-            if("anchored" == target) {
-
+            if("anchored" == target) 
+            {
                 var href = link.Attributes["xhtml:href"].Value;
 
                 var samePage = string.Equals(href,

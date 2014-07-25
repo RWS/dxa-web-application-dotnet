@@ -11,8 +11,10 @@ using DD4T.ContentModel.Contracts.Caching;
 using DD4T.ContentModel.Factories;
 using DD4T.Factories;
 using DD4T.Factories.Caching;
-using Sdl.Web.Common;
-using Sdl.Web.Mvc;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Mvc.Statics;
 
 namespace Sdl.Web.DD4T.Statics
 {
@@ -51,7 +53,7 @@ namespace Sdl.Web.DD4T.Statics
         /// <returns></returns>
         public bool ProcessRequest(HttpRequest request)
         {
-            string urlPath = request.Url.AbsolutePath.Replace("/" + Configuration.StaticsFolder, "");
+            string urlPath = request.Url.AbsolutePath.Replace("/" + SiteConfiguration.StaticsFolder, String.Empty);
             string physicalPath = request.PhysicalPath;
             Log.Debug("Start processing " + urlPath);
             return ProcessUrl(urlPath, false, physicalPath);
@@ -96,7 +98,7 @@ namespace Sdl.Web.DD4T.Statics
             {
                 if (File.Exists(physicalPath))
                 {
-                    if (cacheSinceAppStart && Configuration.LastApplicationStart.CompareTo(lastPublishedDate) < 0)
+                    if (cacheSinceAppStart && SiteConfiguration.LastApplicationStart.CompareTo(lastPublishedDate) < 0)
                     {
                         //File has been modified since last application start but we don't care
                         Log.Debug("Binary {0} is modified, but only since last application restart, so no action required", urlPath);
@@ -135,7 +137,7 @@ namespace Sdl.Web.DD4T.Statics
 
         private static string GetFilePathFromUrl(string urlPath)
         {
-            return HttpContext.Current.Server.MapPath("~/" + Configuration.StaticsFolder + urlPath);
+            return HttpContext.Current.Server.MapPath("~/" + SiteConfiguration.StaticsFolder + urlPath);
         }
         #endregion
 
@@ -236,7 +238,7 @@ namespace Sdl.Web.DD4T.Statics
                 //On the publication resolver to get the right publication id, as there
                 //is no HttpRequest to determine it from, so we match the binary url
                 //with the configured localizations
-                foreach (var loc in Configuration.Localizations.Values)
+                foreach (var loc in SiteConfiguration.Localizations.Values)
                 {
                     if (urlPath.StartsWith(loc.Path))
                     {

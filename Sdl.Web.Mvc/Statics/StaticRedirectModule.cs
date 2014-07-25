@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Web;
-using System.Web.Configuration;
-using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Mvc.Configuration;
 
-namespace Sdl.Web.Mvc
+namespace Sdl.Web.Mvc.Statics
 {
     /// <summary>
     /// Module to redirect requests for version of static files which no longer exist on disk to the root assets folder
@@ -19,7 +15,7 @@ namespace Sdl.Web.Mvc
     {
         public void Init(HttpApplication context)
         {
-            context.BeginRequest += new EventHandler(this.BeginRequest);
+            context.BeginRequest += BeginRequest;
         }
 
         private void BeginRequest(object sender, EventArgs e)
@@ -31,9 +27,9 @@ namespace Sdl.Web.Mvc
             //So we rewrite the request to a full URL including the default page name to ensure the full MVC pipeline is executed
             if (url == WebRequestContext.Localization.Path + "/")
             {
-                context.RewritePath(url + Configuration.GetDefaultDocument());
+                context.RewritePath(url + SiteConfiguration.GetDefaultDocument());
             }
-            var versionLessUrl = Configuration.RemoveVersionFromPath(url);
+            var versionLessUrl = SiteConfiguration.RemoveVersionFromPath(url);
             if (url != versionLessUrl)
             {
                 Log.Debug("Rewriting request for non-existent versioned static file {0} to {1}", url, versionLessUrl);

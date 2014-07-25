@@ -1,15 +1,13 @@
-﻿using Sdl.Web.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 using System.Web.Script.Serialization;
 using System.Xml.Linq;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Tridion.Markup;
 
-namespace Sdl.Web.Tridion
+namespace Sdl.Web.Tridion.Config
 {
     /// <summary>
     /// Class to read Tridion related configuration
@@ -17,8 +15,8 @@ namespace Sdl.Web.Tridion
     public class TridionConfig
     {
         private static List<Dictionary<string,string>> _localizations;
-        private static object localizationLock = new object();
-        private static object regionLock = new object();
+        private static readonly Object LocalizationLock = new Object();
+        private static readonly Object RegionLock = new Object();
         private static Dictionary<string, XpmRegion> _xpmRegions;
 
         // page title and meta field mappings
@@ -27,8 +25,6 @@ namespace Sdl.Web.Tridion
         public static string StandardMetadataDescriptionXmlFieldName = "description";
         public static string RegionForPageTitleComponent = "Main";
         public static string ComponentXmlFieldNameForPageTitle = "headline";
-
-        
 
         public static Dictionary<string, XpmRegion> XpmRegions
         {
@@ -56,28 +52,25 @@ namespace Sdl.Web.Tridion
 
         public static void LoadLocalizations()
         {
-            lock (localizationLock)
+            lock (LocalizationLock)
             {
                 var rootApplicationFolder = AppDomain.CurrentDomain.BaseDirectory;
                 _localizations = new List<Dictionary<string, string>>();
                 XDocument config = XDocument.Load(rootApplicationFolder + "/bin/config/cd_dynamic_conf.xml");
-                if (config != null)
+                foreach (var pub in config.Descendants("Publication"))
                 {
-                    foreach (var pub in config.Descendants("Publication"))
-                    {
-                        _localizations.Add(GetLocalization(pub.Element("Host")));
-                    }
+                    _localizations.Add(GetLocalization(pub.Element("Host")));
                 }
             }
         }
 
         public static void LoadRegions()
         {
-            lock (regionLock)
+            lock (RegionLock)
             {
                 var rootApplicationFolder = AppDomain.CurrentDomain.BaseDirectory;
                 _xpmRegions = new Dictionary<string, XpmRegion>();
-                var configPath = String.Format("{0}/{1}{2}{3}", rootApplicationFolder, Configuration.StaticsFolder, Configuration.DefaultLocalization, "/system/mappings/regions.json");
+                var configPath = String.Format("{0}/{1}{2}{3}", rootApplicationFolder, SiteConfiguration.StaticsFolder, SiteConfiguration.DefaultLocalization, "/system/mappings/regions.json");
                 foreach (var region in GetRegionsFromFile(configPath))
                 {
                     _xpmRegions.Add(region.Region, region);
@@ -108,7 +101,6 @@ namespace Sdl.Web.Tridion
             return res;
         }
 
-
         /// <summary>
         /// Gets a XPM region by name.
         /// </summary>
@@ -125,16 +117,14 @@ namespace Sdl.Web.Tridion
             {
                 return regions[name];
             }
-            else
-            {
-                Exception ex = new Exception(string.Format("XPM Region '{0}' does not exist.", name));
-                //TODO - do we throw an error, or apply some defaults?
-                Log.Error(ex);
-                throw ex;
-            }
+
+            Exception ex = new Exception(string.Format("XPM Region '{0}' does not exist.", name));
+            //TODO - do we throw an error, or apply some defaults?
+            Log.Error(ex);
+            throw ex;
         }
 
-        private static List<XpmRegion> GetRegionsFromFile(string file)
+        private static IEnumerable<XpmRegion> GetRegionsFromFile(string file)
         {
             return new JavaScriptSerializer().Deserialize<List<XpmRegion>>(File.ReadAllText(file));
         }
