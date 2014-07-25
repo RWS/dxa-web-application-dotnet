@@ -330,8 +330,8 @@ namespace Sdl.Web.Common.Configuration
                 {
                     Protocol = !loc.ContainsKey("Protocol") ? "http" : loc["Protocol"],
                     Domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_link_conf" : loc["Domain"],
-                    Port = !loc.ContainsKey("Port") ? "" : loc["Port"],
-                    Path = (!loc.ContainsKey("Path") || loc["Path"] == "/") ? "" : loc["Path"],
+                    Port = !loc.ContainsKey("Port") ? String.Empty : loc["Port"],
+                    Path = (!loc.ContainsKey("Path") || loc["Path"] == "/") ? String.Empty : loc["Path"],
                     LocalizationId = !loc.ContainsKey("LocalizationId") ? "0" : loc["LocalizationId"]
                 };
                 Localizations.Add(localization.GetBaseUrl(), localization);

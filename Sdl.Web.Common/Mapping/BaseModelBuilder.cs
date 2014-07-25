@@ -43,7 +43,7 @@ namespace Sdl.Web.Common.Mapping
                 if (attr is SemanticDefaultsAttribute)
                 {
                     var semantics = (SemanticDefaultsAttribute)attr;
-                    res.Add(semantics.Prefix, new KeyValuePair<string,string>(semantics.Vocab,""));
+                    res.Add(semantics.Prefix, new KeyValuePair<string,string>(semantics.Vocab, String.Empty));
                     addedDefaults = true;
                 }
             }
@@ -51,7 +51,7 @@ namespace Sdl.Web.Common.Mapping
             if (!addedDefaults)
             {
                 var semantics = new SemanticDefaultsAttribute();
-                res.Add(semantics.Prefix, new KeyValuePair<string, string>(semantics.Vocab, ""));
+                res.Add(semantics.Prefix, new KeyValuePair<string, string>(semantics.Vocab, String.Empty));
             }
             return res;
         }
@@ -73,7 +73,7 @@ namespace Sdl.Web.Common.Mapping
         protected virtual Dictionary<string, List<SemanticProperty>> LoadPropertySemantics(Type type)
         {
             //The default prefix is empty - this implies that the prefix should be inherited from the parent object default prefix
-            var defaultPrefix = "";
+            var defaultPrefix = String.Empty;
             var mapAllProperties = true;
             foreach (var attr in type.GetCustomAttributes())
             {

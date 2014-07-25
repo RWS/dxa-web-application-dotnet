@@ -69,14 +69,14 @@ namespace Sdl.Web.Tridion.Context
 
                         if (expectedValue.StartsWith("<"))
                         {
-                            int value = Convert.ToInt32(expectedValue.Replace("<", ""));
+                            int value = Convert.ToInt32(expectedValue.Replace("<", String.Empty));
                             int claimValue = Convert.ToInt32(AmbientDataContext.CurrentClaimStore.Get<string>(uri));
                             if (claimValue >= value)
                                 inFamily = false;
                         }
                         else if (expectedValue.StartsWith(">"))
                         {
-                            int value = Convert.ToInt32(expectedValue.Replace(">", ""));
+                            int value = Convert.ToInt32(expectedValue.Replace(">", String.Empty));
                             int claimValue = Convert.ToInt32(AmbientDataContext.CurrentClaimStore.Get<string>(uri));
                             if (claimValue <= value)
                                 inFamily = false;

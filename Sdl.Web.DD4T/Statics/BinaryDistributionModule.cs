@@ -109,7 +109,7 @@ namespace Sdl.Web.DD4T.Statics
             {
                 Log.Debug("Url {0} does not match binary url pattern, ignoring it.", urlPath);
                 Log.Debug("<<DistributionModule_OnBeginRequest ({0})", urlPath);
-                Log.Trace(timer, "binary-skip", "");
+                Log.Trace(timer, "binary-skip", String.Empty);
                 return;
             }
 

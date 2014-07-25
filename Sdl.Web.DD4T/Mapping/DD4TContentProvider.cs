@@ -50,7 +50,7 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 DateTime timerStart = DateTime.Now;
                 IPage page;
-                if (_pageFactory.TryFindPage(string.Format("{0}{1}", url.StartsWith("/") ? "" : "/", url), out page))
+                if (_pageFactory.TryFindPage(string.Format("{0}{1}", url.StartsWith("/") ? String.Empty : "/", url), out page))
                 {
                     Log.Trace(timerStart, "page-load", url);
                     return page;
@@ -70,7 +70,7 @@ namespace Sdl.Web.DD4T.Mapping
             if (_pageFactory != null)
             {
                 DateTime timerStart = DateTime.Now;
-                if (_pageFactory.TryFindPageContent(string.Format("{0}{1}", url.StartsWith("/") ? "" : "/", url), out page))
+                if (_pageFactory.TryFindPageContent(string.Format("{0}{1}", url.StartsWith("/") ? String.Empty : "/", url), out page))
                 {
                     Log.Trace(timerStart, "page-load", url);
                     return page;

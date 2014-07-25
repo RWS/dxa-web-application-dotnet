@@ -217,7 +217,7 @@ namespace Sdl.Web.Mvc.Html
             }
             string iconClass = (fileType == null ? "fa-file" : String.Format("fa-file-{0}-o", fileType));
             string friendlyFileSize = helper.FriendlyFileSize(download.FileSize).ToString();
-            string descriptionHtml = (!String.IsNullOrEmpty(download.Description) ? String.Format("<small>{0}</small>", download.Description) : "");
+            string descriptionHtml = (!String.IsNullOrEmpty(download.Description) ? String.Format("<small>{0}</small>", download.Description) : String.Empty);
             // TODO: use partial view instead of hardcoding HTML
             string downloadHtml = String.Format(@"
                 <div class=""download-list"">

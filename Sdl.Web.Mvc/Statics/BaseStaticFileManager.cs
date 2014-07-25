@@ -30,11 +30,11 @@ namespace Sdl.Web.Mvc.Statics
                         try
                         {
                             //The other config etc files are bootstrapped from /system/_all.json
-                            var url = String.Format("{0}/{1}/_all.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, SiteConfiguration.SystemFolder);                            
+                            var url = String.Format("{0}/{1}/_all.json", String.IsNullOrEmpty(loc.Path) || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, SiteConfiguration.SystemFolder);                            
                             SerializeFile(url, 2);
                             folders.Add(localizationRoot);
                             //The HTML Design version is published in /version.json
-                            var versionUrl = String.Format("{0}/version.json", loc.Path == "" || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path);
+                            var versionUrl = String.Format("{0}/version.json", String.IsNullOrEmpty(loc.Path) || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path);
                             var versionJson = Serialize(versionUrl, true);
                             if (versionJson != null)
                             {
