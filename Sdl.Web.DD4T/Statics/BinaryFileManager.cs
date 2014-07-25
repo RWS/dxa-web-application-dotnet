@@ -1,21 +1,20 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 using DD4T.ContentModel;
 using DD4T.ContentModel.Contracts.Caching;
 using DD4T.ContentModel.Factories;
 using DD4T.Factories;
 using DD4T.Factories.Caching;
-using DD4T.Utils;
-using Sdl.Web.Mvc;
-using System.Drawing.Imaging;
-using System.Text.RegularExpressions;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using Sdl.Web.Common;
+using Sdl.Web.Mvc;
 
-namespace Sdl.Web.DD4T
+namespace Sdl.Web.DD4T.Statics
 {
     /// <summary>
     /// Ensures a Binary file is cached on the file-system from the Tridion Broker DB
@@ -31,9 +30,7 @@ namespace Sdl.Web.DD4T
         {
             get
             {
-                if (_cacheAgent == null)
-                    _cacheAgent = new DefaultCacheAgent();
-                return _cacheAgent;
+                return _cacheAgent ?? (_cacheAgent = new DefaultCacheAgent());
             }
             set
             {
@@ -41,7 +38,7 @@ namespace Sdl.Web.DD4T
             }
         }
         public const string CacheKeyFormatBinary = "Binary_{0}";
-        private string GetCacheKey(string url)
+        private static string GetCacheKey(string url)
         {
             return string.Format(CacheKeyFormatBinary, url);
         }
@@ -68,19 +65,16 @@ namespace Sdl.Web.DD4T
                 var filePath = GetFilePathFromUrl(urlPath);
                 return Encoding.UTF8.GetString(File.ReadAllBytes(filePath));
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
-            
+
         /// <summary>
         /// Main worker method reads binary from Broker and stores it in file-system
         /// </summary>
         /// <returns></returns>
         public bool ProcessUrl(string urlPath, bool cacheSinceAppStart = false, string physicalPath = null)
         {
-            Dimensions dimensions = null;
+            Dimensions dimensions;
             if (physicalPath == null)
             {
                 physicalPath = GetFilePathFromUrl(urlPath);
@@ -105,7 +99,7 @@ namespace Sdl.Web.DD4T
                     if (cacheSinceAppStart && Configuration.LastApplicationStart.CompareTo(lastPublishedDate) < 0)
                     {
                         //File has been modified since last application start but we don't care
-                        Log.Debug("binary {0} is modified, but only since last application restart, so no action required", urlPath);
+                        Log.Debug("Binary {0} is modified, but only since last application restart, so no action required", urlPath);
                         return true;
                     }
                     FileInfo fi = new FileInfo(physicalPath);
@@ -114,7 +108,7 @@ namespace Sdl.Web.DD4T
                         DateTime fileModifiedDate = File.GetLastWriteTime(physicalPath);
                         if (fileModifiedDate.CompareTo(lastPublishedDate) >= 0)
                         {
-                            Log.Debug("binary {0} is still up to date, no action required", urlPath);
+                            Log.Debug("Binary {0} is still up to date, no action required", urlPath);
                             return true;
                         }
                     }
@@ -139,7 +133,7 @@ namespace Sdl.Web.DD4T
 
         }
 
-        private string GetFilePathFromUrl(string urlPath)
+        private static string GetFilePathFromUrl(string urlPath)
         {
             return HttpContext.Current.Server.MapPath("~/" + Configuration.StaticsFolder + urlPath);
         }
@@ -160,11 +154,7 @@ namespace Sdl.Web.DD4T
         {
             get
             {
-                if (_binaryFactory == null)
-                {
-                    _binaryFactory = new BinaryFactory();
-                }
-                return _binaryFactory;
+                return _binaryFactory ?? (_binaryFactory = new BinaryFactory());
             }
             set
             {
@@ -172,14 +162,14 @@ namespace Sdl.Web.DD4T
             }
         }
 
-       
         /// <summary>
         /// Perform actual write of binary content to file
         /// </summary>
-        /// <param name="binaryMeta">BinaryMeta the binary meta to store</param>
+        /// <param name="binary">The binary to store</param>
         /// <param name="physicalPath">String the file path to write to</param>
-        /// <returns></returns>
-        private bool WriteBinaryToFile(IBinary binary, String physicalPath, Dimensions dimensions)
+        /// <param name="dimensions">Dimensions of file</param>
+        /// <returns>True is binary was written to disk, false otherwise</returns>
+        private static bool WriteBinaryToFile(IBinary binary, String physicalPath, Dimensions dimensions)
         {
             bool result = true;
             FileStream fileStream = null;
@@ -194,7 +184,7 @@ namespace Sdl.Web.DD4T
                     else
                     {
                         FileInfo fileInfo = new FileInfo(physicalPath);
-                        if (!fileInfo.Directory.Exists)
+                        if (fileInfo.Directory != null && !fileInfo.Directory.Exists)
                         {
                             fileInfo.Directory.Create();
                         }
@@ -202,15 +192,18 @@ namespace Sdl.Web.DD4T
                     }
                     byte[] buffer = binary.BinaryData;
 
-                    if (dimensions != null && (dimensions.Width>0 || dimensions.Height>0))
+                    if (dimensions != null && (dimensions.Width > 0 || dimensions.Height > 0))
+                    {
                         buffer = ResizeImageFile(buffer, dimensions, GetImageFormat(physicalPath));
+                    }
 
                     fileStream.Write(buffer, 0, buffer.Length);
                 }
             }
             catch (Exception e)
             {
-                Log.Error("Exception occurred {0}\r\n{1}", e.Message, e.StackTrace);
+                // TODO: file probabaly accessed by a different thread, determine if logging error is enough (assuming other thread will be able to write)
+                Log.Error("Exception occurred: {0}\r\n{1}", e.Message, e.StackTrace);
                 result = false;
             }
             finally
@@ -224,13 +217,13 @@ namespace Sdl.Web.DD4T
             return result;
         }
 
-        private void DeleteFile(string physicalPath)
+        private static void DeleteFile(string physicalPath)
         {
             if (File.Exists(physicalPath))
             {
-                Log.Debug("requested binary {0} no longer exists in broker. Removing...", physicalPath);
+                Log.Debug("Requested binary {0} no longer exists in Broker. Removing...", physicalPath);
                 File.Delete(physicalPath); // file got unpublished
-                Log.Debug("done ({0})", physicalPath);
+                Log.Debug("Done ({0})", physicalPath);
             }
         }
 
@@ -271,11 +264,8 @@ namespace Sdl.Web.DD4T
             {
                 return GetStaticContent(url, true);
             }
-            else
-            {
-                ProcessUrl(url, true);
-                return null;
-            }
+            ProcessUrl(url, true);
+            return null;
         }
 
         internal static byte[] ResizeImageFile(byte[] imageFile, Dimensions dimensions, ImageFormat imageFormat)
@@ -330,7 +320,7 @@ namespace Sdl.Web.DD4T
                 targetH = (dimensions.NoStretch && dimensions.Height > original.Height) ? original.Height : dimensions.Height;
                 targetW = (int)(original.Width * ((float)targetH / (float)original.Height));
             }
-            Image imgPhoto = null;
+            Image imgPhoto;
             using (MemoryStream memoryStream = new MemoryStream(imageFile))
             {
                 imgPhoto = Image.FromStream(memoryStream);
@@ -360,22 +350,24 @@ namespace Sdl.Web.DD4T
                 return memoryStream.GetBuffer();
             }
         }
-        private ImageFormat GetImageFormat(string path)
+
+        private static ImageFormat GetImageFormat(string path)
         {
             switch (Path.GetExtension(path).ToLower())
             {
                 case ".jpg":
                 case ".jpeg":
                     return ImageFormat.Jpeg;
-                case ".png":
-                    return ImageFormat.Png;
                 case ".gif":
                     return ImageFormat.Gif;
+                //case ".png":
+                // use png as default
+                default:
+                    return ImageFormat.Png;
             }
-            return ImageFormat.Png; // use png as default
         }
 
-        private string StripDimensions(string path, out Dimensions dimensions)
+        private static string StripDimensions(string path, out Dimensions dimensions)
         {
             dimensions = new Dimensions();
             Regex re = new Regex(@"_(w(\d+))?(_h(\d+))?(_n)?\.");

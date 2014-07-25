@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using Sdl.Web.Common;
 
-namespace Sdl.Web.DD4T
+namespace Sdl.Web.DD4T.Statics
 {
 	/// <summary>
 	/// HttpModule intercepting a request to a static resource, caches the resource to the file-system from the Broker DB
@@ -76,8 +76,20 @@ namespace Sdl.Web.DD4T
             {
                 Log.Debug("File was created less than 1 second ago, transmitting content directly.");
                 response.Clear();
-                // TODO: check if file is not in use, it could still be accessed/written by a different thread
-                response.TransmitFile(request.PhysicalPath);
+                try
+                {
+                    response.TransmitFile(request.PhysicalPath);
+                }
+                catch (IOException ex)
+                {
+                    //Log.Error("IOException occurred while transmitting file: {0}\r\n{1}", ex.Message, ex.StackTrace);
+
+                    // TODO: when file is accessed by a different thread, should we wait or just log an error
+                    // file is accessed by a different thread (probabaly written), lets wait a second and try again?
+                    Log.Warn("IOException transmitting file: {0}", ex.Message);
+                    System.Threading.Thread.Sleep(1000);
+                    response.TransmitFile(request.PhysicalPath);
+                }
                 Log.Trace(start, "binary-direct", response.StatusCode.ToString(CultureInfo.InvariantCulture));
                 return;
             }
@@ -104,10 +116,10 @@ namespace Sdl.Web.DD4T
             context.RewritePath("/" + Configuration.StaticsFolder + request.Path);
             if (!File.Exists(realPath))
             {
-                Log.Debug("Dir path: " + realPath.Substring(0, realPath.LastIndexOf("\\", StringComparison.Ordinal)));
+                string dir = realPath.Substring(0, realPath.LastIndexOf("\\", StringComparison.Ordinal));
+                Log.Debug("Dir path: {0}", dir);
                 try
                 {
-                    string dir = realPath.Substring(0, realPath.LastIndexOf("\\", StringComparison.Ordinal));
                     if (!Directory.Exists(dir))
                     {
                         Directory.CreateDirectory(dir);
@@ -116,7 +128,7 @@ namespace Sdl.Web.DD4T
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn("IIS empty file could not be created." + ex.Message);
+                    Log.Warn("IIS empty file could not be created. {0}", ex.Message);
                 }
             }
 

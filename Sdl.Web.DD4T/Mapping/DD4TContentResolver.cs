@@ -1,23 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
-using DD4T.ContentModel.Factories;
-using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Tridion;
-using Sdl.Web.Common;
-using Sdl.Web.Models;
 using DD4T.ContentModel;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using interfaces = Sdl.Web.Models.Interfaces;
+using DD4T.ContentModel.Factories;
+using Sdl.Web.Common;
+using Sdl.Web.Common.Interfaces;
+using Sdl.Web.DD4T.Utils;
+using Sdl.Web.Models;
+using Sdl.Web.Tridion;
+using IPage = DD4T.ContentModel.IPage;
 
-namespace Sdl.Web.DD4T
+namespace Sdl.Web.DD4T.Mapping
 {
     public class DD4TContentResolver : IContentResolver
     {
-        readonly IComponentFactory ComponentFactory;
-        readonly ILinkFactory ComponentLinkProvider;
+        readonly IComponentFactory _componentFactory;
+        readonly ILinkFactory _componentLinkProvider;
 
         public string DefaultExtensionLessPageName { get; set; }
         public string DefaultPageName { get; set; }
@@ -25,8 +26,8 @@ namespace Sdl.Web.DD4T
 
         public DD4TContentResolver(ILinkFactory componentLinkProvider, IComponentFactory componentFactory)
         {
-            ComponentLinkProvider = componentLinkProvider;
-            ComponentFactory = componentFactory;
+            _componentLinkProvider = componentLinkProvider;
+            _componentFactory = componentFactory;
             DefaultExtension = ".html";
             DefaultExtensionLessPageName = Configuration.GetDefaultDocument();
             DefaultPageName = DefaultExtensionLessPageName + DefaultExtension;
@@ -65,19 +66,17 @@ namespace Sdl.Web.DD4T
             {
                 return ResolveRichText(xml as XmlDocument);
             }
-            else
+
+            //string content = xml.ToString();
+            try
             {
-                string content = xml.ToString();
-                try
-                {
-                    var doc = new XmlDocument();
-                    doc.LoadXml(string.Format("<xhtml>{0}</xhtml>", xml));
-                    return ResolveRichText(doc);
-                }
-                catch (XmlException)
-                {
-                    return xml;
-                }
+                var doc = new XmlDocument();
+                doc.LoadXml(String.Format("<xhtml>{0}</xhtml>", xml));
+                return ResolveRichText(doc);
+            }
+            catch (XmlException)
+            {
+                return xml;
             }
         }
 
@@ -153,9 +152,9 @@ namespace Sdl.Web.DD4T
                 res.ControllerAreaName = Configuration.GetDefaultModuleName();
                 res.ActionName = Configuration.GetPageController();
             }
-            else if (data is interfaces.IRegion)
+            else if (data is Models.Interfaces.IRegion)
             {
-                var region = data as interfaces.IRegion;
+                var region = data as Models.Interfaces.IRegion;
                 var viewName = region.Name.Replace(" ", "");
                 res = BuildViewData(viewName);
                 res.ControllerName = Configuration.GetRegionController();
@@ -179,7 +178,7 @@ namespace Sdl.Web.DD4T
             {
                 viewName = bits[0].Trim();
             }
-            return new MvcData() { ViewName = viewName, AreaName = areaName };
+            return new MvcData { ViewName = viewName, AreaName = areaName };
         }
         
         /// <summary>
@@ -201,7 +200,7 @@ namespace Sdl.Web.DD4T
             {
                 var linkUrl =
                     link.Attributes["href"].IfNotNull(attr => attr.Value)
-                    ?? link.Attributes["xlink:href"].IfNotNull(attr => ComponentLinkProvider.ResolveLink(attr.Value));
+                    ?? link.Attributes["xlink:href"].IfNotNull(attr => _componentLinkProvider.ResolveLink(attr.Value));
                 
                 if (!string.IsNullOrEmpty(linkUrl))
                 {
@@ -259,7 +258,7 @@ namespace Sdl.Web.DD4T
         {
             var componentUri = link.Attributes["xlink:href"].IfNotNull(attr => attr.Value);
             
-            return this.ComponentFactory.GetComponent(componentUri).IfNotNull(c => c.Title)
+            return _componentFactory.GetComponent(componentUri).IfNotNull(c => c.Title)
                 ?? link.Attributes["title"].IfNotNull(attr => attr.Value);
         }
     }   

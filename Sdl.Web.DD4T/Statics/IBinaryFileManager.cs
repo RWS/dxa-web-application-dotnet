@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web;
-using DD4T.ContentModel;
+﻿using System.Web;
 
-namespace Sdl.Web.DD4T
+namespace Sdl.Web.DD4T.Statics
 {
     public interface IBinaryFileManager
     {

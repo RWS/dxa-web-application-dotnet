@@ -6,27 +6,26 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
-using Sdl.Web.Mvc;
-using Sdl.Web.Models;
-using interfaces = Sdl.Web.Models.Interfaces;
-using Sdl.Web.Common.Mapping;
-using Sdl.Web.Common;
-using Sdl.Web.DD4T;
-using Sdl.Web.Common.Interfaces;
 using DD4T.ContentModel.Factories;
+using Sdl.Web.Common;
+using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Mapping;
+using Sdl.Web.Models;
+using Sdl.Web.Mvc;
 using Sdl.Web.Tridion;
+using interfaces = Sdl.Web.Models.Interfaces;
 
 namespace Sdl.Web.DD4T.Mapping
 {
     public partial class DD4TModelBuilder : BaseModelBuilder
     {
         readonly public ILinkFactory LinkFactory;
-        readonly IContentResolver ContentResolver;
+        readonly IContentResolver _contentResolver;
 
         public DD4TModelBuilder(ILinkFactory linkFactory, IContentResolver contentResolver)
         {
             LinkFactory = linkFactory;
-            ContentResolver = contentResolver;
+            _contentResolver = contentResolver;
         }
 
         public override object Create(object sourceEntity, Type type, List<object> includes = null)
@@ -58,7 +57,7 @@ namespace Sdl.Web.DD4T.Mapping
                 // get schema item id from tcmuri -> tcm:1-2-8
                 string[] uriParts = component.Schema.Id.Split('-');
                 long schemaId = Convert.ToInt64(uriParts[1]);
-                MappingData mapData = new MappingData {SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString())};
+                MappingData mapData = new MappingData {SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString(CultureInfo.InvariantCulture))};
                 // get schema entity names (indexed by vocabulary)
                 mapData.EntityNames = mapData.SemanticSchema.GetEntityNames();
             
@@ -198,7 +197,7 @@ namespace Sdl.Web.DD4T.Mapping
             return null;
         }
 
-        private KeyValuePair<string,string>? GetEntityData(string prefix, Dictionary<string,KeyValuePair<string,string>> entityData, string defaultPrefix)
+        private static KeyValuePair<string,string>? GetEntityData(string prefix, Dictionary<string,KeyValuePair<string,string>> entityData, string defaultPrefix)
         {
             if (defaultPrefix != null && String.IsNullOrEmpty(prefix))
             {
@@ -212,14 +211,14 @@ namespace Sdl.Web.DD4T.Mapping
         }
 
 
-        private IField ExtractMatchedField(SemanticSchemaField matchingField, IFieldSet fields, int embedLevel, string path = null)
+        private static IField ExtractMatchedField(SemanticSchemaField matchingField, IFieldSet fields, int embedLevel, string path = null)
         {
             if (path==null)
             {
                 path = matchingField.Path;
                 while (embedLevel >= -1 && path.Contains("/"))
                 {
-                    int pos = path.IndexOf("/");
+                    int pos = path.IndexOf("/", StringComparison.Ordinal);
                     path = path.Substring(pos+1);
                     embedLevel--;
                 }
@@ -229,7 +228,7 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 if (bits.Length > 1)
                 {
-                    int pos = path.IndexOf("/");
+                    int pos = path.IndexOf("/", StringComparison.Ordinal);
                     return ExtractMatchedField(matchingField, fields[bits[0]].EmbeddedValues[0], embedLevel, path.Substring(pos + 1));
                 }
 
@@ -387,20 +386,18 @@ namespace Sdl.Web.DD4T.Mapping
             return GetMultiKeywords(field.Keywords, linkedItemType, multival);
         }
 
-        private object GetMultiKeywords(IList<IKeyword> items, Type linkedItemType, bool multival)
+        private object GetMultiKeywords(IEnumerable<IKeyword> items, Type linkedItemType, bool multival)
         {
             //What to do depends on the target type
             if (linkedItemType == typeof(Tag))
             {
-                List<Tag> res = items.Select(k => new Tag(){DisplayText=GetKeywordDisplayText(k),Key=GetKeywordKey(k),TagCategory=k.TaxonomyId}).ToList();
+                List<Tag> res = items.Select(k => new Tag {DisplayText=GetKeywordDisplayText(k),Key=GetKeywordKey(k),TagCategory=k.TaxonomyId}).ToList();
                 if (multival)
                 {
                     return res;
                 }
-                else
-                {
-                    return res[0];
-                }
+
+                return res[0];
             } 
             if (linkedItemType == typeof(bool))
             {
@@ -408,7 +405,7 @@ namespace Sdl.Web.DD4T.Mapping
                 List<bool> res = new List<bool>();
                 foreach (var kw in items)
                 {
-                    bool val = false;
+                    bool val;
                     Boolean.TryParse(String.IsNullOrEmpty(kw.Key) ? kw.Title : kw.Key, out val);
                     res.Add(val);
                 }
@@ -416,32 +413,29 @@ namespace Sdl.Web.DD4T.Mapping
                 {
                     return res;
                 }
-                else
-                {
-                    return res[0];
-                }
+
+                return res[0];
             }
-            else if (linkedItemType == typeof(String))
+
+            if (linkedItemType == typeof(String))
             {
                 List<String> res = items.Select(k=>GetKeywordDisplayText(k)).ToList();
                 if (multival)
                 {
                     return res;
                 }
-                else
-                {
-                    return res[0];
-                }
+
+                return res[0];
             }
             return null;
         }
 
-        private string GetKeywordKey(IKeyword k)
+        private static string GetKeywordKey(IKeyword k)
         {
             return !String.IsNullOrEmpty(k.Key) ? k.Key : k.Id;
         }
 
-        private string GetKeywordDisplayText(IKeyword k)
+        private static string GetKeywordDisplayText(IKeyword k)
         {
             return !String.IsNullOrEmpty(k.Description) ? k.Description : k.Title;
         }
@@ -525,9 +519,9 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 if (multival)
                 {
-                    return field.Values.Select(v=>ContentResolver.ResolveContent(v).ToString());
+                    return field.Values.Select(v=>_contentResolver.ResolveContent(v).ToString());
                 }
-                return ContentResolver.ResolveContent(field.Value).ToString();
+                return _contentResolver.ResolveContent(field.Value).ToString();
             }
             return null;
         }
@@ -768,7 +762,7 @@ namespace Sdl.Web.DD4T.Mapping
                 }
             }
             name = name ?? "Main";//default region name
-            return new Region() { Name = name, Module = module };
+            return new Region { Name = name, Module = module };
         }
 
     }

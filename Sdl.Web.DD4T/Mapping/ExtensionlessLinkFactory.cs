@@ -1,8 +1,7 @@
-﻿using System;
-using DD4T.ContentModel.Factories;
+﻿using DD4T.ContentModel.Factories;
 using DD4T.Factories;
 
-namespace Sdl.Web.DD4T
+namespace Sdl.Web.DD4T.Mapping
 {
     public class ExtensionlessLinkFactory : LinkFactory, ILinkFactory
     {
@@ -10,8 +9,8 @@ namespace Sdl.Web.DD4T
         {
             if (url != null)
             {
-                var pos = url.LastIndexOf(".");
-                if (pos > url.LastIndexOf("/"))
+                var pos = url.LastIndexOf(".", System.StringComparison.Ordinal);
+                if (pos > url.LastIndexOf("/", System.StringComparison.Ordinal))
                 {
                     url = url.Substring(0, pos);
                 }
@@ -21,12 +20,12 @@ namespace Sdl.Web.DD4T
         
         string ILinkFactory.ResolveLink(string sourcePageUri, string componentUri, string excludeComponentTemplateUri)
         {
-            return  RemoveExtension(base.ResolveLink(sourcePageUri, componentUri, excludeComponentTemplateUri));
+            return  RemoveExtension(ResolveLink(sourcePageUri, componentUri, excludeComponentTemplateUri));
         }
         
         string ILinkFactory.ResolveLink(string componentUri)
         {
-            return  RemoveExtension(base.ResolveLink(componentUri));
+            return  RemoveExtension(ResolveLink(componentUri));
         }
     }
 }

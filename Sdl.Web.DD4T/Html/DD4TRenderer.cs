@@ -4,15 +4,12 @@ using System.Web.Mvc.Html;
 using DD4T.ContentModel;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Html;
-using Sdl.Web.Models;
 using System;
 using System.Web.Routing;
-using interfaces = Sdl.Web.Models.Interfaces;
 using Sdl.Web.Tridion;
 using Sdl.Web.Common;
-using Sdl.Web.Common.Interfaces;
 
-namespace Sdl.Web.DD4T
+namespace Sdl.Web.DD4T.Html
 {
     public class DD4TRenderer : BaseRenderer
     {
@@ -53,7 +50,7 @@ namespace Sdl.Web.DD4T
             return null;
         }
 
-        public override MvcHtmlString RenderRegion(interfaces.IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
+        public override MvcHtmlString RenderRegion(Models.Interfaces.IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
             var mvcData = ContentResolver.ResolveMvcData(region);
             if (region != null && (excludedItems == null || !excludedItems.Contains(region.Name)))
@@ -77,7 +74,7 @@ namespace Sdl.Web.DD4T
             return null;
         }
 
-        public override MvcHtmlString RenderPageData(interfaces.IPage page, HtmlHelper helper)
+        public override MvcHtmlString RenderPageData(Models.Interfaces.IPage page, HtmlHelper helper)
         {
             if (WebRequestContext.IsPreview)
             {

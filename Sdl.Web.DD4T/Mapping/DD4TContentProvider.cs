@@ -1,36 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using DD4T.ContentModel;
 using DD4T.ContentModel.Exceptions;
 using DD4T.ContentModel.Factories;
-using DD4T.Factories;
-using Sdl.Web.Mvc;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Models;
-using Sdl.Web.Tridion;
-using interfaces = Sdl.Web.Models.Interfaces;
 using Sdl.Web.Common.Mapping;
+using Sdl.Web.Models;
+using Sdl.Web.Mvc;
+using Sdl.Web.Tridion;
+using IPage = DD4T.ContentModel.IPage;
 
-namespace Sdl.Web.DD4T
+namespace Sdl.Web.DD4T.Mapping
 {
     public class DD4TContentProvider : BaseContentProvider
     {
-        readonly ILinkFactory LinkFactory;
-        readonly IPageFactory PageFactory;
+        readonly ILinkFactory _linkFactory;
+        readonly IPageFactory _pageFactory;
 
         public DD4TContentProvider(ILinkFactory linkFactory, IModelBuilder modelBuilder, IPageFactory pageFactory, IContentResolver resolver)
         {
             ContentResolver = resolver;
-            LinkFactory = linkFactory;
+            _linkFactory = linkFactory;
             DefaultModelBuilder = modelBuilder;
-            this.PageFactory = pageFactory;
+            _pageFactory = pageFactory;
         }
-        
-        
-
-        
 
         protected virtual MvcData BuildViewData(string viewName)
         {
@@ -45,16 +38,16 @@ namespace Sdl.Web.DD4T
             {
                 viewName = bits[0].Trim();
             }
-            return new MvcData() { ViewName = viewName, AreaName = areaName };
+            return new MvcData { ViewName = viewName, AreaName = areaName };
         }
         
         protected override object GetPageModelFromUrl(string url)
         {
-            if (PageFactory != null)
+            if (_pageFactory != null)
             {
                 DateTime timerStart = DateTime.Now;
-                IPage page = null;
-                if (PageFactory.TryFindPage(string.Format("{0}{1}", url.StartsWith("/") ? "" : "/", url), out page))
+                IPage page;
+                if (_pageFactory.TryFindPage(string.Format("{0}{1}", url.StartsWith("/") ? "" : "/", url), out page))
                 {
                     Log.Trace(timerStart, "page-load", url);
                     return page;
@@ -69,10 +62,10 @@ namespace Sdl.Web.DD4T
         public override string GetPageContent(string url)
         {
             string page;
-            if (PageFactory != null)
+            if (_pageFactory != null)
             {
                 DateTime timerStart = DateTime.Now;
-                if (PageFactory.TryFindPageContent(string.Format("{0}{1}", url.StartsWith("/") ? "" : "/", url), out page))
+                if (_pageFactory.TryFindPageContent(string.Format("{0}{1}", url.StartsWith("/") ? "" : "/", url), out page))
                 {
                     Log.Trace(timerStart, "page-load", url);
                     return page;
@@ -101,16 +94,18 @@ namespace Sdl.Web.DD4T
         public override void PopulateDynamicList(ContentList<Teaser> list)
         {
             DateTime timerStart = DateTime.Now;
-            BrokerQuery query = new BrokerQuery();
-            query.Start = list.Start;
-            query.PublicationId = Int32.Parse(WebRequestContext.Localization.LocalizationId);
-            query.PageSize = list.PageSize;
-            query.SchemaId = MapSchema(list.ContentType.Key);
-            query.Sort = list.Sort.Key;
+            BrokerQuery query = new BrokerQuery
+                {
+                    Start = list.Start,
+                    PublicationId = Int32.Parse(WebRequestContext.Localization.LocalizationId),
+                    PageSize = list.PageSize,
+                    SchemaId = MapSchema(list.ContentType.Key),
+                    Sort = list.Sort.Key
+                };
             list.ItemListElements = query.ExecuteQuery();
             foreach (var item in list.ItemListElements)
             {
-                item.Link.Url = this.ContentResolver.ResolveLink(item.Link.Url);
+                item.Link.Url = ContentResolver.ResolveLink(item.Link.Url);
             }
             list.HasMore = query.HasMore;
             Log.Trace(timerStart, "list-load", list.Headline ?? "List");
@@ -121,7 +116,7 @@ namespace Sdl.Web.DD4T
             var bits = schemaKey.Split('.');
             string moduleName = bits.Length > 1 ? bits[0] : Configuration.CoreModuleName;
             schemaKey = bits.Length > 1 ? bits[1] : bits[0];
-            int res = 0;
+            int res;
             var schemaId = Configuration.GetGlobalConfig("schemas." + schemaKey, moduleName);
             Int32.TryParse(schemaId, out res);
             return res;

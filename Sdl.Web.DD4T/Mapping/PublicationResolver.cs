@@ -1,15 +1,8 @@
-﻿using DD4T.ContentModel.Contracts.Resolvers;
-using DD4T.Utils;
+﻿using System;
+using DD4T.ContentModel.Contracts.Resolvers;
 using Sdl.Web.Mvc;
-using Sdl.Web.Tridion;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 
-namespace Sdl.Web.DD4T
+namespace Sdl.Web.DD4T.Mapping
 {
     public class PublicationResolver : IPublicationResolver
     {
