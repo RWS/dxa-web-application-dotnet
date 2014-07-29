@@ -160,9 +160,6 @@ namespace Sdl.Web.Common.Mapping
             // we are updating a static variable, so need to be thread safe
             lock (MappingLock)
             {
-                // ensure that the config files have been written to disk
-                SiteConfiguration.StaticFileManager.CreateStaticAssets(applicationRoot);
-
                 _semanticMap = new Dictionary<string, SemanticSchema>();
                 _semanticVocabularies = new List<SemanticVocabulary>();
                 _includes = new Dictionary<string, List<string>>();

@@ -65,7 +65,10 @@ namespace Sdl.Web.DD4T.Statics
             if (ProcessUrl(urlPath, cacheSinceAppStart))
             {
                 var filePath = GetFilePathFromUrl(urlPath);
-                return Encoding.UTF8.GetString(File.ReadAllBytes(filePath));
+                if (File.Exists(filePath))
+                {
+                    return Encoding.UTF8.GetString(File.ReadAllBytes(filePath));
+                }
             }
             return null;
         }
@@ -87,11 +90,19 @@ namespace Sdl.Web.DD4T.Statics
             if (lastPublishedDate == null)
             {
                 BinaryFactory.BinaryProvider.PublicationId = GetLocalizationId(urlPath);
-                DateTime lpb = BinaryFactory.FindLastPublishedDate(urlPath);
-                if (lpb != DateTime.MinValue.AddSeconds(1)) // this is the secret code for 'does not exist'
+                try
                 {
-                    lastPublishedDate = lpb;
-                    CacheAgent.Store(cacheKey, "Binary", lastPublishedDate);
+                    DateTime lpb = BinaryFactory.FindLastPublishedDate(urlPath);
+                    if (lpb != DateTime.MinValue.AddSeconds(1)) // this is the secret code for 'does not exist'
+                    {
+                        lastPublishedDate = lpb;
+                        CacheAgent.Store(cacheKey, "Binary", lastPublishedDate);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //Binary not found
+                    return false;
                 }
             }
             if (lastPublishedDate != null)
@@ -171,7 +182,7 @@ namespace Sdl.Web.DD4T.Statics
         /// <param name="physicalPath">String the file path to write to</param>
         /// <param name="dimensions">Dimensions of file</param>
         /// <returns>True is binary was written to disk, false otherwise</returns>
-        private bool WriteBinaryToFile(IBinary binary, String physicalPath, Dimensions dimensions)
+        private static bool WriteBinaryToFile(IBinary binary, String physicalPath, Dimensions dimensions)
         {
             bool result = true;
             FileStream fileStream = null;
