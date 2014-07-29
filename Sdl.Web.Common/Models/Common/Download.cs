@@ -1,5 +1,5 @@
 ﻿
-namespace Sdl.Web.Common.Models.Common
+namespace Sdl.Web.Common.Models
 {
     [SemanticEntity("http://schema.org", "Thing", "s")]
     public class Download : MediaItem

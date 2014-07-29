@@ -1,7 +1,6 @@
-﻿using Sdl.Web.Common.Models.Interfaces;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace Sdl.Web.Common.Models.Page
+namespace Sdl.Web.Common.Models
 {
     /// <summary>
     /// Model for page content, used for includes and other 'non-concrete' pages. 

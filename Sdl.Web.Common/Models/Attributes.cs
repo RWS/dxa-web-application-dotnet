@@ -1,5 +1,4 @@
 ﻿using System;
-using Sdl.Web.Common.Models.Common;
 
 namespace Sdl.Web.Common.Models
 {

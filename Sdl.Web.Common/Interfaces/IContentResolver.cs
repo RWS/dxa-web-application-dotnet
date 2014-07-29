@@ -1,4 +1,4 @@
-﻿using Sdl.Web.Common.Models.Common;
+﻿using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Interfaces
 {

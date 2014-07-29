@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using Sdl.Web.Common.Models.Interfaces;
 
-namespace Sdl.Web.Common.Models.Page
+namespace Sdl.Web.Common.Models
 {
     /// <summary>
     /// Model for the data that is used to render a web page.

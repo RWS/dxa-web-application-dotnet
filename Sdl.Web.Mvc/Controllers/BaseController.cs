@@ -6,11 +6,7 @@ using System.Web.Mvc;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Common.Models.Common;
-using Sdl.Web.Common.Models.Entity;
-using Sdl.Web.Common.Models.Interfaces;
-using Sdl.Web.Common.Models.Navigation;
-using Sdl.Web.Common.Models.Page;
+using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.ContentProvider;
 

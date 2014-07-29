@@ -1,6 +1,5 @@
 ﻿using System;
-using Sdl.Web.Common.Models.Common;
-using Sdl.Web.Common.Models.Entity;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Interfaces
 {

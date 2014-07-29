@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Web.Mvc;
-using Sdl.Web.Common.Models.Interfaces;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Interfaces
 {

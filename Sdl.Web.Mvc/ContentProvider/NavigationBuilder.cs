@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common.Models.Common;
-using Sdl.Web.Common.Models.Navigation;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Mvc.ContentProvider
 {
