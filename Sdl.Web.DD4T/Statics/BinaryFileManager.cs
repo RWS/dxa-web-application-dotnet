@@ -59,7 +59,6 @@ namespace Sdl.Web.DD4T.Statics
             return ProcessUrl(urlPath, false, physicalPath);
         }
 
-
         public string GetStaticContent(string urlPath, bool cacheSinceAppStart = false)
         {
             if (ProcessUrl(urlPath, cacheSinceAppStart))
@@ -67,7 +66,10 @@ namespace Sdl.Web.DD4T.Statics
                 var filePath = GetFilePathFromUrl(urlPath);
                 if (File.Exists(filePath))
                 {
-                    return Encoding.UTF8.GetString(File.ReadAllBytes(filePath));
+                    lock (NamedLocker.GetLock(filePath))
+                    {
+                        return Encoding.UTF8.GetString(File.ReadAllBytes(filePath));
+                    }
                 }
             }
             return null;
@@ -188,7 +190,7 @@ namespace Sdl.Web.DD4T.Statics
             FileStream fileStream = null;
             try
             {
-                lock (physicalPath)
+                lock (NamedLocker.GetLock(physicalPath))
                 {                    
                     if (File.Exists(physicalPath))
                     {
@@ -213,10 +215,10 @@ namespace Sdl.Web.DD4T.Statics
                     fileStream.Write(buffer, 0, buffer.Length);
                 }
             }
-            catch (Exception e)
+            catch (IOException ex)
             {
-                // TODO: file probabaly accessed by a different thread, determine if logging error is enough (assuming other thread will be able to write)
-                Log.Error("Exception occurred: {0}\r\n{1}", e.Message, e.StackTrace);
+                // file probabaly accessed by a different thread, locking failed
+                Log.Error("Locking failed: {0}\r\n{1}", ex.Message, ex.StackTrace);
                 result = false;
             }
             finally
@@ -235,7 +237,11 @@ namespace Sdl.Web.DD4T.Statics
             if (File.Exists(physicalPath))
             {
                 Log.Debug("Requested binary {0} no longer exists in Broker. Removing...", physicalPath);
-                File.Delete(physicalPath); // file got unpublished
+                lock(NamedLocker.GetLock(physicalPath))
+                {
+                    File.Delete(physicalPath); // file got unpublished
+                }
+                NamedLocker.RemoveLock(physicalPath);
                 Log.Debug("Done ({0})", physicalPath);
             }
         }

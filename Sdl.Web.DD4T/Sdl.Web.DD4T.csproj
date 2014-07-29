@@ -72,6 +72,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Statics\IBinaryFileManager.cs" />
+    <Compile Include="Statics\NamedLocker.cs" />
     <Compile Include="Utils\ObjectExtension.cs" />
     <Compile Include="Properties\VersionInfo.cs" />
   </ItemGroup>

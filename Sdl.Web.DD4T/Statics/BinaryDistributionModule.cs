@@ -79,17 +79,15 @@ namespace Sdl.Web.DD4T.Statics
                 response.Clear();
                 try
                 {
-                    response.TransmitFile(request.PhysicalPath);
+                    lock (NamedLocker.GetLock(request.PhysicalPath))
+                    {
+                        response.TransmitFile(request.PhysicalPath);
+                    }
                 }
                 catch (IOException ex)
                 {
-                    //Log.Error("IOException occurred while transmitting file: {0}\r\n{1}", ex.Message, ex.StackTrace);
-
-                    // TODO: when file is accessed by a different thread, should we wait or just log an error
-                    // file is accessed by a different thread (probabaly written), lets wait a second and try again?
-                    Log.Warn("IOException transmitting file: {0}", ex.Message);
-                    System.Threading.Thread.Sleep(1000);
-                    response.TransmitFile(request.PhysicalPath);
+                    // file probabaly accessed by a different thread, locking failed
+                    Log.Error("Locking failed: {0}\r\n{1}", ex.Message, ex.StackTrace);
                 }
                 Log.Trace(start, "binary-direct", response.StatusCode.ToString(CultureInfo.InvariantCulture));
                 return;
@@ -125,7 +123,17 @@ namespace Sdl.Web.DD4T.Statics
                     {
                         Directory.CreateDirectory(dir);
                     }
-                    CreateEmptyFile(realPath);
+                    //using (FileStream file = File.Create(realPath))
+                    //using (StreamWriter sw = new StreamWriter(file))
+                    //{
+                    //    sw.Write(String.Empty);
+                    //    sw.Close();
+                    //    file.Close();
+                    //}
+                    lock (NamedLocker.GetLock(realPath))
+                    {
+                        File.Create(realPath).Dispose();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -144,18 +152,6 @@ namespace Sdl.Web.DD4T.Statics
         #endregion
 
         #region private
-        private static void CreateEmptyFile(string filename)
-        {
-            //using (FileStream file = File.Create(filename))
-            //using (StreamWriter sw = new StreamWriter(file))
-            //{
-            //    sw.Write(String.Empty);
-            //    sw.Close();
-            //    file.Close();
-            //}
-            File.Create(filename).Dispose();
-        }
-
         private IBinaryFileManager _binaryFileManager;
         public virtual IBinaryFileManager BinaryFileManager 
         {
