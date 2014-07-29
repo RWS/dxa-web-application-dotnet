@@ -157,7 +157,6 @@ namespace Sdl.Web.Common.Configuration
             LastApplicationStart = DateTime.Now;
             SetLocalizations(localizationList);
             Load(applicationRoot);
-            // TODO load semantic mappings
             SemanticMapping.Load(applicationRoot);
         }
             

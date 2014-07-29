@@ -65,7 +65,10 @@ namespace Sdl.Web.DD4T.Statics
             if (ProcessUrl(urlPath, cacheSinceAppStart))
             {
                 var filePath = GetFilePathFromUrl(urlPath);
-                return Encoding.UTF8.GetString(File.ReadAllBytes(filePath));
+                if (File.Exists(filePath))
+                {
+                    return Encoding.UTF8.GetString(File.ReadAllBytes(filePath));
+                }
             }
             return null;
         }
@@ -87,11 +90,19 @@ namespace Sdl.Web.DD4T.Statics
             if (lastPublishedDate == null)
             {
                 BinaryFactory.BinaryProvider.PublicationId = GetLocalizationId(urlPath);
-                DateTime lpb = BinaryFactory.FindLastPublishedDate(urlPath);
-                if (lpb != DateTime.MinValue.AddSeconds(1)) // this is the secret code for 'does not exist'
+                try
                 {
-                    lastPublishedDate = lpb;
-                    CacheAgent.Store(cacheKey, "Binary", lastPublishedDate);
+                    DateTime lpb = BinaryFactory.FindLastPublishedDate(urlPath);
+                    if (lpb != DateTime.MinValue.AddSeconds(1)) // this is the secret code for 'does not exist'
+                    {
+                        lastPublishedDate = lpb;
+                        CacheAgent.Store(cacheKey, "Binary", lastPublishedDate);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //Binary not found
+                    return false;
                 }
             }
             if (lastPublishedDate != null)
