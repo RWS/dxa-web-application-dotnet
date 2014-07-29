@@ -171,7 +171,7 @@ namespace Sdl.Web.DD4T.Statics
         /// <param name="physicalPath">String the file path to write to</param>
         /// <param name="dimensions">Dimensions of file</param>
         /// <returns>True is binary was written to disk, false otherwise</returns>
-        private static bool WriteBinaryToFile(IBinary binary, String physicalPath, Dimensions dimensions)
+        private bool WriteBinaryToFile(IBinary binary, String physicalPath, Dimensions dimensions)
         {
             bool result = true;
             FileStream fileStream = null;
