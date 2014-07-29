@@ -6,11 +6,11 @@ using System.Web.Routing;
 using DD4T.ContentModel;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Common.Models.Interfaces;
+using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.Html;
 using Sdl.Web.Tridion.Markup;
-using IPage = Sdl.Web.Common.Models.Interfaces.IPage;
+using IPage = Sdl.Web.Common.Models.IPage;
 
 namespace Sdl.Web.DD4T.Html
 {

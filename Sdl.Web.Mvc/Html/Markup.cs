@@ -5,7 +5,6 @@ using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Common.Models.Interfaces;
 using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Html

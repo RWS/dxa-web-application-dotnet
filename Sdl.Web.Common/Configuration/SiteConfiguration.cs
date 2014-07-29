@@ -9,7 +9,7 @@ using System.Web.Script.Serialization;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
-using Sdl.Web.Common.Models.Common;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Configuration
 {

@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Web;
 using System.Web.Mvc;
 using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Models.Common;
+using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Html

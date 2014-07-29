@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Sdl.Web.Common.Models.Interfaces
+namespace Sdl.Web.Common.Models
 {
     public interface IPage
     {

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using Sdl.Web.Common.Models.Common;
 
-namespace Sdl.Web.Common.Models.Entity
+namespace Sdl.Web.Common.Models
 {
     public class LinkList<T> : EntityBase
     {

@@ -1,7 +1,6 @@
 ﻿using System;
-using Sdl.Web.Common.Models.Common;
 
-namespace Sdl.Web.Common.Models.Entity
+namespace Sdl.Web.Common.Models
 {
     [SemanticEntity(EntityName = "Image", Prefix = "i", Vocab = CoreVocabulary)]
     [SemanticEntity(EntityName = "Article", Prefix = "a", Vocab = CoreVocabulary)]

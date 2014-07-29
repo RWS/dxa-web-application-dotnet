@@ -99,7 +99,7 @@ namespace Sdl.Web.DD4T.Statics
                         CacheAgent.Store(cacheKey, "Binary", lastPublishedDate);
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
                     //Binary not found
                     return false;

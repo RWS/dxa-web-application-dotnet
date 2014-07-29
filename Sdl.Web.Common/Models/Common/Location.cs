@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sdl.Web.Common.Models.Common
+namespace Sdl.Web.Common.Models
 {
     public class Location : EntityBase
     {
