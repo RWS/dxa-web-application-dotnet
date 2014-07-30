@@ -5,8 +5,11 @@ namespace Sdl.Web.DD4T.Statics
 {
     /// <summary>
     /// NamedLocker using ConcurrentDictionary.
-    /// http://johnculviner.com/achieving-named-lock-locker-functionality-in-c-4-0/
+    /// Based on http://johnculviner.com/achieving-named-lock-locker-functionality-in-c-4-0/
     /// </summary>
+    /// <remarks>
+    /// This works fine for multiple threads, but it doesn't work for multiple processes.
+    /// </remarks>
     internal static class NamedLocker
     {
         private static readonly ConcurrentDictionary<string, object> Locks = new ConcurrentDictionary<string, object>();
