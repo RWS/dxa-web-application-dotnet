@@ -274,6 +274,15 @@ namespace Sdl.Web.Common.Configuration
             return new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(File.ReadAllText(file));
         }
 
+        /// <summary>
+        /// Default file extension used in Page Templates (including the dot).
+        /// </summary>
+        /// <returns>The default file extension.</returns>
+        public static string GetDefaultFileExtension()
+        {
+            return ".html";
+        }
+
         public static string GetDefaultDocument()
         {
             return "index";

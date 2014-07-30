@@ -18,11 +18,16 @@ namespace Sdl.Web.Mvc.Statics
             context.BeginRequest += BeginRequest;
         }
 
-        private void BeginRequest(object sender, EventArgs e)
+        private static void BeginRequest(object sender, EventArgs e)
         {
             HttpApplication application = (HttpApplication)sender;
             HttpContext context = application.Context;
             var url = context.Request.Url.AbsolutePath;
+            // we don't use file extentions, but XPM does when a new page is created based on a page-type, so lets strip the default '.html' extension at all times
+            if (url.EndsWith(SiteConfiguration.GetDefaultFileExtension()))
+            {
+                context.RewritePath(url.Substring(0, url.LastIndexOf('.')));
+            }
             //Strange case : directory requests which exist (eg the root localization folders like /fr/ /de/) are not routed to MVC
             //So we rewrite the request to a full URL including the default page name to ensure the full MVC pipeline is executed
             if (url == WebRequestContext.Localization.Path + "/")
