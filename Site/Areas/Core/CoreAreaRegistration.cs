@@ -16,6 +16,13 @@ namespace Sdl.Web.Site.Areas.Core
         {
             //Google Site Map
             context.MapRoute(
+                "Core_Sitemap",
+                "sitemap",
+                new { controller = "Navigation", action = "SiteMap" }
+            );
+
+            //Google Site Map
+            context.MapRoute(
                 "Core_Sitemap_Xml",
                 "sitemap.xml",
                 new { controller = "Navigation", action = "SiteMap" }
