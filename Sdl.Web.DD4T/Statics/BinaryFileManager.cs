@@ -66,7 +66,7 @@ namespace Sdl.Web.DD4T.Statics
                 var filePath = GetFilePathFromUrl(urlPath);
                 if (File.Exists(filePath))
                 {
-                    lock (NamedLocker.GetLock(filePath))
+                    lock (NamedLocker.GetReadLock(filePath))
                     {
                         return Encoding.UTF8.GetString(File.ReadAllBytes(filePath));
                     }
@@ -190,21 +190,30 @@ namespace Sdl.Web.DD4T.Statics
             FileStream fileStream = null;
             try
             {
-                lock (NamedLocker.GetLock(physicalPath))
-                {                    
-                    if (File.Exists(physicalPath))
-                    {
-                        fileStream = new FileStream(physicalPath, FileMode.Create);
-                    }
-                    else
+                lock (NamedLocker.GetWriteLock(physicalPath))
+                {
+                    //if (File.Exists(physicalPath))
+                    //{
+                    //    fileStream = new FileStream(physicalPath, FileMode.Create);
+                    //}
+                    //else
+                    //{
+                    //    FileInfo fileInfo = new FileInfo(physicalPath);
+                    //    if (fileInfo.Directory != null && !fileInfo.Directory.Exists)
+                    //    {
+                    //        fileInfo.Directory.Create();
+                    //    }
+                    //    fileStream = File.Create(physicalPath);
+                    //}
+                    if (!File.Exists(physicalPath))
                     {
                         FileInfo fileInfo = new FileInfo(physicalPath);
                         if (fileInfo.Directory != null && !fileInfo.Directory.Exists)
                         {
                             fileInfo.Directory.Create();
                         }
-                        fileStream = File.Create(physicalPath);
                     }
+                    fileStream = new FileStream(physicalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
                     byte[] buffer = binary.BinaryData;
 
                     if (dimensions != null && (dimensions.Width > 0 || dimensions.Height > 0))
@@ -237,7 +246,7 @@ namespace Sdl.Web.DD4T.Statics
             if (File.Exists(physicalPath))
             {
                 Log.Debug("Requested binary {0} no longer exists in Broker. Removing...", physicalPath);
-                lock(NamedLocker.GetLock(physicalPath))
+                lock (NamedLocker.GetDeleteLock(physicalPath))
                 {
                     File.Delete(physicalPath); // file got unpublished
                 }

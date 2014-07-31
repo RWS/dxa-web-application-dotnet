@@ -79,7 +79,7 @@ namespace Sdl.Web.DD4T.Statics
                 response.Clear();
                 try
                 {
-                    lock (NamedLocker.GetLock(request.PhysicalPath))
+                    lock (NamedLocker.GetReadLock(request.PhysicalPath))
                     {
                         response.TransmitFile(request.PhysicalPath);
                     }
@@ -130,7 +130,7 @@ namespace Sdl.Web.DD4T.Statics
                     //    sw.Close();
                     //    file.Close();
                     //}
-                    lock (NamedLocker.GetLock(realPath))
+                    lock (NamedLocker.GetWriteLock(realPath))
                     {
                         File.Create(realPath).Dispose();
                     }
