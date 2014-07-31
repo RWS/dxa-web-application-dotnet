@@ -59,9 +59,9 @@ namespace Sdl.Web.DD4T.Statics
             return ProcessUrl(urlPath, false, physicalPath);
         }
 
-        public string GetStaticContent(string urlPath, bool cacheSinceAppStart = false)
+        public string GetStaticContent(string urlPath, bool cacheSinceLastRefresh = false)
         {
-            if (ProcessUrl(urlPath, cacheSinceAppStart))
+            if (ProcessUrl(urlPath, cacheSinceLastRefresh))
             {
                 var filePath = GetFilePathFromUrl(urlPath);
                 if (File.Exists(filePath))
@@ -79,7 +79,7 @@ namespace Sdl.Web.DD4T.Statics
         /// Main worker method reads binary from Broker and stores it in file-system
         /// </summary>
         /// <returns></returns>
-        public bool ProcessUrl(string urlPath, bool cacheSinceAppStart = false, string physicalPath = null)
+        public bool ProcessUrl(string urlPath, bool cacheSinceLastRefresh = false, string physicalPath = null)
         {
             Dimensions dimensions;
             if (physicalPath == null)
@@ -111,7 +111,7 @@ namespace Sdl.Web.DD4T.Statics
             {
                 if (File.Exists(physicalPath))
                 {
-                    if (cacheSinceAppStart && SiteConfiguration.LastApplicationStart.CompareTo(lastPublishedDate) < 0)
+                    if (cacheSinceLastRefresh && SiteConfiguration.LastSettingsRefresh.CompareTo(lastPublishedDate) < 0)
                     {
                         //File has been modified since last application start but we don't care
                         Log.Debug("Binary {0} is modified, but only since last application restart, so no action required", urlPath);

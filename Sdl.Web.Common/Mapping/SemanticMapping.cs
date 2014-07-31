@@ -160,9 +160,9 @@ namespace Sdl.Web.Common.Mapping
             // we are updating a static variable, so need to be thread safe
             lock (MappingLock)
             {
-                _semanticMap = new Dictionary<string, SemanticSchema>();
-                _semanticVocabularies = new List<SemanticVocabulary>();
-                _includes = new Dictionary<string, List<string>>();
+                var semanticMap = new Dictionary<string, SemanticSchema>();
+                var semanticVocabularies = new List<SemanticVocabulary>();
+                var includes = new Dictionary<string, List<string>>();
                 Log.Debug("Loading semantic mappings for default localization");
                 var path = String.Format("{0}/{1}/{2}/{3}", applicationRoot, SiteConfiguration.StaticsFolder, SiteConfiguration.DefaultLocalization, SiteConfiguration.SystemFolder + "/mappings/_all.json");
                 if (File.Exists(path))
@@ -180,7 +180,7 @@ namespace Sdl.Web.Common.Mapping
                             Log.Debug("Loading mapping from file: {0}", configPath);
                             if (type.Equals("vocabularies"))
                             {
-                                _semanticVocabularies = GetVocabulariesFromFile(configPath);
+                                semanticVocabularies = GetVocabulariesFromFile(configPath);
                             }
                             else
                             {
@@ -188,12 +188,12 @@ namespace Sdl.Web.Common.Mapping
                                 {
                                     foreach(var schema in GetSchemasFromFile(configPath))
                                     {
-                                        _semanticMap.Add(schema.Id.ToString(CultureInfo.InvariantCulture), schema);
+                                        semanticMap.Add(schema.Id.ToString(CultureInfo.InvariantCulture), schema);
                                     }
                                 }
                                 else if (type.Equals("includes"))
                                 {
-                                    _includes = GetIncludesFromFile(configPath);
+                                    includes = GetIncludesFromFile(configPath);
                                 }
                             }
                         }
@@ -207,7 +207,9 @@ namespace Sdl.Web.Common.Mapping
                 {
                     Log.Warn("Semantic mapping bootstrap file: {0} does not exist - skipping this", path);
                 }
-
+                SemanticMapping._semanticVocabularies = semanticVocabularies;
+                SemanticMapping._semanticMap = semanticMap;
+                SemanticMapping._includes = includes;
             }
         }
 

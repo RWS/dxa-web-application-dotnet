@@ -19,6 +19,7 @@ namespace Sdl.Web.Mvc.Configuration
     {
         private static Dictionary<string, Dictionary<string, object>> _resources;
         private static readonly object ResourceLock = new object();
+        public static DateTime LastSettingsRefresh { get; set; }
         public object GetObject(string resourceKey, CultureInfo culture)
         {
             //Ignore the culture - we read this from the RequestContext
@@ -43,7 +44,7 @@ namespace Sdl.Web.Mvc.Configuration
 
         public IDictionary Resources(string localization)
         {
-            if (_resources == null)
+            if (_resources == null || LastSettingsRefresh < SiteConfiguration.LastSettingsRefresh)
             {
                 LoadResources();
             }
@@ -103,7 +104,8 @@ namespace Sdl.Web.Mvc.Configuration
                         }
                     }
                 }
-            }     
+            }
+            LastSettingsRefresh = DateTime.Now;
         }
 
         private static Dictionary<string, object> GetResourcesFromFile(string filePath)

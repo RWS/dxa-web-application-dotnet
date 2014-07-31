@@ -39,6 +39,11 @@ namespace Sdl.Web.Mvc.Html
             return null;
         }
 
+        public static string Config(this HtmlHelper htmlHelper, string configName)
+        {
+            return SiteConfiguration.GetConfig(configName, WebRequestContext.Localization.Path);
+        }
+
         public static string FormatResource(this HtmlHelper htmlHelper, string resourceName, params object[] parameters)
         {
             return String.Format(htmlHelper.Resource(resourceName), parameters);

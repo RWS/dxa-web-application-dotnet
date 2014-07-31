@@ -80,7 +80,7 @@ namespace Sdl.Web.Common.Configuration
                 return _globalConfiguration;
             }
         }
-        public static DateTime LastApplicationStart { get; set; }
+        public static DateTime LastSettingsRefresh { get; set; }
         public static string MediaUrlRegex { get; set; }
         private static readonly object ConfigLock = new object();
         private static readonly object ViewRegistryLock = new object();
@@ -152,12 +152,18 @@ namespace Sdl.Web.Common.Configuration
             throw ex;
         }
 
-        public static void Initialize(string applicationRoot, List<Dictionary<string,string>> localizationList )
+        public static void Refresh()
         {
-            LastApplicationStart = DateTime.Now;
+            LastSettingsRefresh = DateTime.Now;
+            var appRoot = AppDomain.CurrentDomain.BaseDirectory;
+            Load(appRoot);
+            SemanticMapping.Load(appRoot);
+        }
+
+        public static void Initialize(List<Dictionary<string,string>> localizationList)
+        {
             SetLocalizations(localizationList);
-            Load(applicationRoot);
-            SemanticMapping.Load(applicationRoot);
+            Refresh();
         }
             
         /// <summary>
@@ -173,11 +179,11 @@ namespace Sdl.Web.Common.Configuration
                 var version = StaticFileManager.CreateStaticAssets(applicationRoot) ?? DefaultVersion;
                 SiteVersion = version;
                 var mediaPatterns = new List<string>{"^/favicon.ico"};
-                _localConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
-                _globalConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
+                var localConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
+                var globalConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
                 foreach (var loc in Localizations.Values)
                 {
-                    if (!_localConfiguration.ContainsKey(loc.Path))
+                    if (!localConfiguration.ContainsKey(loc.Path))
                     {
                         Log.Debug("Loading config for localization : '{0}'", loc.Path);
                         var config = new Dictionary<string, Dictionary<string, string>>();
@@ -220,11 +226,11 @@ namespace Sdl.Web.Common.Configuration
                                     if (type.Contains(".") && loc.Path==DefaultLocalization)
                                     {
                                         var bits = type.Split('.');
-                                        if (!_globalConfiguration.ContainsKey(bits[0]))
+                                        if (!globalConfiguration.ContainsKey(bits[0]))
                                         {
-                                            _globalConfiguration.Add(bits[0], new Dictionary<string, Dictionary<string, string>>());
+                                            globalConfiguration.Add(bits[0], new Dictionary<string, Dictionary<string, string>>());
                                         }
-                                        _globalConfiguration[bits[0]].Add(bits[1], GetConfigFromFile(configPath));
+                                        globalConfiguration[bits[0]].Add(bits[1], GetConfigFromFile(configPath));
                                     }
                                     else
                                     {
@@ -236,7 +242,7 @@ namespace Sdl.Web.Common.Configuration
                                     Log.Error("Config file: {0} does not exist - skipping", configPath);
                                 }
                             }
-                            _localConfiguration.Add(loc.Path, config);
+                            localConfiguration.Add(loc.Path, config);
                         }
                         else
                         {
@@ -250,9 +256,9 @@ namespace Sdl.Web.Common.Configuration
                 Dictionary<string, Localization> relevantLocalizations = new Dictionary<string, Localization>();
                 foreach (var loc in Localizations)
                 {
-                    if (_localConfiguration.ContainsKey(loc.Value.Path))
+                    if (localConfiguration.ContainsKey(loc.Value.Path))
                     {
-                        var config = _localConfiguration[loc.Value.Path];
+                        var config = localConfiguration[loc.Value.Path];
                         if (config.ContainsKey("site"))
                         {
                             if (config["site"].ContainsKey("culture"))
@@ -264,8 +270,9 @@ namespace Sdl.Web.Common.Configuration
                     }
                 }
                 Localizations = relevantLocalizations;
+                SiteConfiguration._localConfiguration = localConfiguration;
+                SiteConfiguration._globalConfiguration = globalConfiguration;
                 Log.Debug("The following localizations are active for this site: {0}", String.Join(", ", Localizations.Select(l=>l.Key).ToArray()));
-                
             }            
         }
 

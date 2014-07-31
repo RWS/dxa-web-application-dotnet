@@ -1,15 +1,18 @@
-﻿using System.Web;
+﻿using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Mapping;
+using System.Web;
 using System.Web.Mvc;
 
 namespace Sdl.Web.Site.Areas.Core.Controllers
 {
+    [RoutePrefix("admin")]
     public class AdminController : Controller
     {
-        [Route("restart")]
-        [Authorize(Roles = "Administrator")]
-        public ActionResult Restart()
+        [Route("refresh")]
+        public ActionResult Refresh()
         {
-            HttpRuntime.UnloadAppDomain();
+            //trigger a reload of config/resources/mappings
+            SiteConfiguration.Refresh();
             return Redirect("~/");
         }
 	}

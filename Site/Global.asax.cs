@@ -30,7 +30,7 @@ namespace Sdl.Web.Site
             InitializeDependencyInjection();
             SiteConfiguration.StaticFileManager = (IStaticFileManager)DependencyResolver.Current.GetService(typeof(IStaticFileManager));
             SiteConfiguration.MediaHelper = (IMediaHelper)DependencyResolver.Current.GetService(typeof(IMediaHelper));
-            SiteConfiguration.Initialize(Server.MapPath("~"), TridionConfig.PublicationMap);
+            SiteConfiguration.Initialize(TridionConfig.PublicationMap);
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
             RegisterGlobalFilters(GlobalFilters.Filters);
