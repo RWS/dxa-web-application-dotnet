@@ -1,7 +1,7 @@
 ﻿@model Teaser
 <div @Markup.Entity(Model)>
     <h3 @Markup.Property(Model,"Headline")>
-        @if (Model.Link.Url != null)
+        @if (Model.Link!=null && Model.Link.Url != null)
         {
             <a href="@Model.Link.Url">@Model.Headline</a>
         }
