@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Sdl.Web.Common.Models
 {
@@ -24,5 +25,37 @@ namespace Sdl.Web.Common.Models
         public string Text { get; set; }
         public DateTime? Date { get; set; }
         public Location Location { get; set; }
+        //To store formatting options for the teaser (link style etc.)
+        [SemanticProperty(IgnoreMapping=true)]
+        private Dictionary<string, string> _formatOptions { get; set; }
+
+        public string GetFormatOption(string key, string defaultValue = null)
+        {
+            if (_formatOptions != null && _formatOptions.ContainsKey(key))
+            {
+                return _formatOptions[key];
+            }
+            else
+            {
+                return defaultValue;
+            }
+        }
+
+        public void SetFormatOption(string key, string value)
+        {
+            if (_formatOptions == null)
+            {
+                _formatOptions = new Dictionary<string, string>();
+            }
+            if (!_formatOptions.ContainsKey(key))
+            {
+                _formatOptions.Add(key, value);
+            }
+            else
+            {
+                _formatOptions[key] = value;
+            }
+        }
+
     }
 }

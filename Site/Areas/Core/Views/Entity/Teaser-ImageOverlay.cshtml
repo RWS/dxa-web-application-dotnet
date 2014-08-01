@@ -1,19 +1,7 @@
 ﻿@model Teaser
-<div class="teaser clearfix" @Markup.Entity(Model)>
-    <div @Markup.Property(Model, "Media")>
-        @Html.Media(Model.Media)
-    </div>
-    <div class="description">
-        <h3 class="overlay overlay-top ribbon" @Markup.Property(Model, "Headline")>
-            @if (Model.Link != null && Model.Link.Url != null)
-            {
-                <a href="@Model.Link.Url" title="@Model.Link.AlternateText">@Model.Headline</a>
-            }
-            else
-            {
-                <text>@Model.Headline</text>
-            }
-        </h3>
-        <p class="overlay overlay-bottom ribbon" @Markup.Property(Model, "Text")>@Model.Text</p>
-    </div>
-</div>
+@{
+    Model.SetFormatOption("style", "loader teaser-desc-inner");
+    Model.SetFormatOption("headingStyle", "overlay overlay-top ribbon");
+    Model.SetFormatOption("descriptionStyle", "overlay overlay-bottom ribbon");
+}
+@Html.Partial("Partials/Teaser")

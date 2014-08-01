@@ -171,6 +171,7 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Areas\Core\Views\Entity\Partials\GoogleStaticMap.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Partials\Teaser.cshtml" />
     <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
     <None Include="Properties\PublishProfiles\Distribution.pubxml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
