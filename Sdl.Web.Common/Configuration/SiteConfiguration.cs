@@ -178,7 +178,7 @@ namespace Sdl.Web.Common.Configuration
                 //Ensure that the config files have been written to disk and HTML Design version is 
                 var version = StaticFileManager.CreateStaticAssets(applicationRoot) ?? DefaultVersion;
                 SiteVersion = version;
-                var mediaPatterns = new List<string>{"^/favicon.ico"};
+                var mediaPatterns = new List<string>{"^/favicon.ico",@".*\.json$"};
                 var localConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
                 var globalConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
                 foreach (var loc in Localizations.Values)
