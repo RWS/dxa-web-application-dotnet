@@ -79,15 +79,12 @@ namespace Sdl.Web.DD4T.Statics
                 response.Clear();
                 try
                 {
-                    lock (NamedLocker.GetReadLock(request.PhysicalPath))
-                    {
-                        response.TransmitFile(request.PhysicalPath);
-                    }
+                    response.TransmitFile(request.PhysicalPath);                        
                 }
                 catch (IOException ex)
                 {
-                    // file probabaly accessed by a different thread, locking failed
-                    Log.Error("Locking failed: {0}\r\n{1}", ex.Message, ex.StackTrace);
+                    // file probabaly accessed by a different thread
+                    Log.Error("TransmitFile failed: {0}\r\n{1}", ex.Message, ex.StackTrace);
                 }
                 Log.Trace(start, "binary-direct", response.StatusCode.ToString(CultureInfo.InvariantCulture));
                 return;
@@ -123,21 +120,15 @@ namespace Sdl.Web.DD4T.Statics
                     {
                         Directory.CreateDirectory(dir);
                     }
-                    //using (FileStream file = File.Create(realPath))
-                    //using (StreamWriter sw = new StreamWriter(file))
-                    //{
-                    //    sw.Write(String.Empty);
-                    //    sw.Close();
-                    //    file.Close();
-                    //}
-                    lock (NamedLocker.GetWriteLock(realPath))
+
+                    lock (NamedLocker.GetLock(realPath))
                     {
                         File.Create(realPath).Dispose();
                     }
                 }
-                catch (Exception ex)
+                catch (IOException)
                 {
-                    Log.Warn("IIS empty file could not be created. {0}", ex.Message);
+                    Log.Warn("Cannot create {0}. This can happen sporadically, let the next thread handle this.", realPath);
                 }
             }
 

@@ -66,10 +66,7 @@ namespace Sdl.Web.DD4T.Statics
                 var filePath = GetFilePathFromUrl(urlPath);
                 if (File.Exists(filePath))
                 {
-                    lock (NamedLocker.GetReadLock(filePath))
-                    {
-                        return Encoding.UTF8.GetString(File.ReadAllBytes(filePath));
-                    }
+                    return Encoding.UTF8.GetString(File.ReadAllBytes(filePath));
                 }
             }
             return null;
@@ -187,55 +184,34 @@ namespace Sdl.Web.DD4T.Statics
         private static bool WriteBinaryToFile(IBinary binary, String physicalPath, Dimensions dimensions)
         {
             bool result = true;
-            FileStream fileStream = null;
             try
             {
-                lock (NamedLocker.GetWriteLock(physicalPath))
+                if (!File.Exists(physicalPath))
                 {
-                    //if (File.Exists(physicalPath))
-                    //{
-                    //    fileStream = new FileStream(physicalPath, FileMode.Create);
-                    //}
-                    //else
-                    //{
-                    //    FileInfo fileInfo = new FileInfo(physicalPath);
-                    //    if (fileInfo.Directory != null && !fileInfo.Directory.Exists)
-                    //    {
-                    //        fileInfo.Directory.Create();
-                    //    }
-                    //    fileStream = File.Create(physicalPath);
-                    //}
-                    if (!File.Exists(physicalPath))
+                    FileInfo fileInfo = new FileInfo(physicalPath);
+                    if (fileInfo.Directory != null && !fileInfo.Directory.Exists)
                     {
-                        FileInfo fileInfo = new FileInfo(physicalPath);
-                        if (fileInfo.Directory != null && !fileInfo.Directory.Exists)
-                        {
-                            fileInfo.Directory.Create();
-                        }
+                        fileInfo.Directory.Create();
                     }
-                    fileStream = new FileStream(physicalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-                    byte[] buffer = binary.BinaryData;
+                }
+                byte[] buffer = binary.BinaryData;
+                if (dimensions != null && (dimensions.Width > 0 || dimensions.Height > 0))
+                {
+                    buffer = ResizeImageFile(buffer, dimensions, GetImageFormat(physicalPath));
+                }
 
-                    if (dimensions != null && (dimensions.Width > 0 || dimensions.Height > 0))
+                lock (NamedLocker.GetLock(physicalPath))
+                {
+                    using (FileStream fileStream = new FileStream(physicalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
                     {
-                        buffer = ResizeImageFile(buffer, dimensions, GetImageFormat(physicalPath));
+                        fileStream.Write(buffer, 0, buffer.Length);
                     }
-
-                    fileStream.Write(buffer, 0, buffer.Length);
                 }
             }
             catch (IOException ex)
             {
-                // file probabaly accessed by a different thread, locking failed
-                Log.Error("Locking failed: {0}\r\n{1}", ex.Message, ex.StackTrace);
+                Log.Warn("Cannot write to {0}. This can happen sporadically, let the next thread handle this.", physicalPath);
                 result = false;
-            }
-            finally
-            {
-                if (fileStream != null)
-                {
-                    fileStream.Close();
-                }
             }
 
             return result;
@@ -246,11 +222,16 @@ namespace Sdl.Web.DD4T.Statics
             if (File.Exists(physicalPath))
             {
                 Log.Debug("Requested binary {0} no longer exists in Broker. Removing...", physicalPath);
-                lock (NamedLocker.GetDeleteLock(physicalPath))
+                try
                 {
-                    File.Delete(physicalPath); // file got unpublished
+                    // file got unpublished
+                    File.Delete(physicalPath); 
+                    NamedLocker.RemoveLock(physicalPath);
                 }
-                NamedLocker.RemoveLock(physicalPath);
+                catch (IOException)
+                {
+                    Log.Warn("Cannot delete {0}. This can happen sporadically, let the next thread handle this.", physicalPath);
+                }
                 Log.Debug("Done ({0})", physicalPath);
             }
         }
