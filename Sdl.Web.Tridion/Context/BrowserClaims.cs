@@ -30,7 +30,7 @@ namespace Sdl.Web.Tridion.Context
 
         public int DisplayColorDepth { get { return GetIntValue(ClaimUris.UriDisplayColorDepth); } }
 
-        public int DisplayHeigth { get { return GetIntValue(ClaimUris.UriBrowserDisplayHeight); } }
+        public int DisplayHeight { get { return GetIntValue(ClaimUris.UriBrowserDisplayHeight); } }
 
         public int DisplayWidth { get { return GetIntValue(ClaimUris.UriBrowserDisplayWidth); } }
 

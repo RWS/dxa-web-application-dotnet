@@ -22,12 +22,12 @@
         {
             foreach (var region in Model.Includes["Left Navigation"].Regions.Values)
             {
-                @ViewBag.Renderer.RenderRegion(region, Html)
+                @ViewBag.Renderer.RenderRegion(region, Html, 3)
             }
         }
         @if (Model.Regions.ContainsKey("Left"))
         {
-            @ViewBag.Renderer.RenderEntity(Model.Regions["Left"], Html)
+            @ViewBag.Renderer.RenderEntity(Model.Regions["Left"], Html, 3)
         }
     </div>
     }

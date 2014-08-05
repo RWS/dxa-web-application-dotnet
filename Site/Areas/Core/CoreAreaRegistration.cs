@@ -14,6 +14,18 @@ namespace Sdl.Web.Site.Areas.Core
 
         public override void RegisterArea(AreaRegistrationContext context) 
         {
+            //Navigation JSON
+            context.MapRoute(
+                "Core_Navigation",
+                "navigation.json",
+                new { controller = "Page", action = "PageRaw" }
+            );
+            //Navigation JSON
+            context.MapRoute(
+                "Core_Navigation_loc",
+                "{localization}/navigation.json",
+                new { controller = "Page", action = "PageRaw" }
+            );
             //Google Site Map
             context.MapRoute(
                 "Core_Sitemap",

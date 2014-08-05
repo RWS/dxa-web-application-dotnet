@@ -4,6 +4,7 @@ using System.Web.Helpers;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
+using System.IO;
 
 namespace Sdl.Web.Mvc.Statics
 {
@@ -36,6 +37,11 @@ namespace Sdl.Web.Mvc.Statics
                             //The HTML Design version is published in /version.json
                             var versionUrl = String.Format("{0}/version.json", String.IsNullOrEmpty(loc.Path) || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path);
                             var versionJson = Serialize(versionUrl, true);
+                            if (versionJson == null && File.Exists(applicationRoot + versionUrl))
+                            {
+                                //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually, in which case we try to load it directly
+                                versionJson = File.ReadAllText(applicationRoot + versionUrl);
+                            }
                             if (versionJson != null)
                             {
                                 version = Json.Decode(versionJson).version;

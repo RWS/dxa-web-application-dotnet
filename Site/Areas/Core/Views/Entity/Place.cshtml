@@ -6,9 +6,8 @@
 <div @Markup.Entity(Model)>
     @if (Model.Image != null && WebRequestContext.ScreenWidth != ScreenWidth.ExtraSmall)
     {
-        <div class="hero image-loading" @Markup.Property(Model, "Image")>
+        <div class="hero" @Markup.Property(Model, "Image")>
             @Html.Media(Model.Image, 3.3)
-		    <div class="loading-panel"></div>
 		    <div class="overlay overlay-tl ribbon">
     	        <h1 @Markup.Property(Model, "Name")>@Model.Name</h1>
     	    </div>
@@ -19,7 +18,7 @@
         <h1 @Markup.Property(Model, "Name")>@Model.Name</h1>
     }
     <div class="container-fluid">
-	    <div class="row">
+	    <div id="location-tile" class="row">
             @if (Model.Location != null)
             {
 		    <div class="col-sm-6">
@@ -37,8 +36,8 @@
 				            </div>
                             if (daddr!=null)
                             {
-                                <a class="popup-iframe popup-mobile-ignore)" href="//maps.google.com/maps?saddr=My+Location&amp;daddr=@daddr">@Html.Resource("core.directionsLinkText")</a><br />
-                                <a class="popup-iframe popup-mobile-ignore)" href="//maps.google.com/maps?q=@daddr">@Html.Resource("core.largeMapLinkText")</a>
+                                <a class="popup-iframe popup-mobile-ignore" href="//maps.google.com/maps?saddr=My+Location&amp;daddr=@daddr">@Html.Resource("core.directionsLinkText")</a><br />
+                                <a class="popup-iframe popup-mobile-ignore" href="//maps.google.com/maps?q=@daddr">@Html.Resource("core.largeMapLinkText")</a>
                             }
                         }
                         @if (Model.Telephone != null || Model.FaxNumber != null || Model.Email != null)

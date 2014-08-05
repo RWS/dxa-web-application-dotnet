@@ -2,9 +2,8 @@
 <article class="rich-text" @Markup.Entity(Model)>
     @if (Model.Image != null && WebRequestContext.ScreenWidth!=ScreenWidth.ExtraSmall)
     {
-        <div class="hero image-loading" @Markup.Property(Model, "Image")>
+        <div class="hero" @Markup.Property(Model, "Image")>
             @Html.Media(Model.Image, 3.3)
-		    <div class="loading-panel"></div>
 		    <div class="overlay overlay-tl ribbon">
     	        <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
     		</div>

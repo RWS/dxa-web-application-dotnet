@@ -9,6 +9,7 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.ContentProvider;
+using System.IO;
 
 namespace Sdl.Web.Mvc.Controllers
 {
@@ -42,6 +43,24 @@ namespace Sdl.Web.Mvc.Controllers
             }
             Log.Trace(timerStart, "page-mapped", pageUrl);
             return View(viewData.ViewName, model);
+        }
+
+        [HandleError]
+        public virtual ActionResult PageRaw(string pageUrl = null)
+        {
+            pageUrl = pageUrl ?? Request.Url.AbsolutePath;
+            var rawContent = ContentProvider.GetPageContent(pageUrl);
+            if (rawContent == null)
+            {
+                throw new HttpException(404, "Page cannot be found");
+            }
+            return GetRawActionResult(Path.GetExtension(pageUrl).Substring(1), rawContent);
+        }
+
+        private ActionResult GetRawActionResult(string type, string rawContent)
+        {
+            var contentType = type == "json" ? "application/json" : "text/" + type;
+            return this.Content(rawContent, contentType);
         }
 
         [HandleSectionError(View = "_SectionError")]
