@@ -178,7 +178,7 @@ namespace Sdl.Web.Common.Configuration
                 //Ensure that the config files have been written to disk and HTML Design version is 
                 var version = StaticFileManager.CreateStaticAssets(applicationRoot) ?? DefaultVersion;
                 SiteVersion = version;
-                var mediaPatterns = new List<string>{"^/favicon.ico",@".*\.json$"};
+                var mediaPatterns = new List<string>{"^/favicon.ico"};
                 var localConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
                 var globalConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
                 foreach (var loc in Localizations.Values)
@@ -214,6 +214,7 @@ namespace Sdl.Web.Common.Configuration
                                 mediaPatterns.Add(String.Format("^{0}{1}.*", mediaRoot, mediaRoot.EndsWith("/") ? String.Empty : "/"));
                             }
                             mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*",loc.Path, SystemFolder));
+                            mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$",loc.Path, SystemFolder));
                             foreach (string file in bootstrapJson.files)
                             {
                                 var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
