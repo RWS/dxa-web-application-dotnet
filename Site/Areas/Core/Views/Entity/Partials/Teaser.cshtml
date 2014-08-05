@@ -2,11 +2,12 @@
 @{
     var linkStyle = Model.GetFormatOption("linkStyle", "teaser-link");
     var isButton = linkStyle.Contains("btn");
+    var widthFactor = WebRequestContext.ScreenWidth == ScreenWidth.ExtraSmall ? "160px" : "100%";
 }
 <div class="teaser @Model.GetFormatOption("style", "loader")">
     @if (Model.Media!=null)
     {
-        @Html.Media(Model.Media, 1.62,"teaser-img loader-img")
+        @Html.Media(Model.Media, widthFactor, 1.62,"teaser-img loader-img")
         <div class="loading-panel"></div>
     }
     <h3 class="teaser-heading @Model.GetFormatOption("headingStyle")" @Markup.Property(Model, "Headline")><a href="@Model.Link.Url">@Model.Headline</a></h3>
