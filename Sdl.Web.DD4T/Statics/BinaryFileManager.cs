@@ -194,6 +194,7 @@ namespace Sdl.Web.DD4T.Statics
                         fileInfo.Directory.Create();
                     }
                 }
+
                 byte[] buffer = binary.BinaryData;
                 if (dimensions != null && (dimensions.Width > 0 || dimensions.Height > 0))
                 {
@@ -202,14 +203,15 @@ namespace Sdl.Web.DD4T.Statics
 
                 lock (NamedLocker.GetLock(physicalPath))
                 {
-                    using (FileStream fileStream = new FileStream(physicalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+                    using (FileStream fileStream = new FileStream(physicalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                     {
-                        fileStream.Write(buffer, 0, buffer.Length);
+                        fileStream.Write(buffer, 0, buffer.Length);                        
                     }
                 }
             }
-            catch (IOException ex)
+            catch (IOException)
             {
+                // file probabaly accessed by a different thread in a different process, locking failed
                 Log.Warn("Cannot write to {0}. This can happen sporadically, let the next thread handle this.", physicalPath);
                 result = false;
             }
@@ -225,11 +227,12 @@ namespace Sdl.Web.DD4T.Statics
                 try
                 {
                     // file got unpublished
-                    File.Delete(physicalPath); 
+                    File.Delete(physicalPath);
                     NamedLocker.RemoveLock(physicalPath);
                 }
                 catch (IOException)
                 {
+                    // file probabaly accessed by a different thread in a different process
                     Log.Warn("Cannot delete {0}. This can happen sporadically, let the next thread handle this.", physicalPath);
                 }
                 Log.Debug("Done ({0})", physicalPath);

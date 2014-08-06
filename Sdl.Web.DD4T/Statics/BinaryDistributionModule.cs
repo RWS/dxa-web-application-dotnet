@@ -79,11 +79,11 @@ namespace Sdl.Web.DD4T.Statics
                 response.Clear();
                 try
                 {
-                    response.TransmitFile(request.PhysicalPath);                        
+                    response.TransmitFile(request.PhysicalPath);
                 }
                 catch (IOException ex)
                 {
-                    // file probabaly accessed by a different thread
+                    // file probabaly accessed by a different thread in a different process
                     Log.Error("TransmitFile failed: {0}\r\n{1}", ex.Message, ex.StackTrace);
                 }
                 Log.Trace(start, "binary-direct", response.StatusCode.ToString(CultureInfo.InvariantCulture));
@@ -128,6 +128,7 @@ namespace Sdl.Web.DD4T.Statics
                 }
                 catch (IOException)
                 {
+                    // file probabaly accessed by a different thread in a different process, locking failed
                     Log.Warn("Cannot create {0}. This can happen sporadically, let the next thread handle this.", realPath);
                 }
             }
