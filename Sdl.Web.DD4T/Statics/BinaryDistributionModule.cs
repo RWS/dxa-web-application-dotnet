@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Web;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.DD4T.Statics
@@ -108,7 +109,7 @@ namespace Sdl.Web.DD4T.Statics
                 return;
             }
 
-            string realPath = request.PhysicalApplicationPath + SiteConfiguration.StaticsFolder + request.Path.Replace("/", "\\"); // request.PhysicalPath;
+            string realPath = Path.Combine(new[] { request.PhysicalApplicationPath, SiteConfiguration.StaticsFolder, request.Path.ToCombinePath() }); // request.PhysicalPath;
             context.RewritePath("/" + SiteConfiguration.StaticsFolder + request.Path);
             if (!File.Exists(realPath))
             {

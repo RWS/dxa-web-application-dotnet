@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Web.Helpers;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using System.IO;
@@ -25,7 +26,7 @@ namespace Sdl.Web.Mvc.Statics
             {
                 foreach (var loc in SiteConfiguration.Localizations.Values)
                 {
-                    var localizationRoot = String.Format("{0}{1}/{2}", applicationRoot, loc.Path, SiteConfiguration.SystemFolder);
+                    var localizationRoot = Path.Combine(new[] { applicationRoot, loc.Path.ToCombinePath(), SiteConfiguration.SystemFolder });
                     if (!folders.Contains(localizationRoot))
                     {
                         try
@@ -37,10 +38,11 @@ namespace Sdl.Web.Mvc.Statics
                             //The HTML Design version is published in /version.json
                             var versionUrl = String.Format("{0}/version.json", String.IsNullOrEmpty(loc.Path) || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path);
                             var versionJson = Serialize(versionUrl, true);
-                            if (versionJson == null && File.Exists(applicationRoot + versionUrl))
+                            var path = Path.Combine(applicationRoot, versionUrl.ToCombinePath());
+                            if (versionJson == null && File.Exists(path))
                             {
                                 //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually, in which case we try to load it directly
-                                versionJson = File.ReadAllText(applicationRoot + versionUrl);
+                                versionJson = File.ReadAllText(path);
                             }
                             if (versionJson != null)
                             {

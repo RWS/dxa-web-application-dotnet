@@ -6,5 +6,10 @@
         {
             return value.Replace(" ", string.Empty);
         }
+
+        public static string ToCombinePath(this string value)
+        {
+            return value.Replace('/', '\\').Trim('\\');
+        }
     }
 }

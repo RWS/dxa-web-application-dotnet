@@ -8,6 +8,7 @@ using System.Web.Compilation;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Mvc.Configuration
@@ -71,7 +72,7 @@ namespace Sdl.Web.Mvc.Configuration
                     {
                         Log.Debug("Loading resources for localization : '{0}'", loc.Path);
                         var resources = new Dictionary<string, object>();
-                        var path = String.Format("{0}/{1}/{2}/{3}", applicationRoot, SiteConfiguration.StaticsFolder, loc.Path, SiteConfiguration.SystemFolder + "/resources/_all.json");
+                        var path = Path.Combine(new[] { applicationRoot, SiteConfiguration.StaticsFolder, loc.Path, SiteConfiguration.SystemFolder, @"resources\_all.json" });
                         if (File.Exists(path))
                         {
                             //The _all.json file contains a list of all other resources files to load
@@ -81,7 +82,7 @@ namespace Sdl.Web.Mvc.Configuration
                             {
                                 var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
                                 type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                                var filePath = String.Format("{0}/{1}/{2}", applicationRoot, SiteConfiguration.StaticsFolder, file);
+                                var filePath = Path.Combine(applicationRoot, SiteConfiguration.StaticsFolder, file.ToCombinePath());
                                 if (File.Exists(filePath))
                                 {
                                     Log.Debug("Loading resources from file: {0}", filePath);

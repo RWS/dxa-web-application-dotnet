@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Web.Compilation;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
@@ -187,7 +188,7 @@ namespace Sdl.Web.Common.Configuration
                     {
                         Log.Debug("Loading config for localization : '{0}'", loc.Path);
                         var config = new Dictionary<string, Dictionary<string, string>>();
-                        var path = String.Format("{0}/{1}/{2}/{3}", applicationRoot, StaticsFolder, loc.Path, SystemFolder + "/config/_all.json");
+                        var path = Path.Combine(new[] { applicationRoot, StaticsFolder, loc.Path.ToCombinePath(), SystemFolder, @"config\_all.json" });
                         if (File.Exists(path))
                         {
                             //The _all.json file contains a reference to all other configuration files
@@ -219,7 +220,7 @@ namespace Sdl.Web.Common.Configuration
                             {
                                 var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
                                 type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                                var configPath = String.Format("{0}/{1}/{2}", applicationRoot, StaticsFolder, file);
+                                var configPath = Path.Combine(new[] { applicationRoot, StaticsFolder, file.ToCombinePath() });
                                 if (File.Exists(configPath))
                                 {
                                     Log.Debug("Loading config from file: {0}", configPath);
@@ -271,8 +272,8 @@ namespace Sdl.Web.Common.Configuration
                     }
                 }
                 Localizations = relevantLocalizations;
-                SiteConfiguration._localConfiguration = localConfiguration;
-                SiteConfiguration._globalConfiguration = globalConfiguration;
+                _localConfiguration = localConfiguration;
+                _globalConfiguration = globalConfiguration;
                 Log.Debug("The following localizations are active for this site: {0}", String.Join(", ", Localizations.Select(l=>l.Key).ToArray()));
             }            
         }
