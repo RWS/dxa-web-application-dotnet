@@ -20,7 +20,6 @@
     <!--[if lt IE 9]>
       <script src="/system/assets/scripts/ie.js"></script>
     <![endif]-->
-
 </head>
 <body>
     @if (Model.Includes.ContainsKey("Header"))
@@ -41,15 +40,17 @@
         $(document).ready(function () {
             $('.selectpicker').selectpicker();
 
-            $('.image-loading').each(function (e) {
-                $(this).addClass('is-loading');
-                $(this).find('img').on('load', function () {
-                    $(this).closest('.image-loading').removeClass('is-loading');
-                });
+            $('.loader .loader-img').one('load', function () {
+                $(this).closest('.loader').find('.loader-overlay').remove();
+                $(this).closest('.loader').removeClass('loader');
+            }).each(function () {
+                if (this.complete) $(this).load();
             });
-        });
+        });        
     </script>
     <script src="@Url.VersionedContent("/assets/scripts/custom.js")"></script>
+    <!-- discover-min.js is part of the SDL Tridion Context Engine -->
+    <script src="@Url.VersionedContent("/assets/scripts/discover-min.js")"></script>
     @ViewBag.Renderer.RenderPageData(Model, Html)
 </body>
 </html>
