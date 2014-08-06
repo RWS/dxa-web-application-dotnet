@@ -5,3 +5,4 @@ bin
 *.suo
 Site/system/v*.*/
 packages/
+Site/ClaimStore.aspx
