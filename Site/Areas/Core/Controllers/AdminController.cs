@@ -1,7 +1,6 @@
-﻿using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Mapping;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Mvc;
 
 namespace Sdl.Web.Site.Areas.Core.Controllers
 {
@@ -9,6 +8,8 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
     public class AdminController : Controller
     {
         [Route("refresh")]
+        [NoCache]
+        [OutputCache(NoStore = true, Duration = 0, VaryByParam = "*")]
         public ActionResult Refresh()
         {
             //trigger a reload of config/resources/mappings

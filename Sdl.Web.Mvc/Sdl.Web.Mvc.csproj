@@ -57,6 +57,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NoCacheAttribute.cs" />
     <Compile Include="Properties\VersionInfo.cs" />
     <Compile Include="Configuration\WebRequestContext.cs" />
     <Compile Include="Controllers\HandleSectionErrorAttribute.cs" />
