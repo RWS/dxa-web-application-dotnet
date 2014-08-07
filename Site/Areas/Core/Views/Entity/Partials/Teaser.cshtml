@@ -10,9 +10,19 @@
         @Html.Media(Model.Media, widthFactor, 1.62,"teaser-img loader-img")
         <div class="loading-panel"></div>
     }
-    <h3 class="teaser-heading @Model.GetFormatOption("headingStyle")" @Markup.Property(Model, "Headline")><a href="@Model.Link.Url">@Model.Headline</a></h3>
+    <h3 class="teaser-heading @Model.GetFormatOption("headingStyle")" @Markup.Property(Model, "Headline")>
+        @if (Model.Link != null && !String.IsNullOrEmpty(Model.Link.Url))
+        {
+
+            <a href="@Model.Link.Url">@Model.Headline</a>
+        }
+        else
+        {
+            @Model.Headline
+        }
+    </h3>
     <p class="teaser-description @Model.GetFormatOption("descriptionStyle")" @Markup.Property(Model, "Text")>@Model.Text</p>
-    @if (Model.Link!=null && Model.Link.Url!=null)
+    @if (Model.Link!=null && !String.IsNullOrEmpty(Model.Link.Url))
     {
         <a class="@linkStyle" href="@Model.Link.Url" title="@Model.Link.AlternateText" @Markup.Property(Model, "Link")>
             @(Model.Link.LinkText ?? Html.Resource("core.readMoreLinkText"))

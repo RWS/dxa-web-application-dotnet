@@ -6,14 +6,14 @@
             @Html.Media(Model.Media, "100%", 3.3)
         </span>
     }
-    @if (Model.Headline != null || Model.Text != null)
+    @if (!String.IsNullOrEmpty(Model.Headline) || !String.IsNullOrEmpty(Model.Text))
     {
-        if (Model.Link != null && Model.Link.LinkText == null)
+        if (Model.Link != null && !String.IsNullOrEmpty(Model.Link.Url) && !String.IsNullOrEmpty(Model.Link.LinkText))
         {
             <a href="@Model.Link.Url" title="@Model.Link.AlternateText">
                 <div class="overlay overlay-tl ribbon">
-                    <h2 class="" @Markup.Property(Model, "Headline")>@Model.Headline</h2>
-                    @if(Model.Text!=null)
+                    <h2 @Markup.Property(Model, "Headline")>@Model.Headline</h2>
+                    @if(!String.IsNullOrEmpty(Model.Text))
                     {
                         <p class="h3" @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", ".<br/>"))</p>
                     }
@@ -23,12 +23,12 @@
         else
         {
             <div class="overlay overlay-tl ribbon">
-                <h2 class="" @Markup.Property(Model, "Headline")>@Model.Headline</h2>
-                @if(Model.Text != null)
+                <h2 @Markup.Property(Model, "Headline")>@Model.Headline</h2>
+                @if(!String.IsNullOrEmpty(Model.Text))
                 {
                     <p class="h3" @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", ".<br/>"))</p>
                 }
-                @if(Model.Link != null && Model.Link.LinkText != null)
+                @if(Model.Link != null && !String.IsNullOrEmpty(Model.Link.Url) && !String.IsNullOrEmpty(Model.Link.LinkText))
                 {
                     <a href="@Model.Link.Url" title="@Model.Link.AlternateText" class="btn btn-primary" @Markup.Property(Model, "Link")>@Model.Link.LinkText</a>
                 }
