@@ -11,7 +11,7 @@
         <div class="loading-panel"></div>
     }
     <h3 class="teaser-heading @Model.GetFormatOption("headingStyle")" @Markup.Property(Model, "Headline")>
-        @if (Model.Link != null && !String.IsNullOrEmpty(Model.Link.Url))
+        @if (Model.Link.IsValidLink())
         {
 
             <a href="@Model.Link.Url">@Model.Headline</a>
@@ -22,7 +22,7 @@
         }
     </h3>
     <p class="teaser-description @Model.GetFormatOption("descriptionStyle")" @Markup.Property(Model, "Text")>@Model.Text</p>
-    @if (Model.Link!=null && !String.IsNullOrEmpty(Model.Link.Url))
+    @if (Model.Link.IsValidLink())
     {
         <a class="@linkStyle" href="@Model.Link.Url" title="@Model.Link.AlternateText" @Markup.Property(Model, "Link")>
             @(Model.Link.LinkText ?? Html.Resource("core.readMoreLinkText"))

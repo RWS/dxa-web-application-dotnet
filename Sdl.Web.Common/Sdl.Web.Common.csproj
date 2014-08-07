@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Configuration\SiteConfiguration.cs" />
     <Compile Include="Configuration\Localization.cs" />
+    <Compile Include="Extensions\LinkExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Interfaces\IContentResolver.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />

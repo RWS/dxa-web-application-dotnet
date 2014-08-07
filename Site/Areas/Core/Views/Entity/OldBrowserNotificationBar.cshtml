@@ -11,7 +11,7 @@
                     <li @Markup.Property(Model, "Continue")>
                         <a id="incompability-hide" href="#"><i class="fa fa-check-circle"></i> @Model.Continue</a>
                     </li>
-                    @if (Model.Link != null)
+                    @if (Model.Link.IsLinkWithText())
                     {
                         <li @Markup.Property(Model, "Link.LinkText")>
                             <a href="@Model.Link.Url"><i class="fa fa-question-circle"></i> @Model.Link.LinkText</a>

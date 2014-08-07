@@ -53,7 +53,7 @@
                                         @Html.Media(element.Media)
                                     </figure>
                                 }
-                                @if (element.Link != null)
+                                @if (element.Link.IsValidLink())
                                 {
                                     <p @Markup.Property(element, "Link.LinkText")>
                                         <a href="@element.Link.Url" title="@element.Link.AlternateText" class="btn btn-primary">@(element.Link.LinkText ?? Html.Resource("core.readMoreLinkText"))</a>

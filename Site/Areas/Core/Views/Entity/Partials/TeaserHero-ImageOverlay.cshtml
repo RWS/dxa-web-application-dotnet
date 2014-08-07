@@ -1,4 +1,5 @@
-﻿@model Teaser
+﻿@using Sdl.Web.Common.Extensions
+@model Teaser
 <div @Markup.Entity(Model)>
     @if (Model.Media != null)
     {
@@ -8,7 +9,7 @@
     }
     @if (!String.IsNullOrEmpty(Model.Headline) || !String.IsNullOrEmpty(Model.Text))
     {
-        if (Model.Link != null && !String.IsNullOrEmpty(Model.Link.Url) && !String.IsNullOrEmpty(Model.Link.LinkText))
+        if (Model.Link.IsLinkWithText())
         {
             <a href="@Model.Link.Url" title="@Model.Link.AlternateText">
                 <div class="overlay overlay-tl ribbon">
@@ -28,7 +29,7 @@
                 {
                     <p class="h3" @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", ".<br/>"))</p>
                 }
-                @if(Model.Link != null && !String.IsNullOrEmpty(Model.Link.Url) && !String.IsNullOrEmpty(Model.Link.LinkText))
+                @if(Model.Link.IsLinkWithText())
                 {
                     <a href="@Model.Link.Url" title="@Model.Link.AlternateText" class="btn btn-primary" @Markup.Property(Model, "Link")>@Model.Link.LinkText</a>
                 }
