@@ -56,7 +56,8 @@ namespace Sdl.Web.Tridion.Config
             {
                 var rootApplicationFolder = AppDomain.CurrentDomain.BaseDirectory;
                 _localizations = new List<Dictionary<string, string>>();
-                XDocument config = XDocument.Load(rootApplicationFolder + "/bin/config/cd_dynamic_conf.xml");
+                string path = Path.Combine(rootApplicationFolder, @"bin\config\cd_dynamic_conf.xml");
+                XDocument config = XDocument.Load(path);
                 foreach (var pub in config.Descendants("Publication"))
                 {
                     _localizations.Add(GetLocalization(pub.Element("Host")));

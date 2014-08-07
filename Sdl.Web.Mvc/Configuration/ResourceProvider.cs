@@ -72,7 +72,7 @@ namespace Sdl.Web.Mvc.Configuration
                     {
                         Log.Debug("Loading resources for localization : '{0}'", loc.Path);
                         var resources = new Dictionary<string, object>();
-                        var path = Path.Combine(new[] { applicationRoot, SiteConfiguration.StaticsFolder, loc.Path, SiteConfiguration.SystemFolder, @"resources\_all.json" });
+                        var path = Path.Combine(new[] { applicationRoot, SiteConfiguration.StaticsFolder, loc.Path.ToCombinePath(), SiteConfiguration.SystemFolder, @"resources\_all.json" });
                         if (File.Exists(path))
                         {
                             //The _all.json file contains a list of all other resources files to load
