@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Web.Script.Serialization;
 using System.Xml.Linq;
+using System.Xml.XPath;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Tridion.Markup;
 
@@ -58,6 +61,10 @@ namespace Sdl.Web.Tridion.Config
                 _localizations = new List<Dictionary<string, string>>();
                 string path = Path.Combine(rootApplicationFolder, @"bin\config\cd_dynamic_conf.xml");
                 XDocument config = XDocument.Load(path);
+                // sorting publications by path in decending order so default path ("/" or "") is last in list
+                var publications = config.Descendants("Publications").First();
+                var sortedPublications = publications.Elements().OrderByDescending(e => e.Element("Host").Attribute("Path").Value); 
+                publications.ReplaceAll(sortedPublications);
                 foreach (var pub in config.Descendants("Publication"))
                 {
                     _localizations.Add(GetLocalization(pub.Element("Host")));
@@ -71,7 +78,7 @@ namespace Sdl.Web.Tridion.Config
             {
                 var rootApplicationFolder = AppDomain.CurrentDomain.BaseDirectory;
                 _xpmRegions = new Dictionary<string, XpmRegion>();
-                var configPath = String.Format("{0}/{1}{2}{3}", rootApplicationFolder, SiteConfiguration.StaticsFolder, SiteConfiguration.DefaultLocalization, "/system/mappings/regions.json");
+                var configPath = Path.Combine(new[] { rootApplicationFolder, SiteConfiguration.StaticsFolder, SiteConfiguration.DefaultLocalization.ToCombinePath(), @"system\mappings\regions.json" });
                 foreach (var region in GetRegionsFromFile(configPath))
                 {
                     _xpmRegions.Add(region.Region, region);

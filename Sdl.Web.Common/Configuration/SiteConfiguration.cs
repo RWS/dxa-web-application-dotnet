@@ -30,7 +30,32 @@ namespace Sdl.Web.Common.Configuration
         public static IMediaHelper MediaHelper {get;set;}
         public static IStaticFileManager StaticFileManager { get; set; }
         public static Dictionary<string, Localization> Localizations { get; set; }
-        
+
+        private static List<Localization> _sortedLocalizations;
+        public static List<Localization> SortedLocalizations
+        {
+            get
+            {
+                // TODO: return a list with localizations containing the core.language too
+                // so LanguageSelector.cshtml doesn't have to get this separately
+                if (_sortedLocalizations == null)
+                {
+                    List<Localization> sortedList = Localizations.Values.ToList();
+                    sortedList.Sort(
+                        delegate(Localization firstPair, Localization nextPair)
+                        {
+                            string firstPairLanguage = GetConfig("core.language", firstPair.Path);
+                            string nextPairLanguage = GetConfig("core.language", nextPair.Path);
+
+                            return String.Compare(firstPairLanguage, nextPairLanguage, StringComparison.Ordinal);
+                        }
+                    );
+                    _sortedLocalizations = sortedList;
+                }
+                return _sortedLocalizations;
+            }
+        }
+
         public const string VersionRegex = "(v\\d*.\\d*)";
         public const string SystemFolder = "system";
         public const string CoreModuleName = "core";
