@@ -22,6 +22,12 @@ namespace Sdl.Web
             return View("GenericHttpError", httpStatusCode);
         }
 
+        [Route("se_blank")]
+        public ActionResult Blank()
+        {
+            return Content("<!-- se_blank.html -->");
+        }
+
         private class PreventDirectAccessAttribute : FilterAttribute, IAuthorizationFilter
         {
             public void OnAuthorization(AuthorizationContext filterContext)
