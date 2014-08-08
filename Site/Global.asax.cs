@@ -7,6 +7,7 @@ using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.Configuration;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Site.Controllers;
 using Sdl.Web.Tridion.Config;
 using Unity.Mvc5;
 
