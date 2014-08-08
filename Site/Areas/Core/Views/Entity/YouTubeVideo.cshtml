@@ -1,10 +1,4 @@
 ﻿@model YouTubeVideo
-<style>
-    .embed-video > iframe {
-        width: 100% !important;
-        height: auto !important;
-    }
-</style>
 <div class="video" @Markup.Entity(Model)> 
     @if (Model.Headline!=null)
     {
