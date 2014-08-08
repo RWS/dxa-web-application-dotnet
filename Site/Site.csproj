@@ -97,6 +97,7 @@
     </Compile>
     <Compile Include="Areas\Core\Controllers\PageController.cs" />
     <Compile Include="Areas\Core\Controllers\RegionController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -180,6 +181,8 @@
       <SubType>Designer</SubType>
     </Content>
     <None Include="Properties\PublishProfiles\Staging %28Stable demo version%29.pubxml" />
+    <Content Include="Views\Error\NotFound.cshtml" />
+    <Content Include="Views\Error\ServerError.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\Core\Views\Admin\" />

@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using System;
+using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using Microsoft.Practices.ServiceLocation;
@@ -49,6 +50,45 @@ namespace Sdl.Web.Site
             var container = section.Configure(new UnityContainer(), "main");
             ServiceLocator.SetLocatorProvider(() => new UnityServiceLocator(container));
             return container;
+        }
+
+        protected void Application_Error(object sender, EventArgs e)
+        {
+            if (Context.IsCustomErrorEnabled)
+                ShowCustomErrorPage(Server.GetLastError());
+        }
+
+        private void ShowCustomErrorPage(Exception exception)
+        {
+            HttpException httpException = exception as HttpException;
+            if (httpException == null)
+                httpException = new HttpException(500, "Internal Server Error", exception);
+
+            Response.Clear();
+            RouteData routeData = new RouteData();
+            routeData.Values.Add("controller", "Error");
+            routeData.Values.Add("fromAppErrorEvent", true);
+
+            switch (httpException.GetHttpCode())
+            {
+                case 404:
+                    routeData.Values.Add("action", "NotFound");
+                    break;
+
+                case 500:
+                    routeData.Values.Add("action", "ServerError");
+                    break;
+
+                default:
+                    routeData.Values.Add("action", "OtherHttpStatusCode");
+                    routeData.Values.Add("httpStatusCode", httpException.GetHttpCode());
+                    break;
+            }
+
+            Server.ClearError();
+
+            IController controller = new ErrorController();
+            controller.Execute(new RequestContext(new HttpContextWrapper(Context), routeData));
         }
     }
 }
