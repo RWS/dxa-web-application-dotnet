@@ -27,6 +27,7 @@ namespace Sdl.Web.Mvc.Controllers
         [HandleError]
         public virtual ActionResult Page(string pageUrl)
         {
+            Log.Debug("BaseController.Page: Processing request for page: {0}", pageUrl);
             DateTime timerStart = DateTime.Now;
             ModelType = ModelType.Page;
             var page = ContentProvider.GetPageModel(pageUrl);
@@ -49,6 +50,7 @@ namespace Sdl.Web.Mvc.Controllers
         public virtual ActionResult PageRaw(string pageUrl = null)
         {
             pageUrl = pageUrl ?? Request.Url.AbsolutePath;
+            Log.Debug("BaseController.PageRaw: Processing request for page: {0}", pageUrl);
             var rawContent = ContentProvider.GetPageContent(pageUrl);
             if (rawContent == null)
             {
