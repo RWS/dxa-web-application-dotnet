@@ -32,7 +32,7 @@ namespace Sdl.Web.Common.Logging
                 {
                     //ignore - we are in a non request context
                 }
-                var message = String.Format(messageFormat, parameters);
+                var message = String.Format(messageFormat ?? "", parameters);
                 log.InfoFormat(TraceFormat, url, type, (DateTime.Now - start).TotalMilliseconds, message);
             }
         }

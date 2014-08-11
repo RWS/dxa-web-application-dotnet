@@ -6,6 +6,7 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
+using System.IO;
 
 namespace Sdl.Web.Mvc.ContentProvider
 {
@@ -60,14 +61,17 @@ namespace Sdl.Web.Mvc.ContentProvider
             var defaultPageFileName = ContentResolver.DefaultPageName;
             if (String.IsNullOrEmpty(url))
             {
-                return defaultPageFileName;
+                url = defaultPageFileName;
             }
             if (url.EndsWith("/"))
             {
-                return url + defaultPageFileName;
+                url = url + defaultPageFileName;
             }
-
-            return url + ContentResolver.DefaultExtension;
+            if (!Path.HasExtension(url))
+            {
+                url = url + ContentResolver.DefaultExtension;
+            }
+            return url;
         }
         
         public virtual object MapModel(object data, ModelType modelType, Type viewModeltype = null)

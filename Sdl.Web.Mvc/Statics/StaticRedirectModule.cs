@@ -24,17 +24,6 @@ namespace Sdl.Web.Mvc.Statics
             HttpContext context = application.Context;
             var url = context.Request.Url.AbsolutePath;
             Log.Debug("StaticRedirectModule_BeginRequest: " + url);
-            // we don't use file extentions, but XPM does when a new page is created based on a page-type, so lets strip the default '.html' extension at all times
-            if (url.EndsWith(SiteConfiguration.GetDefaultFileExtension()))
-            {
-                context.Response.Redirect(url.Substring(0, url.LastIndexOf('.')));
-            }
-            //Strange case : directory requests which exist (eg the root localization folders like /fr/ /de/) are not routed to MVC
-            //So we rewrite the request to a full URL including the default page name to ensure the full MVC pipeline is executed
-            if (url == WebRequestContext.Localization.Path + "/")
-            {
-                context.RewritePath(url + SiteConfiguration.GetDefaultDocument());
-            }
             var versionLessUrl = SiteConfiguration.RemoveVersionFromPath(url);
             if (url != versionLessUrl)
             {
