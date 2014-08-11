@@ -402,6 +402,10 @@ namespace Sdl.Web.DD4T.Statics
                 }
                 return re.Replace(path, ".");
             }
+
+            // unescape and only escape spaces
+            path = HttpContext.Current.Server.UrlDecode(path);
+            path = path.Replace(" ", "%20");
             return path;
         }
     }
