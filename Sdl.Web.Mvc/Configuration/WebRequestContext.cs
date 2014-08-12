@@ -111,13 +111,17 @@ namespace Sdl.Web.Mvc.Configuration
             {
                 if (HttpContext.Current != null)
                 {
-                    var uri = HttpContext.Current.Request.Url.AbsoluteUri;
-                    foreach (var key in SiteConfiguration.Localizations.Keys)
+                    var uri = HttpContext.Current.Request.Path;
+                    if (uri.StartsWith("/" + SiteConfiguration.StaticsFolder))
                     {
-                        if (uri.StartsWith(key))
+                        uri = uri.Substring(SiteConfiguration.StaticsFolder.Length + 1);
+                    }
+                    foreach (var loc in SiteConfiguration.Localizations.Values)
+                    {
+                        if (uri==loc.Path || uri.StartsWith(loc.Path + "/"))
                         {
-                            Log.Debug("Request for {0} is from localization '{1}'", uri, SiteConfiguration.Localizations[key].Path);
-                            return SiteConfiguration.Localizations[key];
+                            Log.Debug("Request for {0} is from localization {1} ('{2}')", uri, loc.LocalizationId, loc.Path);
+                            return loc;
                         }
                     }
                 }

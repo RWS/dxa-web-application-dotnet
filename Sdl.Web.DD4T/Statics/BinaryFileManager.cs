@@ -80,6 +80,7 @@ namespace Sdl.Web.DD4T.Statics
         public bool ProcessUrl(string urlPath, bool cacheSinceLastRefresh = false, string physicalPath = null)
         {
             Dimensions dimensions;
+            bool connectionError = false;
             if (physicalPath == null)
             {
                 physicalPath = GetFilePathFromUrl(urlPath);
@@ -99,11 +100,25 @@ namespace Sdl.Web.DD4T.Statics
                         CacheAgent.Store(cacheKey, "Binary", lastPublishedDate);
                     }
                 }
-                catch
+                catch (NullReferenceException)
                 {
-                    //Binary not found
-                    return false;
+                    //Binary not found, this should return a min date, but theres a bug in DD4T where it throws a NRE
+                    //DO NOTHING - binary removed later
                 }
+                catch (Exception ex)
+                {
+                    Log.Error(ex);
+                    connectionError = true; 
+                }
+            }
+            if (connectionError)
+            {
+                if (File.Exists(physicalPath))
+                {
+                    //if theres an error connecting, but we still have a version on disk, serve this
+                    return true;
+                }
+                return false;
             }
             if (lastPublishedDate != null)
             {
@@ -263,9 +278,16 @@ namespace Sdl.Web.DD4T.Statics
 
         protected IBinary GetBinaryFromBroker(string urlPath)
         {
-            IBinary binary;
+            IBinary binary = null;
             BinaryFactory.BinaryProvider.PublicationId = GetLocalizationId(urlPath);
-            BinaryFactory.TryFindBinary(urlPath, out binary);
+            try
+            {
+                BinaryFactory.TryFindBinary(urlPath, out binary);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+            }
             return binary;
         }
 

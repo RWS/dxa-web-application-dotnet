@@ -33,7 +33,7 @@ namespace Sdl.Web.Common.Models
 
         public string Type { get; set; }
         public List<SitemapItem> Items { get; set; }
-        public DateTime PublishedDate { get; set; }
+        public string PublishedDate { get; set; }
         public bool Visible { get; set; }
     }
 }
