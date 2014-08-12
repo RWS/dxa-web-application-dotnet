@@ -28,8 +28,14 @@ namespace Sdl.Web.Site.Areas.Core
             );
             //Google Site Map
             context.MapRoute(
-                "Core_Sitemap_Xml",
+                "Core_Sitemap",
                 "sitemap.xml",
+                new { controller = "Navigation", action = "SiteMap" }
+            );
+            //Google Site Map
+            context.MapRoute(
+                "Core_Sitemap_Loc",
+                "{localization}/sitemap.xml",
                 new { controller = "Navigation", action = "SiteMap" }
             );
 
