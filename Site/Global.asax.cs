@@ -7,19 +7,16 @@ using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.Configuration;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Site.Controllers;
 using Sdl.Web.Tridion.Config;
 using Unity.Mvc5;
+using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Site.Areas.Core.Controllers;
 
 namespace Sdl.Web.Site
 {
     public class MvcApplication : HttpApplication
     {
-        public static void RegisterGlobalFilters(GlobalFilterCollection filters)
-        {
-            filters.Add(new HandleErrorAttribute());
-        }
-
         public static void RegisterRoutes(RouteCollection routes)
         {
             RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
@@ -35,7 +32,6 @@ namespace Sdl.Web.Site
             SiteConfiguration.Initialize(TridionConfig.PublicationMap);
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
-            RegisterGlobalFilters(GlobalFilters.Filters);
         }
 
         protected IUnityContainer InitializeDependencyInjection()
@@ -65,30 +61,13 @@ namespace Sdl.Web.Site
             if (httpException == null)
                 httpException = new HttpException(500, "Internal Server Error", exception);
 
-            Response.Clear();
             RouteData routeData = new RouteData();
-            routeData.Values.Add("controller", "Error");
-            routeData.Values.Add("fromAppErrorEvent", true);
-
-            switch (httpException.GetHttpCode())
-            {
-                case 404:
-                    routeData.Values.Add("action", "NotFound");
-                    break;
-
-                case 500:
-                    routeData.Values.Add("action", "ServerError");
-                    break;
-
-                default:
-                    routeData.Values.Add("action", "OtherHttpStatusCode");
-                    routeData.Values.Add("httpStatusCode", httpException.GetHttpCode());
-                    break;
-            }
-
+            Log.Error(httpException);
+            routeData.Values.Add("controller", "Page");
+            routeData.Values.Add("area", "Core");
+            routeData.Values.Add("action", "ServerError");
             Server.ClearError();
-
-            IController controller = new ErrorController();
+            IController controller = new PageController(null,null);
             controller.Execute(new RequestContext(new HttpContextWrapper(Context), routeData));
         }
     }

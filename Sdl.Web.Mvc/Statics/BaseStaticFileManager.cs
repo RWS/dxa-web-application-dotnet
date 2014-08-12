@@ -19,7 +19,6 @@ namespace Sdl.Web.Mvc.Statics
     {
         public virtual string CreateStaticAssets(string applicationRoot)
         {
-            DateTime timer = DateTime.Now;
             List<string> folders = new List<string>();
             string version = null;
             try
@@ -60,7 +59,6 @@ namespace Sdl.Web.Mvc.Statics
             {
                 Log.Error(ex, "Error creating files on disk.");
             }
-            Log.Trace(timer, "serialize-config", applicationRoot);
             return version;
         }
 

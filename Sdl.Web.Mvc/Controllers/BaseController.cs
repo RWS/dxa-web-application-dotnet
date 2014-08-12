@@ -24,16 +24,14 @@ namespace Sdl.Web.Mvc.Controllers
             ModelType = ModelType.Entity;
         }
 
-        [HandleError]
         public virtual ActionResult Page(string pageUrl)
         {
             Log.Debug("BaseController.Page: Processing request for page: {0}", pageUrl);
-            DateTime timerStart = DateTime.Now;
             ModelType = ModelType.Page;
             var page = ContentProvider.GetPageModel(pageUrl);
             if (page == null)
             {
-                throw new HttpException(404, "Page cannot be found");
+                return NotFound();
             }
             var viewData = GetViewData(page);
             SetupViewData(0,viewData.AreaName);
@@ -42,11 +40,9 @@ namespace Sdl.Web.Mvc.Controllers
             {
                 WebRequestContext.PageId = ((WebPage)model).Id;
             }
-            Log.Trace(timerStart, "page-mapped", pageUrl);
             return View(viewData.ViewName, model);
         }
 
-        [HandleError]
         public virtual ActionResult PageRaw(string pageUrl = null)
         {
             pageUrl = pageUrl ?? Request.Url.AbsolutePath;
@@ -54,18 +50,32 @@ namespace Sdl.Web.Mvc.Controllers
             var rawContent = ContentProvider.GetPageContent(pageUrl);
             if (rawContent == null)
             {
-                throw new HttpException(404, "Page cannot be found");
+                return NotFound();
             }
             return GetRawActionResult(Path.GetExtension(pageUrl).Substring(1), rawContent);
         }
 
+        public virtual ActionResult NotFound()
+        {
+            var page = ContentProvider.GetPageModel(WebRequestContext.Localization.Path + "error-404");
+            if (page == null)
+            {
+                throw new HttpException(404, "Page Not Found");
+            }
+            var viewData = GetViewData(page);
+            SetupViewData(0, viewData.AreaName);
+            var model = ProcessModel(page, GetViewType(viewData)) ?? page;
+            Response.StatusCode = 404;
+            return View(viewData.ViewName, model);
+        }
+        
         private ActionResult GetRawActionResult(string type, string rawContent)
         {
             var contentType = type == "json" ? "application/json" : "text/" + type;
             return this.Content(rawContent, contentType);
         }
 
-        [HandleSectionError(View = "_SectionError")]
+        [HandleSectionError(View = "SectionError")]
         public virtual ActionResult Region(IRegion region, int containerSize = 0)
         {
             ModelType = ModelType.Region;
@@ -75,39 +85,33 @@ namespace Sdl.Web.Mvc.Controllers
             return View(viewData.ViewName, model);
         }
 
-        [HandleSectionError(View = "_SectionError")]
+        [HandleSectionError(View = "SectionError")]
         public virtual ActionResult Entity(object entity, int containerSize = 0)
         {
-            DateTime timerStart = DateTime.Now;
             ModelType = ModelType.Entity;
             var viewData = GetViewData(entity);
             SetupViewData(containerSize, viewData.AreaName);
             var model = ProcessModel(entity, GetViewType(viewData)) ?? entity;
-            Log.Trace(timerStart, "entity-mapped", viewData.ViewName);
             return View(viewData.ViewName, model);
         }
 
-        [HandleSectionError(View = "_SectionError")]
+        [HandleSectionError(View = "SectionError")]
         public ActionResult List(object entity, int containerSize = 0)
         {
-            DateTime timerStart = DateTime.Now;
             ModelType = ModelType.Entity;
             var viewData = GetViewData(entity);
             SetupViewData(containerSize, viewData.AreaName);
             var model = ProcessList(entity, GetViewType(viewData)) ?? entity;
-            Log.Trace(timerStart, "list-processed", viewData.ViewName);
             return View(viewData.ViewName, model);
         }
 
-        [HandleSectionError(View = "_SectionError")]
+        [HandleSectionError(View = "SectionError")]
         public virtual ActionResult Navigation(object entity, string navType, int containerSize = 0)
         {
-            DateTime timerStart = DateTime.Now;
             ModelType = ModelType.Entity;
             var viewData = GetViewData(entity);
             SetupViewData(containerSize, viewData.AreaName);
             var model = ProcessNavigation(entity, GetViewType(viewData), navType) ?? entity;
-            Log.Trace(timerStart, "navigation-processed", viewData.ViewName);
             return View(viewData.ViewName, model);
         }
 

@@ -22,7 +22,6 @@ namespace Sdl.Web.DD4T.Html
             var mvcData = ContentResolver.ResolveMvcData(cp);
             if (cp != null && (excludedItems == null || !excludedItems.Contains(mvcData.ViewName)))
             {
-                DateTime timerStart = DateTime.Now;
                 var parameters = new RouteValueDictionary();
                 int parentContainerSize = helper.ViewBag.ContainerSize;
                 if (parentContainerSize == 0)
@@ -41,13 +40,10 @@ namespace Sdl.Web.DD4T.Html
                     parameters[key] = mvcData.RouteValues[key];
                 }
                 MvcHtmlString result = helper.Action(mvcData.ActionName, mvcData.ControllerName, parameters);
-                Log.Trace(timerStart, "entity-render", cp.Component.Title);
-                timerStart = DateTime.Now;
                 if (WebRequestContext.IsPreview)
                 {
                     result = new MvcHtmlString(TridionMarkup.ParseEntity(result.ToString()));
                 }
-                Log.Trace(timerStart, "entity-parse", cp.Component.Title);
                 return result;
             }
             return null;
@@ -58,20 +54,16 @@ namespace Sdl.Web.DD4T.Html
             var mvcData = ContentResolver.ResolveMvcData(region);
             if (region != null && (excludedItems == null || !excludedItems.Contains(region.Name)))
             {
-                DateTime timerStart = DateTime.Now;
                 if (containerSize == 0)
                 {
                     containerSize = SiteConfiguration.MediaHelper.GridSize;
                 }
                 MvcHtmlString result = helper.Action(mvcData.ActionName, mvcData.ControllerName, new { Region = region, containerSize = containerSize, area = mvcData.ControllerAreaName });
-                Log.Trace(timerStart, "region-render", region.Name);
-                timerStart = DateTime.Now;
-
+                
                 if (WebRequestContext.IsPreview)
                 {
                     result = new MvcHtmlString(TridionMarkup.ParseRegion(result.ToString()));
                 }
-                Log.Trace(timerStart, "region-parse", region.Name);
                 return result;
             }
             return null;
