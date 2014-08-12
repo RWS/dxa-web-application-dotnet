@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -404,8 +405,8 @@ namespace Sdl.Web.DD4T.Statics
             }
 
             // TSI-417: unescape and only escape spaces
-            //path = HttpContext.Current.Server.UrlDecode(path);
-            //path = path.Replace(" ", "%20");
+            path = WebUtility.UrlDecode(path);
+            path = path.Replace(" ", "%20");
             return path;
         }
     }
