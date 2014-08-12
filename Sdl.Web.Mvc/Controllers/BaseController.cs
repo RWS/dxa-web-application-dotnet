@@ -115,14 +115,12 @@ namespace Sdl.Web.Mvc.Controllers
             return View(viewData.ViewName, model);
         }
 
-        [HandleError]
         public virtual ActionResult SiteMap()
         {
             var model = ContentProvider.GetNavigationModel(SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization));
             return View(model);
         }
 
-        [HandleError]
         public ActionResult Resolve(string itemId, string localization)
         {
             //TODO remove this tcm specific code here
