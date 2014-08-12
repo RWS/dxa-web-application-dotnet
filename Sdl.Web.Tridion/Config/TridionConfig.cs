@@ -95,7 +95,8 @@ namespace Sdl.Web.Tridion.Config
             }
             if (xElement.Attribute("Domain") != null)
             {
-                res.Add("Domain", xElement.Attribute("Domain").Value);
+                // change to lowercase, since that is how we expect it
+                res.Add("Domain", xElement.Attribute("Domain").Value.ToLower());
             }
             if (xElement.Attribute("Port") != null)
             {
