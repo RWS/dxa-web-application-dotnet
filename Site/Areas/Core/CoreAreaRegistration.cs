@@ -16,6 +16,12 @@ namespace Sdl.Web.Site.Areas.Core
         {
             //Navigation JSON
             context.MapRoute(
+                "Core_Blank",
+                "se_blank.html",
+                new { controller = "Page", action = "Blank" }
+            );
+            //Navigation JSON
+            context.MapRoute(
                 "Core_Navigation",
                 "navigation.json",
                 new { controller = "Page", action = "PageRaw" }
