@@ -23,5 +23,13 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
             Response.StatusCode = 500;
             return View();
         }
+
+        [Route("se_blank.html")]
+        public ActionResult Blank()
+        {
+            //For Experience Manager se_blank.html can be completely empty, or a valid HTML page without actual content
+            return Content(string.Empty);
+        }
+
     }
 }
