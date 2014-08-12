@@ -1,10 +1,6 @@
-﻿using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common.Logging;
-using Sdl.Web.Common.Models;
-using Sdl.Web.Mvc.Configuration;
+﻿using System.Web.Mvc;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Mvc.Controllers;
-using System.Web;
-using System.Web.Mvc;
 
 namespace Sdl.Web.Site.Areas.Core.Controllers
 {

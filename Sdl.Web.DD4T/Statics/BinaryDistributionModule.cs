@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -83,7 +82,6 @@ namespace Sdl.Web.DD4T.Statics
                     // file probabaly accessed by a different thread in a different process
                     Log.Error("TransmitFile failed: {0}\r\n{1}", ex.Message, ex.StackTrace);
                 }
-                return;
             }
         }
 
