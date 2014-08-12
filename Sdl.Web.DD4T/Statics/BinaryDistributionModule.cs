@@ -32,7 +32,6 @@ namespace Sdl.Web.DD4T.Statics
 		/// <param name="eventArgs">Current event arguments</param>
         public void DistributionModule_OnPreRequestHandlerExecute(object o, EventArgs eventArgs)
         {
-            DateTime start = DateTime.Now;
             HttpApplication application = (HttpApplication)o;
             HttpContext context = application.Context;
             HttpRequest request = context.Request;
@@ -42,7 +41,6 @@ namespace Sdl.Web.DD4T.Statics
             if (!IsBinaryUrl.IsMatch(urlPath))
             {
                 Log.Debug("Url {0} does not match binary url pattern, ignoring it.", urlPath);
-                Log.Trace(start, "binary-ignored", response.StatusCode.ToString(CultureInfo.InvariantCulture));
                 return;
             }
             
@@ -52,7 +50,6 @@ namespace Sdl.Web.DD4T.Statics
                 response.StatusCode = 404;
                 response.SuppressContent = true;
                 application.CompleteRequest();
-                Log.Trace(start, "binary-not-found", response.StatusCode.ToString(CultureInfo.InvariantCulture));
                 return;
             }
             // if we got here, the file was successfully created on file-system
@@ -68,7 +65,6 @@ namespace Sdl.Web.DD4T.Statics
                 response.StatusCode = 304;
                 response.SuppressContent = true;
                 application.CompleteRequest();
-                Log.Trace(start, "binary-not-modified", response.StatusCode.ToString(CultureInfo.InvariantCulture));
                 return;
             }
 
@@ -87,16 +83,12 @@ namespace Sdl.Web.DD4T.Statics
                     // file probabaly accessed by a different thread in a different process
                     Log.Error("TransmitFile failed: {0}\r\n{1}", ex.Message, ex.StackTrace);
                 }
-                Log.Trace(start, "binary-direct", response.StatusCode.ToString(CultureInfo.InvariantCulture));
                 return;
             }
-
-            Log.Trace(start, "binary-processed", response.StatusCode.ToString(CultureInfo.InvariantCulture));
         }
 
         public static void DistributionModule_OnBeginRequest(Object source, EventArgs e)
         {
-            DateTime timer = DateTime.Now;            
             HttpContext context = HttpContext.Current;
             HttpRequest request = context.Request;
             string urlPath = request.Url.AbsolutePath;
@@ -105,7 +97,6 @@ namespace Sdl.Web.DD4T.Statics
             {
                 Log.Debug("Url {0} does not match binary url pattern, ignoring it.", urlPath);
                 Log.Debug("<<DistributionModule_OnBeginRequest ({0})", urlPath);
-                Log.Trace(timer, "binary-skip", String.Empty);
                 return;
             }
 
