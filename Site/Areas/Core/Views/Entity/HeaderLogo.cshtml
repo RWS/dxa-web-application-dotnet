@@ -1,4 +1,5 @@
 ﻿@model Teaser
+@Html.Partial("LanguageSelector")
 <div @Markup.Entity(Model)>
     <a class="navbar-logo" href="@Model.Link.Url" title="@Model.Link.LinkText">
         @if (Model != null && Model.Media is Image)
