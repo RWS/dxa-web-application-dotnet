@@ -234,29 +234,25 @@ namespace Sdl.Web.DD4T.Mapping
             }
 
             // resolve youtube videos
-            foreach (XmlNode img in doc.SelectNodes("//xhtml:img[@xlink:href[starts-with(string(.),'tcm:')]]", nsmgr))
+            foreach (XmlNode youtube in doc.SelectNodes("//xhtml:youtube[@xlink:href[starts-with(string(.),'tcm:')]]", nsmgr))
             {
-                var imgUri = img.Attributes["xlink:href"].IfNotNull(attr => attr.Value);
-                if (!string.IsNullOrEmpty(imgUri))
+                var uri = youtube.Attributes["xlink:href"].IfNotNull(attr => attr.Value);
+                var title = youtube.Attributes["xlink:title"].IfNotNull(attr => attr.Value);
+                var id = youtube.Attributes["id"].IfNotNull(attr => attr.Value);
+                var headline = youtube.Attributes["headline"].IfNotNull(attr => attr.Value);
+                if (!string.IsNullOrEmpty(uri))
                 {
-                    // check if image is actually a youtube video and replace with video instead
-                    IComponent comp;
-                    // TODO: get multimedia component info, this call fails since it is not a DCP
-                    bool found = _componentFactory.TryGetComponent(imgUri, out comp);
-                    if (found && comp.Schema.Title.ToLower().Contains("youtube"))
-                    {
-                        var attr = doc.CreateAttribute("class");
-                        attr.Value = "video";
-                        var video = doc.CreateElement("xhtml:span");
-                        video.Attributes.Append(attr);
+                    var attr = doc.CreateAttribute("class");
+                    attr.Value = "video";
+                    var video = doc.CreateElement("xhtml:span");
+                    video.Attributes.Append(attr);
 
-                        // now we still have the image, we are just wrapping it in a span tag
-                        // TODO: call media helper for youtube video like is done in the view 
-                        var copy = img.CloneNode(true);
+                    // now we still have the image, we are just wrapping it in a span tag
+                    // TODO: call media helper for youtube video like is done in the view 
+                    var copy = youtube.CloneNode(true);
 
-                        video.AppendChild(copy);
-                        img.ParentNode.ReplaceChild(video, img);
-                    }
+                    video.AppendChild(copy);
+                    youtube.ParentNode.ReplaceChild(video, youtube);
                 }
             }
 
