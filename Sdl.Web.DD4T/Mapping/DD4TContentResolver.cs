@@ -11,6 +11,7 @@ using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DD4T.Utils;
+using Sdl.Web.Mvc.Html;
 using Sdl.Web.Tridion.Linking;
 using IPage = DD4T.ContentModel.IPage;
 
@@ -230,6 +231,40 @@ namespace Sdl.Web.DD4T.Mapping
                         });
                     // remove link node
                     link.ParentNode.RemoveChild(link);
+                }
+            }
+
+            // resolve youtube videos
+            foreach (XmlNode youtube in doc.SelectNodes("//xhtml:youtube[@xlink:href[starts-with(string(.),'tcm:')]]", nsmgr))
+            {
+                string uri = youtube.Attributes["xlink:href"].IfNotNull(attr => attr.Value);
+                //string title = youtube.Attributes["xlink:title"].IfNotNull(attr => attr.Value);
+                string id = youtube.Attributes["id"].IfNotNull(attr => attr.Value);
+                string headline = youtube.Attributes["headline"].IfNotNull(attr => attr.Value);
+                string src = youtube.Attributes["src"].IfNotNull(attr => attr.Value);
+                if (!string.IsNullOrEmpty(uri))
+                {
+                    // call media helper for youtube video like is done in the view 
+                    string element;
+                    if (SiteConfiguration.MediaHelper.ShowVideoPlaceholders)
+                    {
+                        // we have a placeholder image
+                        var placeholderImgUrl = SiteConfiguration.MediaHelper.GetResponsiveImageUrl(src, 0, "100%");
+                        element = HtmlHelperExtensions.GetYouTubePlaceholder(id, placeholderImgUrl, headline, null, "span", true);
+                    }
+                    else
+                    {
+                        element = HtmlHelperExtensions.GetYouTubeEmbed(id);                        
+                    }
+
+                    // convert the element (which is a string) to an xmlnode 
+                    XmlDocument temp = new XmlDocument();
+                    temp.LoadXml(element);
+                    temp.DocumentElement.SetAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+                    var video = doc.ImportNode(temp.DocumentElement, true);
+
+                    // replace youtube element with actual html
+                    youtube.ParentNode.ReplaceChild(video, youtube);
                 }
             }
 
