@@ -37,11 +37,17 @@ namespace Sdl.Web.Mvc.Statics
                             //The HTML Design version is published in /version.json
                             var versionUrl = String.Format("{0}/version.json", String.IsNullOrEmpty(loc.Path) || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path);
                             var versionJson = Serialize(versionUrl, true);
-                            var path = Path.Combine(applicationRoot, versionUrl.ToCombinePath());
-                            if (versionJson == null && File.Exists(path))
+                            if (versionJson == null)
                             {
-                                //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually, in which case we try to load it directly
-                                versionJson = File.ReadAllText(path);
+                                //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually
+                                //in which case we try to load it directly - the HTML Design is thus not published from CMS
+                                versionUrl = String.Format("{0}/{1}/assets/version.json", String.IsNullOrEmpty(loc.Path) || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, SiteConfiguration.SystemFolder);
+                                var path = Path.Combine(applicationRoot, versionUrl.ToCombinePath());
+                                if (File.Exists(path))
+                                {
+                                    versionJson = File.ReadAllText(path);
+                                    SiteConfiguration.IsHtmlDesignPublished = false;
+                                }
                             }
                             if (versionJson != null)
                             {
