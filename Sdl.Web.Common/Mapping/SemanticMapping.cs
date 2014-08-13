@@ -18,7 +18,7 @@ namespace Sdl.Web.Common.Mapping
         /// <summary>
         /// Default semantic vocabulary prefix.
         /// </summary>
-        public const string DefaultPrefix = "tsi";
+        public const string DefaultPrefix = "tri";
 
         /// <summary>
         /// Default semantic vocabulary.
