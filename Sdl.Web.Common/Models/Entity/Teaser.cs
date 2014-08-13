@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Sdl.Web.Common.Models
 {
+    [SemanticEntity(EntityName = "Teaser", Prefix = "t", Vocab = CoreVocabulary)]
     [SemanticEntity(EntityName = "Image", Prefix = "i", Vocab = CoreVocabulary)]
     [SemanticEntity(EntityName = "Article", Prefix = "a", Vocab = CoreVocabulary)]
     [SemanticEntity(EntityName = "Place", Prefix = "p", Vocab = CoreVocabulary)]
@@ -20,7 +21,7 @@ namespace Sdl.Web.Common.Models
         [SemanticProperty("i:_self")]
         [SemanticProperty("a:image")]
         public MediaItem Media { get; set; }
-        [SemanticProperty("content")]
+        [SemanticProperty("t:content")]
         [SemanticProperty("a:introText")]
         public string Text { get; set; }
         public DateTime? Date { get; set; }

@@ -49,7 +49,7 @@ namespace Sdl.Web.DD4T.Mapping
                     }
                     url = TridionHelper.ResolveLink(url, pubid);
                 }
-                if (url.EndsWith(DefaultExtension))
+                if (url!=null && url.EndsWith(DefaultExtension))
                 {
                     url = url.Substring(0, url.Length - DefaultExtension.Length);
                     if (url.EndsWith("/" + DefaultExtensionLessPageName))
