@@ -38,7 +38,8 @@ namespace Sdl.Web.Tridion.Markup
 
         public static string ParseEntity(string entityHtml)
         {
-            //TODO extend for embedded fields/embedded components
+            //HTML Agility pack drops closing option tags for some reason (bug?)
+            HtmlNode.ElementsFlags.Remove("option");
             HtmlDocument html = new HtmlDocument();
             html.LoadHtml(String.Format("<html>{0}</html>", entityHtml));
             var entities = html.DocumentNode.SelectNodes("//*[@data-componentid]");
