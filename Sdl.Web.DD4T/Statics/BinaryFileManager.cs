@@ -154,7 +154,6 @@ namespace Sdl.Web.DD4T.Statics
                     DeleteFile(physicalPath);
                 }
                 return false;
-
             }
             return WriteBinaryToFile(binary, physicalPath, dimensions);
 
@@ -287,7 +286,8 @@ namespace Sdl.Web.DD4T.Statics
             {
                 Log.Error(ex);
             }
-            return binary;
+            //For some reason DD4T returns a non-null binary with null binary data if it doesnt exist
+            return binary.BinaryData==null ? null : binary;
         }
 
         #endregion

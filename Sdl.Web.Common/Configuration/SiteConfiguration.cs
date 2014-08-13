@@ -61,7 +61,7 @@ namespace Sdl.Web.Common.Configuration
         public const string CoreModuleName = "core";
         public const string StaticsFolder = "BinaryData";
         public const string DefaultVersion = "v1.00";
-
+        public static bool IsHtmlDesignPublished = true;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _localConfiguration;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _globalConfiguration;        
         
@@ -239,7 +239,10 @@ namespace Sdl.Web.Common.Configuration
                                 Log.Debug("This is site is has media root: " + mediaRoot);
                                 mediaPatterns.Add(String.Format("^{0}{1}.*", mediaRoot, mediaRoot.EndsWith("/") ? String.Empty : "/"));
                             }
-                            mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*",loc.Path, SystemFolder));
+                            if (IsHtmlDesignPublished)
+                            {
+                                mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*", loc.Path, SystemFolder));
+                            }
                             mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$",loc.Path, SystemFolder));
                             foreach (string file in bootstrapJson.files)
                             {
