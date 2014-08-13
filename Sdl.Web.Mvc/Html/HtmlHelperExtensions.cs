@@ -170,18 +170,7 @@ namespace Sdl.Web.Mvc.Html
                 return new MvcHtmlString(GetYouTubePlaceholder(video.YouTubeId, placeholderImgUrl, video.Headline, cssClass));
             }
 
-            TagBuilder builder = new TagBuilder("iframe");
-            builder.Attributes.Add("src", GetYouTubeUrl(video.YouTubeId));
-            builder.Attributes.Add("id", SiteConfiguration.GetUniqueId("video"));
-            builder.Attributes.Add("allowfullscreen", "true");
-            builder.Attributes.Add("frameborder", "0");
-            
-            if (!String.IsNullOrEmpty(cssClass))
-            {
-                builder.Attributes.Add("class", cssClass);
-            }
-
-            return new MvcHtmlString(builder.ToString(TagRenderMode.SelfClosing));
+            return new MvcHtmlString(GetYouTubeEmbed(video.YouTubeId, cssClass));
         }
 
         public static MvcHtmlString Download(this HtmlHelper helper, Download download)
@@ -255,10 +244,28 @@ namespace Sdl.Web.Mvc.Html
             return String.Format("https://www.youtube.com/embed/{0}?version=3&enablejsapi=1", videoId);
         }
 
-        public static string GetYouTubePlaceholder(string videoId, string imageUrl, string altText = null, string cssClass = null)
+        public static string GetYouTubeEmbed(string videoId, string cssClass = null)
         {
+            TagBuilder builder = new TagBuilder("iframe");
+            builder.Attributes.Add("src", GetYouTubeUrl(videoId));
+            builder.Attributes.Add("id", SiteConfiguration.GetUniqueId("video"));
+            builder.Attributes.Add("allowfullscreen", "true");
+            builder.Attributes.Add("frameborder", "0");
+
+            if (!String.IsNullOrEmpty(cssClass))
+            {
+                builder.Attributes.Add("class", cssClass);
+            }
+
+            return builder.ToString(TagRenderMode.SelfClosing);
+        }
+
+        public static string GetYouTubePlaceholder(string videoId, string imageUrl, string altText = null, string cssClass = null, string elementName = "div", bool xmlCompliant = false)
+        {
+            string closing = xmlCompliant ? "/" : String.Empty;
+
             // TODO: consider using partial view
-            return String.Format("<div class=\"embed-video\"><img src=\"{1}\" alt=\"{2}\"><button type=\"button\" data-video=\"{0}\" class=\"{3}\"><i class=\"fa fa-play-circle\"></i></button></div>", videoId, imageUrl, altText, cssClass);
+            return String.Format("<{4} class=\"embed-video\"><img src=\"{1}\" alt=\"{2}\"{5}><button type=\"button\" data-video=\"{0}\" class=\"{3}\"><i class=\"fa fa-play-circle\"></i></button></{4}>", videoId, imageUrl, altText, cssClass, elementName, closing);
         }
 
         public static string GetResponsiveImageUrl(string url)
