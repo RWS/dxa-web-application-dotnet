@@ -200,10 +200,20 @@ namespace Sdl.Web.DD4T.Mapping
             // resolve links which haven't been resolved
             foreach (XmlNode link in doc.SelectNodes("//xhtml:a[@xlink:href[starts-with(string(.),'tcm:')]][@xhtml:href='' or not(@xhtml:href)]", nsmgr))
             {
-                var linkUrl =
-                    link.Attributes["href"].IfNotNull(attr => attr.Value)
-                    ?? link.Attributes["xlink:href"].IfNotNull(attr => _componentLinkProvider.ResolveLink(attr.Value));
-                
+                // does this link already have a resolved href?
+                string linkUrl = link.Attributes["href"].IfNotNull(attr => attr.Value);
+                if (String.IsNullOrEmpty(linkUrl))
+                {
+                    // DD4T BinaryPublisher resolves these links and adds a src rather than a href, let's try that
+                    linkUrl = link.Attributes["src"].IfNotNull(attr => attr.Value);
+                    // lets remove that invalid attribute directly 
+                    link.Attributes.Remove(link.Attributes["src"]);
+                }
+                if (String.IsNullOrEmpty(linkUrl))
+                {
+                    // assume dynamic component link and try to resolve
+                    linkUrl = link.Attributes["xlink:href"].IfNotNull(attr => _componentLinkProvider.ResolveLink(attr.Value));                    
+                }                
                 if (!string.IsNullOrEmpty(linkUrl))
                 {
                     // add href
