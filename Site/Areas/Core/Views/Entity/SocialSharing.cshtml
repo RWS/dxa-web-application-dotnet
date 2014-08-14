@@ -10,7 +10,7 @@
         {
         <li @Markup.Property(Model,"Links",i++)>
 			<!--<a class="popup-iframe popup-mobile-ignore" href="@String.Format(link.Url,pageUrl)" title="@Html.FormatResource("core.shareOnSocialLinkTitle",link.Tag.DisplayText)"> -->
-			<a href="@String.Format(link.Url,pageUrl)" title="@Html.FormatResource("core.shareOnSocialLinkTitle",link.Tag.DisplayText)">
+			<a href="javascript:window.open('@String.Format(link.Url,pageUrl)', '_blank', 'width=400,height=500');void(0);" title="@Html.FormatResource("core.shareOnSocialLinkTitle",link.Tag.DisplayText)">
 				<i class="fa fa-@link.Tag.Key"></i>
 			</a>
 		</li>
