@@ -35,18 +35,6 @@
         @Html.Partial("Footer", Model.Includes["Footer"])
     }
     <script src="@Url.VersionedContent("/assets/scripts/main.js")"></script>
-    <script>
-        $(document).ready(function () {
-            $('.selectpicker').selectpicker();
-            $('.loader .loader-img').one('load', function () {
-                $(this).closest('.loader').find('.loader-overlay').remove();
-                $(this).closest('.loader').removeClass('loader');
-            }).each(function () {
-                if (this.complete) $(this).load();
-            });
-        });
-    </script>
-    <script src="@Url.VersionedContent("/assets/scripts/custom.js")"></script>
     <!-- discover-min.js is part of the SDL Tridion Context Engine -->
     <script src="@Url.VersionedContent("/assets/scripts/discover-min.js")"></script>
     @if (ViewBag.Renderer!=null)

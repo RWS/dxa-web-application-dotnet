@@ -15,7 +15,7 @@
     var lat = Model.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
     var lng = Model.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }
-<div id="@divId" style="height:@heightString"></div>
+<div id="@divId" class="map-canvas" style="height:@heightString"></div>
 <script src="//maps.googleapis.com/maps/api/js@(queryString)"></script>
 <script>
     function initialize() {
