@@ -24,7 +24,7 @@
         else
         {
             <div class="overlay overlay-tl ribbon">
-                <h2 @Markup.Property(Model, "Headline")>@Model.Headline</h2>
+                <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
                 @if(!String.IsNullOrEmpty(Model.Text))
                 {
                     <p class="h3" @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", ".<br/>"))</p>
