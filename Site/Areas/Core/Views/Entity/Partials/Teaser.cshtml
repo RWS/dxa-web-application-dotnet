@@ -21,7 +21,7 @@
             @Model.Headline
         }
     </h3>
-    <p class="teaser-description @Model.GetFormatOption("descriptionStyle")" @Markup.Property(Model, "Text")>@Model.Text</p>
+    <p class="teaser-description @Model.GetFormatOption("descriptionStyle")" @Markup.Property(Model, "Text")>@Html.Raw(Model.Text)</p>
     @if (Model.Link.IsValidLink())
     {
         <a class="@linkStyle" href="@Model.Link.Url" title="@Model.Link.AlternateText" @Markup.Property(Model, "Link")>

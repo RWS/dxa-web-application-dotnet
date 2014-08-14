@@ -21,40 +21,38 @@ namespace Sdl.Web.Common.Models
         [SemanticProperty("i:_self")]
         [SemanticProperty("a:image")]
         public MediaItem Media { get; set; }
-        [SemanticProperty("t:content")]
+        [SemanticProperty("content")]
         [SemanticProperty("a:introText")]
         public string Text { get; set; }
         public DateTime? Date { get; set; }
         public Location Location { get; set; }
         //To store formatting options for the teaser (link style etc.)
         [SemanticProperty(IgnoreMapping=true)]
-        private Dictionary<string, string> _formatOptions { get; set; }
+        private Dictionary<string, string> FormatOptions { get; set; }
 
         public string GetFormatOption(string key, string defaultValue = null)
         {
-            if (_formatOptions != null && _formatOptions.ContainsKey(key))
+            if (FormatOptions != null && FormatOptions.ContainsKey(key))
             {
-                return _formatOptions[key];
+                return FormatOptions[key];
             }
-            else
-            {
-                return defaultValue;
-            }
+
+            return defaultValue;
         }
 
         public void SetFormatOption(string key, string value)
         {
-            if (_formatOptions == null)
+            if (FormatOptions == null)
             {
-                _formatOptions = new Dictionary<string, string>();
+                FormatOptions = new Dictionary<string, string>();
             }
-            if (!_formatOptions.ContainsKey(key))
+            if (!FormatOptions.ContainsKey(key))
             {
-                _formatOptions.Add(key, value);
+                FormatOptions.Add(key, value);
             }
             else
             {
-                _formatOptions[key] = value;
+                FormatOptions[key] = value;
             }
         }
 
