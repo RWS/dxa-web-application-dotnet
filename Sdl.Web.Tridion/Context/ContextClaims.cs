@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Web;
 using Tridion.ContentDelivery.AmbientData;
 
 namespace Sdl.Web.Tridion.Context
@@ -82,6 +83,22 @@ namespace Sdl.Web.Tridion.Context
                 return null;
             }
             return value;
+        }
+
+        protected virtual bool IsUsingDefaults
+        {
+            get
+            {
+                try
+                {
+                    if (HttpContext.Current.Request.Cookies["context"] == null)
+                    {
+                        return true;
+                    }
+                }
+                catch { }
+                return false;
+            }
         }
     }
 }

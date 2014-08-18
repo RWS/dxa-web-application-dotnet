@@ -32,7 +32,19 @@ namespace Sdl.Web.Tridion.Context
 
         public int DisplayHeight { get { return GetIntValue(ClaimUris.UriBrowserDisplayHeight); } }
 
-        public int DisplayWidth { get { return GetIntValue(ClaimUris.UriBrowserDisplayWidth); } }
+        public int DisplayWidth 
+        { 
+            get 
+            { 
+                var val = GetIntValue(ClaimUris.UriBrowserDisplayWidth);
+                //The context engine uses a default of 800, which we override to 1024
+                if (val == 800 && this.IsUsingDefaults)
+                {
+                    val = 1024;
+                }
+                return val;
+            }
+        }
 
         public List<string> ImageFormatSupport
         {
