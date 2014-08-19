@@ -6,10 +6,10 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Sdl.Web.DD4T")]
-[assembly: AssemblyDescription("SDL Web Reference Implementation DD4T Assembly")]
+[assembly: AssemblyDescription("SDL Tridion Reference Implementation DD4T Assembly")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("SDL Tridion B.V.")]
-[assembly: AssemblyProduct("SDL Web Reference Implementation")]
+[assembly: AssemblyProduct("SDL Tridion Reference Implementation")]
 [assembly: AssemblyCopyright("Copyright © 2014 SDL Tridion Development Lab B.V.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
