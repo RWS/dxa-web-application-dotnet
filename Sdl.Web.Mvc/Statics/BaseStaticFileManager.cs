@@ -78,7 +78,7 @@ namespace Sdl.Web.Mvc.Statics
         protected virtual void SerializeFile(string url, int bootstrapLevel = 0)
         {
             string fileContents = Serialize(url, bootstrapLevel != 0);
-            if (bootstrapLevel != 0)
+            if (bootstrapLevel != 0 && fileContents!=null)
             {
                 var bootstrapJson = Json.Decode(fileContents);
                 foreach (string file in bootstrapJson.files)
