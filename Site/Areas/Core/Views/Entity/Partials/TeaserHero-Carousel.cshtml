@@ -9,28 +9,21 @@
     }
     @if (!String.IsNullOrEmpty(Model.Headline) || !String.IsNullOrEmpty(Model.Text))
     {
-        if (Model.Link.IsLinkWithText())
+        <div class="overlay overlay-tl ribbon">
+        @if(!String.IsNullOrEmpty(Model.Headline))
         {
-            <h4 class="overlay overlay-tr glow" @Markup.Property(Model, "Headline")>
-                @Model.Headline
-                @if(!String.IsNullOrEmpty(Model.Text))
-                {
-                    <br/><small @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", ".<br/>"))</small>
-                }
-            </h4>
-            <div class="carousel-caption">
-                <p><a href="@Model.Link.Url" title="@Model.Link.AlternateText" class="btn btn-primary" @Markup.Property(Model, "Link")>@Model.Link.LinkText</a></p>
-            </div>
+            <h2 @Markup.Property(Model, "Headline")>@Model.Headline</h2>
         }
-        else
+        @if(!String.IsNullOrEmpty(Model.Text))
         {
-            <h4 class="overlay overlay-tl ribbon" @Markup.Property(Model, "Headline")>
-                @Model.Headline
-                @if(!String.IsNullOrEmpty(Model.Text))
-                {
-                    <br/><small @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", ".<br/>"))</small>
-                }
-            </h4>
+            <br/><small @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", "<br/>"))</small>
         }
+        </div>
+    }
+    @if (Model.Link.IsLinkWithText())
+    {
+        <div class="carousel-caption">
+            <p><a href="@Model.Link.Url" title="@Model.Link.AlternateText" class="btn btn-primary" @Markup.Property(Model, "Link")>@Model.Link.LinkText</a></p>
+        </div>
     }
 </div>
