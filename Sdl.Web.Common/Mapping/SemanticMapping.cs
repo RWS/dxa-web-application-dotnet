@@ -140,11 +140,8 @@ namespace Sdl.Web.Common.Mapping
             {
                 return mapping[id];
             }
-
-            Exception ex = new Exception(string.Format("Semantic mappings for schema '{0}' do not exist.", id));
-            //TODO - do we throw an error, or apply some defaults?
-            Log.Error(ex);
-            throw ex;
+            Log.Error("Semantic mappings for schema '{0}' do not exist.", id);
+            return null;
         }
 
         private static void LoadMapping()

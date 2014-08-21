@@ -71,6 +71,7 @@
     <Compile Include="Mapping\SemanticSchema.cs" />
     <Compile Include="Mapping\SemanticSchemaField.cs" />
     <Compile Include="Mapping\SemanticVocabulary.cs" />
+    <Compile Include="Models\Common\Configuration.cs" />
     <Compile Include="Models\Interfaces\IPage.cs" />
     <Compile Include="Models\Interfaces\IEntity.cs" />
     <Compile Include="Interfaces\IMediaHelper.cs" />
