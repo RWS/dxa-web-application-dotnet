@@ -59,7 +59,7 @@ namespace Sdl.Web.DD4T.Mapping
                 long schemaId = Convert.ToInt64(uriParts[1]);
                 MappingData mapData = new MappingData {SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString(CultureInfo.InvariantCulture))};
                 // get schema entity names (indexed by vocabulary)
-                mapData.EntityNames = mapData.SemanticSchema.GetEntityNames();
+                mapData.EntityNames = mapData.SemanticSchema!=null ? mapData.SemanticSchema.GetEntityNames() : null;
             
                 //TODO may need to merge with vocabs from embedded types
                 mapData.TargetEntitiesByPrefix = GetEntityDataFromType(type);
@@ -106,25 +106,35 @@ namespace Sdl.Web.DD4T.Mapping
                             propertyData.Add(pi.Name, GetFieldXPath(field));
                             break;
                         }
-                        //Special cases, where we want to map for example the whole entity to an image property, or a resolved link to the entity to a Url field
-                        if (info.PropertyName == "_self" && mapData.SourceEntity!=null)
+                        //Special cases
+                        if (mapData.SourceEntity!=null)
                         {
                             bool processed = false;
-                            if (propertyType == typeof(MediaItem) && mapData.SourceEntity.Multimedia != null)
+                            //Map the whole entity to an image property, or a resolved link to the entity to a Url field
+                            if (info.PropertyName == "_self")
                             {
-                                 pi.SetValue(model, GetMultiMediaLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
-                                 processed = true;
+                                if (propertyType == typeof(MediaItem) && mapData.SourceEntity.Multimedia != null)
+                                {
+                                     pi.SetValue(model, GetMultiMediaLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
+                                     processed = true;
+                                }
+                                else if (propertyType == typeof(Link) || propertyType == typeof(String))
+                                {
+                                    pi.SetValue(model, GetMultiComponentLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
+                                    processed = true;    
+                                }
                             }
-                            else if (propertyType == typeof(Link) || propertyType == typeof(String))
+                            //Map all fields into a single (Dictionary) property
+                            else if (info.PropertyName == "_all" && pi.PropertyType == typeof(Dictionary<string,string>))
                             {
-                                pi.SetValue(model, GetMultiComponentLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
-                                processed = true;    
+                                pi.SetValue(model, GetAllFieldsAsDictionary(mapData.SourceEntity));
+                                processed = true;
                             }
                             if (processed)
                             {
                                 break;
                             }
-                        }   
+                        }
                     }
                 }
             }
@@ -153,7 +163,7 @@ namespace Sdl.Web.DD4T.Mapping
                     {
                         //Filter out any properties belonging to other entities than the source entity
                         var entityData = GetEntityData(prop.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
-                        if (entityData != null)
+                        if (entityData != null && mapData.EntityNames!=null)
                         {
                             if (mapData.EntityNames.Contains(entityData.Value.Key))
                             {
@@ -178,11 +188,11 @@ namespace Sdl.Web.DD4T.Mapping
                 // determine field semantics
                 var vocab = entityData.Value.Key;
                 string prefix = SemanticMapping.GetPrefix(vocab);
-                if (prefix != null)
+                if (prefix != null && mapData.EntityNames!=null)
                 {
                     string property = info.PropertyName;
                     string entity = mapData.EntityNames[vocab].FirstOrDefault();
-                    if (entity != null)
+                    if (entity != null && mapData.SemanticSchema!=null)
                     {
                         FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
                         // locate semantic schema field
@@ -541,20 +551,53 @@ namespace Sdl.Web.DD4T.Mapping
             return components.Select(c => new Download { Url = c.Multimedia.Url, FileName = c.Multimedia.FileName, FileSize = c.Multimedia.Size, MimeType = c.Multimedia.MimeType, Description = (c.MetadataFields.ContainsKey("description") ? c.MetadataFields["description"].Value : null) }).ToList();
         }
 
-        //private List<T> GetCompLinks<T>(IEnumerable<IComponent> components, Type linkedItemType)
-        //{
-        //    List<T> list = new List<T>();
-        //    foreach (var comp in components)
-        //    {
-        //        list.Add((T)Create(comp, linkedItemType));
-        //    }
-        //    return list;
-        //}
-
-        //private T GetCompLink<T>(IEnumerable<IComponent> components, Type linkedItemType)
-        //{
-        //    return GetCompLinks<T>(components,linkedItemType)[0];
-        //}
+        protected Dictionary<string, string> GetAllFieldsAsDictionary(IComponent component)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            foreach (var fieldname in component.Fields.Keys)
+            {
+                if (!values.ContainsKey(fieldname))
+                {
+                    //special case for multival embedded name/value pair fields
+                    if (fieldname == "settings" && component.Fields[fieldname].FieldType == FieldType.Embedded)
+                    {
+                        foreach (var embedFieldset in component.Fields[fieldname].EmbeddedValues)
+                        {
+                            var key = embedFieldset.ContainsKey("name") ? embedFieldset["name"].Value : null;
+                            if (key != null)
+                            {
+                                var value = embedFieldset.ContainsKey("value") ? embedFieldset["value"].Value : null;
+                                if (!values.ContainsKey(key))
+                                {
+                                    values.Add(key, value);
+                                }
+                            }
+                        }
+                    }
+                    //Default is to add the value as plain text
+                    else
+                    {
+                        var val = component.Fields[fieldname].Value;
+                        if (val != null)
+                        {
+                            values.Add(fieldname, val);
+                        }
+                    }
+                }
+            }
+            foreach (var fieldname in component.MetadataFields.Keys)
+            {
+                if (!values.ContainsKey(fieldname))
+                {
+                    var val = component.MetadataFields[fieldname].Value;
+                    if (val != null)
+                    {
+                        values.Add(fieldname, val);
+                    }
+                }
+            }
+            return values;
+        }
 
         private ResourceProvider _resourceProvider;
 

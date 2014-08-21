@@ -1,13 +1,20 @@
-﻿@model EntityBase
+﻿@model Configuration
 @{
-    var pageId = @WebRequestContext.PageId;
+    List<Localization> localizations = SiteConfiguration.Localizations.Values.ToList();
+    if (Model.Settings.ContainsKey("suppressLocalizations"))
+    {
+        var excludedLocalizations = new List<string>();
+        excludedLocalizations = Model.Settings["suppressLocalizations"].Split(',').Select(l => ("/"+ l).Trim()).ToList();
+        localizations = localizations.Where(l=>!excludedLocalizations.Contains(l.Path)).ToList();
+    }
+    var redirectId = Model.Settings.ContainsKey("defaultContentLink") ? Model.Settings["defaultContentLink"].Substring(4) : WebRequestContext.PageId;
 }
-@if (pageId!=null && SiteConfiguration.Localizations.Count > 1)
+@if (redirectId != null && localizations.Count > 1)
 {
     <select class="selectpicker" data-width="auto">
-        @foreach(var loc in SiteConfiguration.SortedLocalizations)
+        @foreach(var loc in localizations)
         {
-            <option value="@loc.LocalizationId" data-href="/resolve/@(pageId)?localization=@loc.LocalizationId" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>
+            <option value="@loc.LocalizationId" data-href="/resolve/@(redirectId)?localization=@loc.LocalizationId" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>
                 @SiteConfiguration.GetConfig("core.language", loc.Path)
             </option>
         }
