@@ -27,45 +27,39 @@ namespace Sdl.Web.Common.Configuration
     /// </summary>
     public static class SiteConfiguration
     {
+        /// <summary>
+        /// Media helper used for generating responsive markup for images, videos etc.
+        /// </summary>
         public static IMediaHelper MediaHelper {get;set;}
+
+        /// <summary>
+        /// Static file manager used for serializing and accessing static files published from the CMS (config/resources/HTML design assets etc.)
+        /// </summary>
         public static IStaticFileManager StaticFileManager { get; set; }
+        
+        /// <summary>
+        /// A set of all the valid localizations for this site
+        /// </summary>
         public static Dictionary<string, Localization> Localizations { get; set; }
-
-        private static List<Localization> _sortedLocalizations;
-        public static List<Localization> SortedLocalizations
-        {
-            get
-            {
-                // TODO: return a list with localizations containing the core.language too
-                // so LanguageSelector.cshtml doesn't have to get this separately
-                if (_sortedLocalizations == null)
-                {
-                    List<Localization> sortedList = Localizations.Values.ToList();
-                    sortedList.Sort(
-                        delegate(Localization firstPair, Localization nextPair)
-                        {
-                            string firstPairLanguage = GetConfig("core.language", firstPair.Path);
-                            string nextPairLanguage = GetConfig("core.language", nextPair.Path);
-
-                            return String.Compare(firstPairLanguage, nextPairLanguage, StringComparison.Ordinal);
-                        }
-                    );
-                    _sortedLocalizations = sortedList;
-                }
-                return _sortedLocalizations;
-            }
-        }
 
         public const string VersionRegex = "(v\\d*.\\d*)";
         public const string SystemFolder = "system";
         public const string CoreModuleName = "core";
         public const string StaticsFolder = "BinaryData";
         public const string DefaultVersion = "v1.00";
+        
+        /// <summary>
+        /// True by default, is set to false if the HTML design assets (CSS, JS etc.) are not published from the CMS
+        /// </summary>
         public static bool IsHtmlDesignPublished = true;
+
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _localConfiguration;
         private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _globalConfiguration;        
-        
         private static Dictionary<string, Type> _viewModelRegistry;
+        
+        /// <summary>
+        /// A registry of View Path -> View Model Type mappings to enable the correct View Model to be mapped for a given View
+        /// </summary>
         public static Dictionary<string, Type> ViewModelRegistry
         {
             get
@@ -81,9 +75,25 @@ namespace Sdl.Web.Common.Configuration
                 _viewModelRegistry = value;
             }
         }
+
+        /// <summary>
+        /// For multi-localization (language) websites, one is set to be the default
+        /// </summary>
         public static string DefaultLocalization { get; private set; }
+
+        /// <summary>
+        /// True if this is a staging website
+        /// </summary>
         public static bool IsStaging { get; set; }
-        public static bool IsDeveloperMode { get; set; }        
+
+        /// <summary>
+        /// True if the site is being accessed via the domain localhost
+        /// </summary>
+        public static bool IsDeveloperMode { get; set; }
+        
+        /// <summary>
+        /// A dictionary of local (varying per localization) configuration settings, typically accessed with the GetConfig method, or Html.Config extension method (in Views)
+        /// </summary> 
         public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LocalConfiguration
         {
             get
@@ -95,6 +105,10 @@ namespace Sdl.Web.Common.Configuration
                 return _localConfiguration;
             }
         }
+
+        /// <summary>
+        /// A dictionary of global (not varying per localization) configuration settings, typically accessed with the GetGlobalConfig method
+        /// </summary> 
         public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> GlobalConfiguration
         {
             get
@@ -106,8 +120,14 @@ namespace Sdl.Web.Common.Configuration
                 return _globalConfiguration;
             }
         }
+
         public static DateTime LastSettingsRefresh { get; set; }
+
+        /// <summary>
+        /// Used to determine which URLs should be processed by the BinaryDistributionModule
+        /// </summary>
         public static string MediaUrlRegex { get; set; }
+
         private static readonly object ConfigLock = new object();
         private static readonly object ViewRegistryLock = new object();
         
@@ -311,20 +331,6 @@ namespace Sdl.Web.Common.Configuration
             return new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(File.ReadAllText(file));
         }
 
-        /// <summary>
-        /// Default file extension used in Page Templates (including the dot).
-        /// </summary>
-        /// <returns>The default file extension.</returns>
-        public static string GetDefaultFileExtension()
-        {
-            return ".html";
-        }
-
-        public static string GetDefaultDocument()
-        {
-            return "index";
-        }
-
         public static string GetPageController()
         {
             return "Page";
@@ -356,8 +362,16 @@ namespace Sdl.Web.Common.Configuration
             return "Core";
         }
         
+        /// <summary>
+        /// The version number used when building paths to HTML Design assets
+        /// </summary>
         public static string SiteVersion{get;set;}
 
+        /// <summary>
+        /// Removes the version number from a URL path for an asset
+        /// </summary>
+        /// <param name="path">The URL path</param>
+        /// <returns>The 'real' path to the asset</returns>
         public static String RemoveVersionFromPath(string path)
         {
             return Regex.Replace(path, SystemFolder + "/" + VersionRegex + "/", delegate
@@ -366,6 +380,10 @@ namespace Sdl.Web.Common.Configuration
             });
         }
 
+        /// <summary>
+        /// Set the localizations from a List loaded from configuration
+        /// </summary>
+        /// <param name="localizations">List of configuration data</param>
         public static void SetLocalizations(List<Dictionary<string, string>> localizations)
         {
             Localizations = new Dictionary<string, Localization>();
@@ -383,6 +401,12 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
+        /// <summary>
+        /// Ensure that a URL is using the path to the given localization
+        /// </summary>
+        /// <param name="url">The URL to localize</param>
+        /// <param name="localization">The localization to use</param>
+        /// <returns>A localized URL</returns>
         public static string LocalizeUrl(string url, Localization localization = null)
         {
             string path = (localization==null) ? DefaultLocalization : localization.Path;
@@ -393,6 +417,11 @@ namespace Sdl.Web.Common.Configuration
             return url;
         }
 
+        /// <summary>
+        /// Adds a View->View Model Type mapping to the view model registry
+        /// </summary>
+        /// <param name="viewData">The View Data used to determine the registry key and model type</param>
+        /// <param name="viewPath">The path to the view</param>
         public static void AddViewModelToRegistry(MvcData viewData, string viewPath)
         {
             lock (ViewRegistryLock)
@@ -424,6 +453,11 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
+        /// <summary>
+        /// Generic a GUID
+        /// </summary>
+        /// <param name="prefix">prefix for the GUID</param>
+        /// <returns>Prefixed Unique Identifier</returns>
         public static string GetUniqueId(string prefix)
         {
             return prefix + Guid.NewGuid().ToString("N");

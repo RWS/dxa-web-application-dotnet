@@ -31,7 +31,7 @@ namespace Sdl.Web.DD4T.Mapping
             _componentLinkProvider = componentLinkProvider;
             _componentFactory = componentFactory;
             DefaultExtension = ".html";
-            DefaultExtensionLessPageName = SiteConfiguration.GetDefaultDocument();
+            DefaultExtensionLessPageName = "index";
             DefaultPageName = DefaultExtensionLessPageName + DefaultExtension;
         }
 
