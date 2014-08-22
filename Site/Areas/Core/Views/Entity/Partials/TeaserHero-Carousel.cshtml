@@ -4,7 +4,7 @@
     @if (Model.Media != null)
     {
         <span @Markup.Property(Model, "Media")>            
-            @Html.Media(Model.Media, "100%", 3.3)
+            @Html.Media(Model.Media, "100%", WebRequestContext.ScreenWidth==ScreenWidth.ExtraSmall ? 2 : 3.3)
         </span>
     }
     @if (!String.IsNullOrEmpty(Model.Headline) || !String.IsNullOrEmpty(Model.Text))
@@ -16,7 +16,7 @@
         }
         @if(!String.IsNullOrEmpty(Model.Text))
         {
-            <br/><small @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", "<br/>"))</small>
+            <span @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", "<br/>"))</span>
         }
         </div>
     }

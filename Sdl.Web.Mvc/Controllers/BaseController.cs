@@ -13,17 +13,26 @@ using System.IO;
 
 namespace Sdl.Web.Mvc.Controllers
 {
+    /// <summary>
+    /// Base controller containing main controller actions (Page, PageRaw, Region, Entity, Navigation, List etc.)
+    /// </summary>
     public abstract class BaseController : Controller
     {
         public virtual IContentProvider ContentProvider { get; set; }
         public virtual IRenderer Renderer { get; set; }
         public virtual ModelType ModelType { get; set; }
 
-        protected BaseController()
+        public BaseController()
         {
+            //default model type
             ModelType = ModelType.Entity;
         }
 
+        /// <summary>
+        /// Given a page URL, load the corresponding Page Model, Map it to the View Model and render it
+        /// </summary>
+        /// <param name="pageUrl">The page URL</param>
+        /// <returns>Rendered Page View Model</returns>
         public virtual ActionResult Page(string pageUrl)
         {
             Log.Debug("BaseController.Page: Processing request for page: {0}", pageUrl);
@@ -43,6 +52,11 @@ namespace Sdl.Web.Mvc.Controllers
             return View(viewData.ViewName, model);
         }
 
+        /// <summary>
+        /// Given a page URL, load the corresponding raw content and write it to the response
+        /// </summary>
+        /// <param name="pageUrl">The page URL</param>
+        /// <returns>raw page content</returns>
         public virtual ActionResult PageRaw(string pageUrl = null)
         {
             pageUrl = pageUrl ?? Request.Url.AbsolutePath;
@@ -55,6 +69,10 @@ namespace Sdl.Web.Mvc.Controllers
             return GetRawActionResult(Path.GetExtension(pageUrl).Substring(1), rawContent);
         }
 
+        /// <summary>
+        /// Render a file not found page
+        /// </summary>
+        /// <returns>404 page or HttpException if there is none</returns>
         public virtual ActionResult NotFound()
         {
             var page = ContentProvider.GetPageModel(WebRequestContext.Localization.Path + "error-404");
@@ -69,12 +87,12 @@ namespace Sdl.Web.Mvc.Controllers
             return View(viewData.ViewName, model);
         }
         
-        private ActionResult GetRawActionResult(string type, string rawContent)
-        {
-            var contentType = type == "json" ? "application/json" : "text/" + type;
-            return this.Content(rawContent, contentType);
-        }
-
+        /// <summary>
+        /// Map and render a region model
+        /// </summary>
+        /// <param name="region">The region model</param>
+        /// <param name="containerSize">The size (in grid units) of the container the region is in</param>
+        /// <returns>Rendered region model</returns>
         [HandleSectionError(View = "SectionError")]
         public virtual ActionResult Region(IRegion region, int containerSize = 0)
         {
@@ -85,6 +103,12 @@ namespace Sdl.Web.Mvc.Controllers
             return View(viewData.ViewName, model);
         }
 
+        /// <summary>
+        /// Map and render an entity model
+        /// </summary>
+        /// <param name="entity">The entity model</param>
+        /// <param name="containerSize">The size (in grid units) of the container the entity is in</param>
+        /// <returns>Rendered entity model</returns>
         [HandleSectionError(View = "SectionError")]
         public virtual ActionResult Entity(object entity, int containerSize = 0)
         {
@@ -95,8 +119,14 @@ namespace Sdl.Web.Mvc.Controllers
             return View(viewData.ViewName, model);
         }
 
+        /// <summary>
+        /// Populate/Map and render a list entity model
+        /// </summary>
+        /// <param name="entity">The list entity model</param>
+        /// <param name="containerSize">The size (in grid units) of the container the entity is in</param>
+        /// <returns>Rendered list entity model</returns>
         [HandleSectionError(View = "SectionError")]
-        public ActionResult List(object entity, int containerSize = 0)
+        public virtual ActionResult List(object entity, int containerSize = 0)
         {
             ModelType = ModelType.Entity;
             var viewData = GetViewData(entity);
@@ -105,6 +135,13 @@ namespace Sdl.Web.Mvc.Controllers
             return View(viewData.ViewName, model);
         }
 
+        /// <summary>
+        /// Populate and render a navigation entity model
+        /// </summary>
+        /// <param name="entity">The navigation entity</param>
+        /// <param name="navType">The type of navigation to render</param>
+        /// <param name="containerSize">The size (in grid units) of the container the navigation element is in</param>
+        /// <returns></returns>
         [HandleSectionError(View = "SectionError")]
         public virtual ActionResult Navigation(object entity, string navType, int containerSize = 0)
         {
@@ -115,13 +152,18 @@ namespace Sdl.Web.Mvc.Controllers
             return View(viewData.ViewName, model);
         }
 
-        public virtual ActionResult SiteMap(object entity=null, string navType=null, int containerSize = 0)
+        /// <summary>
+        /// Populate and render an XML site map
+        /// </summary>
+        /// <param name="entity">The sitemap entity</param>
+        /// <returns>Rendered XML sitemap</returns>
+        public virtual ActionResult SiteMap(object entity=null)
         {
             var model = ContentProvider.GetNavigationModel(SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization));
             var viewData = GetViewData(entity);
             if (viewData.ViewName != null)
             {
-                SetupViewData(containerSize, viewData.AreaName);
+                SetupViewData(0, viewData.AreaName);
                 return View(viewData.ViewName, model);
             }
             else
@@ -130,9 +172,14 @@ namespace Sdl.Web.Mvc.Controllers
             }
         }
 
-        public ActionResult Resolve(string itemId, string localization)
+        /// <summary>
+        /// Resolve a item ID into a url and redirect to that URL
+        /// </summary>
+        /// <param name="itemId">The item id to resolve</param>
+        /// <param name="localization">The site localization in which to resolve the URL</param>
+        /// <returns>null - response is redirected if the URL can be resolved</returns>
+        public virtual ActionResult Resolve(string itemId, string localization)
         {
-            //TODO remove this tcm specific code here
             var url = ContentProvider.ContentResolver.ResolveLink("tcm:" + itemId, localization);
             if (url == null)
             {
@@ -157,7 +204,6 @@ namespace Sdl.Web.Mvc.Controllers
                 }
                 else
                 {
-                    //var loc = SiteConfiguration.Localizations.Values.Where(l => l.LocalizationId.ToString() == localization).FirstOrDefault();
                     var loc = SiteConfiguration.Localizations.Values.FirstOrDefault(l => l.LocalizationId.ToString(CultureInfo.InvariantCulture) == localization);
                     if (loc != null)
                     {
@@ -172,63 +218,10 @@ namespace Sdl.Web.Mvc.Controllers
             return null;
         }
 
-        protected virtual void SetupViewData(int containerSize = 0, string areaName = null)
-        {
-            ViewBag.Renderer = Renderer;
-            ViewBag.ContainerSize = containerSize;
-            if (areaName != null)
-            {
-                //This enables us to jump areas when rendering sub-views - for example from rendering a region in Core to an entity in ModuleX
-                ControllerContext.RouteData.DataTokens["area"] = areaName;
-            }
-        }
-
-        protected virtual Type GetViewType(MvcData viewData)
-        {
-            var key = String.Format("{0}:{1}", viewData.AreaName, viewData.ViewName);
-            if (!SiteConfiguration.ViewModelRegistry.ContainsKey(key))
-            {
-                //TODO - take into account area?
-                var viewEngineResult = ViewEngines.Engines.FindPartialView(ControllerContext, viewData.ViewName);
-                if (viewEngineResult.View == null)
-                {
-                    Log.Error("Could not find view {0} in locations: {1}", viewData.ViewName, String.Join(",", viewEngineResult.SearchedLocations));
-                    throw new Exception(String.Format("Missing view: {0}", viewData.ViewName));
-                }
-
-                //This is the only way to get the view model type from the view and thus prevent the need to configure this somewhere
-                var path = ((BuildManagerCompiledView)viewEngineResult.View).ViewPath;
-                SiteConfiguration.AddViewModelToRegistry(viewData, path);
-            }
-            return SiteConfiguration.ViewModelRegistry[key];
-        }
-
-        protected virtual MvcData GetViewData(object sourceModel)
-        {
-            return ContentProvider.ContentResolver.ResolveMvcData(sourceModel);
-        }
-
         //This is the method to override if you need to add custom model population logic, first calling the base class and then adding your own logic
         protected virtual object ProcessModel(object sourceModel, Type type)
         {
             return ContentProvider.MapModel(sourceModel, ModelType, type);
-        }
-
-        private T GetRequestParameter<T>(string name)
-        {
-            var val = Request.Params[name];
-            if (!String.IsNullOrEmpty(val))
-            {
-                try
-                {
-                    return (T)Convert.ChangeType(val,typeof(T));
-                }
-                catch (Exception)
-                {
-                    Log.Warn("Could not convert request parameter {0} into type {1}, using type default.", val, typeof(T));
-                }
-            }
-            return default(T);
         }
 
         protected virtual object ProcessList(object sourceModel, Type type)
@@ -280,6 +273,63 @@ namespace Sdl.Web.Mvc.Controllers
             }
             return links;
         }
+        
+        protected virtual ActionResult GetRawActionResult(string type, string rawContent)
+        {
+            var contentType = type == "json" ? "application/json" : "text/" + type;
+            return this.Content(rawContent, contentType);
+        }
 
+        protected virtual void SetupViewData(int containerSize = 0, string areaName = null)
+        {
+            ViewBag.Renderer = Renderer;
+            ViewBag.ContainerSize = containerSize;
+            if (areaName != null)
+            {
+                //This enables us to jump areas when rendering sub-views - for example from rendering a region in Core to an entity in ModuleX
+                ControllerContext.RouteData.DataTokens["area"] = areaName;
+            }
+        }
+
+        protected virtual Type GetViewType(MvcData viewData)
+        {
+            var key = String.Format("{0}:{1}", viewData.AreaName, viewData.ViewName);
+            if (!SiteConfiguration.ViewModelRegistry.ContainsKey(key))
+            {
+                var viewEngineResult = ViewEngines.Engines.FindPartialView(ControllerContext, viewData.ViewName);
+                if (viewEngineResult.View == null)
+                {
+                    Log.Error("Could not find view {0} in locations: {1}", viewData.ViewName, String.Join(",", viewEngineResult.SearchedLocations));
+                    throw new Exception(String.Format("Missing view: {0}", viewData.ViewName));
+                }
+
+                //This is the only way to get the view model type from the view and thus prevent the need to configure this somewhere
+                var path = ((BuildManagerCompiledView)viewEngineResult.View).ViewPath;
+                SiteConfiguration.AddViewModelToRegistry(viewData, path);
+            }
+            return SiteConfiguration.ViewModelRegistry[key];
+        }
+
+        protected virtual MvcData GetViewData(object sourceModel)
+        {
+            return ContentProvider.ContentResolver.ResolveMvcData(sourceModel);
+        }
+
+        protected virtual T GetRequestParameter<T>(string name)
+        {
+            var val = Request.Params[name];
+            if (!String.IsNullOrEmpty(val))
+            {
+                try
+                {
+                    return (T)Convert.ChangeType(val,typeof(T));
+                }
+                catch (Exception)
+                {
+                    Log.Warn("Could not convert request parameter {0} into type {1}, using type default.", val, typeof(T));
+                }
+            }
+            return default(T);
+        }
     }
 }

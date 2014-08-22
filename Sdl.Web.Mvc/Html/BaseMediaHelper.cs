@@ -7,8 +7,14 @@ using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Html
 {
+    /// <summary>
+    /// Media helpers are used to write out image/video URLs and to set responsive design features (screensize breakpoints etc.)
+    /// </summary>
     public abstract class BaseMediaHelper : IMediaHelper
     {
+        //To be implemented
+        public abstract string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0);        
+
         protected BaseMediaHelper()
         {
             //The Golden Ratio is our default aspect
@@ -27,20 +33,57 @@ namespace Sdl.Web.Mvc.Html
             ShowVideoPlaceholders = true;
         }
 
-        //The grid size used (bootstrap default @grid-columns = 12)
+        /// <summary>
+        /// The grid size used (also set in LESS: @grid-columns: 12)
+        /// </summary>
         public int GridSize { get; set; }
-        //Screen size breakpoints 
+        
+        /// <summary>
+        /// Large screensize breakpoint (also set in LESS: @screen-lg: 1140px)
+        /// </summary>
         public int LargeScreenBreakpoint { get; set; }
+        
+        /// <summary>
+        /// Medium screensize breakpoint (also set in LESS: @screen-md: 940px)
+        /// </summary>
         public int MediumScreenBreakpoint { get; set; }
+
+        /// <summary>
+        /// Small screensize breakpoint (also set in LESS: @screen-sm: 480px)
+        /// </summary>
         public int SmallScreenBreakpoint { get; set; }
+        
+        /// <summary>
+        /// Show placeholder images on videos before they are viewed
+        /// </summary>
         public bool ShowVideoPlaceholders { get; set; }
+        
+        /// <summary>
+        /// Default aspect ratio when rendering images/video (if none specified in the view code. Default is the golden ratio: 1.62)
+        /// </summary>
         public double DefaultMediaAspect{ get; set; }
+
+        /// <summary>
+        /// Default Media fill when rendering images/video (if none specified in the view code. Default is 100%)
+        /// </summary>
         public string DefaultMediaFill { get; set; }
+
+        /// <summary>
+        /// Format string used for resized image URLs
+        /// </summary>
         public string ImageResizeUrlFormat { get; set; }
 
-        //A set of fixed widths for resized/responsive images - to optimize caching
+        /// <summary>
+        /// A set of fixed widths for resized/responsive images - to optimize caching (default is 160, 320, 640, 1024, 2048)
+        /// </summary>
         public static List<int> ImageWidths { get; set; }
          
+        /// <summary>
+        /// Calulated the responsive media width based on client display size and pixel ration, grid container size and width factor. 
+        /// </summary>
+        /// <param name="widthFactor">The width factor</param>
+        /// <param name="containerSize">The grid container size containing the media (in grid units)</param>
+        /// <returns>The optimal media width</returns>
         public virtual int GetResponsiveWidth(string widthFactor, int containerSize = 0)
         {
             if (containerSize == 0)
@@ -98,12 +141,18 @@ namespace Sdl.Web.Mvc.Html
             return (int)Math.Ceiling(width);
         }
 
+        /// <summary>
+        /// Calulated the responsive media height based on client display size and pixel ration, grid container size, width factor and aspect ratio. 
+        /// </summary>
+        /// <param name="widthFactor">The width factor</param>
+        /// <param name="aspect">The aspect ratio</param>
+        /// <param name="containerSize">The grid container size containing the media (in grid units)</param>
+        /// <returns>The optimal media height</returns>
         public virtual int GetResponsiveHeight(string widthFactor, double aspect, int containerSize = 0)
         {
             int width = GetResponsiveWidth(widthFactor, containerSize);
             return (int)Math.Ceiling(width / aspect);
         }
 
-        public abstract string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0);        
     }
 }

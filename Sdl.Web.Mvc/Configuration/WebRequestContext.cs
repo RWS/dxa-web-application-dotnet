@@ -14,6 +14,9 @@ namespace Sdl.Web.Mvc.Configuration
     {
         private const int MaxWidth = 1024;
 
+        /// <summary>
+        /// The current request localization
+        /// </summary>
         public static Localization Localization
         {
             get
@@ -22,6 +25,9 @@ namespace Sdl.Web.Mvc.Configuration
             }       
         }
 
+        /// <summary>
+        /// The Tridion Context Engine
+        /// </summary>
         public static ContextEngine ContextEngine
         {
             get
@@ -30,6 +36,9 @@ namespace Sdl.Web.Mvc.Configuration
             }
         }
         
+        /// <summary>
+        /// The maximum width for media objects for this requests display width
+        /// </summary>
         public static int MaxMediaWidth
         {
             get
@@ -39,6 +48,9 @@ namespace Sdl.Web.Mvc.Configuration
             }
         }
 
+        /// <summary>
+        /// The size of display of the device which initiated this request
+        /// </summary>
         public static ScreenWidth ScreenWidth
         {
             get
@@ -48,11 +60,21 @@ namespace Sdl.Web.Mvc.Configuration
             }
         }
 
-        public static string GetRequestUrl()
+        /// <summary>
+        /// The current request URL
+        /// </summary>
+        /// <returns></returns>
+        public static string RequestUrl
         {
-            return HttpContext.Current.Request.Url.ToString();
+            get
+            {
+                return HttpContext.Current.Request.Url.ToString();
+            }
         }
 
+        /// <summary>
+        /// Identifier for the current page
+        /// </summary>
         public static string PageId
         {
             get
@@ -62,6 +84,29 @@ namespace Sdl.Web.Mvc.Configuration
             set
             {
                 AddToContextStore("PageId", value);
+            }
+        }
+
+        /// <summary>
+        /// True if the request is for localhost domain
+        /// </summary>
+        public static bool IsDeveloperMode
+        {
+            get
+            {
+                return (bool?)GetFromContextStore("IsDeveloperMode") ?? (bool)AddToContextStore("IsDeveloperMode", Localization.Domain.Equals("localhost"));
+            }
+        }
+
+        /// <summary>
+        /// True if the request is from XPM (NOTE currently always true for staging as we cannot reliably distinguish XPM requests)
+        /// </summary>
+        public static bool IsPreview
+        {
+            //For now we cannot reliably detect when we are in experience manager, so we set this to be true whenever we are in staging
+            get
+            {
+                return (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", SiteConfiguration.IsStaging);
             }
         }
 
@@ -81,23 +126,6 @@ namespace Sdl.Web.Mvc.Configuration
                 return ScreenWidth.Medium;
             }
             return ScreenWidth.Large;
-        }
-
-        public static bool IsDeveloperMode
-        {
-            get
-            {
-                return (bool?)GetFromContextStore("IsDeveloperMode") ?? (bool)AddToContextStore("IsDeveloperMode", Localization.Domain.Equals("localhost"));
-            }
-        }
-
-        public static bool IsPreview
-        {
-            //For now we cannot reliably detect when we are in experience manager, so we set this to be true whenever we are in staging
-            get
-            {
-                return (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", SiteConfiguration.IsStaging);
-            }
         }
 
         protected static Localization GetCurrentLocalization()

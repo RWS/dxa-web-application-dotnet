@@ -8,9 +8,11 @@ namespace Sdl.Web.Common.Models
     {
         [SemanticProperty("s:headline")]
         public string Headline { get; set; }
+        [SemanticProperty("s:image")]
         public Image Image { get; set; }        
         [SemanticProperty("s:dateCreated")]
-        public DateTime? Date { get; set; }        
+        public DateTime? Date { get; set; }
+        [SemanticProperty("s:about")]
         public string Description { get; set; }
         [SemanticProperty("s:articleBody")]
         public List<Paragraph> ArticleBody { get; set; }

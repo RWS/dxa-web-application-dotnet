@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Sdl.Web.Common.Models
 {
@@ -28,7 +29,7 @@ namespace Sdl.Web.Common.Models
 
         private static string ProcessUrl(string value)
         {
-            return value.Replace(".html", String.Empty);
+            return Path.HasExtension(value) ? value.Substring(0, value.Length - Path.GetExtension(value).Length) : value;
         }
 
         public string Type { get; set; }
