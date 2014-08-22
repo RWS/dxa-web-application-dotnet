@@ -20,7 +20,7 @@
                             @{ int i = 0; }
                             @foreach (Teaser element in Model.ItemListElements)
                             {
-                                <option data-target="#@TabId(panelId, i)" data-toggle="tab">@element.Headline</option>
+                                <option value="#@TabId(panelId, i)" data-toggle="tab">@element.Headline</option>
                                 i++;
                             }
                         </select>
