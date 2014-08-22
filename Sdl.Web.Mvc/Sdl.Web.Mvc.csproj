@@ -74,6 +74,7 @@
     <Compile Include="ContentProvider\BaseContentProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Statics\BaseStaticFileManager.cs" />
+    <Compile Include="Statics\StaticRedirectModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sdl.Web.Common\Sdl.Web.Common.csproj">
