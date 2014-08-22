@@ -13,5 +13,9 @@ namespace Sdl.Web.Common.Interfaces
         int LargeScreenBreakpoint { get; set; }
         int MediumScreenBreakpoint { get; set; }
         int SmallScreenBreakpoint { get; set; }
+        //Default media sizing
+        double DefaultMediaAspect { get; set; }
+        string DefaultMediaFill { get; set; }
+
     }
 }

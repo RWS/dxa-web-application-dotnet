@@ -87,11 +87,6 @@ namespace Sdl.Web.Common.Configuration
         public static bool IsStaging { get; set; }
 
         /// <summary>
-        /// True if the site is being accessed via the domain localhost
-        /// </summary>
-        public static bool IsDeveloperMode { get; set; }
-        
-        /// <summary>
         /// A dictionary of local (varying per localization) configuration settings, typically accessed with the GetConfig method, or Html.Config extension method (in Views)
         /// </summary> 
         public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LocalConfiguration

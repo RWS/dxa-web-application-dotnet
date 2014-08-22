@@ -9,8 +9,16 @@ using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Html
 {
+    /// <summary>
+    /// Writes out semantic markup for use by machine processing (search engines, XPM etc.)
+    /// </summary>
     public static class Markup
     {
+        /// <summary>
+        /// Mark up an entity
+        /// </summary>
+        /// <param name="entity">The entity to markup</param>
+        /// <returns>semantic markup for the given entity</returns>
         public static MvcHtmlString Entity(IEntity entity)
         {
             StringBuilder data = new StringBuilder();
@@ -55,6 +63,13 @@ namespace Sdl.Web.Mvc.Html
             return new MvcHtmlString(data.ToString());
         }
 
+        /// <summary>
+        /// Mark up a property value
+        /// </summary>
+        /// <param name="entity">The entity which contains the property</param>
+        /// <param name="property">The property name</param>
+        /// <param name="index">The index of the property value (for multi value properties)</param>
+        /// <returns>semantic markup for the property value</returns>
         public static MvcHtmlString Property(IEntity entity, string property, int index = 0)
         {
             StringBuilder data = new StringBuilder();
@@ -96,6 +111,11 @@ namespace Sdl.Web.Mvc.Html
             return new MvcHtmlString(data.ToString());
         }
 
+        /// <summary>
+        /// Mark up a region
+        /// </summary>
+        /// <param name="region">The region to mark up</param>
+        /// <returns>Semantic markup for a region</returns>
         public static MvcHtmlString Region(IRegion region)
         {
             var data = String.Empty;

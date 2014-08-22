@@ -709,7 +709,7 @@ namespace Sdl.Web.DD4T.Mapping
             }
             meta.Add("twitter:card", "summary");
             meta.Add("og:title", title);
-            meta.Add("og:url", WebRequestContext.GetRequestUrl());
+            meta.Add("og:url", WebRequestContext.RequestUrl);
             //TODO is this always article?
             meta.Add("og:type", "article");
             meta.Add("og:locale", SiteConfiguration.GetConfig("core.culture", WebRequestContext.Localization.Path));

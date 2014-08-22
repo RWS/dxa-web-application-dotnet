@@ -4,12 +4,15 @@ using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Mvc.ContentProvider
 {
+    /// <summary>
+    /// Class to build navigation structures (top, context, breadcrumb etc.) from base navigation model
+    /// </summary>
     public class NavigationBuilder
     {
         public IContentProvider ContentProvider { get; set; }
         public string NavigationUrl { get; set; }
 
-        public NavigationLinks BuildContextNavigation(string requestUrl)
+        public virtual NavigationLinks BuildContextNavigation(string requestUrl)
         {
             NavigationLinks links = new NavigationLinks();
             SitemapItem parent = (SitemapItem)ContentProvider.GetNavigationModel(NavigationUrl);
@@ -35,7 +38,7 @@ namespace Sdl.Web.Mvc.ContentProvider
             return links;
         }
 
-        public NavigationLinks BuildBreadcrumb(string requestUrl)
+        public virtual NavigationLinks BuildBreadcrumb(string requestUrl)
         {
             NavigationLinks breadcrumb = new NavigationLinks();
             int levels = requestUrl.Split('/').Length;
@@ -57,7 +60,7 @@ namespace Sdl.Web.Mvc.ContentProvider
             return breadcrumb;
         }
 
-        public NavigationLinks BuildTopNavigation(string requestUrl)
+        public virtual NavigationLinks BuildTopNavigation(string requestUrl)
         {
             NavigationLinks links = new NavigationLinks();
             SitemapItem parent = (SitemapItem)ContentProvider.GetNavigationModel(NavigationUrl);
@@ -68,7 +71,7 @@ namespace Sdl.Web.Mvc.ContentProvider
             return links;
         }
 
-        private Link GetLink(SitemapItem sitemapItem)
+        protected Link GetLink(SitemapItem sitemapItem)
         {
             return new Link { Url = ContentProvider.ContentResolver.ResolveLink(sitemapItem.Url), LinkText = sitemapItem.Title };
         }

@@ -3,6 +3,9 @@ using System.Globalization;
 
 namespace Sdl.Web.Mvc.Html
 {
+    /// <summary>
+    /// Media helper to be used when using Contextual Image Delivery
+    /// </summary>
     public class ContextualMediaHelper : BaseMediaHelper
     {
         public string ImageResizeRoute { get; set; }
