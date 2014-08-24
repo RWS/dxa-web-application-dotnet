@@ -17,6 +17,9 @@ using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.DD4T.Mapping
 {
+    /// <summary>
+    /// Content Resolver implementation for DD4T, resolves links and RTF content
+    /// </summary>
     public class DD4TContentResolver : IContentResolver
     {
         readonly IComponentFactory _componentFactory;
@@ -35,6 +38,12 @@ namespace Sdl.Web.DD4T.Mapping
             DefaultPageName = DefaultExtensionLessPageName + DefaultExtension;
         }
 
+        /// <summary>
+        /// Resolve a link into a URL
+        /// </summary>
+        /// <param name="linkData">The TCM URI of the item to resolve a link to</param>
+        /// <param name="resolveInstruction">The publication ID (int)</param>
+        /// <returns></returns>
         public virtual string ResolveLink(object linkData, object resolveInstruction = null)
         {
             var url = linkData as String;
@@ -62,6 +71,12 @@ namespace Sdl.Web.DD4T.Mapping
             return url;
         }
 
+        /// <summary>
+        /// Resolve RTF content for dynamic links, embedded media content etc.
+        /// </summary>
+        /// <param name="xml">Xml of RTF content (XmlDocument or xml string)</param>
+        /// <param name="resolveInstruction"></param>
+        /// <returns></returns>
         public object ResolveContent(object xml, object resolveInstruction = null)
         {
             if (xml is XmlDocument)
@@ -82,6 +97,11 @@ namespace Sdl.Web.DD4T.Mapping
             }
         }
 
+        /// <summary>
+        /// Determine MVC data such as view, controller and area name from a Component Presentation, Region or Page
+        /// </summary>
+        /// <param name="data">The component presentation, region or page object</param>
+        /// <returns></returns>
         public MvcData ResolveMvcData(object data)
         {
             var res = new MvcData();
@@ -184,7 +204,7 @@ namespace Sdl.Web.DD4T.Mapping
         }
         
         /// <summary>
-        /// Extension method on String to resolve rich text. 
+        /// Resolve rich text. 
         /// 
         /// Does the following:
         ///  - strips XML artifacts

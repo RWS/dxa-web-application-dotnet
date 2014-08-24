@@ -17,8 +17,15 @@ using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.DD4T.Mapping
 {
+    /// <summary>
+    /// Model Builder implementation for DD4T - this contains the logic for mapping DD4T objects to View Models
+    /// </summary>
     public partial class DD4TModelBuilder : BaseModelBuilder
     {
+        //NOTE - while it works perfectly well, this class is in need of some refactoring to make
+        //its behaviour a bit more understandable and maintainable, as its currently very easy to 
+        //get lost in the semantic mapping logic
+
         readonly public ILinkFactory LinkFactory;
         readonly IContentResolver _contentResolver;
 

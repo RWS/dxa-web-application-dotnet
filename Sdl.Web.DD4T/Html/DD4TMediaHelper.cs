@@ -4,6 +4,9 @@ using Sdl.Web.Mvc.Html;
 
 namespace Sdl.Web.DD4T.Html
 {
+    /// <summary>
+    /// Media helper implementation for DD4T
+    /// </summary>
     public class DD4TMediaHelper : BaseMediaHelper
     {
         public DD4TMediaHelper()
@@ -11,6 +14,14 @@ namespace Sdl.Web.DD4T.Html
             ImageResizeUrlFormat = "{0}{1}{2}_n{3}";
         }
 
+        /// <summary>
+        /// Get a responsive image URL for a DD4T-rendered image
+        /// </summary>
+        /// <param name="url">Normal URL of the image</param>
+        /// <param name="aspect">Aspect ratio to display</param>
+        /// <param name="widthFactor">Width factor for the image (eg 100% or 250)</param>
+        /// <param name="containerSize">Size (in grid units) of container element</param>
+        /// <returns>A responsive image URL based on the passed parameters and client browser width and pixel ratio</returns>
         public override string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0)
         {
             string h = null;

@@ -14,6 +14,9 @@ using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.DD4T.Mapping
 {
+    /// <summary>
+    /// Content Provider implementation for DD4T - retrieves DD4T model content
+    /// </summary>
     public class DD4TContentProvider : BaseContentProvider
     {
         private readonly ILinkFactory _linkFactory;
@@ -25,6 +28,61 @@ namespace Sdl.Web.DD4T.Mapping
             DefaultModelBuilder = modelBuilder;
             _pageFactory = pageFactory;
             ContentResolver = resolver;
+        }
+
+
+
+        public override string GetPageContent(string url)
+        {
+            string page;
+            if (_pageFactory != null)
+            {
+                if (_pageFactory.TryFindPageContent(string.Format("{0}{1}", url.StartsWith("/") ? String.Empty : "/", url), out page))
+                {
+                    return page;
+                }
+            }
+            else
+            {
+                throw new ConfigurationException("No PageFactory configured");
+            }
+
+            return page;
+        }
+
+
+        //TODO - to get DCP content as object
+        public override object GetEntityModel(string id)
+        {
+            throw new NotImplementedException("This feature will be implemented in a future release");
+        }
+
+        //TODO - to get DCP content as string
+        public override string GetEntityContent(string url)
+        {
+            throw new NotImplementedException("This feature will be implemented in a future release");
+        }
+
+        /// <summary>
+        /// Execute a broker query to populate a list of teasers
+        /// </summary>
+        /// <param name="list">The list definition</param>
+        public override void PopulateDynamicList(ContentList<Teaser> list)
+        {
+            BrokerQuery query = new BrokerQuery
+            {
+                Start = list.Start,
+                PublicationId = Int32.Parse(WebRequestContext.Localization.LocalizationId),
+                PageSize = list.PageSize,
+                SchemaId = MapSchema(list.ContentType.Key),
+                Sort = list.Sort.Key
+            };
+            list.ItemListElements = query.ExecuteQuery();
+            foreach (var item in list.ItemListElements)
+            {
+                item.Link.Url = ContentResolver.ResolveLink(item.Link.Url);
+            }
+            list.HasMore = query.HasMore;
         }
 
         protected virtual MvcData BuildViewData(string viewName)
@@ -60,57 +118,7 @@ namespace Sdl.Web.DD4T.Mapping
 
             return null;
         }
-
-        public override string GetPageContent(string url)
-        {
-            string page;
-            if (_pageFactory != null)
-            {
-                if (_pageFactory.TryFindPageContent(string.Format("{0}{1}", url.StartsWith("/") ? String.Empty : "/", url), out page))
-                {
-                    return page;
-                }
-            }
-            else
-            {
-                throw new ConfigurationException("No PageFactory configured");
-            }
-
-            return page;
-        }
-
-
-        //TODO - to get DCP content as object
-        public override object GetEntityModel(string id)
-        {
-            throw new NotImplementedException();
-        }
-
-        //TODO - to get DCP content as string
-        public override string GetEntityContent(string url)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        public override void PopulateDynamicList(ContentList<Teaser> list)
-        {
-            BrokerQuery query = new BrokerQuery
-                {
-                    Start = list.Start,
-                    PublicationId = Int32.Parse(WebRequestContext.Localization.LocalizationId),
-                    PageSize = list.PageSize,
-                    SchemaId = MapSchema(list.ContentType.Key),
-                    Sort = list.Sort.Key
-                };
-            list.ItemListElements = query.ExecuteQuery();
-            foreach (var item in list.ItemListElements)
-            {
-                item.Link.Url = ContentResolver.ResolveLink(item.Link.Url);
-            }
-            list.HasMore = query.HasMore;
-        }
-
+        
         protected virtual int MapSchema(string schemaKey)
         {
             var bits = schemaKey.Split('.');
