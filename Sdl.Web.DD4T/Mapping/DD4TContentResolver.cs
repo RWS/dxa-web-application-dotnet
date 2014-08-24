@@ -218,7 +218,7 @@ namespace Sdl.Web.DD4T.Mapping
             nsmgr.AddNamespace("xlink", "http://www.w3.org/1999/xlink");
 
             // resolve links which haven't been resolved
-            foreach (XmlNode link in doc.SelectNodes("//xhtml:a[@xlink:href[starts-with(string(.),'tcm:')]][@xhtml:href='' or not(@xhtml:href)]", nsmgr))
+            foreach (XmlNode link in doc.SelectNodes("//a[@xlink:href[starts-with(string(.),'tcm:')]][@href='' or not(@href)]", nsmgr))
             {
                 // does this link already have a resolved href?
                 string linkUrl = link.Attributes["href"].IfNotNull(attr => attr.Value);
@@ -237,7 +237,7 @@ namespace Sdl.Web.DD4T.Mapping
                 if (!string.IsNullOrEmpty(linkUrl))
                 {
                     // add href
-                    var href = doc.CreateAttribute("xhtml:href");
+                    var href = doc.CreateAttribute("href");
                     href.Value = linkUrl;
                     link.Attributes.Append(href);
 
@@ -265,11 +265,10 @@ namespace Sdl.Web.DD4T.Mapping
             }
 
             // resolve youtube videos
-            foreach (XmlNode youtube in doc.SelectNodes("//xhtml:youtube[@xlink:href[starts-with(string(.),'tcm:')]]", nsmgr))
+            foreach (XmlNode youtube in doc.SelectNodes("//img[@youTubeId]", nsmgr))
             {
                 string uri = youtube.Attributes["xlink:href"].IfNotNull(attr => attr.Value);
-                //string title = youtube.Attributes["xlink:title"].IfNotNull(attr => attr.Value);
-                string id = youtube.Attributes["id"].IfNotNull(attr => attr.Value);
+                string id = youtube.Attributes["youTubeId"].IfNotNull(attr => attr.Value);
                 string headline = youtube.Attributes["headline"].IfNotNull(attr => attr.Value);
                 string src = youtube.Attributes["src"].IfNotNull(attr => attr.Value);
                 if (!string.IsNullOrEmpty(uri))
@@ -307,7 +306,7 @@ namespace Sdl.Web.DD4T.Mapping
 
             if("anchored" == target) 
             {
-                var href = link.Attributes["xhtml:href"].Value;
+                var href = link.Attributes["href"].Value;
 
                 var samePage = string.Equals(href,
                     HttpContext.Current.Request.Url.AbsolutePath,
@@ -315,7 +314,7 @@ namespace Sdl.Web.DD4T.Mapping
                 );
                 
                 var hash = GetLinkName(link).IfNotNull(s => '#' + s.Replace(" ", "_").ToLower());
-                link.Attributes["xhtml:href"].Value = (!samePage ? href : string.Empty) + hash;
+                link.Attributes["href"].Value = (!samePage ? href : string.Empty) + hash;
                 link.Attributes["target"].Value = !samePage ? "_top" : string.Empty;
             }
         }
