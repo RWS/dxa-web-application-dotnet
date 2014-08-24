@@ -1,35 +1,32 @@
 ﻿@using Sdl.Web.Common.Extensions
 @model Teaser
+@{
+    var imageAspect = WebRequestContext.ScreenWidth == ScreenWidth.ExtraSmall ? 2 : (WebRequestContext.ScreenWidth == ScreenWidth.Small ? 2.5 : 3.3);
+}
 <div @Markup.Entity(Model)>
     @if (Model.Media != null)
     {
         <span @Markup.Property(Model, "Media")>            
-            @Html.Media(Model.Media, "100%", 3.3)
+            @Html.Media(Model.Media, "100%", imageAspect)
         </span>
     }
     @if (!String.IsNullOrEmpty(Model.Headline) || !String.IsNullOrEmpty(Model.Text))
     {
-        if (Model.Link.IsLinkWithText())
+        <div class="overlay overlay-tl ribbon">
+        @if(!String.IsNullOrEmpty(Model.Headline))
         {
-            <a href="@Model.Link.Url" title="@Model.Link.AlternateText">
-                <div class="overlay overlay-tl ribbon">
-                    <h2 @Markup.Property(Model, "Headline")>@Model.Headline</h2>
-                    @if(!String.IsNullOrEmpty(Model.Text))
-                    {
-                        <p class="h3" @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", ".<br/>"))</p>
-                    }
-                </div>
-            </a>
+            <h2 @Markup.Property(Model, "Headline")>@Model.Headline</h2>
         }
-        else
+        @if(!String.IsNullOrEmpty(Model.Text))
         {
-            <div class="overlay overlay-tl ribbon">
-                <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
-                @if(!String.IsNullOrEmpty(Model.Text))
-                {
-                    <p class="h3" @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", ".<br/>"))</p>
-                }
-            </div>
+            <p @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", "<br/>"))</p>
         }
+        </div>
+    }
+    @if (Model.Link.IsLinkWithText())
+    {
+        <div class="carousel-caption">
+            <p><a href="@Model.Link.Url" title="@Model.Link.AlternateText" class="btn btn-primary" @Markup.Property(Model, "Link")>@Model.Link.LinkText</a></p>
+        </div>
     }
 </div>
