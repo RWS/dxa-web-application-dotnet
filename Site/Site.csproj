@@ -128,7 +128,6 @@
     <Content Include="Areas\Core\Views\Entity\LanguageSelector.cshtml" />
     <Content Include="Areas\Core\Views\Entity\OldBrowserNotificationBar.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Partials\GoogleMap.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Partials\TeaserHero-ImageOverlay.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Place.cshtml" />
     <Content Include="Areas\Core\Views\Entity\SocialLinks.cshtml" />
     <Content Include="Areas\Core\Views\Entity\SocialSharing.cshtml" />
@@ -173,7 +172,7 @@
     <Content Include="Areas\Core\Views\Entity\Partials\GoogleStaticMap.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Partials\Teaser.cshtml" />
     <Content Include="Areas\Core\Views\Navigation\SiteMapXml.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Partials\TeaserHero-Carousel.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Partials\TeaserHero-ImageOverlay.cshtml" />
     <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
     <None Include="Properties\PublishProfiles\Distribution.pubxml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />

@@ -270,6 +270,8 @@ namespace Sdl.Web.DD4T.Mapping
                     return GetMultiEmbedded(field, propertyType, multival, mapData);
                 case (FieldType.Keyword):
                     return GetMultiKeywords(field, propertyType, multival);
+                case (FieldType.Xhtml):
+                    return GetMultiLineStrings(field, propertyType, multival);
                 default:
                     return GetStrings(field, propertyType, multival);
             }
@@ -529,15 +531,28 @@ namespace Sdl.Web.DD4T.Mapping
 
         }
 
+        object GetMultiLineStrings(IField field, Type modelType, bool multival)
+        {
+            if (modelType.IsAssignableFrom(typeof(String)))
+            {
+                if (multival)
+                {
+                    return field.Values.Select(v => _contentResolver.ResolveContent(v).ToString());
+                }
+                return _contentResolver.ResolveContent(field.Value).ToString();
+            }
+            return null;
+        }
+
         object GetStrings(IField field, Type modelType, bool multival)
         {
             if (modelType.IsAssignableFrom(typeof(String)))
             {
                 if (multival)
                 {
-                    return field.Values.Select(v=>_contentResolver.ResolveContent(v).ToString());
+                    return field.Values;
                 }
-                return _contentResolver.ResolveContent(field.Value).ToString();
+                return field.Value;
             }
             return null;
         }
