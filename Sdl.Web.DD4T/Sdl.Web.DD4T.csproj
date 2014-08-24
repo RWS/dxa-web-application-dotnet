@@ -61,7 +61,9 @@
     <Compile Include="Mapping\DD4TContentResolver.cs" />
     <Compile Include="Mapping\DD4TModelBuilder.cs" />
     <Compile Include="Mapping\DD4TContentProvider.cs" />
-    <Compile Include="Mapping\ExtensionlessLinkFactory.cs" />
+    <Compile Include="Mapping\ExtensionlessLinkFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Mapping\MappingData.cs" />
     <Compile Include="Mapping\PublicationResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

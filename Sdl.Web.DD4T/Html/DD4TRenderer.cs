@@ -14,8 +14,19 @@ using IPage = Sdl.Web.Common.Models.IPage;
 
 namespace Sdl.Web.DD4T.Html
 {
+    /// <summary>
+    /// Renderer implementation for DD4T
+    /// </summary>
     public class DD4TRenderer : BaseRenderer
     {
+        /// <summary>
+        /// Render an entity (Component Presentation)
+        /// </summary>
+        /// <param name="item">The Component Presentation object</param>
+        /// <param name="helper">The HTML Helper</param>
+        /// <param name="containerSize">The size of the containing element (in grid units)</param>
+        /// <param name="excludedItems">A list of view names, if the Component Presentation maps to one of these, it is skipped.</param>
+        /// <returns>The rendered content</returns>
         public override MvcHtmlString RenderEntity(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
             var cp = item as IComponentPresentation;
@@ -49,6 +60,14 @@ namespace Sdl.Web.DD4T.Html
             return null;
         }
 
+        /// <summary>
+        /// Render an Region
+        /// </summary>
+        /// <param name="item">The Region object</param>
+        /// <param name="helper">The HTML Helper</param>
+        /// <param name="containerSize">The size of the containing element (in grid units)</param>
+        /// <param name="excludedItems">A list of view names, if the Region maps to one of these, it is skipped.</param>
+        /// <returns>The rendered content</returns>
         public override MvcHtmlString RenderRegion(IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
             var mvcData = ContentResolver.ResolveMvcData(region);
@@ -69,6 +88,12 @@ namespace Sdl.Web.DD4T.Html
             return null;
         }
 
+        /// <summary>
+        /// Render additional XPM page markup
+        /// </summary>
+        /// <param name="page">The DD4T Page object</param>
+        /// <param name="helper">Html Helper</param>
+        /// <returns>The page markup</returns>
         public override MvcHtmlString RenderPageData(IPage page, HtmlHelper helper)
         {
             if (WebRequestContext.IsPreview)
