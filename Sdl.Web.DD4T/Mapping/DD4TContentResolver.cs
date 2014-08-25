@@ -265,11 +265,11 @@ namespace Sdl.Web.DD4T.Mapping
             }
 
             // resolve youtube videos
-            foreach (XmlNode youtube in doc.SelectNodes("//img[@youTubeId]", nsmgr))
+            foreach (XmlNode youtube in doc.SelectNodes("//img[@data-youTubeId]", nsmgr))
             {
                 string uri = youtube.Attributes["xlink:href"].IfNotNull(attr => attr.Value);
-                string id = youtube.Attributes["youTubeId"].IfNotNull(attr => attr.Value);
-                string headline = youtube.Attributes["headline"].IfNotNull(attr => attr.Value);
+                string id = youtube.Attributes["data-youTubeId"].IfNotNull(attr => attr.Value);
+                string headline = youtube.Attributes["data-headline"].IfNotNull(attr => attr.Value);
                 string src = youtube.Attributes["src"].IfNotNull(attr => attr.Value);
                 if (!string.IsNullOrEmpty(uri))
                 {
