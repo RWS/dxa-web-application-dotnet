@@ -285,7 +285,7 @@ namespace Sdl.Web.DD4T.Statics
             }
             catch (Exception ex)
             {
-                Log.Error(ex);
+                Log.Error(ex, "Unable to get {0} from Broker", urlPath);
             }
             //For some reason DD4T returns a non-null binary with null binary data if it doesnt exist
             return binary.BinaryData==null ? null : binary;
