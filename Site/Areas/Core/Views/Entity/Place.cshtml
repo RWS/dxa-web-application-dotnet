@@ -44,9 +44,9 @@
                         {
 				        <h4><i class="fa fa-envelope"></i> @Html.Resource("core.placeContactHeadingText")</h4>
 				        <div class="h-card">
-					        @if (Model.Telephone != null) { <p>@Html.Resource("core.placeTeleponeCaptionText") <a class="tel" href="tel:@Model.Telephone" @Markup.Property(Model, "Telephone")>@Model.Telephone</a></p> }
-					        @if (Model.FaxNumber != null) { <p>@Html.Resource("core.placeFaxCaptionText") <a class="fax" href="fax:@Model.FaxNumber" @Markup.Property(Model, "FaxNumber")>@Model.FaxNumber</a></p> }
-					        @if (Model.Email != null) { <p>@Html.Resource("core.placeEmailCaptionText") <a class="email" href="mailto:@Model.Email" @Markup.Property(Model, "Email")>@Model.Email</a></p> }
+					        @if (Model.Telephone != null) { <p>@Html.Resource("core.teleponeCaptionText") <a class="tel" href="tel:@Model.Telephone" @Markup.Property(Model, "Telephone")>@Model.Telephone</a></p> }
+					        @if (Model.FaxNumber != null) { <p>@Html.Resource("core.faxCaptionText") <a class="fax" href="fax:@Model.FaxNumber" @Markup.Property(Model, "FaxNumber")>@Model.FaxNumber</a></p> }
+					        @if (Model.Email != null) { <p>@Html.Resource("core.emailCaptionText") <a class="email" href="mailto:@Model.Email" @Markup.Property(Model, "Email")>@Model.Email</a></p> }
 				        </div>
                         }
 					</div>
