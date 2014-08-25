@@ -140,6 +140,20 @@ namespace Sdl.Web.DD4T.Mapping
                             res.ControllerName = bits[0];
                         }
                     }
+                    if (template.MetadataFields.ContainsKey("regionView"))
+                    {
+                        var bits = template.MetadataFields["regionView"].Value.Split(':');
+                        if (bits.Length > 1)
+                        {
+                            res.RegionName = bits[1];
+                            res.RegionAreaName = bits[0];
+                        }
+                        else
+                        {
+                            res.RegionName = bits[0];
+                            res.RegionAreaName = SiteConfiguration.GetDefaultModuleName();
+                        }
+                    }
                     if (template.MetadataFields.ContainsKey("action"))
                     {
                         res.ActionName = template.MetadataFields["action"].Value;

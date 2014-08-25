@@ -1,13 +1,25 @@
 ﻿@using Sdl.Web.Common.Extensions
 @model Teaser
 @{
-    var imageAspect = WebRequestContext.ScreenWidth == ScreenWidth.ExtraSmall ? 2 : (WebRequestContext.ScreenWidth == ScreenWidth.Small ? 2.5 : 3.3);
+    var isHero = ViewBag.RegionName == "Hero" ? true : false;
+    double imageAspect = 0.0;
+    if (isHero)
+    {
+        imageAspect = WebRequestContext.ScreenWidth == ScreenWidth.ExtraSmall ? 2 : (WebRequestContext.ScreenWidth == ScreenWidth.Small ? 2.5 : 3.3);
+    }
 }
 <div @Markup.Entity(Model)>
     @if (Model.Media != null)
     {
-        <span @Markup.Property(Model, "Media")>            
-            @Html.Media(Model.Media, "100%", imageAspect)
+        <span @Markup.Property(Model, "Media")>
+            @if (imageAspect==0)
+            {            
+                @Html.Media(Model.Media, "100%")
+            }
+            else
+            {
+                @Html.Media(Model.Media, "100%", imageAspect)
+            }
         </span>
     }
     @if (!String.IsNullOrEmpty(Model.Headline) || !String.IsNullOrEmpty(Model.Text))

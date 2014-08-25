@@ -43,7 +43,7 @@ namespace Sdl.Web.Mvc.Controllers
                 return NotFound();
             }
             var viewData = GetViewData(page);
-            SetupViewData(0,viewData.AreaName);
+            SetupViewData(0, viewData);
             var model = ProcessModel(page, GetViewType(viewData)) ?? page;
             if (model is WebPage)
             {
@@ -81,7 +81,7 @@ namespace Sdl.Web.Mvc.Controllers
                 throw new HttpException(404, "Page Not Found");
             }
             var viewData = GetViewData(page);
-            SetupViewData(0, viewData.AreaName);
+            SetupViewData(0, viewData);
             var model = ProcessModel(page, GetViewType(viewData)) ?? page;
             Response.StatusCode = 404;
             return View(viewData.ViewName, model);
@@ -97,8 +97,8 @@ namespace Sdl.Web.Mvc.Controllers
         public virtual ActionResult Region(IRegion region, int containerSize = 0)
         {
             ModelType = ModelType.Region;
-            SetupViewData(containerSize, region.Module);
             var viewData = GetViewData(region);
+            SetupViewData(containerSize, viewData);
             var model = ProcessModel(region, GetViewType(viewData)) ?? region;
             return View(viewData.ViewName, model);
         }
@@ -114,7 +114,7 @@ namespace Sdl.Web.Mvc.Controllers
         {
             ModelType = ModelType.Entity;
             var viewData = GetViewData(entity);
-            SetupViewData(containerSize, viewData.AreaName);
+            SetupViewData(containerSize, viewData);
             var model = ProcessModel(entity, GetViewType(viewData)) ?? entity;
             return View(viewData.ViewName, model);
         }
@@ -130,7 +130,7 @@ namespace Sdl.Web.Mvc.Controllers
         {
             ModelType = ModelType.Entity;
             var viewData = GetViewData(entity);
-            SetupViewData(containerSize, viewData.AreaName);
+            SetupViewData(containerSize, viewData);
             var model = ProcessList(entity, GetViewType(viewData)) ?? entity;
             return View(viewData.ViewName, model);
         }
@@ -147,7 +147,7 @@ namespace Sdl.Web.Mvc.Controllers
         {
             ModelType = ModelType.Entity;
             var viewData = GetViewData(entity);
-            SetupViewData(containerSize, viewData.AreaName);
+            SetupViewData(containerSize, viewData);
             var model = ProcessNavigation(entity, GetViewType(viewData), navType) ?? entity;
             return View(viewData.ViewName, model);
         }
@@ -163,7 +163,7 @@ namespace Sdl.Web.Mvc.Controllers
             var viewData = GetViewData(entity);
             if (viewData.ViewName != null)
             {
-                SetupViewData(0, viewData.AreaName);
+                SetupViewData(0, viewData);
                 return View(viewData.ViewName, model);
             }
             else
@@ -280,14 +280,15 @@ namespace Sdl.Web.Mvc.Controllers
             return this.Content(rawContent, contentType);
         }
 
-        protected virtual void SetupViewData(int containerSize = 0, string areaName = null)
+        protected virtual void SetupViewData(int containerSize = 0, MvcData viewData = null)
         {
             ViewBag.Renderer = Renderer;
             ViewBag.ContainerSize = containerSize;
-            if (areaName != null)
+            if (viewData != null)
             {
+                ViewBag.RegionName = viewData.RegionName;
                 //This enables us to jump areas when rendering sub-views - for example from rendering a region in Core to an entity in ModuleX
-                ControllerContext.RouteData.DataTokens["area"] = areaName;
+                ControllerContext.RouteData.DataTokens["area"] = viewData.AreaName;
             }
         }
 

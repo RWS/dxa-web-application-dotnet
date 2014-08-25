@@ -16,7 +16,7 @@
             {
                 var item = Model.ItemListElements[i];
                 <div class="item @(i==0?"active":"")" @Markup.Property(Model, "ItemListElements", i)>
-                    @Html.Partial("Partials/TeaserHero-ImageOverlay", item)
+                    @Html.Partial("Partials/Teaser-ImageOverlay", item)
                 </div>
             }
         }
