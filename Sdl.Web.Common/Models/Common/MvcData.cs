@@ -9,6 +9,8 @@ namespace Sdl.Web.Common.Models
         public string ActionName { get; set; }
         public string ViewName { get; set; }
         public string AreaName { get; set; }
+        public string RegionName { get; set; }
+        public string RegionAreaName { get; set; }
         public Dictionary<string, string> RouteValues { get; set; }
     }
 }
