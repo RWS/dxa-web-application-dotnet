@@ -38,7 +38,11 @@ namespace Sdl.Web.Common.Mapping
                 if (attr is SemanticEntityAttribute)
                 {
                     var semantics = (SemanticEntityAttribute)attr;
-                    res.Add(semantics.Prefix, new KeyValuePair<string,string>(semantics.Vocab,semantics.EntityName));
+                    // we can only support mapping to a single semantic entity, the derived type is set first, so that is what we use
+                    if (!res.ContainsKey(semantics.Prefix))
+                    {
+                        res.Add(semantics.Prefix, new KeyValuePair<string, string>(semantics.Vocab, semantics.EntityName));                        
+                    }
                 }
                 if (attr is SemanticDefaultsAttribute)
                 {

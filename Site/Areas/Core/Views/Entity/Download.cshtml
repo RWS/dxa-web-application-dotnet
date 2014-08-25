@@ -1,2 +1,4 @@
 ﻿@model Download
-@Html.Media(Model)
+<div @Markup.Entity(Model)>
+    @Html.Media(Model)
+</div>

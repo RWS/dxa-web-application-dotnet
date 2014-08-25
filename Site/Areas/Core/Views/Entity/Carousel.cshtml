@@ -1,11 +1,12 @@
 ﻿@model ItemList
-<div id="carousel-large" class="carousel slide" @Markup.Entity(Model)>
+@{ string carouselId = Guid.NewGuid().ToString("N"); }
+<div id="carousel-@carouselId" class="carousel slide" data-ride="carousel" data-interval="5000" @Markup.Entity(Model)>
     <ol class="carousel-indicators">
         @if (Model.ItemListElements!=null)
         {
             for (int i = 0; i < Model.ItemListElements.Count; i++)
             {
-                <li data-target="#carousel-large" data-slide-to="@i" class="@(i == 0 ? "active" : "")"></li>
+                <li data-target="#carousel-@carouselId" data-slide-to="@i" class="@(i == 0 ? "active" : String.Empty)"></li>
             }
         }
     </ol>
@@ -22,10 +23,10 @@
         }
     </div>
     <!-- Controls -->
-    <a class="left carousel-control" href="#carousel-large" data-slide="prev">
+    <a class="left carousel-control" href="#carousel-@carouselId" data-slide="prev">
         <i class='fa fa-chevron-left carousel-icon-left'></i>
     </a>
-    <a class="right carousel-control" href="#carousel-large" data-slide="next">
+    <a class="right carousel-control" href="#carousel-@carouselId" data-slide="next">
         <i class='fa fa-chevron-right carousel-icon-right'></i>
     </a>
 </div>
