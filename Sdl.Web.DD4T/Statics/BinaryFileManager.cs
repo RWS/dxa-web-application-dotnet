@@ -321,9 +321,9 @@ namespace Sdl.Web.DD4T.Statics
                 {
                     //We crop the width, but only if the required height is smaller than that of the original image
                     //Or we don't mind stretching the image to fit
-                    if (dimensions.NoStretch == false || dimensions.Height <= original.Height)
+                    //if (dimensions.NoStretch == false || dimensions.Height <= original.Height)
                     {
-                        targetH = dimensions.Height;
+                        targetH = Math.Min(dimensions.Height,original.Height);
                         targetW = (int)Math.Ceiling(targetH * targetAspect);
                         cropX = (int)Math.Ceiling((original.Width - (original.Height * targetAspect)) / 2);
                         sourceW = sourceW - 2 * cropX;
@@ -333,9 +333,9 @@ namespace Sdl.Web.DD4T.Statics
                 {
                     //We crop the height, but only if the required width is smaller than that of the original image
                     //Or we don't mind stretching the image to fit
-                    if (dimensions.NoStretch == false || dimensions.Width <= original.Width)
+                    //if (dimensions.NoStretch == false || dimensions.Width <= original.Width)
                     {
-                        targetW = dimensions.Width;
+                        targetW = Math.Min(dimensions.Width,original.Width);
                         targetH = (int)Math.Ceiling(targetW / targetAspect);
                         cropY = (int)Math.Ceiling((original.Height - (original.Width / targetAspect)) / 2);
                         sourceH = sourceH - 2 * cropY;
