@@ -16,6 +16,7 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.Statics;
+using DD4T.ContentModel.Exceptions;
 
 namespace Sdl.Web.DD4T.Statics
 {
@@ -283,11 +284,15 @@ namespace Sdl.Web.DD4T.Statics
             {
                 BinaryFactory.TryFindBinary(urlPath, out binary);
             }
+            catch (BinaryNotFoundException ex)
+            {
+                Log.Warn("Binary: {0} does not exist", urlPath);
+            }
             catch (Exception ex)
             {
-                Log.Error(ex, "Unable to get {0} from Broker", urlPath);
+                Log.Error(ex, "Could not load binary: {0}", urlPath);
             }
-            //For some reason DD4T returns a non-null binary with null binary data if it doesnt exist
+            //For some reason DD4T sometimes returns a non-null binary with null binary data if it doesnt exist
             return binary.BinaryData==null ? null : binary;
         }
 
