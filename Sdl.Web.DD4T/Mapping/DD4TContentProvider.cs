@@ -34,6 +34,7 @@ namespace Sdl.Web.DD4T.Mapping
 
         public override string GetPageContent(string url)
         {
+            Log.Debug("DD4TContentProvicer.GetPageContent: Processing request for page: {0}", url);
             string page;
             if (_pageFactory != null)
             {
