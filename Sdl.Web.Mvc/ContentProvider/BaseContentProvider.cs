@@ -59,13 +59,17 @@ namespace Sdl.Web.Mvc.ContentProvider
         /// <returns>Model corresponding to that URL</returns>
         public object GetPageModel(string url)
         {
+            var parsedUrl = ParseUrl(url);
+            Log.Debug("Getting page model for URL {0} (original request: {1})", parsedUrl, url);
             //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
             //1. Try adding the default extension, so /news becomes /news.html
-            var model = GetPageModelFromUrl(ParseUrl(url));
+            var model = GetPageModelFromUrl(parsedUrl);
             if (model == null && !url.EndsWith("/") && url.LastIndexOf(".", StringComparison.Ordinal) <= url.LastIndexOf("/", StringComparison.Ordinal))
             {
                 //2. Try adding the default page, so /news becomes /news/index.html
-                model = GetPageModelFromUrl(ParseUrl(url + "/"));
+                parsedUrl = ParseUrl(url + "/");
+                Log.Debug("No content for URL found, trying default: {0}", parsedUrl);
+                model = GetPageModelFromUrl(parsedUrl);
             }
             return model;
         }

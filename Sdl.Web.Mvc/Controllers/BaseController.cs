@@ -35,7 +35,6 @@ namespace Sdl.Web.Mvc.Controllers
         /// <returns>Rendered Page View Model</returns>
         public virtual ActionResult Page(string pageUrl)
         {
-            Log.Debug("BaseController.Page: Processing request for page: {0}", pageUrl);
             ModelType = ModelType.Page;
             var page = ContentProvider.GetPageModel(pageUrl);
             if (page == null)
@@ -60,7 +59,6 @@ namespace Sdl.Web.Mvc.Controllers
         public virtual ActionResult PageRaw(string pageUrl = null)
         {
             pageUrl = pageUrl ?? Request.Url.AbsolutePath;
-            Log.Debug("BaseController.PageRaw: Processing request for page: {0}", pageUrl);
             var rawContent = ContentProvider.GetPageContent(pageUrl);
             if (rawContent == null)
             {
@@ -75,7 +73,7 @@ namespace Sdl.Web.Mvc.Controllers
         /// <returns>404 page or HttpException if there is none</returns>
         public virtual ActionResult NotFound()
         {
-            var page = ContentProvider.GetPageModel(WebRequestContext.Localization.Path + "error-404");
+            var page = ContentProvider.GetPageModel(WebRequestContext.Localization.Path + "/error-404");
             if (page == null)
             {
                 throw new HttpException(404, "Page Not Found");
