@@ -22,7 +22,7 @@ namespace Sdl.Web.Mvc.Html
             //to swamp the cache with lots of different sized versions of the same image
             for (int i = 0; i < ImageWidths.Count; i++)
             {
-                if (width <= ImageWidths[i])
+                if (width <= ImageWidths[i] || i == ImageWidths.Count - 1)
                 {
                     width = ImageWidths[i];
                     break;

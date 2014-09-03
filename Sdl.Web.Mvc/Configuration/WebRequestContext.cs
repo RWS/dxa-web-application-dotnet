@@ -44,7 +44,7 @@ namespace Sdl.Web.Mvc.Configuration
             get
             {
                 //Pixel Ratio can be non-integer value (if zoom is applied to browser) - so we use a min of 1, and otherwise round when calculating max width
-                return (int?)GetFromContextStore("MaxMediaWidth") ?? (int)AddToContextStore("MaxMediaWidth", Math.Max(1, Math.Min(1, Convert.ToInt32(ContextEngine.Device.PixelRatio))) * Math.Min(ContextEngine.Browser.DisplayWidth, MaxWidth));
+                return (int?)GetFromContextStore("MaxMediaWidth") ?? (int)AddToContextStore("MaxMediaWidth", Convert.ToInt32(Math.Max(1.0, ContextEngine.Device.PixelRatio) * Math.Min(ContextEngine.Browser.DisplayWidth, MaxWidth)));
             }
         }
 
