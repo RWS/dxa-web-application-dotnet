@@ -17,6 +17,7 @@ namespace Sdl.Web.Site
 {
     public class MvcApplication : HttpApplication
     {
+        private static bool initialized = false;
         public static void RegisterRoutes(RouteCollection routes)
         {
             RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
@@ -32,6 +33,7 @@ namespace Sdl.Web.Site
             SiteConfiguration.Initialize(TridionConfig.PublicationMap);
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
+            initialized = true;
         }
 
         protected IUnityContainer InitializeDependencyInjection()
@@ -51,7 +53,7 @@ namespace Sdl.Web.Site
 
         protected void Application_Error(object sender, EventArgs e)
         {
-            if (Context.IsCustomErrorEnabled)
+            if (Context.IsCustomErrorEnabled && initialized)
                 ShowCustomErrorPage(Server.GetLastError());
         }
 
