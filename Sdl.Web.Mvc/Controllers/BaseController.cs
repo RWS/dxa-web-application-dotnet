@@ -205,7 +205,7 @@ namespace Sdl.Web.Mvc.Controllers
                     var loc = SiteConfiguration.Localizations.Values.FirstOrDefault(l => l.LocalizationId.ToString(CultureInfo.InvariantCulture) == localization);
                     if (loc != null)
                     {
-                        url = loc.Path;
+                        url = String.IsNullOrEmpty(loc.Path) ? "/" : loc.Path;
                     }
                 }
             }
