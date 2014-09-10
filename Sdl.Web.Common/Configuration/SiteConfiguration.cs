@@ -319,7 +319,7 @@ namespace Sdl.Web.Common.Configuration
                 _globalConfiguration = globalConfiguration;
                 if (relevantLocalizations.Count==0)
                 {
-                    var msg = "No valid localizations are active for this site. Check that you have the right localization IDs configured in cd_dynamic_conf.xml";
+                    var msg = "No valid localizations are active for this site. Check the site log, and that you have the right localization IDs configured in cd_dynamic_conf.xml";
                     Log.Error(msg);
                     throw new Exception(msg);
                 }
