@@ -7,7 +7,8 @@
         excludedLocalizations = Model.Settings["suppressLocalizations"].Split(',').Select(l => ("/"+ l).Trim()).ToList();
         localizations = localizations.Where(l=>!excludedLocalizations.Contains(l.Path)).ToList();
     }
-    var redirectId = Model.Settings.ContainsKey("defaultContentLink") ? Model.Settings["defaultContentLink"].Substring(4) : WebRequestContext.PageId;
+    var redirectId = WebRequestContext.PageId;
+    var defaultItem = Model.Settings.ContainsKey("defaultContentLink") ? Model.Settings["defaultContentLink"].Substring(4) : null;
 }
 @if (redirectId != null && localizations.Count > 1)
 {
@@ -15,7 +16,8 @@
         <select class="selectpicker" data-width="auto">
             @foreach(var loc in localizations)
             {
-                <option value="@loc.LocalizationId" data-href="/resolve/@(redirectId)?localization=@loc.LocalizationId" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>
+                var parms = "localization=" + loc.LocalizationId + (defaultItem!=null ? "&defaultItemId=" + defaultItem:"");
+                <option value="@loc.LocalizationId" data-href="/resolve/@(redirectId)?@parms" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>
                     @SiteConfiguration.GetConfig("core.language", loc.Path)
                 </option>
             }

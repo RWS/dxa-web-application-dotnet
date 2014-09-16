@@ -176,9 +176,13 @@ namespace Sdl.Web.Mvc.Controllers
         /// <param name="itemId">The item id to resolve</param>
         /// <param name="localization">The site localization in which to resolve the URL</param>
         /// <returns>null - response is redirected if the URL can be resolved</returns>
-        public virtual ActionResult Resolve(string itemId, string localization)
+        public virtual ActionResult Resolve(string itemId, string localization, string defaultItemId = null)
         {
             var url = ContentProvider.ContentResolver.ResolveLink("tcm:" + itemId, localization);
+            if (url == null && defaultItemId!=null)
+            {
+                url = ContentProvider.ContentResolver.ResolveLink("tcm:" + defaultItemId, localization);
+            }
             if (url == null)
             {
                 var bits = itemId.Split(':');
