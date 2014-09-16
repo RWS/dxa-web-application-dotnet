@@ -25,7 +25,7 @@
             int i=0;
             foreach (var para in Model.ArticleBody)
             {
-                <div @Markup.Property(Model, "Paragraphs", i++)>
+                <div @Markup.Property(Model, "ArticleBody", i++)>
                     @if (para.Subheading!=null)
                     {
                         <h3 @Markup.Property(para, "Subheading")>@para.Subheading</h3>
