@@ -132,7 +132,7 @@ namespace Sdl.Web.Mvc.Html
                 }
                 int cols = SiteConfiguration.MediaHelper.GridSize / containerSize;
                 //TODO - should we make padding configurable?
-                int padding = (cols - 1) * 20;
+                int padding = (cols - 1) * 30;
                 //Get the max possible width
                 width = WebRequestContext.MaxMediaWidth;
                 //Factor the max possible width by the fill factor and container size and remove padding
