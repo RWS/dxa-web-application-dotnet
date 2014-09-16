@@ -317,34 +317,36 @@ namespace Sdl.Web.DD4T.Statics
             int sourceW = original.Width, sourceH = original.Height;
             int targetW = original.Width, targetH = original.Height;
             
-            //Most complex case is if a height AND width is specified - as we will have to crop
+            //Most complex case is if a height AND width is specified
             if (dimensions.Width > 0 && dimensions.Height > 0)
             {
-                float originalAspect = (float)original.Width / (float)original.Height;
-                float targetAspect = (float)dimensions.Width / (float)dimensions.Height;
-                if (targetAspect < originalAspect)
+                if (dimensions.NoStretch)
                 {
-                    //We crop the width, but only if the required height is smaller than that of the original image
-                    //Or we don't mind stretching the image to fit
-                    //if (dimensions.NoStretch == false || dimensions.Height <= original.Height)
+                    //If we don't want to stretch, then we crop
+                    float originalAspect = (float)original.Width / (float)original.Height;
+                    float targetAspect = (float)dimensions.Width / (float)dimensions.Height;
+                    if (targetAspect < originalAspect)
                     {
-                        targetH = Math.Min(dimensions.Height,original.Height);
+                        //Crop the width - ensuring that we do not stretch if the requested height is bigger than the original
+                        targetH = dimensions.Height > original.Height ? original.Height : dimensions.Height;
                         targetW = (int)Math.Ceiling(targetH * targetAspect);
                         cropX = (int)Math.Ceiling((original.Width - (original.Height * targetAspect)) / 2);
                         sourceW = sourceW - 2 * cropX;
                     }
-                }
-                else
-                {
-                    //We crop the height, but only if the required width is smaller than that of the original image
-                    //Or we don't mind stretching the image to fit
-                    //if (dimensions.NoStretch == false || dimensions.Width <= original.Width)
+                    else
                     {
-                        targetW = Math.Min(dimensions.Width,original.Width);
+                        //Crop the height - ensuring that we do not stretch if the requested width is bigger than the original
+                        targetW = dimensions.Width > original.Width ? original.Width : dimensions.Width;
                         targetH = (int)Math.Ceiling(targetW / targetAspect);
                         cropY = (int)Math.Ceiling((original.Height - (original.Width / targetAspect)) / 2);
                         sourceH = sourceH - 2 * cropY;
                     }
+                }
+                else
+                {
+                    //We stretch to fit the dimensions
+                    targetH = dimensions.Height;
+                    targetW = dimensions.Width;
                 }
             }
             //If we simply have a certain width or height, its simple: We just use that and derive the other
@@ -359,6 +361,11 @@ namespace Sdl.Web.DD4T.Statics
             {
                 targetH = (dimensions.NoStretch && dimensions.Height > original.Height) ? original.Height : dimensions.Height;
                 targetW = (int)(original.Width * ((float)targetH / (float)original.Height));
+            }
+            if (targetW == original.Width && targetH == original.Height)
+            {
+                //No resize required
+                return imageFile;
             }
             Image imgPhoto;
             using (MemoryStream memoryStream = new MemoryStream(imageFile))

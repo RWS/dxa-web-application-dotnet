@@ -317,7 +317,16 @@ namespace Sdl.Web.Common.Configuration
                 Localizations = relevantLocalizations;
                 _localConfiguration = localConfiguration;
                 _globalConfiguration = globalConfiguration;
-                Log.Debug("The following localizations are active for this site: {0}", String.Join(", ", Localizations.Select(l=>l.Key).ToArray()));
+                if (relevantLocalizations.Count==0)
+                {
+                    var msg = "No valid localizations are active for this site. Check the site log, and that you have the right localization IDs configured in cd_dynamic_conf.xml";
+                    Log.Error(msg);
+                    throw new Exception(msg);
+                }
+                else
+                {
+                    Log.Debug("The following localizations are active for this site: {0}", String.Join(", ", Localizations.Select(l => l.Key).ToArray()));    
+                }
             }            
         }
 
