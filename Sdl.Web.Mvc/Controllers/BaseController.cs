@@ -41,6 +41,28 @@ namespace Sdl.Web.Mvc.Controllers
             {
                 return NotFound();
             }
+
+            // return page as xml
+            if (WebRequestContext.RequestUrl.Contains("format=xml"))
+            {
+                // parse url to actual page
+                string defaultPageFileName = ContentProvider.ContentResolver.DefaultPageName;
+                if (String.IsNullOrEmpty(pageUrl))
+                {
+                    pageUrl = defaultPageFileName;
+                }
+                if (pageUrl.EndsWith("/"))
+                {
+                    pageUrl = pageUrl + defaultPageFileName;
+                }
+                if (!Path.HasExtension(pageUrl))
+                {
+                    pageUrl = pageUrl + ContentProvider.ContentResolver.DefaultExtension;
+                }
+
+                return GetRawActionResult("xml", ContentProvider.GetPageContent(pageUrl));
+            }
+
             var viewData = GetViewData(page);
             SetupViewData(0, viewData);
             var model = ProcessModel(page, GetViewType(viewData)) ?? page;
@@ -48,6 +70,14 @@ namespace Sdl.Web.Mvc.Controllers
             {
                 WebRequestContext.PageId = ((WebPage)model).Id;
             }
+
+            // return page as json
+            if (WebRequestContext.RequestUrl.Contains("format=json"))
+            {
+                return Json(model, JsonRequestBehavior.AllowGet);
+            }
+
+            // return rendered page view model
             return View(viewData.ViewName, model);
         }
 
