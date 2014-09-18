@@ -95,7 +95,7 @@ namespace Sdl.Web.Mvc.Controllers
             }
 
             // convert json dates to RFC822
-            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             var nodes = doc.SelectNodes("//*[@type='string' and starts-with(., '/Date(')]");
             foreach (XmlElement node in nodes)
             {
