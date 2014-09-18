@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -9,7 +11,7 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.ContentProvider;
-using System.IO;
+using Sdl.Web.Mvc.Utils;
 
 namespace Sdl.Web.Mvc.Controllers
 {
@@ -29,7 +31,8 @@ namespace Sdl.Web.Mvc.Controllers
         }
 
         /// <summary>
-        /// Given a page URL, load the corresponding Page Model, Map it to the View Model and render it
+        /// Given a page URL, load the corresponding Page Model, Map it to the View Model and render it. 
+        /// Can return XML or JSON if specifically requested on the URL query string (e.g. ?format=xml). 
         /// </summary>
         /// <param name="pageUrl">The page URL</param>
         /// <returns>Rendered Page View Model</returns>
@@ -42,27 +45,6 @@ namespace Sdl.Web.Mvc.Controllers
                 return NotFound();
             }
 
-            // return page as xml
-            if (WebRequestContext.RequestUrl.Contains("format=xml"))
-            {
-                // parse url to actual page
-                string defaultPageFileName = ContentProvider.ContentResolver.DefaultPageName;
-                if (String.IsNullOrEmpty(pageUrl))
-                {
-                    pageUrl = defaultPageFileName;
-                }
-                if (pageUrl.EndsWith("/"))
-                {
-                    pageUrl = pageUrl + defaultPageFileName;
-                }
-                if (!Path.HasExtension(pageUrl))
-                {
-                    pageUrl = pageUrl + ContentProvider.ContentResolver.DefaultExtension;
-                }
-
-                return GetRawActionResult("xml", ContentProvider.GetPageContent(pageUrl));
-            }
-
             var viewData = GetViewData(page);
             SetupViewData(0, viewData);
             var model = ProcessModel(page, GetViewType(viewData)) ?? page;
@@ -71,14 +53,66 @@ namespace Sdl.Web.Mvc.Controllers
                 WebRequestContext.PageId = ((WebPage)model).Id;
             }
 
-            // return page as json
+            // determine preferred accept type
+            QValue preferred = PreferredAcceptType("text/html", "text/xml", "application/json");
+            switch (preferred.Name)
+            {
+                case "text/xml":
+                    // parse url to actual page, so we can get its (xml) content drirectly
+                    string defaultPageFileName = ContentProvider.ContentResolver.DefaultPageName;
+                    if (String.IsNullOrEmpty(pageUrl))
+                    {
+                        pageUrl = defaultPageFileName;
+                    }
+                    if (pageUrl.EndsWith("/"))
+                    {
+                        pageUrl = pageUrl + defaultPageFileName;
+                    }
+                    if (!Path.HasExtension(pageUrl))
+                    {
+                        pageUrl = pageUrl + ContentProvider.ContentResolver.DefaultExtension;
+                    }
+                    // return page as xml
+                    return GetRawActionResult("xml", ContentProvider.GetPageContent(pageUrl));
+                case "application/json":
+                    // return page as json
+                    return Json(model, JsonRequestBehavior.AllowGet);
+                default:
+                    // return rendered page view model
+                    return View(viewData.ViewName, model);
+            }
+        }
+
+        /// <summary>
+        /// Returns the first match found from the given candidates that is accepted
+        /// </summary>
+        /// <param name="candidates">The list of supported accept types to find</param>
+        /// <returns>The first QValue match to be found</returns>
+        private static QValue PreferredAcceptType(params string[] candidates)
+        {
+            // load accept types, adding any accept types from query string to the top of the list (so they have first priority)
+            List<string> acceptTypeList = new List<string>();
+            if (WebRequestContext.RequestUrl.Contains("format=xml"))
+            {
+                acceptTypeList.Add("text/xml");
+            }
             if (WebRequestContext.RequestUrl.Contains("format=json"))
             {
-                return Json(model, JsonRequestBehavior.AllowGet);
+                acceptTypeList.Add("application/json");
+            }
+            acceptTypeList.AddRange(WebRequestContext.AcceptTypes);
+            QValueList acceptTypes = new QValueList(acceptTypeList);
+
+            // get the types we can handle, can be accepted and in the defined client preference
+            QValue preferred = acceptTypes.FindPreferred(candidates);
+
+            // if none of the preferred values were found, but the client can accept wildcard encodings, we'll default to text/html
+            if (preferred.IsEmpty && acceptTypes.AcceptWildcard && acceptTypes.Find("text/html").IsEmpty)
+            {
+                return new QValue("text/html");
             }
 
-            // return rendered page view model
-            return View(viewData.ViewName, model);
+            return preferred;
         }
 
         /// <summary>
@@ -194,10 +228,7 @@ namespace Sdl.Web.Mvc.Controllers
                 SetupViewData(0, viewData);
                 return View(viewData.ViewName, model);
             }
-            else
-            {
-                return View("SiteMapXml", model);
-            }
+            return View("SiteMapXml", model);
         }
 
         /// <summary>
@@ -205,6 +236,7 @@ namespace Sdl.Web.Mvc.Controllers
         /// </summary>
         /// <param name="itemId">The item id to resolve</param>
         /// <param name="localization">The site localization in which to resolve the URL</param>
+        /// <param name="defaultItemId"></param>
         /// <returns>null - response is redirected if the URL can be resolved</returns>
         public virtual ActionResult Resolve(string itemId, string localization, string defaultItemId = null)
         {
@@ -309,7 +341,7 @@ namespace Sdl.Web.Mvc.Controllers
         protected virtual ActionResult GetRawActionResult(string type, string rawContent)
         {
             var contentType = type == "json" ? "application/json" : "text/" + type;
-            return this.Content(rawContent, contentType);
+            return Content(rawContent, contentType);
         }
 
         protected virtual void SetupViewData(int containerSize = 0, MvcData viewData = null)

@@ -75,6 +75,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Statics\BaseStaticFileManager.cs" />
     <Compile Include="Statics\StaticRedirectModule.cs" />
+    <Compile Include="Utils\QValue.cs" />
+    <Compile Include="Utils\QValueList.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sdl.Web.Common\Sdl.Web.Common.csproj">
