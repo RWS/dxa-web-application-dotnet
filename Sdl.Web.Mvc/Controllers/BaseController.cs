@@ -3,8 +3,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Json;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Script.Serialization;
+using System.Xml;
+using System.Xml.Linq;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
@@ -54,33 +60,98 @@ namespace Sdl.Web.Mvc.Controllers
             }
 
             // determine preferred accept type
-            QValue preferred = PreferredAcceptType("text/html", "text/xml", "application/json");
+            QValue preferred = PreferredAcceptType("text/html", "text/xml", "application/json", "application/rss+xml", "application/atom+xml");
             switch (preferred.Name)
             {
-                case "text/xml":
-                    // parse url to actual page, so we can get its (xml) content drirectly
-                    string defaultPageFileName = ContentProvider.ContentResolver.DefaultPageName;
-                    if (String.IsNullOrEmpty(pageUrl))
-                    {
-                        pageUrl = defaultPageFileName;
-                    }
-                    if (pageUrl.EndsWith("/"))
-                    {
-                        pageUrl = pageUrl + defaultPageFileName;
-                    }
-                    if (!Path.HasExtension(pageUrl))
-                    {
-                        pageUrl = pageUrl + ContentProvider.ContentResolver.DefaultExtension;
-                    }
-                    // return page as xml
-                    return GetRawActionResult("xml", ContentProvider.GetPageContent(pageUrl));
                 case "application/json":
                     // return page as json
                     return Json(model, JsonRequestBehavior.AllowGet);
+                case "text/xml":
+                    // return page as xml
+                    return GetRawActionResult("xml", ContentProvider.GetPageContent(ParseUrl(pageUrl)));
+                case "application/rss+xml":
+                    // return page as rss feed
+                    return GetFeedActionResult(Json(model, JsonRequestBehavior.AllowGet).Data, "rss");
+                case "application/atom+xml":
+                    // return page as atom feed
+                    return GetFeedActionResult(Json(model, JsonRequestBehavior.AllowGet).Data, "atom");
                 default:
                     // return rendered page view model
                     return View(viewData.ViewName, model);
             }
+        }
+
+        private static XmlDocument JsonToXml(string json)
+        {
+            // convert json dates to RFC822
+            //Regex regex = new Regex("(?<!\\/Date\\( )[-]?[0-9]+");
+            //json = regex.Replace(json, "10000000000001");
+
+            XmlDocument doc = new XmlDocument();
+            using (var reader = JsonReaderWriterFactory.CreateJsonReader(Encoding.UTF8.GetBytes(json), XmlDictionaryReaderQuotas.Max))
+            {
+                XElement xml = XElement.Load(reader);
+                doc.LoadXml(xml.ToString());
+            }
+
+            // convert json dates to RFC822
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            var nodes = doc.SelectNodes("//*[@type='string' and starts-with(., '/Date(')]");
+            foreach (XmlElement node in nodes)
+            {
+                // date is formatted as /Date(-00000000000000)/
+                string value = node.InnerText;
+                string[] parts = value.Split(new[] {'(', ')'});
+                long msecs;
+                Int64.TryParse(parts[1], out msecs);
+                if (Math.Sign(msecs) == -1)
+                {
+                    msecs = 0;
+                }
+                DateTime date = epoch.AddMilliseconds(msecs);
+                node.InnerText = date.ToString("r");
+            }
+
+            return doc;
+        }
+
+        private ActionResult GetFeedActionResult(object data, string type)
+        {
+            string json = new JavaScriptSerializer().Serialize(data);
+            XmlDocument doc = JsonToXml(json);
+
+            switch (type)
+            {
+                case "rss":
+                    return GetRawActionResult(type, doc.OuterXml);
+                case "atom":
+                    return GetRawActionResult(type, doc.OuterXml);
+                default:
+                    return GetRawActionResult(type, doc.OuterXml);
+            }
+        }
+
+        /// <summary>
+        /// Parse url to actual page with extension
+        /// </summary>
+        /// <param name="url">Requested url</param>
+        /// <returns>Page url</returns>
+        private string ParseUrl(string url)
+        {
+            string defaultPageFileName = ContentProvider.ContentResolver.DefaultPageName;
+            if (String.IsNullOrEmpty(url))
+            {
+                url = defaultPageFileName;
+            }
+            if (url.EndsWith("/"))
+            {
+                url = url + defaultPageFileName;
+            }
+            if (!Path.HasExtension(url))
+            {
+                url = url + ContentProvider.ContentResolver.DefaultExtension;
+            }
+            return url;
         }
 
         /// <summary>
@@ -99,6 +170,14 @@ namespace Sdl.Web.Mvc.Controllers
             if (WebRequestContext.RequestUrl.Contains("format=json"))
             {
                 acceptTypeList.Add("application/json");
+            }
+            if (WebRequestContext.RequestUrl.Contains("format=rss"))
+            {
+                acceptTypeList.Add("application/rss+xml");
+            }
+            if (WebRequestContext.RequestUrl.Contains("format=atom"))
+            {
+                acceptTypeList.Add("application/atom+xml");
             }
             acceptTypeList.AddRange(WebRequestContext.AcceptTypes);
             QValueList acceptTypes = new QValueList(acceptTypeList);
@@ -340,7 +419,22 @@ namespace Sdl.Web.Mvc.Controllers
         
         protected virtual ActionResult GetRawActionResult(string type, string rawContent)
         {
-            var contentType = type == "json" ? "application/json" : "text/" + type;
+            string contentType;
+            switch (type)
+            {
+                case "json":
+                    contentType = "application/json";
+                    break;
+                case "rss":
+                    contentType = "application/rss+xml";
+                    break;
+                case "atom":
+                    contentType = "application/atom+xml";
+                    break;
+                default:
+                    contentType = "text/" + type;
+                    break;
+            }
             return Content(rawContent, contentType);
         }
 
