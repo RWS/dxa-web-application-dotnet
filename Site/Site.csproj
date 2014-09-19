@@ -86,6 +86,8 @@
       <HintPath>..\packages\Microsoft.AspNet.WebPages.3.1.2\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Configuration" />
+    <Reference Include="System.XML" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="Unity.Mvc5">
       <HintPath>..\packages\Unity.Mvc5.1.1\lib\net45\Unity.Mvc5.dll</HintPath>
     </Reference>
@@ -177,6 +179,11 @@
     <Content Include="Areas\Core\Views\Entity\Partials\Teaser.cshtml" />
     <Content Include="Areas\Core\Views\Navigation\SiteMapXml.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Partials\Teaser-ImageOverlay.cshtml" />
+    <Content Include="Areas\Search\Views\Entity\SearchBox.cshtml" />
+    <Content Include="Areas\Search\Views\web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Areas\Search\Views\Search\SearchResults.cshtml" />
     <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
     <None Include="Properties\PublishProfiles\Distribution.pubxml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
@@ -198,6 +205,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Modules\Sdl.Web.Modules.Search\Sdl.Web.Modules.Search.csproj">
+      <Project>{8fefff4c-0ae2-452f-89b1-36f7d2944032}</Project>
+      <Name>Sdl.Web.Modules.Search</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Sdl.Web.DD4T\Sdl.Web.DD4T.csproj">
       <Project>{360aec0a-3367-486a-885f-7931f32234c1}</Project>
       <Name>Sdl.Web.DD4T</Name>

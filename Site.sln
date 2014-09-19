@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Tridion", "Sdl.Web.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Common", "Sdl.Web.Common\Sdl.Web.Common.csproj", "{21C08F9A-24C2-481A-95C3-A255BE9771A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Modules.Search", "Modules\Sdl.Web.Modules.Search\Sdl.Web.Modules.Search.csproj", "{8FEFFF4C-0AE2-452F-89B1-36F7D2944032}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{21C08F9A-24C2-481A-95C3-A255BE9771A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21C08F9A-24C2-481A-95C3-A255BE9771A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21C08F9A-24C2-481A-95C3-A255BE9771A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FEFFF4C-0AE2-452F-89B1-36F7D2944032}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FEFFF4C-0AE2-452F-89B1-36F7D2944032}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FEFFF4C-0AE2-452F-89B1-36F7D2944032}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FEFFF4C-0AE2-452F-89B1-36F7D2944032}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

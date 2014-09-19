@@ -1,23 +1,24 @@
 ﻿using System.Web.Mvc;
 
-namespace Sdl.Web.Site.Areas.Core
+namespace Sdl.Web.Modules.Search
 {
-    public class CoreAreaRegistration : AreaRegistration 
+    public class SearchAreaRegistration : AreaRegistration 
     {
         public override string AreaName 
         {
             get 
             {
-                return "Core";
+                return "Search";
             }
         }
+
         public override void RegisterArea(AreaRegistrationContext context) 
         {
             //Default Route - required for sub actions (region/entity/navigation etc.)
             context.MapRoute(
-                "Core_Default", 
-                "{controller}/{action}/{id}", 
-                new { controller = "Home", action = "Index", id = UrlParameter.Optional }
+                "Default_Search", 
+                "{controller}/{action}/{id}",
+                new { controller = "Search", action = "Entity", id = UrlParameter.Optional }
             );
         }
     }
