@@ -76,6 +76,7 @@
     <Compile Include="Html\UrlHelperExtensions.cs" />
     <Compile Include="ContentProvider\BaseContentProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\ResourceHelper.cs" />
     <Compile Include="Statics\BaseStaticFileManager.cs" />
     <Compile Include="Statics\StaticRedirectModule.cs" />
     <Compile Include="Utils\QValue.cs" />
@@ -95,6 +96,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\atom.xslt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\rss.xslt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
