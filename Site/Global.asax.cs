@@ -7,17 +7,16 @@ using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.Configuration;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Tridion.Config;
-using Unity.Mvc5;
-using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Site.Areas.Core.Controllers;
+using Sdl.Web.Tridion.Config;
+using Unity.Mvc5;
 
 namespace Sdl.Web.Site
 {
     public class MvcApplication : HttpApplication
     {
-        private static bool initialized = false;
+        private static bool _initialized = false;
         public static void RegisterRoutes(RouteCollection routes)
         {
             RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
@@ -78,7 +77,7 @@ namespace Sdl.Web.Site
             SiteConfiguration.Initialize(TridionConfig.PublicationMap);
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
-            initialized = true;
+            _initialized = true;
         }
 
         protected IUnityContainer InitializeDependencyInjection()
@@ -98,15 +97,19 @@ namespace Sdl.Web.Site
 
         protected void Application_Error(object sender, EventArgs e)
         {
-            if (Context.IsCustomErrorEnabled && initialized)
+            if (Context.IsCustomErrorEnabled && _initialized)
+            {
                 ShowCustomErrorPage(Server.GetLastError());
+            }
         }
 
         private void ShowCustomErrorPage(Exception exception)
         {
             HttpException httpException = exception as HttpException;
             if (httpException == null)
+            {
                 httpException = new HttpException(500, "Internal Server Error", exception);
+            }
 
             RouteData routeData = new RouteData();
             Log.Error(httpException);

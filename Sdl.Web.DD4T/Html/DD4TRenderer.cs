@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Web.Mvc;
 using System.Web.Mvc.Html;
 using System.Web.Routing;
 using DD4T.ContentModel;
 using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.Html;
@@ -63,7 +61,7 @@ namespace Sdl.Web.DD4T.Html
         /// <summary>
         /// Render an Region
         /// </summary>
-        /// <param name="item">The Region object</param>
+        /// <param name="region">The Region object</param>
         /// <param name="helper">The HTML Helper</param>
         /// <param name="containerSize">The size of the containing element (in grid units)</param>
         /// <param name="excludedItems">A list of view names, if the Region maps to one of these, it is skipped.</param>

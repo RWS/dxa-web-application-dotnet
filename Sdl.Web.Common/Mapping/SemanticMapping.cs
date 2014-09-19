@@ -205,9 +205,9 @@ namespace Sdl.Web.Common.Mapping
                 {
                     Log.Warn("Semantic mapping bootstrap file: {0} does not exist - skipping this", path);
                 }
-                SemanticMapping._semanticVocabularies = semanticVocabularies;
-                SemanticMapping._semanticMap = semanticMap;
-                SemanticMapping._includes = includes;
+                _semanticVocabularies = semanticVocabularies;
+                _semanticMap = semanticMap;
+                _includes = includes;
             }
         }
 
