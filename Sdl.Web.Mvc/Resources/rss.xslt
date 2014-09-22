@@ -30,7 +30,7 @@
                     <xsl:variable name="lang" select="Meta/*[local-name() = 'item' and @item = 'og:locale']"/>
                     <xsl:value-of select="translate($lang, $uppercase, $lowercase)"/>
                 </language>
-                <xsl:for-each select="Regions/Main/Items/item/Component">
+                <xsl:for-each select="Regions/*/Items/item/Component">
                     <item>
                         <title>
                             <xsl:variable name="title" select="MetadataFields/standardMeta/EmbeddedValues/item/name/Value"/>
