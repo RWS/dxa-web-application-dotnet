@@ -30,8 +30,6 @@ namespace Sdl.Web.DD4T.Mapping
             ContentResolver = resolver;
         }
 
-
-
         public override string GetPageContent(string url)
         {
             Log.Debug("DD4TContentProvicer.GetPageContent: Processing request for page: {0}", url);
@@ -50,7 +48,6 @@ namespace Sdl.Web.DD4T.Mapping
 
             return page;
         }
-
 
         //TODO - to get DCP content as object
         public override object GetEntityModel(string id)

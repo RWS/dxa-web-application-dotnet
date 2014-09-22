@@ -34,7 +34,7 @@
             <subtitle>
                 <xsl:value-of select="Meta/description"/>
             </subtitle>
-            <xsl:for-each select="Regions/Main/Items/item/Component">
+            <xsl:for-each select="Regions/*/Items/item/Component">
                 <xsl:variable name="link">
                     <xsl:choose>
                         <xsl:when test="contains($url, 'http://')">

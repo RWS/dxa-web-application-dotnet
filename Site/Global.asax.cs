@@ -22,37 +22,39 @@ namespace Sdl.Web.Site
             RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
             RouteTable.Routes.IgnoreRoute("cid/{*pathInfo}");
             RouteTable.Routes.MapMvcAttributeRoutes();
+            
+            // XPM blank page
             routes.MapRoute(
                 "Core_Blank",
                 "se_blank.html",
                 new { controller = "Page", action = "Blank" }
             ).DataTokens.Add("area","Core");
-            //Navigation JSON
+
+            // Navigation JSON
             routes.MapRoute(
                 "Core_Navigation",
                 "navigation.json",
                 new { controller = "Page", action = "PageRaw" }
             ).DataTokens.Add("area", "Core");
-            //Navigation JSON
             routes.MapRoute(
                 "Core_Navigation_loc",
                 "{localization}/navigation.json",
                 new { controller = "Page", action = "PageRaw" }
             ).DataTokens.Add("area", "Core");
-            //Google Site Map
+
+            // Google Site Map
             routes.MapRoute(
                 "Core_Sitemap",
                 "sitemap.xml",
                 new { controller = "Navigation", action = "SiteMap" }
             ).DataTokens.Add("area", "Core");
-            //Google Site Map
             routes.MapRoute(
                 "Core_Sitemap_Loc",
                 "{localization}/sitemap.xml",
                 new { controller = "Navigation", action = "SiteMap" }
             ).DataTokens.Add("area", "Core");
 
-            //For resolving ids to urls
+            // For resolving ids to urls
             routes.MapRoute(
                "Core_Resolve",
                "resolve/{*itemId}",
@@ -60,7 +62,7 @@ namespace Sdl.Web.Site
                new { itemId = @"^(.*)?$" }
             ).DataTokens.Add("area", "Core");
 
-            //Tridion Page Route
+            // Tridion Page Route
             routes.MapRoute(
                "Core_Page",
                "{*pageUrl}",
