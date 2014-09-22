@@ -1,4 +1,4 @@
-﻿@model Sdl.Web.Modules.Search.SearchResults<Teaser>
+﻿@model Sdl.Web.Modules.Search.SearchQuery<Teaser>
 <div class='rich-text' @Markup.Entity(Model)>
     @if (Model.Headline != null)
     {
@@ -6,17 +6,17 @@
             <h1 class='h3' @Markup.Property(Model, "Headline")>@Model.Headline</h1>
         </div>
     }
-        @if (Model.ItemListElements.Count > 0)
+        @if (Model.Total > 0)
         {
             if (Model.ResultsText != null)
             {
             <div @Markup.Property(Model, "ResultsText")>
-                @Html.Raw(String.Format(Model.ResultsText, Model.Query.QueryText, Model.Total))
+                @Html.Raw(String.Format(Model.ResultsText, Model.QueryText, Model.Total))
             </div>
             }
-        <div class="pull-right">@String.Format(Html.Resource("core.showingItemsText"), Model.Start + 1, Model.Start + Model.ItemListElements.Count)</div>
+        <div class="pull-right">@String.Format(Html.Resource("core.showingItemsText"), Model.Start + 1, Model.Start + Model.Results.Count)</div>
         <div class="list-group">
-            @foreach (var item in Model.ItemListElements)
+            @foreach (var item in Model.Results)
             {
                 <a href="@item.Link.Url" class="list-group-item">
                 <h4 class="list-group-item-heading">@item.Headline</h4>
@@ -35,7 +35,7 @@
     else if(Model.NoResultsText!=null)
     {
         <div @Markup.Property(Model,"NoResultsText")>
-            @Html.Raw(String.Format(Model.NoResultsText,Model.Query.QueryText))
+            @Html.Raw(String.Format(Model.NoResultsText,Model.QueryText))
         </div>
     }
 </div>
