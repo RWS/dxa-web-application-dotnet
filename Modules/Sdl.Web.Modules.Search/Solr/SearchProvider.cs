@@ -27,8 +27,9 @@ namespace Sdl.Web.Modules.Search.Solr
                 parameters.Add("start", data.Start.ToString());
                 parameters.Add("rows", data.PageSize.ToString());
                 var results = conn.ExecuteQuery(parameters);
-                results.Query = data.Query;
-                data = results;
+                data.ItemListElements = results.ItemListElements;
+                
+                data.Total = results.Total;
             }
             return data;
         }

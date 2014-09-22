@@ -6,8 +6,14 @@
             <h1 class='h3' @Markup.Property(Model, "Headline")>@Model.Headline</h1>
         </div>
     }
-    @if (Model.ItemListElements.Count > 0)
-    {
+        @if (Model.ItemListElements.Count > 0)
+        {
+            if (Model.ResultsText != null)
+            {
+            <div @Markup.Property(Model, "ResultsText")>
+                @Html.Raw(String.Format(Model.ResultsText, Model.Query.QueryText, Model.Total))
+            </div>
+            }
         <div class="pull-right">@String.Format(Html.Resource("core.showingItemsText"), Model.Start + 1, Model.Start + Model.ItemListElements.Count)</div>
         <div class="list-group">
             @foreach (var item in Model.ItemListElements)
@@ -24,6 +30,12 @@
                 }
                 </a>
             }
+        </div>
+    }
+    else if(Model.NoResultsText!=null)
+    {
+        <div @Markup.Property(Model,"NoResultsText")>
+            @Html.Raw(String.Format(Model.NoResultsText,Model.Query.QueryText))
         </div>
     }
 </div>

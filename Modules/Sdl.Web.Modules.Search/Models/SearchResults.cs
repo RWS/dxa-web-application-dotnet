@@ -8,6 +8,8 @@ namespace Sdl.Web.Modules.Search
     {
         [SemanticProperty("s:headline")]
         public string Headline { get; set; }
+        public string ResultsText { get; set; }
+        public string NoResultsText { get; set; }
         public Link Link { get; set; }
         public int PageSize { get; set; }
         public Tag SearchScope { get; set; }
