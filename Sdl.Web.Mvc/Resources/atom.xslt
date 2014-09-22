@@ -81,7 +81,17 @@
                         </xsl:attribute>
                     </link>
                     <author>
-                        <name>unknown</name>
+                        <name>
+                            <xsl:variable name="author" select="MetadataFields/standardMeta/EmbeddedValues/item/author/Value"/>
+                            <xsl:choose>
+                                <xsl:when test="$author != ''">
+                                    <xsl:value-of select="$author"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:text>unknown</xsl:text>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </name>
                     </author>
                 </entry>
             </xsl:for-each>
