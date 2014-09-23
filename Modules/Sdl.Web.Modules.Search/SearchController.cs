@@ -14,6 +14,7 @@ namespace Sdl.Web.Modules.Search
         {
             ContentProvider = contentProvider;
             SearchProvider = searchProvider;
+            SearchProvider.ContentResolver = contentProvider.ContentResolver;
             Renderer = renderer;
         }
 

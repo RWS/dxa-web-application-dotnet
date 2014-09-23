@@ -184,6 +184,7 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Areas\Search\Views\Search\SearchResults.cshtml" />
+    <Content Include="Areas\Search\Views\Search\Partials\Pager.cshtml" />
     <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
     <None Include="Properties\PublishProfiles\Distribution.pubxml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
