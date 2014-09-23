@@ -16,7 +16,7 @@ namespace Sdl.Web.Modules.Search.Solr
     {
         public IContentResolver ContentResolver { get; set; }
 
-        public SearchQuery<T> ExecuteQuery<T>(NameValueCollection parameters, SearchQuery<T> data)
+        public virtual SearchQuery<T> ExecuteQuery<T>(NameValueCollection parameters, SearchQuery<T> data)
         {
             NameValueCollection processedParameters = SetupParameters(parameters);
             processedParameters["rows"] = data.PageSize.ToString();
@@ -36,9 +36,9 @@ namespace Sdl.Web.Modules.Search.Solr
             return data;
         }
 
-        protected T MapResult<T>(SearchResult result)
+        protected virtual T MapResult<T>(SearchResult result)
         {
-            //TODO - how to handle this generically
+            //TODO - utilize some kind of semantic mapping for returning the result
             if (typeof(T) == typeof(Teaser))
             {
                 var teaser = new Teaser();
@@ -48,10 +48,14 @@ namespace Sdl.Web.Modules.Search.Solr
                 teaser.Text = result.Summary;
                 return (T)Convert.ChangeType(teaser, typeof(T));
             }
-            return default(T);
+            else if (typeof(T) == typeof(SearchResult))
+            {
+                return (T)Convert.ChangeType(result, typeof(T));
+            }
+            throw new Exception("Currently only Sdl.Web.Common.Models.Teaser and SI4T.Query.Models.SearchResult are supported model generic types");
         }
 
-        private NameValueCollection SetupParameters(NameValueCollection parameters)
+        protected virtual NameValueCollection SetupParameters(NameValueCollection parameters)
         {
             //parameters.Add("fq", "publicationid:" + WebRequestContext.Localization.LocalizationId);
             var result = new NameValueCollection();
