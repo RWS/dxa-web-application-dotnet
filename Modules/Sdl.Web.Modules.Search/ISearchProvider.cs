@@ -1,6 +1,8 @@
-﻿using Sdl.Web.Common.Models;
+﻿using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +11,7 @@ namespace Sdl.Web.Modules.Search
 {
     public interface ISearchProvider
     {
-        SearchResults<Teaser> ExecuteQuery(SearchResults<Teaser> data);
+        IContentResolver ContentResolver { get; set; }
+        SearchQuery<T> ExecuteQuery<T>(NameValueCollection parameters, SearchQuery<T> data);
     }
 }

@@ -58,7 +58,7 @@ namespace Sdl.Web.Modules.Search.Solr
             {
                 //results.HasError = true;
                 //results.ErrorDetail = ex.Message + " : " + ex.StackTrace;
-                Log.Error("Query resulted in error: {1}", ex.Message + " : " + ex.StackTrace);
+                Log.Error("Query resulted in error: {0}", ex.Message + " : " + ex.StackTrace);
             }
             return results;
         }
