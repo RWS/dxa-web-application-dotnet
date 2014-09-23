@@ -1,15 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Json;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Script.Serialization;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Xsl;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.ContentProvider;
-using System.IO;
+using Sdl.Web.Mvc.Resources;
+using Sdl.Web.Mvc.Utils;
 
 namespace Sdl.Web.Mvc.Controllers
 {
@@ -29,7 +38,8 @@ namespace Sdl.Web.Mvc.Controllers
         }
 
         /// <summary>
-        /// Given a page URL, load the corresponding Page Model, Map it to the View Model and render it
+        /// Given a page URL, load the corresponding Page Model, Map it to the View Model and render it. 
+        /// Can return XML or JSON if specifically requested on the URL query string (e.g. ?format=xml). 
         /// </summary>
         /// <param name="pageUrl">The page URL</param>
         /// <returns>Rendered Page View Model</returns>
@@ -41,6 +51,7 @@ namespace Sdl.Web.Mvc.Controllers
             {
                 return NotFound();
             }
+
             var viewData = GetViewData(page);
             SetupViewData(0, viewData);
             var model = ProcessModel(page, GetViewType(viewData)) ?? page;
@@ -48,7 +59,27 @@ namespace Sdl.Web.Mvc.Controllers
             {
                 WebRequestContext.PageId = ((WebPage)model).Id;
             }
-            return View(viewData.ViewName, model);
+
+            // determine preferred accept type
+            QValue preferred = PreferredAcceptType("text/html", "text/xml", "application/json", "application/rss+xml", "application/atom+xml");
+            switch (preferred.Name)
+            {
+                case "application/json":
+                    // return page as json
+                    return Json(model, JsonRequestBehavior.AllowGet);
+                case "text/xml":
+                    // return page as xml (using xml from broker)
+                    return GetRawActionResult("xml", ContentProvider.GetPageContent(ParseUrl(pageUrl)));
+                case "application/rss+xml":
+                    // return page as rss feed (based on json from model)
+                    return GetFeedActionResult(Json(model, JsonRequestBehavior.AllowGet).Data, "rss");
+                case "application/atom+xml":
+                    // return page as atom feed (based on json from model)
+                    return GetFeedActionResult(Json(model, JsonRequestBehavior.AllowGet).Data, "atom");
+                default:
+                    // return rendered page view model
+                    return View(viewData.ViewName, model);
+            }
         }
 
         /// <summary>
@@ -164,10 +195,7 @@ namespace Sdl.Web.Mvc.Controllers
                 SetupViewData(0, viewData);
                 return View(viewData.ViewName, model);
             }
-            else
-            {
-                return View("SiteMapXml", model);
-            }
+            return View("SiteMapXml", model);
         }
 
         /// <summary>
@@ -175,6 +203,7 @@ namespace Sdl.Web.Mvc.Controllers
         /// </summary>
         /// <param name="itemId">The item id to resolve</param>
         /// <param name="localization">The site localization in which to resolve the URL</param>
+        /// <param name="defaultItemId"></param>
         /// <returns>null - response is redirected if the URL can be resolved</returns>
         public virtual ActionResult Resolve(string itemId, string localization, string defaultItemId = null)
         {
@@ -278,8 +307,29 @@ namespace Sdl.Web.Mvc.Controllers
         
         protected virtual ActionResult GetRawActionResult(string type, string rawContent)
         {
-            var contentType = type == "json" ? "application/json" : "text/" + type;
-            return this.Content(rawContent, contentType);
+            const string xmlDeclaration = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+
+            string contentType;
+            switch (type)
+            {
+                case "json":
+                    contentType = "application/json";
+                    break;
+                case "xml":
+                case "rss":
+                case "atom":
+                    // add XML declaration if it doesn't exist
+                    if (!rawContent.StartsWith(xmlDeclaration.Substring(0, 5)))
+                    {
+                        rawContent = xmlDeclaration + rawContent;
+                    }
+                    contentType = type.Equals("xml") ? "text/xml" : String.Format("application/{0}+xml", type);
+                    break;
+                default:
+                    contentType = "text/" + type;
+                    break;
+            }
+            return Content(rawContent, contentType);
         }
 
         protected virtual void SetupViewData(int containerSize = 0, MvcData viewData = null)
@@ -333,6 +383,136 @@ namespace Sdl.Web.Mvc.Controllers
                 }
             }
             return default(T);
+        }
+
+        private ActionResult GetFeedActionResult(object data, string type)
+        {
+            string json = new JavaScriptSerializer().Serialize(data);
+            XmlDocument doc = JsonToXml(json);
+            XslCompiledTransform xslTransform = new XslCompiledTransform();
+
+            StringBuilder output = new StringBuilder();
+            XmlWriterSettings writerSettings = new XmlWriterSettings
+            {
+                Encoding = Encoding.UTF8,
+                Indent = false,
+                OmitXmlDeclaration = true
+            };
+
+            switch (type)
+            {
+                case "rss":
+                    // transform XML using XSLT to RSS
+                    using (Stream stream = ResourceHelper.GetEmbeddedResourceAsStream("Sdl.Web.Mvc.Resources.rss.xslt"))
+                    using (XmlReader reader = new XmlTextReader(stream))
+                    using (XmlWriter writer = XmlWriter.Create(output, writerSettings))
+                    {
+                        xslTransform.Load(reader);
+                        xslTransform.Transform(doc.CreateNavigator(), null, writer);
+                        return GetRawActionResult(type, output.ToString());
+                    }
+                case "atom":
+                    // transform XML using XSLT to Atom
+                    using (Stream stream = ResourceHelper.GetEmbeddedResourceAsStream("Sdl.Web.Mvc.Resources.atom.xslt"))
+                    using (XmlReader reader = new XmlTextReader(stream))
+                    using (XmlWriter writer = XmlWriter.Create(output, writerSettings))
+                    {
+                        xslTransform.Load(reader);
+                        xslTransform.Transform(doc.CreateNavigator(), null, writer);
+                        return GetRawActionResult(type, output.ToString());
+                    }
+                default:
+                    return GetRawActionResult(type, doc.OuterXml);
+            }
+        }
+
+        /// <summary>
+        /// Parse url to actual page with extension
+        /// </summary>
+        /// <param name="url">Requested url</param>
+        /// <returns>Page url</returns>
+        private string ParseUrl(string url)
+        {
+            string defaultPageFileName = ContentProvider.ContentResolver.DefaultPageName;
+            if (String.IsNullOrEmpty(url))
+            {
+                url = defaultPageFileName;
+            }
+            if (url.EndsWith("/"))
+            {
+                url = url + defaultPageFileName;
+            }
+            if (!Path.HasExtension(url))
+            {
+                url = url + ContentProvider.ContentResolver.DefaultExtension;
+            }
+            return url;
+        }
+
+        private static XmlDocument JsonToXml(string json)
+        {
+            XmlDocument doc = new XmlDocument();
+            using (var reader = JsonReaderWriterFactory.CreateJsonReader(Encoding.UTF8.GetBytes(json), XmlDictionaryReaderQuotas.Max))
+            {
+                XElement xml = XElement.Load(reader);
+                doc.LoadXml(xml.ToString());
+            }
+
+            // convert JSON dates to RFC-822
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            var nodes = doc.SelectNodes("//*[@type='string' and starts-with(., '/Date(')]");
+            foreach (XmlElement node in nodes)
+            {
+                // date is formatted as /Date(-12345678900000)/
+                string value = node.InnerText;
+                string[] parts = value.Split(new[] { '(', ')' });
+                long msecs;
+                Int64.TryParse(parts[1], out msecs);
+                DateTime date = epoch.AddMilliseconds(msecs);
+                node.InnerText = date.ToString("r");
+            }
+
+            return doc;
+        }
+
+        /// <summary>
+        /// Returns the first match found from the given candidates that is accepted
+        /// </summary>
+        /// <param name="candidates">The list of supported accept types to find</param>
+        /// <returns>The first QValue match to be found</returns>
+        private static QValue PreferredAcceptType(params string[] candidates)
+        {
+            // load accept types, adding any accept types from query string to the top of the list (so they have first priority)
+            List<string> acceptTypeList = new List<string>();
+            if (WebRequestContext.RequestUrl.Contains("format=xml"))
+            {
+                acceptTypeList.Add("text/xml");
+            }
+            if (WebRequestContext.RequestUrl.Contains("format=json"))
+            {
+                acceptTypeList.Add("application/json");
+            }
+            if (WebRequestContext.RequestUrl.Contains("format=rss"))
+            {
+                acceptTypeList.Add("application/rss+xml");
+            }
+            if (WebRequestContext.RequestUrl.Contains("format=atom"))
+            {
+                acceptTypeList.Add("application/atom+xml");
+            }
+            acceptTypeList.AddRange(WebRequestContext.AcceptTypes);
+            QValueList acceptTypes = new QValueList(acceptTypeList);
+
+            // get the types we can handle, can be accepted and in the defined client preference
+            QValue preferred = acceptTypes.FindPreferred(candidates);
+
+            // if none of the preferred values were found, but the client can accept wildcard encodings, we'll default to text/html
+            if (preferred.IsEmpty && acceptTypes.AcceptWildcard && acceptTypes.Find("text/html").IsEmpty)
+            {
+                return new QValue("text/html");
+            }
+
+            return preferred;
         }
     }
 }

@@ -63,12 +63,22 @@ namespace Sdl.Web.Mvc.Configuration
         /// <summary>
         /// The current request URL
         /// </summary>
-        /// <returns></returns>
         public static string RequestUrl
         {
             get
             {
                 return HttpContext.Current.Request.Url.ToString();
+            }
+        }
+
+        /// <summary>
+        /// String array of client-supported MIME accept types
+        /// </summary>
+        public static string[] AcceptTypes
+        {
+            get 
+            { 
+                return HttpContext.Current.Request.AcceptTypes;
             }
         }
 

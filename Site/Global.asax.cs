@@ -7,53 +7,54 @@ using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.Configuration;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Tridion.Config;
-using Unity.Mvc5;
-using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Site.Areas.Core.Controllers;
+using Sdl.Web.Tridion.Config;
+using Unity.Mvc5;
 
 namespace Sdl.Web.Site
 {
     public class MvcApplication : HttpApplication
     {
-        private static bool initialized = false;
+        private static bool _initialized = false;
         public static void RegisterRoutes(RouteCollection routes)
         {
             RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
             RouteTable.Routes.IgnoreRoute("cid/{*pathInfo}");
             RouteTable.Routes.MapMvcAttributeRoutes();
+            
+            // XPM blank page
             routes.MapRoute(
                 "Core_Blank",
                 "se_blank.html",
                 new { controller = "Page", action = "Blank" }
             ).DataTokens.Add("area","Core");
-            //Navigation JSON
+
+            // Navigation JSON
             routes.MapRoute(
                 "Core_Navigation",
                 "navigation.json",
                 new { controller = "Page", action = "PageRaw" }
             ).DataTokens.Add("area", "Core");
-            //Navigation JSON
             routes.MapRoute(
                 "Core_Navigation_loc",
                 "{localization}/navigation.json",
                 new { controller = "Page", action = "PageRaw" }
             ).DataTokens.Add("area", "Core");
-            //Google Site Map
+
+            // Google Site Map
             routes.MapRoute(
                 "Core_Sitemap",
                 "sitemap.xml",
                 new { controller = "Navigation", action = "SiteMap" }
             ).DataTokens.Add("area", "Core");
-            //Google Site Map
             routes.MapRoute(
                 "Core_Sitemap_Loc",
                 "{localization}/sitemap.xml",
                 new { controller = "Navigation", action = "SiteMap" }
             ).DataTokens.Add("area", "Core");
 
-            //For resolving ids to urls
+            // For resolving ids to urls
             routes.MapRoute(
                "Core_Resolve",
                "resolve/{*itemId}",
@@ -61,7 +62,7 @@ namespace Sdl.Web.Site
                new { itemId = @"^(.*)?$" }
             ).DataTokens.Add("area", "Core");
 
-            //Tridion Page Route
+            // Tridion Page Route
             routes.MapRoute(
                "Core_Page",
                "{*pageUrl}",
@@ -78,7 +79,7 @@ namespace Sdl.Web.Site
             SiteConfiguration.Initialize(TridionConfig.PublicationMap);
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
-            initialized = true;
+            _initialized = true;
         }
 
         protected IUnityContainer InitializeDependencyInjection()
@@ -98,15 +99,19 @@ namespace Sdl.Web.Site
 
         protected void Application_Error(object sender, EventArgs e)
         {
-            if (Context.IsCustomErrorEnabled && initialized)
+            if (Context.IsCustomErrorEnabled && _initialized)
+            {
                 ShowCustomErrorPage(Server.GetLastError());
+            }
         }
 
         private void ShowCustomErrorPage(Exception exception)
         {
             HttpException httpException = exception as HttpException;
             if (httpException == null)
+            {
                 httpException = new HttpException(500, "Internal Server Error", exception);
+            }
 
             RouteData routeData = new RouteData();
             Log.Error(httpException);
