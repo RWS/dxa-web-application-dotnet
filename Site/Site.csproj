@@ -206,10 +206,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Modules\Sdl.Web.Modules.Search\Sdl.Web.Modules.Search.csproj">
-      <Project>{8fefff4c-0ae2-452f-89b1-36f7d2944032}</Project>
-      <Name>Sdl.Web.Modules.Search</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Sdl.Web.DD4T\Sdl.Web.DD4T.csproj">
       <Project>{360aec0a-3367-486a-885f-7931f32234c1}</Project>
       <Name>Sdl.Web.DD4T</Name>
