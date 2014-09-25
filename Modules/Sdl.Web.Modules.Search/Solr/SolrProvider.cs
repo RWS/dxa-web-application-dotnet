@@ -9,6 +9,7 @@ using Sdl.Web.Common.Configuration;
 using SI4T.Query.Solr;
 using SI4T.Query.Models;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Modules.Search.Solr
 {
@@ -20,14 +21,27 @@ namespace Sdl.Web.Modules.Search.Solr
         {
             NameValueCollection processedParameters = SetupParameters(parameters);
             processedParameters["rows"] = data.PageSize.ToString();
-            Connection conn = new Connection(SiteConfiguration.GetConfig("search." + (SiteConfiguration.IsStaging ? "staging" : "live") + "IndexConfig"));
+            var url = SiteConfiguration.GetConfig("search." + (SiteConfiguration.IsStaging ? "staging" : "live") + "IndexConfig");
+            Log.Debug("Connecting to search index on url: {0}", url);
+            Connection conn = new Connection(url);
+            foreach(var key in processedParameters.AllKeys)
+            {
+                Log.Debug("Parameter '{0}' is '{1}'", key, processedParameters[key]);
+            }
             var results = conn.ExecuteQuery(processedParameters);
+            Log.Debug("Search query {0} returned {1} results", results.QueryUrl, results.Total);
+            if (results.HasError)
+            {
+                var ex = new Exception("Error executing search: " + results.ErrorDetail);
+                Log.Error(ex);
+                throw ex;
+            }
             data.QueryText = parameters["q"];
             data.Start = results.Start;
             data.Total = results.Total;
             data.PageSize = results.PageSize;
             data.HasMore = results.Start + results.PageSize - 1 <= results.Total;
-            data.CurrentPage = results.Start / results.PageSize + 1;//TODO check
+            data.CurrentPage = results.PageSize == 0 ? 1 : results.Start / results.PageSize + 1;
             data.Parameters = processedParameters;
             foreach (var result in results.Items)
             {
