@@ -98,7 +98,7 @@ namespace Sdl.Web.DD4T.Html
             {
                 if (!page.PageData.ContainsKey("CmsUrl"))
                 {
-                    page.PageData.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl"));
+                    page.PageData.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl",WebRequestContext.Localization));
                 }
                 return new MvcHtmlString(TridionMarkup.PageMarkup(page.PageData));
             }

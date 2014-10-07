@@ -162,7 +162,8 @@ namespace Sdl.Web.Common.Mapping
                 var semanticVocabularies = new List<SemanticVocabulary>();
                 var includes = new Dictionary<string, List<string>>();
                 Log.Debug("Loading semantic mappings for default localization");
-                var path = Path.Combine(new[] { applicationRoot, SiteConfiguration.StaticsFolder, SiteConfiguration.DefaultLocalization, SiteConfiguration.SystemFolder, @"mappings\_all.json" });
+                var rootFolder = Path.Combine(new[] { applicationRoot, SiteConfiguration.GetLocalStaticsFolder("17") });
+                var path = Path.Combine(new[] { rootFolder, SiteConfiguration.DefaultLocalization, SiteConfiguration.SystemFolder, @"mappings\_all.json" });
                 if (File.Exists(path))
                 {
                     // the _all.json file contains a reference to all other configuration files
@@ -172,7 +173,7 @@ namespace Sdl.Web.Common.Mapping
                     {
                         var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
                         type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                        var configPath = Path.Combine(new[] { applicationRoot, SiteConfiguration.StaticsFolder, file.ToCombinePath() });
+                        var configPath = Path.Combine(new[] { rootFolder, file.ToCombinePath() });
                         if (File.Exists(configPath))
                         {
                             Log.Debug("Loading mapping from file: {0}", configPath);

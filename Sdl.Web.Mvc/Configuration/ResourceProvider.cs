@@ -40,73 +40,70 @@ namespace Sdl.Web.Mvc.Configuration
 
         private IDictionary GetResourceCache()
         {
-            return Resources(WebRequestContext.Localization.Path);
+            return Resources(WebRequestContext.Localization);
         }
 
-        public IDictionary Resources(string localization)
+        public IDictionary Resources(Localization localization)
         {
             if (_resources == null || LastSettingsRefresh < SiteConfiguration.LastSettingsRefresh)
             {
-                LoadResources();
+                //TODO only invalidate part of resources on refresh
+                _resources = new Dictionary<string, Dictionary<string, object>>();
+                LastSettingsRefresh = DateTime.Now;
             }
-            if (!_resources.ContainsKey(localization))
+            if (!_resources.ContainsKey(localization.LocalizationId))
             {
-                var ex = new Exception(String.Format("No resources can be found for localization {0}. Check that the localization path is correct and the resources have been published.", localization));
-                Log.Error(ex);
-                throw ex;
+                LoadResourcesForLocalization(localization);
+                if (!_resources.ContainsKey(localization.LocalizationId))
+                {
+                    var ex = new Exception(String.Format("No resources can be found for localization {0}. Check that the localization path is correct and the resources have been published.", localization.GetBaseUrl()));
+                    Log.Error(ex);
+                    throw ex;
+                }
             }
-            return _resources[localization];
+            return _resources[localization.LocalizationId];
         }
 
-        private static void LoadResources()
+        private static void LoadResourcesForLocalization(Localization loc)
         {
-            //We are reading into a static variable, so need to be thread safe
-            lock (ResourceLock)
+            if (!_resources.ContainsKey(loc.LocalizationId))
             {
                 var applicationRoot = AppDomain.CurrentDomain.BaseDirectory;
-                _resources = new Dictionary<string, Dictionary<string, object>>();
-                foreach (var loc in SiteConfiguration.Localizations.Values)
+                Log.Debug("Loading resources for localization : '{0}'", loc.GetBaseUrl());
+                var resources = new Dictionary<string, object>();
+                var staticsRoot = Path.Combine(new[] { applicationRoot, SiteConfiguration.GetLocalStaticsFolder(loc.LocalizationId) });
+                var path = Path.Combine(new[] { staticsRoot, loc.Path.ToCombinePath(), SiteConfiguration.SystemFolder, @"resources\_all.json" });
+                if (File.Exists(path))
                 {
-                    //Just in case the same localization is in there more than once
-                    if (!_resources.ContainsKey(loc.Path))
+                    //The _all.json file contains a list of all other resources files to load
+                    Log.Debug("Loading resource bootstrap file : '{0}'", path);
+                    var bootstrapJson = Json.Decode(File.ReadAllText(path));
+                    foreach (string file in bootstrapJson.files)
                     {
-                        Log.Debug("Loading resources for localization : '{0}'", loc.Path);
-                        var resources = new Dictionary<string, object>();
-                        var path = Path.Combine(new[] { applicationRoot, SiteConfiguration.StaticsFolder, loc.Path.ToCombinePath(), SiteConfiguration.SystemFolder, @"resources\_all.json" });
-                        if (File.Exists(path))
+                        var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                        type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
+                        var filePath = Path.Combine(staticsRoot, file.ToCombinePath());
+                        if (File.Exists(filePath))
                         {
-                            //The _all.json file contains a list of all other resources files to load
-                            Log.Debug("Loading resource bootstrap file : '{0}'", path);
-                            var bootstrapJson = Json.Decode(File.ReadAllText(path));
-                            foreach (string file in bootstrapJson.files)
+                            Log.Debug("Loading resources from file: {0}", filePath);
+                            foreach (var item in GetResourcesFromFile(filePath))
                             {
-                                var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
-                                type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                                var filePath = Path.Combine(applicationRoot, SiteConfiguration.StaticsFolder, file.ToCombinePath());
-                                if (File.Exists(filePath))
-                                {
-                                    Log.Debug("Loading resources from file: {0}", filePath);
-                                    foreach (var item in GetResourcesFromFile(filePath))
-                                    {
-                                        //we ensure resource key uniqueness by adding the type (which comes from the filename)
-                                        resources.Add(String.Format("{0}.{1}", type, item.Key), item.Value);
-                                    }
-                                }
-                                else
-                                {
-                                    Log.Error("Resource file: {0} does not exist - skipping", filePath);
-                                }
+                                //we ensure resource key uniqueness by adding the type (which comes from the filename)
+                                resources.Add(String.Format("{0}.{1}", type, item.Key), item.Value);
                             }
-                            _resources.Add(loc.Path, resources);
                         }
                         else
                         {
-                            Log.Warn("Localization resource bootstrap file: {0} does not exist - skipping this localization", path);
+                            Log.Error("Resource file: {0} does not exist - skipping", filePath);
                         }
                     }
+                    _resources.Add(loc.LocalizationId, resources);
+                }
+                else
+                {
+                    Log.Warn("Localization resource bootstrap file: {0} does not exist - skipping this localization", path);
                 }
             }
-            LastSettingsRefresh = DateTime.Now;
         }
 
         private static Dictionary<string, object> GetResourcesFromFile(string filePath)

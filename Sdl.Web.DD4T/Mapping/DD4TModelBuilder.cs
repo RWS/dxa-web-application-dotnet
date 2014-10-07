@@ -734,7 +734,7 @@ namespace Sdl.Web.DD4T.Mapping
             meta.Add("og:url", WebRequestContext.RequestUrl);
             //TODO is this always article?
             meta.Add("og:type", "article");
-            meta.Add("og:locale", SiteConfiguration.GetConfig("core.culture", WebRequestContext.Localization.Path));
+            meta.Add("og:locale", WebRequestContext.Localization.Culture);
             if (description != null)
             {
                 meta.Add("og:description", description);

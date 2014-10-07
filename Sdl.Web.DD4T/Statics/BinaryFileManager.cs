@@ -55,7 +55,7 @@ namespace Sdl.Web.DD4T.Statics
         /// <returns></returns>
         public bool ProcessRequest(HttpRequest request)
         {
-            string urlPath = request.Url.AbsolutePath.Replace("/" + SiteConfiguration.StaticsFolder, String.Empty);
+            string urlPath = request.Url.AbsolutePath.Replace("/" + SiteConfiguration.GetLocalStaticsUrl(WebRequestContext.Localization.LocalizationId), String.Empty);
             string physicalPath = request.PhysicalPath;
             Log.Debug("Start processing " + urlPath);
             return ProcessUrl(urlPath, false, physicalPath);
@@ -163,7 +163,7 @@ namespace Sdl.Web.DD4T.Statics
 
         private static string GetFilePathFromUrl(string urlPath)
         {
-            return HttpContext.Current.Server.MapPath("~/" + SiteConfiguration.StaticsFolder + urlPath);
+            return HttpContext.Current.Server.MapPath("~/" + SiteConfiguration.GetLocalStaticsFolder("17") + urlPath);
         }
         #endregion
 

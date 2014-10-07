@@ -5,6 +5,7 @@ using System.Web;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.DD4T.Statics
 {
@@ -36,7 +37,8 @@ namespace Sdl.Web.DD4T.Statics
             HttpRequest request = context.Request;
             HttpResponse response = context.Response;
             string urlPath = request.Url.AbsolutePath;
-            urlPath = urlPath.StartsWith("/" + SiteConfiguration.StaticsFolder) ? urlPath.Substring(SiteConfiguration.StaticsFolder.Length + 1) : urlPath;
+            var staticsRootUrl = SiteConfiguration.GetLocalStaticsUrl(WebRequestContext.Localization.LocalizationId);
+            urlPath = urlPath.StartsWith("/" + staticsRootUrl) ? urlPath.Substring(staticsRootUrl.Length + 1) : urlPath;
             if (!IsBinaryUrl.IsMatch(urlPath))
             {
                 Log.Debug("Url {0} does not match binary url pattern, ignoring it.", urlPath);
@@ -98,8 +100,8 @@ namespace Sdl.Web.DD4T.Statics
                 return;
             }
 
-            string realPath = Path.Combine(new[] { request.PhysicalApplicationPath, SiteConfiguration.StaticsFolder, request.Path.ToCombinePath() }); // request.PhysicalPath;
-            context.RewritePath("/" + SiteConfiguration.StaticsFolder + request.Path);
+            string realPath = Path.Combine(new[] { request.PhysicalApplicationPath, SiteConfiguration.GetLocalStaticsFolder(WebRequestContext.Localization.LocalizationId), request.Path.ToCombinePath() }); // request.PhysicalPath;
+            context.RewritePath("/" + SiteConfiguration.GetLocalStaticsFolder(WebRequestContext.Localization.LocalizationId) + request.Path);
             if (!File.Exists(realPath))
             {
                 string dir = realPath.Substring(0, realPath.LastIndexOf("\\", StringComparison.Ordinal));
@@ -152,7 +154,7 @@ namespace Sdl.Web.DD4T.Statics
         {
             get
             {
-                return _isBinaryUrl ?? (_isBinaryUrl = new Regex(SiteConfiguration.MediaUrlRegex));
+                return _isBinaryUrl ?? (_isBinaryUrl = new Regex(WebRequestContext.Localization.MediaUrlRegex));
             }
         }
 

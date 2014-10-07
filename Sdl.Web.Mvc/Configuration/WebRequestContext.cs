@@ -149,26 +149,14 @@ namespace Sdl.Web.Mvc.Configuration
             {
                 if (HttpContext.Current != null)
                 {
-                    var uri = HttpContext.Current.Request.Path;
-                    if (uri.StartsWith("/" + SiteConfiguration.StaticsFolder))
-                    {
-                        uri = uri.Substring(SiteConfiguration.StaticsFolder.Length + 1);
-                    }
-                    foreach (var loc in SiteConfiguration.Localizations.Values)
-                    {
-                        if (uri==loc.Path || uri.StartsWith(loc.Path + "/"))
-                        {
-                            Log.Debug("Request for {0} is from localization {1} ('{2}')", uri, loc.LocalizationId, loc.Path);
-                            return loc;
-                        }
-                    }
+                    return SiteConfiguration.GetLocalizationFromUri(HttpContext.Current.Request.Url);
                 }
             }
             catch (Exception)
             {
-                //Do nothing - In some cases we do not have a request (loading config on app start etc.) - we fallback on a default localization
+                //Do nothing
             }
-            return new Localization { LocalizationId = "0", Culture = "en-US", Path = String.Empty };
+            return null;
         }
         
         protected static object GetFromContextStore(string key)

@@ -76,9 +76,10 @@ namespace Sdl.Web.Tridion.Config
         {
             lock (RegionLock)
             {
-                var rootApplicationFolder = AppDomain.CurrentDomain.BaseDirectory;
+                var localizationId = "17";
+                var rootApplicationFolder = AppDomain.CurrentDomain.BaseDirectory + SiteConfiguration.GetLocalStaticsFolder(localizationId);
                 _xpmRegions = new Dictionary<string, XpmRegion>();
-                var configPath = Path.Combine(new[] { rootApplicationFolder, SiteConfiguration.StaticsFolder, SiteConfiguration.DefaultLocalization.ToCombinePath(), @"system\mappings\regions.json" });
+                var configPath = Path.Combine(new[] { rootApplicationFolder, SiteConfiguration.DefaultLocalization.ToCombinePath(), @"system\mappings\regions.json" });
                 foreach (var region in GetRegionsFromFile(configPath))
                 {
                     _xpmRegions.Add(region.Region, region);
