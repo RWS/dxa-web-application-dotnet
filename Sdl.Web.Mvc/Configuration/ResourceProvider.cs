@@ -68,25 +68,23 @@ namespace Sdl.Web.Mvc.Configuration
         {
             if (!_resources.ContainsKey(loc.LocalizationId))
             {
-                var applicationRoot = AppDomain.CurrentDomain.BaseDirectory;
                 Log.Debug("Loading resources for localization : '{0}'", loc.GetBaseUrl());
                 var resources = new Dictionary<string, object>();
-                var staticsRoot = Path.Combine(new[] { applicationRoot, SiteConfiguration.GetLocalStaticsFolder(loc.LocalizationId) });
-                var path = Path.Combine(new[] { staticsRoot, loc.Path.ToCombinePath(), SiteConfiguration.SystemFolder, @"resources\_all.json" });
-                if (File.Exists(path))
+                var url = Path.Combine(loc.Path.ToCombinePath(), SiteConfiguration.SystemFolder, @"resources\_all.json").Replace("\\","/");
+                var jsonData = SiteConfiguration.StaticFileManager.Serialize(url, loc, true);
+                if (jsonData!=null)
                 {
                     //The _all.json file contains a list of all other resources files to load
-                    Log.Debug("Loading resource bootstrap file : '{0}'", path);
-                    var bootstrapJson = Json.Decode(File.ReadAllText(path));
-                    foreach (string file in bootstrapJson.files)
+                    var bootstrapJson = Json.Decode(jsonData);
+                    foreach (string resourceUrl in bootstrapJson.files)
                     {
-                        var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                        var type = resourceUrl.Substring(resourceUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
                         type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                        var filePath = Path.Combine(staticsRoot, file.ToCombinePath());
-                        if (File.Exists(filePath))
+                        jsonData = SiteConfiguration.StaticFileManager.Serialize(resourceUrl, loc, true);
+                        if (jsonData!=null)
                         {
-                            Log.Debug("Loading resources from file: {0}", filePath);
-                            foreach (var item in GetResourcesFromFile(filePath))
+                            Log.Debug("Loading resources from file: {0}", resourceUrl);
+                            foreach (var item in GetResourcesFromFile(jsonData))
                             {
                                 //we ensure resource key uniqueness by adding the type (which comes from the filename)
                                 resources.Add(String.Format("{0}.{1}", type, item.Key), item.Value);
@@ -94,21 +92,21 @@ namespace Sdl.Web.Mvc.Configuration
                         }
                         else
                         {
-                            Log.Error("Resource file: {0} does not exist - skipping", filePath);
+                            Log.Error("Resource file: {0} does not exist for localization {1} - skipping", resourceUrl, loc.LocalizationId);
                         }
                     }
                     _resources.Add(loc.LocalizationId, resources);
                 }
                 else
                 {
-                    Log.Warn("Localization resource bootstrap file: {0} does not exist - skipping this localization", path);
+                    Log.Error("Localization resource bootstrap file: {0} does not exist for localization {1}. Check that the Publish Settings page has been published in this publication.", url, loc.LocalizationId);
                 }
             }
         }
 
-        private static Dictionary<string, object> GetResourcesFromFile(string filePath)
+        private static Dictionary<string, object> GetResourcesFromFile(string jsonData)
         {
-            return new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(File.ReadAllText(filePath));
+            return new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(jsonData);
         }
     }
 

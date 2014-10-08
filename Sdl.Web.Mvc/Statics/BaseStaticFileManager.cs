@@ -32,11 +32,11 @@ namespace Sdl.Web.Mvc.Statics
                         {
                             //The other config etc files are bootstrapped from /system/_all.json
                             var url = String.Format("{0}/{1}/_all.json", String.IsNullOrEmpty(loc.Path) || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, SiteConfiguration.SystemFolder);                            
-                            SerializeFile(url, 2);
+                            SerializeFile(url, loc, 2);
                             folders.Add(localizationRoot);
                             //The HTML Design version is published in /version.json
                             var versionUrl = String.Format("{0}/version.json", String.IsNullOrEmpty(loc.Path) || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path);
-                            var versionJson = Serialize(versionUrl, true);
+                            var versionJson = Serialize(versionUrl, loc, true);
                             if (versionJson == null)
                             {
                                 //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually
@@ -68,16 +68,16 @@ namespace Sdl.Web.Mvc.Statics
             return version;
         }
 
-        public abstract string Serialize(string url, bool returnContents = false);
+        public abstract string Serialize(string url, Localization loc, bool returnContents = false);
 
         /// <summary>
         /// Recursively serialize a file (which may contain just a list of further files to recursively process)
         /// </summary>
         /// <param name="url">The url of the file</param>
         /// <param name="bootstrapLevel">Level of recursion expected 0=none (the file contains data to serialize rather than a list of other files)</param>
-        protected virtual void SerializeFile(string url, int bootstrapLevel = 0)
+        protected virtual void SerializeFile(string url, Localization loc, int bootstrapLevel = 0)
         {
-            string fileContents = Serialize(url, bootstrapLevel != 0);
+            string fileContents = Serialize(url, loc, bootstrapLevel != 0);
             if (bootstrapLevel != 0 && fileContents!=null)
             {
                 var bootstrapJson = Json.Decode(fileContents);
@@ -85,7 +85,7 @@ namespace Sdl.Web.Mvc.Statics
                 {
                     try
                     {
-                        SerializeFile(file, bootstrapLevel - 1);
+                        SerializeFile(file, loc, bootstrapLevel - 1);
                     }
                     catch (Exception ex)
                     {

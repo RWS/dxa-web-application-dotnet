@@ -61,11 +61,11 @@ namespace Sdl.Web.DD4T.Statics
             return ProcessUrl(urlPath, false, physicalPath);
         }
 
-        public string GetStaticContent(string urlPath, bool cacheSinceLastRefresh = false)
+        public string GetStaticContent(string urlPath, Localization loc, bool cacheSinceLastRefresh = false)
         {
-            if (ProcessUrl(urlPath, cacheSinceLastRefresh))
+            if (ProcessUrl(urlPath, cacheSinceLastRefresh, null, loc))
             {
-                var filePath = GetFilePathFromUrl(urlPath);
+                var filePath = GetFilePathFromUrl(urlPath, loc);
                 if (File.Exists(filePath))
                 {
                     return Encoding.UTF8.GetString(File.ReadAllBytes(filePath));
@@ -78,20 +78,24 @@ namespace Sdl.Web.DD4T.Statics
         /// Main worker method reads binary from Broker and stores it in file-system
         /// </summary>
         /// <returns></returns>
-        public bool ProcessUrl(string urlPath, bool cacheSinceLastRefresh = false, string physicalPath = null)
+        public bool ProcessUrl(string urlPath, bool cacheSinceLastRefresh = false, string physicalPath = null, Localization loc = null)
         {
             Dimensions dimensions;
+            if (loc==null)
+            {
+                loc = WebRequestContext.Localization;
+            }
             bool connectionError = false;
             if (physicalPath == null)
             {
-                physicalPath = GetFilePathFromUrl(urlPath);
+                physicalPath = GetFilePathFromUrl(urlPath, loc);
             }
             urlPath = StripDimensions(urlPath, out dimensions);
             string cacheKey = GetCacheKey(urlPath);
             DateTime? lastPublishedDate = CacheAgent.Load(cacheKey) as DateTime?;
             if (lastPublishedDate == null)
             {
-                BinaryFactory.BinaryProvider.PublicationId = GetLocalizationId(urlPath);
+                BinaryFactory.BinaryProvider.PublicationId = Int32.Parse(loc.LocalizationId);
                 try
                 {
                     DateTime lpb = BinaryFactory.FindLastPublishedDate(urlPath);
@@ -146,7 +150,7 @@ namespace Sdl.Web.DD4T.Statics
 
             // the normal situation (where a binary is still in Tridion and it is present on the file system already and it is up to date) is now covered
             // Let's handle the exception situations. 
-            IBinary binary = GetBinaryFromBroker(urlPath);
+            IBinary binary = GetBinaryFromBroker(urlPath,loc);
             if (binary==null)
             {
                 Log.Debug("Binary with url {0} not found", urlPath);
@@ -161,9 +165,9 @@ namespace Sdl.Web.DD4T.Statics
 
         }
 
-        private static string GetFilePathFromUrl(string urlPath)
+        private static string GetFilePathFromUrl(string urlPath, Localization loc)
         {
-            return HttpContext.Current.Server.MapPath("~/" + SiteConfiguration.GetLocalStaticsFolder("17") + urlPath);
+            return HttpContext.Current.Server.MapPath("~/" + SiteConfiguration.GetLocalStaticsFolder(loc.LocalizationId) + urlPath);
         }
         #endregion
 
@@ -255,31 +259,10 @@ namespace Sdl.Web.DD4T.Statics
             }
         }
 
-        protected int GetLocalizationId(string urlPath)
-        {
-            int localizationId = Int32.Parse(WebRequestContext.Localization.LocalizationId);
-            if (localizationId == 0)
-            {
-                //When we are reading in config on application start, we cannot rely
-                //On the publication resolver to get the right publication id, as there
-                //is no HttpRequest to determine it from, so we match the binary url
-                //with the configured localizations
-                foreach (var loc in SiteConfiguration.Localizations.Values)
-                {
-                    if (urlPath.StartsWith(loc.Path))
-                    {
-                        localizationId = Int32.Parse(loc.LocalizationId);
-                        break;
-                    }
-                }
-            }
-            return localizationId;
-        }
-
-        protected IBinary GetBinaryFromBroker(string urlPath)
+        protected IBinary GetBinaryFromBroker(string urlPath, Localization loc)
         {
             IBinary binary = null;
-            BinaryFactory.BinaryProvider.PublicationId = GetLocalizationId(urlPath);
+            BinaryFactory.BinaryProvider.PublicationId = Int32.Parse(loc.LocalizationId);
             try
             {
                 BinaryFactory.TryFindBinary(urlPath, out binary);
@@ -298,13 +281,13 @@ namespace Sdl.Web.DD4T.Statics
 
         #endregion
 
-        public override string Serialize(string url, bool returnContents = false)
+        public override string Serialize(string url, Localization loc, bool returnContents = false)
         {
             if (returnContents)
             {
-                return GetStaticContent(url, true);
+                return GetStaticContent(url, loc, true);
             }
-            ProcessUrl(url, true);
+            ProcessUrl(url, true, null, loc);
             return null;
         }
 

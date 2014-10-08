@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Sdl.Web.Common.Configuration;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Sdl.Web.Common.Mapping
@@ -29,6 +30,9 @@ namespace Sdl.Web.Common.Mapping
         /// </summary>
         public List<SchemaSemantics> Semantics { get; set; }
 
+
+        public Localization Localization { get; set; }
+
         /// <summary>
         /// Initializes a new empty instance of the <see cref="SemanticSchema"/> class.
         /// </summary>
@@ -48,7 +52,7 @@ namespace Sdl.Web.Common.Mapping
             List<KeyValuePair<string, string>> entityNames = new List<KeyValuePair<string, string>>();
             foreach (var schemaSemantics in Semantics)
             {
-                string vocab = SemanticMapping.GetVocabulary(schemaSemantics.Prefix);
+                string vocab = SemanticMapping.GetVocabulary(schemaSemantics.Prefix, Localization);
                 entityNames.Add(new KeyValuePair<string, string>(vocab, schemaSemantics.Entity));
             }
 

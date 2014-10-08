@@ -9,7 +9,7 @@
 
         public static string ToCombinePath(this string value)
         {
-            return value.Replace('/', '\\').Trim('\\');
+            return "\\" + value.Replace('/', '\\').Trim('\\');
         }
     }
 }

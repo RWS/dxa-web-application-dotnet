@@ -20,7 +20,7 @@ namespace Sdl.Web.Tridion.Config
         private static List<Dictionary<string,string>> _localizations;
         private static readonly Object LocalizationLock = new Object();
         private static readonly Object RegionLock = new Object();
-        private static Dictionary<string, XpmRegion> _xpmRegions;
+        private static Dictionary<string, Dictionary<string, XpmRegion>> _xpmRegions = new Dictionary<string,Dictionary<string,XpmRegion>>();
 
         // page title and meta field mappings
         public static string StandardMetadataXmlFieldName = "standardMeta";
@@ -29,18 +29,6 @@ namespace Sdl.Web.Tridion.Config
         public static string RegionForPageTitleComponent = "Main";
         public static string ComponentXmlFieldNameForPageTitle = "headline";
 
-        public static Dictionary<string, XpmRegion> XpmRegions
-        {
-            get
-            {
-                if (_xpmRegions == null)
-                {
-                    LoadRegions();
-                }
-                return _xpmRegions;
-            }
-        }
-        
         public static List<Dictionary<string, string>> PublicationMap
         {
             get
@@ -68,21 +56,6 @@ namespace Sdl.Web.Tridion.Config
                 foreach (var pub in config.Descendants("Publication"))
                 {
                     _localizations.Add(GetLocalization(pub.Element("Host")));
-                }
-            }
-        }
-
-        public static void LoadRegions()
-        {
-            lock (RegionLock)
-            {
-                var localizationId = "17";
-                var rootApplicationFolder = AppDomain.CurrentDomain.BaseDirectory + SiteConfiguration.GetLocalStaticsFolder(localizationId);
-                _xpmRegions = new Dictionary<string, XpmRegion>();
-                var configPath = Path.Combine(new[] { rootApplicationFolder, SiteConfiguration.DefaultLocalization.ToCombinePath(), @"system\mappings\regions.json" });
-                foreach (var region in GetRegionsFromFile(configPath))
-                {
-                    _xpmRegions.Add(region.Region, region);
                 }
             }
         }
@@ -116,27 +89,46 @@ namespace Sdl.Web.Tridion.Config
         /// </summary>
         /// <param name="name">The region name</param>
         /// <returns>The XPM region matching the name for the given module</returns>
-        public static XpmRegion GetXpmRegion(string name)
+        public static XpmRegion GetXpmRegion(string name, Localization loc)
         {
-            return GetXpmRegion(XpmRegions, name);
-        }
-
-        private static XpmRegion GetXpmRegion(IReadOnlyDictionary<string, XpmRegion> regions, string name)
-        {
-            if (regions.ContainsKey(name))
+            if (!_xpmRegions.ContainsKey(loc.LocalizationId))
             {
-                return regions[name];
+                LoadRegionsForLocalization(loc);
             }
-
-            Exception ex = new Exception(string.Format("XPM Region '{0}' does not exist.", name));
-            //TODO - do we throw an error, or apply some defaults?
-            Log.Error(ex);
-            throw ex;
+            if (_xpmRegions.ContainsKey(loc.LocalizationId))
+            {
+                var regionData = _xpmRegions[loc.LocalizationId];
+                if (regionData.ContainsKey(name))
+                {
+                    return regionData[name];
+                }
+            }
+            Log.Warn("XPM Region '{0}' does not exist in localization {1}.", name, loc.LocalizationId);
+            return null;
         }
 
-        private static IEnumerable<XpmRegion> GetRegionsFromFile(string file)
+        private static void LoadRegionsForLocalization(Localization loc)
         {
-            return new JavaScriptSerializer().Deserialize<List<XpmRegion>>(File.ReadAllText(file));
+            var url = Path.Combine(loc.Path.ToCombinePath(), @"system\mappings\regions.json").Replace("\\", "/");
+            var jsonData = SiteConfiguration.StaticFileManager.Serialize(url, loc, true);
+            if (jsonData != null)
+            {
+                var regions = new Dictionary<string, XpmRegion>();
+                foreach (var region in GetRegionsFromFile(jsonData))
+                {
+                    regions.Add(region.Region, region);
+                }
+                _xpmRegions.Add(loc.LocalizationId, regions);
+            }
+            else
+            {
+                Log.Error("Region file: {0} does not exist for localization {1}. Check that the Publish Settings page has been published in this publication.", url, loc.LocalizationId);
+            }
+        }
+        
+        private static IEnumerable<XpmRegion> GetRegionsFromFile(string jsonData)
+        {
+            return new JavaScriptSerializer().Deserialize<List<XpmRegion>>(jsonData);
         }
     }
 }

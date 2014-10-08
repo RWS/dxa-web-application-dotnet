@@ -135,7 +135,7 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 var page = (IPage)model;
                 var bits = page.PageTemplate.Id.Split('-');
-                var includes = SemanticMapping.GetIncludes(bits[1]);
+                var includes = SemanticMapping.GetIncludes(bits[1], WebRequestContext.Localization);
                 if (includes != null)
                 {
                     foreach (var include in includes)

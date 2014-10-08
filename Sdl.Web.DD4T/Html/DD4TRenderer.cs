@@ -79,7 +79,7 @@ namespace Sdl.Web.DD4T.Html
                 
                 if (WebRequestContext.IsPreview)
                 {
-                    result = new MvcHtmlString(TridionMarkup.ParseRegion(result.ToString()));
+                    result = new MvcHtmlString(TridionMarkup.ParseRegion(result.ToString(),WebRequestContext.Localization));
                 }
                 return result;
             }
@@ -94,7 +94,7 @@ namespace Sdl.Web.DD4T.Html
         /// <returns>The page markup</returns>
         public override MvcHtmlString RenderPageData(IPage page, HtmlHelper helper)
         {
-            if (WebRequestContext.IsPreview)
+            if (WebRequestContext.Localization.IsStaging)
             {
                 if (!page.PageData.ContainsKey("CmsUrl"))
                 {

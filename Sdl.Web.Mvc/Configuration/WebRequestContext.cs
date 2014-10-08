@@ -116,7 +116,7 @@ namespace Sdl.Web.Mvc.Configuration
             //For now we cannot reliably detect when we are in experience manager, so we set this to be true whenever we are in staging
             get
             {
-                return (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", SiteConfiguration.IsStaging);
+                return (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", WebRequestContext.Localization.IsStaging);
             }
         }
 

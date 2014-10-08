@@ -84,6 +84,7 @@ namespace Sdl.Web.Common.Configuration
         /// <summary>
         /// True if this is a staging website
         /// </summary>
+        [Obsolete("Use Localization.IsStaging property of current localization (eg via WebRequestContext.Localization.IsStaging)",true)]
         public static bool IsStaging { get; set; }
 
         /// <summary>
@@ -217,7 +218,6 @@ namespace Sdl.Web.Common.Configuration
             LastSettingsRefresh = DateTime.Now;
             var appRoot = AppDomain.CurrentDomain.BaseDirectory;
             Load(appRoot);
-            SemanticMapping.Load(appRoot);
         }
 
         public static void Initialize(List<Dictionary<string,string>> localizationList)
@@ -236,8 +236,9 @@ namespace Sdl.Web.Common.Configuration
             lock (ConfigLock)
             {
                 //Ensure that the config files have been written to disk and HTML Design version is 
-                var version = StaticFileManager.CreateStaticAssets(applicationRoot) ?? DefaultVersion;
-                SiteVersion = version;
+                //var version = StaticFileManager.CreateStaticAssets(applicationRoot) ?? DefaultVersion;
+                //var version = DefaultVersion;
+                //SiteVersion = version;
                 DefaultLocalization = "";
                 //Filter out localizations that were not found on disk, and add culture/set default localization from config
                 /*Dictionary<string, Localization> relevantLocalizations = new Dictionary<string, Localization>();
@@ -275,16 +276,15 @@ namespace Sdl.Web.Common.Configuration
             //TODO - need to lock something?
             if (!_localConfiguration.ContainsKey(loc.LocalizationId))
             {
-                var applicationRoot = AppDomain.CurrentDomain.BaseDirectory;
                 var mediaPatterns = new List<string> { "^/favicon.ico" };
-                Log.Debug("Loading config for localization : '{0}'", loc.Path);
+                Log.Debug("Loading config for localization : '{0}'", loc.GetBaseUrl());
                 var config = new Dictionary<string, Dictionary<string, string>>();
-                var path = Path.Combine(new[] { applicationRoot, GetLocalStaticsFolder(loc.LocalizationId), loc.Path.ToCombinePath(), SystemFolder, @"config\_all.json" });
-                if (File.Exists(path))
+                var url = Path.Combine(loc.Path.ToCombinePath(), SystemFolder, @"config\_all.json").Replace("\\", "/");
+                var jsonData = StaticFileManager.Serialize(url, loc, true);
+                if (jsonData!=null)
                 {
                     //The _all.json file contains a reference to all other configuration files
-                    Log.Debug("Loading config bootstrap file : '{0}'", path);
-                    var bootstrapJson = Json.Decode(File.ReadAllText(path));
+                    var bootstrapJson = Json.Decode(jsonData);
                     if (bootstrapJson.defaultLocalization != null && bootstrapJson.defaultLocalization)
                     {
                         DefaultLocalization = loc.Path;
@@ -292,8 +292,8 @@ namespace Sdl.Web.Common.Configuration
                     }
                     if (bootstrapJson.staging != null && bootstrapJson.staging)
                     {
-                        IsStaging = true;
-                        Log.Info("This is site is staging");
+                        loc.IsStaging = true;
+                        Log.Info("Site {0} is a staging site.",loc.GetBaseUrl());
                     }
                     if (bootstrapJson.mediaRoot != null)
                     {
@@ -310,14 +310,14 @@ namespace Sdl.Web.Common.Configuration
                         mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*", loc.Path, SystemFolder));
                     }
                     mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$", loc.Path, SystemFolder));
-                    foreach (string file in bootstrapJson.files)
+                    foreach (string configUrl in bootstrapJson.files)
                     {
-                        var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                        var type = configUrl.Substring(configUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
                         type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                        var configPath = Path.Combine(new[] { applicationRoot, GetLocalStaticsFolder(loc.LocalizationId), file.ToCombinePath() });
-                        if (File.Exists(configPath))
+                        jsonData = StaticFileManager.Serialize(configUrl, loc, true);
+                        if (jsonData!=null)
                         {
-                            Log.Debug("Loading config from file: {0}", configPath);
+                            Log.Debug("Loading config from file: {0} for localization {1}", configUrl, loc.LocalizationId);
                             //For the default localization we load in global configuration
                             /*TODO
                             if (type.Contains(".") && loc.Path == DefaultLocalization)
@@ -331,12 +331,12 @@ namespace Sdl.Web.Common.Configuration
                             }
                             else*/
                             {
-                                config.Add(type, GetConfigFromFile(configPath));
+                                config.Add(type, GetConfigFromFile(jsonData));
                             }
                         }
                         else
                         {
-                            Log.Error("Config file: {0} does not exist - skipping", configPath);
+                            Log.Error("Config file: {0} does not exist for localization {1} - skipping", configUrl, loc.LocalizationId);
                         }
                     }
                     if (!_localConfiguration.ContainsKey(loc.LocalizationId))
@@ -346,7 +346,25 @@ namespace Sdl.Web.Common.Configuration
                 }
                 else
                 {
-                    Log.Warn("Localization configuration bootstrap file: {0} does not exist - skipping this localization", path);
+                    Log.Warn("Localization configuration bootstrap file: {0} does not exist for localization {1} - skipping this localization", url, loc.LocalizationId);
+                }
+                loc.IsHtmlDesignPublished = true;//default
+                var versionUrl = Path.Combine(loc.Path.ToCombinePath(), @"version.json").Replace("\\", "/");
+                var versionJson = StaticFileManager.Serialize(versionUrl, loc, true);
+                if (versionJson == null)
+                {
+                    //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually
+                    //in which case we try to load it directly - the HTML Design is thus not published from CMS
+                    var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SystemFolder, @"\assets\version.json");
+                    if (File.Exists(path))
+                    {
+                        versionJson = File.ReadAllText(path);
+                        loc.IsHtmlDesignPublished = false;
+                    }
+                }
+                if (versionJson != null)
+                {
+                    loc.Version = Json.Decode(versionJson).version;
                 }
                 loc.MediaUrlRegex = String.Join("|", mediaPatterns);
                 loc.Culture = GetConfig("core.culture", loc);
@@ -354,9 +372,9 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
-        private static Dictionary<string, string> GetConfigFromFile(string file)
+        private static Dictionary<string, string> GetConfigFromFile(string jsonData)
         {
-            return new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(File.ReadAllText(file));
+            return new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(jsonData);
         }
 
         public static string GetPageController()
@@ -393,6 +411,7 @@ namespace Sdl.Web.Common.Configuration
         /// <summary>
         /// The version number used when building paths to HTML Design assets
         /// </summary>
+        [Obsolete("Use Version property of current Localization instead. Eg WebRequestContext.Localization.Version.",true)]
         public static string SiteVersion{get;set;}
 
         /// <summary>
