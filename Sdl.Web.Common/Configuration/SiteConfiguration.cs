@@ -53,9 +53,9 @@ namespace Sdl.Web.Common.Configuration
         /// </summary>
         public static bool IsHtmlDesignPublished = true;
 
-        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _localConfiguration = new Dictionary<string,Dictionary<string,Dictionary<string,string>>>();
-        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _globalConfiguration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();        
+        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _configuration = new Dictionary<string,Dictionary<string,Dictionary<string,string>>>();
         private static Dictionary<string, Type> _viewModelRegistry;
+        private static Dictionary<string, DateTime> _localizationLastRefreshes = new Dictionary<string, DateTime>();
         
         /// <summary>
         /// A registry of View Path -> View Model Type mappings to enable the correct View Model to be mapped for a given View
@@ -77,11 +77,6 @@ namespace Sdl.Web.Common.Configuration
         }
 
         /// <summary>
-        /// For multi-localization (language) websites, one is set to be the default
-        /// </summary>
-        public static string DefaultLocalization { get; private set; }
-
-        /// <summary>
         /// True if this is a staging website
         /// </summary>
         [Obsolete("Use Localization.IsStaging property of current localization (eg via WebRequestContext.Localization.IsStaging)",true)]
@@ -90,30 +85,13 @@ namespace Sdl.Web.Common.Configuration
         /// <summary>
         /// A dictionary of local (varying per localization) configuration settings, typically accessed with the GetConfig method, or Html.Config extension method (in Views)
         /// </summary> 
-        public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LocalConfiguration
+        public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> Configuration
         {
             get
             {
-                return _localConfiguration;
+                return _configuration;
             }
         }
-
-        /// <summary>
-        /// A dictionary of global (not varying per localization) configuration settings, typically accessed with the GetGlobalConfig method
-        /// </summary> 
-        public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> GlobalConfiguration
-        {
-            get
-            {
-                if (_globalConfiguration == null)
-                {
-                    LoadConfig();
-                }
-                return _globalConfiguration;
-            }
-        }
-
-        public static DateTime LastSettingsRefresh { get; set; }
 
         private static readonly object ConfigLock = new object();
         private static readonly object ViewRegistryLock = new object();
@@ -124,9 +102,22 @@ namespace Sdl.Web.Common.Configuration
         /// <param name="key">The configuration key, in the format "section.name" (eg "Schema.Article")</param>
         /// <param name="module">The module (eg "Search") - if none specified this defaults to "Core"</param>
         /// <returns>The configuration matching the key for the given module</returns>
+        [Obsolete("GetGlobalConfig(string,string) is deprecated, please use GetConfig(string, Localization) by combining the key and module parameters in the format {module.key} (eg core.schemas.article)", true)]
         public static string GetGlobalConfig(string key, string module = CoreModuleName)
         {
-            return GetConfig(GlobalConfiguration, key, module, true);
+            return GetConfig(String.Format("{0}.{1}",module,key), GetLocalizationFromPath(""));
+        }
+
+        private static Localization GetLocalizationFromPath(string path)
+        {
+            foreach (var loc in Localizations.Values)
+            {
+                if (loc.Path == path)
+                {
+                    return loc;
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -138,18 +129,7 @@ namespace Sdl.Web.Common.Configuration
         [Obsolete("GetConfig(string,string) is deprecated, please use GetConfig(string, Localization) instead.", true)]
         public static string GetConfig(string key, string localization = null)
         {
-            if (localization == null)
-            {
-                localization = DefaultLocalization;
-            }
-            foreach (var loc in Localizations.Values)
-            {
-                if (loc.Path == localization)
-                {
-                    return GetConfig(key, loc);
-                }
-            }
-            return null;
+            return GetConfig(key, GetLocalizationFromPath(localization ?? ""));
         }
 
         /// <summary>
@@ -161,20 +141,16 @@ namespace Sdl.Web.Common.Configuration
         public static string GetConfig(string key, Localization localization)
         {
             CheckLocalizationLoaded(localization);
-            return GetConfig(LocalConfiguration, key, localization.LocalizationId);
+            return GetConfig(Configuration, key, localization.LocalizationId);
         }
 
         public static void CheckLocalizationLoaded(Localization localization)
         {
-            if (!LocalConfiguration.ContainsKey(localization.LocalizationId))
+            var key = localization.LocalizationId;
+            if (!Configuration.ContainsKey(key) || (_localizationLastRefreshes.ContainsKey(key) && _localizationLastRefreshes[key] < localization.LastSettingsRefresh))
             {
                 LoadLocalization(localization);
             }
-        }
-
-        private static void LoadConfig()
-        {
-            Load(AppDomain.CurrentDomain.BaseDirectory);
         }
         
         private static string GetConfig(IReadOnlyDictionary<string, Dictionary<string, Dictionary<string, string>>> config, string key, string type, bool global = false)
@@ -184,19 +160,23 @@ namespace Sdl.Web.Common.Configuration
             {
                 var subConfig = config[type];
                 var bits = key.Split('.');
-                if (bits.Length == 2)
+                if (bits.Length >= 2)
                 {
-                    if (subConfig.ContainsKey(bits[0]))
+                    //We actually allow more than one . in the key (for example core.schemas.article) in this case the section
+                    //is the part up to the last dot and the key is the part after it.
+                    var sectionbit = key.Substring(0, key.LastIndexOf("."));
+                    var keybit = bits[bits.Length - 1];
+                    if (subConfig.ContainsKey(sectionbit))
                     {
-                        if (subConfig[bits[0]].ContainsKey(bits[1]))
+                        if (subConfig[sectionbit].ContainsKey(keybit))
                         {
-                            return subConfig[bits[0]][bits[1]];
+                            return subConfig[sectionbit][keybit];
                         }
-                        ex = new Exception(String.Format("Configuration key {0} does not exist in section {1}", bits[1], bits[0]));
+                        ex = new Exception(String.Format("Configuration key {0} does not exist in section {1}", keybit, sectionbit));
                     }
                     else
                     {
-                        ex = new Exception(String.Format("Configuration section {0} does not exist", bits[0]));
+                        ex = new Exception(String.Format("Configuration section {0} does not exist", sectionbit));
                     }
                 }
                 else
@@ -213,68 +193,28 @@ namespace Sdl.Web.Common.Configuration
             throw ex;
         }
 
-        public static void Refresh()
+        public static void Refresh(Localization loc)
         {
-            LastSettingsRefresh = DateTime.Now;
-            var appRoot = AppDomain.CurrentDomain.BaseDirectory;
-            Load(appRoot);
+            loc.LastSettingsRefresh = DateTime.Now;
         }
 
         public static void Initialize(List<Dictionary<string,string>> localizationList)
         {
             SetLocalizations(localizationList);
-            Refresh();
-        }
-            
-        /// <summary>
-        /// Loads configuration into memory from database/disk
-        /// </summary>
-        /// <param name="applicationRoot">The root filepath of the application</param>
-        public static void Load(string applicationRoot)
-        {
-            //We are updating a static variable, so need to be thread safe
-            lock (ConfigLock)
-            {
-                //Ensure that the config files have been written to disk and HTML Design version is 
-                //var version = StaticFileManager.CreateStaticAssets(applicationRoot) ?? DefaultVersion;
-                //var version = DefaultVersion;
-                //SiteVersion = version;
-                DefaultLocalization = "";
-                //Filter out localizations that were not found on disk, and add culture/set default localization from config
-                /*Dictionary<string, Localization> relevantLocalizations = new Dictionary<string, Localization>();
-                foreach (var loc in Localizations)
-                {
-                    if (_localConfiguration.ContainsKey(loc.Value.LocalizationId))
-                    {
-                        var config = _localConfiguration[loc.Value.LocalizationId];
-                        if (config.ContainsKey("site"))
-                        {
-                            if (config["site"].ContainsKey("culture"))
-                            {
-                                loc.Value.Culture = config["site"]["culture"];
-                            }
-                        }
-                        relevantLocalizations.Add(loc.Key, loc.Value);
-                    }
-                }
-                Localizations = relevantLocalizations;
-                if (relevantLocalizations.Count==0)
-                {
-                    var msg = "No valid localizations are active for this site. Check the site log, and that you have the right localization IDs configured in cd_dynamic_conf.xml";
-                    Log.Error(msg);
-                    throw new Exception(msg);
-                }
-                else
-                {
-                    Log.Debug("The following localizations are active for this site: {0}", String.Join(", ", Localizations.Select(l => l.Key).ToArray()));    
-                }*/
-            }            
         }
 
         private static void LoadLocalization(Localization loc)
         {
             //TODO - need to lock something?
-            if (!_localConfiguration.ContainsKey(loc.LocalizationId))
+            if (_localizationLastRefreshes.ContainsKey(loc.LocalizationId))
+            {
+                _localizationLastRefreshes[loc.LocalizationId] = DateTime.Now;
+            }
+            else
+            {
+                _localizationLastRefreshes.Add(loc.LocalizationId, DateTime.Now);
+            }
+            var key = loc.LocalizationId;
             {
                 var mediaPatterns = new List<string> { "^/favicon.ico" };
                 Log.Debug("Loading config for localization : '{0}'", loc.GetBaseUrl());
@@ -287,8 +227,7 @@ namespace Sdl.Web.Common.Configuration
                     var bootstrapJson = Json.Decode(jsonData);
                     if (bootstrapJson.defaultLocalization != null && bootstrapJson.defaultLocalization)
                     {
-                        DefaultLocalization = loc.Path;
-                        Log.Info("Set default localization : '{0}'", loc.Path);
+                        loc.IsDefaultLocalization = true;
                     }
                     if (bootstrapJson.staging != null && bootstrapJson.staging)
                     {
@@ -317,31 +256,21 @@ namespace Sdl.Web.Common.Configuration
                         jsonData = StaticFileManager.Serialize(configUrl, loc, true);
                         if (jsonData!=null)
                         {
-                            Log.Debug("Loading config from file: {0} for localization {1}", configUrl, loc.LocalizationId);
-                            //For the default localization we load in global configuration
-                            /*TODO
-                            if (type.Contains(".") && loc.Path == DefaultLocalization)
-                            {
-                                var bits = type.Split('.');
-                                if (!globalConfiguration.ContainsKey(bits[0]))
-                                {
-                                    globalConfiguration.Add(bits[0], new Dictionary<string, Dictionary<string, string>>());
-                                }
-                                globalConfiguration[bits[0]].Add(bits[1], GetConfigFromFile(configPath));
-                            }
-                            else*/
-                            {
-                                config.Add(type, GetConfigFromFile(jsonData));
-                            }
+                            Log.Debug("Loading config from file: {0} for localization {1}", configUrl, key);
+                            config.Add(type, GetConfigFromFile(jsonData));
                         }
                         else
                         {
-                            Log.Error("Config file: {0} does not exist for localization {1} - skipping", configUrl, loc.LocalizationId);
+                            Log.Error("Config file: {0} does not exist for localization {1} - skipping", configUrl, key);
                         }
                     }
-                    if (!_localConfiguration.ContainsKey(loc.LocalizationId))
+                    if (_configuration.ContainsKey(key))
                     {
-                        _localConfiguration.Add(loc.LocalizationId, config);
+                        _configuration[key] = config;
+                    }
+                    else
+                    {
+                        _configuration.Add(key, config);
                     }
                 }
                 else
@@ -454,12 +383,11 @@ namespace Sdl.Web.Common.Configuration
         /// <param name="url">The URL to localize</param>
         /// <param name="localization">The localization to use</param>
         /// <returns>A localized URL</returns>
-        public static string LocalizeUrl(string url, Localization localization = null)
+        public static string LocalizeUrl(string url, Localization localization)
         {
-            string path = (localization==null) ? DefaultLocalization : localization.Path;
-            if (!String.IsNullOrEmpty(path))
+            if (!String.IsNullOrEmpty(localization.Path))
             {
-                return path + "/" + url;
+                return localization.Path + "/" + url;
             }
             return url;
         }

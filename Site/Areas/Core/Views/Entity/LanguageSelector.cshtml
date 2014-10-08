@@ -18,7 +18,7 @@
             {
                 var parms = "localization=" + loc.LocalizationId + (defaultItem!=null ? "&defaultItemId=" + defaultItem:"");
                 <option value="@loc.LocalizationId" data-href="/resolve/@(redirectId)?@parms" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>
-                    @SiteConfiguration.GetConfig("core.language", loc.Path)
+                    @SiteConfiguration.GetConfig("core.language", loc)
                 </option>
             }
         </select>

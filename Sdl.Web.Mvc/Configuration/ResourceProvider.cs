@@ -18,9 +18,11 @@ namespace Sdl.Web.Mvc.Configuration
     /// </summary>
     public class ResourceProvider : IResourceProvider
     {
-        private static Dictionary<string, Dictionary<string, object>> _resources;
+        private static Dictionary<string, Dictionary<string, object>> _resources = new Dictionary<string,Dictionary<string,object>>();
         private static readonly object ResourceLock = new object();
-        public static DateTime LastSettingsRefresh { get; set; }
+        private static readonly object RefreshLock = new object();
+        private static Dictionary<string, DateTime> _localizationLastRefreshes = new Dictionary<string, DateTime>();
+        
         public object GetObject(string resourceKey, CultureInfo culture)
         {
             //Ignore the culture - we read this from the RequestContext
@@ -45,13 +47,9 @@ namespace Sdl.Web.Mvc.Configuration
 
         public IDictionary Resources(Localization localization)
         {
-            if (_resources == null || LastSettingsRefresh < SiteConfiguration.LastSettingsRefresh)
-            {
-                //TODO only invalidate part of resources on refresh
-                _resources = new Dictionary<string, Dictionary<string, object>>();
-                LastSettingsRefresh = DateTime.Now;
-            }
-            if (!_resources.ContainsKey(localization.LocalizationId))
+            var key = localization.LocalizationId;
+            //Load resources if they are not already loaded, or if they are out of date and need refreshing
+            if (!_resources.ContainsKey(key) || (_localizationLastRefreshes.ContainsKey(key) && _localizationLastRefreshes[key] < localization.LastSettingsRefresh))
             {
                 LoadResourcesForLocalization(localization);
                 if (!_resources.ContainsKey(localization.LocalizationId))
@@ -66,7 +64,15 @@ namespace Sdl.Web.Mvc.Configuration
 
         private static void LoadResourcesForLocalization(Localization loc)
         {
-            if (!_resources.ContainsKey(loc.LocalizationId))
+            if (_localizationLastRefreshes.ContainsKey(loc.LocalizationId))
+            {
+                _localizationLastRefreshes[loc.LocalizationId] = DateTime.Now;
+            }
+            else
+            {
+                _localizationLastRefreshes.Add(loc.LocalizationId, DateTime.Now);
+            }
+            var key = loc.LocalizationId;
             {
                 Log.Debug("Loading resources for localization : '{0}'", loc.GetBaseUrl());
                 var resources = new Dictionary<string, object>();
@@ -92,15 +98,23 @@ namespace Sdl.Web.Mvc.Configuration
                         }
                         else
                         {
-                            Log.Error("Resource file: {0} does not exist for localization {1} - skipping", resourceUrl, loc.LocalizationId);
+                            Log.Error("Resource file: {0} does not exist for localization {1} - skipping", resourceUrl, key);
                         }
                     }
-                    _resources.Add(loc.LocalizationId, resources);
+                    if (_resources.ContainsKey(key))
+                    {
+                        _resources[key] = resources;
+                    }
+                    else
+                    {
+                        _resources.Add(key, resources);
+                    }
                 }
                 else
                 {
                     Log.Error("Localization resource bootstrap file: {0} does not exist for localization {1}. Check that the Publish Settings page has been published in this publication.", url, loc.LocalizationId);
                 }
+
             }
         }
 

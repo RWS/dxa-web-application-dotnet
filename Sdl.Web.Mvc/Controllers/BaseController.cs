@@ -231,7 +231,7 @@ namespace Sdl.Web.Mvc.Controllers
             {
                 if (localization == null)
                 {
-                    url = SiteConfiguration.DefaultLocalization;
+                    url = "";
                 }
                 else
                 {
