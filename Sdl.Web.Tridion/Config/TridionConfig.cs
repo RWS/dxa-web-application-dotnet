@@ -19,7 +19,8 @@ namespace Sdl.Web.Tridion.Config
     {
         private static List<Dictionary<string,string>> _localizations;
         private static readonly Object LocalizationLock = new Object();
-        private static readonly Object RegionLock = new Object();
+        private static readonly string _regionSettingsType = "regions";
+        
         private static Dictionary<string, Dictionary<string, XpmRegion>> _xpmRegions = new Dictionary<string,Dictionary<string,XpmRegion>>();
 
         // page title and meta field mappings
@@ -91,13 +92,14 @@ namespace Sdl.Web.Tridion.Config
         /// <returns>The XPM region matching the name for the given module</returns>
         public static XpmRegion GetXpmRegion(string name, Localization loc)
         {
-            if (!_xpmRegions.ContainsKey(loc.LocalizationId))
+            var key = loc.LocalizationId;
+            if (!_xpmRegions.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_regionSettingsType,loc))
             {
                 LoadRegionsForLocalization(loc);
             }
-            if (_xpmRegions.ContainsKey(loc.LocalizationId))
+            if (_xpmRegions.ContainsKey(key))
             {
-                var regionData = _xpmRegions[loc.LocalizationId];
+                var regionData = _xpmRegions[key];
                 if (regionData.ContainsKey(name))
                 {
                     return regionData[name];
@@ -109,7 +111,8 @@ namespace Sdl.Web.Tridion.Config
 
         private static void LoadRegionsForLocalization(Localization loc)
         {
-            var url = Path.Combine(loc.Path.ToCombinePath(), @"system\mappings\regions.json").Replace("\\", "/");
+            var key = loc.LocalizationId;
+            var url = Path.Combine(loc.Path.ToCombinePath(true), @"system\mappings\regions.json").Replace("\\", "/");
             var jsonData = SiteConfiguration.StaticFileManager.Serialize(url, loc, true);
             if (jsonData != null)
             {
@@ -118,7 +121,7 @@ namespace Sdl.Web.Tridion.Config
                 {
                     regions.Add(region.Region, region);
                 }
-                _xpmRegions.Add(loc.LocalizationId, regions);
+                SiteConfiguration.ThreadSafeSettingsUpdate<Dictionary<string, XpmRegion>>(_regionSettingsType, _xpmRegions, key, regions);
             }
             else
             {

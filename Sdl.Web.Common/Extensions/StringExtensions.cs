@@ -7,9 +7,9 @@
             return value.Replace(" ", string.Empty);
         }
 
-        public static string ToCombinePath(this string value)
+        public static string ToCombinePath(this string value, bool prefixWithSlash = false)
         {
-            return "\\" + value.Replace('/', '\\').Trim('\\');
+            return (prefixWithSlash ? "\\" : "") + value.Replace('/', '\\').Trim('\\');
         }
     }
 }

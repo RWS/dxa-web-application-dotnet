@@ -17,55 +17,10 @@ namespace Sdl.Web.Mvc.Statics
     /// </summary>
     public abstract class BaseStaticFileManager : IStaticFileManager
     {
+        [Obsolete("Static assets are now lazy created/loaded on demand so this method is no longer required",true)]
         public virtual string CreateStaticAssets(string applicationRoot)
         {
-            List<string> folders = new List<string>();
-            string version = null;
-            try
-            {
-                foreach (var loc in SiteConfiguration.Localizations.Values)
-                {
-                    var localizationRoot = Path.Combine(new[] { applicationRoot, loc.Path.ToCombinePath(), SiteConfiguration.SystemFolder });
-                    if (!folders.Contains(localizationRoot))
-                    {
-                        try
-                        {
-                            //The other config etc files are bootstrapped from /system/_all.json
-                            var url = String.Format("{0}/{1}/_all.json", String.IsNullOrEmpty(loc.Path) || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, SiteConfiguration.SystemFolder);                            
-                            SerializeFile(url, loc, 2);
-                            folders.Add(localizationRoot);
-                            //The HTML Design version is published in /version.json
-                            var versionUrl = String.Format("{0}/version.json", String.IsNullOrEmpty(loc.Path) || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path);
-                            var versionJson = Serialize(versionUrl, loc, true);
-                            if (versionJson == null)
-                            {
-                                //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually
-                                //in which case we try to load it directly - the HTML Design is thus not published from CMS
-                                versionUrl = String.Format("{0}/{1}/assets/version.json", String.IsNullOrEmpty(loc.Path) || loc.Path.StartsWith("/") ? loc.Path : "/" + loc.Path, SiteConfiguration.SystemFolder);
-                                var path = Path.Combine(applicationRoot, versionUrl.ToCombinePath());
-                                if (File.Exists(path))
-                                {
-                                    versionJson = File.ReadAllText(path);
-                                    SiteConfiguration.IsHtmlDesignPublished = false;
-                                }
-                            }
-                            if (versionJson != null)
-                            {
-                                version = Json.Decode(versionJson).version;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error(ex, "Error serializing localization {0}", localizationRoot);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error creating files on disk.");
-            }
-            return version;
+            return null;
         }
 
         public abstract string Serialize(string url, Localization loc, bool returnContents = false);

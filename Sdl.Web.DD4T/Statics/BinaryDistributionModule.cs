@@ -6,6 +6,7 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Mvc.Configuration;
+using System.Collections.Generic;
 
 namespace Sdl.Web.DD4T.Statics
 {
@@ -100,7 +101,7 @@ namespace Sdl.Web.DD4T.Statics
                 return;
             }
 
-            string realPath = Path.Combine(new[] { request.PhysicalApplicationPath, SiteConfiguration.GetLocalStaticsFolder(WebRequestContext.Localization.LocalizationId), request.Path.ToCombinePath() }); // request.PhysicalPath;
+            string realPath = Path.Combine(new[] { request.PhysicalApplicationPath, SiteConfiguration.GetLocalStaticsFolder(WebRequestContext.Localization.LocalizationId), request.Path.ToCombinePath() });
             context.RewritePath("/" + SiteConfiguration.GetLocalStaticsFolder(WebRequestContext.Localization.LocalizationId) + request.Path);
             if (!File.Exists(realPath))
             {
@@ -149,12 +150,33 @@ namespace Sdl.Web.DD4T.Statics
             }
         }
 
-        private static Regex _isBinaryUrl;
+        private static Dictionary<string,Regex> _localizationBinaryRegexes = new Dictionary<string,Regex>();
+        private static readonly object RegexLock = new object();
         private static Regex IsBinaryUrl
         {
             get
             {
-                return _isBinaryUrl ?? (_isBinaryUrl = new Regex(WebRequestContext.Localization.MediaUrlRegex));
+                var loc = WebRequestContext.Localization;
+                if (!_localizationBinaryRegexes.ContainsKey(loc.LocalizationId))
+                {
+                    AddBinaryRegex(loc.LocalizationId,loc.MediaUrlRegex);
+                }
+                return _localizationBinaryRegexes[loc.LocalizationId];
+            }
+        }
+
+        private static void AddBinaryRegex(string key, string regex)
+        {
+            lock(RegexLock)
+            {
+                if (_localizationBinaryRegexes.ContainsKey(key))
+                {
+                    _localizationBinaryRegexes[key] = new Regex(regex);
+                }
+                else
+                {
+                    _localizationBinaryRegexes.Add(key, new Regex(regex));
+                }
             }
         }
 
