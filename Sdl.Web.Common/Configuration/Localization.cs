@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Sdl.Web.Common.Configuration
 {
@@ -16,6 +17,7 @@ namespace Sdl.Web.Common.Configuration
         public bool IsDefaultLocalization { get; set; }
         public string Version { get; set; }
         public DateTime LastSettingsRefresh { get; set; }
+        public List<string> SiteLocalizationIds { get; set; }
 
         public string GetBaseUrl() 
         {

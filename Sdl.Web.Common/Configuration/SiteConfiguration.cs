@@ -224,6 +224,14 @@ namespace Sdl.Web.Common.Configuration
                     Log.Debug("This is site is has media root: " + mediaRoot);
                     mediaPatterns.Add(String.Format("^{0}{1}.*", mediaRoot, mediaRoot.EndsWith("/") ? String.Empty : "/"));
                 }
+                if (bootstrapJson.siteLocalizations != null)
+                {
+                    updatedLocalizationSettings.SiteLocalizationIds = new List<string>();
+                    foreach (var item in bootstrapJson.siteLocalizations)
+                    {
+                        updatedLocalizationSettings.SiteLocalizationIds.Add(item);
+                    }
+                }
                 if (updatedLocalizationSettings.IsHtmlDesignPublished)
                 {
                     mediaPatterns.Add("^/favicon.ico");
@@ -260,6 +268,7 @@ namespace Sdl.Web.Common.Configuration
                 loc.Version = updatedLocalizationSettings.Version;
                 loc.MediaUrlRegex = String.Join("|", mediaPatterns);
                 loc.Culture = GetConfig("core.culture", loc);
+                loc.SiteLocalizationIds = updatedLocalizationSettings.SiteLocalizationIds;
                 Log.Debug("MediaUrlRegex for localization {0} : {1}", loc.GetBaseUrl(), loc.MediaUrlRegex);
             }
         }

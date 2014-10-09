@@ -1,20 +1,30 @@
 ﻿@model Configuration
 @{
-    List<Localization> localizations = SiteConfiguration.Localizations.Values.ToList();
-    if (Model.Settings.ContainsKey("suppressLocalizations"))
+    var siteLocalizations = new List<Localization>();
+    List<string> siteLocalizationIds = WebRequestContext.Localization.SiteLocalizationIds;
+    if (siteLocalizationIds!=null && siteLocalizationIds.Count>1)
     {
         var excludedLocalizations = new List<string>();
-        excludedLocalizations = Model.Settings["suppressLocalizations"].Split(',').Select(l => ("/" + l.Trim())).ToList();
-        localizations = localizations.Where(l=>!excludedLocalizations.Contains(l.Path)).ToList();
+        if (Model.Settings.ContainsKey("suppressLocalizations"))
+        {
+            excludedLocalizations = Model.Settings["suppressLocalizations"].Split(',').Select(l => ("/" + l.Trim())).ToList();
+        }
+        foreach (var loc in SiteConfiguration.Localizations.Values)
+        {
+            if (siteLocalizationIds.Contains(loc.LocalizationId) && !excludedLocalizations.Contains(loc.Path))
+            {
+                siteLocalizations.Add(loc);
+            }
+        }
     }
     var redirectId = WebRequestContext.PageId;
     var defaultItem = Model.Settings.ContainsKey("defaultContentLink") ? Model.Settings["defaultContentLink"].Substring(4) : null;
 }
-@if (redirectId != null && localizations.Count > 1)
+@if (redirectId != null && siteLocalizations.Count > 1)
 {
     <div @Markup.Entity(Model)>
         <select class="selectpicker" data-width="auto">
-            @foreach(var loc in localizations)
+            @foreach (var loc in siteLocalizations)
             {
                 var parms = "localization=" + loc.LocalizationId + (defaultItem!=null ? "&defaultItemId=" + defaultItem:"");
                 <option value="@loc.LocalizationId" data-href="/resolve/@(redirectId)?@parms" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>
