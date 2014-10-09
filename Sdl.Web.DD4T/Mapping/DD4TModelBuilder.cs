@@ -64,7 +64,7 @@ namespace Sdl.Web.DD4T.Mapping
                 // get schema item id from tcmuri -> tcm:1-2-8
                 string[] uriParts = component.Schema.Id.Split('-');
                 long schemaId = Convert.ToInt64(uriParts[1]);
-                MappingData mapData = new MappingData {SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString(CultureInfo.InvariantCulture))};
+                MappingData mapData = new MappingData {SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString(CultureInfo.InvariantCulture),WebRequestContext.Localization)};
                 // get schema entity names (indexed by vocabulary)
                 mapData.EntityNames = mapData.SemanticSchema!=null ? mapData.SemanticSchema.GetEntityNames() : null;
             
@@ -194,7 +194,7 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 // determine field semantics
                 var vocab = entityData.Value.Key;
-                string prefix = SemanticMapping.GetPrefix(vocab);
+                string prefix = SemanticMapping.GetPrefix(vocab,WebRequestContext.Localization);
                 if (prefix != null && mapData.EntityNames!=null)
                 {
                     string property = info.PropertyName;
@@ -734,7 +734,7 @@ namespace Sdl.Web.DD4T.Mapping
             meta.Add("og:url", WebRequestContext.RequestUrl);
             //TODO is this always article?
             meta.Add("og:type", "article");
-            meta.Add("og:locale", SiteConfiguration.GetConfig("core.culture", WebRequestContext.Localization.Path));
+            meta.Add("og:locale", WebRequestContext.Localization.Culture);
             if (description != null)
             {
                 meta.Add("og:description", description);

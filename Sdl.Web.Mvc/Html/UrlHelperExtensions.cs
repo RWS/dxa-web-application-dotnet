@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sdl.Web.Mvc.Configuration;
+using System;
 using System.Web.Mvc;
 
 namespace Sdl.Web.Mvc.Html
@@ -21,7 +22,7 @@ namespace Sdl.Web.Mvc.Html
             {
                 path = "/" + path;
             }
-            string version = Common.Configuration.SiteConfiguration.SiteVersion;
+            string version = WebRequestContext.Localization.Version;
             if (!String.IsNullOrEmpty(version))
             {
                 version = "/" + version;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using HtmlAgilityPack;
 using Sdl.Web.Tridion.Config;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Tridion.Markup
 {
@@ -20,7 +21,7 @@ namespace Sdl.Web.Tridion.Markup
         private const string NullUri = "tcm:0-0-0";
         private const string Epoch = "1970-01-01T00:00:00";
 
-        public static string ParseRegion(string regionHtml)
+        public static string ParseRegion(string regionHtml, Localization loc)
         {
             HtmlDocument html = new HtmlDocument();
             html.LoadHtml(String.Format("<html>{0}</html>", regionHtml));
@@ -30,7 +31,7 @@ namespace Sdl.Web.Tridion.Markup
                 string name = ReadAndRemoveAttribute(entity, "data-region");
 
                 // TODO determine min occurs and max occurs for the region
-                HtmlCommentNode regionData = html.CreateComment(MarkRegion(name));
+                HtmlCommentNode regionData = html.CreateComment(MarkRegion(name,loc));
                 entity.ChildNodes.Insert(0, regionData);
             }
             return html.DocumentNode.SelectSingleNode("/html").InnerHtml;
@@ -111,12 +112,12 @@ namespace Sdl.Web.Tridion.Markup
             return defaultValue;
         }
 
-        private static string MarkRegion(string name, int minOccurs = 0, int maxOccurs = 0)
+        private static string MarkRegion(string name, Localization loc, int minOccurs = 0, int maxOccurs = 0)
         {
             StringBuilder allowedComponentTypes = new StringBuilder(); 
             string separator = String.Empty;
             bool first = true;
-            XpmRegion xpmRegion = TridionConfig.GetXpmRegion(name);
+            XpmRegion xpmRegion = TridionConfig.GetXpmRegion(name, loc);
             foreach (var componentTypes in xpmRegion.ComponentTypes)
             {
                 allowedComponentTypes.AppendFormat(ComponentTypeFormat, componentTypes.Schema, componentTypes.Template, separator);
