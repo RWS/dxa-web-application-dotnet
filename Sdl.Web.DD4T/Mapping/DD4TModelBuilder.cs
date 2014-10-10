@@ -726,7 +726,7 @@ namespace Sdl.Web.DD4T.Mapping
                 // Index and Default are not a proper titles for an HTML page
                 if (title.ToLowerInvariant().Equals("index") || title.ToLowerInvariant().Equals("default"))
                 {
-                    title = GetResource("core.defaultPageTitle") + titlePostfix;
+                    title = GetResource("core.defaultPageTitle");
                 }
             }
             meta.Add("twitter:card", "summary");
