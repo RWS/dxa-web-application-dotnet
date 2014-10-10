@@ -212,7 +212,7 @@ namespace Sdl.Web.Common.Configuration
             {
                 //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually
                 //in which case we try to load it directly - the HTML Design is thus not published from CMS
-                var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SystemFolder, @"\assets\version.json");
+                var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SystemFolder, @"assets\version.json");
                 if (File.Exists(path))
                 {
                     versionJson = File.ReadAllText(path);

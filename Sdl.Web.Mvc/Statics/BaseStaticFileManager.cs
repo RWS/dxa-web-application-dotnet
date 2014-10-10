@@ -24,30 +24,5 @@ namespace Sdl.Web.Mvc.Statics
         }
 
         public abstract string Serialize(string url, Localization loc, bool returnContents = false);
-
-        /// <summary>
-        /// Recursively serialize a file (which may contain just a list of further files to recursively process)
-        /// </summary>
-        /// <param name="url">The url of the file</param>
-        /// <param name="bootstrapLevel">Level of recursion expected 0=none (the file contains data to serialize rather than a list of other files)</param>
-        protected virtual void SerializeFile(string url, Localization loc, int bootstrapLevel = 0)
-        {
-            string fileContents = Serialize(url, loc, bootstrapLevel != 0);
-            if (bootstrapLevel != 0 && fileContents!=null)
-            {
-                var bootstrapJson = Json.Decode(fileContents);
-                foreach (string file in bootstrapJson.files)
-                {
-                    try
-                    {
-                        SerializeFile(file, loc, bootstrapLevel - 1);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, "Error serializing file {0}", file);
-                    }
-                }
-            }
-        }
     }
 }
