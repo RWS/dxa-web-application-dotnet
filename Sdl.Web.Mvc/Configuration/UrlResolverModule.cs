@@ -25,7 +25,6 @@ namespace Sdl.Web.Mvc.Configuration
                 //if unsuccesful, throw an error and do not process the request any further
                 throw new Exception("Request URL does not map to a localization managed by this web application.");
             }
-            SiteConfiguration.CheckLocalizationLoaded(localization);
         }
 
         public void Dispose()

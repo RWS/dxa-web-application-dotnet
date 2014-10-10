@@ -12,6 +12,6 @@ namespace Sdl.Web.Modules.Search
     public interface ISearchProvider
     {
         IContentResolver ContentResolver { get; set; }
-        SearchQuery<T> ExecuteQuery<T>(NameValueCollection parameters, SearchQuery<T> data);
+        SearchQuery<T> ExecuteQuery<T>(NameValueCollection parameters, SearchQuery<T> data, string searchIndex);
     }
 }

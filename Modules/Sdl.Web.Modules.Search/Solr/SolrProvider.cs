@@ -17,13 +17,12 @@ namespace Sdl.Web.Modules.Search.Solr
     {
         public IContentResolver ContentResolver { get; set; }
 
-        public virtual SearchQuery<T> ExecuteQuery<T>(NameValueCollection parameters, SearchQuery<T> data)
+        public virtual SearchQuery<T> ExecuteQuery<T>(NameValueCollection parameters, SearchQuery<T> data, string searchIndex)
         {
             NameValueCollection processedParameters = SetupParameters(parameters);
             processedParameters["rows"] = data.PageSize.ToString();
-            var url = SiteConfiguration.GetConfig("search." + (SiteConfiguration.IsStaging ? "staging" : "live") + "IndexConfig");
-            Log.Debug("Connecting to search index on url: {0}", url);
-            Connection conn = new Connection(url);
+            Log.Debug("Connecting to search index: {0}", searchIndex);
+            Connection conn = new Connection(searchIndex);
             foreach(var key in processedParameters.AllKeys)
             {
                 Log.Debug("Parameter '{0}' is '{1}'", key, processedParameters[key]);

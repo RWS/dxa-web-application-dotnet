@@ -1,6 +1,8 @@
-﻿using Sdl.Web.Common.Interfaces;
+﻿using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.Controllers;
 using System;
 using System.Collections.Specialized;
@@ -25,12 +27,14 @@ namespace Sdl.Web.Modules.Search
             var model = base.ProcessModel(sourceModel, type);
             if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(SearchQuery<>)))
             {
+                var loc = WebRequestContext.Localization;
+                var searchIndex = SiteConfiguration.GetConfig("search." + (loc.IsStaging ? "staging" : "live") + "IndexConfig", loc);
                 //Use reflection to execute the generic method ISearchProvider.ExecuteQuery
                 //As we do not know the generic type until runtime (its specified by the view model)
                 Type resultType = type.GetGenericArguments()[0];
                 MethodInfo method = typeof(ISearchProvider).GetMethod("ExecuteQuery");
                 MethodInfo generic = method.MakeGenericMethod(resultType);
-                return generic.Invoke(SearchProvider, new object[] { Request.QueryString, model });
+                return generic.Invoke(SearchProvider, new object[] { Request.QueryString, model, searchIndex });
             }
             else
             {

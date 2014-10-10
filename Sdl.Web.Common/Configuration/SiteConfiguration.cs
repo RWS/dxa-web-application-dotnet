@@ -115,7 +115,7 @@ namespace Sdl.Web.Common.Configuration
             var key = localization.LocalizationId;
             if (!_configuration.ContainsKey(key) || CheckSettingsNeedRefresh(_settingsType,localization))
             {
-                LoadLocalization(localization);
+                LoadLocalization(localization, true);
             }
         }
         
@@ -163,7 +163,11 @@ namespace Sdl.Web.Common.Configuration
         {
             lock(LocalizationUpdateLock)
             {
-                loc.LastSettingsRefresh = DateTime.Now;
+                //refresh all localizations for this site
+                foreach(var localization in loc.GetSiteLocalizations())
+                {
+                    LoadLocalization(localization);
+                }
             }
         }
 
@@ -172,16 +176,36 @@ namespace Sdl.Web.Common.Configuration
             SetLocalizations(localizationList);
         }
 
-        private static void LoadLocalization(Localization loc)
+        private static void LoadLocalizationDetails(Localization loc, List<string> fileUrls)
+        {
+            var key = loc.LocalizationId;
+            var config = new Dictionary<string, Dictionary<string, string>>();
+            foreach (string configUrl in fileUrls)
+            {
+                var type = configUrl.Substring(configUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
+                var jsonData = StaticFileManager.Serialize(configUrl, loc, true);
+                if (jsonData != null)
+                {
+                    Log.Debug("Loading config from file: {0} for localization {1}", configUrl, key);
+                    config.Add(type, GetConfigFromFile(jsonData));
+                }
+                else
+                {
+                    Log.Error("Config file: {0} does not exist for localization {1} - skipping", configUrl, key);
+                }
+            }
+            ThreadSafeSettingsUpdate<Dictionary<string, Dictionary<string, string>>>(_settingsType, _configuration, key, config);
+        }
+
+        public static void LoadLocalization(Localization loc, bool loadDetails = false)
         {
             Log.Debug("Loading config for localization : '{0}'", loc.GetBaseUrl());
             var key = loc.LocalizationId;
-
             //temp variable to store localization settings updates, to be threadsafe updated later on
             var updatedLocalizationSettings = new Localization();
             updatedLocalizationSettings.IsHtmlDesignPublished = true;
             var mediaPatterns = new List<string>();
-            var config = new Dictionary<string, Dictionary<string, string>>();
             var versionUrl = Path.Combine(loc.Path.ToCombinePath(true), @"version.json").Replace("\\", "/");
             var versionJson = StaticFileManager.Serialize(versionUrl, loc, true);
             if (versionJson == null)
@@ -199,12 +223,10 @@ namespace Sdl.Web.Common.Configuration
             {
                 updatedLocalizationSettings.Version = Json.Decode(versionJson).version;
             }
-            var url = Path.Combine(loc.Path.ToCombinePath(true), SystemFolder, @"config\_all.json").Replace("\\", "/");
-            var jsonData = StaticFileManager.Serialize(url, loc, true);
-            if (jsonData!=null)
+            var bootstrapJson = GetConfigBootstrapJson(loc);
+            if (bootstrapJson != null)
             {
                 //The _all.json file contains a reference to all other configuration files
-                var bootstrapJson = Json.Decode(jsonData);
                 if (bootstrapJson.defaultLocalization != null && bootstrapJson.defaultLocalization)
                 {
                     updatedLocalizationSettings.IsDefaultLocalization = true;
@@ -237,27 +259,20 @@ namespace Sdl.Web.Common.Configuration
                     mediaPatterns.Add("^/favicon.ico");
                     mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*", loc.Path, SystemFolder));
                 }
-                mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$", loc.Path, SystemFolder));
-                foreach (string configUrl in bootstrapJson.files)
+                if (bootstrapJson.files != null)
                 {
-                    var type = configUrl.Substring(configUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
-                    type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                    jsonData = StaticFileManager.Serialize(configUrl, loc, true);
-                    if (jsonData!=null)
+                    List<string> configFiles = new List<string>();
+                    foreach (string file in bootstrapJson.files)
                     {
-                        Log.Debug("Loading config from file: {0} for localization {1}", configUrl, key);
-                        config.Add(type, GetConfigFromFile(jsonData));
+                        configFiles.Add(file);
                     }
-                    else
-                    {
-                        Log.Error("Config file: {0} does not exist for localization {1} - skipping", configUrl, key);
-                    }
+                    LoadLocalizationDetails(loc, configFiles);
                 }
-                ThreadSafeSettingsUpdate<Dictionary<string, Dictionary<string,string>>>(_settingsType, _configuration, key, config);
+                mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$", loc.Path, SystemFolder));
             }
             else
             {
-                Log.Warn("Localization configuration bootstrap file: {0} does not exist for localization {1} - skipping this localization", url, loc.LocalizationId);
+                Log.Warn("Localization configuration bootstrap file: does not exist for localization {0} - skipping this localization", loc.LocalizationId);
             }
             //make threadsafe update to localization settings
             lock(LocalizationUpdateLock)
@@ -268,9 +283,21 @@ namespace Sdl.Web.Common.Configuration
                 loc.Version = updatedLocalizationSettings.Version;
                 loc.MediaUrlRegex = String.Join("|", mediaPatterns);
                 loc.Culture = GetConfig("core.culture", loc);
-                loc.SiteLocalizationIds = updatedLocalizationSettings.SiteLocalizationIds;
+                loc.SiteLocalizationIds = updatedLocalizationSettings.SiteLocalizationIds; 
+                loc.LastSettingsRefresh = DateTime.Now;
                 Log.Debug("MediaUrlRegex for localization {0} : {1}", loc.GetBaseUrl(), loc.MediaUrlRegex);
             }
+        }
+
+        private static dynamic GetConfigBootstrapJson(Localization loc)
+        {
+            var url = Path.Combine(loc.Path.ToCombinePath(true), SystemFolder, @"config\_all.json").Replace("\\", "/");
+            var jsonData = StaticFileManager.Serialize(url, loc, true);
+            if (jsonData!=null)
+            { 
+                return Json.Decode(jsonData);
+            }
+            return null;            
         }
 
         private static Dictionary<string, string> GetConfigFromFile(string jsonData)
@@ -327,6 +354,7 @@ namespace Sdl.Web.Common.Configuration
                     Path = (!loc.ContainsKey("Path") || loc["Path"] == "/") ? String.Empty : loc["Path"],
                     LocalizationId = !loc.ContainsKey("LocalizationId") ? "0" : loc["LocalizationId"]
                 };
+                LoadLocalization(localization);
                 Localizations.Add(localization.GetBaseUrl(), localization);
             }
         }
