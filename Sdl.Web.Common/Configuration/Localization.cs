@@ -46,7 +46,7 @@ namespace Sdl.Web.Common.Configuration
                 foreach (var loc in SiteConfiguration.Localizations.Values)
                 {
                     var key = loc.LocalizationId;
-                    if (!processedIds.Contains(key) && _siteLocalizationIds.Contains(key))
+                    if (!processedIds.Contains(key) && _siteLocalizationIds!=null && _siteLocalizationIds.Contains(key))
                     {
                         _siteLocalizations.Add(loc);
                         if (_siteLocalizations.Count==_siteLocalizationIds.Count)
