@@ -1,19 +1,19 @@
 ﻿@model Configuration
 @{
-    var siteLocalizations = new List<Localization>();
-    List<string> siteLocalizationIds = WebRequestContext.Localization.SiteLocalizationIds;
-    if (siteLocalizationIds!=null && siteLocalizationIds.Count>1)
+    var siteLocalizations = WebRequestContext.Localization.GetSiteLocalizations();
+    var filteredLocalizations = new List<Localization>();
+    if (siteLocalizations.Count > 1)
     {
         var excludedLocalizations = new List<string>();
         if (Model.Settings.ContainsKey("suppressLocalizations"))
         {
             excludedLocalizations = Model.Settings["suppressLocalizations"].Split(',').Select(l => ("/" + l.Trim())).ToList();
         }
-        foreach (var loc in SiteConfiguration.Localizations.Values)
+        foreach (var loc in siteLocalizations)
         {
-            if (siteLocalizationIds.Contains(loc.LocalizationId) && !excludedLocalizations.Contains(loc.Path))
+            if (!excludedLocalizations.Contains(loc.Path))
             {
-                siteLocalizations.Add(loc);
+                filteredLocalizations.Add(loc);
             }
         }
     }

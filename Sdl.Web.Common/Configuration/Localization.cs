@@ -17,11 +17,47 @@ namespace Sdl.Web.Common.Configuration
         public bool IsDefaultLocalization { get; set; }
         public string Version { get; set; }
         public DateTime LastSettingsRefresh { get; set; }
-        public List<string> SiteLocalizationIds { get; set; }
-
+        public List<string> SiteLocalizationIds {
+            get
+            {
+                return _siteLocalizationIds;
+            }
+            set
+            {
+                _siteLocalizationIds = value;
+                _siteLocalizations = null;
+            }
+        }
+        
         public string GetBaseUrl() 
         {
             return String.Format("{0}://{1}{2}{3}", Protocol, Domain, String.IsNullOrEmpty(Port) ? Port : ":" + Port, String.IsNullOrEmpty(Path) || Path.StartsWith("/") ? Path : "/" + Path);
+        }
+
+        private List<string> _siteLocalizationIds;
+        private List<Localization> _siteLocalizations;
+        
+        public List<Localization> GetSiteLocalizations()
+        {
+            if (_siteLocalizations==null)
+            {
+                _siteLocalizations = new List<Localization>();
+                var processedIds = new List<string>();
+                foreach (var loc in SiteConfiguration.Localizations.Values)
+                {
+                    var key = loc.LocalizationId;
+                    if (!processedIds.Contains(key) && _siteLocalizationIds.Contains(key))
+                    {
+                        _siteLocalizations.Add(loc);
+                        if (_siteLocalizations.Count==_siteLocalizationIds.Count)
+                        {
+                            //we found all localizations, so save a few CPU cycles
+                            break;
+                        }
+                    }
+                }
+            }
+            return _siteLocalizations;
         }
     }
 }
