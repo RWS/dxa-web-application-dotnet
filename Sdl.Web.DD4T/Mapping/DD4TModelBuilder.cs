@@ -137,6 +137,7 @@ namespace Sdl.Web.DD4T.Mapping
                                 pi.SetValue(model, GetAllFieldsAsDictionary(mapData.SourceEntity));
                                 processed = true;
                             }
+
                             if (processed)
                             {
                                 break;
@@ -544,7 +545,7 @@ namespace Sdl.Web.DD4T.Mapping
             return null;
         }
 
-        object GetStrings(IField field, Type modelType, bool multival)
+        static object GetStrings(IField field, Type modelType, bool multival)
         {
             if (modelType.IsAssignableFrom(typeof(String)))
             {
@@ -756,7 +757,7 @@ namespace Sdl.Web.DD4T.Mapping
         {
             if (field.FieldType==FieldType.Embedded)
             {
-                if (field.EmbeddedValues!=null & field.EmbeddedValues.Count>0)
+                if (field.EmbeddedValues!=null && field.EmbeddedValues.Count>0)
                 {
                     var subfields = field.EmbeddedValues[0];
                     foreach (var subfield in subfields.Values)
