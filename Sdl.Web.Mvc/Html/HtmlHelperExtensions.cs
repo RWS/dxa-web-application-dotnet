@@ -166,7 +166,7 @@ namespace Sdl.Web.Mvc.Html
                 builder.Attributes.Add("width", imgWidth);
             }
             builder.Attributes.Add("alt", image.AlternateText);
-            builder.Attributes.Add("data-aspect", (Math.Truncate(aspect * 100) / 100).ToString());
+            builder.Attributes.Add("data-aspect", (Math.Truncate(aspect * 100) / 100).ToString(CultureInfo.InvariantCulture));
             if (!String.IsNullOrEmpty(cssClass))
             {
                 builder.Attributes.Add("class", cssClass);
