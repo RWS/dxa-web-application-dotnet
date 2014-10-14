@@ -439,6 +439,21 @@ namespace Sdl.Web.Common.Configuration
             }
             return url;
         }
+
+        /// <summary>
+        /// Take a partial URL (so not including protocol, domain, port) and make it full by
+        /// Adding the protocol, domain, port etc. from the given localization
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static string MakeFullUrl(string url, Localization loc)
+        {
+            if (url.StartsWith(loc.Path))
+            {
+                url = url.Substring(loc.Path.Length);
+            }
+            return url.StartsWith("http") ? url : loc.GetBaseUrl() + url;
+        }
         
         public static string GetLocalStaticsFolder(string localizationId)
         {
