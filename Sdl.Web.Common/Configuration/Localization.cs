@@ -49,6 +49,7 @@ namespace Sdl.Web.Common.Configuration
                     if (!processedIds.Contains(key) && _siteLocalizationIds!=null && _siteLocalizationIds.Contains(key))
                     {
                         _siteLocalizations.Add(loc);
+                        processedIds.Add(key);
                         if (_siteLocalizations.Count==_siteLocalizationIds.Count)
                         {
                             //we found all localizations, so save a few CPU cycles
