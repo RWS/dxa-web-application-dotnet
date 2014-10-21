@@ -42,8 +42,9 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DD4T.Providers.SDLTridion2013">
-      <HintPath>..\packages\DD4T-Tridion-2013sp1.1.31.1\lib\DD4T.Providers.SDLTridion2013.dll</HintPath>
+    <Reference Include="DD4T.Providers.SDLTridion2013sp1, Version=1.31.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\_references\dd4t-update\DD4T.Providers.SDLTridion2013sp1.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
