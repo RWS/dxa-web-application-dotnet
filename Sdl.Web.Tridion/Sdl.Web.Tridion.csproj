@@ -57,6 +57,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\ConfigFileLocalizationResolver.cs" />
+    <Compile Include="Config\ServiceLocalizationResolver.cs" />
     <Compile Include="Context\BrowserClaims.cs" />
     <Compile Include="Context\ClaimUris.cs" />
     <Compile Include="Context\ContextClaims.cs" />

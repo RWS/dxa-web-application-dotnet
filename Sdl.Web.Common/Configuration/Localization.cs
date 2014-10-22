@@ -42,20 +42,10 @@ namespace Sdl.Web.Common.Configuration
             if (_siteLocalizations==null)
             {
                 _siteLocalizations = new List<Localization>();
-                var processedIds = new List<string>();
-                foreach (var loc in SiteConfiguration.Localizations.Values)
+                foreach (var id in _siteLocalizationIds)
                 {
-                    var key = loc.LocalizationId;
-                    if (!processedIds.Contains(key) && _siteLocalizationIds!=null && _siteLocalizationIds.Contains(key))
-                    {
-                        _siteLocalizations.Add(loc);
-                        processedIds.Add(key);
-                        if (_siteLocalizations.Count==_siteLocalizationIds.Count)
-                        {
-                            //we found all localizations, so save a few CPU cycles
-                            break;
-                        }
-                    }
+                    var loc = SiteConfiguration.LocalizationResolver.GetLocalizationFromId(id);
+                    _siteLocalizations.Add(loc);
                 }
             }
             return _siteLocalizations;

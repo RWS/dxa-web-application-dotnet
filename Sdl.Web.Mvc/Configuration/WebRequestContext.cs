@@ -22,7 +22,11 @@ namespace Sdl.Web.Mvc.Configuration
             get
             {
                 return (Localization)GetFromContextStore("Localization") ?? (Localization)AddToContextStore("Localization", GetCurrentLocalization());
-            }       
+            }
+            set
+            {
+                AddToContextStore("Localization", value);
+            }
         }
 
         /// <summary>
@@ -140,16 +144,11 @@ namespace Sdl.Web.Mvc.Configuration
 
         protected static Localization GetCurrentLocalization()
         {
-            //If theres a single localization use that regardless
-            if (SiteConfiguration.Localizations.Count == 1)
-            {
-                return SiteConfiguration.Localizations.SingleOrDefault().Value;
-            }
             try
             {
                 if (HttpContext.Current != null)
                 {
-                    return SiteConfiguration.GetLocalizationFromUri(HttpContext.Current.Request.Url);
+                    return SiteConfiguration.LocalizationResolver.GetLocalizationFromUri(HttpContext.Current.Request.Url);
                 }
             }
             catch (Exception)

@@ -38,9 +38,9 @@ namespace Sdl.Web.Common.Configuration
         public static IStaticFileManager StaticFileManager { get; set; }
         
         /// <summary>
-        /// A set of all the valid localizations for this site
+        /// Localization resolver used for mapping URLs to localizations/content stores
         /// </summary>
-        public static Dictionary<string, Localization> Localizations { get; set; }
+        public static ILocalizationResolver LocalizationResolver { get; set; }
 
         public const string VersionRegex = "(v\\d*.\\d*)";
         public const string SystemFolder = "system";
@@ -74,30 +74,6 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
-        private static Localization GetLocalizationFromPath(string path)
-        {
-            foreach (var loc in Localizations.Values)
-            {
-                if (loc.Path == path)
-                {
-                    return loc;
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Gets a (localized) configuration setting
-        /// </summary>
-        /// <param name="key">The configuration key, in the format "section.name" (eg "Environment.CmsUrl")</param>
-        /// <param name="localization">The localization (eg "en", "fr") - if none specified the default is used</param>
-        /// <returns>The configuration matching the key for the given localization</returns>
-        [Obsolete("GetConfig(string,string) is deprecated, please use GetConfig(string, Localization) instead.", true)]
-        public static string GetConfig(string key, string localization = null)
-        {
-            return GetConfig(key, GetLocalizationFromPath(localization ?? ""));
-        }
-
         /// <summary>
         /// Gets a (localized) configuration setting
         /// </summary>
@@ -115,7 +91,7 @@ namespace Sdl.Web.Common.Configuration
             var key = localization.LocalizationId;
             if (!_configuration.ContainsKey(key) || CheckSettingsNeedRefresh(_settingsType,localization))
             {
-                LoadLocalization(localization, true);
+                localization = LoadLocalization(localization, true);
             }
         }
         
@@ -166,14 +142,10 @@ namespace Sdl.Web.Common.Configuration
                 //refresh all localizations for this site
                 foreach(var localization in loc.GetSiteLocalizations())
                 {
+                    //TODO - update the localization
                     LoadLocalization(localization);
                 }
             }
-        }
-
-        public static void Initialize(List<Dictionary<string,string>> localizationList)
-        {
-            SetLocalizations(localizationList);
         }
 
         private static void LoadLocalizationDetails(Localization loc, List<string> fileUrls)
@@ -198,13 +170,12 @@ namespace Sdl.Web.Common.Configuration
             ThreadSafeSettingsUpdate<Dictionary<string, Dictionary<string, string>>>(_settingsType, _configuration, key, config);
         }
 
-        public static void LoadLocalization(Localization loc, bool loadDetails = false)
+        public static Localization LoadLocalization(Localization loc, bool loadDetails = false)
         {
-            Log.Debug("Loading config for localization : '{0}'", loc.GetBaseUrl());
             var key = loc.LocalizationId;
-            //temp variable to store localization settings updates, to be threadsafe updated later on
-            var updatedLocalizationSettings = new Localization();
-            updatedLocalizationSettings.IsHtmlDesignPublished = true;
+            Log.Debug("Loading config for localization : {0} ('{1}') - ", key, loc.GetBaseUrl());
+            var localization = new Localization{ Protocol = loc.Protocol, Domain = loc.Domain, Port = loc.Port, Path = loc.Path, LocalizationId = loc.LocalizationId };
+            localization.IsHtmlDesignPublished = true;
             var mediaPatterns = new List<string>();
             var versionUrl = Path.Combine(loc.Path.ToCombinePath(true), @"version.json").Replace("\\", "/");
             var versionJson = StaticFileManager.Serialize(versionUrl, loc, true);
@@ -216,12 +187,12 @@ namespace Sdl.Web.Common.Configuration
                 if (File.Exists(path))
                 {
                     versionJson = File.ReadAllText(path);
-                    updatedLocalizationSettings.IsHtmlDesignPublished = false;
+                    localization.IsHtmlDesignPublished = false;
                 }
             }
             if (versionJson != null)
             {
-                updatedLocalizationSettings.Version = Json.Decode(versionJson).version;
+                localization.Version = Json.Decode(versionJson).version;
             }
             var bootstrapJson = GetConfigBootstrapJson(loc);
             if (bootstrapJson != null)
@@ -229,11 +200,11 @@ namespace Sdl.Web.Common.Configuration
                 //The _all.json file contains a reference to all other configuration files
                 if (bootstrapJson.defaultLocalization != null && bootstrapJson.defaultLocalization)
                 {
-                    updatedLocalizationSettings.IsDefaultLocalization = true;
+                    localization.IsDefaultLocalization = true;
                 }
                 if (bootstrapJson.staging != null && bootstrapJson.staging)
                 {
-                    updatedLocalizationSettings.IsStaging = true;
+                    localization.IsStaging = true;
                     Log.Info("Site {0} is a staging site.",loc.GetBaseUrl());
                 }
                 if (bootstrapJson.mediaRoot != null)
@@ -248,18 +219,18 @@ namespace Sdl.Web.Common.Configuration
                 }
                 if (bootstrapJson.siteLocalizations != null)
                 {
-                    updatedLocalizationSettings.SiteLocalizationIds = new List<string>();
+                    localization.SiteLocalizationIds = new List<string>();
                     foreach (var item in bootstrapJson.siteLocalizations)
                     {
-                        updatedLocalizationSettings.SiteLocalizationIds.Add(item);
+                        localization.SiteLocalizationIds.Add(item);
                     }
                 }
-                if (updatedLocalizationSettings.IsHtmlDesignPublished)
+                if (localization.IsHtmlDesignPublished)
                 {
                     mediaPatterns.Add("^/favicon.ico");
                     mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*", loc.Path, SystemFolder));
                 }
-                if (bootstrapJson.files != null)
+                if (bootstrapJson.files != null && loadDetails)
                 {
                     List<string> configFiles = new List<string>();
                     foreach (string file in bootstrapJson.files)
@@ -274,19 +245,11 @@ namespace Sdl.Web.Common.Configuration
             {
                 Log.Warn("Localization configuration bootstrap file: does not exist for localization {0} - skipping this localization", loc.LocalizationId);
             }
-            //make threadsafe update to localization settings
-            lock(LocalizationUpdateLock)
-            {
-                loc.IsStaging = updatedLocalizationSettings.IsStaging;
-                loc.IsHtmlDesignPublished = updatedLocalizationSettings.IsHtmlDesignPublished;
-                loc.IsDefaultLocalization = updatedLocalizationSettings.IsDefaultLocalization;
-                loc.Version = updatedLocalizationSettings.Version;
-                loc.MediaUrlRegex = String.Join("|", mediaPatterns);
-                loc.Culture = GetConfig("core.culture", loc);
-                loc.SiteLocalizationIds = updatedLocalizationSettings.SiteLocalizationIds; 
-                loc.LastSettingsRefresh = DateTime.Now;
-                Log.Debug("MediaUrlRegex for localization {0} : {1}", loc.GetBaseUrl(), loc.MediaUrlRegex);
-            }
+            localization.MediaUrlRegex = String.Join("|", mediaPatterns);
+            localization.Culture = GetConfig("core.culture", loc);
+            localization.LastSettingsRefresh = DateTime.Now;
+            Log.Debug("MediaUrlRegex for localization {0} : {1}", loc.GetBaseUrl(), loc.MediaUrlRegex);
+            return localization;
         }
 
         private static dynamic GetConfigBootstrapJson(Localization loc)
@@ -337,27 +300,7 @@ namespace Sdl.Web.Common.Configuration
         }
         
         
-        /// <summary>
-        /// Set the localizations from a List loaded from configuration
-        /// </summary>
-        /// <param name="localizations">List of configuration data</param>
-        public static void SetLocalizations(List<Dictionary<string, string>> localizations)
-        {
-            Localizations = new Dictionary<string, Localization>();
-            foreach (var loc in localizations)
-            {
-                var localization = new Localization
-                {
-                    Protocol = !loc.ContainsKey("Protocol") ? "http" : loc["Protocol"],
-                    Domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_link_conf" : loc["Domain"],
-                    Port = !loc.ContainsKey("Port") ? String.Empty : loc["Port"],
-                    Path = (!loc.ContainsKey("Path") || loc["Path"] == "/") ? String.Empty : loc["Path"],
-                    LocalizationId = !loc.ContainsKey("LocalizationId") ? "0" : loc["LocalizationId"]
-                };
-                LoadLocalization(localization);
-                Localizations.Add(localization.GetBaseUrl(), localization);
-            }
-        }
+        
 
         
         /// <summary>
@@ -407,24 +350,6 @@ namespace Sdl.Web.Common.Configuration
             {
                 return SystemFolder + "/";
             });
-        }
-
-
-        public static Localization GetLocalizationFromUri(Uri uri)
-        {
-            string url = uri.ToString();
-            Log.Debug("request for url {0} on port {1}", url, uri.Port);
-            foreach (var rootUrl in SiteConfiguration.Localizations.Keys)
-            {
-                Log.Debug("Checking url {0} with localization {1}", url, rootUrl);
-                if (url.ToLower().StartsWith(rootUrl.ToLower()))
-                {
-                    var loc = SiteConfiguration.Localizations[rootUrl];
-                    Log.Debug("Request for {0} is from localization {1} ('{2}')", uri, loc.LocalizationId, loc.Path);
-                    return loc;
-                }
-            }
-            return null;
         }
 
         /// <summary>
@@ -560,7 +485,13 @@ namespace Sdl.Web.Common.Configuration
         [Obsolete("GetGlobalConfig(string,string) is deprecated, please use GetConfig(string, Localization) by combining the key and module parameters in the format {module.key} (eg core.schemas.article)", true)]
         public static string GetGlobalConfig(string key, string module = CoreModuleName)
         {
-            return GetConfig(String.Format("{0}.{1}", module, key), GetLocalizationFromPath(""));
+            return null;
+        }
+
+        [Obsolete("GetConfig(string,string) is deprecated, please use GetConfig(string, Localization) instead.", true)]
+        public static string GetConfig(string key, string localization = null)
+        {
+            return null;
         }
 
         [Obsolete("Use Version property of current Localization instead. Eg WebRequestContext.Localization.Version.", true)]
@@ -574,6 +505,18 @@ namespace Sdl.Web.Common.Configuration
         public static void Load(string applicationRoot)
         {
         }
+        [Obsolete("Localizations are now loaded on demand in the web application so this is no longer required", true)]
+        public static void SetLocalizations(List<Dictionary<string, string>> localizations)
+        {
+
+        }
+        [Obsolete("Localizations are now loaded on demand in the web application so this is no longer required", true)]
+        public static void Initialize(List<Dictionary<string, string>> localizationList)
+        {
+            
+        }
+        [Obsolete("Localizations are now loaded on demand in the web application so this is no longer available. Use the SiteConfiguration.LocalizationResolver.GetLocalizationByUri or GetLocalizationById methods", true)]
+        public static Dictionary<string, Localization> Localizations { get; set; }
         
         #endregion
 

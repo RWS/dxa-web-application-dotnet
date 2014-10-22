@@ -218,12 +218,10 @@ namespace Sdl.Web.Mvc.Controllers
                 if (bits.Length > 1)
                 {
                     bits = bits[1].Split('-');
-                    foreach (var loc in SiteConfiguration.Localizations.Values)
+                    var loc = SiteConfiguration.LocalizationResolver.GetLocalizationFromId(bits[0]);
+                    if (loc != null)
                     {
-                        if (loc.LocalizationId == bits[0])
-                        {
-                            url = loc.Path;
-                        }
+                        url = String.IsNullOrEmpty(loc.Path) ? "/" : loc.Path;
                     }
                 }
             }
@@ -231,11 +229,11 @@ namespace Sdl.Web.Mvc.Controllers
             {
                 if (localization == null)
                 {
-                    url = "";
+                    url = "/";
                 }
                 else
                 {
-                    var loc = SiteConfiguration.Localizations.Values.FirstOrDefault(l => l.LocalizationId.ToString(CultureInfo.InvariantCulture) == localization);
+                    var loc = SiteConfiguration.LocalizationResolver.GetLocalizationFromId(localization);
                     if (loc != null)
                     {
                         url = String.IsNullOrEmpty(loc.Path) ? "/" : loc.Path;
