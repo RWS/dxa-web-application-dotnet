@@ -413,8 +413,10 @@ namespace Sdl.Web.Common.Configuration
         public static Localization GetLocalizationFromUri(Uri uri)
         {
             string url = uri.ToString();
+            Log.Debug("request for url {0} on port {1}", url, uri.Port);
             foreach (var rootUrl in SiteConfiguration.Localizations.Keys)
             {
+                Log.Debug("Checking url {0} with localization {1}", url, rootUrl);
                 if (url.ToLower().StartsWith(rootUrl.ToLower()))
                 {
                     var loc = SiteConfiguration.Localizations[rootUrl];

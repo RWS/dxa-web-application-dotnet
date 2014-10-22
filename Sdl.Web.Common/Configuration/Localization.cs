@@ -31,7 +31,7 @@ namespace Sdl.Web.Common.Configuration
         
         public string GetBaseUrl() 
         {
-            return String.Format("{0}://{1}{2}{3}", Protocol, Domain, String.IsNullOrEmpty(Port) ? Port : ":" + Port, String.IsNullOrEmpty(Path) || Path.StartsWith("/") ? Path : "/" + Path);
+            return String.Format("{0}://{1}{2}{3}", Protocol, Domain, String.IsNullOrEmpty(Port) || Port=="80" ? "" : ":" + Port, String.IsNullOrEmpty(Path) || Path.StartsWith("/") ? Path : "/" + Path);
         }
 
         private List<string> _siteLocalizationIds;
