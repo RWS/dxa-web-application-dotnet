@@ -153,7 +153,7 @@ namespace Sdl.Web.DD4T.Statics
             IBinary binary = GetBinaryFromBroker(urlPath,loc);
             if (binary==null)
             {
-                Log.Debug("Binary with url {0} not found", urlPath);
+                Log.Debug("Binary with url {0} not found in publication {1}", urlPath, loc.LocalizationId);
                 // binary does not exist in Tridion, it should be removed from the local file system too
                 if (File.Exists(physicalPath))
                 {
