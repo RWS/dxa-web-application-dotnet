@@ -23,6 +23,10 @@ namespace Sdl.Web.Mvc.Configuration
             {
                 return (Localization)GetFromContextStore("Localization") ?? (Localization)AddToContextStore("Localization", GetCurrentLocalization());
             }
+            set
+            {
+                AddToContextStore("Localization", value);
+            }
         }
 
         /// <summary>
@@ -156,16 +160,9 @@ namespace Sdl.Web.Mvc.Configuration
 
         protected static Localization GetCurrentLocalization()
         {
-            try
+            if (HttpContext.Current != null)
             {
-                if (HttpContext.Current != null)
-                {
-                    return SiteConfiguration.LocalizationManager.GetLocalizationFromUri(HttpContext.Current.Request.Url);
-                }
-            }
-            catch (Exception)
-            {
-                //Do nothing
+                return SiteConfiguration.LocalizationManager.GetLocalizationFromUri(HttpContext.Current.Request.Url);
             }
             return null;
         }

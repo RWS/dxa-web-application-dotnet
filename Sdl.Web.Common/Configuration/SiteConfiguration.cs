@@ -247,10 +247,6 @@ namespace Sdl.Web.Common.Configuration
                 }
                 mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$", loc.Path, SystemFolder));
             }
-            else
-            {
-                Log.Warn("Localization configuration bootstrap file: does not exist for localization {0} - skipping this localization", loc.LocalizationId);
-            }
             localization.MediaUrlRegex = String.Join("|", mediaPatterns);
             localization.Culture = GetConfig("core.culture", loc);
             localization.Language = GetConfig("core.language", loc);
@@ -262,11 +258,16 @@ namespace Sdl.Web.Common.Configuration
         {
             var url = Path.Combine(loc.Path.ToCombinePath(true), SystemFolder, @"config\_all.json").Replace("\\", "/");
             var jsonData = StaticFileManager.Serialize(url, loc, true);
-            if (jsonData!=null)
-            { 
+            if (jsonData != null)
+            {
                 return Json.Decode(jsonData);
             }
-            return null;            
+            else
+            {
+                var ex = new Exception(String.Format("Could not load configuration bootstrap file {0} for localization {1}.", url, loc.LocalizationId));
+                Log.Error(ex);
+                throw ex;
+            }          
         }
 
         private static Dictionary<string, string> GetConfigFromFile(string jsonData)
@@ -304,10 +305,6 @@ namespace Sdl.Web.Common.Configuration
         {
             return "Core";
         }
-        
-        
-        
-
         
         /// <summary>
         /// Adds a View->View Model Type mapping to the view model registry
