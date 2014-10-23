@@ -93,7 +93,7 @@ namespace Sdl.Web.Tridion.Config
         public static XpmRegion GetXpmRegion(string name, Localization loc)
         {
             var key = loc.LocalizationId;
-            if (!_xpmRegions.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_regionSettingsType,loc))
+            if (!_xpmRegions.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_regionSettingsType,loc.LocalizationId))
             {
                 LoadRegionsForLocalization(loc);
             }

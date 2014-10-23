@@ -19,11 +19,12 @@ namespace Sdl.Web.Mvc.Configuration
         private static void BeginRequest(object sender, EventArgs e)
         {
             //Attempt to get current localization, if successful this will be cached for the whole request
-            var localization = WebRequestContext.Localization;
-            if (localization == null)
+            if (WebRequestContext.Localization == null)
             {
                 //if unsuccesful, throw an error and do not process the request any further
-                throw new Exception("Request URL does not map to a localization managed by this web application.");
+                var ex = new Exception("Request URL does not map to a localization managed by this web application.");
+                Log.Error(ex);
+                throw ex;
             }
         }
 

@@ -22,7 +22,7 @@ namespace Sdl.Web.Mvc.Configuration
             get
             {
                 return (Localization)GetFromContextStore("Localization") ?? (Localization)AddToContextStore("Localization", GetCurrentLocalization());
-            }       
+            }
         }
 
         /// <summary>
@@ -104,8 +104,24 @@ namespace Sdl.Web.Mvc.Configuration
         {
             get
             {
-                return (bool?)GetFromContextStore("IsDeveloperMode") ?? (bool)AddToContextStore("IsDeveloperMode", Localization.Domain.Equals("localhost"));
+                return (bool?)GetFromContextStore("IsDeveloperMode") ?? (bool)AddToContextStore("IsDeveloperMode", GetIsDeveloperMode());
             }
+        }
+
+        private static bool GetIsDeveloperMode()
+        {
+            try
+            {
+                if (HttpContext.Current != null)
+                {
+                    return HttpContext.Current.Request.Url.Host.ToLower() == "localhost";
+                }
+            }
+            catch (Exception)
+            {
+                //Do nothing
+            }
+            return false;
         }
 
         /// <summary>
@@ -140,16 +156,11 @@ namespace Sdl.Web.Mvc.Configuration
 
         protected static Localization GetCurrentLocalization()
         {
-            //If theres a single localization use that regardless
-            if (SiteConfiguration.Localizations.Count == 1)
-            {
-                return SiteConfiguration.Localizations.SingleOrDefault().Value;
-            }
             try
             {
                 if (HttpContext.Current != null)
                 {
-                    return SiteConfiguration.GetLocalizationFromUri(HttpContext.Current.Request.Url);
+                    return SiteConfiguration.LocalizationManager.GetLocalizationFromUri(HttpContext.Current.Request.Url);
                 }
             }
             catch (Exception)
