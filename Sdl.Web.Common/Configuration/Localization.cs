@@ -6,8 +6,18 @@ namespace Sdl.Web.Common.Configuration
 {
     public class Localization
     {
+        private string _path;
         public string LocalizationId { get; set;}
-        public string Path { get; set; }
+        public string Path {
+            get
+            {
+                return _path;
+            }
+            set
+            {
+                _path = value != null && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value;
+            }
+        }
         public string Culture { get; set; }
         public string Language { get; set; }
         public string MediaUrlRegex { get; set; }
