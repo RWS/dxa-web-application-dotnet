@@ -40,7 +40,7 @@ namespace Sdl.Web.Common.Configuration
         /// <summary>
         /// Localization resolver used for mapping URLs to localizations/content stores
         /// </summary>
-        public static ILocalizationResolver LocalizationResolver { get; set; }
+        public static ILocalizationManager LocalizationManager { get; set; }
 
         public const string VersionRegex = "(v\\d*.\\d*)";
         public const string SystemFolder = "system";
@@ -80,19 +80,26 @@ namespace Sdl.Web.Common.Configuration
         /// <param name="key">The configuration key, in the format "section.name" (eg "Environment.CmsUrl")</param>
         /// <param name="localization">The localization to get config for</param>
         /// <returns>The configuration matching the key for the given localization</returns>
-        public static string GetConfig(string key, Localization localization)
+        public static string GetConfig(string key, Localization localization = null)
         {
-            CheckLocalizationLoaded(localization);
+            if (localization == null)
+            {
+                localization = LocalizationManager.GetContextLocalization();
+            }
+            if (!CheckConfig(localization.LocalizationId))
+            {
+                LocalizationManager.UpdateLocalization(localization, true);
+            }
             return GetConfig(_configuration, key, localization.LocalizationId);
         }
 
-        public static void CheckLocalizationLoaded(Localization localization)
+        private static bool CheckConfig(string localizationId)
         {
-            var key = localization.LocalizationId;
-            if (!_configuration.ContainsKey(key) || CheckSettingsNeedRefresh(_settingsType,localization))
+            if (!_configuration.ContainsKey(localizationId) || CheckSettingsNeedRefresh(_settingsType, localizationId))
             {
-                localization = LoadLocalization(localization, true);
+                return false;
             }
+            return true;
         }
         
         private static string GetConfig(IReadOnlyDictionary<string, Dictionary<string, Dictionary<string, string>>> config, string key, string type, bool global = false)
@@ -140,10 +147,9 @@ namespace Sdl.Web.Common.Configuration
             lock(LocalizationUpdateLock)
             {
                 //refresh all localizations for this site
-                foreach(var localization in loc.GetSiteLocalizations())
+                foreach(var localization in loc.SiteLocalizations)
                 {
-                    //TODO - update the localization
-                    LoadLocalization(localization);
+                    LocalizationManager.UpdateLocalization(localization);
                 }
             }
         }
@@ -173,8 +179,8 @@ namespace Sdl.Web.Common.Configuration
         public static Localization LoadLocalization(Localization loc, bool loadDetails = false)
         {
             var key = loc.LocalizationId;
-            Log.Debug("Loading config for localization : {0} ('{1}') - ", key, loc.GetBaseUrl());
-            var localization = new Localization{ Protocol = loc.Protocol, Domain = loc.Domain, Port = loc.Port, Path = loc.Path, LocalizationId = loc.LocalizationId };
+            Log.Debug("Loading config for localization : {0}", key);
+            var localization = new Localization{ Path = loc.Path, LocalizationId = loc.LocalizationId };
             localization.IsHtmlDesignPublished = true;
             var mediaPatterns = new List<string>();
             var versionUrl = Path.Combine(loc.Path.ToCombinePath(true), @"version.json").Replace("\\", "/");
@@ -205,7 +211,7 @@ namespace Sdl.Web.Common.Configuration
                 if (bootstrapJson.staging != null && bootstrapJson.staging)
                 {
                     localization.IsStaging = true;
-                    Log.Info("Site {0} is a staging site.",loc.GetBaseUrl());
+                    Log.Info("Localization {0} is a staging site.",loc.LocalizationId);
                 }
                 if (bootstrapJson.mediaRoot != null)
                 {
@@ -219,10 +225,10 @@ namespace Sdl.Web.Common.Configuration
                 }
                 if (bootstrapJson.siteLocalizations != null)
                 {
-                    localization.SiteLocalizationIds = new List<string>();
+                    localization.SiteLocalizations = new List<Localization>();
                     foreach (var item in bootstrapJson.siteLocalizations)
                     {
-                        localization.SiteLocalizationIds.Add(item);
+                        localization.SiteLocalizations.Add(new Localization { LocalizationId = item.id ?? item, Path = item.path, Language = item.language });
                     }
                 }
                 if (localization.IsHtmlDesignPublished)
@@ -247,8 +253,8 @@ namespace Sdl.Web.Common.Configuration
             }
             localization.MediaUrlRegex = String.Join("|", mediaPatterns);
             localization.Culture = GetConfig("core.culture", loc);
-            localization.LastSettingsRefresh = DateTime.Now;
-            Log.Debug("MediaUrlRegex for localization {0} : {1}", loc.GetBaseUrl(), loc.MediaUrlRegex);
+            localization.Language = GetConfig("core.language", loc);
+            Log.Debug("MediaUrlRegex for localization {0} : {1}", localization.LocalizationId, localization.MediaUrlRegex);
             return localization;
         }
 
@@ -412,12 +418,11 @@ namespace Sdl.Web.Common.Configuration
         //A global lock
         private static readonly object Lock = new object();
         
-        public static bool CheckSettingsNeedRefresh(string type, Localization loc)
+        public static bool CheckSettingsNeedRefresh(string type, string localizationId)
         {
-            var key = loc.LocalizationId;
-            if (_refreshStates.ContainsKey(key))
+            if (_refreshStates.ContainsKey(localizationId))
             {
-                return _refreshStates[key].ContainsKey(type) && _refreshStates[key][type] < loc.LastSettingsRefresh;
+                return _refreshStates[localizationId].ContainsKey(type) && _refreshStates[localizationId][type] < LocalizationManager.GetLastLocalizationRefresh(localizationId);
             }
             return false;
         }

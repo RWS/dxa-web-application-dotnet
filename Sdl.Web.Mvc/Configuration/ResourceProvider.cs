@@ -46,12 +46,12 @@ namespace Sdl.Web.Mvc.Configuration
         {
             var key = localization.LocalizationId;
             //Load resources if they are not already loaded, or if they are out of date and need refreshing
-            if (!_resources.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_settingsType,localization))
+            if (!_resources.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_settingsType,localization.LocalizationId))
             {
                 LoadResourcesForLocalization(localization);
                 if (!_resources.ContainsKey(key))
                 {
-                    var ex = new Exception(String.Format("No resources can be found for localization {0}. Check that the localization path is correct and the resources have been published.", localization.GetBaseUrl()));
+                    var ex = new Exception(String.Format("No resources can be found for localization {0}. Check that the localization path is correct and the resources have been published.", localization.LocalizationId));
                     Log.Error(ex);
                     throw ex;
                 }
@@ -61,7 +61,7 @@ namespace Sdl.Web.Mvc.Configuration
 
         private static void LoadResourcesForLocalization(Localization loc)
         {
-            Log.Debug("Loading resources for localization : '{0}'", loc.GetBaseUrl());
+            Log.Debug("Loading resources for localization : {0}", loc.LocalizationId);
             var key = loc.LocalizationId;
             var resources = new Dictionary<string, object>();
             var url = Path.Combine(loc.Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"resources\_all.json").Replace("\\","/");

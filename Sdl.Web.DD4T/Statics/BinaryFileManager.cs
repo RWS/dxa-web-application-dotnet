@@ -129,7 +129,7 @@ namespace Sdl.Web.DD4T.Statics
             {
                 if (File.Exists(physicalPath))
                 {
-                    if (cacheSinceLastRefresh && loc.LastSettingsRefresh.CompareTo(lastPublishedDate) < 0)
+                    if (cacheSinceLastRefresh && SiteConfiguration.LocalizationManager.GetLastLocalizationRefresh(loc.LocalizationId).CompareTo(lastPublishedDate) < 0)
                     {
                         //File has been modified since last application start but we don't care
                         Log.Debug("Binary {0} is modified, but only since last application restart, so no action required", urlPath);

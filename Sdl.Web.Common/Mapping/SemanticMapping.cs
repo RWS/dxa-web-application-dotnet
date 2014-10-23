@@ -41,7 +41,7 @@ namespace Sdl.Web.Common.Mapping
         public static string GetVocabulary(string prefix, Localization loc)
         {
             var key = loc.LocalizationId;
-            if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc))
+            if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc.LocalizationId))
             {
                 LoadVocabulariesForLocalization(loc);
             }
@@ -62,7 +62,7 @@ namespace Sdl.Web.Common.Mapping
         public static string GetPrefix(string vocab, Localization loc)
         {
             var key = loc.LocalizationId;
-            if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc))
+            if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc.LocalizationId))
             {
                 LoadVocabulariesForLocalization(loc);
             }
@@ -83,7 +83,7 @@ namespace Sdl.Web.Common.Mapping
         public static List<string> GetIncludes(string pageTypeIdentifier, Localization loc)
         {
             var key = loc.LocalizationId;
-            if (!_includes.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_includeSettingsType, loc))
+            if (!_includes.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_includeSettingsType, loc.LocalizationId))
             {
                 LoadIncludesForLocalization(loc);
             }
@@ -107,7 +107,7 @@ namespace Sdl.Web.Common.Mapping
         public static SemanticSchema GetSchema(string id, Localization loc)
         {
             var key = loc.LocalizationId;
-            if (!_semanticMap.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_mapSettingsType, loc))
+            if (!_semanticMap.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_mapSettingsType, loc.LocalizationId))
             {
                 LoadSemanticMapForLocalization(loc);
             }

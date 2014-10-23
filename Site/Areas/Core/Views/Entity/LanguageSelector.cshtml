@@ -1,6 +1,6 @@
 ﻿@model Configuration
 @{
-    var siteLocalizations = WebRequestContext.Localization.GetSiteLocalizations();
+    var siteLocalizations = WebRequestContext.Localization.SiteLocalizations;
     var filteredLocalizations = new List<Localization>();
     if (siteLocalizations.Count > 1)
     {
@@ -27,8 +27,9 @@
             @foreach (var loc in siteLocalizations)
             {
                 var parms = "localization=" + loc.LocalizationId + (defaultItem!=null ? "&defaultItemId=" + defaultItem:"");
+                parms += "&defaultPath=" + loc.Path;
                 <option value="@loc.LocalizationId" data-href="/resolve/@(redirectId)?@parms" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>
-                    @SiteConfiguration.GetConfig("core.language", loc)
+                    @loc.Language
                 </option>
             }
         </select>
