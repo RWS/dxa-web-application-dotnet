@@ -64,7 +64,7 @@ namespace Sdl.Web.Mvc.ContentProvider
             //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
             //1. Try adding the default extension, so /news becomes /news.html
             var model = GetPageModelFromUrl(parsedUrl);
-            if (model == null && !url.EndsWith("/") && url.LastIndexOf(".", StringComparison.Ordinal) <= url.LastIndexOf("/", StringComparison.Ordinal))
+            if (model == null && (url==null || (!url.EndsWith("/") && url.LastIndexOf(".", StringComparison.Ordinal) <= url.LastIndexOf("/", StringComparison.Ordinal))))
             {
                 //2. Try adding the default page, so /news becomes /news/index.html
                 parsedUrl = ParseUrl(url + "/");

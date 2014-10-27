@@ -202,15 +202,15 @@ namespace Sdl.Web.Mvc.Controllers
         /// Resolve a item ID into a url and redirect to that URL
         /// </summary>
         /// <param name="itemId">The item id to resolve</param>
-        /// <param name="localization">The site localization in which to resolve the URL</param>
+        /// <param name="localizationId">The site localization in which to resolve the URL</param>
         /// <param name="defaultItemId"></param>
         /// <returns>null - response is redirected if the URL can be resolved</returns>
-        public virtual ActionResult Resolve(string itemId, string localization, string defaultItemId = null, string defaultPath = null)
+        public virtual ActionResult Resolve(string itemId, string localizationId, string defaultItemId = null, string defaultPath = null)
         {
-            var url = ContentProvider.ContentResolver.ResolveLink("tcm:" + itemId, localization);
+            var url = ContentProvider.ContentResolver.ResolveLink("tcm:" + itemId, localizationId);
             if (url == null && defaultItemId!=null)
             {
-                url = ContentProvider.ContentResolver.ResolveLink("tcm:" + defaultItemId, localization);
+                url = ContentProvider.ContentResolver.ResolveLink("tcm:" + defaultItemId, localizationId);
             }
             if (url == null)
             {
