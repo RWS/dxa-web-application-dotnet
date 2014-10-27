@@ -36,6 +36,7 @@ namespace Sdl.Web.Mvc.Statics
             var loc = WebRequestContext.Localization;
             if (loc == null)
             {
+                WebRequestContext.HasNoLocalization = true;
                 //if unsuccesful, log an information message, but carry on - there may be assets managed outside of the CMS managed URLs
                 Log.Info("Request URL {0} does not map to a localization managed by this web application.", HttpContext.Current.Request.Url);
             }
