@@ -64,7 +64,7 @@ namespace Sdl.Web.DD4T.Mapping
                 // get schema item id from tcmuri -> tcm:1-2-8
                 string[] uriParts = component.Schema.Id.Split('-');
                 long schemaId = Convert.ToInt64(uriParts[1]);
-                MappingData mapData = new MappingData {SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString(CultureInfo.InvariantCulture))};
+                MappingData mapData = new MappingData {SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString(CultureInfo.InvariantCulture),WebRequestContext.Localization)};
                 // get schema entity names (indexed by vocabulary)
                 mapData.EntityNames = mapData.SemanticSchema!=null ? mapData.SemanticSchema.GetEntityNames() : null;
             
@@ -137,6 +137,7 @@ namespace Sdl.Web.DD4T.Mapping
                                 pi.SetValue(model, GetAllFieldsAsDictionary(mapData.SourceEntity));
                                 processed = true;
                             }
+
                             if (processed)
                             {
                                 break;
@@ -194,7 +195,7 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 // determine field semantics
                 var vocab = entityData.Value.Key;
-                string prefix = SemanticMapping.GetPrefix(vocab);
+                string prefix = SemanticMapping.GetPrefix(vocab,WebRequestContext.Localization);
                 if (prefix != null && mapData.EntityNames!=null)
                 {
                     string property = info.PropertyName;
@@ -544,7 +545,7 @@ namespace Sdl.Web.DD4T.Mapping
             return null;
         }
 
-        object GetStrings(IField field, Type modelType, bool multival)
+        static object GetStrings(IField field, Type modelType, bool multival)
         {
             if (modelType.IsAssignableFrom(typeof(String)))
             {
@@ -726,7 +727,7 @@ namespace Sdl.Web.DD4T.Mapping
                 // Index and Default are not a proper titles for an HTML page
                 if (title.ToLowerInvariant().Equals("index") || title.ToLowerInvariant().Equals("default"))
                 {
-                    title = GetResource("core.defaultPageTitle") + titlePostfix;
+                    title = GetResource("core.defaultPageTitle");
                 }
             }
             meta.Add("twitter:card", "summary");
@@ -734,7 +735,7 @@ namespace Sdl.Web.DD4T.Mapping
             meta.Add("og:url", WebRequestContext.RequestUrl);
             //TODO is this always article?
             meta.Add("og:type", "article");
-            meta.Add("og:locale", SiteConfiguration.GetConfig("core.culture", WebRequestContext.Localization.Path));
+            meta.Add("og:locale", WebRequestContext.Localization.Culture);
             if (description != null)
             {
                 meta.Add("og:description", description);
@@ -756,7 +757,7 @@ namespace Sdl.Web.DD4T.Mapping
         {
             if (field.FieldType==FieldType.Embedded)
             {
-                if (field.EmbeddedValues!=null & field.EmbeddedValues.Count>0)
+                if (field.EmbeddedValues!=null && field.EmbeddedValues.Count>0)
                 {
                     var subfields = field.EmbeddedValues[0];
                     foreach (var subfield in subfields.Values)

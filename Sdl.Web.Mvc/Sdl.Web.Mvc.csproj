@@ -60,6 +60,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\BaseLocalizationManager.cs" />
     <Compile Include="Controllers\NoCacheAttribute.cs" />
     <Compile Include="Properties\VersionInfo.cs" />
     <Compile Include="Configuration\WebRequestContext.cs" />

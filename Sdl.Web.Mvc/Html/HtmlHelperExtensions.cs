@@ -23,7 +23,7 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>Formatted date</returns>
         public static string Date(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
         {
-            return date != null ? ((DateTime)date).ToString(format, new CultureInfo(SiteConfiguration.GetConfig("core.culture", WebRequestContext.Localization.Path))) : null;
+            return date != null ? ((DateTime)date).ToString(format, WebRequestContext.Localization.CultureInfo) : null;
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace Sdl.Web.Mvc.Html
                     return String.Format(htmlHelper.Resource("core.xDaysAgoText"), dayDiff);
                 }
 
-                return ((DateTime)date).ToString(format, new CultureInfo(SiteConfiguration.GetConfig("core.culture", WebRequestContext.Localization.Path)));
+                return ((DateTime)date).ToString(format, new CultureInfo(WebRequestContext.Localization.Culture));
             }
             return null;
         }
@@ -64,7 +64,7 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The config value</returns>
         public static string Config(this HtmlHelper htmlHelper, string configName)
         {
-            return SiteConfiguration.GetConfig(configName, WebRequestContext.Localization.Path);
+            return SiteConfiguration.GetConfig(configName, WebRequestContext.Localization);
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace Sdl.Web.Mvc.Html
                 builder.Attributes.Add("width", imgWidth);
             }
             builder.Attributes.Add("alt", image.AlternateText);
-            builder.Attributes.Add("data-aspect", (Math.Truncate(aspect * 100) / 100).ToString());
+            builder.Attributes.Add("data-aspect", (Math.Truncate(aspect * 100) / 100).ToString(CultureInfo.InvariantCulture));
             if (!String.IsNullOrEmpty(cssClass))
             {
                 builder.Attributes.Add("class", cssClass);

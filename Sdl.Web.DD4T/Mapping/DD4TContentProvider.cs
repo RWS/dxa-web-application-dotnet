@@ -123,7 +123,7 @@ namespace Sdl.Web.DD4T.Mapping
             string moduleName = bits.Length > 1 ? bits[0] : SiteConfiguration.CoreModuleName;
             schemaKey = bits.Length > 1 ? bits[1] : bits[0];
             int res;
-            var schemaId = SiteConfiguration.GetGlobalConfig("schemas." + schemaKey, moduleName);
+            var schemaId = SiteConfiguration.GetConfig(String.Format("{0}.schemas.{1}",moduleName, schemaKey ),WebRequestContext.Localization);
             Int32.TryParse(schemaId, out res);
             return res;
         }
@@ -135,7 +135,7 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 var page = (IPage)model;
                 var bits = page.PageTemplate.Id.Split('-');
-                var includes = SemanticMapping.GetIncludes(bits[1]);
+                var includes = SemanticMapping.GetIncludes(bits[1], WebRequestContext.Localization);
                 if (includes != null)
                 {
                     foreach (var include in includes)

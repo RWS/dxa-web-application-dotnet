@@ -12,8 +12,8 @@
     @if (Model.Media != null)
     {
         <span @Markup.Property(Model, "Media")>
-            @if (imageAspect==0)
-            {            
+            @if (imageAspect == 0)
+            {
                 @Html.Media(Model.Media, "100%")
             }
             else
@@ -21,6 +21,11 @@
                 @Html.Media(Model.Media, "100%", imageAspect)
             }
         </span>
+    }
+    else
+    {
+        @* 1x1px transparent GIF *@
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="100%">
     }
     @if (!String.IsNullOrEmpty(Model.Headline) || !String.IsNullOrEmpty(Model.Text))
     {

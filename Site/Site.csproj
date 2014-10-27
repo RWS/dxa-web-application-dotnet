@@ -42,8 +42,9 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DD4T.Providers.SDLTridion2013">
-      <HintPath>..\packages\DD4T-Tridion-2013sp1.1.31.1\lib\DD4T.Providers.SDLTridion2013.dll</HintPath>
+    <Reference Include="DD4T.Providers.SDLTridion2013sp1, Version=1.31.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\_references\dd4t-update\DD4T.Providers.SDLTridion2013sp1.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
@@ -71,12 +72,15 @@
     <Reference Include="System.Web.Mvc, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.Mvc.5.1.2\lib\net45\System.Web.Mvc.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.Razor.3.1.2\lib\net45\System.Web.Razor.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Web.Routing">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.WebPages.3.1.2\lib\net45\System.Web.WebPages.dll</HintPath>
@@ -184,10 +188,13 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Areas\Search\Views\Search\SearchResults.cshtml" />
+    <Content Include="Areas\Search\Views\Search\Partials\Pager.cshtml" />
     <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
     <None Include="Properties\PublishProfiles\Distribution.pubxml" />
     <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
-    <Content Include="Unity.config" />
+    <Content Include="Unity.config">
+      <Link>Unity.config</Link>
+    </Content>
     <Content Include="Views\web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -205,10 +212,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Modules\Sdl.Web.Modules.Search\Sdl.Web.Modules.Search.csproj">
-      <Project>{8fefff4c-0ae2-452f-89b1-36f7d2944032}</Project>
-      <Name>Sdl.Web.Modules.Search</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Sdl.Web.DD4T\Sdl.Web.DD4T.csproj">
       <Project>{360aec0a-3367-486a-885f-7931f32234c1}</Project>
       <Name>Sdl.Web.DD4T</Name>

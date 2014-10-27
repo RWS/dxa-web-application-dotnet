@@ -202,51 +202,21 @@ namespace Sdl.Web.Mvc.Controllers
         /// Resolve a item ID into a url and redirect to that URL
         /// </summary>
         /// <param name="itemId">The item id to resolve</param>
-        /// <param name="localization">The site localization in which to resolve the URL</param>
+        /// <param name="localizationId">The site localization in which to resolve the URL</param>
         /// <param name="defaultItemId"></param>
         /// <returns>null - response is redirected if the URL can be resolved</returns>
-        public virtual ActionResult Resolve(string itemId, string localization, string defaultItemId = null)
+        public virtual ActionResult Resolve(string itemId, string localizationId, string defaultItemId = null, string defaultPath = null)
         {
-            var url = ContentProvider.ContentResolver.ResolveLink("tcm:" + itemId, localization);
+            var url = ContentProvider.ContentResolver.ResolveLink("tcm:" + itemId, localizationId);
             if (url == null && defaultItemId!=null)
             {
-                url = ContentProvider.ContentResolver.ResolveLink("tcm:" + defaultItemId, localization);
+                url = ContentProvider.ContentResolver.ResolveLink("tcm:" + defaultItemId, localizationId);
             }
             if (url == null)
             {
-                var bits = itemId.Split(':');
-                if (bits.Length > 1)
-                {
-                    bits = bits[1].Split('-');
-                    foreach (var loc in SiteConfiguration.Localizations.Values)
-                    {
-                        if (loc.LocalizationId == bits[0])
-                        {
-                            url = loc.Path;
-                        }
-                    }
-                }
+                url = String.IsNullOrEmpty(defaultPath) ? "/" : defaultPath;
             }
-            if (url == null)
-            {
-                if (localization == null)
-                {
-                    url = SiteConfiguration.DefaultLocalization;
-                }
-                else
-                {
-                    var loc = SiteConfiguration.Localizations.Values.FirstOrDefault(l => l.LocalizationId.ToString(CultureInfo.InvariantCulture) == localization);
-                    if (loc != null)
-                    {
-                        url = String.IsNullOrEmpty(loc.Path) ? "/" : loc.Path;
-                    }
-                }
-            }
-            if (url != null)
-            {
-                Response.Redirect(url, true);
-            }
-            return null;
+            return Redirect(url);
         }
 
         //This is the method to override if you need to add custom model population logic, first calling the base class and then adding your own logic

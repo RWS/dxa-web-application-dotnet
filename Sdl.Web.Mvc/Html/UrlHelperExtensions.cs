@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sdl.Web.Mvc.Configuration;
+using System;
 using System.Web.Mvc;
 
 namespace Sdl.Web.Mvc.Html
@@ -17,16 +18,21 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>A localized, versioned URL</returns>
         public static string VersionedContent(this UrlHelper helper, string path, string localization = "")
         {
+            var loc = WebRequestContext.Localization;
             if (!path.StartsWith("/"))
             {
                 path = "/" + path;
             }
-            string version = Common.Configuration.SiteConfiguration.SiteVersion;
+            string version = loc.Version;
+            if (localization == "" && WebRequestContext.Localization.SiteLocalizations!=null && WebRequestContext.Localization.SiteLocalizations.Count>0)
+            {
+                localization = WebRequestContext.Localization.SiteLocalizations[0].Path;
+            }
             if (!String.IsNullOrEmpty(version))
             {
                 version = "/" + version;
             }
-            path = "~/" + localization + "system" + version + path;
+            path = "~" + localization + "/system" + version + path;
             return helper.Content(path);
         }
     }

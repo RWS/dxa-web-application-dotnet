@@ -61,6 +61,24 @@ namespace Sdl.Web.Site
                new { controller = "Page", action = "Resolve" },
                new { itemId = @"^(.*)?$" }
             ).DataTokens.Add("area", "Core");
+            routes.MapRoute(
+               "Core_Resolve_Loc",
+               "{localization}/resolve/{*itemId}",
+               new { controller = "Page", action = "Resolve" },
+               new { itemId = @"^(.*)?$" }
+            ).DataTokens.Add("area", "Core");
+
+            // Admin actions
+            routes.MapRoute(
+               "Core_Admin",
+               "admin/{action}",
+               new { controller = "Admin", action = "Refresh" }
+            ).DataTokens.Add("area", "Core");
+            routes.MapRoute(
+               "Core_Admin_Loc",
+               "{localization}/admin/{action}",
+               new { controller = "Admin", action = "Refresh" }
+            ).DataTokens.Add("area", "Core");
 
             // Tridion Page Route
             routes.MapRoute(
@@ -76,7 +94,10 @@ namespace Sdl.Web.Site
             InitializeDependencyInjection();
             SiteConfiguration.StaticFileManager = (IStaticFileManager)DependencyResolver.Current.GetService(typeof(IStaticFileManager));
             SiteConfiguration.MediaHelper = (IMediaHelper)DependencyResolver.Current.GetService(typeof(IMediaHelper));
-            SiteConfiguration.Initialize(TridionConfig.PublicationMap);
+            SiteConfiguration.LocalizationManager = (ILocalizationManager)DependencyResolver.Current.GetService(typeof(ILocalizationManager));
+            //Optionally preload list of localizations for this application
+            SiteConfiguration.LocalizationManager.SetLocalizations(TridionConfig.PublicationMap);
+            
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
             _initialized = true;

@@ -18,9 +18,8 @@ namespace Sdl.Web.Mvc.Configuration
     /// </summary>
     public class ResourceProvider : IResourceProvider
     {
-        private static Dictionary<string, Dictionary<string, object>> _resources;
-        private static readonly object ResourceLock = new object();
-        public static DateTime LastSettingsRefresh { get; set; }
+        private static Dictionary<string, Dictionary<string, object>> _resources = new Dictionary<string, Dictionary<string, object>>();
+        private static readonly string _settingsType = "resources";
         public object GetObject(string resourceKey, CultureInfo culture)
         {
             //Ignore the culture - we read this from the RequestContext
@@ -40,78 +39,67 @@ namespace Sdl.Web.Mvc.Configuration
 
         private IDictionary GetResourceCache()
         {
-            return Resources(WebRequestContext.Localization.Path);
+            return Resources(WebRequestContext.Localization);
         }
 
-        public IDictionary Resources(string localization)
+        public IDictionary Resources(Localization localization)
         {
-            if (_resources == null || LastSettingsRefresh < SiteConfiguration.LastSettingsRefresh)
+            var key = localization.LocalizationId;
+            //Load resources if they are not already loaded, or if they are out of date and need refreshing
+            if (!_resources.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_settingsType,localization.LocalizationId))
             {
-                LoadResources();
-            }
-            if (!_resources.ContainsKey(localization))
-            {
-                var ex = new Exception(String.Format("No resources can be found for localization {0}. Check that the localization path is correct and the resources have been published.", localization));
-                Log.Error(ex);
-                throw ex;
-            }
-            return _resources[localization];
-        }
-
-        private static void LoadResources()
-        {
-            //We are reading into a static variable, so need to be thread safe
-            lock (ResourceLock)
-            {
-                var applicationRoot = AppDomain.CurrentDomain.BaseDirectory;
-                _resources = new Dictionary<string, Dictionary<string, object>>();
-                foreach (var loc in SiteConfiguration.Localizations.Values)
+                LoadResourcesForLocalization(localization);
+                if (!_resources.ContainsKey(key))
                 {
-                    //Just in case the same localization is in there more than once
-                    if (!_resources.ContainsKey(loc.Path))
-                    {
-                        Log.Debug("Loading resources for localization : '{0}'", loc.Path);
-                        var resources = new Dictionary<string, object>();
-                        var path = Path.Combine(new[] { applicationRoot, SiteConfiguration.StaticsFolder, loc.Path.ToCombinePath(), SiteConfiguration.SystemFolder, @"resources\_all.json" });
-                        if (File.Exists(path))
-                        {
-                            //The _all.json file contains a list of all other resources files to load
-                            Log.Debug("Loading resource bootstrap file : '{0}'", path);
-                            var bootstrapJson = Json.Decode(File.ReadAllText(path));
-                            foreach (string file in bootstrapJson.files)
-                            {
-                                var type = file.Substring(file.LastIndexOf("/", StringComparison.Ordinal) + 1);
-                                type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                                var filePath = Path.Combine(applicationRoot, SiteConfiguration.StaticsFolder, file.ToCombinePath());
-                                if (File.Exists(filePath))
-                                {
-                                    Log.Debug("Loading resources from file: {0}", filePath);
-                                    foreach (var item in GetResourcesFromFile(filePath))
-                                    {
-                                        //we ensure resource key uniqueness by adding the type (which comes from the filename)
-                                        resources.Add(String.Format("{0}.{1}", type, item.Key), item.Value);
-                                    }
-                                }
-                                else
-                                {
-                                    Log.Error("Resource file: {0} does not exist - skipping", filePath);
-                                }
-                            }
-                            _resources.Add(loc.Path, resources);
-                        }
-                        else
-                        {
-                            Log.Warn("Localization resource bootstrap file: {0} does not exist - skipping this localization", path);
-                        }
-                    }
+                    var ex = new Exception(String.Format("No resources can be found for localization {0}. Check that the localization path is correct and the resources have been published.", localization.LocalizationId));
+                    Log.Error(ex);
+                    throw ex;
                 }
             }
-            LastSettingsRefresh = DateTime.Now;
+            return _resources[key];
         }
 
-        private static Dictionary<string, object> GetResourcesFromFile(string filePath)
+        private static void LoadResourcesForLocalization(Localization loc)
         {
-            return new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(File.ReadAllText(filePath));
+            Log.Debug("Loading resources for localization : {0}", loc.LocalizationId);
+            var key = loc.LocalizationId;
+            var resources = new Dictionary<string, object>();
+            var url = Path.Combine(loc.Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"resources\_all.json").Replace("\\","/");
+            var jsonData = SiteConfiguration.StaticFileManager.Serialize(url, loc, true);
+            if (jsonData!=null)
+            {
+                //The _all.json file contains a list of all other resources files to load
+                var bootstrapJson = Json.Decode(jsonData);
+                foreach (string resourceUrl in bootstrapJson.files)
+                {
+                    var type = resourceUrl.Substring(resourceUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                    type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
+                    jsonData = SiteConfiguration.StaticFileManager.Serialize(resourceUrl, loc, true);
+                    if (jsonData!=null)
+                    {
+                        Log.Debug("Loading resources from file: {0}", resourceUrl);
+                        foreach (var item in GetResourcesFromFile(jsonData))
+                        {
+                            //we ensure resource key uniqueness by adding the type (which comes from the filename)
+                            resources.Add(String.Format("{0}.{1}", type, item.Key), item.Value);
+                        }
+                    }
+                    else
+                    {
+                        Log.Error("Resource file: {0} does not exist for localization {1} - skipping", resourceUrl, key);
+                    }
+                }
+                SiteConfiguration.ThreadSafeSettingsUpdate<Dictionary<string, object>>(_settingsType, _resources, key, resources);
+            }
+            else
+            {
+                Log.Error("Localization resource bootstrap file: {0} does not exist for localization {1}. Check that the Publish Settings page has been published in this publication.", url, loc.LocalizationId);
+            }
+        }
+
+        private static Dictionary<string, object> GetResourcesFromFile(string jsonData)
+        {
+            return new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(jsonData);
         }
     }
 
