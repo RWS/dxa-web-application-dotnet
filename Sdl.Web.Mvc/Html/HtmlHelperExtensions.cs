@@ -23,7 +23,7 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>Formatted date</returns>
         public static string Date(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
         {
-            return date != null ? ((DateTime)date).ToString(format, new CultureInfo(WebRequestContext.Localization.Culture)) : null;
+            return date != null ? ((DateTime)date).ToString(format, WebRequestContext.Localization.CultureInfo) : null;
         }
 
         /// <summary>
