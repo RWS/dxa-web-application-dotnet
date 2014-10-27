@@ -30,6 +30,21 @@ namespace Sdl.Web.Mvc.Configuration
         }
 
         /// <summary>
+        /// True if the current request is for a resource outside the scope of a particular localization
+        /// </summary>
+        public static bool HasNoLocalization
+        {
+            get
+            {
+                return (bool?)GetFromContextStore("IsDeveloperMode") ?? false;
+            }
+            set
+            {
+                AddToContextStore("IsDeveloperMode", value);
+            }
+        }
+
+        /// <summary>
         /// The Tridion Context Engine
         /// </summary>
         public static ContextEngine ContextEngine

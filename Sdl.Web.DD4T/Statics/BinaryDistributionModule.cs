@@ -38,6 +38,10 @@ namespace Sdl.Web.DD4T.Statics
             HttpRequest request = context.Request;
             HttpResponse response = context.Response;
             string urlPath = request.Url.AbsolutePath;
+            if (WebRequestContext.HasNoLocalization)
+            {
+                return;
+            }
             var staticsRootUrl = SiteConfiguration.GetLocalStaticsUrl(WebRequestContext.Localization.LocalizationId);
             urlPath = urlPath.StartsWith("/" + staticsRootUrl) ? urlPath.Substring(staticsRootUrl.Length + 1) : urlPath;
             if (!IsBinaryUrl.IsMatch(urlPath))
@@ -92,7 +96,11 @@ namespace Sdl.Web.DD4T.Statics
         {
             HttpContext context = HttpContext.Current;
             HttpRequest request = context.Request;
-            string urlPath = request.Url.AbsolutePath;
+            string urlPath = request.Url.AbsolutePath; 
+            if (WebRequestContext.HasNoLocalization)
+            {
+                return;
+            }
             Log.Debug(">>DistributionModule_OnBeginRequest ({0})", urlPath);            
             if (!IsBinaryUrl.IsMatch(urlPath))
             {
@@ -113,7 +121,6 @@ namespace Sdl.Web.DD4T.Statics
                     {
                         Directory.CreateDirectory(dir);
                     }
-
                     lock (NamedLocker.GetLock(realPath))
                     {
                         File.Create(realPath).Dispose();
