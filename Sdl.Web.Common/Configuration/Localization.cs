@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Web;
+using System.Linq;
+using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Common.Configuration
 {
@@ -18,7 +21,26 @@ namespace Sdl.Web.Common.Configuration
                 _path = value != null && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value;
             }
         }
-        public string Culture { get; set; }
+        private string _culture;
+        public string Culture { 
+            get{
+                return _culture;
+            }
+            set
+            {
+                try
+                {
+                    _culture = value;
+                    CultureInfo = new CultureInfo(value);
+                }
+                catch
+                {
+                    Log.Error("Attempt to set the culture for localization {0} to {1}. This is not a value culture.", LocalizationId, value);
+                    CultureInfo = new CultureInfo("en-US");
+                }
+            }
+        }
+        public CultureInfo CultureInfo { get; set; }
         public string Language { get; set; }
         public string MediaUrlRegex { get; set; }
         public bool IsStaging { get; set; }

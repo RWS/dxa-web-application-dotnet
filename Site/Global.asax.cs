@@ -61,6 +61,24 @@ namespace Sdl.Web.Site
                new { controller = "Page", action = "Resolve" },
                new { itemId = @"^(.*)?$" }
             ).DataTokens.Add("area", "Core");
+            routes.MapRoute(
+               "Core_Resolve_Loc",
+               "{localization}/resolve/{*itemId}",
+               new { controller = "Page", action = "Resolve" },
+               new { itemId = @"^(.*)?$" }
+            ).DataTokens.Add("area", "Core");
+
+            // Admin actions
+            routes.MapRoute(
+               "Core_Admin",
+               "admin/{action}",
+               new { controller = "Admin", action = "Refresh" }
+            ).DataTokens.Add("area", "Core");
+            routes.MapRoute(
+               "Core_Admin_Loc",
+               "{localization}/admin/{action}",
+               new { controller = "Admin", action = "Refresh" }
+            ).DataTokens.Add("area", "Core");
 
             // Tridion Page Route
             routes.MapRoute(

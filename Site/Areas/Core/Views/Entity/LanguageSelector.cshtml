@@ -26,9 +26,9 @@
         <select class="selectpicker" data-width="auto">
             @foreach (var loc in siteLocalizations)
             {
-                var parms = "localization=" + loc.LocalizationId + (defaultItem!=null ? "&defaultItemId=" + defaultItem:"");
+                var parms = "localizationId=" + loc.LocalizationId + (defaultItem!=null ? "&defaultItemId=" + defaultItem:"");
                 parms += "&defaultPath=" + loc.Path;
-                <option value="@loc.LocalizationId" data-href="/resolve/@(redirectId)?@parms" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>
+                <option value="@loc.LocalizationId" data-href="@(WebRequestContext.Localization.Path)/resolve/@(redirectId)?@parms" @(loc.LocalizationId==WebRequestContext.Localization.LocalizationId ? "selected" : "")>
                     @loc.Language
                 </option>
             }
