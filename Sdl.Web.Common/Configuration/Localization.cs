@@ -37,6 +37,7 @@ namespace Sdl.Web.Common.Configuration
                 {
                     Log.Error("Attempt to set the culture for localization {0} to {1}. This is not a value culture.", LocalizationId, value);
                     CultureInfo = new CultureInfo("en-US");
+                    _culture = "en-US";
                 }
             }
         }

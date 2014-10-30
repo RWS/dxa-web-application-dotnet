@@ -8,18 +8,21 @@ namespace Sdl.Web.Common.Models
     /// </summary>
     public class PageBase : IPage
     {
+        public string Id { get; set; }
+        public string Title { get; set; }
+        public Dictionary<string, IRegion> Regions { get; set; }
         /// <summary>
         /// For storing system data (for example page id and modified date for xpm markup).
         /// </summary>
         public Dictionary<string, string> PageData { get; set; }
-        public Dictionary<string, IRegion> Regions { get; set; }
-        public string Id { get; set; }
-        public string Title { get; set; }
+        public MvcData AppData { get; set; }
 
         public PageBase()
         {
             Regions = new Dictionary<string, IRegion>();
             PageData = new Dictionary<string, string>();
         }
+
+
     }
 }

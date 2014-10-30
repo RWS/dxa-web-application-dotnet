@@ -9,7 +9,6 @@ namespace Sdl.Web.Common.Models
     {
         public string Url { get; set; }
         public Dictionary<string, string> Meta { get; set; }
-        
         /// <summary>
         /// Included content not explicitly added to the page but required for rendering (header, footer, nav etc.).
         /// </summary>

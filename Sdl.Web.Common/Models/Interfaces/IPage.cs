@@ -7,5 +7,6 @@ namespace Sdl.Web.Common.Models
         Dictionary<string, string> PageData { get; set; }
         Dictionary<string, IRegion> Regions { get; set; }
         string Id { get; set; }
+        MvcData AppData { get; set; }
     }
 }

@@ -51,7 +51,7 @@ namespace Sdl.Web.Mvc.Html
                     return String.Format(htmlHelper.Resource("core.xDaysAgoText"), dayDiff);
                 }
 
-                return ((DateTime)date).ToString(format, new CultureInfo(WebRequestContext.Localization.Culture));
+                return ((DateTime)date).ToString(format, WebRequestContext.Localization.CultureInfo);
             }
             return null;
         }

@@ -38,6 +38,9 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -60,8 +63,14 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\BaseAreaRegistration.cs" />
     <Compile Include="Configuration\BaseLocalizationManager.cs" />
+    <Compile Include="Formats\FormatDataAttribute.cs" />
     <Compile Include="Controllers\NoCacheAttribute.cs" />
+    <Compile Include="Formats\JsonNetResult.cs" />
+    <Compile Include="Formats\JsonViewFormatter.cs" />
+    <Compile Include="Formats\MediaTypeViewFormatter.cs" />
+    <Compile Include="Formats\ViewResultFormatters.cs" />
     <Compile Include="Properties\VersionInfo.cs" />
     <Compile Include="Configuration\WebRequestContext.cs" />
     <Compile Include="Controllers\HandleSectionErrorAttribute.cs" />

@@ -7,6 +7,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using System.IO;
+using Sdl.Web.Common.Models.Common;
 
 namespace Sdl.Web.Mvc.ContentProvider
 {
@@ -71,7 +72,7 @@ namespace Sdl.Web.Mvc.ContentProvider
                 Log.Debug("No content for URL found, trying default: {0}", parsedUrl);
                 model = GetPageModelFromUrl(parsedUrl);
             }
-            return model;
+            return model==null ? null : MapModel(model, ModelType.Page);
         }
         
         /// <summary>
@@ -87,21 +88,50 @@ namespace Sdl.Web.Mvc.ContentProvider
             MvcData viewData = ContentResolver.ResolveMvcData(data);
             if (viewModeltype == null)
             {
-                var key = String.Format("{0}:{1}", viewData.AreaName, viewData.ViewName);
+                var key = SiteConfiguration.GetViewModelRegistryKey(viewData);
                 viewModeltype = SiteConfiguration.ViewModelRegistry.ContainsKey(key) ? SiteConfiguration.ViewModelRegistry[key] : null;
-            }
-            if (viewModeltype!=null)
-            {
-                IModelBuilder builder = DefaultModelBuilder;
-                if (ModelBuilders.ContainsKey(viewModeltype))
+                if (viewModeltype == null)
                 {
-                    builder = ModelBuilders[viewModeltype];
+                    var ex = new Exception(String.Format("Cannot find entry in ViewModelRegistry with key {0}. Check that you have registered this view in the {1} area registration", key, viewData.AreaName));
+                    throw ex;
                 }
-                return builder.Create(data, viewModeltype, includes);
             }
-            var ex = new Exception(String.Format("Cannot find view model for entity in ViewModelRegistry. Check the view is strongly typed using the @model statement"));
-            Log.Error(ex);
-            throw ex;
+            IModelBuilder builder = DefaultModelBuilder;
+            if (ModelBuilders.ContainsKey(viewModeltype))
+            {
+                builder = ModelBuilders[viewModeltype];
+            }
+            var model = builder.Create(data, viewModeltype, includes, viewData);
+            return model==null ? data : MapModelItems(model);
+        }
+
+        protected object MapModelItems(object model)
+        {
+            if (model is IPage)
+            {
+                var page = ((IPage)model);
+                foreach (var region in page.Regions.Values)
+                {
+                    for (int i = 0; i < region.Items.Count; i++)
+                    {
+                        object mappedItem = null;
+                        try
+                        {
+                            mappedItem = MapModel(region.Items[i], ModelType.Entity);
+                        }
+                        catch (Exception ex)
+                        {
+                            //if there is a problem mapping the item, we replace it with an exception entity
+                            //and carry on processing - this should not cause a failure in the rendering of
+                            //the page as a whole
+                            Log.Error(ex);
+                            mappedItem = new ExceptionEntity { Exception = ex, AppData = ContentResolver.ResolveMvcData(region.Items[i]) };                   
+                        }
+                        region.Items[i] = mappedItem;
+                    }
+                }
+            }
+            return model;
         }
 
         /// <summary>

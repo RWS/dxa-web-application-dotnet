@@ -9,6 +9,7 @@ namespace Sdl.Web.Common.Interfaces
         string DefaultExtension { get; set; }
         string ResolveLink(object linkData, object resolveInstruction = null);
         object ResolveContent(object content, object resolveInstruction = null);
+        bool EvaluateEntity(object entity, object evaluationData = null);
         MvcData ResolveMvcData(object data);
     }
 }

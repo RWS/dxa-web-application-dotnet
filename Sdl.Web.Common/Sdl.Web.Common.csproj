@@ -72,6 +72,7 @@
     <Compile Include="Mapping\SemanticSchema.cs" />
     <Compile Include="Mapping\SemanticSchemaField.cs" />
     <Compile Include="Mapping\SemanticVocabulary.cs" />
+    <Compile Include="Models\Common\ErrorEntity.cs" />
     <Compile Include="Models\Entity\Configuration.cs" />
     <Compile Include="Models\Interfaces\IPage.cs" />
     <Compile Include="Models\Interfaces\IEntity.cs" />
