@@ -9,7 +9,9 @@ using Sdl.Web.Common.Models.Common;
 namespace Sdl.Web.Mvc.Formats
 {
     /// <summary>
-    /// Action Filter attritbute used to divert rendering from the standard View to a data formatter (for example JSON/RSS)
+    /// Action Filter attritbute used to divert rendering from the standard View to a 
+    /// data formatter (for example JSON/RSS), and if necessary enriching the model
+    /// by processing all entities to add external data
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class FormatDataAttribute : ActionFilterAttribute
@@ -22,65 +24,28 @@ namespace Sdl.Web.Mvc.Formats
                 var model = filterContext.Controller.ViewData.Model;
                 if (formatter.ProcessModel)
                 {
-                    model = ProcessModel(model, filterContext);
+                    var controller = filterContext.Controller as BaseController;
+                    if (controller!=null)
+                    {
+                        if (model is IPage)
+                        {
+                            model = controller.ProcessPageModel((IPage)model);
+                        }
+                        else
+                        {
+                            model = controller.ProcessEntityModel(model as IEntity) ?? model;
+                        }
+                    }
                 }
                 var result = formatter.FormatData(filterContext, model);
                 if (result != null)
+                {
                     filterContext.Result = result;
+                }
             }
             base.OnActionExecuted(filterContext);
         }
 
-        private object ProcessModel(object model, ControllerContext context)
-        {
-            var pageData = model as WebPage;
-            if (pageData!=null)
-            {
-                foreach(var region in pageData.Regions.Values)
-                {
-                    for (int i = 0; i < region.Items.Count; i++)
-                    {
-                        var entity = region.Items[i] as IEntity;
-                        if (entity != null && entity.AppData!=null)
-                        {
-                            if (IsCustomAction(entity.AppData))
-                            {
-                                region.Items[i] = ProcessEntityModel(entity, context);
-                            }
-                        }
-                    }
-                }
-            }
-            return model;
-        }
 
-        private bool IsCustomAction(MvcData mvcData)
-        {
-            return mvcData.ActionName != SiteConfiguration.GetEntityAction() || mvcData.ControllerName != SiteConfiguration.GetEntityController() || mvcData.ControllerAreaName != SiteConfiguration.GetDefaultModuleName();
-        }
-
-        private object ProcessEntityModel(IEntity entity, ControllerContext context)
-        {
-            var tempRequestContext = new RequestContext(context.HttpContext, new RouteData());
-            tempRequestContext.RouteData.DataTokens["Area"] = entity.AppData.ControllerAreaName;
-            tempRequestContext.RouteData.Values["controller"] = entity.AppData.ControllerName;
-            tempRequestContext.RouteData.Values["area"] = entity.AppData.ControllerAreaName;
-            tempRequestContext.HttpContext = context.HttpContext;
-           
-            BaseController controller = ControllerBuilder.Current.GetControllerFactory().CreateController(tempRequestContext, entity.AppData.ControllerName) as BaseController;
-            try
-            {
-                if (controller != null)
-                {
-                    controller.ControllerContext = new ControllerContext(context.HttpContext, tempRequestContext.RouteData, controller);
-                    return controller.ProcessModel(entity);
-                }
-            }
-            catch (Exception ex)
-            {
-                return new ExceptionEntity { Exception = ex };
-            }
-            return entity;
-        }
     }
 }
