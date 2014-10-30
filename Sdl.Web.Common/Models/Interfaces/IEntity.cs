@@ -6,6 +6,7 @@ namespace Sdl.Web.Common.Models
     {
         Dictionary<string, string> EntityData{get;set;}
         Dictionary<string, string> PropertyData{get;set;}
-        string Id{get;set;}
+        string Id { get; set; }
+        MvcData AppData { get; set; }
     }
 }

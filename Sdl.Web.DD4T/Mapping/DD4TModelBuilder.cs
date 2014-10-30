@@ -35,17 +35,16 @@ namespace Sdl.Web.DD4T.Mapping
             _contentResolver = contentResolver;
         }
 
-        public override object Create(object sourceEntity, Type type, List<object> includes = null)
+        public override object Create(object sourceEntity, Type type, List<object> includes = null, MvcData mvcData = null)
         {
             if (sourceEntity is IPage)
             {
-                return CreatePage(sourceEntity, type, includes);
+                return CreatePage(sourceEntity, type, includes, mvcData);
             }
-            
-            return CreateEntity(sourceEntity, type, includes);
+            return CreateEntity(sourceEntity, type, includes, mvcData);
         }
-        
-        protected virtual object CreateEntity(object sourceEntity, Type type, List<object> includes=null)
+
+        protected virtual object CreateEntity(object sourceEntity, Type type, List<object> includes = null, MvcData mvcData = null)
         {
             IComponent component = sourceEntity as IComponent;
             Dictionary<string, string> entityData;
@@ -77,15 +76,18 @@ namespace Sdl.Web.DD4T.Mapping
                 var model = CreateModelFromMapData(mapData);
                 if (model is IEntity)
                 {
-                    ((IEntity)model).EntityData = entityData;
-                    ((IEntity)model).Id = component.Id.Split('-')[1];
+                    var entity = (IEntity)model;
+                    entity.EntityData = entityData;
+                    entity.Id = component.Id.Split('-')[1];
+                    entity.AppData = mvcData;
                 }
                 if (model is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
                 {
-                    ((MediaItem)model).Url = component.Multimedia.Url;
-                    ((MediaItem)model).FileName= component.Multimedia.FileName;
-                    ((MediaItem)model).FileSize = component.Multimedia.Size;
-                    ((MediaItem)model).MimeType = component.Multimedia.MimeType;
+                    var mediaItem = (MediaItem)model;
+                    mediaItem.Url = component.Multimedia.Url;
+                    mediaItem.FileName = component.Multimedia.FileName;
+                    mediaItem.FileSize = component.Multimedia.Size;
+                    mediaItem.MimeType = component.Multimedia.MimeType;
                 }
                 return model;
 
@@ -624,7 +626,7 @@ namespace Sdl.Web.DD4T.Mapping
 
         private ResourceProvider _resourceProvider;
 
-        protected virtual object CreatePage(object sourceEntity, Type type, List<object> includes)
+        protected virtual object CreatePage(object sourceEntity, Type type, List<object> includes, MvcData mvcData = null)
         {
             IPage page = sourceEntity as IPage;
             if (page != null)
@@ -639,23 +641,27 @@ namespace Sdl.Web.DD4T.Mapping
                 //default title - will be overridden later if appropriate
                 model.Title = page.Title;
                 model.Id = page.Id.Substring(4);
+                model.AppData = mvcData;
                 foreach (var cp in page.ComponentPresentations)
                 {
-                    var region = GetRegionFromComponentPresentation(cp);
-                    if (!model.Regions.ContainsKey(region.Name))
+                    if (_contentResolver.EvaluateEntity(cp))
                     {
-                        model.Regions.Add(region.Name, region);
+                        var region = GetRegionFromComponentPresentation(cp);
+                        if (!model.Regions.ContainsKey(region.Name))
+                        {
+                            model.Regions.Add(region.Name, region);
+                        }
+                        model.Regions[region.Name].Items.Add(cp);
                     }
-                    model.Regions[region.Name].Items.Add(cp);
                 }
                 if (!isInclude)
                 {
                     var webpageModel = (WebPage)model;
                     foreach (var include in includes)
                     {
-                        var includePage = (PageBase)Create(include, typeof(PageBase));
-                        if (includePage != null)
+                        if (include is PageBase)
                         {
+                            var includePage = (PageBase)include;
                             webpageModel.Includes.Add(includePage.Title, includePage);
                         }
                     }
@@ -827,7 +833,9 @@ namespace Sdl.Web.DD4T.Mapping
                 }
             }
             name = name ?? "Main";//default region name
-            return new Region { Name = name, Module = module };
+
+            var mvcData = new MvcData() { AreaName = module, ViewName = name, ControllerName = SiteConfiguration.GetRegionController(), ControllerAreaName = SiteConfiguration.GetDefaultModuleName(), ActionName = SiteConfiguration.GetRegionAction() };
+            return new Region { Name = name, AppData = mvcData };
         }
 
     }

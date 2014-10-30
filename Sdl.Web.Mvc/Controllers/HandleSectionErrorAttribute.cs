@@ -16,6 +16,6 @@ namespace Sdl.Web.Mvc.Controllers
             filterContext.Result = new ViewResult { ViewName = View, ViewData = data };
             filterContext.ExceptionHandled = true;
             filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
-        }
+        } 
     }
 }

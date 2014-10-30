@@ -313,31 +313,42 @@ namespace Sdl.Web.Common.Configuration
         /// <param name="viewPath">The path to the view</param>
         public static void AddViewModelToRegistry(MvcData viewData, string viewPath)
         {
+            var key = GetViewModelRegistryKey(viewData);
+            if (!ViewModelRegistry.ContainsKey(key))
+            {
+                try
+                {
+                    Type type = BuildManager.GetCompiledType(viewPath);
+                    if (type.BaseType.IsGenericType)
+                    {
+                        AddViewModelToRegistry(viewData,type.BaseType.GetGenericArguments()[0]);
+                    }
+                    else
+                    {
+                        Exception ex = new Exception(String.Format("View {0} is not strongly typed. Please ensure you use the @model directive", viewPath));
+                        throw ex;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Exception e = new Exception(String.Format("Error adding view model to registry using view path {0}", viewPath), ex);
+                    throw e;
+                }
+            }
+        }
+        public static string GetViewModelRegistryKey(MvcData mvcData)
+        {
+            return String.Format("{0}:{1}:{2}", mvcData.AreaName, mvcData.ControllerName, mvcData.ViewName);
+        }
+        public static void AddViewModelToRegistry(MvcData mvcData, Type modelType)
+        {
             lock (ViewRegistryLock)
             {
-                var key = String.Format("{0}:{1}", viewData.AreaName, viewData.ViewName);
+                var key = GetViewModelRegistryKey(mvcData);
                 if (!ViewModelRegistry.ContainsKey(key))
                 {
-                    try
-                    {
-                        Type type = BuildManager.GetCompiledType(viewPath);
-                        if (type.BaseType.IsGenericType)
-                        {
-                            ViewModelRegistry.Add(key, type.BaseType.GetGenericArguments()[0]);
-                        }
-                        else
-                        {
-                            Exception ex = new Exception(String.Format("View {0} is not strongly typed. Please ensure you use the @model directive", viewPath));
-                            Log.Error(ex);
-                            throw ex;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Exception e = new Exception(String.Format("Error adding view model to registry using view path {0}", viewPath), ex);
-                        Log.Error(e);
-                        throw e;
-                    }
+                    ViewModelRegistry.Add(key, modelType);
+                    Log.Debug("Added view to View Model Registry with key {0} and type {1}", key, modelType.FullName);
                 }
             }
         }

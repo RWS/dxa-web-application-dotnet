@@ -1,8 +1,10 @@
-﻿using System.Web.Mvc;
+﻿using Sdl.Web.Mvc.Configuration;
+using System;
+using System.Web.Mvc;
 
 namespace Sdl.Web.Site.Areas.GoogleAnalytics
 {
-    public class GoogleAnalyticsAreaRegistration : AreaRegistration 
+    public class GoogleAnalyticsAreaRegistration : BaseAreaRegistration 
     {
         public override string AreaName 
         {
@@ -11,15 +13,10 @@ namespace Sdl.Web.Site.Areas.GoogleAnalytics
                 return "GoogleAnalytics";
             }
         }
-
-        public override void RegisterArea(AreaRegistrationContext context) 
+        protected override void RegisterAllViewModels()
         {
-            //Default Route - required for sub actions (region/entity/navigation etc.)
-            context.MapRoute(
-                "Default_GoogleAnalytics", 
-                "{controller}/{action}/{id}", 
-                new { controller = "Home", action = "Index", id = UrlParameter.Optional }
-            );
+            RegisterViewModel("GoogleAnalytics", typeof(Sdl.Web.Common.Models.Configuration));
         }
+        
     }
 }

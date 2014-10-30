@@ -27,9 +27,9 @@ namespace Sdl.Web.DD4T.Html
         /// <returns>The rendered content</returns>
         public override MvcHtmlString RenderEntity(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
-            var cp = item as IComponentPresentation;
-            var mvcData = ContentResolver.ResolveMvcData(cp);
-            if (cp != null && (excludedItems == null || !excludedItems.Contains(mvcData.ViewName)))
+            var entity = item as IEntity;
+            var mvcData = entity.AppData;
+            if (entity != null && (excludedItems == null || !excludedItems.Contains(mvcData.ViewName)))
             {
                 var parameters = new RouteValueDictionary();
                 int parentContainerSize = helper.ViewBag.ContainerSize;
@@ -42,7 +42,7 @@ namespace Sdl.Web.DD4T.Html
                     containerSize = SiteConfiguration.MediaHelper.GridSize;
                 }
                 parameters["containerSize"] = (containerSize * parentContainerSize) / SiteConfiguration.MediaHelper.GridSize;
-                parameters["entity"] = cp;
+                parameters["entity"] = entity;
                 parameters["area"] = mvcData.ControllerAreaName;
                 foreach (var key in mvcData.RouteValues.Keys)
                 {
@@ -68,7 +68,7 @@ namespace Sdl.Web.DD4T.Html
         /// <returns>The rendered content</returns>
         public override MvcHtmlString RenderRegion(IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
-            var mvcData = ContentResolver.ResolveMvcData(region);
+            var mvcData = region.AppData;
             if (region != null && (excludedItems == null || !excludedItems.Contains(region.Name)))
             {
                 if (containerSize == 0)

@@ -98,6 +98,19 @@ namespace Sdl.Web.DD4T.Mapping
         }
 
         /// <summary>
+        /// Extension point to allow for implementations to provide evaluation logic
+        /// to determine if an entity should be included when building the page model
+        /// Can be used for example to evaluated context expressions or target group conditions
+        /// </summary>
+        /// <param name="entity">The entity object to evaluate</param>
+        /// <param name="evaluationData">Additional data to aid in evaluation</param>
+        /// <returns>true if the entity should be included</returns>
+        public bool EvaluateEntity(object entity, object evaluationData = null)
+        {
+            return true;
+        }
+
+        /// <summary>
         /// Determine MVC data such as view, controller and area name from a Component Presentation, Region or Page
         /// </summary>
         /// <param name="data">The component presentation, region or page object</param>
@@ -190,13 +203,8 @@ namespace Sdl.Web.DD4T.Mapping
             }
             else if (data is IRegion)
             {
-                var region = data as IRegion;
-                var viewName = region.Name.RemoveSpaces();
-                res = BuildViewData(viewName);
-                res.ControllerName = SiteConfiguration.GetRegionController();
-                res.ActionName = SiteConfiguration.GetRegionAction();
-                res.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
-                res.AreaName = region.Module;
+                //Region app data is generated on creation in DD4TModelBuilder.GetRegionFromComponentPresentation()
+                return ((IRegion)data).AppData;
             }
             return res;
         }

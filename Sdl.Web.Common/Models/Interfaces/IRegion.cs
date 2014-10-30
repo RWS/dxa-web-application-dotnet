@@ -8,5 +8,6 @@ namespace Sdl.Web.Common.Models
         string Module { get; set; }
         string Name { get; set; }
         List<object> Items { get; set; }
+        MvcData AppData { get; set; }
     }
 }
