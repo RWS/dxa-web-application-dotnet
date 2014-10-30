@@ -62,6 +62,7 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Interfaces\IContentResolver.cs" />
     <Compile Include="Interfaces\ILocalizationManager.cs" />
+    <Compile Include="Interfaces\IModelProcessor.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Mapping\BaseModelBuilder.cs" />
@@ -72,7 +73,7 @@
     <Compile Include="Mapping\SemanticSchema.cs" />
     <Compile Include="Mapping\SemanticSchemaField.cs" />
     <Compile Include="Mapping\SemanticVocabulary.cs" />
-    <Compile Include="Models\Common\ErrorEntity.cs" />
+    <Compile Include="Models\Common\ExceptionEntity.cs" />
     <Compile Include="Models\Entity\Configuration.cs" />
     <Compile Include="Models\Interfaces\IPage.cs" />
     <Compile Include="Models\Interfaces\IEntity.cs" />

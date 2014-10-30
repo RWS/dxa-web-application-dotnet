@@ -11,6 +11,7 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Site.Areas.Core.Controllers;
 using Sdl.Web.Tridion.Config;
 using Unity.Mvc5;
+using Sdl.Web.Mvc.Formats;
 
 namespace Sdl.Web.Site
 {
@@ -97,6 +98,10 @@ namespace Sdl.Web.Site
             SiteConfiguration.LocalizationManager = (ILocalizationManager)DependencyResolver.Current.GetService(typeof(ILocalizationManager));
             //Optionally preload list of localizations for this application
             SiteConfiguration.LocalizationManager.SetLocalizations(TridionConfig.PublicationMap);
+            //Optionally set data formatters to allow pages to be rendered in data formats
+            DataFormatters.Formatters.Add("json", new JsonFormatter());
+            //Note - this is experimental
+            DataFormatters.Formatters.Add("rss", new RssFormatter());
             
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();

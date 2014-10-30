@@ -44,6 +44,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Web.Extensions" />
@@ -65,12 +66,15 @@
   <ItemGroup>
     <Compile Include="Configuration\BaseAreaRegistration.cs" />
     <Compile Include="Configuration\BaseLocalizationManager.cs" />
+    <Compile Include="Formats\FeedResult.cs" />
     <Compile Include="Formats\FormatDataAttribute.cs" />
     <Compile Include="Controllers\NoCacheAttribute.cs" />
+    <Compile Include="Formats\FeedFormatter.cs" />
+    <Compile Include="Formats\RssFormatter.cs" />
     <Compile Include="Formats\JsonNetResult.cs" />
-    <Compile Include="Formats\JsonViewFormatter.cs" />
-    <Compile Include="Formats\MediaTypeViewFormatter.cs" />
-    <Compile Include="Formats\ViewResultFormatters.cs" />
+    <Compile Include="Formats\JsonFormatter.cs" />
+    <Compile Include="Formats\BaseFormatter.cs" />
+    <Compile Include="Formats\DataFormatters.cs" />
     <Compile Include="Properties\VersionInfo.cs" />
     <Compile Include="Configuration\WebRequestContext.cs" />
     <Compile Include="Controllers\HandleSectionErrorAttribute.cs" />

@@ -20,18 +20,17 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         /// <param name="containerSize">The size (in grid units) of the container the entity is in</param>
         /// <returns>Rendered list entity model</returns>
         [HandleSectionError(View = "SectionError")]
-        public virtual ActionResult List(object entity, int containerSize = 0)
+        public virtual ActionResult List(IEntity entity, int containerSize = 0)
         {
             ModelType = ModelType.Entity;
-            var viewData = GetViewData(entity);
-            SetupViewData(containerSize, viewData);
-            var model = ProcessModel(entity, GetViewType(viewData)) ?? entity;
-            return View(viewData.ViewName, model);
+            SetupViewData(containerSize, entity.AppData);
+            var model = ProcessModel(entity) ?? entity;
+            return View(entity.AppData.ViewName, model);
         }
 
-        public override object ProcessModel(object sourceModel, System.Type type)
+        public override object ProcessModel(object sourceModel)
         {
-            var model = base.ProcessModel(sourceModel, type) as ContentList<Teaser>;
+            var model = base.ProcessModel(sourceModel) as ContentList<Teaser>;
             if (model != null)
             {
                 if (model.ItemListElements.Count == 0)

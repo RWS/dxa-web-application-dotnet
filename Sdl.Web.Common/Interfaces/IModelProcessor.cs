@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sdl.Web.Common.Models.Common
+namespace Sdl.Web.Common.Interfaces
 {
-    public class ExceptionEntity : EntityBase
+    interface IModelProcessor
     {
-        public Exception Exception { get; set; }
+        object ProcessModel(object sourceModel);
     }
 }
