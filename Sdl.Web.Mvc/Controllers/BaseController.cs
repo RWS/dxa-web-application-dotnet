@@ -210,7 +210,8 @@ namespace Sdl.Web.Mvc.Controllers
         /// <param name="sourceModel"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public virtual object ProcessModel(object sourceModel, Type type)
+        [Obsolete("Use ProcessModel(object model) instead. Model mapping now occurs before entity controller actions.")]
+        protected virtual object ProcessModel(object sourceModel, Type type)
         {
             return ContentProvider.MapModel(sourceModel, ModelType, type);
         }
