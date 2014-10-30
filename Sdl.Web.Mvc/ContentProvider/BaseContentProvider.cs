@@ -22,7 +22,7 @@ namespace Sdl.Web.Mvc.ContentProvider
         public abstract string GetPageContent(string url);
         public abstract object GetEntityModel(string id);
         public abstract string GetEntityContent(string url);
-        public abstract void PopulateDynamicList(ContentList<Teaser> list);
+        public abstract ContentList<Teaser> PopulateDynamicList(ContentList<Teaser> list);
 
         protected abstract object GetPageModelFromUrl(string url);
         protected abstract List<object> GetIncludesFromModel(object data, ModelType modelType);

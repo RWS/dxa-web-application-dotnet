@@ -65,8 +65,9 @@ namespace Sdl.Web.DD4T.Mapping
         /// Execute a broker query to populate a list of teasers
         /// </summary>
         /// <param name="list">The list definition</param>
-        public override void PopulateDynamicList(ContentList<Teaser> list)
+        public override ContentList<Teaser> PopulateDynamicList(ContentList<Teaser> list)
         {
+            var listData = list;
             BrokerQuery query = new BrokerQuery
             {
                 Start = list.Start,
@@ -75,12 +76,13 @@ namespace Sdl.Web.DD4T.Mapping
                 SchemaId = MapSchema(list.ContentType.Key),
                 Sort = list.Sort.Key
             };
-            list.ItemListElements = query.ExecuteQuery();
-            foreach (var item in list.ItemListElements)
+            listData.ItemListElements = query.ExecuteQuery();
+            foreach (var item in listData.ItemListElements)
             {
                 item.Link.Url = ContentResolver.ResolveLink(item.Link.Url);
             }
-            list.HasMore = query.HasMore;
+            listData.HasMore = query.HasMore;
+            return listData;
         }
 
         protected virtual MvcData BuildViewData(string viewName)

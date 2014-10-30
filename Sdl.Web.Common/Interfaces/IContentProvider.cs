@@ -16,8 +16,8 @@ namespace Sdl.Web.Common.Interfaces
 
         //Map the domain model to the presentation model
         object MapModel(object entity, ModelType modelType = ModelType.Entity, Type viewModeltype = null);
-        
+
         //Execute a query to get content
-        void PopulateDynamicList(ContentList<Teaser> list);        
+        ContentList<Teaser> PopulateDynamicList(ContentList<Teaser> list);        
     }
 }
