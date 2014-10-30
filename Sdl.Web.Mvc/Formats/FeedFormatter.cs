@@ -7,6 +7,8 @@ using System;
 using Sdl.Web.Mvc.Configuration;
 using System.Web;
 using System.Collections.Specialized;
+using System.Reflection;
+using System.Collections.ObjectModel;
 
 namespace Sdl.Web.Mvc.Formats
 {
@@ -41,14 +43,130 @@ namespace Sdl.Web.Mvc.Formats
             {
                 foreach (var entity in region.Items)
                 {
-                    if (entity is Teaser)
+                    if (entity is IEntity)
                     {
-                        var teaser = entity as Teaser;
-                        items.Add(new SyndicationItem(teaser.Headline, teaser.Text, new Uri(teaser.Link.Url)));
+                        items.AddRange(GetFeedItemsFromEntity((IEntity)entity));
                     }
                 }
             }
             return items;
+        }
+
+        protected virtual List<SyndicationItem> GetFeedItemsFromEntity(IEntity entity)
+        {
+            var items = new List<SyndicationItem>();
+            List<Teaser> entityItems = GetEntityItems(entity);
+            foreach(var item in entityItems)
+            {
+                items.Add(GetSyndicationItemFromTeaser(item));
+            }
+            return items;
+        }
+
+        private List<Teaser> GetEntityItems(IEntity entity)
+        {
+            var res = new List<Teaser>();
+            //1. Check if entity is a teaser, if add it
+            if (entity is Teaser)
+            {
+                res.Add((Teaser)entity);
+            }
+            else
+            {
+                //2. Second check if entity type is (semantically) a list, and if so, get its list items
+                List<Teaser> items = GetTeaserListFromSemantics(entity);
+                if (items != null)
+                {
+                    res = items;
+                }
+                else
+                {
+                    //3. Last resort, try to find some suitable properties using reflection
+                    var teaser = new Teaser();
+                    foreach (var pi in entity.GetType().GetProperties())
+                    {
+                        switch (pi.Name)
+                        {
+                            case "Headline":
+                            case "Name":
+                                teaser.Headline = pi.GetValue(entity) as String;
+                                break;
+                            case "Date":
+                                var date = pi.GetValue(entity) as DateTime?;
+                                if (date != null)
+                                    teaser.Date = (DateTime)date;
+                                break;
+                            case "Description":
+                                teaser.Text = pi.GetValue(entity) as String;
+                                break;
+                            case "Link":
+                                teaser.Link = pi.GetValue(entity) as Link;
+                                break;
+                            case "Url":
+                                var url = pi.GetValue(entity) as String;
+                                if (url != null)
+                                    teaser.Link = new Link { Url = url };
+                                break;
+                        }
+                    }
+                    if (teaser.Headline != null || teaser.Text != null || teaser.Link != null)
+                    {
+                        res.Add(teaser);
+                    }
+                }
+            }
+            return res;
+        }
+
+        private List<Teaser> GetTeaserListFromSemantics(IEntity entity)
+        {
+            Type type = entity.GetType();
+            bool isList = false;
+            foreach (var attr in type.GetCustomAttributes(true))
+            {
+                if (attr is SemanticEntityAttribute)
+                {
+                    var semantics = (SemanticEntityAttribute)attr;
+                    isList = semantics.Vocab == "http://schema.org" && semantics.EntityName == "ItemList";
+                    if (isList)
+                    {
+                        break;
+                    }
+                }
+            }
+            if (isList)
+            {
+                foreach(var pi in type.GetProperties())
+                {
+                    if (pi.PropertyType == typeof(List<Teaser>))
+                    {
+                         return pi.GetValue(entity) as List<Teaser>;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private SyndicationItem GetSyndicationItemFromTeaser(Teaser item)
+        {
+            var si = new SyndicationItem();
+            if (item.Headline != null)
+            {
+                si.Title = new TextSyndicationContent(item.Headline);
+            }
+            if (item.Text != null)
+            {
+                si.Summary = new TextSyndicationContent(item.Text);
+            }
+            if (item.Link != null && item.Link.Url!=null)
+            {
+                si.Links.Add(new SyndicationLink(new Uri(item.Link.Url)));
+            }
+            if (item.Date != null)
+            {
+                si.PublishDate = (DateTime)item.Date;
+            }
+            return si;
         }
     }
 }

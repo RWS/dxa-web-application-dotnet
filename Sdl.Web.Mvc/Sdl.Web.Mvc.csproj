@@ -70,6 +70,7 @@
     <Compile Include="Formats\FormatDataAttribute.cs" />
     <Compile Include="Controllers\NoCacheAttribute.cs" />
     <Compile Include="Formats\FeedFormatter.cs" />
+    <Compile Include="Formats\AtomFormatter.cs" />
     <Compile Include="Formats\RssFormatter.cs" />
     <Compile Include="Formats\JsonNetResult.cs" />
     <Compile Include="Formats\JsonFormatter.cs" />
