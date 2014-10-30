@@ -62,7 +62,6 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Interfaces\IContentResolver.cs" />
     <Compile Include="Interfaces\ILocalizationManager.cs" />
-    <Compile Include="Interfaces\IModelProcessor.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Mapping\BaseModelBuilder.cs" />

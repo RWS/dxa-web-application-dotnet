@@ -21,6 +21,7 @@ using Sdl.Web.Mvc.Resources;
 using Sdl.Web.Mvc.Utils;
 using Sdl.Web.Mvc.Formats;
 using Sdl.Web.Common.Models.Common;
+using System.Web.Routing;
 
 namespace Sdl.Web.Mvc.Controllers
 {
@@ -334,5 +335,63 @@ namespace Sdl.Web.Mvc.Controllers
             }
             return url;
         }
+
+
+        public virtual object ProcessPageModel(IPage model)
+        {
+            // For each entity in the page which has a custom controller action (so is likely
+            // to enrich the CMS managed model with additional data) we call the 
+            // controller ProcessModel method, and update our model with the enriched
+            // data
+            if (model != null)
+            {
+                foreach (var region in model.Regions.Values)
+                {
+                    for (int i = 0; i < region.Items.Count; i++)
+                    {
+                        var entity = region.Items[i] as IEntity;
+                        if (entity != null && entity.AppData != null)
+                        {
+                            region.Items[i] = ProcessEntityModel(entity);                            
+                        }
+                    }
+                }
+            }
+            return model;
+        }
+
+        public virtual object ProcessEntityModel(IEntity entity)
+        {
+            //Enrich a base (CMS managed) entity with additional data by calling the
+            //appropriate custom controller's ProcessModel method
+            if (entity!=null && IsCustomAction(entity.AppData))
+            {
+                var tempRequestContext = new RequestContext(this.HttpContext, new RouteData());
+                tempRequestContext.RouteData.DataTokens["Area"] = entity.AppData.ControllerAreaName;
+                tempRequestContext.RouteData.Values["controller"] = entity.AppData.ControllerName;
+                tempRequestContext.RouteData.Values["area"] = entity.AppData.ControllerAreaName;
+                tempRequestContext.HttpContext = this.HttpContext;
+                BaseController controller = ControllerBuilder.Current.GetControllerFactory().CreateController(tempRequestContext, entity.AppData.ControllerName) as BaseController;
+                try
+                {
+                    if (controller != null)
+                    {
+                        controller.ControllerContext = new ControllerContext(this.HttpContext, tempRequestContext.RouteData, controller);
+                        return controller.ProcessModel(entity);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return new ExceptionEntity { Exception = ex };
+                }
+            }
+            return entity;
+        }
+
+        protected virtual bool IsCustomAction(MvcData mvcData)
+        {
+            return mvcData.ActionName != SiteConfiguration.GetEntityAction() || mvcData.ControllerName != SiteConfiguration.GetEntityController() || mvcData.ControllerAreaName != SiteConfiguration.GetDefaultModuleName();
+        }
+
     }
 }

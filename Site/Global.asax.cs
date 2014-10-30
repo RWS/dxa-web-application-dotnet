@@ -100,8 +100,8 @@ namespace Sdl.Web.Site
             SiteConfiguration.LocalizationManager.SetLocalizations(TridionConfig.PublicationMap);
             //Optionally set data formatters to allow pages to be rendered in data formats
             DataFormatters.Formatters.Add("json", new JsonFormatter());
-            //Note - this is experimental
             DataFormatters.Formatters.Add("rss", new RssFormatter());
+            DataFormatters.Formatters.Add("atom", new AtomFormatter());
             
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
