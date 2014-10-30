@@ -4,7 +4,7 @@
     if (Model.Settings.ContainsKey("suppressLocalizations"))
     {
         var excludedLocalizations = new List<string>();
-        excludedLocalizations = Model.Settings["suppressLocalizations"].Split(',').Select(l => ("/"+ l).Trim()).ToList();
+        excludedLocalizations = Model.Settings["suppressLocalizations"].Split(',').Select(l => ("/" + l.Trim())).ToList();
         localizations = localizations.Where(l=>!excludedLocalizations.Contains(l.Path)).ToList();
     }
     var redirectId = WebRequestContext.PageId;
