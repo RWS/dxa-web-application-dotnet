@@ -123,6 +123,12 @@
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
+    <Content Include="Web.Tridion71Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Tridion71Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
     <Content Include="Log.config" />
     <Content Include="Areas\Core\Views\web.config" />
     <Content Include="Areas\Core\Views\Entity\Accordion.cshtml" />
@@ -199,6 +205,7 @@
     </Content>
     <None Include="Properties\PublishProfiles\Staging %28Stable demo version%29.pubxml" />
     <Content Include="Views\Shared\ServerError.cshtml" />
+    <Content Include="Unity.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\Core\Views\Admin\" />
@@ -238,6 +245,9 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Tridion71|AnyCPU'">
+    <OutputPath>bin\</OutputPath>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />

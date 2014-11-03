@@ -47,14 +47,14 @@
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
-    <Reference Include="Tridion.ContentDelivery, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Tridion.ContentDelivery">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.dll</HintPath>
+      <HintPath>..\_references\$(Configuration)\Tridion.ContentDelivery.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Tridion.ContentDelivery.AmbientData, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Tridion.ContentDelivery.AmbientData">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
+      <HintPath>..\_references\$(Configuration)\Tridion.ContentDelivery.AmbientData.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
