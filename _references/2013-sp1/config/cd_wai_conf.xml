@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration Version="7.1"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="schemas/cd_wai_conf.xsd">
+	<Global>
+	</Global>
+	<Presentations>
+	</Presentations>
+</Configuration>
