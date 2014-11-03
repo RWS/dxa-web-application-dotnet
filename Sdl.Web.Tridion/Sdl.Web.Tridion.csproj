@@ -41,24 +41,24 @@
     <Reference Include="Tridion.ContentDelivery">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Tridion.ContentDelivery.AmbientData">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Release' Or '$(Configuration)' == 'Debug'">
     <Reference Include="Tridion.ContentDelivery">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\_references\latest\Tridion.ContentDelivery.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Tridion.ContentDelivery.AmbientData">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\_references\latest\Tridion.ContentDelivery.AmbientData.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
