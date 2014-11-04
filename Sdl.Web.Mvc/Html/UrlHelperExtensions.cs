@@ -1,6 +1,7 @@
 ﻿using Sdl.Web.Mvc.Configuration;
 using System;
 using System.Web.Mvc;
+using System.Linq;
 
 namespace Sdl.Web.Mvc.Html
 {
@@ -26,7 +27,8 @@ namespace Sdl.Web.Mvc.Html
             string version = loc.Version;
             if (localization == "" && WebRequestContext.Localization.SiteLocalizations!=null && WebRequestContext.Localization.SiteLocalizations.Count>0)
             {
-                localization = WebRequestContext.Localization.SiteLocalizations[0].Path;
+                var defaultLoc = WebRequestContext.Localization.SiteLocalizations.Where(l=>l.IsDefaultLocalization).FirstOrDefault() ?? WebRequestContext.Localization;
+                localization = defaultLoc.Path;
             }
             if (!String.IsNullOrEmpty(version))
             {

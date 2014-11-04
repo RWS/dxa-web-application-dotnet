@@ -158,7 +158,7 @@ namespace Sdl.Web.Mvc.Formats
             {
                 si.Summary = new TextSyndicationContent(item.Text);
             }
-            if (item.Link != null && item.Link.Url!=null)
+            if (item.Link != null && item.Link.Url!=null && item.Link.Url.StartsWith("http"))
             {
                 si.Links.Add(new SyndicationLink(new Uri(item.Link.Url)));
             }

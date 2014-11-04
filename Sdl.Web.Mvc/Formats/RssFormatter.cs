@@ -9,6 +9,7 @@ namespace Sdl.Web.Mvc.Formats
         {
             AddMediaType("application/rss+xml");
             this.ProcessModel = true;
+            this.AddIncludes = false;
         }
 
         public override ActionResult FormatData(ControllerContext controllerContext, object model)

@@ -9,13 +9,14 @@ namespace Sdl.Web.Common.Interfaces
 
         //Get specific page/entity content
         object GetPageModel(string url);
+        object GetPageModel(string url, bool addIncludes);
         string GetPageContent(string url);
         object GetEntityModel(string id);
         string GetEntityContent(string url);
         object GetNavigationModel(string url);
 
         //Map the domain model to the presentation model
-        object MapModel(object entity, ModelType modelType = ModelType.Entity, Type viewModeltype = null);
+        object MapModel(object entity, ModelType modelType = ModelType.Entity, Type viewModeltype = null, bool addIncludes = true);
 
         //Execute a query to get content
         ContentList<Teaser> PopulateDynamicList(ContentList<Teaser> list);        
