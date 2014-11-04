@@ -194,16 +194,12 @@
     </Content>
     <Content Include="Areas\Search\Views\Search\SearchResults.cshtml" />
     <Content Include="Areas\Search\Views\Search\Partials\Pager.cshtml" />
-    <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
-    <None Include="Properties\PublishProfiles\Distribution.pubxml" />
-    <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
     <Content Include="Unity.config">
       <Link>Unity.config</Link>
     </Content>
     <Content Include="Views\web.config">
       <SubType>Designer</SubType>
     </Content>
-    <None Include="Properties\PublishProfiles\Staging %28Stable demo version%29.pubxml" />
     <Content Include="Views\Shared\ServerError.cshtml" />
     <Content Include="Unity.config" />
   </ItemGroup>
