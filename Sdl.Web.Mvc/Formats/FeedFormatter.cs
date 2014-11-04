@@ -127,7 +127,7 @@ namespace Sdl.Web.Mvc.Formats
                 if (attr is SemanticEntityAttribute)
                 {
                     var semantics = (SemanticEntityAttribute)attr;
-                    isList = semantics.Vocab == "http://schema.org" && semantics.EntityName == "ItemList";
+                    isList = semantics.Vocab == "http://schema.org/" && semantics.EntityName == "ItemList";
                     if (isList)
                     {
                         break;

@@ -1,7 +1,7 @@
 ﻿
 namespace Sdl.Web.Common.Models
 {
-    [SemanticEntity("http://schema.org", "MediaObject", "s")]
+    [SemanticEntity("http://schema.org/", "MediaObject", "s")]
     public class Download : MediaItem
     {
         [SemanticProperty("s:name")]
