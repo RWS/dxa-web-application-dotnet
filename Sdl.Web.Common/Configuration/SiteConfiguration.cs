@@ -227,7 +227,7 @@ namespace Sdl.Web.Common.Configuration
                     localization.SiteLocalizations = new List<Localization>();
                     foreach (var item in bootstrapJson.siteLocalizations)
                     {
-                        localization.SiteLocalizations.Add(new Localization { LocalizationId = item.id ?? item, Path = item.path, Language = item.language });
+                        localization.SiteLocalizations.Add(new Localization { LocalizationId = item.id ?? item, Path = item.path, Language = item.language, IsDefaultLocalization = item.isMaster ?? false });
                     }
                 }
                 if (localization.IsHtmlDesignPublished)
