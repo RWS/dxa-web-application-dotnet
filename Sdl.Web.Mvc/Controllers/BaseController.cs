@@ -50,7 +50,8 @@ namespace Sdl.Web.Mvc.Controllers
         public virtual ActionResult Page(string pageUrl)
         {
             ModelType = ModelType.Page;
-            var page = ContentProvider.GetPageModel(pageUrl);
+            bool addIncludes = ViewBag.AddIncludes != null ? ViewBag.AddIncludes : true; 
+            var page = ContentProvider.GetPageModel(pageUrl, addIncludes);
             if (page == null)
             {
                 return NotFound();
@@ -199,7 +200,7 @@ namespace Sdl.Web.Mvc.Controllers
             //Check if an exception was generated when creating the model, so now is the time to throw it
             if (model is ExceptionEntity)
             {
-                throw ((ExceptionEntity)model).Exception;
+                throw new Exception(((ExceptionEntity)model).Error);
             }
             return model;
         }
@@ -383,7 +384,8 @@ namespace Sdl.Web.Mvc.Controllers
                 }
                 catch (Exception ex)
                 {
-                    return new ExceptionEntity { Exception = ex };
+                    Log.Error(ex);
+                    return new ExceptionEntity { Error = ex.Message };
                 }
             }
             return entity;

@@ -48,6 +48,7 @@ namespace Sdl.Web.Common.Configuration
         public bool IsHtmlDesignPublished { get; set; }
         public bool IsDefaultLocalization { get; set; }
         public string Version { get; set; }
+        public List<string> DataFormats { get; set; }
         public List<Localization> SiteLocalizations { get; set; }
 
         public string GetBaseUrl() 

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Sdl.Web.Common.Configuration;
+using Sdl.Web.Mvc.Configuration;
+using System.Collections.Generic;
 using System.Web;
 using System.Web.Mvc;
 
@@ -15,7 +17,7 @@ namespace Sdl.Web.Mvc.Formats
         public static IDataFormatter GetFormatter(ControllerContext controllerContext)
         {
             string format = GetFormat(controllerContext);
-            if (Formatters.ContainsKey(format))
+            if (Formatters.ContainsKey(format) && WebRequestContext.Localization.DataFormats.Contains(format))
             {
                 return Formatters[format];
             }

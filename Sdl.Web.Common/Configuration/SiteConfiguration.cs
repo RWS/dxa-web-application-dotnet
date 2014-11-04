@@ -104,7 +104,7 @@ namespace Sdl.Web.Common.Configuration
         
         private static string GetConfig(IReadOnlyDictionary<string, Dictionary<string, Dictionary<string, string>>> config, string key, string type, bool global = false)
         {
-            Exception ex;
+            string error = null;
             if (config.ContainsKey(type))
             {
                 var subConfig = config[type];
@@ -121,25 +121,24 @@ namespace Sdl.Web.Common.Configuration
                         {
                             return subConfig[sectionbit][keybit];
                         }
-                        ex = new Exception(String.Format("Configuration key {0} does not exist in section {1}", keybit, sectionbit));
+                        error = String.Format("Configuration key {0} does not exist in section {1}", keybit, sectionbit);
                     }
                     else
                     {
-                        ex = new Exception(String.Format("Configuration section {0} does not exist", sectionbit));
+                        error = String.Format("Configuration section {0} does not exist", sectionbit);
                     }
                 }
                 else
                 {
-                    ex = new Exception(String.Format("Configuration key {0} is in the wrong format. It should be in the format [section].[key], for example \"environment.cmsurl\"", key));
+                    error = String.Format("Configuration key {0} is in the wrong format. It should be in the format [section].[key], for example \"environment.cmsurl\"", key);
                 }
             }
             else
             {
-                ex = new Exception(String.Format("Configuration for {0} '{1}' does not exist.", global ? "module" : "localization", type));
+                error = String.Format("Configuration for {0} '{1}' does not exist.", global ? "module" : "localization", type);
             }
-
-            Log.Error(ex);
-            throw ex;
+            Log.Error(error);
+            return null;
         }
 
         public static void Refresh(Localization loc)
@@ -250,6 +249,8 @@ namespace Sdl.Web.Common.Configuration
             localization.MediaUrlRegex = String.Join("|", mediaPatterns);
             localization.Culture = GetConfig("core.culture", loc);
             localization.Language = GetConfig("core.language", loc);
+            var formats = GetConfig("core.dataFormats", loc);
+            localization.DataFormats = formats == null ? new List<string>() : formats.Split(',').Select(f => f.Trim()).ToList();
             Log.Debug("MediaUrlRegex for localization {0} : {1}", localization.LocalizationId, localization.MediaUrlRegex);
             return localization;
         }

@@ -16,9 +16,19 @@ namespace Sdl.Web.Mvc.Formats
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class FormatDataAttribute : ActionFilterAttribute
     {
-        public override void OnActionExecuted(ActionExecutedContext filterContext)
+        public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var formatter = DataFormatters.GetFormatter(filterContext);
+            if (formatter != null)
+            {
+                filterContext.Controller.ViewBag.DataFormatter = formatter;
+                filterContext.Controller.ViewBag.AddIncludes = formatter.AddIncludes;
+            }
+            base.OnActionExecuting(filterContext);
+        }
+        public override void OnActionExecuted(ActionExecutedContext filterContext)
+        {
+            var formatter = filterContext.Controller.ViewBag.DataFormatter as IDataFormatter;
             if (formatter != null)
             {
                 var model = filterContext.Controller.ViewData.Model;

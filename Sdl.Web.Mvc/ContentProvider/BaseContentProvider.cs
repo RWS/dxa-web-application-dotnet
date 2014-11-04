@@ -60,6 +60,17 @@ namespace Sdl.Web.Mvc.ContentProvider
         /// <returns>Model corresponding to that URL</returns>
         public object GetPageModel(string url)
         {
+            return GetPageModel(url, true);
+        }
+
+        /// <summary>
+        /// Get the model for a page given the URL
+        /// </summary>
+        /// <param name="url">Page URL</param>
+        /// <param name="addIncludes">If true then includes will be added in the model</param>
+        /// <returns>Model corresponding to that URL</returns>
+        public object GetPageModel(string url, bool addIncludes)
+        {
             var parsedUrl = ParseUrl(url);
             Log.Debug("Getting page model for URL {0} (original request: {1})", parsedUrl, url);
             //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
@@ -72,7 +83,7 @@ namespace Sdl.Web.Mvc.ContentProvider
                 Log.Debug("No content for URL found, trying default: {0}", parsedUrl);
                 model = GetPageModelFromUrl(parsedUrl);
             }
-            return model==null ? null : MapModel(model, ModelType.Page);
+            return model==null ? null : MapModel(model, ModelType.Page, null, addIncludes);
         }
         
         /// <summary>
@@ -82,14 +93,14 @@ namespace Sdl.Web.Mvc.ContentProvider
         /// <param name="modelType">The type of domain model (Page/Region/Entity)</param>
         /// <param name="viewModeltype">The presentation model Type to map to</param>
         /// <returns></returns>
-        public virtual object MapModel(object data, ModelType modelType, Type viewModeltype = null)
+        public virtual object MapModel(object data, ModelType modelType, Type viewModeltype = null, bool addIncludes = true)
         {
             if (data.GetType() == viewModeltype)
             {
                 //model already mapped to required type
                 return data;
             }
-            List<object> includes = GetIncludesFromModel(data, modelType);
+            List<object> includes = addIncludes ? GetIncludesFromModel(data, modelType) : new List<object>();
             MvcData viewData = ContentResolver.ResolveMvcData(data);
             if (viewModeltype == null)
             {
@@ -130,7 +141,7 @@ namespace Sdl.Web.Mvc.ContentProvider
                             //and carry on processing - this should not cause a failure in the rendering of
                             //the page as a whole
                             Log.Error(ex);
-                            mappedItem = new ExceptionEntity { Exception = ex, AppData = ContentResolver.ResolveMvcData(region.Items[i]) };                   
+                            mappedItem = new ExceptionEntity { Error = ex.Message, AppData = ContentResolver.ResolveMvcData(region.Items[i]) };                   
                         }
                         region.Items[i] = mappedItem;
                     }

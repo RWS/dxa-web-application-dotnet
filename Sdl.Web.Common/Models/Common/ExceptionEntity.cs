@@ -8,6 +8,6 @@ namespace Sdl.Web.Common.Models.Common
 {
     public class ExceptionEntity : EntityBase
     {
-        public Exception Exception { get; set; }
+        public string Error { get; set; }
     }
 }

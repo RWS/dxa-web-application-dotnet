@@ -9,6 +9,7 @@ namespace Sdl.Web.Mvc.Formats
         double Score(ControllerContext controllerContext);
         ActionResult FormatData(ControllerContext controllerContext, object model);
         bool ProcessModel { get; }
+        bool AddIncludes { get; }
     }
 
     /// <summary>
@@ -44,5 +45,6 @@ namespace Sdl.Web.Mvc.Formats
         }
 
         public bool ProcessModel { get; protected set; }
+        public bool AddIncludes { get; protected set; }
     }
 }
