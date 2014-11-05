@@ -28,32 +28,35 @@ namespace Sdl.Web.DD4T.Html
         public override MvcHtmlString RenderEntity(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
             var entity = item as IEntity;
-            var mvcData = entity.AppData;
-            if (entity != null && (excludedItems == null || !excludedItems.Contains(mvcData.ViewName)))
+            if (entity!=null)
             {
-                var parameters = new RouteValueDictionary();
-                int parentContainerSize = helper.ViewBag.ContainerSize;
-                if (parentContainerSize == 0)
+                var mvcData = entity.AppData;
+                if (excludedItems == null || !excludedItems.Contains(mvcData.ViewName))
                 {
-                    parentContainerSize = SiteConfiguration.MediaHelper.GridSize;
+                    var parameters = new RouteValueDictionary();
+                    int parentContainerSize = helper.ViewBag.ContainerSize;
+                    if (parentContainerSize == 0)
+                    {
+                        parentContainerSize = SiteConfiguration.MediaHelper.GridSize;
+                    }
+                    if (containerSize == 0)
+                    {
+                        containerSize = SiteConfiguration.MediaHelper.GridSize;
+                    }
+                    parameters["containerSize"] = (containerSize * parentContainerSize) / SiteConfiguration.MediaHelper.GridSize;
+                    parameters["entity"] = entity;
+                    parameters["area"] = mvcData.ControllerAreaName;
+                    foreach (var key in mvcData.RouteValues.Keys)
+                    {
+                        parameters[key] = mvcData.RouteValues[key];
+                    }
+                    MvcHtmlString result = helper.Action(mvcData.ActionName, mvcData.ControllerName, parameters);
+                    if (WebRequestContext.IsPreview)
+                    {
+                        result = new MvcHtmlString(TridionMarkup.ParseEntity(result.ToString()));
+                    }
+                    return result;
                 }
-                if (containerSize == 0)
-                {
-                    containerSize = SiteConfiguration.MediaHelper.GridSize;
-                }
-                parameters["containerSize"] = (containerSize * parentContainerSize) / SiteConfiguration.MediaHelper.GridSize;
-                parameters["entity"] = entity;
-                parameters["area"] = mvcData.ControllerAreaName;
-                foreach (var key in mvcData.RouteValues.Keys)
-                {
-                    parameters[key] = mvcData.RouteValues[key];
-                }
-                MvcHtmlString result = helper.Action(mvcData.ActionName, mvcData.ControllerName, parameters);
-                if (WebRequestContext.IsPreview)
-                {
-                    result = new MvcHtmlString(TridionMarkup.ParseEntity(result.ToString()));
-                }
-                return result;
             }
             return null;
         }
