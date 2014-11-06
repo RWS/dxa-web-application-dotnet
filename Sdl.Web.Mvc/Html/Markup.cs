@@ -32,7 +32,6 @@ namespace Sdl.Web.Mvc.Html
                     var prefix = attribute.Prefix;
                     if (!String.IsNullOrEmpty(prefix))
                     {
-                        prefixes.Add(prefix, attribute.Vocab);
                         if (!prefixes.ContainsKey(prefix))
                         {
                             prefixes.Add(prefix, attribute.Vocab);

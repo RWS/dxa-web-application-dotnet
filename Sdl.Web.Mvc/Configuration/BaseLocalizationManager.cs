@@ -32,7 +32,7 @@ namespace Sdl.Web.Mvc.Configuration
             {
                 throw new Exception("No Localizations Loaded");
             }
-            string url = uri.ToString();
+            string url = uri.ToString() + "/";
             foreach (var rootUrl in _urlToLocalizationIdMap.Keys)
             {
                 if (url.ToLower().StartsWith(rootUrl))
@@ -81,8 +81,12 @@ namespace Sdl.Web.Mvc.Configuration
                     var protocol = !loc.ContainsKey("Protocol") ? "http" : loc["Protocol"].ToLower();
                     var domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_link_conf" : loc["Domain"].ToLower();
                     var port = !loc.ContainsKey("Port") ? String.Empty : loc["Port"];
-
-                    _urlToLocalizationIdMap.Add(GetBaseUrl(protocol, domain, port, localization.Path), locId);
+                    var baseUrl = GetBaseUrl(protocol, domain, port, localization.Path);
+                    if (!baseUrl.EndsWith("/"))
+                    {
+                        baseUrl += "/";
+                    }
+                    _urlToLocalizationIdMap.Add(baseUrl, locId);
                     if (!_uniqueLocalizations.ContainsKey(locId))
                     {
                         _uniqueLocalizations.Add(locId, localization);
