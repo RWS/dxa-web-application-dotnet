@@ -59,7 +59,7 @@ namespace Sdl.Web.Mvc.Controllers
 
             var viewData = GetViewData(page);
             SetupViewData(0, viewData);
-            var model = ProcessModel(page) ?? page;
+            var model = EnrichModel(page) ?? page;
             if (model is WebPage)
             {
                 WebRequestContext.PageId = ((WebPage)model).Id;
@@ -97,7 +97,7 @@ namespace Sdl.Web.Mvc.Controllers
             }
             var viewData = GetViewData(page);
             SetupViewData(0, viewData);
-            var model = ProcessModel(page) ?? page;
+            var model = EnrichModel(page) ?? page;
             Response.StatusCode = 404;
             return View(viewData.ViewName, model);
         }
@@ -113,7 +113,7 @@ namespace Sdl.Web.Mvc.Controllers
         {
             ModelType = ModelType.Region;
             SetupViewData(containerSize, region.AppData);
-            var model = ProcessModel(region) ?? region;
+            var model = EnrichModel(region) ?? region;
             return View(region.AppData.ViewName, model);
         }
 
@@ -128,7 +128,7 @@ namespace Sdl.Web.Mvc.Controllers
         {
             ModelType = ModelType.Entity;
             SetupViewData(containerSize, entity.AppData);
-            var model = ProcessModel(entity) ?? entity;
+            var model = EnrichModel(entity) ?? entity;
             return View(entity.AppData.ViewName, model);
         }
 
@@ -190,31 +190,43 @@ namespace Sdl.Web.Mvc.Controllers
         }
 
         /// <summary>
-        /// This is the method to override if you need to add custom model population logic, first calling the base class and then adding your own logic
+        /// This is the method to override if you need to add custom model population logic, 
+        /// first calling the base class and then adding your own logic
         /// </summary>
-        /// <param name="sourceModel"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public virtual object ProcessModel(object model)
+        /// <param name="model">The model which you wish to add data to</param>
+        /// <returns>A fully populated view model combining CMS content with other data</returns>
+        public virtual object EnrichModel(object model)
         {
             //Check if an exception was generated when creating the model, so now is the time to throw it
             if (model is ExceptionEntity)
             {
                 throw new Exception(((ExceptionEntity)model).Error);
             }
-            return model;
+            return ProcessModel(model);
+        }
+
+        /// <summary>
+        /// This is the method to override if you need to add custom model population logic, first calling the base class and then adding your own logic
+        /// </summary>
+        /// <param name="sourceModel">The model to process</param>
+        /// <returns>A processed view model</returns>
+        protected virtual object ProcessModel(object sourceModel)
+        {
+            //For backwards compatiblity we call the obsolete ProcessModel method, as this is what people creating
+            //custom controllers based on v1.0 API will have overridden
+            return ProcessModel(sourceModel, sourceModel.GetType());
         }
         
         /// <summary>
         /// This is the method to override if you need to add custom model population logic, first calling the base class and then adding your own logic
         /// </summary>
-        /// <param name="sourceModel"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        [Obsolete("Use ProcessModel(object model) instead. Model mapping now occurs before entity controller actions.")]
+        /// <param name="sourceModel">The model to process</param>
+        /// <param name="type">The type of view model required</param>
+        /// <returns>A processed view model</returns>
+        [Obsolete("Use ProcessModel(object model) instead. Model mapping now occurs before entity controller actions so there is no need for a type parameter.")]
         protected virtual object ProcessModel(object sourceModel, Type type)
         {
-            return ContentProvider.MapModel(sourceModel, ModelType, type);
+            return sourceModel;
         }
 
         protected virtual object ProcessNavigation(object sourceModel, string navType)
@@ -379,7 +391,7 @@ namespace Sdl.Web.Mvc.Controllers
                     if (controller != null)
                     {
                         controller.ControllerContext = new ControllerContext(this.HttpContext, tempRequestContext.RouteData, controller);
-                        return controller.ProcessModel(entity);
+                        return controller.EnrichModel(entity);
                     }
                 }
                 catch (Exception ex)

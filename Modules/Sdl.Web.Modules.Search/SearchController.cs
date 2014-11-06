@@ -24,7 +24,6 @@ namespace Sdl.Web.Modules.Search
 
         override protected object ProcessModel(object sourceModel, Type type)
         {
-            var model = base.ProcessModel(sourceModel, type);
             if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(SearchQuery<>)))
             {
                 var loc = WebRequestContext.Localization;
@@ -34,7 +33,7 @@ namespace Sdl.Web.Modules.Search
                 Type resultType = type.GetGenericArguments()[0];
                 MethodInfo method = typeof(ISearchProvider).GetMethod("ExecuteQuery");
                 MethodInfo generic = method.MakeGenericMethod(resultType);
-                return generic.Invoke(SearchProvider, new object[] { Request.QueryString, model, searchIndex });
+                return generic.Invoke(SearchProvider, new object[] { Request.QueryString, sourceModel, searchIndex });
             }
             else
             {
