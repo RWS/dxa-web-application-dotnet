@@ -95,12 +95,6 @@ namespace Sdl.Web.Mvc.ContentProvider
         /// <returns></returns>
         public virtual object MapModel(object data, ModelType modelType, Type viewModeltype = null, bool addIncludes = true)
         {
-            if (data.GetType() == viewModeltype)
-            {
-                //model already mapped to required type
-                return data;
-            }
-            List<object> includes = addIncludes ? GetIncludesFromModel(data, modelType) : new List<object>();
             MvcData viewData = ContentResolver.ResolveMvcData(data);
             if (viewModeltype == null)
             {
@@ -112,6 +106,12 @@ namespace Sdl.Web.Mvc.ContentProvider
                     throw ex;
                 }
             }
+            if (data.GetType() == viewModeltype)
+            {
+                //model already mapped to required type
+                return data;
+            }
+            List<object> includes = addIncludes ? GetIncludesFromModel(data, modelType) : new List<object>();
             IModelBuilder builder = DefaultModelBuilder;
             if (ModelBuilders.ContainsKey(viewModeltype))
             {

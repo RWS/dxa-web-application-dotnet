@@ -28,7 +28,7 @@ namespace Sdl.Web.Modules.Search
             if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(SearchQuery<>)))
             {
                 var loc = WebRequestContext.Localization;
-                var searchIndex = SiteConfiguration.GetConfig("search." + (loc.IsStaging ? "staging" : "live") + "IndexConfig", loc);
+                var searchIndex = SiteConfiguration.GetConfig("search." + (loc.IsStaging ? "staging" : "live") + "IndexConfig");
                 //Use reflection to execute the generic method ISearchProvider.ExecuteQuery
                 //As we do not know the generic type until runtime (its specified by the view model)
                 Type resultType = type.GetGenericArguments()[0];

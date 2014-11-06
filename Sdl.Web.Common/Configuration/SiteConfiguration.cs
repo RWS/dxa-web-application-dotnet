@@ -502,12 +502,6 @@ namespace Sdl.Web.Common.Configuration
             return null;
         }
 
-        [Obsolete("GetConfig(string,string) is deprecated, please use GetConfig(string, Localization) instead.", true)]
-        public static string GetConfig(string key, string localization = null)
-        {
-            return null;
-        }
-
         [Obsolete("Use Version property of current Localization instead. Eg WebRequestContext.Localization.Version.", true)]
         public static string SiteVersion { get; set; }
 
