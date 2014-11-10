@@ -285,7 +285,7 @@ namespace Sdl.Web.DD4T.Statics
         {
             if (returnContents)
             {
-                return GetStaticContent(url, loc, true);
+                return GetStaticContent(url, loc);
             }
             ProcessUrl(url, true, null, loc);
             return null;
