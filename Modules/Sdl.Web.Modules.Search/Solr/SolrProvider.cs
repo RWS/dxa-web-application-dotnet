@@ -10,6 +10,7 @@ using SI4T.Query.Solr;
 using SI4T.Query.Models;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
+using System.Text.RegularExpressions;
 
 namespace Sdl.Web.Modules.Search.Solr
 {
@@ -39,7 +40,7 @@ namespace Sdl.Web.Modules.Search.Solr
             data.Start = results.Start;
             data.Total = results.Total;
             data.PageSize = results.PageSize;
-            data.HasMore = results.Start + results.PageSize - 1 <= results.Total;
+            data.HasMore = results.Start + results.PageSize <= results.Total;
             data.CurrentPage = results.PageSize == 0 ? 1 : results.Start / results.PageSize + 1;
             data.Parameters = processedParameters;
             foreach (var result in results.Items)
@@ -70,15 +71,15 @@ namespace Sdl.Web.Modules.Search.Solr
 
         protected virtual NameValueCollection SetupParameters(NameValueCollection parameters)
         {
-            //parameters.Add("fq", "publicationid:" + WebRequestContext.Localization.LocalizationId);
             var result = new NameValueCollection();
-            foreach(var key in parameters.AllKeys)
+            result.Add("fq", "publicationid:" + WebRequestContext.Localization.LocalizationId);
+            foreach (var key in parameters.AllKeys)
             {
                 string value = "";
                 switch(key)
                 {
                     case "q":
-                        value = String.Format("\"{0}\"", parameters[key]);
+                        value = PrepareQuery(parameters[key]);
                         break;
                     default:
                         value = parameters[key];
@@ -92,6 +93,15 @@ namespace Sdl.Web.Modules.Search.Solr
             }
             result.Add("hl", "true");
             return result;
+        }
+
+        private string PrepareQuery(string query)
+        {
+            var escapedQuery = Regex.Replace(query, @"([\\&|+\-!(){}[\]^\""~*?:])", delegate(Match match)
+            {
+                return @"\" + match.Groups[1].Value;
+            });
+            return escapedQuery; 
         }
     }
 }

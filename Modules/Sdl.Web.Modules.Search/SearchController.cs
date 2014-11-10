@@ -33,7 +33,8 @@ namespace Sdl.Web.Modules.Search
                 Type resultType = type.GetGenericArguments()[0];
                 MethodInfo method = typeof(ISearchProvider).GetMethod("ExecuteQuery");
                 MethodInfo generic = method.MakeGenericMethod(resultType);
-                return generic.Invoke(SearchProvider, new object[] { Request.QueryString, sourceModel, searchIndex });
+                NameValueCollection parameters = Request.QueryString;
+                return generic.Invoke(SearchProvider, new object[] { parameters, sourceModel, searchIndex });
             }
             else
             {

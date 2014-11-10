@@ -28,13 +28,16 @@ namespace Sdl.Web.Mvc.Formats
         {
             List<string> res = new List<string>();
             var acceptTypes = controllerContext.HttpContext.Request.AcceptTypes;
-            foreach (var type in acceptTypes)
+            if (acceptTypes!=null)
             {
-                foreach (var mediaType in allowedTypes)
+                foreach (var type in acceptTypes)
                 {
-                    if (type.Contains(mediaType))
+                    foreach (var mediaType in allowedTypes)
                     {
-                        res.Add(type);
+                        if (type.Contains(mediaType))
+                        {
+                            res.Add(type);
+                        }
                     }
                 }
             }
@@ -84,18 +87,21 @@ namespace Sdl.Web.Mvc.Formats
         {
             double score = 0.0;
             var acceptTypes = controllerContext.HttpContext.Request.AcceptTypes;
-            foreach (var type in acceptTypes)
+            if (acceptTypes!=null)
             {
-                if (type.Contains("html"))
+                foreach (var type in acceptTypes)
                 {
-                    var thisScore = GetScoreFromAcceptString(type);
-                    if (thisScore>score)
+                    if (type.Contains("html"))
                     {
-                        score = thisScore;
-                    }
-                    if (score==1)
-                    {
-                        break;
+                        var thisScore = GetScoreFromAcceptString(type);
+                        if (thisScore > score)
+                        {
+                            score = thisScore;
+                        }
+                        if (score == 1)
+                        {
+                            break;
+                        }
                     }
                 }
             }
