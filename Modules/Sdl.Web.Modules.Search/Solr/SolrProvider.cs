@@ -40,7 +40,7 @@ namespace Sdl.Web.Modules.Search.Solr
             data.Start = results.Start;
             data.Total = results.Total;
             data.PageSize = results.PageSize;
-            data.HasMore = results.Start + results.PageSize - 1 <= results.Total;
+            data.HasMore = results.Start + results.PageSize <= results.Total;
             data.CurrentPage = results.PageSize == 0 ? 1 : results.Start / results.PageSize + 1;
             data.Parameters = processedParameters;
             foreach (var result in results.Items)
