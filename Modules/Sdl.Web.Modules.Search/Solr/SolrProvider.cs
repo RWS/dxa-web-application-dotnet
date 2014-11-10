@@ -71,9 +71,9 @@ namespace Sdl.Web.Modules.Search.Solr
 
         protected virtual NameValueCollection SetupParameters(NameValueCollection parameters)
         {
-            //parameters.Add("fq", "publicationid:" + WebRequestContext.Localization.LocalizationId);
             var result = new NameValueCollection();
-            foreach(var key in parameters.AllKeys)
+            result.Add("fq", "publicationid:" + WebRequestContext.Localization.LocalizationId);
+            foreach (var key in parameters.AllKeys)
             {
                 string value = "";
                 switch(key)
