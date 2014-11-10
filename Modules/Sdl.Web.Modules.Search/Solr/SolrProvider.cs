@@ -10,6 +10,7 @@ using SI4T.Query.Solr;
 using SI4T.Query.Models;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
+using System.Text.RegularExpressions;
 
 namespace Sdl.Web.Modules.Search.Solr
 {
@@ -78,7 +79,7 @@ namespace Sdl.Web.Modules.Search.Solr
                 switch(key)
                 {
                     case "q":
-                        value = String.Format("\"{0}\"", parameters[key]);
+                        value = PrepareQuery(parameters[key]);
                         break;
                     default:
                         value = parameters[key];
@@ -92,6 +93,15 @@ namespace Sdl.Web.Modules.Search.Solr
             }
             result.Add("hl", "true");
             return result;
+        }
+
+        private string PrepareQuery(string query)
+        {
+            var escapedQuery = Regex.Replace(query, @"([\\&|+\-!(){}[\]^\""~*?:])", delegate(Match match)
+            {
+                return @"\" + match.Groups[1].Value;
+            });
+            return escapedQuery; 
         }
     }
 }
