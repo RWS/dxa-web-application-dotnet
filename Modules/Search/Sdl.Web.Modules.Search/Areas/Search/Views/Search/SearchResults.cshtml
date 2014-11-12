@@ -1,0 +1,42 @@
+﻿@model Sdl.Web.Modules.Search.SearchQuery<Teaser>
+<div class='rich-text' @Markup.Entity(Model)>
+    @if (Model.Headline != null)
+    {
+        <div class='page-header page-header-top'>
+            <h1 class='h3' @Markup.Property(Model, "Headline")>@Model.Headline</h1>
+        </div>
+    }
+    @if (Model.Total > 0)
+    {
+        if (Model.ResultsText != null)
+        {
+            <div @Markup.Property(Model, "ResultsText")>
+                @Html.Raw(String.Format(Model.ResultsText, Html.Encode(Model.QueryText), Model.Total))
+            </div>
+        }
+        @Html.Partial("Partials/Pager")
+        <div class="list-group">
+            @foreach (var item in Model.Results)
+            {
+                <a href="@item.Link.Url" class="list-group-item">
+                    <h4 class="list-group-item-heading">@item.Headline</h4>
+                    @if (item.Date != null)
+                    {
+                        <time class="meta small">@Html.DateDiff(item.Date)</time>
+                    }
+                    @if (item.Text != null)
+                    {
+                        <p class="list-group-item-text">@item.Text</p>
+                    }
+                </a>
+            }
+        </div>
+        @Html.Partial("Partials/Pager")
+    }
+    else if (Model.NoResultsText != null)
+    {
+        <div @Markup.Property(Model, "NoResultsText")>
+            @Html.Raw(String.Format(Model.NoResultsText, Html.Encode(Model.QueryText)))
+        </div>
+    }
+</div>

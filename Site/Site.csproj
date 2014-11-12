@@ -98,7 +98,6 @@
   <ItemGroup>
     <Compile Include="Areas\Core\Controllers\AdminController.cs" />
     <Compile Include="Areas\Core\CoreAreaRegistration.cs" />
-    <Compile Include="Areas\GoogleAnalytics\GoogleAnalyticsAreaRegistration.cs" />
     <Compile Include="Areas\Core\Controllers\EntityController.cs" />
     <Compile Include="Areas\Core\Controllers\ListController.cs" />
     <Compile Include="Areas\Core\Controllers\NavigationController.cs">
@@ -153,7 +152,6 @@
     <Content Include="Areas\Core\Views\Entity\TeaserHero-ImageOverlay.cshtml" />
     <Content Include="Areas\Core\Views\Entity\TeaserMap.cshtml" />
     <Content Include="Areas\Core\Views\Entity\YouTubeVideo.cshtml" />
-    <Content Include="Areas\GoogleAnalytics\Views\Entity\GoogleAnalytics.cshtml" />
     <Content Include="Areas\Core\Views\List\List.cshtml" />
     <Content Include="Areas\Core\Views\List\PagedList.cshtml" />
     <Content Include="Areas\Core\Views\List\Partials\Pager.cshtml" />
@@ -181,19 +179,10 @@
     <Content Include="Views\Shared\Footer.cshtml" />
     <Content Include="Views\Shared\Header.cshtml" />
     <Content Include="Views\Shared\SectionError.cshtml" />
-    <Content Include="Areas\GoogleAnalytics\Views\web.config">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="Areas\Core\Views\Entity\Partials\GoogleStaticMap.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Partials\Teaser.cshtml" />
     <Content Include="Areas\Core\Views\Navigation\SiteMapXml.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Partials\Teaser-ImageOverlay.cshtml" />
-    <Content Include="Areas\Search\Views\Entity\SearchBox.cshtml" />
-    <Content Include="Areas\Search\Views\web.config">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Areas\Search\Views\Search\SearchResults.cshtml" />
-    <Content Include="Areas\Search\Views\Search\Partials\Pager.cshtml" />
     <Content Include="Unity.config">
       <Link>Unity.config</Link>
     </Content>
