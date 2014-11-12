@@ -88,8 +88,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(TargetPath)" "$(SolutionDir)..\mod\GoogleAnalytics\Site\bin\" /Y
-xcopy "$(ProjectDir)Areas\*" "$(SolutionDir)..\mod\GoogleAnalytics\Site\Areas" /Y /s
-xcopy "$(SolutionDir)..\mod\GoogleAnalytics\Site\*" "$(SolutionDir)..\Site" /Y /s</PostBuildEvent>
+xcopy "$(ProjectDir)\Areas\*" "$(SolutionDir)..\mod\GoogleAnalytics\Site\Areas\" /Y /s
+xcopy "$(SolutionDir)..\mod\GoogleAnalytics\Site\*" "$(SolutionDir)..\Site\" /Y /s</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

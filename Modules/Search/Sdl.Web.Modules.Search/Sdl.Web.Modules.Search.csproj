@@ -52,9 +52,8 @@
       <Private>True</Private>
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
-    <Reference Include="SI4T.Query, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\SI4T.Query.1.0.2\lib\net40\SI4T.Query.dll</HintPath>
+    <Reference Include="SI4T.Query">
+      <HintPath>..\..\packages\SI4T.Query.1.0.2\lib\net40\SI4T.Query.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -124,7 +123,7 @@
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(TargetPath)" "$(SolutionDir)..\mod\Search\Site\bin\" /Y
 xcopy "$(ProjectDir)$(OutDir)SI4T.Query.dll" "$(SolutionDir)..\mod\Search\Site\bin\" /Y
-xcopy "$(ProjectDir)\Areas\*" "$(SolutionDir)..\mod\Search\Site\Areas" /Y /s
-xcopy "$(SolutionDir)..\mod\Search\Site\*" "$(SolutionDir)..\Site" /Y /s</PostBuildEvent>
+xcopy "$(ProjectDir)\Areas\*" "$(SolutionDir)..\mod\Search\Site\Areas\" /Y /s
+xcopy "$(SolutionDir)..\mod\Search\Site\*" "$(SolutionDir)..\Site\" /Y /s</PostBuildEvent>
   </PropertyGroup>
 </Project>
