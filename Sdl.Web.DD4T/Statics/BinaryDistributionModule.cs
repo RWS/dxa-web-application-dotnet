@@ -178,11 +178,11 @@ namespace Sdl.Web.DD4T.Statics
             {
                 if (_localizationBinaryRegexes.ContainsKey(key))
                 {
-                    _localizationBinaryRegexes[key] = new Regex(regex);
+                    _localizationBinaryRegexes[key] = new Regex(regex,RegexOptions.IgnoreCase);
                 }
                 else
                 {
-                    _localizationBinaryRegexes.Add(key, new Regex(regex));
+                    _localizationBinaryRegexes.Add(key, new Regex(regex,RegexOptions.IgnoreCase));
                 }
             }
         }

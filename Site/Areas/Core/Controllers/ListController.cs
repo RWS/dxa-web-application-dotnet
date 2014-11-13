@@ -24,7 +24,7 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         {
             ModelType = ModelType.Entity;
             SetupViewData(containerSize, entity.AppData);
-            var model = ProcessModel(entity) ?? entity;
+            var model = EnrichModel(entity) ?? entity;
             return View(entity.AppData.ViewName, model);
         }
 
