@@ -50,7 +50,7 @@ namespace Sdl.Web.Site.Areas.Core
             RegisterViewModel("SiteMapXml", typeof(SitemapItem), "Navigation");
             RegisterViewModel("TopNavigation", typeof(NavigationLinks), "Navigation");
             RegisterViewModel("GeneralPage", typeof(WebPage), "Page");
-            RegisterViewModel("IncludePage", typeof(PageBase), "Page");
+            RegisterViewModel("IncludePage", typeof(WebPage), "Page");
             RegisterViewModel("RedirectPage", typeof(WebPage), "Page");
             RegisterViewModel("2-Column", typeof(Region), "Region");
             RegisterViewModel("3-Column", typeof(Region), "Region");
