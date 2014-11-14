@@ -4,6 +4,10 @@
     @ViewBag.Renderer.RenderRegion(Model.Regions["Info"], Html)
 }
 <header id="page-header" class="navbar navbar-default">
+    @if (WebRequestContext.Localization.IsStaging)
+    {
+        <div class="xpm-button"><a href="/system/include/header" title="Edit Header"><i class="fa fa-pencil-square-o fa-2x"></i></a></div>
+    }
     <div class="container-fluid page-border">
         <div class="row">
             <div class="col-xs-12" role="navigation">
