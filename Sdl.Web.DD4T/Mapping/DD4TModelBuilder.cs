@@ -631,17 +631,16 @@ namespace Sdl.Web.DD4T.Mapping
             IPage page = sourceEntity as IPage;
             if (page != null)
             {
-                PageBase model = new PageBase();
-                bool isInclude = true;
-                if (type == typeof(WebPage))
-                {
-                    model = new WebPage();
-                    isInclude = false;
-                }
+                var model = new WebPage();
+                bool isInclude = false;
                 //default title - will be overridden later if appropriate
                 model.Title = page.Title;
                 model.Id = page.Id.Substring(4);
                 model.AppData = mvcData;
+                if (includes.Count==0 && model.AppData.ViewName.Contains("Include"))
+                {
+                    isInclude = true;
+                }
                 foreach (var cp in page.ComponentPresentations)
                 {
                     if (_contentResolver.EvaluateEntity(cp))
@@ -656,18 +655,19 @@ namespace Sdl.Web.DD4T.Mapping
                 }
                 if (!isInclude)
                 {
-                    var webpageModel = (WebPage)model;
                     foreach (var include in includes)
                     {
-                        if (include is PageBase)
+                        if (include is WebPage)
                         {
-                            var includePage = (PageBase)include;
-                            webpageModel.Includes.Add(includePage.Title, includePage);
+                            var includePage = (WebPage)include;
+                            model.Includes.Add(includePage.Title, includePage);
                         }
                     }
-                    webpageModel.PageData = GetPageData(page);
-                    webpageModel.Title = ProcessPageMetadata(page, webpageModel.Meta);
-                    model = webpageModel;
+                    model.PageData = GetPageData(page);
+                    if (!isInclude)
+                    {
+                        model.Title = ProcessPageMetadata(page, model.Meta);
+                    }
                 }
                 return model;
             }
