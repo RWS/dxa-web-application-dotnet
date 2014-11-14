@@ -24,6 +24,8 @@ namespace Sdl.Web.Modules.Search
 
         override protected object ProcessModel(object sourceModel, Type type)
         {
+            //For 1.0 backwards compatibility, not needed in 2.0 as model is already mapped
+            sourceModel = base.ProcessModel(sourceModel, type);
             if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(SearchQuery<>)))
             {
                 var loc = WebRequestContext.Localization;
