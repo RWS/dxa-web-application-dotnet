@@ -1,8 +1,22 @@
 ﻿@model PageBase
 <footer id="page-footer" class="page-row">
-    @if (WebRequestContext.Localization.IsStaging)
+    @if (WebRequestContext.IsPreview)
     {
-        <div class="xpm-button"><a href="/system/include/footer" title="Edit Footer"><i class="fa fa-pencil-square-o fa-2x"></i></a></div>
+        <div class="xpm-button">
+            <a href="/system/include/footer" title="Edit Footer" class="fa-stack fa-lg">
+                <i class="fa fa-square fa-stack-2x"></i>
+                <i class="fa fa-pencil fa-inverse fa-stack-1x"></i>
+            </a>
+        </div>
+    }
+    @if (WebRequestContext.IsInclude)
+    {
+        <div class="xpm-button">
+            <a href="javascript:history.back()" title="Go Back" class="fa-stack fa-lg">
+                <i class="fa fa-square fa-stack-2x"></i>
+                <i class="fa fa-arrow-left fa-inverse fa-stack-1x"></i>
+            </a>
+        </div>
     }
     <div class="container-fluid page-border">
         @foreach (Region region in Model.Regions.Values)

@@ -4,10 +4,24 @@
     @ViewBag.Renderer.RenderRegion(Model.Regions["Info"], Html)
 }
 <header id="page-header" class="navbar navbar-default">
-    @if (WebRequestContext.Localization.IsStaging)
+    @if (WebRequestContext.IsPreview)
     {
-        <div class="xpm-button"><a href="/system/include/header" title="Edit Header"><i class="fa fa-pencil-square-o fa-2x"></i></a></div>
+        <div class="xpm-button">
+            <a href="/system/include/header" title="Edit Header" class="fa-stack fa-lg">
+                <i class="fa fa-square fa-stack-2x"></i>
+                <i class="fa fa-pencil fa-inverse fa-stack-1x"></i>
+            </a>
+        </div>
     }
+    @if (WebRequestContext.IsInclude)
+    {
+        <div class="xpm-button">
+            <a href="javascript:history.back()" title="Go Back" class="fa-stack fa-lg">
+                <i class="fa fa-square fa-stack-2x"></i>
+                <i class="fa fa-arrow-left fa-inverse fa-stack-1x"></i>
+            </a>
+        </div>
+    }    
     <div class="container-fluid page-border">
         <div class="row">
             <div class="col-xs-12" role="navigation">

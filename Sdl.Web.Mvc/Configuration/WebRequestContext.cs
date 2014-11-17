@@ -1,9 +1,7 @@
-﻿using System;
-using System.Linq;
-using System.Web;
-using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Logging;
+﻿using Sdl.Web.Common.Configuration;
 using Sdl.Web.Tridion.Context;
+using System;
+using System.Web;
 
 namespace Sdl.Web.Mvc.Configuration
 {
@@ -151,7 +149,19 @@ namespace Sdl.Web.Mvc.Configuration
             //For now we cannot reliably detect when we are in experience manager, so we set this to be true whenever we are in staging
             get
             {
-                return (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", WebRequestContext.Localization.IsStaging);
+                return (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", Localization.IsStaging);
+            }
+        }
+
+        /// <summary>
+        /// True if the request is rendered as an include
+        /// </summary>
+        public static bool IsInclude
+        {
+            get
+            {
+                // TODO: determine if rendered as an include
+                return (bool?)GetFromContextStore("IsInclude") ?? (bool)AddToContextStore("IsInclude", Localization.IsStaging);
             }
         }
 
