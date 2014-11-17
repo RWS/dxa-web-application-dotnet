@@ -4,7 +4,7 @@
     @ViewBag.Renderer.RenderRegion(Model.Regions["Info"], Html)
 }
 <header id="page-header" class="navbar navbar-default">
-    @Html.Partial("Partials/XpmButton", Model.Title)
+    @ViewBag.Renderer.RenderIncludePageData(Model, Html)
     <div class="container-fluid page-border">
         <div class="row">
             <div class="col-xs-12" role="navigation">

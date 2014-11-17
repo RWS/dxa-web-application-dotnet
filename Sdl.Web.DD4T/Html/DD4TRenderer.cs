@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Web.Mvc;
-using System.Web.Mvc.Html;
-using System.Web.Routing;
-using DD4T.ContentModel;
-using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.Html;
 using Sdl.Web.Tridion.Markup;
+using System.Collections.Generic;
+using System.Web.Mvc;
+using System.Web.Mvc.Html;
+using System.Web.Routing;
 using IPage = Sdl.Web.Common.Models.IPage;
 
 namespace Sdl.Web.DD4T.Html
@@ -101,11 +100,26 @@ namespace Sdl.Web.DD4T.Html
             {
                 if (!page.PageData.ContainsKey("CmsUrl"))
                 {
-                    page.PageData.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl",WebRequestContext.Localization));
+                    page.PageData.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
                 }
                 return new MvcHtmlString(TridionMarkup.PageMarkup(page.PageData));
             }
             return null;
-        }        
+        }
+
+        /// <summary>
+        /// Render additional XPM include page markup
+        /// </summary>
+        /// <param name="page">The include page object</param>
+        /// <param name="helper">Html Helper</param>
+        /// <returns>The include page markup</returns>
+        public MvcHtmlString RenderIncludePageData(PageBase page, HtmlHelper helper)
+        {
+            if (WebRequestContext.Localization.IsStaging)
+            {
+                return helper.Partial("Partials/XpmButton", page.Title);
+            }
+            return null;
+        }
     }
 }
