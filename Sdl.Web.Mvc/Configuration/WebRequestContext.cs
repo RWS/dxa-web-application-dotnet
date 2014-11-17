@@ -154,14 +154,14 @@ namespace Sdl.Web.Mvc.Configuration
         }
 
         /// <summary>
-        /// True if the request is rendered as an include
+        /// True if the request is an include page
         /// </summary>
         public static bool IsInclude
         {
+            // if request url contains "system/include" the include page is requested directly
             get
             {
-                // TODO: determine if rendered as an include
-                return (bool?)GetFromContextStore("IsInclude") ?? (bool)AddToContextStore("IsInclude", Localization.IsStaging);
+                return (bool?)GetFromContextStore("IsInclude") ?? (bool)AddToContextStore("IsInclude", RequestUrl.Contains("system/include/"));
             }
         }
 

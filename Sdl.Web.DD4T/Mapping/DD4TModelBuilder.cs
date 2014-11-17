@@ -637,7 +637,8 @@ namespace Sdl.Web.DD4T.Mapping
                 model.Title = page.Title;
                 model.Id = page.Id.Substring(4);
                 model.AppData = mvcData;
-                if (includes.Count==0 && model.AppData.ViewName.Contains("Include"))
+                model.PageData = GetPageData(page);
+                if (includes.Count == 0 && model.AppData.ViewName.Contains("Include"))
                 {
                     isInclude = true;
                 }
@@ -663,11 +664,7 @@ namespace Sdl.Web.DD4T.Mapping
                             model.Includes.Add(includePage.Title, includePage);
                         }
                     }
-                    model.PageData = GetPageData(page);
-                    if (!isInclude)
-                    {
-                        model.Title = ProcessPageMetadata(page, model.Meta);
-                    }
+                    model.Title = ProcessPageMetadata(page, model.Meta);
                 }
                 return model;
             }

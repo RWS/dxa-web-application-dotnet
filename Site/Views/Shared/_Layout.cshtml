@@ -21,21 +21,31 @@
     <![endif]-->
 </head>
 <body>
-    @if (Model.Includes.ContainsKey("Header"))
+    @if (WebRequestContext.IsInclude)
     {
-        @Html.Partial("Header", Model.Includes["Header"])
+        @* for include pages requested directly, render as partial to retain styling 
+           instead of calling RenderBody(), hide output of RenderBody() with CSS *@
+        <div style="display:none;">@RenderBody()</div>
+        @Html.Partial(Model.Title, Model)
     }
-    <main class="page-row page-row-expanded" role="main">
-		<div class="container-fluid page-border">
-			@RenderBody()
-		</div>
-    </main>
-    @if (Model.Includes.ContainsKey("Footer"))
+    else
     {
-        @Html.Partial("Footer", Model.Includes["Footer"])
+        if (Model.Includes.ContainsKey("Header"))
+        {
+            @Html.Partial("Header", Model.Includes["Header"])
+        }
+        <main class="page-row page-row-expanded" role="main">
+            <div class="container-fluid page-border">
+                @RenderBody()
+            </div>
+        </main>
+        if (Model.Includes.ContainsKey("Footer"))
+        {
+            @Html.Partial("Footer", Model.Includes["Footer"])
+        }
     }
     <script src="@Url.VersionedContent("/assets/scripts/main.js")"></script>
-    @if (WebRequestContext.Localization.IsStaging)
+    @if (WebRequestContext.IsPreview)
     {
         <script src="@Url.VersionedContent("/assets/scripts/xpm.js")"></script>
     }
