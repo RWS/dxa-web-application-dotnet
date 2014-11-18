@@ -52,6 +52,7 @@ namespace Sdl.Web.DD4T.Html
                     MvcHtmlString result = helper.Action(mvcData.ActionName, mvcData.ControllerName, parameters);
                     if (WebRequestContext.IsPreview)
                     {
+                        // TODO: don't parse entity if this is in an include page (not rendered directly, so !WebRequestContext.IsInclude)
                         result = new MvcHtmlString(TridionMarkup.ParseEntity(result.ToString()));
                     }
                     return result;
@@ -81,6 +82,7 @@ namespace Sdl.Web.DD4T.Html
                 
                 if (WebRequestContext.IsPreview)
                 {
+                    // TODO: don't parse region if this is a region in an include page (not rendered directly, so !WebRequestContext.IsInclude)
                     result = new MvcHtmlString(TridionMarkup.ParseRegion(result.ToString(),WebRequestContext.Localization));
                 }
                 return result;
@@ -110,14 +112,14 @@ namespace Sdl.Web.DD4T.Html
         /// <summary>
         /// Render additional XPM include page markup
         /// </summary>
-        /// <param name="page">The include page object</param>
+        /// <param name="page">The DD4T include Page object</param>
         /// <param name="helper">Html Helper</param>
         /// <returns>The include page markup</returns>
-        public MvcHtmlString RenderIncludePageData(PageBase page, HtmlHelper helper)
+        public override MvcHtmlString RenderIncludePageData(IPage page, HtmlHelper helper)
         {
             if (WebRequestContext.Localization.IsStaging)
             {
-                return helper.Partial("Partials/XpmButton", page.Title);
+                return helper.Partial("Partials/XpmButton", page);
             }
             return null;
         }

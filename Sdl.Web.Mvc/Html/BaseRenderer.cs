@@ -21,5 +21,6 @@ namespace Sdl.Web.Mvc.Html
         public abstract MvcHtmlString RenderEntity(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null);
         public abstract MvcHtmlString RenderRegion(IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null);
         public abstract MvcHtmlString RenderPageData(IPage page, HtmlHelper helper);
+        public abstract MvcHtmlString RenderIncludePageData(IPage page, HtmlHelper helper);
     }
 }
