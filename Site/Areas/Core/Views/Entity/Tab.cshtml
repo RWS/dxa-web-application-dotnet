@@ -1,7 +1,7 @@
 ﻿@model ItemList
-@helper TabId(string panelId, int index)
+@helper TabId(int index)
 {
-    @("tab" + panelId + "_" + index)
+    @(Model.Id + "_" + index)
 }
 <article class="rich-text" @Markup.Entity(Model)>
     <div class="content">
@@ -11,7 +11,6 @@
         }
         @if (Model.ItemListElements.Count > 0)
         {
-            string panelId = Guid.NewGuid().ToString("N");
             <div class="panel panel-default">
                 <div class="panel-body tab-container">
                     <!-- Tab dropdown -->
@@ -20,8 +19,7 @@
                             @{ int i = 0; }
                             @foreach (Teaser element in Model.ItemListElements)
                             {
-                                <option value="#@TabId(panelId, i)" data-toggle="tab">@element.Headline</option>
-                                i++;
+                                <option value="#@TabId(i++)" data-toggle="tab">@element.Headline</option>
                             }
                         </select>
                     </div>
@@ -30,10 +28,9 @@
                         @{ i = 0; }
                         @foreach (Teaser element in Model.ItemListElements)
                         {
-                            <li class="@(i==0?"active":"")">
-                                <a href="#@TabId(panelId, i)" data-toggle="tab" @Markup.Property(element, "Headline")>@element.Headline</a>
+                            <li class="@(i==0 ? "active" : String.Empty)">
+                                <a href="#@TabId(i++)" data-toggle="tab" @Markup.Property(element, "Headline")>@element.Headline</a>
                             </li>
-                            i++;
                         }
                     </ul>
                     <!-- Tab panes -->
@@ -41,7 +38,7 @@
                         @{ i = 0; }
                         @foreach (Teaser element in Model.ItemListElements)
                         {
-                            <div class="tab-pane @(i == 0 ? "active" : "")" id="@TabId(panelId, i)">
+                            <div class="tab-pane @(i==0 ? "active" : String.Empty)" id="@TabId(i)" @Markup.Property(Model, "ItemListElements", i++)>
                                 <div @Markup.Property(element, "Text")>
                                     @Html.Raw(element.Text)
                                 </div>
@@ -58,7 +55,6 @@
                                     </p>
                                 }
                             </div>
-                            i++;
                         }
                     </div>
                 </div>
