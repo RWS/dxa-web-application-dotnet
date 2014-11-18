@@ -1,26 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Json;
-using System.Text;
-using System.Web;
-using System.Web.Mvc;
-using System.Web.Script.Serialization;
-using System.Xml;
-using System.Xml.Linq;
-using System.Xml.Xsl;
-using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Common.Models.Common;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.ContentProvider;
-using Sdl.Web.Mvc.Resources;
-using Sdl.Web.Mvc.Utils;
 using Sdl.Web.Mvc.Formats;
-using Sdl.Web.Common.Models.Common;
+using System;
+using System.IO;
+using System.Web;
+using System.Web.Mvc;
 using System.Web.Routing;
 
 namespace Sdl.Web.Mvc.Controllers
@@ -174,6 +163,7 @@ namespace Sdl.Web.Mvc.Controllers
         /// <param name="itemId">The item id to resolve</param>
         /// <param name="localizationId">The site localization in which to resolve the URL</param>
         /// <param name="defaultItemId"></param>
+        /// <param name="defaultPath"></param>
         /// <returns>null - response is redirected if the URL can be resolved</returns>
         public virtual ActionResult Resolve(string itemId, string localizationId, string defaultItemId = null, string defaultPath = null)
         {
@@ -380,17 +370,17 @@ namespace Sdl.Web.Mvc.Controllers
             //appropriate custom controller's ProcessModel method
             if (entity!=null && IsCustomAction(entity.AppData))
             {
-                var tempRequestContext = new RequestContext(this.HttpContext, new RouteData());
+                var tempRequestContext = new RequestContext(HttpContext, new RouteData());
                 tempRequestContext.RouteData.DataTokens["Area"] = entity.AppData.ControllerAreaName;
                 tempRequestContext.RouteData.Values["controller"] = entity.AppData.ControllerName;
                 tempRequestContext.RouteData.Values["area"] = entity.AppData.ControllerAreaName;
-                tempRequestContext.HttpContext = this.HttpContext;
+                tempRequestContext.HttpContext = HttpContext;
                 BaseController controller = ControllerBuilder.Current.GetControllerFactory().CreateController(tempRequestContext, entity.AppData.ControllerName) as BaseController;
                 try
                 {
                     if (controller != null)
                     {
-                        controller.ControllerContext = new ControllerContext(this.HttpContext, tempRequestContext.RouteData, controller);
+                        controller.ControllerContext = new ControllerContext(HttpContext, tempRequestContext.RouteData, controller);
                         return controller.EnrichModel(entity);
                     }
                 }

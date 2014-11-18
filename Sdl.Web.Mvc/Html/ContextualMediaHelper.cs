@@ -11,8 +11,8 @@ namespace Sdl.Web.Mvc.Html
     public class ContextualMediaHelper : BaseMediaHelper
     {
         public string ImageResizeRoute { get; set; }
-        private const string singleSiteToken = "source/site";
-        public ContextualMediaHelper() : base()
+        private const string SingleSiteToken = "source/site";
+        public ContextualMediaHelper()
         {
             ImageResizeUrlFormat = "/{0}/scale/{1}x{2}/{3}{4}";
             ImageResizeRoute = "cid";
@@ -35,7 +35,7 @@ namespace Sdl.Web.Mvc.Html
             string height = aspect == 0 ? String.Empty : ((int)Math.Ceiling(width / aspect)).ToString(CultureInfo.InvariantCulture);
             //Build the URL
             url = SiteConfiguration.MakeFullUrl(url, WebRequestContext.Localization);
-            var prefix = singleSiteToken;
+            var prefix = SingleSiteToken;
             if (url.StartsWith("http"))
             {
                 prefix = "";

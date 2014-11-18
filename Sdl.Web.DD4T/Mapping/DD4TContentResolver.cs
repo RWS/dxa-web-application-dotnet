@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Web;
-using System.Xml;
-using DD4T.ContentModel;
+﻿using DD4T.ContentModel;
 using DD4T.ContentModel.Factories;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
@@ -13,6 +7,12 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.DD4T.Utils;
 using Sdl.Web.Mvc.Html;
 using Sdl.Web.Tridion.Linking;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Web;
+using System.Xml;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.DD4T.Mapping
@@ -199,7 +199,7 @@ namespace Sdl.Web.DD4T.Mapping
                 res = BuildViewData(viewName);
                 res.ControllerName = SiteConfiguration.GetPageController();
                 res.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
-                res.ActionName = SiteConfiguration.GetPageController();
+                res.ActionName = SiteConfiguration.GetPageAction();
             }
             else if (data is IRegion)
             {

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Web;
-using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Mvc.Configuration;
+using System;
+using System.Web;
 
 namespace Sdl.Web.Mvc.Statics
 {

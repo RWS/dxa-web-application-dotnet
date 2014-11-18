@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Web.Helpers;
-using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Extensions;
+﻿using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common.Logging;
-using System.IO;
+using System;
 
 namespace Sdl.Web.Mvc.Statics
 {

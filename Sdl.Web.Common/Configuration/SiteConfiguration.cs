@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Sdl.Web.Common.Extensions;
+using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,11 +10,6 @@ using System.Text.RegularExpressions;
 using System.Web.Compilation;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
-using Sdl.Web.Common.Extensions;
-using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common.Logging;
-using Sdl.Web.Common.Mapping;
-using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Configuration
 {
@@ -55,6 +54,7 @@ namespace Sdl.Web.Common.Configuration
         
         private static readonly object ViewRegistryLock = new object();
         private static Dictionary<string, Type> _viewModelRegistry;
+
         /// <summary>
         /// A registry of View Path -> View Model Type mappings to enable the correct View Model to be mapped for a given View
         /// </summary>
@@ -104,7 +104,7 @@ namespace Sdl.Web.Common.Configuration
         
         private static string GetConfig(IReadOnlyDictionary<string, Dictionary<string, Dictionary<string, string>>> config, string key, string type, bool global = false)
         {
-            string error = null;
+            string error;
             if (config.ContainsKey(type))
             {
                 var subConfig = config[type];
@@ -263,12 +263,10 @@ namespace Sdl.Web.Common.Configuration
             {
                 return Json.Decode(jsonData);
             }
-            else
-            {
-                var ex = new Exception(String.Format("Could not load configuration bootstrap file {0} for localization {1}.", url, loc.LocalizationId));
-                Log.Error(ex);
-                throw ex;
-            }          
+
+            var ex = new Exception(String.Format("Could not load configuration bootstrap file {0} for localization {1}.", url, loc.LocalizationId));
+            Log.Error(ex);
+            throw ex;
         }
 
         private static Dictionary<string, string> GetConfigFromFile(string jsonData)
@@ -280,6 +278,7 @@ namespace Sdl.Web.Common.Configuration
         {
             return "Page";
         }
+
         public static string GetPageAction()
         {
             return "Page";
@@ -289,6 +288,7 @@ namespace Sdl.Web.Common.Configuration
         {
             return "Region";
         }
+
         public static string GetRegionAction()
         {
             return "Region";
@@ -298,10 +298,12 @@ namespace Sdl.Web.Common.Configuration
         {
             return "Entity";
         }
+
         public static string GetEntityAction()
         {
             return "Entity";
         }
+
         public static string GetDefaultModuleName()
         {
             return "Core";
@@ -337,10 +339,12 @@ namespace Sdl.Web.Common.Configuration
                 }
             }
         }
+
         public static string GetViewModelRegistryKey(MvcData mvcData)
         {
             return String.Format("{0}:{1}:{2}", mvcData.AreaName, mvcData.ControllerName, mvcData.ViewName);
         }
+
         public static void AddViewModelToRegistry(MvcData mvcData, Type modelType)
         {
             lock (ViewRegistryLock)
@@ -386,8 +390,6 @@ namespace Sdl.Web.Common.Configuration
         /// Take a partial URL (so not including protocol, domain, port) and make it full by
         /// Adding the protocol, domain, port etc. from the given localization
         /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
         public static string MakeFullUrl(string url, Localization loc)
         {
             if (url.StartsWith(loc.Path))
@@ -416,7 +418,6 @@ namespace Sdl.Web.Common.Configuration
         {
             return prefix + Guid.NewGuid().ToString("N");
         }
-
         
         #region Thread Safe Settings Update Helper Methods
         
@@ -485,7 +486,7 @@ namespace Sdl.Web.Common.Configuration
         public static string DefaultLocalization { get; private set; }
 
         [Obsolete("Configuration should not be access directly, but rather via the GetConfig(string, Localization) method.", true)]
-        public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LocalConfiguration{get;set;}
+        public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LocalConfiguration { get; set; }
 
         [Obsolete("Configuration should not be access directly, but rather via the GetConfig(string, Localization) method. There is also no longer a concept of Global Configuration, all configuration is local to a particular localization.", true)]
         public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> GlobalConfiguration { get; set; }
@@ -509,24 +510,24 @@ namespace Sdl.Web.Common.Configuration
         public static void Refresh()
         {
         }
+
         [Obsolete("Configuration is now lazy loaded on demand per localization, so there is no need to call Load.", true)]
         public static void Load(string applicationRoot)
         {
         }
+
         [Obsolete("Localizations are now loaded on demand in the web application so this is no longer required", true)]
         public static void SetLocalizations(List<Dictionary<string, string>> localizations)
         {
-
         }
+
         [Obsolete("Localizations are now loaded on demand in the web application so this is no longer required", true)]
         public static void Initialize(List<Dictionary<string, string>> localizationList)
-        {
-            
+        {            
         }
-        [Obsolete("Localizations are now loaded on demand in the web application so this is no longer available. Use the SiteConfiguration.LocalizationResolver.GetLocalizationByUri or GetLocalizationById methods", true)]
-        public static Dictionary<string, Localization> Localizations { get; set; }
-        
-        #endregion
 
+        [Obsolete("Localizations are now loaded on demand in the web application so this is no longer available. Use the SiteConfiguration.LocalizationResolver.GetLocalizationByUri or GetLocalizationById methods", true)]
+        public static Dictionary<string, Localization> Localizations { get; set; }        
+        #endregion
     }
 }

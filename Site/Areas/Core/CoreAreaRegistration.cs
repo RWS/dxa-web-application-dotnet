@@ -1,10 +1,5 @@
-﻿using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Logging;
-using Sdl.Web.Common.Models;
+﻿using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
-using System;
-using System.IO;
-using System.Web.Mvc;
 
 namespace Sdl.Web.Site.Areas.Core
 {
@@ -63,7 +58,6 @@ namespace Sdl.Web.Site.Areas.Core
             RegisterViewModel("Main", typeof(Region), "Region");
             RegisterViewModel("Nav", typeof(Region), "Region");
             RegisterViewModel("Tools", typeof(Region), "Region");
-        }
-        
+        }        
     }
 }

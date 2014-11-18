@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Models;
+using Sdl.Web.Mvc.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Web;
 using System.Web.Mvc;
-using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Models;
-using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Html
 {
@@ -216,7 +216,7 @@ namespace Sdl.Web.Mvc.Html
         /// Write out an youtube video item
         /// </summary>
         /// <param name="helper"></param>
-        /// <param name="media">The video item to write out</param>
+        /// <param name="video">The video item to write out</param>
         /// <param name="widthFactor">The factor to apply to the width - can be % (eg "100%") or absolute (eg "120")</param>
         /// <param name="aspect">The aspect ratio for the video</param>
         /// <param name="cssClass">Css class to apply</param>

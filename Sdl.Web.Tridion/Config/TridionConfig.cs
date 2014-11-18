@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Extensions;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Tridion.Markup;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.Script.Serialization;
 using System.Xml.Linq;
-using System.Xml.XPath;
-using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Extensions;
-using Sdl.Web.Common.Logging;
-using Sdl.Web.Tridion.Markup;
 
 namespace Sdl.Web.Tridion.Config
 {
@@ -19,9 +18,9 @@ namespace Sdl.Web.Tridion.Config
     {
         private static List<Dictionary<string,string>> _localizations;
         private static readonly Object LocalizationLock = new Object();
-        private static readonly string _regionSettingsType = "regions";
-        
-        private static Dictionary<string, Dictionary<string, XpmRegion>> _xpmRegions = new Dictionary<string,Dictionary<string,XpmRegion>>();
+
+        private const string RegionSettingsType = "regions";
+        private static readonly Dictionary<string, Dictionary<string, XpmRegion>> XpmRegions = new Dictionary<string,Dictionary<string,XpmRegion>>();
 
         // page title and meta field mappings
         public static string StandardMetadataXmlFieldName = "standardMeta";
@@ -89,17 +88,18 @@ namespace Sdl.Web.Tridion.Config
         /// Gets a XPM region by name.
         /// </summary>
         /// <param name="name">The region name</param>
+        /// <param name="loc"></param>
         /// <returns>The XPM region matching the name for the given module</returns>
         public static XpmRegion GetXpmRegion(string name, Localization loc)
         {
             var key = loc.LocalizationId;
-            if (!_xpmRegions.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_regionSettingsType,loc.LocalizationId))
+            if (!XpmRegions.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(RegionSettingsType,loc.LocalizationId))
             {
                 LoadRegionsForLocalization(loc);
             }
-            if (_xpmRegions.ContainsKey(key))
+            if (XpmRegions.ContainsKey(key))
             {
-                var regionData = _xpmRegions[key];
+                var regionData = XpmRegions[key];
                 if (regionData.ContainsKey(name))
                 {
                     return regionData[name];
@@ -121,7 +121,7 @@ namespace Sdl.Web.Tridion.Config
                 {
                     regions.Add(region.Region, region);
                 }
-                SiteConfiguration.ThreadSafeSettingsUpdate<Dictionary<string, XpmRegion>>(_regionSettingsType, _xpmRegions, key, regions);
+                SiteConfiguration.ThreadSafeSettingsUpdate(RegionSettingsType, XpmRegions, key, regions);
             }
             else
             {
