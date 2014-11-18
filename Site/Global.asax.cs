@@ -1,23 +1,23 @@
-﻿using System;
-using System.Web;
-using System.Web.Mvc;
-using System.Web.Routing;
-using Microsoft.Practices.ServiceLocation;
+﻿using Microsoft.Practices.ServiceLocation;
 using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.Configuration;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Mvc.Formats;
 using Sdl.Web.Site.Areas.Core.Controllers;
 using Sdl.Web.Tridion.Config;
+using System;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Routing;
 using Unity.Mvc5;
-using Sdl.Web.Mvc.Formats;
 
 namespace Sdl.Web.Site
 {
     public class MvcApplication : HttpApplication
     {
-        private static bool _initialized = false;
+        private static bool _initialized;
         public static void RegisterRoutes(RouteCollection routes)
         {
             RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");

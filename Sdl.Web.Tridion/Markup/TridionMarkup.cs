@@ -1,9 +1,9 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Tridion.Config;
+using System;
 using System.Collections.Generic;
 using System.Text;
-using HtmlAgilityPack;
-using Sdl.Web.Tridion.Config;
-using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Tridion.Markup
 {

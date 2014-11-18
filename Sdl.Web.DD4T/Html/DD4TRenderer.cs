@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Web.Mvc;
-using System.Web.Mvc.Html;
-using System.Web.Routing;
-using DD4T.ContentModel;
-using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.Html;
 using Sdl.Web.Tridion.Markup;
+using System.Collections.Generic;
+using System.Web.Mvc;
+using System.Web.Mvc.Html;
+using System.Web.Routing;
 using IPage = Sdl.Web.Common.Models.IPage;
 
 namespace Sdl.Web.DD4T.Html
@@ -53,6 +52,7 @@ namespace Sdl.Web.DD4T.Html
                     MvcHtmlString result = helper.Action(mvcData.ActionName, mvcData.ControllerName, parameters);
                     if (WebRequestContext.IsPreview)
                     {
+                        // TODO: don't parse entity if this is in an include page (not rendered directly, so !WebRequestContext.IsInclude)
                         result = new MvcHtmlString(TridionMarkup.ParseEntity(result.ToString()));
                     }
                     return result;
@@ -82,6 +82,7 @@ namespace Sdl.Web.DD4T.Html
                 
                 if (WebRequestContext.IsPreview)
                 {
+                    // TODO: don't parse region if this is a region in an include page (not rendered directly, so !WebRequestContext.IsInclude)
                     result = new MvcHtmlString(TridionMarkup.ParseRegion(result.ToString(),WebRequestContext.Localization));
                 }
                 return result;
@@ -101,11 +102,26 @@ namespace Sdl.Web.DD4T.Html
             {
                 if (!page.PageData.ContainsKey("CmsUrl"))
                 {
-                    page.PageData.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl",WebRequestContext.Localization));
+                    page.PageData.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
                 }
                 return new MvcHtmlString(TridionMarkup.PageMarkup(page.PageData));
             }
             return null;
-        }        
+        }
+
+        /// <summary>
+        /// Render additional XPM include page markup
+        /// </summary>
+        /// <param name="page">The DD4T include Page object</param>
+        /// <param name="helper">Html Helper</param>
+        /// <returns>The include page markup</returns>
+        public override MvcHtmlString RenderIncludePageData(IPage page, HtmlHelper helper)
+        {
+            if (WebRequestContext.Localization.IsStaging)
+            {
+                return helper.Partial("Partials/XpmButton", page);
+            }
+            return null;
+        }
     }
 }

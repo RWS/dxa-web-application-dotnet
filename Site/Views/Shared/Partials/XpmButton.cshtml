@@ -1,0 +1,19 @@
+﻿@model PageBase
+@if (WebRequestContext.IsInclude)
+{
+    <div class="xpm-button">
+        <a href="javascript:history.back()" title="Go Back" class="fa-stack fa-lg">
+            <i class="fa fa-square fa-stack-2x"></i>
+            <i class="fa fa-arrow-left fa-inverse fa-stack-1x"></i>
+        </a>
+    </div>
+}
+else
+{
+    <div class="xpm-button">
+        <a href="/system/include/@Model.Title.ToLower()" title="Edit @Model.Title" class="fa-stack fa-lg">
+            <i class="fa fa-square fa-stack-2x"></i>
+            <i class="fa fa-pencil fa-inverse fa-stack-1x"></i>
+        </a>
+    </div>
+}

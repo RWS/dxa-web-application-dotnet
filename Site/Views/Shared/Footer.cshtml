@@ -1,5 +1,6 @@
 ﻿@model PageBase
 <footer id="page-footer" class="page-row">
+    @ViewBag.Renderer.RenderIncludePageData(Model, Html)
     <div class="container-fluid page-border">
         @foreach (Region region in Model.Regions.Values)
         {
