@@ -576,6 +576,24 @@ namespace Sdl.Web.DD4T.Mapping
             return components.Select(c => new Download { Url = c.Multimedia.Url, FileName = c.Multimedia.FileName, FileSize = c.Multimedia.Size, MimeType = c.Multimedia.MimeType, Description = (c.MetadataFields.ContainsKey("description") ? c.MetadataFields["description"].Value : null) }).ToList();
         }
 
+        private List<T> GetCompLinks<T>(IEnumerable<IComponent> components, Type linkedItemType)
+        {
+            List<T> list = new List<T>();
+            foreach (var comp in components)
+            {
+                list.Add((T)Create(comp, linkedItemType));
+            }
+            return list;
+        }
+
+        /// <remarks>
+        /// Called via reflection in <see cref="GetMultiComponentLinks(IEnumerable{IComponent}, Type, bool)"/>.
+        /// </remarks>
+        private T GetCompLink<T>(IEnumerable<IComponent> components, Type linkedItemType)
+        {
+            return GetCompLinks<T>(components, linkedItemType)[0];
+        }
+
         protected Dictionary<string, string> GetAllFieldsAsDictionary(IComponent component)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
