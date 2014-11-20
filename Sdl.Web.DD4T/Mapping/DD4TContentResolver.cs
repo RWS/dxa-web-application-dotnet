@@ -254,7 +254,7 @@ namespace Sdl.Web.DD4T.Mapping
                 if (String.IsNullOrEmpty(linkUrl))
                 {
                     // assume dynamic component link and try to resolve
-                    linkUrl = link.Attributes["xlink:href"].IfNotNull(attr => _componentLinkProvider.ResolveLink(attr.Value));                    
+                    linkUrl = link.Attributes["xlink:href"].IfNotNull(attr => ResolveLink(attr.Value));                    
                 }                
                 if (!string.IsNullOrEmpty(linkUrl))
                 {
