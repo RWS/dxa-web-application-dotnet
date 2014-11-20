@@ -47,11 +47,11 @@ namespace Sdl.Web.Common.Configuration
         public const string StaticsFolder = "BinaryData";
         public const string DefaultVersion = "v1.00";
 
-        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> _configuration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
+        private static readonly Dictionary<string, Dictionary<string, Dictionary<string, string>>> Configuration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
 
         private static readonly object LocalizationUpdateLock = new object();
-        private static readonly string _settingsType = "config";
-        
+        private const string SettingsType = "config";
+
         private static readonly object ViewRegistryLock = new object();
         private static Dictionary<string, Type> _viewModelRegistry;
 
@@ -90,12 +90,12 @@ namespace Sdl.Web.Common.Configuration
             {
                 LocalizationManager.UpdateLocalization(localization, true);
             }
-            return GetConfig(_configuration, key, localization.LocalizationId);
+            return GetConfig(Configuration, key, localization.LocalizationId);
         }
 
         private static bool CheckConfig(string localizationId)
         {
-            if (!_configuration.ContainsKey(localizationId) || CheckSettingsNeedRefresh(_settingsType, localizationId))
+            if (!Configuration.ContainsKey(localizationId) || CheckSettingsNeedRefresh(SettingsType, localizationId))
             {
                 return false;
             }
@@ -153,7 +153,7 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
-        private static void LoadLocalizationDetails(Localization loc, List<string> fileUrls)
+        private static void LoadLocalizationDetails(Localization loc, IEnumerable<string> fileUrls)
         {
             var key = loc.LocalizationId;
             var config = new Dictionary<string, Dictionary<string, string>>();
@@ -172,15 +172,19 @@ namespace Sdl.Web.Common.Configuration
                     Log.Error("Config file: {0} does not exist for localization {1} - skipping", configUrl, key);
                 }
             }
-            ThreadSafeSettingsUpdate<Dictionary<string, Dictionary<string, string>>>(_settingsType, _configuration, key, config);
+            ThreadSafeSettingsUpdate(SettingsType, Configuration, key, config);
         }
 
         public static Localization LoadLocalization(Localization loc, bool loadDetails = false)
         {
             var key = loc.LocalizationId;
             Log.Debug("Loading config for localization : {0}", key);
-            var localization = new Localization{ Path = loc.Path, LocalizationId = loc.LocalizationId };
-            localization.IsHtmlDesignPublished = true;
+            var localization = new Localization
+            {
+                Path = loc.Path,
+                LocalizationId = loc.LocalizationId,
+                IsHtmlDesignPublished = true
+            };
             var mediaPatterns = new List<string>();
             var versionUrl = Path.Combine(loc.Path.ToCombinePath(true), @"version.json").Replace("\\", "/");
             var versionJson = StaticFileManager.Serialize(versionUrl, loc, true);
@@ -422,17 +426,17 @@ namespace Sdl.Web.Common.Configuration
         #region Thread Safe Settings Update Helper Methods
         
         //A set of refresh states, keyed by localization id and then type (eg "config", "resources" etc.) 
-        private static Dictionary<string, Dictionary<string, DateTime>> _refreshStates = new Dictionary<string, Dictionary<string, DateTime>>();
+        private static readonly Dictionary<string, Dictionary<string, DateTime>> RefreshStates = new Dictionary<string, Dictionary<string, DateTime>>();
         //A set of locks to use, one per localization
-        private static Dictionary<string, object> _localizationLocks = new Dictionary<string, object>();
+        private static readonly Dictionary<string, object> LocalizationLocks = new Dictionary<string, object>();
         //A global lock
         private static readonly object Lock = new object();
         
         public static bool CheckSettingsNeedRefresh(string type, string localizationId)
         {
-            if (_refreshStates.ContainsKey(localizationId))
+            if (RefreshStates.ContainsKey(localizationId))
             {
-                return _refreshStates[localizationId].ContainsKey(type) && _refreshStates[localizationId][type] < LocalizationManager.GetLastLocalizationRefresh(localizationId);
+                return RefreshStates[localizationId].ContainsKey(type) && RefreshStates[localizationId][type] < LocalizationManager.GetLastLocalizationRefresh(localizationId);
             }
             return false;
         }
@@ -449,11 +453,11 @@ namespace Sdl.Web.Common.Configuration
         private static void UpdateRefreshState(string localizationId, string type)
         {
             //Update is already done under a localization lock, so we don't need to lock again here
-            if (!_refreshStates.ContainsKey(localizationId))
+            if (!RefreshStates.ContainsKey(localizationId))
             {
-                _refreshStates.Add(localizationId, new Dictionary<string, DateTime>());
+                RefreshStates.Add(localizationId, new Dictionary<string, DateTime>());
             }
-            var states = _refreshStates[localizationId];
+            var states = RefreshStates[localizationId];
             if (states.ContainsKey(type))
             {
                 states[type] = DateTime.Now;
@@ -466,14 +470,14 @@ namespace Sdl.Web.Common.Configuration
 
         private static object GetLocalizationLock(string localizationId)
         {
-            if (!_localizationLocks.ContainsKey(localizationId))
+            if (!LocalizationLocks.ContainsKey(localizationId))
             {
                 lock (Lock)
                 {
-                    _localizationLocks.Add(localizationId, new object());
+                    LocalizationLocks.Add(localizationId, new object());
                 }
             }
-            return _localizationLocks[localizationId];
+            return LocalizationLocks[localizationId];
         }
 
         #endregion

@@ -1,16 +1,14 @@
-﻿using System;
+﻿using Sdl.Web.Common.Logging;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Web;
-using System.Linq;
-using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Common.Configuration
 {
     public class Localization
     {
         private string _path;
-        public string LocalizationId { get; set;}
         public string Path {
             get
             {
@@ -43,6 +41,7 @@ namespace Sdl.Web.Common.Configuration
         }
         public CultureInfo CultureInfo { get; set; }
         public string Language { get; set; }
+        public string LocalizationId { get; set; }
         public string MediaUrlRegex { get; set; }
         public bool IsStaging { get; set; }
         public bool IsHtmlDesignPublished { get; set; }
