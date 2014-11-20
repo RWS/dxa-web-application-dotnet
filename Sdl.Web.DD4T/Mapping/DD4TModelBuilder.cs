@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using DD4T.ContentModel;
+﻿using DD4T.ContentModel;
 using DD4T.ContentModel.Factories;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
@@ -13,6 +6,13 @@ using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Config;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.DD4T.Mapping
@@ -475,7 +475,7 @@ namespace Sdl.Web.DD4T.Mapping
                 List<String> urls = new List<String>();
                 foreach (var comp in items)
                 {
-                    var url = LinkFactory.ResolveLink(comp.Id);
+                    var url = _contentResolver.ResolveLink(comp.Id);
                     if (url != null)
                     {
                         urls.Add(url);
@@ -793,7 +793,7 @@ namespace Sdl.Web.DD4T.Mapping
                 switch (field.Name)
                 {
                     case "internalLink":
-                        value = LinkFactory.ResolveLink(field.Value);
+                        value = _contentResolver.ResolveLink(field.Value);
                         break;
                     case "image":
                         value = field.LinkedComponentValues[0].Multimedia.Url;
@@ -849,7 +849,7 @@ namespace Sdl.Web.DD4T.Mapping
             }
             name = name ?? "Main";//default region name
 
-            var mvcData = new MvcData() { AreaName = module, ViewName = name, ControllerName = SiteConfiguration.GetRegionController(), ControllerAreaName = SiteConfiguration.GetDefaultModuleName(), ActionName = SiteConfiguration.GetRegionAction() };
+            var mvcData = new MvcData { AreaName = module, ViewName = name, ControllerName = SiteConfiguration.GetRegionController(), ControllerAreaName = SiteConfiguration.GetDefaultModuleName(), ActionName = SiteConfiguration.GetRegionAction() };
             return new Region { Name = name, AppData = mvcData };
         }
 
