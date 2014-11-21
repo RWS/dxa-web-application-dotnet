@@ -1,14 +1,9 @@
 ﻿using Sdl.Web.Common.Models;
-using System.ServiceModel.Syndication;
-using System.Web.Mvc;
-using System.Linq;
-using System.Collections.Generic;
-using System;
 using Sdl.Web.Mvc.Configuration;
+using System;
+using System.Collections.Generic;
+using System.ServiceModel.Syndication;
 using System.Web;
-using System.Collections.Specialized;
-using System.Reflection;
-using System.Collections.ObjectModel;
 
 namespace Sdl.Web.Mvc.Formats
 {
@@ -21,9 +16,11 @@ namespace Sdl.Web.Mvc.Formats
             {
                 var description = page.Meta.ContainsKey("description") ? page.Meta["description"] : null;
                 var url = RemoveFormatFromUrl();
-                SyndicationFeed feed = new SyndicationFeed(page.Title, description, new Uri(url));
-                feed.Language = WebRequestContext.Localization.Culture;
-                feed.Items = GetFeedItemsFromPage(page);
+                SyndicationFeed feed = new SyndicationFeed(page.Title, description, new Uri(url))
+                {
+                    Language = WebRequestContext.Localization.Culture,
+                    Items = GetFeedItemsFromPage(page)
+                };
                 return feed;
             }
             return null;
@@ -36,7 +33,7 @@ namespace Sdl.Web.Mvc.Formats
             return HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path) + (filtered.Count>0 ?  "?" + filtered : "");
         }
 
-        private List<SyndicationItem> GetFeedItemsFromPage(WebPage page)
+        private IEnumerable<SyndicationItem> GetFeedItemsFromPage(WebPage page)
         {
             var items = new List<SyndicationItem>();
             foreach (var region in page.Regions.Values)
@@ -55,7 +52,7 @@ namespace Sdl.Web.Mvc.Formats
         protected virtual List<SyndicationItem> GetFeedItemsFromEntity(IEntity entity)
         {
             var items = new List<SyndicationItem>();
-            List<Teaser> entityItems = GetEntityItems(entity);
+            IEnumerable<Teaser> entityItems = GetEntityItems(entity);
             foreach(var item in entityItems)
             {
                 items.Add(GetSyndicationItemFromTeaser(item));
@@ -63,7 +60,7 @@ namespace Sdl.Web.Mvc.Formats
             return items;
         }
 
-        private List<Teaser> GetEntityItems(IEntity entity)
+        private IEnumerable<Teaser> GetEntityItems(IEntity entity)
         {
             var res = new List<Teaser>();
             //1. Check if entity is a teaser, if add it
@@ -94,7 +91,7 @@ namespace Sdl.Web.Mvc.Formats
                             case "Date":
                                 var date = pi.GetValue(entity) as DateTime?;
                                 if (date != null)
-                                    teaser.Date = (DateTime)date;
+                                    teaser.Date = date;
                                 break;
                             case "Description":
                                 teaser.Text = pi.GetValue(entity) as String;

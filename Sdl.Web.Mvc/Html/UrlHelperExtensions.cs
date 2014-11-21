@@ -1,7 +1,7 @@
 ﻿using Sdl.Web.Mvc.Configuration;
 using System;
-using System.Web.Mvc;
 using System.Linq;
+using System.Web.Mvc;
 
 namespace Sdl.Web.Mvc.Html
 {
@@ -25,9 +25,9 @@ namespace Sdl.Web.Mvc.Html
                 path = "/" + path;
             }
             string version = loc.Version;
-            if (localization == "" && WebRequestContext.Localization.SiteLocalizations!=null && WebRequestContext.Localization.SiteLocalizations.Count>0)
+            if (String.IsNullOrEmpty(localization) && WebRequestContext.Localization.SiteLocalizations != null && WebRequestContext.Localization.SiteLocalizations.Count > 0)
             {
-                var defaultLoc = WebRequestContext.Localization.SiteLocalizations.Where(l=>l.IsDefaultLocalization).FirstOrDefault() ?? WebRequestContext.Localization;
+                var defaultLoc = WebRequestContext.Localization.SiteLocalizations.FirstOrDefault(l => l.IsDefaultLocalization) ?? WebRequestContext.Localization;
                 localization = defaultLoc.Path;
             }
             if (!String.IsNullOrEmpty(version))

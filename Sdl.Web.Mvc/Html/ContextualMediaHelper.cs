@@ -43,7 +43,7 @@ namespace Sdl.Web.Mvc.Html
                 {
                     prefix = "https/";
                 }
-                url = url.Substring(url.IndexOf("://") + 3);
+                url = url.Substring(url.IndexOf("://", StringComparison.Ordinal) + 3);
             }
             return String.Format(ImageResizeUrlFormat, ImageResizeRoute, width, height, prefix, url);
         }

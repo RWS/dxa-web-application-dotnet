@@ -8,8 +8,8 @@ namespace Sdl.Web.Mvc.Formats
         public AtomFormatter()
         {
             AddMediaType("application/atom+xml");
-            this.ProcessModel = true;
-            this.AddIncludes = false;
+            ProcessModel = true;
+            AddIncludes = false;
         }
 
         public override ActionResult FormatData(ControllerContext controllerContext, object model)

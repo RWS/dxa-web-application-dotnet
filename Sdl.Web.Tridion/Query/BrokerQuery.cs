@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Sdl.Web.Common.Models;
+using System;
 using System.Collections.Generic;
-using Sdl.Web.Common.Models;
 using Tridion.ContentDelivery.DynamicContent.Query;
 using Tridion.ContentDelivery.Meta;
 using Tridion.ContentDelivery.Taxonomies;

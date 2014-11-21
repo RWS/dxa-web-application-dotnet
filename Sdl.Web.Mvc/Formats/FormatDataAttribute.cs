@@ -1,10 +1,7 @@
-﻿using System.Web.Mvc;
-using System;
-using Sdl.Web.Common.Models;
-using Sdl.Web.Common.Configuration;
-using System.Web.Routing;
+﻿using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Controllers;
-using Sdl.Web.Common.Models.Common;
+using System;
+using System.Web.Mvc;
 
 namespace Sdl.Web.Mvc.Formats
 {
@@ -26,6 +23,7 @@ namespace Sdl.Web.Mvc.Formats
             }
             base.OnActionExecuting(filterContext);
         }
+
         public override void OnActionExecuted(ActionExecutedContext filterContext)
         {
             var formatter = filterContext.Controller.ViewBag.DataFormatter as IDataFormatter;
@@ -55,7 +53,5 @@ namespace Sdl.Web.Mvc.Formats
             }
             base.OnActionExecuted(filterContext);
         }
-
-
     }
 }

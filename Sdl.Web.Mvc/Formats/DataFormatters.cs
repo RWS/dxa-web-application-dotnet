@@ -1,7 +1,5 @@
-﻿using Sdl.Web.Common.Configuration;
-using Sdl.Web.Mvc.Configuration;
+﻿using Sdl.Web.Mvc.Configuration;
 using System.Collections.Generic;
-using System.Web;
 using System.Web.Mvc;
 
 namespace Sdl.Web.Mvc.Formats
@@ -47,7 +45,7 @@ namespace Sdl.Web.Mvc.Formats
         public static double GetScoreFromAcceptString(string type)
         {
             double res = 1.0;
-            int pos = type.IndexOf("q=");
+            int pos = type.IndexOf("q=", System.StringComparison.Ordinal);
             if (pos > 0)
             {
                 double.TryParse(type.Substring(pos + 2), out res);

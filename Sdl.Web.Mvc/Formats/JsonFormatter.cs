@@ -7,14 +7,13 @@ namespace Sdl.Web.Mvc.Formats
         public JsonFormatter()
         {
             AddMediaType("application/json");
-            this.ProcessModel = true;
-            this.AddIncludes = false;
+            ProcessModel = true;
+            AddIncludes = false;
         }
 
         public override ActionResult FormatData(ControllerContext controllerContext, object model)
         {
-            return model==null ? null : new JsonNetResult { Data = model };
+            return model == null ? null : new JsonNetResult { Data = model };
         }
-
     }
 }
