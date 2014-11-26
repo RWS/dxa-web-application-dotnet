@@ -3,11 +3,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Sdl.Web.Mvc.Configuration
 {
@@ -16,9 +12,9 @@ namespace Sdl.Web.Mvc.Configuration
     /// </summary>
     public class BaseLocalizationManager : ILocalizationManager
     {
-        private Dictionary<string, Localization> _uniqueLocalizations = null;
-        private Dictionary<string, string> _urlToLocalizationIdMap = null;
-        private Dictionary<string, DateTime> _refreshData = new Dictionary<string,DateTime>();
+        private Dictionary<string, Localization> _uniqueLocalizations;
+        private Dictionary<string, string> _urlToLocalizationIdMap;
+        private readonly Dictionary<string, DateTime> _refreshData = new Dictionary<string,DateTime>();
         private readonly object _localizationLock = new object();
         
         public virtual Localization GetContextLocalization()
@@ -32,7 +28,7 @@ namespace Sdl.Web.Mvc.Configuration
             {
                 throw new Exception("No Localizations Loaded");
             }
-            string url = uri.ToString() + "/";
+            string url = uri + "/";
             foreach (var rootUrl in _urlToLocalizationIdMap.Keys)
             {
                 if (url.ToLower().StartsWith(rootUrl))
@@ -56,7 +52,7 @@ namespace Sdl.Web.Mvc.Configuration
             {
                 throw new Exception ("No Localizations Loaded");
             }
-            return _uniqueLocalizations.Values.Where(l => l.LocalizationId == localizationId).FirstOrDefault();
+            return _uniqueLocalizations.Values.FirstOrDefault(l => l.LocalizationId == localizationId);
         }
 
 
@@ -79,7 +75,7 @@ namespace Sdl.Web.Mvc.Configuration
                         LocalizationId = locId
                     };
                     var protocol = !loc.ContainsKey("Protocol") ? "http" : loc["Protocol"].ToLower();
-                    var domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_link_conf" : loc["Domain"].ToLower();
+                    var domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_dynamic_conf" : loc["Domain"].ToLower();
                     var port = !loc.ContainsKey("Port") ? String.Empty : loc["Port"];
                     var baseUrl = GetBaseUrl(protocol, domain, port, localization.Path);
                     if (!baseUrl.EndsWith("/"))

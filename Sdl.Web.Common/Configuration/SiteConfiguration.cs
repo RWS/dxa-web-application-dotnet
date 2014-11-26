@@ -113,7 +113,7 @@ namespace Sdl.Web.Common.Configuration
                 {
                     //We actually allow more than one . in the key (for example core.schemas.article) in this case the section
                     //is the part up to the last dot and the key is the part after it.
-                    var sectionbit = key.Substring(0, key.LastIndexOf("."));
+                    var sectionbit = key.Substring(0, key.LastIndexOf(".", StringComparison.Ordinal));
                     var keybit = bits[bits.Length - 1];
                     if (subConfig.ContainsKey(sectionbit))
                     {

@@ -39,7 +39,7 @@ namespace Sdl.Web.Mvc.Controllers
         public virtual ActionResult Page(string pageUrl)
         {
             ModelType = ModelType.Page;
-            bool addIncludes = ViewBag.AddIncludes != null ? ViewBag.AddIncludes : true; 
+            bool addIncludes = ViewBag.AddIncludes ?? true; 
             var page = ContentProvider.GetPageModel(pageUrl, addIncludes);
             if (page == null)
             {
