@@ -49,13 +49,18 @@ namespace Sdl.Web.Tridion.Config
                 _localizations = new List<Dictionary<string, string>>();
                 string path = Path.Combine(rootApplicationFolder, @"bin\config\cd_dynamic_conf.xml");
                 XDocument config = XDocument.Load(path);
-                // sorting publications by path in decending order so default path ("/" or "") is last in list
+                // sorting Publications by Path in decending order so default Path ("/" or "") is last in list
+                // using Path of first Host element found in a Publication, assuming the Paths of all of these Host elements will be equal
                 var publications = config.Descendants("Publications").First();
                 var sortedPublications = publications.Elements().OrderByDescending(e => e.Element("Host").Attribute("Path").Value); 
                 publications.ReplaceAll(sortedPublications);
                 foreach (var pub in config.Descendants("Publication"))
                 {
-                    _localizations.Add(GetLocalization(pub.Element("Host")));
+                    // there could be multiple Host elements per Publication, add them all
+                    foreach (var host in pub.Elements("Host"))
+                    {
+                        _localizations.Add(GetLocalization(host));                        
+                    }
                 }
             }
         }
