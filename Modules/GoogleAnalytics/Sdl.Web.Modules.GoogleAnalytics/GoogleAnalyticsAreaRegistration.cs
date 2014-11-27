@@ -1,8 +1,6 @@
 ﻿using Sdl.Web.Mvc.Configuration;
-using System;
-using System.Web.Mvc;
 
-namespace Sdl.Web.Site.Areas.GoogleAnalytics
+namespace Sdl.Web.Modules.GoogleAnalytics
 {
     public class GoogleAnalyticsAreaRegistration : BaseAreaRegistration 
     {
@@ -13,10 +11,10 @@ namespace Sdl.Web.Site.Areas.GoogleAnalytics
                 return "GoogleAnalytics";
             }
         }
+
         protected override void RegisterAllViewModels()
         {
-            RegisterViewModel("GoogleAnalytics", typeof(Sdl.Web.Common.Models.Configuration));
-        }
-        
+            RegisterViewModel("GoogleAnalytics", typeof(Common.Models.Configuration));
+        }        
     }
 }
