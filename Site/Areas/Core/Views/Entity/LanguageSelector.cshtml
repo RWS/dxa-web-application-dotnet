@@ -20,11 +20,11 @@
     var redirectId = WebRequestContext.PageId;
     var defaultItem = Model.Settings.ContainsKey("defaultContentLink") ? Model.Settings["defaultContentLink"].Substring(4) : null;
 }
-@if (redirectId != null && siteLocalizations.Count > 1)
+@if (redirectId != null && filteredLocalizations.Count > 1)
 {
     <div @Markup.Entity(Model)>
         <select class="selectpicker" data-width="auto">
-            @foreach (var loc in siteLocalizations)
+            @foreach (var loc in filteredLocalizations)
             {
                 var parms = "localizationId=" + loc.LocalizationId + (defaultItem!=null ? "&defaultItemId=" + defaultItem:"");
                 parms += "&defaultPath=" + loc.Path;
