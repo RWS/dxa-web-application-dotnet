@@ -145,7 +145,7 @@ namespace Sdl.Web.Tridion.Markup
             var pageTemplateDate = pageData.ContainsKey("PageTemplateModified") ? pageData["PageTemplateModified"] : null;
             var cmsUrl = pageData.ContainsKey("CmsUrl") ? pageData["CmsUrl"] : null;
             // remove trailing slash from cmsUrl if available
-            if (!string.IsNullOrEmpty(cmsUrl) && cmsUrl.EndsWith("/"))
+            if (!String.IsNullOrEmpty(cmsUrl) && cmsUrl.EndsWith("/"))
             {
                 cmsUrl = cmsUrl.Remove(cmsUrl.Length - 1);
             }
