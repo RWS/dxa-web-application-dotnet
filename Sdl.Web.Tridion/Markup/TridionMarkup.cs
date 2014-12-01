@@ -144,6 +144,11 @@ namespace Sdl.Web.Tridion.Markup
             var pageDate = pageData.ContainsKey("PageModified") ? pageData["PageModified"] : null;
             var pageTemplateDate = pageData.ContainsKey("PageTemplateModified") ? pageData["PageTemplateModified"] : null;
             var cmsUrl = pageData.ContainsKey("CmsUrl") ? pageData["CmsUrl"] : null;
+            // remove trailing slash from cmsUrl if available
+            if (!String.IsNullOrEmpty(cmsUrl) && cmsUrl.EndsWith("/"))
+            {
+                cmsUrl = cmsUrl.Remove(cmsUrl.Length - 1);
+            }
             return String.Format(PageFormat, pageId, pageDate, pageTemplateId, pageTemplateDate) + String.Format(PageScript, cmsUrl);
         }
     }
