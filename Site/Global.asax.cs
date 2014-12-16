@@ -9,6 +9,7 @@ using Sdl.Web.Site.Areas.Core.Controllers;
 using Sdl.Web.Tridion.Config;
 using System;
 using System.Web;
+using System.Web.Configuration;
 using System.Web.Mvc;
 using System.Web.Routing;
 using Unity.Mvc5;
@@ -70,16 +71,20 @@ namespace Sdl.Web.Site
             ).DataTokens.Add("area", "Core");
 
             // Admin actions
-            routes.MapRoute(
-               "Core_Admin",
-               "admin/{action}",
-               new { controller = "Admin", action = "Refresh" }
-            ).DataTokens.Add("area", "Core");
-            routes.MapRoute(
-               "Core_Admin_Loc",
-               "{localization}/admin/{action}",
-               new { controller = "Admin", action = "Refresh" }
-            ).DataTokens.Add("area", "Core");
+            string enable = WebConfigurationManager.AppSettings["admin.refresh.enabled"];
+            if (!String.IsNullOrEmpty(enable) && enable.Equals("true", StringComparison.InvariantCultureIgnoreCase))
+            {
+                routes.MapRoute(
+                   "Core_Admin",
+                   "admin/{action}",
+                   new { controller = "Admin", action = "Refresh" }
+                ).DataTokens.Add("area", "Core");
+                routes.MapRoute(
+                   "Core_Admin_Loc",
+                   "{localization}/admin/{action}",
+                   new { controller = "Admin", action = "Refresh" }
+                ).DataTokens.Add("area", "Core");                
+            }
 
             // Tridion Page Route
             routes.MapRoute(
