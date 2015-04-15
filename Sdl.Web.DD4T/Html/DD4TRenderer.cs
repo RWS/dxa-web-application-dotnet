@@ -1,41 +1,110 @@
-﻿using DD4T.ContentModel;
-using DD4T.Utils;
-using HtmlAgilityPack;
-using Sdl.Web.Mvc;
-using Sdl.Web.Mvc.Html;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.Web.Mvc.Html;
+using System.Web.Routing;
+using DD4T.ContentModel;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Models;
+using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Mvc.Html;
+using Sdl.Web.Tridion.Markup;
+using IPage = Sdl.Web.Common.Models.IPage;
 
-namespace Sdl.Web.DD4T
+namespace Sdl.Web.DD4T.Html
 {
+    /// <summary>
+    /// Renderer implementation for DD4T
+    /// </summary>
     public class DD4TRenderer : BaseRenderer
     {
-        public override System.Web.Mvc.MvcHtmlString Render(object item, HtmlHelper helper)
+        /// <summary>
+        /// Render an entity (Component Presentation)
+        /// </summary>
+        /// <param name="item">The Component Presentation object</param>
+        /// <param name="helper">The HTML Helper</param>
+        /// <param name="containerSize">The size of the containing element (in grid units)</param>
+        /// <param name="excludedItems">A list of view names, if the Component Presentation maps to one of these, it is skipped.</param>
+        /// <returns>The rendered content</returns>
+        public override MvcHtmlString RenderEntity(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
             var cp = item as IComponentPresentation;
-            if (cp!=null)
+            var mvcData = ContentResolver.ResolveMvcData(cp);
+            if (cp != null && (excludedItems == null || !excludedItems.Contains(mvcData.ViewName)))
             {
-                string controller = ConfigurationHelper.ComponentPresentationController;
-                string action  = ConfigurationHelper.ComponentPresentationAction;
-                if (cp.ComponentTemplate.MetadataFields != null && cp.ComponentTemplate.MetadataFields.ContainsKey("controller"))
+                var parameters = new RouteValueDictionary();
+                int parentContainerSize = helper.ViewBag.ContainerSize;
+                if (parentContainerSize == 0)
                 {
-                    controller = cp.ComponentTemplate.MetadataFields["controller"].Value;
+                    parentContainerSize = SiteConfiguration.MediaHelper.GridSize;
                 }
-                if (cp.ComponentTemplate.MetadataFields != null && cp.ComponentTemplate.MetadataFields.ContainsKey("action"))
+                if (containerSize == 0)
                 {
-                    action = cp.ComponentTemplate.MetadataFields["action"].Value;
+                    containerSize = SiteConfiguration.MediaHelper.GridSize;
                 }
-                MvcHtmlString result = helper.Action(action, controller, new { componentPresentation = cp });
-                return Semantics.Parse(result,cp);
+                parameters["containerSize"] = (containerSize * parentContainerSize) / SiteConfiguration.MediaHelper.GridSize;
+                parameters["entity"] = cp;
+                parameters["area"] = mvcData.ControllerAreaName;
+                foreach (var key in mvcData.RouteValues.Keys)
+                {
+                    parameters[key] = mvcData.RouteValues[key];
+                }
+                MvcHtmlString result = helper.Action(mvcData.ActionName, mvcData.ControllerName, parameters);
+                if (WebRequestContext.IsPreview)
+                {
+                    result = new MvcHtmlString(TridionMarkup.ParseEntity(result.ToString()));
+                }
+                return result;
             }
             return null;
         }
 
+        /// <summary>
+        /// Render an Region
+        /// </summary>
+        /// <param name="item">The Region object</param>
+        /// <param name="helper">The HTML Helper</param>
+        /// <param name="containerSize">The size of the containing element (in grid units)</param>
+        /// <param name="excludedItems">A list of view names, if the Region maps to one of these, it is skipped.</param>
+        /// <returns>The rendered content</returns>
+        public override MvcHtmlString RenderRegion(IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
+        {
+            var mvcData = ContentResolver.ResolveMvcData(region);
+            if (region != null && (excludedItems == null || !excludedItems.Contains(region.Name)))
+            {
+                if (containerSize == 0)
+                {
+                    containerSize = SiteConfiguration.MediaHelper.GridSize;
+                }
+                MvcHtmlString result = helper.Action(mvcData.ActionName, mvcData.ControllerName, new { Region = region, containerSize = containerSize, area = mvcData.ControllerAreaName });
+                
+                if (WebRequestContext.IsPreview)
+                {
+                    result = new MvcHtmlString(TridionMarkup.ParseRegion(result.ToString()));
+                }
+                return result;
+            }
+            return null;
+        }
 
+        /// <summary>
+        /// Render additional XPM page markup
+        /// </summary>
+        /// <param name="page">The DD4T Page object</param>
+        /// <param name="helper">Html Helper</param>
+        /// <returns>The page markup</returns>
+        public override MvcHtmlString RenderPageData(IPage page, HtmlHelper helper)
+        {
+            if (WebRequestContext.IsPreview)
+            {
+                if (!page.PageData.ContainsKey("CmsUrl"))
+                {
+                    page.PageData.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl"));
+                }
+                return new MvcHtmlString(TridionMarkup.PageMarkup(page.PageData));
+            }
+            return null;
+        }        
     }
 }

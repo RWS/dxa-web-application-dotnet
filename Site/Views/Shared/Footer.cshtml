@@ -1,0 +1,14 @@
+﻿@model PageBase
+<footer id="page-footer" class="page-row">
+    <div class="container-fluid page-border">
+        @foreach (Region region in Model.Regions.Values)
+        {
+            @ViewBag.Renderer.RenderRegion(region, Html, 12, new List<string>{"Links"})
+        }
+        <hr />
+        @if (Model.Regions.ContainsKey("Links"))
+        {
+            @ViewBag.Renderer.RenderRegion(Model.Regions["Links"], Html)
+        }
+    </div>
+</footer>

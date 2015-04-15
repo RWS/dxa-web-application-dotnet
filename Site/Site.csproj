@@ -8,14 +8,14 @@
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{4B9E8878-0810-4CD1-B57A-D06589C49FE2}</ProjectGuid>
-    <ProjectTypeGuids>{E3E379DF-F4C6-4180-9B81-6769533ABE47};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Site</RootNamespace>
-    <AssemblyName>Site</AssemblyName>
+    <RootNamespace>Sdl.Web.Site</RootNamespace>
+    <AssemblyName>Sdl.Web.Site</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>false</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -30,6 +30,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -38,170 +39,75 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DD4T.Providers.SDLTridion2013">
+      <HintPath>..\packages\DD4T-Tridion-2013sp1.1.31.1\lib\DD4T.Providers.SDLTridion2013.dll</HintPath>
+    </Reference>
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="netrtsn, Version=3.5.0.0, Culture=neutral, PublicKeyToken=3f62086c257dc8e1, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\netrtsn.dll</HintPath>
+      <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Configuration, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data.Entity" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Web.DynamicData" />
-    <Reference Include="System.Web.Entity" />
-    <Reference Include="System.Web.ApplicationServices" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Web.Routing" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Web.Services" />
-    <Reference Include="System.EnterpriseServices" />
-    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Net.Http">
-    </Reference>
-    <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.4.0.30506.0\lib\net40\System.Net.Http.Formatting.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Net.Http.WebRequest">
-    </Reference>
-    <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.4.0.30506.0\lib\net40\System.Web.Http.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Http.WebHost, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.4.0.30506.0\lib\net40\System.Web.Http.WebHost.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.Mvc.4.0.30506.0\lib\net40\System.Web.Mvc.dll</HintPath>
+    <Reference Include="System.Web.Mvc, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.1.2\lib\net45\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.Razor.2.0.30506.0\lib\net40\System.Web.Razor.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.30506.0\lib\net40\System.Web.WebPages.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.30506.0\lib\net40\System.Web.WebPages.Deployment.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.30506.0\lib\net40\System.Web.WebPages.Razor.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="Tridion.ContentDelivery, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.dll</HintPath>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.1.2\lib\net45\System.Web.Razor.dll</HintPath>
     </Reference>
-    <Reference Include="Tridion.ContentDelivery.AmbientData, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.1.2\lib\net45\System.Web.WebPages.dll</HintPath>
     </Reference>
-    <Reference Include="Tridion.ContentDelivery.Configuration, Version=7.1.0.165, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.Configuration.dll</HintPath>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.1.2\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
-    <Reference Include="Tridion.ContentDelivery.Interop, Version=7.1.0.10, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.Interop.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.Context, Version=7.1.2.1706, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.Context.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.Context.Image, Version=7.1.2.1706, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.Context.Image.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.Context.Interop, Version=7.1.2.1706, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.Context.Interop.dll</HintPath>
+    <Reference Include="System.Configuration" />
+    <Reference Include="Unity.Mvc5">
+      <HintPath>..\packages\Unity.Mvc5.1.1\lib\net45\Unity.Mvc5.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\ComponentController.cs" />
-    <Compile Include="Controllers\PageController.cs" />
-    <Compile Include="Controllers\RegionController.cs" />
+    <Compile Include="Areas\Core\Controllers\AdminController.cs" />
+    <Compile Include="Areas\Core\CoreAreaRegistration.cs" />
+    <Compile Include="Areas\GoogleAnalytics\GoogleAnalyticsAreaRegistration.cs" />
+    <Compile Include="Areas\Core\Controllers\EntityController.cs" />
+    <Compile Include="Areas\Core\Controllers\ListController.cs" />
+    <Compile Include="Areas\Core\Controllers\NavigationController.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Areas\Core\Controllers\PageController.cs" />
+    <Compile Include="Areas\Core\Controllers\RegionController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\VersionInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="assets\images\temp\sdl-globe.png" />
-    <None Include="assets\less\main.less" />
-    <Content Include="assets\less\_bootstrap.less" />
-    <Content Include="assets\less\_footer.less" />
-    <Content Include="assets\less\_icons.less" />
-    <Content Include="assets\less\_mixins.less" />
-    <Content Include="assets\less\_nav.less" />
-    <Content Include="assets\less\_text.less" />
-    <Content Include="assets\less\_variables.less" />
-    <Content Include="assets\scripts\custom.js" />
-    <Content Include="assets\scripts\discover-min.js" />
-    <Content Include="assets\scripts\header.js" />
-    <Content Include="assets\scripts\plugins.js" />
-    <Content Include="assets\scripts\theme-customiser.js" />
-    <Content Include="bower_components\bootstrap\less\utilities.less" />
-    <Content Include="bower_components\bootstrap\less\modals.less" />
-    <Content Include="bower_components\bootstrap\less\navbar.less" />
-    <Content Include="bower_components\bootstrap\less\navs.less" />
-    <Content Include="bower_components\bootstrap\less\normalize.less" />
-    <Content Include="bower_components\bootstrap\less\pager.less" />
-    <Content Include="bower_components\bootstrap\less\pagination.less" />
-    <Content Include="bower_components\bootstrap\less\panels.less" />
-    <Content Include="bower_components\bootstrap\less\popovers.less" />
-    <Content Include="bower_components\bootstrap\less\print.less" />
-    <Content Include="bower_components\bootstrap\less\progress-bars.less" />
-    <Content Include="bower_components\bootstrap\less\responsive-utilities.less" />
-    <Content Include="bower_components\bootstrap\less\scaffolding.less" />
-    <Content Include="bower_components\bootstrap\less\tables.less" />
-    <Content Include="bower_components\bootstrap\less\thumbnails.less" />
-    <Content Include="bower_components\bootstrap\less\tooltip.less" />
-    <Content Include="bower_components\bootstrap\less\carousel.less" />
-    <Content Include="bower_components\bootstrap\less\close.less" />
-    <Content Include="bower_components\bootstrap\less\code.less" />
-    <Content Include="bower_components\bootstrap\less\component-animations.less" />
-    <Content Include="bower_components\bootstrap\less\dropdowns.less" />
-    <Content Include="bower_components\bootstrap\less\grid.less" />
-    <Content Include="bower_components\bootstrap\less\input-groups.less" />
-    <Content Include="bower_components\bootstrap\less\jumbotron.less" />
-    <Content Include="bower_components\bootstrap\less\labels.less" />
-    <Content Include="bower_components\bootstrap\less\list-group.less" />
-    <Content Include="bower_components\bootstrap\less\media.less" />
-    <Content Include="bower_components\bootstrap\less\alerts.less" />
-    <Content Include="bower_components\bootstrap\less\badges.less" />
-    <Content Include="bower_components\bootstrap\less\breadcrumbs.less" />
-    <Content Include="bower_components\bootstrap\less\button-groups.less" />
-    <None Include="bower_components\bootstrap\less\variables.less" />
-    <Content Include="bower_components\bootstrap\less\wells.less" />
-    <Content Include="bower_components\font-awesome\less\bordered-pulled.less" />
-    <Content Include="bower_components\font-awesome\less\core.less" />
-    <Content Include="bower_components\font-awesome\less\fixed-width.less" />
-    <None Include="bower_components\font-awesome\less\font-awesome.less" />
-    <Content Include="bower_components\bootstrap\less\buttons.less" />
-    <Content Include="bower_components\bootstrap\less\forms.less" />
-    <None Include="bower_components\bootstrap\less\mixins.less" />
-    <Content Include="bower_components\bootstrap\less\type.less" />
-    <Content Include="bower_components\less.js\dist\less-1.7.0.min.js" />
     <Content Include="Global.asax" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -212,23 +118,78 @@
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
-    <Content Include="Views\Web.config" />
+    <Content Include="Log.config" />
+    <Content Include="Areas\Core\Views\web.config" />
+    <Content Include="Areas\Core\Views\Entity\Accordion.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Article.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Carousel.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\CookieNotificationBar.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Download.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\FooterLinkGroup.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\FooterLinks.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\HeaderLinks.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\HeaderLogo.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\LanguageSelector.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\OldBrowserNotificationBar.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Partials\GoogleMap.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Place.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\SocialLinks.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\SocialSharing.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Tab.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Teaser-ImageOverlay.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Teaser.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\TeaserColored.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\TeaserHero-ImageOverlay.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\TeaserMap.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\YouTubeVideo.cshtml" />
+    <Content Include="Areas\GoogleAnalytics\Views\Entity\GoogleAnalytics.cshtml" />
+    <Content Include="Areas\Core\Views\List\List.cshtml" />
+    <Content Include="Areas\Core\Views\List\PagedList.cshtml" />
+    <Content Include="Areas\Core\Views\List\Partials\Pager.cshtml" />
+    <Content Include="Areas\Core\Views\List\ThumbnailList.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\Breadcrumb.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\SiteMap.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\LeftNavigation.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\TopNavigation.cshtml" />
+    <Content Include="Areas\Core\Views\Page\GeneralPage.cshtml" />
+    <Content Include="Areas\Core\Views\Page\IncludePage.cshtml" />
+    <Content Include="Areas\Core\Views\Page\RedirectPage.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Page\ContentPage.cshtml" />
-    <Content Include="Views\Component\Article.cshtml" />
-    <Content Include="bower_components\font-awesome\less\icons.less" />
-    <Content Include="bower_components\font-awesome\less\larger.less" />
-    <Content Include="bower_components\font-awesome\less\list.less" />
-    <Content Include="bower_components\font-awesome\less\mixins.less" />
-    <Content Include="bower_components\font-awesome\less\path.less" />
-    <Content Include="bower_components\font-awesome\less\rotated-flipped.less" />
-    <Content Include="bower_components\font-awesome\less\spinning.less" />
-    <Content Include="bower_components\font-awesome\less\stacked.less" />
-    <Content Include="bower_components\font-awesome\less\variables.less" />
-    <Content Include="Views\Region\Main.cshtml" />
+    <Content Include="Areas\Core\Views\Page\_ViewStart.cshtml" />
+    <Content Include="Areas\Core\Views\Region\2-Column.cshtml" />
+    <Content Include="Areas\Core\Views\Region\3-Column.cshtml" />
+    <Content Include="Areas\Core\Views\Region\4-Column.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Hero.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Info.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Left.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Links.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Logo.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Main.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Nav.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Tools.cshtml" />
+    <Content Include="Views\Shared\Footer.cshtml" />
+    <Content Include="Views\Shared\Header.cshtml" />
+    <Content Include="Views\Shared\SectionError.cshtml" />
+    <Content Include="Areas\GoogleAnalytics\Views\web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Areas\Core\Views\Entity\Partials\GoogleStaticMap.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Partials\Teaser.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\SiteMapXml.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Partials\Teaser-ImageOverlay.cshtml" />
+    <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
+    <None Include="Properties\PublishProfiles\Distribution.pubxml" />
+    <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
+    <Content Include="Unity.config" />
+    <Content Include="Views\web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <None Include="Properties\PublishProfiles\Staging %28Stable demo version%29.pubxml" />
+    <Content Include="Views\Shared\ServerError.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Data\" />
+    <Folder Include="Areas\Core\Views\Admin\" />
+    <Folder Include="Areas\Core\Views\Shared\" />
     <Folder Include="bin\" />
   </ItemGroup>
   <ItemGroup>
@@ -237,25 +198,33 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="assets\fonts\fontawesome-webfont.woff" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Sdl.Web.DD4T\Sdl.Web.DD4T.csproj">
       <Project>{360aec0a-3367-486a-885f-7931f32234c1}</Project>
       <Name>Sdl.Web.DD4T</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Sdl.Web.Models\Sdl.Web.Mvc.csproj">
+    <ProjectReference Include="..\Sdl.Web.Mvc\Sdl.Web.Mvc.csproj">
       <Project>{923b2009-9a0b-4425-88a5-bf7af25c8f8b}</Project>
       <Name>Sdl.Web.Mvc</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Sdl.Tridion.Context.Mvc\Sdl.Tridion.Context.Mvc.csproj">
-      <Project>{87762bc5-b81b-4e2e-995d-5ce9dadbafa4}</Project>
-      <Name>Sdl.Tridion.Context.Mvc</Name>
+    <ProjectReference Include="..\Sdl.Web.Common\Sdl.Web.Common.csproj">
+      <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
+      <Name>Sdl.Web.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj">
+      <Project>{ae4651df-a42f-4863-a0e1-870eacf3d072}</Project>
+      <Name>Sdl.Web.Tridion</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
@@ -271,7 +240,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>59860</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://staging.corporate-site.com</IISUrl>
+          <IISUrl>http://localhost:59860/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
@@ -287,4 +256,8 @@
   </Target>
   <Target Name="AfterBuild">
   </Target> -->
+  <Target Name="BeforeBuild">
+    <WriteLinesToFile Condition=" '$(AsmVersion)' != '' " File="Properties\VersionInfo.cs" Overwrite="True" Lines="[assembly: System.Reflection.AssemblyVersion(&quot;$(AsmVersion)&quot;)]  // Generated by build%0a[assembly: System.Reflection.AssemblyInformationalVersion(&quot;$(AsmVersion)&quot;)]  // Generated by build" />
+    <WriteLinesToFile Condition=" '$(FileVersion)' != '' " File="Properties\VersionInfo.cs" Overwrite="False" Lines="[assembly: System.Reflection.AssemblyFileVersion(&quot;$(FileVersion)&quot;)]  // Generated by build" />
+  </Target>
 </Project>

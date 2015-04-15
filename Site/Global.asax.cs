@@ -1,50 +1,126 @@
-﻿using log4net.Config;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Formatting;
-using System.Reflection;
+﻿using System;
 using System.Web;
-using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Microsoft.Practices.ServiceLocation;
+using Microsoft.Practices.Unity;
+using Microsoft.Practices.Unity.Configuration;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Tridion.Config;
+using Unity.Mvc5;
+using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Site.Areas.Core.Controllers;
 
-namespace Site
+namespace Sdl.Web.Site
 {
     public class MvcApplication : HttpApplication
     {
-        public static void RegisterGlobalFilters(GlobalFilterCollection filters)
-        {
-            filters.Add(new HandleErrorAttribute());
-        }
-
+        private static bool initialized = false;
         public static void RegisterRoutes(RouteCollection routes)
         {
-            routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-            //routes.IgnoreRoute("{*favicon}", new { favicon = @"(.*/)?favicon.ico(/.*)?" });
-            routes.IgnoreRoute("cid/{*pathInfo}");
-            //Tridion page route
+            RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+            RouteTable.Routes.IgnoreRoute("cid/{*pathInfo}");
+            RouteTable.Routes.MapMvcAttributeRoutes();
+            //Navigation JSON
             routes.MapRoute(
-               "TridionPage",
-               "{*PageId}",
-               new { controller = "Page", action = "Page" }, // Parameter defaults
-               new { pageId = @"^(.*)?$" } // Parameter constraints
-            );
+                "Core_Blank",
+                "se_blank.html",
+                new { controller = "Page", action = "Blank" }
+            ).DataTokens.Add("area", "Core");
 
+            //Navigation JSON
             routes.MapRoute(
-                name: "Default",
-                url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
-            );
-            routes.IgnoreRoute("cid/{*pathInfo}");
+                "Core_Navigation",
+                "navigation.json",
+                new { controller = "Page", action = "PageRaw" }
+            ).DataTokens.Add("area", "Core");
+
+            //Navigation JSON
+            routes.MapRoute(
+                "Core_Navigation_loc",
+                "{localization}/navigation.json",
+                new { controller = "Page", action = "PageRaw" }
+            ).DataTokens.Add("area", "Core");
+
+            //Google Site Map
+            routes.MapRoute(
+                "Core_Sitemap",
+                "sitemap.xml",
+                new { controller = "Navigation", action = "SiteMap" }
+            ).DataTokens.Add("area", "Core");
+
+            //Google Site Map
+            routes.MapRoute(
+                "Core_Sitemap_Loc",
+                "{localization}/sitemap.xml",
+                new { controller = "Navigation", action = "SiteMap" }
+            ).DataTokens.Add("area", "Core");
+        
+            //For resolving ids to urls
+            routes.MapRoute(
+               "Core_Resolve",
+               "resolve/{*itemId}",
+               new { controller = "Page", action = "Resolve" },
+               new { itemId = @"^(.*)?$" }
+            ).DataTokens.Add("area", "Core");
             
+            //Tridion Page Route
+            routes.MapRoute(
+               "Core_Page",
+               "{*pageUrl}",
+               new { controller = "Page", action = "Page" },
+               new { pageId = @"^(.*)?$" }
+            ).DataTokens.Add("area", "Core");
         }
 
         protected void Application_Start()
         {
-            AreaRegistration.RegisterAllAreas();
-            RegisterGlobalFilters(GlobalFilters.Filters);
+            InitializeDependencyInjection();
+            SiteConfiguration.StaticFileManager = (IStaticFileManager)DependencyResolver.Current.GetService(typeof(IStaticFileManager));
+            SiteConfiguration.MediaHelper = (IMediaHelper)DependencyResolver.Current.GetService(typeof(IMediaHelper));
+            SiteConfiguration.Initialize(TridionConfig.PublicationMap);
             RegisterRoutes(RouteTable.Routes);
+            AreaRegistration.RegisterAllAreas();
+            initialized = true;
+        }
+
+        protected IUnityContainer InitializeDependencyInjection()
+        {
+            var container = BuildUnityContainer();
+            DependencyResolver.SetResolver(new UnityDependencyResolver(container));
+            return container;
+        }
+
+        protected IUnityContainer BuildUnityContainer()
+        {
+            var section = (UnityConfigurationSection)System.Configuration.ConfigurationManager.GetSection("unity");
+            var container = section.Configure(new UnityContainer(), "main");
+            ServiceLocator.SetLocatorProvider(() => new UnityServiceLocator(container));
+            return container;
+        }
+
+        protected void Application_Error(object sender, EventArgs e)
+        {
+            if (Context.IsCustomErrorEnabled && initialized)
+                ShowCustomErrorPage(Server.GetLastError());
+        }
+
+        private void ShowCustomErrorPage(Exception exception)
+        {
+            HttpException httpException = exception as HttpException;
+            if (httpException == null)
+                httpException = new HttpException(500, "Internal Server Error", exception);
+
+            RouteData routeData = new RouteData();
+            Log.Error(httpException);
+            routeData.Values.Add("controller", "Page");
+            routeData.Values.Add("area", "Core");
+            routeData.Values.Add("action", "ServerError");
+            Server.ClearError();
+            IController controller = new PageController(null,null);
+            controller.Execute(new RequestContext(new HttpContextWrapper(Context), routeData));
         }
     }
 }

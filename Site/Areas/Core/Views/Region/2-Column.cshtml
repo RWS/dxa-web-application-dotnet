@@ -1,0 +1,14 @@
+﻿@model Region
+<div @Markup.Region(Model)>
+    @for (int i = 0; i < Math.Ceiling(Model.Items.Count / 2.0); i++)
+    {
+        <div class="row">
+            @for (int j = 0; j < 2 && (2 * i + j < Model.Items.Count); j++)
+            {
+            <div class="col-sm-6">
+                @ViewBag.Renderer.RenderEntity(Model.Items[2 * i+j],Html,6)
+            </div>
+            }
+        </div>
+    }
+</div>

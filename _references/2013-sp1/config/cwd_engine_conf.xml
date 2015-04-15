@@ -25,7 +25,7 @@
     </whitelist>
     <sources>
       <urls>
-        <site>http://localhost:82</site>
+        <site>http://saintjohn01.ams.dev:82</site>
       </urls>
     </sources>
   </image>

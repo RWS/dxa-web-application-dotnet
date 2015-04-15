@@ -1,0 +1,47 @@
+﻿@model ItemList
+<article class="rich-text" @Markup.Entity(Model)>
+    <div class="content">
+        @if (Model.Headline != null)
+        {
+            <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
+        }
+        @if (Model.ItemListElements.Count > 0)
+        {
+            int i = 0;
+            string accordionId = Guid.NewGuid().ToString("N");
+            <div class="panel-group responsive-accordion" id="@accordionId">
+                @foreach (Teaser element in Model.ItemListElements)
+                {
+                    string collapseId = Guid.NewGuid().ToString("N");
+                    <div class="panel panel-default" @Markup.Property(Model, "itemListElement", i++)>
+                        <div class="panel-heading" data-toggle="collapse" data-target="#@collapseId" data-parent="#@accordionId">
+                            <h4 class="panel-title" @Markup.Property(element, "Headline")>@element.Headline</h4>
+                        </div>
+                        <div id="@collapseId" class="panel-collapse collapse @(i==1?"in":"")">
+                            <div class="panel-body">
+                                @if (element.Text != null)
+                                {
+                                    <div @Markup.Property(element, "Text")>
+                                        @Html.Raw(element.Text)    
+                                    </div>
+                                }
+                                @if (element.Media != null)
+                                {
+                                    <figure @Markup.Property(element, "Media")>
+                                        @Html.Media(element.Media)
+                                    </figure>
+                                }                                    
+                                @if (element.Link.IsValidLink())
+                                {
+                                    <p @Markup.Property(element, "Link.LinkText")>
+                                        <a href="@element.Link.Url" title="@element.Link.AlternateText" class="btn btn-primary">@(element.Link.LinkText ?? Html.Resource("core.readMoreLinkText"))</a>
+                                    </p>
+                                }    
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</article>

@@ -1,0 +1,25 @@
+﻿@model NavigationLinks
+@if (Model.Items!=null && Model.Items.Count>0)
+{
+    const int maxItems = 5;
+    int start = Model.Items.Count > maxItems ? Model.Items.Count - (maxItems) + 1 : 1;
+    
+    <ol class="breadcrumb" @Markup.Entity(Model)>
+        <li>
+           <a href="@Model.Items[0].Url"><i class="fa fa-home"><span class="sr-only">@Model.Items[0].LinkText</span></i></a>
+        </li>
+        @if (start > 1)
+        {
+            <li>...</li>
+        }
+        @for (int i = start; i < Model.Items.Count - 1; i++)
+        {
+            <li><a href="@Model.Items[i].Url">@Model.Items[i].LinkText</a></li>
+        }
+        @if (Model.Items.Count>1)
+        {      
+            <li class="active">@Model.Items[Model.Items.Count-1].LinkText</li>
+        }
+        
+    </ol>
+}
