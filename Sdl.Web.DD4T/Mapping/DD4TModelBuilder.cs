@@ -740,7 +740,7 @@ namespace Sdl.Web.DD4T.Mapping
                     }
                 }
             }
-            string titlePostfix = String.Format(" {0} {1}", GetResource("core.pageTitleSeparator"), GetResource("core.pageTitlePostfix"));
+            string titlePostfix = GetResource("core.pageTitleSeparator") + GetResource("core.pageTitlePostfix");
             //if we still dont have a title, use the page title
             if (title == null)
             {
