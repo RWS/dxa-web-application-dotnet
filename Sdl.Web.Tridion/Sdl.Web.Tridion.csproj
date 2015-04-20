@@ -46,7 +46,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <ItemGroup Condition="'$(Configuration)' == 'Tridion71Release' Or '$(Configuration)' == 'Tridion71Debug'">
+  <ItemGroup>
     <Reference Include="Tridion.ContentDelivery">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.dll</HintPath>
@@ -57,20 +57,6 @@
       <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
       <Private>True</Private>
     </Reference>
-  </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)' == 'Release' Or '$(Configuration)' == 'Debug'">
-    <Reference Include="Tridion.ContentDelivery">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\latest\Tridion.ContentDelivery.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Tridion.ContentDelivery.AmbientData">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\latest\Tridion.ContentDelivery.AmbientData.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="HtmlAgilityPack">
       <HintPath>..\packages\HtmlAgilityPack.1.4.6\lib\Net45\HtmlAgilityPack.dll</HintPath>
     </Reference>

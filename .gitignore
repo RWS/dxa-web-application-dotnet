@@ -3,9 +3,5 @@ obj
 bin
 *.user
 *.suo
-Site/system/v*.*/
 packages/
-Site/ClaimStore.aspx
-mod/
-Site/Areas/GoogleAnalytics/
-Site/Areas/Search/
+web/
