@@ -7,16 +7,16 @@
         <Version Condition="'$(VERSION)' != ''">$(VERSION)</Version>
         <BuildConfiguration>Release</BuildConfiguration>
         <ProjectDirectory>$(MSBuildProjectDirectory)</ProjectDirectory>
-		<CdTestDeployFolder>\\saintjohn01.ams.dev\C$\inetpub\wwwroot\GitVersion</CdTestDeployFolder>
+        <CdTestDeployFolder>\\saintjohn01.ams.dev\C$\inetpub\wwwroot\GitVersion</CdTestDeployFolder>
         
         <!--Tools-->
         <MsBuildExe>C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe</MsBuildExe>
-	</PropertyGroup>
+  </PropertyGroup>
 
 
-	<!-- =============================================================================================================================================  -->
-	<Target Name="Build">
-		<Message Text="Start build..." Importance="high" />
+  <!-- =============================================================================================================================================  -->
+  <Target Name="Build">
+    <Message Text="Start build..." Importance="high" />
         
         <CallTarget Targets="PrepareBuild"/>
         <CallTarget Targets="PackageBuild"/>
