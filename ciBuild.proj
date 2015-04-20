@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.5">
+
+    <PropertyGroup>
+        <!-- Input parameters -->
+        <Version Condition="'$(VERSION)' == ''">0.0.0.0</Version>
+        <Version Condition="'$(VERSION)' != ''">$(VERSION)</Version>
+        <BuildConfiguration>Release</BuildConfiguration>
+        <ProjectDirectory>$(MSBuildProjectDirectory)</ProjectDirectory>
+		<CdTestDeployFolder>\\saintjohn01.ams.dev\C$\inetpub\wwwroot\GitVersion</CdTestDeployFolder>
+        
+        <!--Tools-->
+        <MsBuildExe>C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe</MsBuildExe>
+	</PropertyGroup>
+
+
+	<!-- =============================================================================================================================================  -->
+	<Target Name="Build">
+		<Message Text="Start build..." Importance="high" />
+        
+        <CallTarget Targets="PrepareBuild"/>
+        <CallTarget Targets="PackageBuild"/>
+    </Target>
+
+    <!-- =============================================================================================================================================  -->
+    <Target Name="PrepareBuild">
+        <Message Text="Preparing build..." Importance="high" />
+
+        <Exec Command="_tools\RestorePackages Site.sln" WorkingDirectory="$(ProjectDirectory)" />
+    </Target>
+
+    <!-- =============================================================================================================================================  -->
+    <Target Name="PackageBuild">
+        <Message Text="Running build commands..." Importance="high" />
+
+        <!--Build solution from cmd, otherwise it puts illegal character in '$(CdTestDeployFolder)' path-->
+        <!--<MSBuild Projects="$(ProjectDirectory)\Site\Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version);WebPublishMethod=FileSystem;DeleteExistingFiles=False;SkipExtraFilesOnServer=True;ReplaceMatchingFiles=True;publishUrl=&quot;$(CdTestDeployFolder)&quot;" Targets="WebPublish" StopOnFirstFailure="true" />-->
+        <Exec Command="&quot;$(MsBuildExe)&quot; Site\Site.csproj /t:WebPublish /p:Configuration=$(BuildConfiguration) /p:Platform=AnyCPU /p:AsmVersion=$(Version) /p:FileVersion=$(Version) /p:WebPublishMethod=FileSystem /p:DeleteExistingFiles=False /p:SkipExtraFilesOnServer=True /p:ReplaceMatchingFiles=True /p:publishUrl=&quot;$(CdTestDeployFolder)&quot;" WorkingDirectory="$(ProjectDirectory)" />
+    </Target>
+
+</Project>
