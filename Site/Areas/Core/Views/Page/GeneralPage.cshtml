@@ -1,17 +1,14 @@
 ﻿@model Sdl.Web.Common.Models.WebPage
 @{
-    bool hasLeftBar = Model.Includes.ContainsKey("Left Navigation") || Model.Regions.Keys.Contains("Left");
+    bool hasLeftBar = Model.Includes.ContainsKey("Left Navigation") || Model.Regions.ContainsKey("Left");
     int mainContainerSize = hasLeftBar ? 9 : 12;
 }
-@if (Model.Regions.ContainsKey("Hero"))
-{
-    @ViewBag.Renderer.RenderRegion(Model.Regions["Hero"], Html)
-}
+@Html.DxaRegion("Hero")
 @if (Model.Includes.ContainsKey("Content Tools"))
 {
     foreach (var region in Model.Includes["Content Tools"].Regions.Values)
     {
-        @ViewBag.Renderer.RenderRegion(region, Html)
+        @Html.DxaRegion(region)
     }
 }
 <div class="row">
@@ -22,7 +19,7 @@
         {
             foreach (var region in Model.Includes["Left Navigation"].Regions.Values)
             {
-                @ViewBag.Renderer.RenderRegion(region, Html, 3)
+                @Html.DxaRegion(region, containerSize: 3)
             }
         }
         @if (Model.Regions.ContainsKey("Left"))
@@ -32,9 +29,6 @@
     </div>
     }
     <div class="col-sm-12 col-md-@(mainContainerSize)">
-        @foreach (Region region in Model.Regions.Values)
-        {
-            @ViewBag.Renderer.RenderRegion(region, Html, mainContainerSize, new List<string>{"Hero", "Left"})
-        }
+        @Html.DxaRegions(exclude: "Hero,Left", containerSize: mainContainerSize)
     </div>
 </div>

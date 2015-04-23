@@ -5,9 +5,9 @@
         <div class="row">
             @for (int j = 0; j < 2 && (2 * i + j < Model.Items.Count); j++)
             {
-            <div class="col-sm-6">
-                @ViewBag.Renderer.RenderEntity(Model.Items[2 * i+j],Html,6)
-            </div>
+                <div class="col-sm-6">
+                    @Html.DxaEntity(Model.Items[2 * i + j], containerSize: 6)
+                </div>
             }
         </div>
     }

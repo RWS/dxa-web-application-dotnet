@@ -1,17 +1,23 @@
-﻿using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Models;
-using Sdl.Web.Mvc.Configuration;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Models;
+using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Html
 {
     /// <summary>
-    /// HtmlHelper extension methods for use in Views
+    /// <see cref="HtmlHelper"/> extension methods for use in (Razor) Views.
     /// </summary>
+    /// <remarks>
+    /// These extension methods are available on the built-in <c>@Html</c> object.
+    /// For example: <code>@Html.DxaRegions(exclude: "Logo")</code>
+    /// </remarks>
     public static class HtmlHelperExtensions
     {
         /// <summary>
@@ -311,6 +317,121 @@ namespace Sdl.Web.Mvc.Html
             return Media(helper, media, null, aspect, cssClass);
         }
 
+        #region Region/Entity rendering extension methods
+        /// <summary>
+        /// Renders a given Entity object.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="entity">The Entity to render.</param>
+        /// <param name="containerSize">TODO</param>
+        /// <returns>The rendered HTML or an empty string if <paramref name="entity"/> is <c>null</c>.</returns>
+        public static MvcHtmlString DxaEntity(this HtmlHelper htmlHelper, object entity, int containerSize = 0)
+        {
+            // TODO TSI-634: entity param should be strongly typed, but this requires a strongly type Region Model.
+            // TODO TSI-787: use RenderPartial
+            return (entity == null) ?
+                MvcHtmlString.Empty :
+                htmlHelper.ViewBag.Renderer.RenderEntity(entity, htmlHelper, containerSize);
+        }
+
+        /// <summary>
+        /// Renders all Entities in the current Region Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="containerSize">TODO</param>
+        /// <returns>The rendered HTML.</returns>
+        /// <remarks>This method will throw an exception if the current Model does not represent a Region.</remarks>
+        public static MvcHtmlString DxaEntities(this HtmlHelper htmlHelper, int containerSize = 0)
+        {
+            IRegion regionModel = (IRegion) htmlHelper.ViewData.Model;
+
+            StringBuilder resultBuilder = new StringBuilder();
+            foreach (object entity in regionModel.Items)
+            {
+                resultBuilder.Append(htmlHelper.DxaEntity(entity, containerSize));
+            }
+            return new MvcHtmlString(resultBuilder.ToString());
+        }
+
+        /// <summary>
+        /// Renders a given Region object
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="region">The Region object to render. This object determines the View that will be used.</param>
+        /// <param name="containerSize">TODO</param>
+        /// <returns>The rendered HTML or an empty string if <paramref name="region"/> is <c>null</c>.</returns>
+        public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, IRegion region, int containerSize = 0)
+        {
+            // TODO TSI-787: use RenderPartial
+            return (region == null) ? 
+                MvcHtmlString.Empty : 
+                htmlHelper.ViewBag.Renderer.RenderRegion(region, htmlHelper, containerSize);
+        }
+
+        /// <summary>
+        /// Renders a Region (of the current Page Model) with a given name.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="regionName">The name of the Region to render. This object determines the View that will be used.</param>
+        /// <param name="emptyViewName">
+        /// The name of the View to use when no Region with the given name is found in the Page Model (i.e. no Entities exist in the given Region). 
+        /// If <c>null</c> (the default) then nothing will be rendered in that case. 
+        /// </param>
+        /// <param name="containerSize">TODO</param>
+        /// <returns>The rendered HTML or an empty string if no Region with a given name is found and <paramref name="emptyViewName"/> is <c>null</c>.</returns>
+        /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
+        public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, string regionName, string emptyViewName = null, int containerSize = 0)
+        {
+            IPage pageModel = (IPage) htmlHelper.ViewData.Model;
+            IRegion region;
+            if (!pageModel.Regions.TryGetValue(regionName, out region))
+            {
+                if (emptyViewName == null)
+                {
+                    return MvcHtmlString.Empty;
+                }
+                region = new Region(regionName, emptyViewName);
+            }
+
+            return htmlHelper.DxaRegion(region, containerSize);
+        }
+
+        /// <summary>
+        /// Renders all Regions (of the current Page Model), except the ones with given names.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="exclude">The (comma separated) name(s) of the Regions to exclude. Can be <c>null</c> (the default) to render all Regions.</param>
+        /// <param name="containerSize">TODO</param>
+        /// <returns>The rendered HTML.</returns>
+        /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
+        public static MvcHtmlString DxaRegions(this HtmlHelper htmlHelper, string exclude = null, int containerSize = 0)
+        {
+            IPage pageModel = (IPage)htmlHelper.ViewData.Model;
+
+            IEnumerable<IRegion> regions;
+            if (string.IsNullOrEmpty(exclude))
+            {
+                regions = pageModel.Regions.Values;
+            }
+            else
+            {
+                string[] excludedNames = exclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                regions = pageModel.Regions.Values.Where(r => !excludedNames.Any(n => n.Equals(r.Name, StringComparison.InvariantCultureIgnoreCase)));
+            }
+
+            StringBuilder resultBuilder = new StringBuilder();
+            foreach (IRegion region in regions)
+            {
+                resultBuilder.Append(htmlHelper.DxaRegion(region, containerSize));
+            }
+
+            return new MvcHtmlString(resultBuilder.ToString());
+        }
+
+        #endregion
+
+
+        #region TODO: These are not HtmlHelper extension methods; move to another class.
         public static string GetYouTubeUrl(string videoId)
         {
             return String.Format("https://www.youtube.com/embed/{0}?version=3&enablejsapi=1", videoId);
@@ -354,5 +475,6 @@ namespace Sdl.Web.Mvc.Html
         {
             return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(url, SiteConfiguration.MediaHelper.DefaultMediaAspect, widthFactor, containerSize);
         }
+        #endregion
     }
 }

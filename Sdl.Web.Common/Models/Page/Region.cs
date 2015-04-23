@@ -16,9 +16,25 @@ namespace Sdl.Web.Common.Models
         public string Module { get; set; }
         
         
+        // TODO: do we need this public constructor?
         public Region()
         {
             Items = new List<object>();
+        }
+
+        /// <summary>
+        /// Creates an empty Region
+        /// </summary>
+        /// <param name="name">The name of the Region.</param>
+        /// <param name="viewName">The name of the View to use to render the Region.</param>
+        public Region(string name, string viewName) 
+            : this()
+        {
+            Name = name;
+            AppData = new MvcData
+            {
+                ViewName = viewName
+            };
         }
     }
 }

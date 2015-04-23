@@ -1,5 +1,2 @@
 ﻿@model Sdl.Web.Common.Models.WebPage
-@foreach (Region region in Model.Regions.Values)
-{
-    @ViewBag.Renderer.RenderRegion(region, Html)
-}
+@Html.DxaRegions()

@@ -1,8 +1,5 @@
 ﻿@model PageBase
-@if (Model.Regions.ContainsKey("Info"))
-{
-    @ViewBag.Renderer.RenderRegion(Model.Regions["Info"], Html)
-}
+@Html.DxaRegion("Info")
 <header id="page-header" class="navbar navbar-default">
     @ViewBag.Renderer.RenderIncludePageData(Model, Html)
     <div class="container-fluid page-border">
@@ -12,15 +9,9 @@
                     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                         <i class="fa fa-bars"></i>
                     </button>
-                    @if (Model.Regions.ContainsKey("Logo"))
-                    {
-                        @ViewBag.Renderer.RenderRegion(Model.Regions["Logo"], Html)
-                    }
+                    @Html.DxaRegion("Logo")
                 </div>
-                @foreach (Region region in Model.Regions.Values)
-                {
-                    @ViewBag.Renderer.RenderRegion(region, Html, 12, new List<string> {"Logo", "Info"})
-                }
+                @Html.DxaRegions(exclude: "Logo,Info", containerSize: 12)
             </div>
         </div>
     </div>

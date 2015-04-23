@@ -10,7 +10,7 @@
             @for (int j = 0; j < cols && (cols * i + j < Model.Items.Count); j++)
             {
                 <div class="col-sm-6 col-md-4">
-                    @ViewBag.Renderer.RenderEntity(Model.Items[cols * i + j], Html,12 / cols)
+                    @Html.DxaEntity(Model.Items[cols * i + j], containerSize: 12 / cols)
                 </div>
             }
         </div>
