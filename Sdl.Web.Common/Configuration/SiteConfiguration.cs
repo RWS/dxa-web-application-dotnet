@@ -1,4 +1,5 @@
-﻿using Sdl.Web.Common.Extensions;
+﻿using System.Web.UI.WebControls;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -52,25 +53,19 @@ namespace Sdl.Web.Common.Configuration
         private static readonly object LocalizationUpdateLock = new object();
         private const string SettingsType = "config";
 
-        private static readonly object ViewRegistryLock = new object();
-        private static Dictionary<string, Type> _viewModelRegistry;
-
         /// <summary>
         /// A registry of View Path -> View Model Type mappings to enable the correct View Model to be mapped for a given View
         /// </summary>
+        [Obsolete("Dropped in DXA 1.1. Use ModelTypeRegistry.GetViewModelType instead.")]
         public static Dictionary<string, Type> ViewModelRegistry
         {
             get
             {
-                if (_viewModelRegistry == null)
-                {
-                    _viewModelRegistry = new Dictionary<string, Type>();
-                }
-                return _viewModelRegistry;
+                throw new NotSupportedException("SiteConfiguration.ViewModelRegistry is dropped in DXA 1.1. Use ModelTypeRegistry.GetViewModelType instead.");
             }
             set
             {
-                _viewModelRegistry = value;
+                throw new NotSupportedException("SiteConfiguration.ViewModelRegistry is dropped in DXA 1.1.");
             }
         }
 
@@ -318,48 +313,22 @@ namespace Sdl.Web.Common.Configuration
         /// </summary>
         /// <param name="viewData">The View Data used to determine the registry key and model type</param>
         /// <param name="viewPath">The path to the view</param>
+        [Obsolete("Method is deprecated in DXA 1.1. Use ModelTypeRegistry.RegisterViewModel instead.")]
         public static void AddViewModelToRegistry(MvcData viewData, string viewPath)
         {
-            var key = GetViewModelRegistryKey(viewData);
-            if (!ViewModelRegistry.ContainsKey(key))
-            {
-                try
-                {
-                    Type type = BuildManager.GetCompiledType(viewPath);
-                    if (type.BaseType.IsGenericType)
-                    {
-                        AddViewModelToRegistry(viewData,type.BaseType.GetGenericArguments()[0]);
-                    }
-                    else
-                    {
-                        Exception ex = new Exception(String.Format("View {0} is not strongly typed. Please ensure you use the @model directive", viewPath));
-                        throw ex;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Exception e = new Exception(String.Format("Error adding view model to registry using view path {0}", viewPath), ex);
-                    throw e;
-                }
-            }
+            ModelTypeRegistry.RegisterViewModel(viewData, viewPath);
         }
 
+        [Obsolete("Method is deprecated in DXA 1.1. Use ModelTypeRegistry instead.")]
         public static string GetViewModelRegistryKey(MvcData mvcData)
         {
             return String.Format("{0}:{1}:{2}", mvcData.AreaName, mvcData.ControllerName, mvcData.ViewName);
         }
 
+        [Obsolete("Method is deprecated in DXA 1.1. Use ModelTypeRegistry.RegisterViewModel instead.")]
         public static void AddViewModelToRegistry(MvcData mvcData, Type modelType)
         {
-            lock (ViewRegistryLock)
-            {
-                var key = GetViewModelRegistryKey(mvcData);
-                if (!ViewModelRegistry.ContainsKey(key))
-                {
-                    ViewModelRegistry.Add(key, modelType);
-                    Log.Debug("Added view to View Model Registry with key {0} and type {1}", key, modelType.FullName);
-                }
-            }
+            ModelTypeRegistry.RegisterViewModel(mvcData, modelType);
         }
 
         /// <summary>

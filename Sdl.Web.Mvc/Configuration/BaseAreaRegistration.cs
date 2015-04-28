@@ -35,8 +35,8 @@ namespace Sdl.Web.Mvc.Configuration
         /// <param name="controllerName">The controller name (eg Search)</param>
         protected virtual void RegisterViewModel(string viewName, Type modelType, string controllerName = "Entity")
         {
-            var mvcData = new MvcData { AreaName = this.AreaName, ControllerName = controllerName, ViewName = viewName };
-            SiteConfiguration.AddViewModelToRegistry(mvcData, modelType);
+            var mvcData = new MvcData { AreaName = AreaName, ControllerName = controllerName, ViewName = viewName };
+            ModelTypeRegistry.RegisterViewModel(mvcData, modelType);
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Sdl.Web.Mvc.Configuration
                     var mvcData = new MvcData { AreaName = this.AreaName, ControllerName = controller, ViewName = view };
                     try
                     {
-                        SiteConfiguration.AddViewModelToRegistry(mvcData, virtualPath);
+                        ModelTypeRegistry.RegisterViewModel(mvcData, virtualPath);
                         viewCount++;
                     }
                     catch

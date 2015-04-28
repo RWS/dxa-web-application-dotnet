@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 
@@ -327,11 +330,23 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The rendered HTML or an empty string if <paramref name="entity"/> is <c>null</c>.</returns>
         public static MvcHtmlString DxaEntity(this HtmlHelper htmlHelper, object entity, int containerSize = 0)
         {
+            if (entity == null)
+            {
+                return MvcHtmlString.Empty;
+            }
+
             // TODO TSI-634: entity param should be strongly typed, but this requires a strongly type Region Model.
+            if (entity is IEntity)
+            {
+                Log.Debug("Rendering Entity [{0}] with Id '{1}' (containerSize: {2})", entity.GetType().Name, ((IEntity)entity).Id, containerSize);
+            }
+            else
+            {
+                Log.Debug("Rendering loosely typed Entity [{0}] (containerSize: {1}).", entity.GetType().Name, containerSize);
+            }
+            
             // TODO TSI-787: use RenderPartial
-            return (entity == null) ?
-                MvcHtmlString.Empty :
-                htmlHelper.ViewBag.Renderer.RenderEntity(entity, htmlHelper, containerSize);
+            return htmlHelper.ViewBag.Renderer.RenderEntity(entity, htmlHelper, containerSize);
         }
 
         /// <summary>
@@ -343,10 +358,10 @@ namespace Sdl.Web.Mvc.Html
         /// <remarks>This method will throw an exception if the current Model does not represent a Region.</remarks>
         public static MvcHtmlString DxaEntities(this HtmlHelper htmlHelper, int containerSize = 0)
         {
-            IRegion regionModel = (IRegion) htmlHelper.ViewData.Model;
+            IRegion region = (IRegion) htmlHelper.ViewData.Model;
 
             StringBuilder resultBuilder = new StringBuilder();
-            foreach (object entity in regionModel.Items)
+            foreach (object entity in region.Items)
             {
                 resultBuilder.Append(htmlHelper.DxaEntity(entity, containerSize));
             }
@@ -362,6 +377,8 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The rendered HTML or an empty string if <paramref name="region"/> is <c>null</c>.</returns>
         public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, IRegion region, int containerSize = 0)
         {
+            Log.Debug("Rendering Region '{0}' (containerSize: {1})", region.Name, containerSize);
+
             // TODO TSI-787: use RenderPartial
             return (region == null) ? 
                 MvcHtmlString.Empty : 
@@ -382,10 +399,12 @@ namespace Sdl.Web.Mvc.Html
         /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
         public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, string regionName, string emptyViewName = null, int containerSize = 0)
         {
-            IPage pageModel = (IPage) htmlHelper.ViewData.Model;
+            // TODO TSI-779: support nested Regions
+            IPage page = (IPage) htmlHelper.ViewData.Model;
             IRegion region;
-            if (!pageModel.Regions.TryGetValue(regionName, out region))
+            if (!page.Regions.TryGetValue(regionName, out region))
             {
+                Log.Debug("Region '{0}' not found. Using empy View '{1}'.", regionName, emptyViewName);
                 if (emptyViewName == null)
                 {
                     return MvcHtmlString.Empty;
@@ -406,17 +425,18 @@ namespace Sdl.Web.Mvc.Html
         /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
         public static MvcHtmlString DxaRegions(this HtmlHelper htmlHelper, string exclude = null, int containerSize = 0)
         {
-            IPage pageModel = (IPage)htmlHelper.ViewData.Model;
+            // TODO TSI-779: support nested Regions
+            IPage page = (IPage)htmlHelper.ViewData.Model;
 
             IEnumerable<IRegion> regions;
             if (string.IsNullOrEmpty(exclude))
             {
-                regions = pageModel.Regions.Values;
+                regions = page.Regions.Values;
             }
             else
             {
                 string[] excludedNames = exclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                regions = pageModel.Regions.Values.Where(r => !excludedNames.Any(n => n.Equals(r.Name, StringComparison.InvariantCultureIgnoreCase)));
+                regions = page.Regions.Values.Where(r => !excludedNames.Any(n => n.Equals(r.Name, StringComparison.InvariantCultureIgnoreCase)));
             }
 
             StringBuilder resultBuilder = new StringBuilder();
@@ -430,6 +450,105 @@ namespace Sdl.Web.Mvc.Html
 
         #endregion
 
+        #region Region/Entity/Propery semantic markup extension methods
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for the current Region Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <returns>The HTML/RDFa attributes for the Region. These should be included in an HTML start tag.</returns>
+        /// <remarks>This method will throw an exception if the current Model does not represent a Region.</remarks>
+        public static MvcHtmlString DxaRegionMarkup(this HtmlHelper htmlHelper)
+        {
+            IRegion region = (IRegion) htmlHelper.ViewData.Model;
+            return htmlHelper.DxaRegionMarkup(region);
+        }
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for a given Region Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="region">The Region object to generate semantic markup for.</param>
+        /// <returns>The HTML/RDFa attributes for the Region. These should be included in an HTML start tag.</returns>
+        public static MvcHtmlString DxaRegionMarkup(this HtmlHelper htmlHelper, IRegion region)
+        {
+            return Markup.Region(region);
+        }
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for the current Entity Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <returns>The HTML/RDFa attributes for the Entity. These should be included in an HTML start tag.</returns>
+        /// <remarks>This method will throw an exception if the current Model does not represent an Entity.</remarks>
+        public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper)
+        {
+            IEntity entity = (IEntity) htmlHelper.ViewData.Model;
+            return htmlHelper.DxaEntityMarkup(entity);
+        }
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for a given Entity Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="entity">The Entity object to generate semantic markup for.</param>
+        /// <returns>The HTML/RDFa attributes for the Entity. These should be included in an HTML start tag.</returns>
+        public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper, IEntity entity)
+        {
+            return Markup.Entity(entity);
+        }
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for a given property of the current Entity Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="propertyName">The name of the property.</param>
+        /// <param name="index">The index of the property value (for multi-value properties).</param>
+        /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
+        public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, string propertyName, int index = 0)
+        {
+            // TODO: autogenerate index (?)
+            IEntity entity = (IEntity) htmlHelper.ViewData.Model;
+            return Markup.Property(entity, propertyName, index);
+        }
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for a given property of a given Entity Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="entity">The Entity Model.</param>
+        /// <param name="propertyName">The name of the property.</param>
+        /// <param name="index">The index of the property value (for multi-value properties).</param>
+        /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
+        public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, IEntity entity, string propertyName, int index = 0)
+        {
+            return Markup.Property(entity, propertyName, index);
+        }
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for a given property.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="propertyExpression">A parameterless lambda expression which evaluates to the property.</param>
+        /// <param name="index">The index of the property value (for multi-value properties).</param>
+        /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
+        public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, Expression<Func<object>> propertyExpression, int index = 0)
+        {
+            // TODO: autogenerate index (?)
+            MemberExpression memberExpression = propertyExpression.Body as MemberExpression;
+            if (memberExpression == null)
+            {
+                throw new DxaException(
+                    string.Format("Unexpected expression type provided to DxaPropertyMarkup: {0}. Expecting a single Entity property.", propertyExpression.Body.GetType().Name)
+                    );
+            }
+
+            // TODO: obtain the Entity from the propertyExpression
+            IEntity entity = (IEntity) htmlHelper.ViewData.Model;
+
+            return Markup.Property(entity, memberExpression.Member, index);
+        }
+        #endregion
 
         #region TODO: These are not HtmlHelper extension methods; move to another class.
         public static string GetYouTubeUrl(string videoId)

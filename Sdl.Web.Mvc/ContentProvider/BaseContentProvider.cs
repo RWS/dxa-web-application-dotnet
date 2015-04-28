@@ -98,13 +98,7 @@ namespace Sdl.Web.Mvc.ContentProvider
             MvcData viewData = ContentResolver.ResolveMvcData(data);
             if (viewModeltype == null)
             {
-                var key = SiteConfiguration.GetViewModelRegistryKey(viewData);
-                viewModeltype = SiteConfiguration.ViewModelRegistry.ContainsKey(key) ? SiteConfiguration.ViewModelRegistry[key] : null;
-                if (viewModeltype == null)
-                {
-                    var ex = new Exception(String.Format("Cannot find entry in ViewModelRegistry with key {0}. Check that you have registered this view in the {1} area registration", key, viewData.AreaName));
-                    throw ex;
-                }
+                viewModeltype = ModelTypeRegistry.GetViewModelType(viewData);
             }
             if (data.GetType() == viewModeltype)
             {

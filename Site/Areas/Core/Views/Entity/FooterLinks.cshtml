@@ -1,16 +1,16 @@
 ﻿@model LinkList<Link>
-<ul class="list-inline text-center" @Markup.Entity(Model)>
+<ul class="list-inline text-center" @Html.DxaEntityMarkup()>
 	@if (Model.Headline!=null)
     {
         <li>
-            <small @Markup.Property(Model, "Headline")>@Model.Headline</small>
+            <small @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</small>
         </li>         
     }
     @{ int index = 0; }
     @foreach(var link in Model.Links)
     {
         <li>
-            <small @Markup.Property(Model, "Links", index)><a href="@link.Url" title="@link.AlternateText">@link.LinkText</a></small>
+            <small @Html.DxaPropertyMarkup(() => Model.Links, index)><a href="@link.Url" title="@link.AlternateText">@link.LinkText</a></small>
         </li>
         index++;
     }

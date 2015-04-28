@@ -3,11 +3,11 @@
 {
     @(Model.Id + "_" + index)
 }
-<article class="rich-text" @Markup.Entity(Model)>
+<article class="rich-text" @Html.DxaEntityMarkup()>
     <div class="content">
         @if (Model.Headline != null)
         {
-            <h1 @Markup.Property(Model, "Headline")>@Model.Headline</h1>
+            <h1 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
         }
         @if (Model.ItemListElements.Count > 0)
         {
@@ -29,7 +29,7 @@
                         @foreach (Teaser element in Model.ItemListElements)
                         {
                             <li class="@(i==0 ? "active" : String.Empty)">
-                                <a href="#@TabId(i++)" data-toggle="tab" @Markup.Property(element, "Headline")>@element.Headline</a>
+                                <a href="#@TabId(i++)" data-toggle="tab" @Html.DxaPropertyMarkup(element, "Headline")>@element.Headline</a>
                             </li>
                         }
                     </ul>
@@ -38,19 +38,19 @@
                         @{ i = 0; }
                         @foreach (Teaser element in Model.ItemListElements)
                         {
-                            <div class="tab-pane @(i==0 ? "active" : String.Empty)" id="@TabId(i)" @Markup.Property(Model, "ItemListElements", i++)>
-                                <div @Markup.Property(element, "Text")>
+                            <div class="tab-pane @(i==0 ? "active" : String.Empty)" id="@TabId(i)" @Html.DxaPropertyMarkup(() => Model.ItemListElements, i++)>
+                                <div @Html.DxaPropertyMarkup(element, "Text")>
                                     @Html.Raw(element.Text)
                                 </div>
                                 @if (element.Media != null)
                                 {
-                                    <figure @Markup.Property(element, "Media")>
+                                    <figure @Html.DxaPropertyMarkup(element, "Media")>
                                         @Html.Media(element.Media)
                                     </figure>
                                 }
                                 @if (element.Link.IsValidLink())
                                 {
-                                    <p @Markup.Property(element, "Link.LinkText")>
+                                    <p @Html.DxaPropertyMarkup(element, "Link")>
                                         <a href="@element.Link.Url" title="@element.Link.AlternateText" class="btn btn-primary">@(element.Link.LinkText ?? Html.Resource("core.readMoreLinkText"))</a>
                                     </p>
                                 }

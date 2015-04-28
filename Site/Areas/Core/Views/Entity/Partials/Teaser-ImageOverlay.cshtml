@@ -8,10 +8,10 @@
         imageAspect = WebRequestContext.ScreenWidth == ScreenWidth.ExtraSmall ? 2 : (WebRequestContext.ScreenWidth == ScreenWidth.Small ? 2.5 : 3.3);
     }
 }
-<div @Markup.Entity(Model)>
+<div @Html.DxaEntityMarkup()>
     @if (Model.Media != null)
     {
-        <span @Markup.Property(Model, "Media")>
+        <span @Html.DxaPropertyMarkup(() => Model.Media)>
             @if (imageAspect == 0)
             {
                 @Html.Media(Model.Media, "100%")
@@ -32,18 +32,18 @@
         <div class="overlay overlay-tl ribbon">
         @if(!String.IsNullOrEmpty(Model.Headline))
         {
-            <h2 @Markup.Property(Model, "Headline")>@Model.Headline</h2>
+            <h2 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h2>
         }
         @if(!String.IsNullOrEmpty(Model.Text))
         {
-            <div @Markup.Property(Model, "Text")>@Html.Raw(Model.Text.Replace(". ", "<br/>"))</div>
+            <div @Html.DxaPropertyMarkup(() => Model.Text)>@Html.Raw(Model.Text.Replace(". ", "<br/>"))</div>
         }
         </div>
     }
     @if (Model.Link.IsLinkWithText())
     {
         <div class="carousel-caption">
-            <p><a href="@Model.Link.Url" title="@Model.Link.AlternateText" class="btn btn-primary" @Markup.Property(Model, "Link")>@Model.Link.LinkText</a></p>
+            <p><a href="@Model.Link.Url" title="@Model.Link.AlternateText" class="btn btn-primary" @Html.DxaPropertyMarkup(() => Model.Link)>@Model.Link.LinkText</a></p>
         </div>
     }
 </div>

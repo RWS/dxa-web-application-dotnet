@@ -277,10 +277,10 @@ namespace Sdl.Web.Mvc.Controllers
             }
         }
 
+        [Obsolete("Method is deprecated in DXA 1.1.")]
         protected virtual Type GetViewType(MvcData viewData)
         {
-            var key = SiteConfiguration.GetViewModelRegistryKey(viewData);
-            return SiteConfiguration.ViewModelRegistry.ContainsKey(key) ? SiteConfiguration.ViewModelRegistry[key] : null;
+            return ModelTypeRegistry.GetViewModelType(viewData);
         }
 
         protected virtual MvcData GetViewData(object sourceModel)
