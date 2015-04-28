@@ -33,6 +33,8 @@
     <Target Name="PackageBuild">
         <Message Text="Running build commands..." Importance="high" />
 
+        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.DD4T\Sdl.Web.DD4T.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
+      
         <!--Build solution from cmd, otherwise it puts illegal character in '$(CdTestDeployFolder)' path-->
         <!--<MSBuild Projects="$(ProjectDirectory)\Site\Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version);WebPublishMethod=FileSystem;DeleteExistingFiles=False;SkipExtraFilesOnServer=True;ReplaceMatchingFiles=True;publishUrl=&quot;$(CdTestDeployFolder)&quot;" Targets="WebPublish" StopOnFirstFailure="true" />-->
         <Exec Command="&quot;$(MsBuildExe)&quot; Site\Site.csproj /t:WebPublish /p:Configuration=$(BuildConfiguration) /p:Platform=AnyCPU /p:AsmVersion=$(Version) /p:FileVersion=$(Version) /p:WebPublishMethod=FileSystem /p:DeleteExistingFiles=False /p:SkipExtraFilesOnServer=True /p:ReplaceMatchingFiles=True /p:publishUrl=&quot;$(CdTestDeployFolder)&quot;" WorkingDirectory="$(ProjectDirectory)" />
