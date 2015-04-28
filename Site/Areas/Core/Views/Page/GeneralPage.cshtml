@@ -1,4 +1,5 @@
-﻿@model Sdl.Web.Common.Models.WebPage
+﻿@using System.ComponentModel
+@model Sdl.Web.Common.Models.WebPage
 @{
     bool hasLeftBar = Model.Includes.ContainsKey("Left Navigation") || Model.Regions.ContainsKey("Left");
     int mainContainerSize = hasLeftBar ? 9 : 12;
@@ -22,10 +23,7 @@
                 @Html.DxaRegion(region, containerSize: 3)
             }
         }
-        @if (Model.Regions.ContainsKey("Left"))
-        {
-            @ViewBag.Renderer.RenderEntity(Model.Regions["Left"], Html, 3)
-        }
+        @Html.DxaRegion("Left", containerSize: 3)
     </div>
     }
     <div class="col-sm-12 col-md-@(mainContainerSize)">

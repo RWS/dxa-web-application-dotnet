@@ -450,7 +450,29 @@ namespace Sdl.Web.Mvc.Html
 
         #endregion
 
-        #region Region/Entity/Propery semantic markup extension methods
+        #region Semantic markup extension methods
+
+        /// <summary>
+        /// Generates XPM markup for the current Page Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <returns>The XPM markup for the Page.</returns>
+        /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
+        public static MvcHtmlString DxaPageMarkup(this HtmlHelper htmlHelper)
+        {
+            // TODO TSI-776: this method should output "semantic" attributes on the HTML element representing the Page like we do for DxaRegionMarkup, DxaEntityMarkup and DxaPropertyMarkup
+            if (!WebRequestContext.Localization.IsStaging)
+            {
+                return MvcHtmlString.Empty;
+            }
+
+            IPage page = (IPage) htmlHelper.ViewData.Model;
+            if (!page.PageData.ContainsKey("CmsUrl"))
+            {
+                page.PageData.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
+            }
+            return new MvcHtmlString(Tridion.Markup.TridionMarkup.PageMarkup(page.PageData));
+        }
 
         /// <summary>
         /// Generates semantic markup (HTML/RDFa attributes) for the current Region Model.

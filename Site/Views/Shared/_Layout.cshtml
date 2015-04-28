@@ -49,9 +49,6 @@
     {
         <script src="@Url.VersionedContent("/assets/scripts/xpm.js")"></script>
     }
-    @if (ViewBag.Renderer!=null)
-    {
-        @ViewBag.Renderer.RenderPageData(Model, Html)
-    }
+    @Html.DxaPageMarkup()
 </body>
 </html>
