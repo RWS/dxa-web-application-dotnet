@@ -48,12 +48,12 @@ namespace Sdl.Web.Site
             routes.MapRoute(
                 "Core_Sitemap",
                 "sitemap.xml",
-                new { controller = "Navigation", action = "SiteMap" }
+                new { controller = "Navigation", action = "SiteMapXml" }
             ).DataTokens.Add("area", "Core");
             routes.MapRoute(
                 "Core_Sitemap_Loc",
                 "{localization}/sitemap.xml",
-                new { controller = "Navigation", action = "SiteMap" }
+                new { controller = "Navigation", action = "SiteMapXml" }
             ).DataTokens.Add("area", "Core");
 
             // For resolving ids to urls

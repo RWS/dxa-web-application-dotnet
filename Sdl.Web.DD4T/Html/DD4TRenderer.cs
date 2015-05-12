@@ -66,7 +66,7 @@ namespace Sdl.Web.DD4T.Html
         /// <summary>
         /// Render an Region
         /// </summary>
-        /// <param name="region">The Region object</param>
+        /// <param name="region">The Region Model</param>
         /// <param name="helper">The HTML Helper</param>
         /// <param name="containerSize">The size of the containing element (in grid units)</param>
         /// <param name="excludedItems">A list of view names, if the Region maps to one of these, it is skipped.</param>
@@ -95,7 +95,7 @@ namespace Sdl.Web.DD4T.Html
         /// <summary>
         /// Render additional XPM page markup
         /// </summary>
-        /// <param name="page">The DD4T Page object</param>
+        /// <param name="page">The Page Model</param>
         /// <param name="helper">Html Helper</param>
         /// <returns>The page markup</returns>
         public override MvcHtmlString RenderPageData(PageModel page, HtmlHelper helper)
@@ -114,7 +114,7 @@ namespace Sdl.Web.DD4T.Html
         /// <summary>
         /// Render additional XPM include page markup
         /// </summary>
-        /// <param name="page">The DD4T include Page object</param>
+        /// <param name="page">The include Page Model</param>
         /// <param name="helper">Html Helper</param>
         /// <returns>The include page markup</returns>
         public override MvcHtmlString RenderIncludePageData(PageModel page, HtmlHelper helper)

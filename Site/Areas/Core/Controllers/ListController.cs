@@ -28,9 +28,9 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
             return View(entity.MvcData.ViewName, model);
         }
 
-        public override object EnrichModel(object sourceModel)
+        public override ViewModel EnrichModel(ViewModel sourceModel)
         {
-            var model = base.ProcessModel(sourceModel) as ContentList<Teaser>;
+            ContentList<Teaser> model = base.EnrichModel(sourceModel) as ContentList<Teaser>;
             if (model != null)
             {
                 if (model.ItemListElements.Count == 0)

@@ -50,7 +50,7 @@ namespace Sdl.Web.DD4T.Mapping
         }
 
         //TODO - to get DCP content as object
-        public override object GetEntityModel(string id)
+        public override EntityModel GetEntityModel(string id)
         {
             throw new NotImplementedException("This feature will be implemented in a future release");
         }
@@ -130,27 +130,27 @@ namespace Sdl.Web.DD4T.Mapping
             return res;
         }
 
-        protected override List<object> GetIncludesFromModel(object model, ModelType modelType)
+        protected override List<PageModel> GetIncludesFromModel(object model)
         {
-            List<object> res = new List<object>();
-            if (modelType == ModelType.Page)
+            List<PageModel> result = new List<PageModel>();
+            if (model is IPage)
             {
-                var page = (IPage)model;
-                var bits = page.PageTemplate.Id.Split('-');
-                var includes = SemanticMapping.GetIncludes(bits[1], WebRequestContext.Localization);
+                IPage page = (IPage)model;
+                string[] bits = page.PageTemplate.Id.Split('-');
+                List<string> includes = SemanticMapping.GetIncludes(bits[1], WebRequestContext.Localization);
                 if (includes != null)
                 {
-                    foreach (var include in includes)
+                    foreach (string include in includes)
                     {
-                        var item = GetPageModel(SiteConfiguration.LocalizeUrl(include, WebRequestContext.Localization));
+                        PageModel item = GetPageModel(SiteConfiguration.LocalizeUrl(include, WebRequestContext.Localization), addIncludes: false);
                         if (item != null)
                         {
-                            res.Add(item);
+                            result.Add(item);
                         }
                     }
                 }
             }
-            return res;
+            return result;
         }
     }
 }

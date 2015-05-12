@@ -322,7 +322,7 @@ namespace Sdl.Web.Mvc.Html
 
         #region Region/Entity rendering extension methods
         /// <summary>
-        /// Renders a given Entity object.
+        /// Renders a given Entity Model.
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
         /// <param name="entity">The Entity to render.</param>
@@ -361,10 +361,10 @@ namespace Sdl.Web.Mvc.Html
         }
 
         /// <summary>
-        /// Renders a given Region object
+        /// Renders a given Region Model
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
-        /// <param name="region">The Region object to render. This object determines the View that will be used.</param>
+        /// <param name="region">The Region Model to render. This object determines the View that will be used.</param>
         /// <param name="containerSize">TODO</param>
         /// <returns>The rendered HTML or an empty string if <paramref name="region"/> is <c>null</c>.</returns>
         public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, RegionModel region, int containerSize = 0)
@@ -482,7 +482,7 @@ namespace Sdl.Web.Mvc.Html
         /// Generates semantic markup (HTML/RDFa attributes) for a given Region Model.
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
-        /// <param name="region">The Region object to generate semantic markup for.</param>
+        /// <param name="region">The Region Model to generate semantic markup for.</param>
         /// <returns>The HTML/RDFa attributes for the Region. These should be included in an HTML start tag.</returns>
         public static MvcHtmlString DxaRegionMarkup(this HtmlHelper htmlHelper, RegionModel region)
         {
@@ -505,7 +505,7 @@ namespace Sdl.Web.Mvc.Html
         /// Generates semantic markup (HTML/RDFa attributes) for a given Entity Model.
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
-        /// <param name="entity">The Entity object to generate semantic markup for.</param>
+        /// <param name="entity">The Entity Model to generate semantic markup for.</param>
         /// <returns>The HTML/RDFa attributes for the Entity. These should be included in an HTML start tag.</returns>
         public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper, EntityModel entity)
         {
@@ -521,7 +521,7 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
         public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, string propertyName, int index = 0)
         {
-            // TODO: autogenerate index (?)
+            // TODO TSI-777: autogenerate index (?)
             EntityModel entity = (EntityModel) htmlHelper.ViewData.Model;
             return Markup.RenderPropertyAttributes(entity, propertyName, index);
         }
@@ -543,12 +543,12 @@ namespace Sdl.Web.Mvc.Html
         /// Generates semantic markup (HTML/RDFa attributes) for a given property.
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
-        /// <param name="propertyExpression">A parameterless lambda expression which evaluates to the property.</param>
+        /// <param name="propertyExpression">A parameterless lambda expression which evaluates to a property of the current Entity Model.</param>
         /// <param name="index">The index of the property value (for multi-value properties).</param>
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
         public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, Expression<Func<object>> propertyExpression, int index = 0)
         {
-            // TODO: autogenerate index (?)
+            // TODO TSI-777: autogenerate index (?)
             MemberExpression memberExpression = propertyExpression.Body as MemberExpression;
             if (memberExpression == null)
             {
@@ -557,7 +557,7 @@ namespace Sdl.Web.Mvc.Html
                     );
             }
 
-            // TODO: obtain the Entity Model from the propertyExpression
+            // TODO TSI-777: obtain the Entity Model from the propertyExpression
             EntityModel entity = (EntityModel) htmlHelper.ViewData.Model;
 
             return Markup.RenderPropertyAttributes(entity, memberExpression.Member, index);

@@ -40,7 +40,7 @@ namespace Sdl.Web.Mvc.Controllers
         {
             ModelType = ModelType.Page;
             bool addIncludes = ViewBag.AddIncludes ?? true; 
-            PageModel page = (PageModel) ContentProvider.GetPageModel(pageUrl, addIncludes); // TODO TSI-634: GetPageModel should return Page
+            PageModel page = ContentProvider.GetPageModel(pageUrl, addIncludes); 
             if (page == null)
             {
                 return NotFound();
@@ -81,7 +81,7 @@ namespace Sdl.Web.Mvc.Controllers
         [FormatData]
         public virtual ActionResult NotFound()
         {
-            PageModel page = (PageModel)ContentProvider.GetPageModel(WebRequestContext.Localization.Path + "/error-404"); // TODO TSI-634: GetPageModel should return Page
+            PageModel page = ContentProvider.GetPageModel(WebRequestContext.Localization.Path + "/error-404"); 
             if (page == null)
             {
                 throw new HttpException(404, "Page Not Found");
@@ -133,29 +133,35 @@ namespace Sdl.Web.Mvc.Controllers
         /// <param name="containerSize">The size (in grid units) of the container the navigation element is in</param>
         /// <returns></returns>
         [HandleSectionError(View = "SectionError")]
-        public virtual ActionResult Navigation(object entity, string navType, int containerSize = 0)
+        public virtual ActionResult Navigation(EntityModel entity, string navType, int containerSize = 0)
         {
             ModelType = ModelType.Entity;
-            var viewData = GetViewData(entity);
+            MvcData viewData = GetViewData(entity);
             SetupViewData(containerSize, viewData);
-            var model = ProcessNavigation(entity, navType) ?? entity;
+            EntityModel model = ProcessNavigation(entity, navType) ?? entity;
+            return View(viewData.ViewName, model);
+        }
+
+        /// <summary>
+        /// Populate and render a site map
+        /// </summary>
+        /// <param name="entity">The sitemap entity</param>
+        /// <returns>Rendered site map</returns>
+        public virtual ActionResult SiteMap(SitemapItem entity)
+        {
+            SitemapItem model = ContentProvider.GetNavigationModel(SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization));
+            MvcData viewData = GetViewData(entity);
+            SetupViewData(0, viewData);
             return View(viewData.ViewName, model);
         }
 
         /// <summary>
         /// Populate and render an XML site map
         /// </summary>
-        /// <param name="entity">The sitemap entity</param>
-        /// <returns>Rendered XML sitemap</returns>
-        public virtual ActionResult SiteMap(object entity=null)
+        /// <returns>Rendered XML site map</returns>
+        public virtual ActionResult SiteMapXml()
         {
-            var model = ContentProvider.GetNavigationModel(SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization));
-            var viewData = GetViewData(entity);
-            if (viewData.ViewName != null)
-            {
-                SetupViewData(0, viewData);
-                return View(viewData.ViewName, model);
-            }
+            SitemapItem model = ContentProvider.GetNavigationModel(SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization));
             return View("SiteMapXml", model);
         }
 
@@ -187,33 +193,18 @@ namespace Sdl.Web.Mvc.Controllers
         /// </summary>
         /// <param name="model">The model which you wish to add data to</param>
         /// <returns>A fully populated view model combining CMS content with other data</returns>
-        public virtual object EnrichModel(object model)
+        public virtual ViewModel EnrichModel(ViewModel model)
         {
-            // TODO TSI-634: This should be more stongly typed (ViewModel instead of object), but this was part of the V1.0 (semi-)public API
-
             //Check if an exception was generated when creating the model, so now is the time to throw it
             if (model is ExceptionEntity)
             {
                 throw new Exception(((ExceptionEntity)model).Error);
             }
-            return ProcessModel(model);
-        }
-
-        /// <summary>
-        /// This is the method to override if you need to add custom model population logic, first calling the base class and then adding your own logic
-        /// </summary>
-        /// <param name="sourceModel">The model to process</param>
-        /// <returns>A processed view model</returns>
-        protected virtual object ProcessModel(object sourceModel)
-        {
-            // TODO TSI-634: This should be more stongly typed (ViewModel instead of object), but this was part of the V1.0 (semi-)public API
-
-            //For backwards compatiblity we call the obsolete ProcessModel method, as this is what people creating
-            //custom controllers based on v1.0 API will have overridden
 #pragma warning disable 618
-            return ProcessModel(sourceModel, sourceModel.GetType()) as ViewModel;
+            return (ViewModel) ProcessModel(model, model.GetType()); // To support legacy overrides
 #pragma warning restore 618
         }
+
         
         /// <summary>
         /// This is the method to override if you need to add custom model population logic, first calling the base class and then adding your own logic
@@ -221,20 +212,18 @@ namespace Sdl.Web.Mvc.Controllers
         /// <param name="sourceModel">The model to process</param>
         /// <param name="type">The type of view model required</param>
         /// <returns>A processed view model</returns>
-        [Obsolete("Use ProcessModel(ViewModel model) instead. Model mapping now occurs before entity controller actions so there is no need for a type parameter.")]
+        [Obsolete("Deprecated in DXA 1.1. Override EnrichModel instead.")]
         protected virtual object ProcessModel(object sourceModel, Type type)
         {
-            // TODO TSI-634: This should be more stongly typed (ViewModel instead of object), but this was part of the V1.0 (semi-)public API
+            // NOTE: Intentionally loosely typed for backwards compatibility; this was part of the V1.0 (semi-)public API
 
             return sourceModel;
         }
 
-        protected virtual object ProcessNavigation(object sourceModel, string navType)
+        protected virtual EntityModel ProcessNavigation(EntityModel sourceModel, string navType)
         {
-            // TODO TSI-634: This should be more stongly typed (ViewModel instead of object), but this was part of the V1.0 (semi-)public API
-
             string navigationUrl = SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization);
-            NavigationLinks nav = ProcessModel(sourceModel) as NavigationLinks;
+            NavigationLinks nav = EnrichModel(sourceModel) as NavigationLinks; 
             NavigationLinks links = new NavigationLinks();
             switch (navType)
             {
@@ -294,14 +283,9 @@ namespace Sdl.Web.Mvc.Controllers
             return ModelTypeRegistry.GetViewModelType(viewData);
         }
 
-        protected virtual MvcData GetViewData(object sourceModel)
+        protected virtual MvcData GetViewData(ViewModel viewModel)
         {
-            ViewModel viewModel = sourceModel as ViewModel;
-            if (viewModel != null)
-            {
-                return viewModel.MvcData;
-            }
-            return ContentProvider.ContentResolver.ResolveMvcData(sourceModel);
+            return viewModel == null ? null : viewModel.MvcData;
         }
 
         protected virtual T GetRequestParameter<T>(string name)

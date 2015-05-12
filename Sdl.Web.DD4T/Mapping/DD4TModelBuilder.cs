@@ -2,8 +2,10 @@
 using DD4T.ContentModel.Factories;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Common.Models.Common;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Config;
 using System;
@@ -35,16 +37,16 @@ namespace Sdl.Web.DD4T.Mapping
             _contentResolver = contentResolver;
         }
 
-        public override object Create(object sourceEntity, Type type, List<object> includes = null, MvcData mvcData = null)
+        public override ViewModel Create(object sourceEntity, Type type, List<PageModel> includes = null, MvcData mvcData = null)
         {
             if (sourceEntity is IPage)
             {
                 return CreatePage((IPage) sourceEntity, type, includes, mvcData);
             }
-            return CreateEntity(sourceEntity, type, includes, mvcData);
+            return CreateEntity(sourceEntity, type, mvcData);
         }
 
-        protected virtual object CreateEntity(object sourceEntity, Type type, List<object> includes = null, MvcData mvcData = null)
+        protected virtual EntityModel CreateEntity(object sourceEntity, Type type, MvcData mvcData = null)
         {
             IComponent component = sourceEntity as IComponent;
             Dictionary<string, string> entityData;
@@ -73,14 +75,10 @@ namespace Sdl.Web.DD4T.Mapping
                 mapData.Meta = component.MetadataFields;
                 mapData.TargetType = type;
                 mapData.SourceEntity = component;
-                object model = CreateModelFromMapData(mapData);
-                if (model is EntityModel)
-                {
-                    EntityModel entity = (EntityModel)model;
-                    entity.XpmMetadata = entityData;
-                    entity.Id = component.Id.Split('-')[1];
-                    entity.MvcData = mvcData;
-                }
+                EntityModel model = CreateModelFromMapData(mapData);
+                model.XpmMetadata = entityData;
+                model.Id = component.Id.Split('-')[1];
+                model.MvcData = mvcData;
                 if (model is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
                 {
                     MediaItem mediaItem = (MediaItem)model;
@@ -95,9 +93,9 @@ namespace Sdl.Web.DD4T.Mapping
             return null;
         }
 
-        protected virtual object CreateModelFromMapData(MappingData mapData)
+        protected virtual EntityModel CreateModelFromMapData(MappingData mapData)
         {
-            object model = Activator.CreateInstance(mapData.TargetType);
+            EntityModel model = (EntityModel) Activator.CreateInstance(mapData.TargetType);
             Dictionary<string, string> propertyData = new Dictionary<string, string>();
             Dictionary<string, List<SemanticProperty>> propertySemantics = FilterPropertySematicsByEntity(LoadPropertySemantics(mapData.TargetType),mapData);
             foreach (PropertyInfo pi in mapData.TargetType.GetProperties())
@@ -576,7 +574,8 @@ namespace Sdl.Web.DD4T.Mapping
             return components.Select(c => new Download { Url = c.Multimedia.Url, FileName = c.Multimedia.FileName, FileSize = c.Multimedia.Size, MimeType = c.Multimedia.MimeType, Description = (c.MetadataFields.ContainsKey("description") ? c.MetadataFields["description"].Value : null) }).ToList();
         }
 
-        private List<T> GetCompLinks<T>(IEnumerable<IComponent> components)
+        private List<T> GetCompLinks<T>(IEnumerable<IComponent> components) 
+            where T: EntityModel
         {
             List<T> list = new List<T>();
             foreach (var comp in components)
@@ -590,6 +589,7 @@ namespace Sdl.Web.DD4T.Mapping
         /// Called via reflection in <see cref="GetMultiComponentLinks(IEnumerable{IComponent}, Type, bool)"/>.
         /// </remarks>
         private T GetCompLink<T>(IEnumerable<IComponent> components)
+            where T: EntityModel
         {
             return GetCompLinks<T>(components)[0];
         }
@@ -644,7 +644,7 @@ namespace Sdl.Web.DD4T.Mapping
 
         private ResourceProvider _resourceProvider;
 
-        protected virtual PageModel CreatePage(IPage page, Type type, List<object> includes, MvcData mvcData = null)
+        protected virtual PageModel CreatePage(IPage page, Type type, List<PageModel> includes, MvcData mvcData = null)
         {
             PageModel model = new PageModel(page.Id.Split('-')[1]);
             bool isInclude = false;
@@ -667,21 +667,34 @@ namespace Sdl.Web.DD4T.Mapping
                     }
 
                     MvcData entityMvcData = _contentResolver.ResolveMvcData(cp);
-                    Type entityType = ModelTypeRegistry.GetViewModelType(entityMvcData);
-                    EntityModel entity = (EntityModel)CreateEntity(cp, entityType, includes, entityMvcData);
+
+                    EntityModel entity;
+                    try
+                    {
+                        Type entityType = ModelTypeRegistry.GetViewModelType(entityMvcData);
+                        entity = CreateEntity(cp, entityType, entityMvcData);
+                    }
+                    catch (Exception ex)
+                    {
+                        //if there is a problem mapping the item, we replace it with an exception entity
+                        //and carry on processing - this should not cause a failure in the rendering of
+                        //the page as a whole
+                        Log.Error(ex);
+                        entity = new ExceptionEntity
+                        {
+                            Error = ex.Message,
+                            MvcData = entityMvcData // TODO TSI-634: The regular View won't expect an ExceptionEntity model (?)
+                        };
+                    }
 
                     model.Regions[region.Name].Entities.Add(entity);
                 }
             }
             if (!isInclude)
             {
-                foreach (object include in includes)
+                foreach (PageModel include in includes)
                 {
-                    if (include is PageModel)
-                    {
-                        PageModel includePage = (PageModel)include;
-                        model.Includes.Add(includePage.Title, includePage);
-                    }
+                    model.Includes.Add(include.Title, include);
                 }
                 model.Title = ProcessPageMetadata(page, model.Meta);
             }

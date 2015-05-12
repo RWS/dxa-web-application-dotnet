@@ -27,7 +27,7 @@ namespace Sdl.Web.Common.Mapping
             }
         }
         
-        public abstract object Create(object sourceEntity, Type type, List<object> includes=null, MvcData mvcData = null);
+        public abstract ViewModel Create(object sourceEntity, Type type, List<PageModel> includes=null, MvcData mvcData = null);
 
         protected virtual Dictionary<string, KeyValuePair<string,string>> GetEntityDataFromType(Type type)
         {

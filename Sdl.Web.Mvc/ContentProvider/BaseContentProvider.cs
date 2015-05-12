@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Web;
 using System.Web.Script.Serialization;
 using Sdl.Web.Common.Configuration;
@@ -20,12 +21,12 @@ namespace Sdl.Web.Mvc.ContentProvider
 
         //These need to be implemented by the specific content provider
         public abstract string GetPageContent(string url);
-        public abstract object GetEntityModel(string id);
+        public abstract EntityModel GetEntityModel(string id);
         public abstract string GetEntityContent(string url);
         public abstract ContentList<Teaser> PopulateDynamicList(ContentList<Teaser> list);
 
-        protected abstract object GetPageModelFromUrl(string url);
-        protected abstract List<object> GetIncludesFromModel(object data, ModelType modelType);
+        protected abstract object GetPageModelFromUrl(string url); // TODO TSI-634: strongly typed.
+        protected abstract List<PageModel> GetIncludesFromModel(object data); // TODO TSI-634: strongly typed.
 
         private static Dictionary<Type, IModelBuilder> _modelBuilders;
         /// <summary>
@@ -57,19 +58,9 @@ namespace Sdl.Web.Mvc.ContentProvider
         /// Get the model for a page given the URL
         /// </summary>
         /// <param name="url">Page URL</param>
-        /// <returns>Model corresponding to that URL</returns>
-        public object GetPageModel(string url)
-        {
-            return GetPageModel(url, true);
-        }
-
-        /// <summary>
-        /// Get the model for a page given the URL
-        /// </summary>
-        /// <param name="url">Page URL</param>
         /// <param name="addIncludes">If true then includes will be added in the model</param>
         /// <returns>Model corresponding to that URL</returns>
-        public object GetPageModel(string url, bool addIncludes)
+        public PageModel GetPageModel(string url, bool addIncludes)
         {
             var parsedUrl = ParseUrl(url);
             Log.Debug("Getting page model for URL {0} (original request: {1})", parsedUrl, url);
@@ -83,18 +74,22 @@ namespace Sdl.Web.Mvc.ContentProvider
                 Log.Debug("No content for URL found, trying default: {0}", parsedUrl);
                 model = GetPageModelFromUrl(parsedUrl);
             }
-            return model==null ? null : MapModel(model, ModelType.Page, null, addIncludes);
+            return (PageModel) MapModel(model, addIncludes: addIncludes);
         }
         
         /// <summary>
         /// Map the domain (CMS) model to the presentation (View) Model
         /// </summary>
         /// <param name="data">The domain model</param>
-        /// <param name="modelType">The type of domain model (Page/Region/Entity)</param>
         /// <param name="viewModeltype">The presentation model Type to map to</param>
         /// <returns></returns>
-        public virtual object MapModel(object data, ModelType modelType, Type viewModeltype = null, bool addIncludes = true)
+        public virtual ViewModel MapModel(object data, Type viewModeltype = null, bool addIncludes = true)
         {
+            if (data == null)
+            {
+                return null;
+            }
+
             MvcData viewData = ContentResolver.ResolveMvcData(data);
             if (viewModeltype == null)
             {
@@ -103,49 +98,15 @@ namespace Sdl.Web.Mvc.ContentProvider
             if (data.GetType() == viewModeltype)
             {
                 //model already mapped to required type
-                return data;
+                return (ViewModel) data;
             }
-            List<object> includes = addIncludes ? GetIncludesFromModel(data, modelType) : new List<object>();
+            List<PageModel> includes = addIncludes ? GetIncludesFromModel(data) : new List<PageModel>();
             IModelBuilder builder = DefaultModelBuilder;
             if (ModelBuilders.ContainsKey(viewModeltype))
             {
                 builder = ModelBuilders[viewModeltype];
             }
-            var model = builder.Create(data, viewModeltype, includes, viewData);
-            return model==null ? data : MapModelItems(model);
-        }
-
-        protected object MapModelItems(object model)
-        {
-            if (model is PageModel)
-            {
-                PageModel page = ((PageModel)model);
-                foreach (RegionModel region in page.Regions)
-                {
-                    for (int i = 0; i < region.Entities.Count; i++)
-                    {
-                        EntityModel mappedItem;
-                        try
-                        {
-                            mappedItem = (EntityModel) MapModel(region.Entities[i], ModelType.Entity);
-                        }
-                        catch (Exception ex)
-                        {
-                            //if there is a problem mapping the item, we replace it with an exception entity
-                            //and carry on processing - this should not cause a failure in the rendering of
-                            //the page as a whole
-                            Log.Error(ex);
-                            mappedItem = new ExceptionEntity
-                            {
-                                Error = ex.Message, 
-                                MvcData = ContentResolver.ResolveMvcData(region.Entities[i])
-                            };
-                        }
-                        region.Entities[i] = mappedItem;
-                    }
-                }
-            }
-            return model;
+            return builder.Create(data, viewModeltype, includes, viewData);
         }
 
         /// <summary>
@@ -153,17 +114,22 @@ namespace Sdl.Web.Mvc.ContentProvider
         /// </summary>
         /// <param name="url">The URL representing the navigation structure</param>
         /// <returns>A navigation model for the given URL</returns>
-        public virtual object GetNavigationModel(string url)
+        public virtual SitemapItem GetNavigationModel(string url)
         {
             string key = "navigation-" + url;
             //This is a temporary measure to cache the navigationModel per request to not retrieve and serialize 3 times per request. Comprehensive caching strategy pending
+            SitemapItem result;
             if (HttpContext.Current.Items[key] == null)
             {
                 string navigationJsonString = GetPageContent(url);
-                var navigationModel = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
-                HttpContext.Current.Items[key] = navigationModel;
+                result = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
+                HttpContext.Current.Items[key] = result;
             }
-            return HttpContext.Current.Items[key] as SitemapItem;
+            else
+            {
+                result = (SitemapItem) HttpContext.Current.Items[key];
+            }
+            return result;
         }
 
         /// <summary>
