@@ -44,20 +44,20 @@ namespace Sdl.Web.Site.Areas.Core
             RegisterViewModel("SiteMap", typeof(SitemapItem), "Navigation");
             RegisterViewModel("SiteMapXml", typeof(SitemapItem), "Navigation");
             RegisterViewModel("TopNavigation", typeof(NavigationLinks), "Navigation");
-            RegisterViewModel("GeneralPage", typeof(WebPage), "Page");
-            RegisterViewModel("IncludePage", typeof(WebPage), "Page");
-            RegisterViewModel("RedirectPage", typeof(WebPage), "Page");
-            RegisterViewModel("2-Column", typeof(Region), "Region");
-            RegisterViewModel("3-Column", typeof(Region), "Region");
-            RegisterViewModel("4-Column", typeof(Region), "Region");
-            RegisterViewModel("Hero", typeof(Region), "Region");
-            RegisterViewModel("Info", typeof(Region), "Region");
-            RegisterViewModel("Left", typeof(Region), "Region");
-            RegisterViewModel("Links", typeof(Region), "Region");
-            RegisterViewModel("Logo", typeof(Region), "Region");
-            RegisterViewModel("Main", typeof(Region), "Region");
-            RegisterViewModel("Nav", typeof(Region), "Region");
-            RegisterViewModel("Tools", typeof(Region), "Region");
+            RegisterViewModel("GeneralPage", typeof(PageModel), "Page");
+            RegisterViewModel("IncludePage", typeof(PageModel), "Page");
+            RegisterViewModel("RedirectPage", typeof(PageModel), "Page");
+            RegisterViewModel("2-Column", typeof(RegionModel), "Region");
+            RegisterViewModel("3-Column", typeof(RegionModel), "Region");
+            RegisterViewModel("4-Column", typeof(RegionModel), "Region");
+            RegisterViewModel("Hero", typeof(RegionModel), "Region");
+            RegisterViewModel("Info", typeof(RegionModel), "Region");
+            RegisterViewModel("Left", typeof(RegionModel), "Region");
+            RegisterViewModel("Links", typeof(RegionModel), "Region");
+            RegisterViewModel("Logo", typeof(RegionModel), "Region");
+            RegisterViewModel("Main", typeof(RegionModel), "Region");
+            RegisterViewModel("Nav", typeof(RegionModel), "Region");
+            RegisterViewModel("Tools", typeof(RegionModel), "Region");
         }        
     }
 }

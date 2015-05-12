@@ -3,7 +3,7 @@
 namespace Sdl.Web.Common.Models
 {
     [SemanticEntity(Vocab = "http://schema.org/", EntityName = "GeoCoordinates", Prefix = "s", Public = true)]
-    public class Location : EntityBase
+    public class Location : EntityModel
     {
         [SemanticProperty("s:longitude")]
         public double Longitude { get; set; }

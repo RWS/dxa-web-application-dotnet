@@ -267,7 +267,7 @@ namespace Sdl.Web.DD4T.Statics
             {
                 BinaryFactory.TryFindBinary(urlPath, out binary);
             }
-            catch (BinaryNotFoundException ex)
+            catch (BinaryNotFoundException)
             {
                 Log.Warn("Binary: {0} does not exist", urlPath);
             }

@@ -1,4 +1,4 @@
-﻿@model Sdl.Web.Common.Models.WebPage
+﻿@model PageModel
 @{
     string edit = Request.QueryString["edit"];
     var redirectUrl = Model.Meta.ContainsKey("externalLink") ? Model.Meta["externalLink"] : (Model.Meta.ContainsKey("internalLink") ? Model.Meta["internalLink"] : null);

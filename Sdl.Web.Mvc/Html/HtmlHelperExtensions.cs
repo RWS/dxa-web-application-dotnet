@@ -328,22 +328,14 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="entity">The Entity to render.</param>
         /// <param name="containerSize">TODO</param>
         /// <returns>The rendered HTML or an empty string if <paramref name="entity"/> is <c>null</c>.</returns>
-        public static MvcHtmlString DxaEntity(this HtmlHelper htmlHelper, object entity, int containerSize = 0)
+        public static MvcHtmlString DxaEntity(this HtmlHelper htmlHelper, EntityModel entity, int containerSize = 0)
         {
             if (entity == null)
             {
                 return MvcHtmlString.Empty;
             }
 
-            // TODO TSI-634: entity param should be strongly typed, but this requires a strongly type Region Model.
-            if (entity is IEntity)
-            {
-                Log.Debug("Rendering Entity [{0}] with Id '{1}' (containerSize: {2})", entity.GetType().Name, ((IEntity)entity).Id, containerSize);
-            }
-            else
-            {
-                Log.Debug("Rendering loosely typed Entity [{0}] (containerSize: {1}).", entity.GetType().Name, containerSize);
-            }
+            Log.Debug("Rendering Entity [{0}] (containerSize: {1})", entity, containerSize);
             
             // TODO TSI-787: use RenderPartial
             return htmlHelper.ViewBag.Renderer.RenderEntity(entity, htmlHelper, containerSize);
@@ -358,10 +350,10 @@ namespace Sdl.Web.Mvc.Html
         /// <remarks>This method will throw an exception if the current Model does not represent a Region.</remarks>
         public static MvcHtmlString DxaEntities(this HtmlHelper htmlHelper, int containerSize = 0)
         {
-            IRegion region = (IRegion) htmlHelper.ViewData.Model;
+            RegionModel region = (RegionModel) htmlHelper.ViewData.Model;
 
             StringBuilder resultBuilder = new StringBuilder();
-            foreach (object entity in region.Items)
+            foreach (EntityModel entity in region.Entities)
             {
                 resultBuilder.Append(htmlHelper.DxaEntity(entity, containerSize));
             }
@@ -375,7 +367,7 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="region">The Region object to render. This object determines the View that will be used.</param>
         /// <param name="containerSize">TODO</param>
         /// <returns>The rendered HTML or an empty string if <paramref name="region"/> is <c>null</c>.</returns>
-        public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, IRegion region, int containerSize = 0)
+        public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, RegionModel region, int containerSize = 0)
         {
             Log.Debug("Rendering Region '{0}' (containerSize: {1})", region.Name, containerSize);
 
@@ -400,8 +392,8 @@ namespace Sdl.Web.Mvc.Html
         public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, string regionName, string emptyViewName = null, int containerSize = 0)
         {
             // TODO TSI-779: support nested Regions
-            IPage page = (IPage) htmlHelper.ViewData.Model;
-            IRegion region;
+            PageModel page = (PageModel) htmlHelper.ViewData.Model;
+            RegionModel region;
             if (!page.Regions.TryGetValue(regionName, out region))
             {
                 Log.Debug("Region '{0}' not found. Using empy View '{1}'.", regionName, emptyViewName);
@@ -409,7 +401,7 @@ namespace Sdl.Web.Mvc.Html
                 {
                     return MvcHtmlString.Empty;
                 }
-                region = new Region(regionName, emptyViewName);
+                region = new RegionModel(regionName, emptyViewName);
             }
 
             return htmlHelper.DxaRegion(region, containerSize);
@@ -426,21 +418,21 @@ namespace Sdl.Web.Mvc.Html
         public static MvcHtmlString DxaRegions(this HtmlHelper htmlHelper, string exclude = null, int containerSize = 0)
         {
             // TODO TSI-779: support nested Regions
-            IPage page = (IPage)htmlHelper.ViewData.Model;
+            PageModel page = (PageModel)htmlHelper.ViewData.Model;
 
-            IEnumerable<IRegion> regions;
+            IEnumerable<RegionModel> regions;
             if (string.IsNullOrEmpty(exclude))
             {
-                regions = page.Regions.Values;
+                regions = page.Regions;
             }
             else
             {
                 string[] excludedNames = exclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                regions = page.Regions.Values.Where(r => !excludedNames.Any(n => n.Equals(r.Name, StringComparison.InvariantCultureIgnoreCase)));
+                regions = page.Regions.Where(r => !excludedNames.Any(n => n.Equals(r.Name, StringComparison.InvariantCultureIgnoreCase)));
             }
 
             StringBuilder resultBuilder = new StringBuilder();
-            foreach (IRegion region in regions)
+            foreach (RegionModel region in regions)
             {
                 resultBuilder.Append(htmlHelper.DxaRegion(region, containerSize));
             }
@@ -466,12 +458,12 @@ namespace Sdl.Web.Mvc.Html
                 return MvcHtmlString.Empty;
             }
 
-            IPage page = (IPage) htmlHelper.ViewData.Model;
-            if (!page.PageData.ContainsKey("CmsUrl"))
+            PageModel page = (PageModel) htmlHelper.ViewData.Model;
+            if (!page.XpmMetadata.ContainsKey("CmsUrl"))
             {
-                page.PageData.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
+                page.XpmMetadata.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
             }
-            return new MvcHtmlString(Tridion.Markup.TridionMarkup.PageMarkup(page.PageData));
+            return new MvcHtmlString(Tridion.Markup.TridionMarkup.PageMarkup(page.XpmMetadata));
         }
 
         /// <summary>
@@ -482,7 +474,7 @@ namespace Sdl.Web.Mvc.Html
         /// <remarks>This method will throw an exception if the current Model does not represent a Region.</remarks>
         public static MvcHtmlString DxaRegionMarkup(this HtmlHelper htmlHelper)
         {
-            IRegion region = (IRegion) htmlHelper.ViewData.Model;
+            RegionModel region = (RegionModel) htmlHelper.ViewData.Model;
             return htmlHelper.DxaRegionMarkup(region);
         }
 
@@ -492,9 +484,9 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
         /// <param name="region">The Region object to generate semantic markup for.</param>
         /// <returns>The HTML/RDFa attributes for the Region. These should be included in an HTML start tag.</returns>
-        public static MvcHtmlString DxaRegionMarkup(this HtmlHelper htmlHelper, IRegion region)
+        public static MvcHtmlString DxaRegionMarkup(this HtmlHelper htmlHelper, RegionModel region)
         {
-            return Markup.Region(region);
+            return Markup.RenderRegionAttributes(region);
         }
 
         /// <summary>
@@ -505,7 +497,7 @@ namespace Sdl.Web.Mvc.Html
         /// <remarks>This method will throw an exception if the current Model does not represent an Entity.</remarks>
         public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper)
         {
-            IEntity entity = (IEntity) htmlHelper.ViewData.Model;
+            EntityModel entity = (EntityModel) htmlHelper.ViewData.Model;
             return htmlHelper.DxaEntityMarkup(entity);
         }
 
@@ -515,9 +507,9 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
         /// <param name="entity">The Entity object to generate semantic markup for.</param>
         /// <returns>The HTML/RDFa attributes for the Entity. These should be included in an HTML start tag.</returns>
-        public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper, IEntity entity)
+        public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper, EntityModel entity)
         {
-            return Markup.Entity(entity);
+            return Markup.RenderEntityAttributes(entity);
         }
 
         /// <summary>
@@ -530,8 +522,8 @@ namespace Sdl.Web.Mvc.Html
         public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, string propertyName, int index = 0)
         {
             // TODO: autogenerate index (?)
-            IEntity entity = (IEntity) htmlHelper.ViewData.Model;
-            return Markup.Property(entity, propertyName, index);
+            EntityModel entity = (EntityModel) htmlHelper.ViewData.Model;
+            return Markup.RenderPropertyAttributes(entity, propertyName, index);
         }
 
         /// <summary>
@@ -542,9 +534,9 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="propertyName">The name of the property.</param>
         /// <param name="index">The index of the property value (for multi-value properties).</param>
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
-        public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, IEntity entity, string propertyName, int index = 0)
+        public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, EntityModel entity, string propertyName, int index = 0)
         {
-            return Markup.Property(entity, propertyName, index);
+            return Markup.RenderPropertyAttributes(entity, propertyName, index);
         }
 
         /// <summary>
@@ -565,10 +557,10 @@ namespace Sdl.Web.Mvc.Html
                     );
             }
 
-            // TODO: obtain the Entity from the propertyExpression
-            IEntity entity = (IEntity) htmlHelper.ViewData.Model;
+            // TODO: obtain the Entity Model from the propertyExpression
+            EntityModel entity = (EntityModel) htmlHelper.ViewData.Model;
 
-            return Markup.Property(entity, memberExpression.Member, index);
+            return Markup.RenderPropertyAttributes(entity, memberExpression.Member, index);
         }
         #endregion
 

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Web.UI.WebControls;
 
 namespace Sdl.Web.Common.Models
 {

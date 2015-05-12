@@ -2,7 +2,7 @@
 
 namespace Sdl.Web.Common.Models
 {
-    public class NavigationLinks : EntityBase
+    public class NavigationLinks : EntityModel
     {
         public List<Link> Items { get; set; }
 

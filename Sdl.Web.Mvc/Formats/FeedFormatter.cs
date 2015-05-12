@@ -11,7 +11,7 @@ namespace Sdl.Web.Mvc.Formats
     {
         protected SyndicationFeed GetData(object model)
         {
-            var page = model as WebPage;
+            PageModel page = model as PageModel;
             if (page!=null)
             {
                 var description = page.Meta.ContainsKey("description") ? page.Meta["description"] : null;
@@ -33,34 +33,31 @@ namespace Sdl.Web.Mvc.Formats
             return HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path) + (filtered.Count>0 ?  "?" + filtered : "");
         }
 
-        private IEnumerable<SyndicationItem> GetFeedItemsFromPage(WebPage page)
+        private IEnumerable<SyndicationItem> GetFeedItemsFromPage(PageModel page)
         {
-            var items = new List<SyndicationItem>();
-            foreach (var region in page.Regions.Values)
+            List<SyndicationItem> items = new List<SyndicationItem>();
+            foreach (RegionModel region in page.Regions)
             {
-                foreach (var entity in region.Items)
+                foreach (EntityModel entity in region.Entities)
                 {
-                    if (entity is IEntity)
-                    {
-                        items.AddRange(GetFeedItemsFromEntity((IEntity)entity));
-                    }
+                    items.AddRange(GetFeedItemsFromEntity(entity));
                 }
             }
             return items;
         }
 
-        protected virtual List<SyndicationItem> GetFeedItemsFromEntity(IEntity entity)
+        protected virtual List<SyndicationItem> GetFeedItemsFromEntity(EntityModel entity)
         {
-            var items = new List<SyndicationItem>();
+            List<SyndicationItem> items = new List<SyndicationItem>();
             IEnumerable<Teaser> entityItems = GetEntityItems(entity);
-            foreach(var item in entityItems)
+            foreach(Teaser item in entityItems)
             {
                 items.Add(GetSyndicationItemFromTeaser(item));
             }
             return items;
         }
 
-        private IEnumerable<Teaser> GetEntityItems(IEntity entity)
+        private IEnumerable<Teaser> GetEntityItems(EntityModel entity)
         {
             var res = new List<Teaser>();
             //1. Check if entity is a teaser, if add it
@@ -115,7 +112,7 @@ namespace Sdl.Web.Mvc.Formats
             return res;
         }
 
-        private List<Teaser> GetTeaserListFromSemantics(IEntity entity)
+        private List<Teaser> GetTeaserListFromSemantics(EntityModel entity)
         {
             Type type = entity.GetType();
             bool isList = false;

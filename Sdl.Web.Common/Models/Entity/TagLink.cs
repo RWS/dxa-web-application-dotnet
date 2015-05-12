@@ -1,6 +1,6 @@
 ﻿namespace Sdl.Web.Common.Models
 {
-    public class TagLink : EntityBase
+    public class TagLink : EntityModel
     {
         [SemanticProperty(PropertyName = "internalLink")]
         [SemanticProperty(PropertyName = "externalLink")]

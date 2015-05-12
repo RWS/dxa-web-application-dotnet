@@ -83,6 +83,7 @@
     <Compile Include="Mapping\SemanticSchemaField.cs" />
     <Compile Include="Mapping\SemanticVocabulary.cs" />
     <Compile Include="Models\Common\ExceptionEntity.cs" />
+    <Compile Include="Models\EntityModel.cs" />
     <Compile Include="Models\Entity\Configuration.cs" />
     <Compile Include="Models\Interfaces\IPage.cs" />
     <Compile Include="Models\Interfaces\IEntity.cs" />
@@ -115,9 +116,13 @@
     <Compile Include="Interfaces\IStaticFileManager.cs" />
     <Compile Include="Models\Navigation\NavigationLinks.cs" />
     <Compile Include="Models\Navigation\SitemapItem.cs" />
+    <Compile Include="Models\PageModel.cs" />
     <Compile Include="Models\Page\PageBase.cs" />
     <Compile Include="Models\Page\Region.cs" />
+    <Compile Include="Models\RegionModel.cs" />
     <Compile Include="Models\Page\WebPage.cs" />
+    <Compile Include="Models\RegionModelSet.cs" />
+    <Compile Include="Models\ViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\VersionInfo.cs" />
     <Compile Include="Models\ModelTypeRegistry.cs" />

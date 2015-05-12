@@ -39,7 +39,7 @@ namespace Sdl.Web.DD4T.Mapping
         {
             if (sourceEntity is IPage)
             {
-                return CreatePage(sourceEntity, type, includes, mvcData);
+                return CreatePage((IPage) sourceEntity, type, includes, mvcData);
             }
             return CreateEntity(sourceEntity, type, includes, mvcData);
         }
@@ -50,7 +50,7 @@ namespace Sdl.Web.DD4T.Mapping
             Dictionary<string, string> entityData;
             if (component == null && sourceEntity is IComponentPresentation)
             {
-                var cp = (IComponentPresentation)sourceEntity;
+                IComponentPresentation cp = (IComponentPresentation)sourceEntity;
                 component = cp.Component;
                 entityData = GetEntityData(cp);
             }
@@ -73,17 +73,17 @@ namespace Sdl.Web.DD4T.Mapping
                 mapData.Meta = component.MetadataFields;
                 mapData.TargetType = type;
                 mapData.SourceEntity = component;
-                var model = CreateModelFromMapData(mapData);
-                if (model is IEntity)
+                object model = CreateModelFromMapData(mapData);
+                if (model is EntityModel)
                 {
-                    var entity = (IEntity)model;
-                    entity.EntityData = entityData;
+                    EntityModel entity = (EntityModel)model;
+                    entity.XpmMetadata = entityData;
                     entity.Id = component.Id.Split('-')[1];
-                    entity.AppData = mvcData;
+                    entity.MvcData = mvcData;
                 }
                 if (model is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
                 {
-                    var mediaItem = (MediaItem)model;
+                    MediaItem mediaItem = (MediaItem)model;
                     mediaItem.Url = component.Multimedia.Url;
                     mediaItem.FileName = component.Multimedia.FileName;
                     mediaItem.FileSize = component.Multimedia.Size;
@@ -97,10 +97,10 @@ namespace Sdl.Web.DD4T.Mapping
 
         protected virtual object CreateModelFromMapData(MappingData mapData)
         {
-            var model = Activator.CreateInstance(mapData.TargetType);
+            object model = Activator.CreateInstance(mapData.TargetType);
             Dictionary<string, string> propertyData = new Dictionary<string, string>();
-            var propertySemantics = FilterPropertySematicsByEntity(LoadPropertySemantics(mapData.TargetType),mapData);
-            foreach (var pi in mapData.TargetType.GetProperties())
+            Dictionary<string, List<SemanticProperty>> propertySemantics = FilterPropertySematicsByEntity(LoadPropertySemantics(mapData.TargetType),mapData);
+            foreach (PropertyInfo pi in mapData.TargetType.GetProperties())
             {
                 bool multival = pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
                 Type propertyType = multival ? pi.PropertyType.GetGenericArguments()[0] : pi.PropertyType;
@@ -148,9 +148,9 @@ namespace Sdl.Web.DD4T.Mapping
                     }
                 }
             }
-            if (model is IEntity)
+            if (model is EntityModel)
             {
-                ((IEntity)model).PropertyData = propertyData;
+                ((EntityModel)model).XpmPropertyMetadata = propertyData;
             }
             return model;
         }
@@ -644,52 +644,51 @@ namespace Sdl.Web.DD4T.Mapping
 
         private ResourceProvider _resourceProvider;
 
-        protected virtual object CreatePage(object sourceEntity, Type type, List<object> includes, MvcData mvcData = null)
+        protected virtual PageModel CreatePage(IPage page, Type type, List<object> includes, MvcData mvcData = null)
         {
-            IPage page = sourceEntity as IPage;
-            if (page != null)
+            PageModel model = new PageModel(page.Id.Split('-')[1]);
+            bool isInclude = false;
+            //default title - will be overridden later if appropriate
+            model.Title = page.Title;
+            model.MvcData = mvcData;
+            model.XpmMetadata = GetPageData(page);
+            if (includes.Count == 0 && model.MvcData.ViewName.Contains("Include"))
             {
-                var model = new WebPage();
-                bool isInclude = false;
-                //default title - will be overridden later if appropriate
-                model.Title = page.Title;
-                model.Id = page.Id.Substring(4);
-                model.AppData = mvcData;
-                model.PageData = GetPageData(page);
-                if (includes.Count == 0 && model.AppData.ViewName.Contains("Include"))
-                {
-                    isInclude = true;
-                }
-                foreach (var cp in page.ComponentPresentations)
-                {
-                    if (_contentResolver.EvaluateEntity(cp))
-                    {
-                        var region = GetRegionFromComponentPresentation(cp);
-                        if (!model.Regions.ContainsKey(region.Name))
-                        {
-                            model.Regions.Add(region.Name, region);
-                        }
-                        model.Regions[region.Name].Items.Add(cp);
-                    }
-                }
-                if (!isInclude)
-                {
-                    foreach (var include in includes)
-                    {
-                        if (include is WebPage)
-                        {
-                            var includePage = (WebPage)include;
-                            model.Includes.Add(includePage.Title, includePage);
-                        }
-                    }
-                    model.Title = ProcessPageMetadata(page, model.Meta);
-                }
-                return model;
+                isInclude = true;
             }
-            throw new Exception(String.Format("Cannot create model for class {0}. Expecting IPage.", sourceEntity.GetType().FullName));
+            foreach (IComponentPresentation cp in page.ComponentPresentations)
+            {
+                if (_contentResolver.EvaluateEntity(cp))
+                {
+                    RegionModel region = GetRegionFromComponentPresentation(cp);
+                    if (!model.Regions.ContainsKey(region.Name))
+                    {
+                        model.Regions.Add(region);
+                    }
+
+                    MvcData entityMvcData = _contentResolver.ResolveMvcData(cp);
+                    Type entityType = ModelTypeRegistry.GetViewModelType(entityMvcData);
+                    EntityModel entity = (EntityModel)CreateEntity(cp, entityType, includes, entityMvcData);
+
+                    model.Regions[region.Name].Entities.Add(entity);
+                }
+            }
+            if (!isInclude)
+            {
+                foreach (object include in includes)
+                {
+                    if (include is PageModel)
+                    {
+                        PageModel includePage = (PageModel)include;
+                        model.Includes.Add(includePage.Title, includePage);
+                    }
+                }
+                model.Title = ProcessPageMetadata(page, model.Meta);
+            }
+            return model;
         }
 
-        protected virtual string ProcessPageMetadata(IPage page, Dictionary<string,string> meta)
+        protected virtual string ProcessPageMetadata(IPage page, IDictionary<string,string> meta)
         {
             //First grab metadata from the page
             if (page.MetadataFields != null)
@@ -774,7 +773,7 @@ namespace Sdl.Web.DD4T.Mapping
             return title + titlePostfix;
         }
 
-        protected virtual void ProcessMetadataField(IField field, Dictionary<string, string> meta)
+        protected virtual void ProcessMetadataField(IField field, IDictionary<string, string> meta)
         {
             if (field.FieldType==FieldType.Embedded)
             {
@@ -818,7 +817,7 @@ namespace Sdl.Web.DD4T.Mapping
             return _resourceProvider.GetObject(name, CultureInfo.CurrentUICulture).ToString();
         }
 
-        private static Region GetRegionFromComponentPresentation(IComponentPresentation cp)
+        private static RegionModel GetRegionFromComponentPresentation(IComponentPresentation cp)
         {
             string name = null;
             var module = SiteConfiguration.GetDefaultModuleName();//Default module
@@ -849,8 +848,15 @@ namespace Sdl.Web.DD4T.Mapping
             }
             name = name ?? "Main";//default region name
 
-            var mvcData = new MvcData { AreaName = module, ViewName = name, ControllerName = SiteConfiguration.GetRegionController(), ControllerAreaName = SiteConfiguration.GetDefaultModuleName(), ActionName = SiteConfiguration.GetRegionAction() };
-            return new Region { Name = name, AppData = mvcData };
+            MvcData mvcData = new MvcData
+            {
+                AreaName = module, 
+                ViewName = name, 
+                ControllerName = SiteConfiguration.GetRegionController(), 
+                ControllerAreaName = SiteConfiguration.GetDefaultModuleName(), 
+                ActionName = SiteConfiguration.GetRegionAction()
+            };
+            return new RegionModel(name) { MvcData = mvcData };
         }
 
     }

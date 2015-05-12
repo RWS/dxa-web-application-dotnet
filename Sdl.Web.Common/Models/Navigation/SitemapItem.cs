@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Sdl.Web.Common.Models
 {
-    public class SitemapItem : EntityBase
+    public class SitemapItem : EntityModel
     {
         private string _url;
 

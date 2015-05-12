@@ -1,5 +1,6 @@
 ﻿using DD4T.ContentModel;
 using DD4T.ContentModel.Factories;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
@@ -201,11 +202,16 @@ namespace Sdl.Web.DD4T.Mapping
                 res.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
                 res.ActionName = SiteConfiguration.GetPageAction();
             }
-            else if (data is IRegion)
+            else if (data is ViewModel)
             {
                 //Region app data is generated on creation in DD4TModelBuilder.GetRegionFromComponentPresentation()
-                return ((IRegion)data).AppData;
+                return ((ViewModel)data).MvcData;
             }
+            else
+            {
+                throw new DxaException("Unexpected Type: " + data.GetType().FullName);
+            }
+
             return res;
         }
 

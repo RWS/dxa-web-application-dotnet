@@ -7,29 +7,28 @@ using System.Collections.Generic;
 using System.Web.Mvc;
 using System.Web.Mvc.Html;
 using System.Web.Routing;
-using IPage = Sdl.Web.Common.Models.IPage;
 
 namespace Sdl.Web.DD4T.Html
 {
     /// <summary>
     /// Renderer implementation for DD4T
     /// </summary>
+    /// TODO TSI-788: This code is no longer DD4T-specific and should be moved to Sdl.Web.Mvc.
     public class DD4TRenderer : BaseRenderer
     {
         /// <summary>
-        /// Render an entity (Component Presentation)
+        /// Render an Entity Model
         /// </summary>
-        /// <param name="item">The Component Presentation object</param>
+        /// <param name="entity">The Entity Model</param>
         /// <param name="helper">The HTML Helper</param>
         /// <param name="containerSize">The size of the containing element (in grid units)</param>
         /// <param name="excludedItems">A list of view names, if the Component Presentation maps to one of these, it is skipped.</param>
         /// <returns>The rendered content</returns>
-        public override MvcHtmlString RenderEntity(object item, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
+        public override MvcHtmlString RenderEntity(EntityModel entity, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
-            var entity = item as IEntity;
             if (entity!=null)
             {
-                var mvcData = entity.AppData;
+                MvcData mvcData = entity.MvcData;
                 if (excludedItems == null || !excludedItems.Contains(mvcData.ViewName))
                 {
                     var parameters = new RouteValueDictionary();
@@ -45,9 +44,12 @@ namespace Sdl.Web.DD4T.Html
                     parameters["containerSize"] = (containerSize * parentContainerSize) / SiteConfiguration.MediaHelper.GridSize;
                     parameters["entity"] = entity;
                     parameters["area"] = mvcData.ControllerAreaName;
-                    foreach (var key in mvcData.RouteValues.Keys)
+                    if (mvcData.RouteValues != null)
                     {
-                        parameters[key] = mvcData.RouteValues[key];
+                        foreach (var key in mvcData.RouteValues.Keys)
+                        {
+                            parameters[key] = mvcData.RouteValues[key];
+                        }
                     }
                     MvcHtmlString result = helper.Action(mvcData.ActionName, mvcData.ControllerName, parameters);
                     if (WebRequestContext.IsPreview)
@@ -69,9 +71,9 @@ namespace Sdl.Web.DD4T.Html
         /// <param name="containerSize">The size of the containing element (in grid units)</param>
         /// <param name="excludedItems">A list of view names, if the Region maps to one of these, it is skipped.</param>
         /// <returns>The rendered content</returns>
-        public override MvcHtmlString RenderRegion(IRegion region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
+        public override MvcHtmlString RenderRegion(RegionModel region, HtmlHelper helper, int containerSize = 0, List<string> excludedItems = null)
         {
-            var mvcData = region.AppData;
+            MvcData mvcData = region.MvcData;
             if (region != null && (excludedItems == null || !excludedItems.Contains(region.Name)))
             {
                 if (containerSize == 0)
@@ -96,15 +98,15 @@ namespace Sdl.Web.DD4T.Html
         /// <param name="page">The DD4T Page object</param>
         /// <param name="helper">Html Helper</param>
         /// <returns>The page markup</returns>
-        public override MvcHtmlString RenderPageData(IPage page, HtmlHelper helper)
+        public override MvcHtmlString RenderPageData(PageModel page, HtmlHelper helper)
         {
             if (WebRequestContext.Localization.IsStaging)
             {
-                if (!page.PageData.ContainsKey("CmsUrl"))
+                if (!page.XpmMetadata.ContainsKey("CmsUrl"))
                 {
-                    page.PageData.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
+                    page.XpmMetadata.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
                 }
-                return new MvcHtmlString(TridionMarkup.PageMarkup(page.PageData));
+                return new MvcHtmlString(TridionMarkup.PageMarkup(page.XpmMetadata));
             }
             return null;
         }
@@ -115,7 +117,7 @@ namespace Sdl.Web.DD4T.Html
         /// <param name="page">The DD4T include Page object</param>
         /// <param name="helper">Html Helper</param>
         /// <returns>The include page markup</returns>
-        public override MvcHtmlString RenderIncludePageData(IPage page, HtmlHelper helper)
+        public override MvcHtmlString RenderIncludePageData(PageModel page, HtmlHelper helper)
         {
             if (WebRequestContext.Localization.IsStaging)
             {

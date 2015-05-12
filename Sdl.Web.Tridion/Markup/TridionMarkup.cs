@@ -137,7 +137,7 @@ namespace Sdl.Web.Tridion.Markup
             return String.Format(RegionFormat, name, allowedComponentTypes, minOccurs, maxOccursElement);
         }
 
-        public static string PageMarkup(Dictionary<string,string> pageData)
+        public static string PageMarkup(IDictionary<string,string> pageData)
         {
             var pageId = pageData.ContainsKey("PageID") ? pageData["PageID"] : null;
             var pageTemplateId = pageData.ContainsKey("PageTemplateID") ? pageData["PageTemplateID"] : null;

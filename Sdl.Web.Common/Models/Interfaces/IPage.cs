@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Sdl.Web.Common.Models
 {
+    [Obsolete("Deprecated in DXA 1.1. Use class PageModel instead.")]
     public interface IPage
     {
         Dictionary<string, string> PageData { get; set; }

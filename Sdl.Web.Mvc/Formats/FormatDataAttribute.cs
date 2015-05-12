@@ -29,23 +29,23 @@ namespace Sdl.Web.Mvc.Formats
             var formatter = filterContext.Controller.ViewBag.DataFormatter as IDataFormatter;
             if (formatter != null)
             {
-                var model = filterContext.Controller.ViewData.Model;
+                object model = filterContext.Controller.ViewData.Model;
                 if (formatter.ProcessModel)
                 {
-                    var controller = filterContext.Controller as BaseController;
+                    BaseController controller = filterContext.Controller as BaseController;
                     if (controller!=null)
                     {
-                        if (model is IPage)
+                        if (model is PageModel)
                         {
-                            model = controller.ProcessPageModel((IPage)model);
+                            model = controller.ProcessPageModel((PageModel)model);
                         }
                         else
                         {
-                            model = controller.ProcessEntityModel(model as IEntity) ?? model;
+                            model = controller.ProcessEntityModel(model as EntityModel) ?? model;
                         }
                     }
                 }
-                var result = formatter.FormatData(filterContext, model);
+                ActionResult result = formatter.FormatData(filterContext, model);
                 if (result != null)
                 {
                     filterContext.Result = result;

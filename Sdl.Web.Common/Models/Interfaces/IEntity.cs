@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Sdl.Web.Common.Models
 {
+    [Obsolete("Deprecated in DXA 1.1. Use class EntityModel instead.")]
     public interface IEntity
     {
         Dictionary<string, string> EntityData{get;set;}

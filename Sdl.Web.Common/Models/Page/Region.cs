@@ -1,40 +1,112 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sdl.Web.Common.Models
 {
-    public class Region : IRegion
+    /// <summary>
+    /// Represents the View Model for a Page Region.
+    /// </summary>
+    [Obsolete("Deprecated in DXA 1.1. Use class RegionModel instead.")]
+#pragma warning disable 618
+    public class Region : ViewModel, IRegion
+#pragma warning restore 618
     {
-        public string Name { get; set; }
+        private readonly string _name;
+        protected readonly IList<EntityModel> _entities = new List<EntityModel>();
+
         /// <summary>
-        /// Items are the raw entities that make up the page (eg Component Presentations, or other regions).
+        /// Gets or sets the name of the Region.
         /// </summary>
-        public List<object> Items { get; set; }
-        public Dictionary<string, string> RegionData { get; set; }
-        public MvcData AppData { get; set; }
-        [Obsolete("Please use AppData.AreaName.",true)]
-        public string Module { get; set; }
-        
-        
-        // TODO: do we need this public constructor?
-        public Region()
+        public string Name
         {
-            Items = new List<object>();
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.1");
+            }
         }
 
         /// <summary>
-        /// Creates an empty Region
+        /// Items are the raw entities that make up the page (eg Component Presentations, or other regions).
+        /// </summary>
+        [Obsolete("Deprecated in DXA 1.1. Use property Entities instead.")]
+        public List<object> Items
+        {
+            get
+            {
+                return _entities.Cast<object>().ToList();
+            }
+            set
+            {
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property Entities instead.");
+            }
+        }
+
+        [Obsolete("Deprecated in DXA 1.1. Use property XpmMetadata instead.")]
+        public Dictionary<string, string> RegionData
+        {
+            get
+            {
+                return XpmMetadata as Dictionary<string, string>;
+            }
+            set
+            {
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property XpmMetadata instead.");
+            }
+        }
+
+        [Obsolete("Deprecated in DXA 1.1. Use property MvcData instead.")]
+        public MvcData AppData
+        {
+            get
+            {
+                return MvcData;
+            }
+            set
+            {
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property MvcData instead.");
+            }
+        }
+
+        [Obsolete("Deprecated in DXA 1.1. Use MvcData.AreaName instead.", true)]
+        public string Module
+        {
+            get
+            {
+                return (MvcData == null) ? null : MvcData.AreaName;
+            }
+            set
+            {
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property MvcData instead.");
+            }
+        }
+
+        #region Constructors
+        /// <summary>
+        /// Initializes a new Region instance.
+        /// </summary>
+        [Obsolete("Deprecated in DXA 1.1. Use class RegionModel instead.")]
+        public Region()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new Region instance with a given name
         /// </summary>
         /// <param name="name">The name of the Region.</param>
-        /// <param name="viewName">The name of the View to use to render the Region.</param>
-        public Region(string name, string viewName) 
-            : this()
+        protected Region(string name)
         {
-            Name = name;
-            AppData = new MvcData
+            if (string.IsNullOrEmpty(name))
             {
-                ViewName = viewName
-            };
+                throw new DxaException("Region must have a non-empty name.");
+            }
+            _name = name;
         }
+
+        #endregion
     }
 }

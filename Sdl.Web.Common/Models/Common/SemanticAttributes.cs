@@ -5,7 +5,7 @@ namespace Sdl.Web.Common.Models
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class SemanticDefaultsAttribute : Attribute
     {
-        public SemanticDefaultsAttribute() : this(EntityBase.CoreVocabulary) { }
+        public SemanticDefaultsAttribute() : this(ViewModel.CoreVocabulary) { }
         public SemanticDefaultsAttribute(string vocab) : this(vocab, String.Empty) { }
         public SemanticDefaultsAttribute(string vocab, string prefix) : this(vocab, prefix, true) { }
         public SemanticDefaultsAttribute(string vocab, string prefix, bool mapAllProperties)

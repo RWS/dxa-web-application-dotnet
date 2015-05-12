@@ -1,25 +1,51 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Sdl.Web.Common.Models
 {
     /// <summary>
-    /// Model for the data that is used to render a web page.
+    /// Legacy Model for the data that is used to render a web page.
     /// </summary>
+    [Obsolete("Deprecated in DXA 1.1. Use class PageModel instead.")]
     public class WebPage : PageBase
     {
-        public string Url { get; set; }
-        public Dictionary<string, string> Meta { get; set; }
         /// <summary>
-        /// Included content not explicitly added to the page but required for rendering (header, footer, nav etc.).
+        /// Gets or sets the URL of the Page.
         /// </summary>
-        public Dictionary<string, IPage> Includes { get; set; }
-        
-        public WebPage()
+        public string Url
         {
-            PageData = new Dictionary<string, string>();
+            get; 
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the Page metadata which is typically rendered as HTML meta tags (name/value pairs).
+        /// </summary>
+        public IDictionary<string, string> Meta
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets or sets the Page Includes. The dictionary keys are the include names.
+        /// </summary>
+        public IDictionary<string, PageModel> Includes
+        {
+            // TODO TSI-779: Model Includes as Regions
+            get; 
+            private set;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of WebPage
+        /// </summary>
+        /// <param name="id">The identifier for the Page.</param>
+        protected WebPage(string id)
+            : base(id)
+        {
             Meta = new Dictionary<string, string>();
-            Regions = new Dictionary<string, IRegion>();
-            Includes = new Dictionary<string, IPage>();
+            Includes = new Dictionary<string, PageModel>();
         }
     }
 }

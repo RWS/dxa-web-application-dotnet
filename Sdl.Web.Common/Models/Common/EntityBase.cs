@@ -1,17 +1,58 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Sdl.Web.Common.Models
 {
-    public class EntityBase : IEntity
+    /// <summary>
+    /// Legacy base class for View Models for Entities.
+    /// </summary>
+    [Obsolete("Deprecated in DXA 1.1. Use class EntityModel instead.")]
+#pragma warning disable 618
+    public class EntityBase : EntityModel, IEntity
+#pragma warning restore 618
     {
         [SemanticProperty(IgnoreMapping = true)]
-        public string Id { get; set; }
+        [Obsolete("Deprecated in DXA 1.1. Use property XpmMetadata instead.")]
+        public Dictionary<string, string> EntityData
+        {
+            get
+            {
+                return XpmMetadata as Dictionary<string, string>;
+            }
+            set
+            {
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property XpmMetadata instead.");
+            }
+        }
+
         [SemanticProperty(IgnoreMapping = true)]
-        public Dictionary<string, string> EntityData { get; set; }
+        [Obsolete("Deprecated in DXA 1.1. Use property XpmPropertyMetadata instead.")]
+        public Dictionary<string, string> PropertyData
+        {
+            get
+            {
+                return XpmPropertyMetadata as Dictionary<string, string>;
+            }
+            set
+            {
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property XpmPropertyMetadata instead.");
+            }
+        }
+
         [SemanticProperty(IgnoreMapping = true)]
-        public Dictionary<string, string> PropertyData { get; set; }
-        [SemanticProperty(IgnoreMapping = true)]
-        public MvcData AppData { get; set; }
-        public const string CoreVocabulary = "http://www.sdl.com/web/schemas/core";
+        [Obsolete("Deprecated in DXA 1.1. Use property MvcData instead.")]
+        public MvcData AppData
+        {
+            get
+            {
+                return MvcData;
+            }
+            set
+            {
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property MvcData instead.");
+            }
+        }
+
     }
 }

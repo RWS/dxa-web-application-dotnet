@@ -3,7 +3,7 @@
 namespace Sdl.Web.Common.Models
 {
     [SemanticEntity(Vocab = "http://schema.org/", EntityName = "ItemList", Prefix = "s", Public = true)]
-    public class ItemList : EntityBase
+    public class ItemList : EntityModel
     {
         [SemanticProperty("s:headline")]
         public string Headline { get; set; }

@@ -40,19 +40,21 @@ namespace Sdl.Web.Mvc.Controllers
         {
             ModelType = ModelType.Page;
             bool addIncludes = ViewBag.AddIncludes ?? true; 
-            var page = ContentProvider.GetPageModel(pageUrl, addIncludes);
+            PageModel page = (PageModel) ContentProvider.GetPageModel(pageUrl, addIncludes); // TODO TSI-634: GetPageModel should return Page
             if (page == null)
             {
                 return NotFound();
             }
 
-            var viewData = GetViewData(page);
+            MvcData viewData = GetViewData(page);
             SetupViewData(0, viewData);
-            var model = EnrichModel(page) ?? page;
-            if (model is WebPage)
+            PageModel model =  (EnrichModel(page) as PageModel) ?? page;
+
+            if (!string.IsNullOrEmpty(model.Id))
             {
-                WebRequestContext.PageId = ((WebPage)model).Id;
+                WebRequestContext.PageId = model.Id;
             }
+
             return View(viewData.ViewName, model);
         }
 
@@ -64,7 +66,7 @@ namespace Sdl.Web.Mvc.Controllers
         public virtual ActionResult PageRaw(string pageUrl = null)
         {
             pageUrl = pageUrl ?? Request.Url.AbsolutePath;
-            var rawContent = ContentProvider.GetPageContent(pageUrl);
+            string rawContent = ContentProvider.GetPageContent(pageUrl);
             if (rawContent == null)
             {
                 return NotFound();
@@ -79,14 +81,14 @@ namespace Sdl.Web.Mvc.Controllers
         [FormatData]
         public virtual ActionResult NotFound()
         {
-            var page = ContentProvider.GetPageModel(WebRequestContext.Localization.Path + "/error-404");
+            PageModel page = (PageModel)ContentProvider.GetPageModel(WebRequestContext.Localization.Path + "/error-404"); // TODO TSI-634: GetPageModel should return Page
             if (page == null)
             {
                 throw new HttpException(404, "Page Not Found");
             }
-            var viewData = GetViewData(page);
+            MvcData viewData = GetViewData(page);
             SetupViewData(0, viewData);
-            var model = EnrichModel(page) ?? page;
+            ViewModel model = (EnrichModel(page) as ViewModel) ?? page;
             Response.StatusCode = 404;
             return View(viewData.ViewName, model);
         }
@@ -98,12 +100,12 @@ namespace Sdl.Web.Mvc.Controllers
         /// <param name="containerSize">The size (in grid units) of the container the region is in</param>
         /// <returns>Rendered region model</returns>
         [HandleSectionError(View = "SectionError")]
-        public virtual ActionResult Region(IRegion region, int containerSize = 0)
+        public virtual ActionResult Region(RegionModel region, int containerSize = 0)
         {
             ModelType = ModelType.Region;
-            SetupViewData(containerSize, region.AppData);
-            var model = EnrichModel(region) ?? region;
-            return View(region.AppData.ViewName, model);
+            SetupViewData(containerSize, region.MvcData);
+            RegionModel model = (EnrichModel(region) as RegionModel) ?? region;
+            return View(region.MvcData.ViewName, model);
         }
 
         /// <summary>
@@ -113,12 +115,12 @@ namespace Sdl.Web.Mvc.Controllers
         /// <param name="containerSize">The size (in grid units) of the container the entity is in</param>
         /// <returns>Rendered entity model</returns>
         [HandleSectionError(View = "SectionError")]
-        public virtual ActionResult Entity(IEntity entity, int containerSize = 0)
+        public virtual ActionResult Entity(EntityModel entity, int containerSize = 0)
         {
             ModelType = ModelType.Entity;
-            SetupViewData(containerSize, entity.AppData);
-            var model = EnrichModel(entity) ?? entity;
-            return View(entity.AppData.ViewName, model);
+            SetupViewData(containerSize, entity.MvcData);
+            EntityModel model = (EnrichModel(entity) as EntityModel) ?? entity;
+            return View(entity.MvcData.ViewName, model);
         }
 
        
@@ -187,6 +189,8 @@ namespace Sdl.Web.Mvc.Controllers
         /// <returns>A fully populated view model combining CMS content with other data</returns>
         public virtual object EnrichModel(object model)
         {
+            // TODO TSI-634: This should be more stongly typed (ViewModel instead of object), but this was part of the V1.0 (semi-)public API
+
             //Check if an exception was generated when creating the model, so now is the time to throw it
             if (model is ExceptionEntity)
             {
@@ -202,9 +206,13 @@ namespace Sdl.Web.Mvc.Controllers
         /// <returns>A processed view model</returns>
         protected virtual object ProcessModel(object sourceModel)
         {
+            // TODO TSI-634: This should be more stongly typed (ViewModel instead of object), but this was part of the V1.0 (semi-)public API
+
             //For backwards compatiblity we call the obsolete ProcessModel method, as this is what people creating
             //custom controllers based on v1.0 API will have overridden
-            return ProcessModel(sourceModel, sourceModel.GetType());
+#pragma warning disable 618
+            return ProcessModel(sourceModel, sourceModel.GetType()) as ViewModel;
+#pragma warning restore 618
         }
         
         /// <summary>
@@ -213,17 +221,20 @@ namespace Sdl.Web.Mvc.Controllers
         /// <param name="sourceModel">The model to process</param>
         /// <param name="type">The type of view model required</param>
         /// <returns>A processed view model</returns>
-        [Obsolete("Use ProcessModel(object model) instead. Model mapping now occurs before entity controller actions so there is no need for a type parameter.")]
+        [Obsolete("Use ProcessModel(ViewModel model) instead. Model mapping now occurs before entity controller actions so there is no need for a type parameter.")]
         protected virtual object ProcessModel(object sourceModel, Type type)
         {
+            // TODO TSI-634: This should be more stongly typed (ViewModel instead of object), but this was part of the V1.0 (semi-)public API
+
             return sourceModel;
         }
 
         protected virtual object ProcessNavigation(object sourceModel, string navType)
         {
-            var navigationUrl = SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization);
-            var model = ProcessModel(sourceModel);
-            var nav = model as NavigationLinks;
+            // TODO TSI-634: This should be more stongly typed (ViewModel instead of object), but this was part of the V1.0 (semi-)public API
+
+            string navigationUrl = SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization);
+            NavigationLinks nav = ProcessModel(sourceModel) as NavigationLinks;
             NavigationLinks links = new NavigationLinks();
             switch (navType)
             {
@@ -239,8 +250,8 @@ namespace Sdl.Web.Mvc.Controllers
             }
             if (nav != null)
             {
-                links.EntityData = nav.EntityData;
-                links.PropertyData = nav.PropertyData;
+                links.XpmMetadata = nav.XpmMetadata;
+                links.XpmPropertyMetadata = nav.XpmPropertyMetadata;
             }
             return links;
         }
@@ -285,17 +296,10 @@ namespace Sdl.Web.Mvc.Controllers
 
         protected virtual MvcData GetViewData(object sourceModel)
         {
-            if (sourceModel is IEntity)
+            ViewModel viewModel = sourceModel as ViewModel;
+            if (viewModel != null)
             {
-                return (((IEntity)sourceModel).AppData);
-            }
-            if (sourceModel is IPage)
-            {
-                return (((IPage)sourceModel).AppData);
-            }
-            if (sourceModel is IRegion)
-            {
-                return (((IRegion)sourceModel).AppData);
+                return viewModel.MvcData;
             }
             return ContentProvider.ContentResolver.ResolveMvcData(sourceModel);
         }
@@ -341,7 +345,7 @@ namespace Sdl.Web.Mvc.Controllers
         }
 
 
-        public virtual object ProcessPageModel(IPage model)
+        public virtual object ProcessPageModel(PageModel model)
         {
             // For each entity in the page which has a custom controller action (so is likely
             // to enrich the CMS managed model with additional data) we call the 
@@ -349,14 +353,14 @@ namespace Sdl.Web.Mvc.Controllers
             // data
             if (model != null)
             {
-                foreach (var region in model.Regions.Values)
+                foreach (RegionModel region in model.Regions)
                 {
-                    for (int i = 0; i < region.Items.Count; i++)
+                    for (int i = 0; i < region.Entities.Count; i++)
                     {
-                        var entity = region.Items[i] as IEntity;
-                        if (entity != null && entity.AppData != null)
+                        EntityModel entity = region.Entities[i];
+                        if (entity != null && entity.MvcData != null)
                         {
-                            region.Items[i] = ProcessEntityModel(entity);                            
+                            region.Entities[i] = ProcessEntityModel(entity);                            
                         }
                     }
                 }
@@ -364,24 +368,26 @@ namespace Sdl.Web.Mvc.Controllers
             return model;
         }
 
-        public virtual object ProcessEntityModel(IEntity entity)
+        public virtual EntityModel ProcessEntityModel(EntityModel entity)
         {
             //Enrich a base (CMS managed) entity with additional data by calling the
             //appropriate custom controller's ProcessModel method
-            if (entity!=null && IsCustomAction(entity.AppData))
+            if (entity!=null && IsCustomAction(entity.MvcData))
             {
+                MvcData mvcData = entity.MvcData;
+
                 var tempRequestContext = new RequestContext(HttpContext, new RouteData());
-                tempRequestContext.RouteData.DataTokens["Area"] = entity.AppData.ControllerAreaName;
-                tempRequestContext.RouteData.Values["controller"] = entity.AppData.ControllerName;
-                tempRequestContext.RouteData.Values["area"] = entity.AppData.ControllerAreaName;
+                tempRequestContext.RouteData.DataTokens["Area"] = mvcData.ControllerAreaName;
+                tempRequestContext.RouteData.Values["controller"] = mvcData.ControllerName;
+                tempRequestContext.RouteData.Values["area"] = mvcData.ControllerAreaName;
                 tempRequestContext.HttpContext = HttpContext;
-                BaseController controller = ControllerBuilder.Current.GetControllerFactory().CreateController(tempRequestContext, entity.AppData.ControllerName) as BaseController;
+                BaseController controller = ControllerBuilder.Current.GetControllerFactory().CreateController(tempRequestContext, mvcData.ControllerName) as BaseController;
                 try
                 {
                     if (controller != null)
                     {
                         controller.ControllerContext = new ControllerContext(HttpContext, tempRequestContext.RouteData, controller);
-                        return controller.EnrichModel(entity);
+                        return (EntityModel) controller.EnrichModel(entity);
                     }
                 }
                 catch (Exception ex)

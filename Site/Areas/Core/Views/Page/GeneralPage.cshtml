@@ -1,5 +1,4 @@
-﻿@using System.ComponentModel
-@model Sdl.Web.Common.Models.WebPage
+﻿@model PageModel
 @{
     bool hasLeftBar = Model.Includes.ContainsKey("Left Navigation") || Model.Regions.ContainsKey("Left");
     int mainContainerSize = hasLeftBar ? 9 : 12;
@@ -7,7 +6,7 @@
 @Html.DxaRegion("Hero")
 @if (Model.Includes.ContainsKey("Content Tools"))
 {
-    foreach (var region in Model.Includes["Content Tools"].Regions.Values)
+    foreach (RegionModel region in Model.Includes["Content Tools"].Regions)
     {
         @Html.DxaRegion(region)
     }
@@ -18,7 +17,7 @@
     <div class="col-sm-12 col-md-3">
         @if (Model.Includes.ContainsKey("Left Navigation"))
         {
-            foreach (var region in Model.Includes["Left Navigation"].Regions.Values)
+            foreach (var region in Model.Includes["Left Navigation"].Regions)
             {
                 @Html.DxaRegion(region, containerSize: 3)
             }

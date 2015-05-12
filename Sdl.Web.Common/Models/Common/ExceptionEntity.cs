@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sdl.Web.Common.Models.Common
 {
-    public class ExceptionEntity : EntityBase
+    public class ExceptionEntity : EntityModel
     {
         public string Error { get; set; }
     }

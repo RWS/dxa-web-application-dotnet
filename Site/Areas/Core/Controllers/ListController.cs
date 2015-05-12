@@ -20,12 +20,12 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         /// <param name="containerSize">The size (in grid units) of the container the entity is in</param>
         /// <returns>Rendered list entity model</returns>
         [HandleSectionError(View = "SectionError")]
-        public virtual ActionResult List(IEntity entity, int containerSize = 0)
+        public virtual ActionResult List(EntityModel entity, int containerSize = 0)
         {
             ModelType = ModelType.Entity;
-            SetupViewData(containerSize, entity.AppData);
+            SetupViewData(containerSize, entity.MvcData);
             var model = EnrichModel(entity) ?? entity;
-            return View(entity.AppData.ViewName, model);
+            return View(entity.MvcData.ViewName, model);
         }
 
         public override object EnrichModel(object sourceModel)

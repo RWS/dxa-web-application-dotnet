@@ -117,17 +117,17 @@ namespace Sdl.Web.Mvc.ContentProvider
 
         protected object MapModelItems(object model)
         {
-            if (model is IPage)
+            if (model is PageModel)
             {
-                var page = ((IPage)model);
-                foreach (var region in page.Regions.Values)
+                PageModel page = ((PageModel)model);
+                foreach (RegionModel region in page.Regions)
                 {
-                    for (int i = 0; i < region.Items.Count; i++)
+                    for (int i = 0; i < region.Entities.Count; i++)
                     {
-                        object mappedItem = null;
+                        EntityModel mappedItem;
                         try
                         {
-                            mappedItem = MapModel(region.Items[i], ModelType.Entity);
+                            mappedItem = (EntityModel) MapModel(region.Entities[i], ModelType.Entity);
                         }
                         catch (Exception ex)
                         {
@@ -135,9 +135,13 @@ namespace Sdl.Web.Mvc.ContentProvider
                             //and carry on processing - this should not cause a failure in the rendering of
                             //the page as a whole
                             Log.Error(ex);
-                            mappedItem = new ExceptionEntity { Error = ex.Message, AppData = ContentResolver.ResolveMvcData(region.Items[i]) };                   
+                            mappedItem = new ExceptionEntity
+                            {
+                                Error = ex.Message, 
+                                MvcData = ContentResolver.ResolveMvcData(region.Entities[i])
+                            };
                         }
-                        region.Items[i] = mappedItem;
+                        region.Entities[i] = mappedItem;
                     }
                 }
             }
