@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
+using System.IO;
 using System.Web;
 using System.Web.Script.Serialization;
-using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
-using System.IO;
-using Sdl.Web.Common.Models.Common;
 
 namespace Sdl.Web.Mvc.ContentProvider
 {

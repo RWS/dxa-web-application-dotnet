@@ -6,10 +6,9 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
 {
     public class PageController : BaseController
     {
-        public PageController(IContentProvider contentProvider, IRenderer renderer)
+        public PageController(IContentProvider contentProvider)
         {
             ContentProvider = contentProvider;
-            Renderer = renderer;
         }
 
         public ActionResult ServerError()

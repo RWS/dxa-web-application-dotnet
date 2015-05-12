@@ -7,10 +7,9 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
 {
     public class ListController : BaseController
     {
-        public ListController(IContentProvider contentProvider, IRenderer renderer)
+        public ListController(IContentProvider contentProvider)
         {
             ContentProvider = contentProvider;
-            Renderer = renderer;
         }
 
         /// <summary>
@@ -24,7 +23,7 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         {
             ModelType = ModelType.Entity;
             SetupViewData(containerSize, entity.MvcData);
-            var model = EnrichModel(entity) ?? entity;
+            ViewModel model = EnrichModel(entity) ?? entity;
             return View(entity.MvcData.ViewName, model);
         }
 

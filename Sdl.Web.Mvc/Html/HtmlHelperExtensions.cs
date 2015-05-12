@@ -6,11 +6,14 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Mvc.Html;
+using System.Web.Routing;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Tridion.Markup;
 
 namespace Sdl.Web.Mvc.Html
 {
@@ -335,10 +338,37 @@ namespace Sdl.Web.Mvc.Html
                 return MvcHtmlString.Empty;
             }
 
+            if (containerSize == 0)
+            {
+                containerSize = SiteConfiguration.MediaHelper.GridSize;
+            }
+
             Log.Debug("Rendering Entity [{0}] (containerSize: {1})", entity, containerSize);
-            
-            // TODO TSI-787: use RenderPartial
-            return htmlHelper.ViewBag.Renderer.RenderEntity(entity, htmlHelper, containerSize);
+
+            MvcData mvcData = entity.MvcData;
+            var parameters = new RouteValueDictionary();
+            int parentContainerSize = htmlHelper.ViewBag.ContainerSize;
+            if (parentContainerSize == 0)
+            {
+                parentContainerSize = SiteConfiguration.MediaHelper.GridSize;
+            }
+            parameters["containerSize"] = (containerSize * parentContainerSize) / SiteConfiguration.MediaHelper.GridSize;
+            parameters["entity"] = entity;
+            parameters["area"] = mvcData.ControllerAreaName;
+            if (mvcData.RouteValues != null)
+            {
+                foreach (var key in mvcData.RouteValues.Keys)
+                {
+                    parameters[key] = mvcData.RouteValues[key];
+                }
+            }
+            MvcHtmlString result = htmlHelper.Action(mvcData.ActionName, mvcData.ControllerName, parameters);
+            if (WebRequestContext.IsPreview)
+            {
+                // TODO TSI-773: don't parse entity if this is in an include page (not rendered directly, so !WebRequestContext.IsInclude)
+                result = new MvcHtmlString(TridionMarkup.ParseEntity(result.ToString()));
+            }
+            return result;
         }
 
         /// <summary>
@@ -369,12 +399,27 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The rendered HTML or an empty string if <paramref name="region"/> is <c>null</c>.</returns>
         public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, RegionModel region, int containerSize = 0)
         {
+            if (region == null)
+            {
+                return MvcHtmlString.Empty;
+            }
+
+            if (containerSize == 0)
+            {
+                containerSize = SiteConfiguration.MediaHelper.GridSize;
+            }
+
             Log.Debug("Rendering Region '{0}' (containerSize: {1})", region.Name, containerSize);
 
-            // TODO TSI-787: use RenderPartial
-            return (region == null) ? 
-                MvcHtmlString.Empty : 
-                htmlHelper.ViewBag.Renderer.RenderRegion(region, htmlHelper, containerSize);
+            MvcData mvcData = region.MvcData;
+            MvcHtmlString result = htmlHelper.Action(mvcData.ActionName, mvcData.ControllerName, new { Region = region, containerSize = containerSize, area = mvcData.ControllerAreaName });
+
+            if (WebRequestContext.IsPreview)
+            {
+                // TODO TSI-773: don't parse region if this is a region in an include page (not rendered directly, so !WebRequestContext.IsInclude)
+                result = new MvcHtmlString(TridionMarkup.ParseRegion(result.ToString(), WebRequestContext.Localization));
+            }
+            return result;
         }
 
         /// <summary>
@@ -448,9 +493,10 @@ namespace Sdl.Web.Mvc.Html
         /// Generates XPM markup for the current Page Model.
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="isIncludePage">Specifies whether markup for an include Page (XPM edit include page/back button) should be rendered.</param>
         /// <returns>The XPM markup for the Page.</returns>
         /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
-        public static MvcHtmlString DxaPageMarkup(this HtmlHelper htmlHelper)
+        public static MvcHtmlString DxaPageMarkup(this HtmlHelper htmlHelper, bool isIncludePage = false)
         {
             // TODO TSI-776: this method should output "semantic" attributes on the HTML element representing the Page like we do for DxaRegionMarkup, DxaEntityMarkup and DxaPropertyMarkup
             if (!WebRequestContext.Localization.IsStaging)
@@ -459,11 +505,20 @@ namespace Sdl.Web.Mvc.Html
             }
 
             PageModel page = (PageModel) htmlHelper.ViewData.Model;
+
+            Log.Debug("Rendering XPM markup for Page [{0}] (isIncludePage: {1})", page, isIncludePage);
+
+            if (isIncludePage)
+            {
+                 return htmlHelper.Partial("Partials/XpmButton", page);
+            }
+
             if (!page.XpmMetadata.ContainsKey("CmsUrl"))
             {
                 page.XpmMetadata.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
             }
-            return new MvcHtmlString(Tridion.Markup.TridionMarkup.PageMarkup(page.XpmMetadata));
+
+            return new MvcHtmlString(Tridion.Markup.TridionMarkup.PageMarkup(page.XpmMetadata)); 
         }
 
         /// <summary>

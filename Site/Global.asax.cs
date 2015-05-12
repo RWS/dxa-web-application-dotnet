@@ -19,6 +19,7 @@ namespace Sdl.Web.Site
     public class MvcApplication : HttpApplication
     {
         private static bool _initialized;
+
         public static void RegisterRoutes(RouteCollection routes)
         {
             RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
@@ -115,15 +116,15 @@ namespace Sdl.Web.Site
 
         protected IUnityContainer InitializeDependencyInjection()
         {
-            var container = BuildUnityContainer();
+            IUnityContainer container = BuildUnityContainer();
             DependencyResolver.SetResolver(new UnityDependencyResolver(container));
             return container;
         }
 
         protected IUnityContainer BuildUnityContainer()
         {
-            var section = (UnityConfigurationSection)System.Configuration.ConfigurationManager.GetSection("unity");
-            var container = section.Configure(new UnityContainer(), "main");
+            UnityConfigurationSection section = (UnityConfigurationSection)System.Configuration.ConfigurationManager.GetSection("unity");
+            IUnityContainer container = section.Configure(new UnityContainer(), "main");
             ServiceLocator.SetLocatorProvider(() => new UnityServiceLocator(container));
             return container;
         }
@@ -150,7 +151,7 @@ namespace Sdl.Web.Site
             routeData.Values.Add("area", "Core");
             routeData.Values.Add("action", "ServerError");
             Server.ClearError();
-            IController controller = new PageController(null,null);
+            IController controller = new PageController(null);
             controller.Execute(new RequestContext(new HttpContextWrapper(Context), routeData));
         }
     }

@@ -1,6 +1,6 @@
 ﻿@model PageModel
 <footer id="page-footer" class="page-row">
-    @ViewBag.Renderer.RenderIncludePageData(Model, Html)
+    @Html.DxaPageMarkup(isIncludePage: true)
     <div class="container-fluid page-border">
         @Html.DxaRegions(exclude: "Links", containerSize: 12)
         <hr />

@@ -145,6 +145,7 @@ namespace Sdl.Web.DD4T.Mapping
                         PageModel item = GetPageModel(SiteConfiguration.LocalizeUrl(include, WebRequestContext.Localization), addIncludes: false);
                         if (item != null)
                         {
+                            item.IsIncluded = true;
                             result.Add(item);
                         }
                     }

@@ -1,7 +1,7 @@
 ﻿@model PageModel
 @Html.DxaRegion("Info")
 <header id="page-header" class="navbar navbar-default">
-    @ViewBag.Renderer.RenderIncludePageData(Model, Html)
+    @Html.DxaPageMarkup(isIncludePage: true)
     <div class="container-fluid page-border">
         <div class="row">
             <div class="col-xs-12" role="navigation">

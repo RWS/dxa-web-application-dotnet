@@ -5,10 +5,9 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
 {
     public class EntityController : BaseController
     {
-        public EntityController(IContentProvider contentProvider, IRenderer renderer)
+        public EntityController(IContentProvider contentProvider)
         {
             ContentProvider = contentProvider;
-            Renderer = renderer;
         }
     }
 }

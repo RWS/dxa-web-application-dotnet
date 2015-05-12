@@ -11,6 +11,7 @@ using System.IO;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Sdl.Web.Mvc.Html;
 
 namespace Sdl.Web.Mvc.Controllers
 {
@@ -19,11 +20,37 @@ namespace Sdl.Web.Mvc.Controllers
     /// </summary>
     public abstract class BaseController : Controller
     {
-        public virtual IContentProvider ContentProvider { get; set; }
-        public virtual IRenderer Renderer { get; set; }
-        public virtual ModelType ModelType { get; set; }
+#pragma warning disable 618
+        private IRenderer _renderer = new BaseRenderer();
 
-        public BaseController()
+        [Obsolete("Renderers are deprecated in DXA 1.1. Rendering should be done using DXA 1.1 HtmlHelper extension methods.")]
+        protected IRenderer Renderer
+        {
+            get
+            {
+                return _renderer;
+            }
+            set
+            {
+                // To support (deprecated) Dependency Injection
+                _renderer = value;
+            }
+        }
+#pragma warning restore 618
+
+        protected IContentProvider ContentProvider
+        {
+            get; 
+            set;
+        }
+
+        protected ModelType ModelType
+        {
+            get; 
+            set;
+        }
+
+        protected BaseController()
         {
             //default model type
             ModelType = ModelType.Entity;
@@ -267,7 +294,11 @@ namespace Sdl.Web.Mvc.Controllers
 
         protected virtual void SetupViewData(int containerSize = 0, MvcData viewData = null)
         {
+#pragma warning disable 618
+            // To support (deprecated) use of ViewBag.Renderer in Views.
             ViewBag.Renderer = Renderer;
+#pragma warning restore 618
+
             ViewBag.ContainerSize = containerSize;
             if (viewData != null)
             {
