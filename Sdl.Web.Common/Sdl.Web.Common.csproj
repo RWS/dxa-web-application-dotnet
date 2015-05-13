@@ -111,7 +111,6 @@
     <Compile Include="Models\Entity\Teaser.cs" />
     <Compile Include="Interfaces\IContentProvider.cs" />
     <Compile Include="Interfaces\ILogger.cs" />
-    <Compile Include="Interfaces\IModelBuilder.cs" />
     <Compile Include="Interfaces\IRenderer.cs" />
     <Compile Include="Interfaces\IStaticFileManager.cs" />
     <Compile Include="Models\Navigation\NavigationLinks.cs" />

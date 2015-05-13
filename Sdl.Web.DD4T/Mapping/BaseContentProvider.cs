@@ -7,7 +7,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 
-namespace Sdl.Web.Mvc.ContentProvider
+namespace Sdl.Web.DD4T.Mapping
 {
     /// <summary>
     /// Abstract Base Content Provider
@@ -22,8 +22,8 @@ namespace Sdl.Web.Mvc.ContentProvider
         public abstract string GetEntityContent(string url);
         public abstract ContentList<Teaser> PopulateDynamicList(ContentList<Teaser> list);
 
-        protected abstract object GetPageModelFromUrl(string url); // TODO TSI-634: strongly typed.
-        protected abstract List<PageModel> GetIncludesFromModel(object data); // TODO TSI-634: strongly typed.
+        protected abstract object GetPageModelFromUrl(string url); 
+        protected abstract List<PageModel> GetIncludesFromModel(object data); 
 
         private static Dictionary<Type, IModelBuilder> _modelBuilders;
         /// <summary>

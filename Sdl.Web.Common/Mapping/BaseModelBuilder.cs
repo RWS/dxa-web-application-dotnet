@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Mapping
 {
-    public abstract class BaseModelBuilder : IModelBuilder
+    public abstract class BaseModelBuilder
     {
         private static readonly object SemanticsLock = new object();
 
@@ -27,7 +26,6 @@ namespace Sdl.Web.Common.Mapping
             }
         }
         
-        public abstract ViewModel Create(object sourceEntity, Type type, List<PageModel> includes=null, MvcData mvcData = null);
 
         protected virtual Dictionary<string, KeyValuePair<string,string>> GetEntityDataFromType(Type type)
         {

@@ -22,7 +22,7 @@ namespace Sdl.Web.DD4T.Mapping
     /// <summary>
     /// Model Builder implementation for DD4T - this contains the logic for mapping DD4T objects to View Models
     /// </summary>
-    public partial class DD4TModelBuilder : BaseModelBuilder
+    public class DD4TModelBuilder : BaseModelBuilder, IModelBuilder
     {
         //NOTE - while it works perfectly well, this class is in need of some refactoring to make
         //its behaviour a bit more understandable and maintainable, as its currently very easy to 
@@ -37,7 +37,7 @@ namespace Sdl.Web.DD4T.Mapping
             _contentResolver = contentResolver;
         }
 
-        public override ViewModel Create(object sourceEntity, Type type, List<PageModel> includes = null, MvcData mvcData = null)
+        public ViewModel Create(object sourceEntity, Type type, List<PageModel> includes = null, MvcData mvcData = null)
         {
             if (sourceEntity is IPage)
             {

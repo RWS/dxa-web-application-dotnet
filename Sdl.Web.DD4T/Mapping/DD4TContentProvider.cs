@@ -8,7 +8,6 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
-using Sdl.Web.Mvc.ContentProvider;
 using Sdl.Web.Tridion.Query;
 using IPage = DD4T.ContentModel.IPage;
 

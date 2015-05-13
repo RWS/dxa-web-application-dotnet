@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sdl.Web.Common.Interfaces
+namespace Sdl.Web.DD4T.Mapping
 {
     public interface IModelBuilder
     {
