@@ -6,6 +6,7 @@ using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 
@@ -136,6 +137,8 @@ namespace Sdl.Web.Mvc.Html
                 string predicate = xpath.EndsWith("]") ? string.Empty : string.Format("[{0}]", index + 1);
                 markup += string.Format(" data-xpath=\"{0}{1}\"", HttpUtility.HtmlAttributeEncode(xpath), predicate);
             }
+
+            Log.Debug("Rendered markup for Entity [{0}] Property '{1}': {2}", entityModel, propertyName, markup);
 
             return new MvcHtmlString(markup);
         }

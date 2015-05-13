@@ -28,21 +28,21 @@
                 <div @Html.DxaPropertyMarkup(() => Model.ArticleBody, i++)>
                     @if (para.Subheading!=null)
                     {
-                        <h3 @Html.DxaPropertyMarkup(para, "Subheading")>@para.Subheading</h3>
+                        <h3 @Html.DxaPropertyMarkup(() => para.Subheading)>@para.Subheading</h3>
                     }
                     @if (para.Content!=null)
                     {
-                        <div @Html.DxaPropertyMarkup(para, "Content")>
+                        <div @Html.DxaPropertyMarkup(() => para.Content)>
                             @Html.Raw(para.Content)
                         </div>
                     }
                     @if (para.Media!=null)
                     {
-                        <figure @Html.DxaPropertyMarkup(para, "Media")>
+                        <figure @Html.DxaPropertyMarkup(() => para.Media)>
                             @Html.Media(para.Media, "100%", 0) 
                             @if (para.Caption!=null)
                             {
-                                <figcaption @Html.DxaPropertyMarkup(para, "Caption")>
+                                <figcaption @Html.DxaPropertyMarkup(() => para.Caption)>
                                     @para.Caption
                                 </figcaption>
                             }

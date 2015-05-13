@@ -29,7 +29,7 @@
                         @foreach (Teaser element in Model.ItemListElements)
                         {
                             <li class="@(i==0 ? "active" : String.Empty)">
-                                <a href="#@TabId(i++)" data-toggle="tab" @Html.DxaPropertyMarkup(element, "Headline")>@element.Headline</a>
+                                <a href="#@TabId(i++)" data-toggle="tab" @Html.DxaPropertyMarkup(() => element.Headline)>@element.Headline</a>
                             </li>
                         }
                     </ul>
@@ -39,18 +39,18 @@
                         @foreach (Teaser element in Model.ItemListElements)
                         {
                             <div class="tab-pane @(i==0 ? "active" : String.Empty)" id="@TabId(i)" @Html.DxaPropertyMarkup(() => Model.ItemListElements, i++)>
-                                <div @Html.DxaPropertyMarkup(element, "Text")>
+                                <div @Html.DxaPropertyMarkup(() => element.Text)>
                                     @Html.Raw(element.Text)
                                 </div>
                                 @if (element.Media != null)
                                 {
-                                    <figure @Html.DxaPropertyMarkup(element, "Media")>
+                                    <figure @Html.DxaPropertyMarkup(() => element.Media)>
                                         @Html.Media(element.Media)
                                     </figure>
                                 }
                                 @if (element.Link.IsValidLink())
                                 {
-                                    <p @Html.DxaPropertyMarkup(element, "Link")>
+                                    <p @Html.DxaPropertyMarkup(() => element.Link)>
                                         <a href="@element.Link.Url" title="@element.Link.AlternateText" class="btn btn-primary">@(element.Link.LinkText ?? Html.Resource("core.readMoreLinkText"))</a>
                                     </p>
                                 }

@@ -607,15 +607,31 @@ namespace Sdl.Web.Mvc.Html
             MemberExpression memberExpression = propertyExpression.Body as MemberExpression;
             if (memberExpression == null)
             {
+                UnaryExpression boxingExpression = propertyExpression.Body as UnaryExpression;
+                if (boxingExpression != null)
+                {
+                    memberExpression = boxingExpression.Operand as MemberExpression;
+                }
+            }
+            if (memberExpression == null)
+            {
                 throw new DxaException(
-                    string.Format("Unexpected expression type provided to DxaPropertyMarkup: {0}. Expecting a single Entity property.", propertyExpression.Body.GetType().Name)
+                    string.Format("Unexpected expression provided to DxaPropertyMarkup: {0}. Expecting a lambda which evaluates to an Entity Model property.", propertyExpression.Body.GetType().Name)
                     );
             }
 
-            // TODO TSI-777: obtain the Entity Model from the propertyExpression
-            EntityModel entity = (EntityModel) htmlHelper.ViewData.Model;
+            Expression<Func<object>> entityExpression = Expression.Lambda<Func<object>>(memberExpression.Expression);
+            Func<object> entityLambda = entityExpression.Compile();
+            object entity = entityLambda.Invoke();
+            EntityModel entityModel = entity as EntityModel;
+            if (entityModel == null)
+            {
+                throw new DxaException(
+                    string.Format("Unexpected type used in DxaPropertyMarkup expression: {0}. Expecting a lambda which evaluates to an Entity Model property.", entity)
+                    );
+            }
 
-            return Markup.RenderPropertyAttributes(entity, memberExpression.Member, index);
+            return Markup.RenderPropertyAttributes(entityModel, memberExpression.Member, index);
         }
         #endregion
 
