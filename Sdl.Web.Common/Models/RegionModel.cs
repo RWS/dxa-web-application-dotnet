@@ -6,7 +6,7 @@ namespace Sdl.Web.Common.Models
     /// Represents the View Model for a Page Region.
     /// </summary>
 #pragma warning disable 618
-    // TODO: Ideally this would inherit directly from ViewModel, but for backward compatibility we need the legacy type inbetween.
+    // TODO DXA 2.0: Ideally this would inherit directly from ViewModel, but for backward compatibility we need the legacy type inbetween.
     public class RegionModel : Region
 #pragma warning restore 618
     {

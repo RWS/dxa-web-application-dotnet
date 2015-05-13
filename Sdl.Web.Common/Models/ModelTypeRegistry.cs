@@ -10,7 +10,7 @@ namespace Sdl.Web.Common.Models
     /// <summary>
     /// Represents a Registry of View Model Types and associated Semantics.
     /// </summary>
-    public static class ModelTypeRegistry // TODO: make internal?
+    public static class ModelTypeRegistry
     {
         private static readonly IDictionary<MvcData, Type> _viewToModelTypeMapping = new Dictionary<MvcData, Type>();
         private static readonly IDictionary<Type, SemanticInfo> _modelTypeToSemanticInfoMapping = new Dictionary<Type, SemanticInfo>();
@@ -56,7 +56,6 @@ namespace Sdl.Web.Common.Models
         {
             lock (_viewToModelTypeMapping)
             {
-                // TODO: can't viewData be derived from viewPath?
                 if (_viewToModelTypeMapping.ContainsKey(viewData))
                 {
                     Log.Warn("View '{0}' registered multiple times. Virtual Path: '{1}'", viewData, viewVirtualPath);

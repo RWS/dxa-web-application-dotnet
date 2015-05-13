@@ -15,6 +15,6 @@ namespace Sdl.Web.Common.Interfaces
         SitemapItem GetNavigationModel(string url);
 
         //Execute a query to get content
-        ContentList<Teaser> PopulateDynamicList(ContentList<Teaser> list); // TODO TSI-634: too strongly typed (?)
+        ContentList<Teaser> PopulateDynamicList(ContentList<Teaser> list); // TODO TSI-788: too strongly typed (?)
     }
 }
