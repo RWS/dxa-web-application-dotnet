@@ -44,16 +44,11 @@ namespace Sdl.Web.Mvc.Controllers
             set;
         }
 
+        [Obsolete("Deprecated in DXA 1.1. The Model Type should be determined using the ViewModel class hierarchy.")]
         protected ModelType ModelType
         {
             get; 
             set;
-        }
-
-        protected BaseController()
-        {
-            //default model type
-            ModelType = ModelType.Entity;
         }
 
         /// <summary>
@@ -65,7 +60,9 @@ namespace Sdl.Web.Mvc.Controllers
         [FormatData]
         public virtual ActionResult Page(string pageUrl)
         {
+#pragma warning disable 618
             ModelType = ModelType.Page;
+#pragma warning restore 618
             bool addIncludes = ViewBag.AddIncludes ?? true; 
             PageModel page = ContentProvider.GetPageModel(pageUrl, addIncludes); 
             if (page == null)
@@ -129,7 +126,9 @@ namespace Sdl.Web.Mvc.Controllers
         [HandleSectionError(View = "SectionError")]
         public virtual ActionResult Region(RegionModel region, int containerSize = 0)
         {
+#pragma warning disable 618
             ModelType = ModelType.Region;
+#pragma warning restore 618
             SetupViewData(containerSize, region.MvcData);
             RegionModel model = (EnrichModel(region) as RegionModel) ?? region;
             return View(region.MvcData.ViewName, model);
@@ -144,7 +143,6 @@ namespace Sdl.Web.Mvc.Controllers
         [HandleSectionError(View = "SectionError")]
         public virtual ActionResult Entity(EntityModel entity, int containerSize = 0)
         {
-            ModelType = ModelType.Entity;
             SetupViewData(containerSize, entity.MvcData);
             EntityModel model = (EnrichModel(entity) as EntityModel) ?? entity;
             return View(entity.MvcData.ViewName, model);
@@ -162,7 +160,6 @@ namespace Sdl.Web.Mvc.Controllers
         [HandleSectionError(View = "SectionError")]
         public virtual ActionResult Navigation(EntityModel entity, string navType, int containerSize = 0)
         {
-            ModelType = ModelType.Entity;
             MvcData viewData = GetViewData(entity);
             SetupViewData(containerSize, viewData);
             EntityModel model = ProcessNavigation(entity, navType) ?? entity;

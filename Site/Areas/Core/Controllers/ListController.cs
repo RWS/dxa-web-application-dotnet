@@ -21,7 +21,6 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         [HandleSectionError(View = "SectionError")]
         public virtual ActionResult List(EntityModel entity, int containerSize = 0)
         {
-            ModelType = ModelType.Entity;
             SetupViewData(containerSize, entity.MvcData);
             ViewModel model = EnrichModel(entity) ?? entity;
             return View(entity.MvcData.ViewName, model);
