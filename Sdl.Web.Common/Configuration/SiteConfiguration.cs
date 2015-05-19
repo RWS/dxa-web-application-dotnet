@@ -313,7 +313,7 @@ namespace Sdl.Web.Common.Configuration
         /// </summary>
         /// <param name="viewData">The View Data used to determine the registry key and model type</param>
         /// <param name="viewPath">The path to the view</param>
-        [Obsolete("Method is deprecated in DXA 1.1. Use ModelTypeRegistry.RegisterViewModel instead.")]
+        [Obsolete("Method is deprecated in DXA 1.1. Use BaseAreaRegistration.RegisterViewModel instead.")]
         public static void AddViewModelToRegistry(MvcData viewData, string viewPath)
         {
             ModelTypeRegistry.RegisterViewModel(viewData, viewPath);
@@ -325,7 +325,7 @@ namespace Sdl.Web.Common.Configuration
             return String.Format("{0}:{1}:{2}", mvcData.AreaName, mvcData.ControllerName, mvcData.ViewName);
         }
 
-        [Obsolete("Method is deprecated in DXA 1.1. Use ModelTypeRegistry.RegisterViewModel instead.")]
+        [Obsolete("Method is deprecated in DXA 1.1. Use BaseAreaRegistration.RegisterViewModel instead.")]
         public static void AddViewModelToRegistry(MvcData mvcData, Type modelType)
         {
             ModelTypeRegistry.RegisterViewModel(mvcData, modelType);
