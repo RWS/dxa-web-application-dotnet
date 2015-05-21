@@ -5,9 +5,5 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
 {
     public class RegionController : BaseController
     {
-        public RegionController(IContentProvider contentProvider)
-        {
-            ContentProvider = contentProvider;
-        }
     }
 }

@@ -5,9 +5,5 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
 {
     public class NavigationController : BaseController
     {      
-        public NavigationController(IContentProvider contentProvider)
-        {
-            ContentProvider = contentProvider;
-        }
     }
 }

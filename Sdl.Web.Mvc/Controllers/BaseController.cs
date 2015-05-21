@@ -1,4 +1,8 @@
-﻿using Sdl.Web.Common;
+﻿using System;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Routing;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
@@ -6,11 +10,6 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Common;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.Formats;
-using System;
-using System.IO;
-using System.Web;
-using System.Web.Mvc;
-using System.Web.Routing;
 using Sdl.Web.Mvc.Html;
 
 namespace Sdl.Web.Mvc.Controllers
@@ -20,6 +19,7 @@ namespace Sdl.Web.Mvc.Controllers
     /// </summary>
     public abstract class BaseController : Controller
     {
+        private IContentProvider _contentProvider;
 #pragma warning disable 618
         private IRenderer _renderer = new BaseRenderer();
 
@@ -40,8 +40,19 @@ namespace Sdl.Web.Mvc.Controllers
 
         protected IContentProvider ContentProvider
         {
-            get; 
-            set;
+            get
+            {
+                if (_contentProvider == null)
+                {
+                    _contentProvider = SiteConfiguration.ContentProvider;
+                }
+                return _contentProvider;
+            }
+            set
+            {
+                // To support (deprecated) Dependency Injection
+                _contentProvider = value;
+            }
         }
 
         [Obsolete("Deprecated in DXA 1.1. The Model Type should be determined using the ViewModel class hierarchy.")]

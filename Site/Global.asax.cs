@@ -150,7 +150,7 @@ namespace Sdl.Web.Site
             routeData.Values.Add("area", "Core");
             routeData.Values.Add("action", "ServerError");
             Server.ClearError();
-            IController controller = new PageController(null);
+            IController controller = new PageController();
             controller.Execute(new RequestContext(new HttpContextWrapper(Context), routeData));
         }
     }

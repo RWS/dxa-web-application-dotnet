@@ -7,11 +7,6 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
 {
     public class ListController : BaseController
     {
-        public ListController(IContentProvider contentProvider)
-        {
-            ContentProvider = contentProvider;
-        }
-
         /// <summary>
         /// Populate/Map and render a list entity model
         /// </summary>

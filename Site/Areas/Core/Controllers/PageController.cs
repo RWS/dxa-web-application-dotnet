@@ -6,11 +6,6 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
 {
     public class PageController : BaseController
     {
-        public PageController(IContentProvider contentProvider)
-        {
-            ContentProvider = contentProvider;
-        }
-
         public ActionResult ServerError()
         {
             //For a server error, it may be that there is an issue with connectivity,
