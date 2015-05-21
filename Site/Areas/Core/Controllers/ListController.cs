@@ -16,12 +16,12 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         [HandleSectionError(View = "SectionError")]
         public virtual ActionResult List(EntityModel entity, int containerSize = 0)
         {
-            SetupViewData(containerSize, entity.MvcData);
+            SetupViewData(entity, containerSize);
             ViewModel model = EnrichModel(entity) ?? entity;
-            return View(entity.MvcData.ViewName, model);
+            return View(model.MvcData.ViewName, model);
         }
 
-        public override ViewModel EnrichModel(ViewModel sourceModel)
+        protected override ViewModel EnrichModel(ViewModel sourceModel)
         {
             ContentList<Teaser> model = base.EnrichModel(sourceModel) as ContentList<Teaser>;
             if (model != null)
