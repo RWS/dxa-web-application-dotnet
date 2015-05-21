@@ -39,9 +39,9 @@ namespace Sdl.Web.Common.Interfaces
         EntityModel GetEntityModel(string id);
 
         /// <summary>
-        /// Populates a Content List (of Teasers) by executing the query it specifies.
+        /// Populates a Content List by executing the query it specifies.
         /// </summary>
         /// <param name="contentList">The Content List which specifies the query and is to be populated.</param>
-        void PopulateDynamicList(ContentList<Teaser> contentList); // TODO TSI-788: too strongly typed (?)
+        void PopulateDynamicList<T>(ContentList<T> contentList) where T: EntityModel; 
     }
 }

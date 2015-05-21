@@ -1,4 +1,5 @@
-﻿using Sdl.Web.Common.Interfaces;
+﻿using System.Linq;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Controllers;
 using System.Web.Mvc;
@@ -24,22 +25,22 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         protected override ViewModel EnrichModel(ViewModel sourceModel)
         {
             ContentList<Teaser> model = base.EnrichModel(sourceModel) as ContentList<Teaser>;
-            if (model != null)
+            if (model == null || model.ItemListElements.Any())
             {
-                if (model.ItemListElements.Count == 0)
-                {
-                    //we need to run a query to populate the list
-                    int start = GetRequestParameter<int>("start");
-                    if (model.Id == Request.Params["id"])
-                    {
-                        //we only take the start from the query string if there is also an id parameter matching the model entity id
-                        //this means that we are sure that the paging is coming from the right entity (if there is more than one paged list on the page)
-                        model.CurrentPage = (start / model.PageSize) + 1;
-                        model.Start = start;
-                    }
-                    ContentProvider.PopulateDynamicList(model);
-                }
+                return model;
             }
+
+            //we need to run a query to populate the list
+            int start = GetRequestParameter<int>("start");
+            if (model.Id == Request.Params["id"])
+            {
+                //we only take the start from the query string if there is also an id parameter matching the model entity id
+                //this means that we are sure that the paging is coming from the right entity (if there is more than one paged list on the page)
+                model.CurrentPage = (start / model.PageSize) + 1;
+                model.Start = start;
+            }
+            ContentProvider.PopulateDynamicList(model);
+
             return model;
         }
     }

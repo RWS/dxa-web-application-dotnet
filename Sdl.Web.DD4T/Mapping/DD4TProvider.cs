@@ -120,7 +120,7 @@ namespace Sdl.Web.DD4T.Mapping
         /// Populates a Content List (of Teasers) by executing the query it specifies.
         /// </summary>
         /// <param name="contentList">The Content List which specifies the query and is to be populated.</param>
-        public virtual void PopulateDynamicList(ContentList<Teaser> contentList)
+        public virtual void PopulateDynamicList<T>(ContentList<T> contentList) where T:EntityModel
         {
             BrokerQuery query = new BrokerQuery
             {
@@ -131,7 +131,8 @@ namespace Sdl.Web.DD4T.Mapping
                 Sort = contentList.Sort.Key
             };
 
-            List<Teaser> queryResults = query.ExecuteQuery();
+            // TODO: For now BrokerQuery always returns Teasers
+            IEnumerable<Teaser> queryResults = query.ExecuteQuery();
 
             ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
             foreach (Teaser item in queryResults)
@@ -139,7 +140,7 @@ namespace Sdl.Web.DD4T.Mapping
                 item.Link.Url = linkResolver.ResolveLink(item.Link.Url);
             }
 
-            contentList.ItemListElements = queryResults;
+            contentList.ItemListElements = queryResults.Cast<T>().ToList();
             contentList.HasMore = query.HasMore;
         }
 
