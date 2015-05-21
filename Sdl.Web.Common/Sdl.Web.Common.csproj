@@ -133,6 +133,7 @@
     <Compile Include="Models\ModelTypeRegistry.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Interfaces\ExtensionPoints.cd" />
     <None Include="Models\ViewModels.cd" />
     <None Include="packages.config" />
   </ItemGroup>

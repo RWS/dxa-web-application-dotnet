@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Interface Name="Sdl.Web.Common.Interfaces.IContentProvider">
+    <Position X="0.5" Y="0.75" Width="4.25" />
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAACCAAAAAAEAAAAAAAAAQAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\IContentProvider.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Sdl.Web.Common.Interfaces.ILinkResolver">
+    <Position X="0.5" Y="2.75" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\ILinkResolver.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Sdl.Web.Common.Interfaces.INavigationProvider">
+    <Position X="5" Y="0.75" Width="6" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAQAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAA=</HashCode>
+      <FileName>Interfaces\INavigationProvider.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Sdl.Web.Common.Interfaces.IRichTextProcessor">
+    <Position X="4.5" Y="2.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\IRichTextProcessor.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Sdl.Web.Common.Interfaces.IConditionalEntityEvaluator">
+    <Position X="7.5" Y="2.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\IConditionalEntityEvaluator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Sdl.Web.Common.Interfaces.IMediaHelper">
+    <Position X="0.5" Y="4.25" Width="6.25" />
+    <TypeIdentifier>
+      <HashCode>AAIAAABEAAAAAAAKBAAAAAAAACAAAAAAAAAAAAIABAA=</HashCode>
+      <FileName>Interfaces\IMediaHelper.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
