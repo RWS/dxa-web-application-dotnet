@@ -37,12 +37,12 @@ namespace Sdl.Web.Site
             routes.MapRoute(
                 "Core_Navigation",
                 "navigation.json",
-                new { controller = "Page", action = "PageRaw" }
+                new { controller = "Navigation", action = "SiteMapJson" }
             ).DataTokens.Add("area", "Core");
             routes.MapRoute(
                 "Core_Navigation_loc",
                 "{localization}/navigation.json",
-                new { controller = "Page", action = "PageRaw" }
+                new { controller = "Navigation", action = "SiteMapJson" }
             ).DataTokens.Add("area", "Core");
 
             // Google Site Map
@@ -99,10 +99,9 @@ namespace Sdl.Web.Site
         protected void Application_Start()
         {
             InitializeDependencyInjection();
-            SiteConfiguration.StaticFileManager = (IStaticFileManager)DependencyResolver.Current.GetService(typeof(IStaticFileManager));
-            SiteConfiguration.MediaHelper = (IMediaHelper)DependencyResolver.Current.GetService(typeof(IMediaHelper));
-            SiteConfiguration.LocalizationManager = (ILocalizationManager)DependencyResolver.Current.GetService(typeof(ILocalizationManager));
+            SiteConfiguration.InitializeProviders(DependencyResolver.Current);
             //Optionally preload list of localizations for this application
+            // TODO TSI-744: this requires a reference to Sdl.Web.Tridion (which is not intended as public API)
             SiteConfiguration.LocalizationManager.SetLocalizations(TridionConfig.PublicationMap);
             //Optionally set data formatters to allow pages to be rendered in data formats
             DataFormatters.Formatters.Add("json", new JsonFormatter());

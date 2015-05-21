@@ -1,10 +1,10 @@
-﻿using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Common;
 using Sdl.Web.Mvc.Configuration;
-using Sdl.Web.Mvc.ContentProvider;
 using Sdl.Web.Mvc.Formats;
 using System;
 using System.IO;
@@ -16,7 +16,7 @@ using Sdl.Web.Mvc.Html;
 namespace Sdl.Web.Mvc.Controllers
 {
     /// <summary>
-    /// Base controller containing main controller actions (Page, PageRaw, Region, Entity, Navigation, List etc.)
+    /// Base controller containing main controller actions (Page, Region, Entity, Navigation, List etc.)
     /// </summary>
     public abstract class BaseController : Controller
     {
@@ -80,22 +80,6 @@ namespace Sdl.Web.Mvc.Controllers
             }
 
             return View(viewData.ViewName, model);
-        }
-
-        /// <summary>
-        /// Given a page URL, load the corresponding raw content and write it to the response
-        /// </summary>
-        /// <param name="pageUrl">The page URL</param>
-        /// <returns>raw page content</returns>
-        public virtual ActionResult PageRaw(string pageUrl = null)
-        {
-            pageUrl = pageUrl ?? Request.Url.AbsolutePath;
-            string rawContent = ContentProvider.GetPageContent(pageUrl);
-            if (rawContent == null)
-            {
-                return NotFound();
-            }
-            return GetRawActionResult(Path.GetExtension(pageUrl).Substring(1), rawContent);
         }
 
         /// <summary>
@@ -167,27 +151,38 @@ namespace Sdl.Web.Mvc.Controllers
         }
 
         /// <summary>
-        /// Populate and render a site map
+        /// Retrieves a rendered HTML site map
         /// </summary>
         /// <param name="entity">The sitemap entity</param>
-        /// <returns>Rendered site map</returns>
+        /// <returns>Rendered site map HTML.</returns>
         public virtual ActionResult SiteMap(SitemapItem entity)
         {
-            SitemapItem model = ContentProvider.GetNavigationModel(SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization));
+            SitemapItem model = SiteConfiguration.NavigationProvider.GetNavigationModel(WebRequestContext.Localization);
             MvcData viewData = GetViewData(entity);
             SetupViewData(0, viewData);
             return View(viewData.ViewName, model);
         }
 
         /// <summary>
-        /// Populate and render an XML site map
+        /// Retrieves a Google XML site map
         /// </summary>
-        /// <returns>Rendered XML site map</returns>
+        /// <returns>Google site map XML.</returns>
         public virtual ActionResult SiteMapXml()
         {
-            SitemapItem model = ContentProvider.GetNavigationModel(SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization));
+            SitemapItem model = SiteConfiguration.NavigationProvider.GetNavigationModel(WebRequestContext.Localization);
             return View("SiteMapXml", model);
         }
+
+        /// <summary>
+        /// Retrieves a JSON site map
+        /// </summary>
+        /// <returns>Site map JSON.</returns>
+        public virtual ActionResult SiteMapJson()
+        {
+            SitemapItem model = SiteConfiguration.NavigationProvider.GetNavigationModel(WebRequestContext.Localization);
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
 
         /// <summary>
         /// Resolve a item ID into a url and redirect to that URL
@@ -197,12 +192,12 @@ namespace Sdl.Web.Mvc.Controllers
         /// <param name="defaultItemId"></param>
         /// <param name="defaultPath"></param>
         /// <returns>null - response is redirected if the URL can be resolved</returns>
-        public virtual ActionResult Resolve(string itemId, string localizationId, string defaultItemId = null, string defaultPath = null)
+        public virtual ActionResult Resolve(string itemId, int localizationId, string defaultItemId = null, string defaultPath = null)
         {
-            var url = ContentProvider.ContentResolver.ResolveLink("tcm:" + itemId, localizationId);
+            var url = SiteConfiguration.LinkResolver.ResolveLink("tcm:" + itemId, localizationId);
             if (url == null && defaultItemId!=null)
             {
-                url = ContentProvider.ContentResolver.ResolveLink("tcm:" + defaultItemId, localizationId);
+                url = SiteConfiguration.LinkResolver.ResolveLink("tcm:" + defaultItemId, localizationId);
             }
             if (url == null)
             {
@@ -246,27 +241,32 @@ namespace Sdl.Web.Mvc.Controllers
 
         protected virtual EntityModel ProcessNavigation(EntityModel sourceModel, string navType)
         {
-            string navigationUrl = SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization);
-            NavigationLinks nav = EnrichModel(sourceModel) as NavigationLinks; 
-            NavigationLinks links = new NavigationLinks();
+            INavigationProvider navigationProvider = SiteConfiguration.NavigationProvider;
+            string requestUrlPath = Request.Url.LocalPath;
+            Localization localization = WebRequestContext.Localization;
+            NavigationLinks navigationLinks;
             switch (navType)
             {
                 case "Top":
-                    links = new NavigationBuilder { ContentProvider = ContentProvider, NavigationUrl = navigationUrl }.BuildTopNavigation(Request.Url.LocalPath);
+                    navigationLinks = navigationProvider.GetTopNavigationLinks(requestUrlPath, localization);
                     break;
                 case "Left":
-                    links = new NavigationBuilder { ContentProvider = ContentProvider, NavigationUrl = navigationUrl }.BuildContextNavigation(Request.Url.LocalPath);
+                    navigationLinks = navigationProvider.GetContextNavigationLinks(requestUrlPath, localization);
                     break;
                 case "Breadcrumb":
-                    links = new NavigationBuilder { ContentProvider = ContentProvider, NavigationUrl = navigationUrl }.BuildBreadcrumb(Request.Url.LocalPath);
+                    navigationLinks = navigationProvider.GetBreadcrumbNavigationLinks(requestUrlPath, localization);
                     break;
+                default:
+                    throw new DxaException("Unexpected navType: " + navType);
             }
-            if (nav != null)
+
+            NavigationLinks navModel = EnrichModel(sourceModel) as NavigationLinks;
+            if (navModel != null)
             {
-                links.XpmMetadata = nav.XpmMetadata;
-                links.XpmPropertyMetadata = nav.XpmPropertyMetadata;
+                navigationLinks.XpmMetadata = navModel.XpmMetadata;
+                navigationLinks.XpmPropertyMetadata = navModel.XpmPropertyMetadata;
             }
-            return links;
+            return navigationLinks;
         }
         
         protected virtual ActionResult GetRawActionResult(string type, string rawContent)
@@ -332,30 +332,6 @@ namespace Sdl.Web.Mvc.Controllers
             }
             return default(T);
         }
-
-        /// <summary>
-        /// Parse url to actual page with extension
-        /// </summary>
-        /// <param name="url">Requested url</param>
-        /// <returns>Page url</returns>
-        private string ParseUrl(string url)
-        {
-            string defaultPageFileName = ContentProvider.ContentResolver.DefaultPageName;
-            if (String.IsNullOrEmpty(url))
-            {
-                url = defaultPageFileName;
-            }
-            if (url.EndsWith("/"))
-            {
-                url = url + defaultPageFileName;
-            }
-            if (!Path.HasExtension(url))
-            {
-                url = url + ContentProvider.ContentResolver.DefaultExtension;
-            }
-            return url;
-        }
-
 
         public virtual object ProcessPageModel(PageModel model)
         {

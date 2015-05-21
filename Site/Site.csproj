@@ -176,13 +176,12 @@
     <Content Include="Areas\Core\Views\Navigation\SiteMapXml.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Partials\Teaser-ImageOverlay.cshtml" />
     <Content Include="Unity.config">
-      <Link>Unity.config</Link>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="Views\web.config">
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Views\Shared\ServerError.cshtml" />
-    <Content Include="Unity.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\Core\Views\Admin\" />

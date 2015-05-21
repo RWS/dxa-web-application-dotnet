@@ -72,10 +72,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Html\DD4TMediaHelper.cs" />
-    <Compile Include="Mapping\BaseContentProvider.cs" />
-    <Compile Include="Mapping\DD4TContentResolver.cs" />
+    <Compile Include="Mapping\DD4TRichTextProcessor.cs" />
+    <Compile Include="Mapping\DD4TMappingUtilities.cs" />
     <Compile Include="Mapping\DD4TModelBuilder.cs" />
-    <Compile Include="Mapping\DD4TContentProvider.cs" />
+    <Compile Include="Mapping\DD4TProvider.cs" />
     <Compile Include="Mapping\ExtensionlessLinkFactory.cs">
       <SubType>Code</SubType>
     </Compile>

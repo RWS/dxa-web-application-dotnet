@@ -31,13 +31,5 @@ namespace Sdl.Web.Common.Models
             get;
             set;
         }
-
-        /// <summary>
-        /// Initializes a new ViewModel instance.
-        /// </summary>
-        protected ViewModel()
-        {
-            XpmMetadata = new Dictionary<string, string>();
-        }
     }
 }

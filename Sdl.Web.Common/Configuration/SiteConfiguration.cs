@@ -1,16 +1,15 @@
-﻿using System.Web.UI.WebControls;
-using Sdl.Web.Common.Extensions;
-using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common.Logging;
-using Sdl.Web.Common.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web.Compilation;
 using System.Web.Helpers;
+using System.Web.Mvc;
 using System.Web.Script.Serialization;
+using Sdl.Web.Common.Extensions;
+using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Configuration
 {
@@ -27,21 +26,6 @@ namespace Sdl.Web.Common.Configuration
     /// </summary>
     public static class SiteConfiguration
     {
-        /// <summary>
-        /// Media helper used for generating responsive markup for images, videos etc.
-        /// </summary>
-        public static IMediaHelper MediaHelper {get;set;}
-
-        /// <summary>
-        /// Static file manager used for serializing and accessing static files published from the CMS (config/resources/HTML design assets etc.)
-        /// </summary>
-        public static IStaticFileManager StaticFileManager { get; set; }
-        
-        /// <summary>
-        /// Localization resolver used for mapping URLs to localizations/content stores
-        /// </summary>
-        public static ILocalizationManager LocalizationManager { get; set; }
-
         public const string VersionRegex = "(v\\d*.\\d*)";
         public const string SystemFolder = "system";
         public const string CoreModuleName = "core";
@@ -50,8 +34,137 @@ namespace Sdl.Web.Common.Configuration
 
         private static readonly Dictionary<string, Dictionary<string, Dictionary<string, string>>> Configuration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
 
-        private static readonly object LocalizationUpdateLock = new object();
-        private const string SettingsType = "config";
+        private static readonly object _localizationUpdateLock = new object();
+        private const string _settingsType = "config";
+
+        #region References to "providers"
+        /// <summary>
+        /// Gets the Content Provider used for obtaining the Page and Entity Models
+        /// </summary>
+        public static IContentProvider ContentProvider
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the Content Provider used for obtaining the Navigation Models
+        /// </summary>
+        public static INavigationProvider NavigationProvider
+        {
+            get;
+            private set;
+        }
+
+
+        /// <summary>
+        /// Gets the Link Resolver.
+        /// </summary>
+        public static ILinkResolver LinkResolver
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the Rich Text Processor.
+        /// </summary>
+        public static IRichTextProcessor RichTextProcessor
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the Conditional Entity Evaluator.
+        /// </summary>
+        public static IConditionalEntityEvaluator ConditionalEntityEvaluator
+        {
+            get;
+            private set;
+        }
+
+
+        /// <summary>
+        /// Gets the Media helper used for generating responsive markup for images, videos etc.
+        /// </summary>
+        public static IMediaHelper MediaHelper 
+        { 
+            get; 
+            private set; 
+        }
+
+        /// <summary>
+        /// Gets the Static File Manager used for serializing and accessing static files published from the CMS (config/resources/HTML design assets etc.)
+        /// </summary>
+        public static IStaticFileManager StaticFileManager
+        {
+            get; 
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the Localization Manager used for mapping URLs to localizations/content stores
+        /// </summary>
+        public static ILocalizationManager LocalizationManager
+        {
+            get; 
+            private set;
+        }
+
+        /// <summary>
+        /// Initializes the providers (Content Provider, Link Resolver, Media Helper, etc.) using dependency injection, i.e. obtained from configuration.
+        /// </summary>
+        /// <param name="dependencyResolver">The Dependency Resolver used to get implementations for provider interfaces.</param>
+        public static void InitializeProviders(IDependencyResolver dependencyResolver)
+        {
+            ContentProvider = (IContentProvider)dependencyResolver.GetService(typeof(IContentProvider));
+            if (ContentProvider == null)
+            {
+                throw new DxaException("No Content Provider is configured. Check your Unity.config; it must define an implementation type for interface IContentProvider.");
+            }
+
+            NavigationProvider = (INavigationProvider)dependencyResolver.GetService(typeof(INavigationProvider));
+            if (NavigationProvider == null)
+            {
+                throw new DxaException("No Navigation Provider is configured. Check your Unity.config; it must define an implementation type for interface INavigationProvider.");
+            }
+
+            LinkResolver = (ILinkResolver)dependencyResolver.GetService(typeof(ILinkResolver));
+            if (LinkResolver == null)
+            {
+                throw new DxaException("No Link Resolver is configured. Check your Unity.config; it must define an implementation type for interface ILinkResolver.");
+            }
+
+            RichTextProcessor = (IRichTextProcessor)dependencyResolver.GetService(typeof(IRichTextProcessor));
+            if (RichTextProcessor == null)
+            {
+                throw new DxaException("No Rich Text Processor is configured. Check your Unity.config; it must define an implementation type for interface IRichTextProcessor.");
+            }
+
+            // ConditionalEntityEvaluator is an optional provider so can be null (if not configured).
+            ConditionalEntityEvaluator = (IConditionalEntityEvaluator)dependencyResolver.GetService(typeof(IConditionalEntityEvaluator));
+            
+            MediaHelper = (IMediaHelper)dependencyResolver.GetService(typeof(IMediaHelper));
+            if (MediaHelper == null)
+            {
+                throw new DxaException("No Media Helper is configured. Check your Unity.config; it must define an implementation type for interface IMediaHelper.");
+            }
+
+            StaticFileManager = (IStaticFileManager)dependencyResolver.GetService(typeof(IStaticFileManager));
+            if (StaticFileManager == null)
+            {
+                throw new DxaException("No Static File Manager is configured. Check your Unity.config; it must define an implementation type for interface IStaticFileManager.");
+            }
+
+            LocalizationManager = (ILocalizationManager) dependencyResolver.GetService(typeof(ILocalizationManager));
+            if (LocalizationManager == null)
+            {
+                throw new DxaException("No Localization Manager is configured. Check your Unity.config; it must define an implementation type for interface ILocalizationManager.");
+            }
+        }
+        #endregion
+
 
         /// <summary>
         /// A registry of View Path -> View Model Type mappings to enable the correct View Model to be mapped for a given View
@@ -90,7 +203,7 @@ namespace Sdl.Web.Common.Configuration
 
         private static bool CheckConfig(string localizationId)
         {
-            if (!Configuration.ContainsKey(localizationId) || CheckSettingsNeedRefresh(SettingsType, localizationId))
+            if (!Configuration.ContainsKey(localizationId) || CheckSettingsNeedRefresh(_settingsType, localizationId))
             {
                 return false;
             }
@@ -138,7 +251,7 @@ namespace Sdl.Web.Common.Configuration
 
         public static void Refresh(Localization loc)
         {
-            lock(LocalizationUpdateLock)
+            lock(_localizationUpdateLock)
             {
                 //refresh all localizations for this site
                 foreach(var localization in loc.SiteLocalizations)
@@ -167,7 +280,7 @@ namespace Sdl.Web.Common.Configuration
                     Log.Error("Config file: {0} does not exist for localization {1} - skipping", configUrl, key);
                 }
             }
-            ThreadSafeSettingsUpdate(SettingsType, Configuration, key, config);
+            ThreadSafeSettingsUpdate(_settingsType, Configuration, key, config);
         }
 
         public static Localization LoadLocalization(Localization loc, bool loadDetails = false)

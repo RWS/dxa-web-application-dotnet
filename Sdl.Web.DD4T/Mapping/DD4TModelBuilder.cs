@@ -1,5 +1,11 @@
-﻿using DD4T.ContentModel;
-using DD4T.ContentModel.Factories;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using DD4T.ContentModel;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
@@ -8,13 +14,6 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Common;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Config;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.DD4T.Mapping
@@ -24,79 +23,117 @@ namespace Sdl.Web.DD4T.Mapping
     /// </summary>
     public class DD4TModelBuilder : BaseModelBuilder, IModelBuilder
     {
-        //NOTE - while it works perfectly well, this class is in need of some refactoring to make
-        //its behaviour a bit more understandable and maintainable, as its currently very easy to 
-        //get lost in the semantic mapping logic
+        // TODO: while it works perfectly well, this class is in need of some refactoring to make its behaviour a bit more understandable and maintainable,
+        // as its currently very easy to get lost in the semantic mapping logic
+        private ResourceProvider _resourceProvider;
 
-        readonly public ILinkFactory LinkFactory;
-        readonly IContentResolver _contentResolver;
+        #region IModelBuilder members
 
-        public DD4TModelBuilder(ILinkFactory linkFactory, IContentResolver contentResolver)
+        public virtual PageModel CreatePageModel(IPage page, Type type, List<PageModel> includes, MvcData mvcData)
         {
-            LinkFactory = linkFactory;
-            _contentResolver = contentResolver;
-        }
+            // TODO: Use the provided type
+            PageModel model = new PageModel(page.Id.Split('-')[1]);
+            bool isInclude = false;
+            //default title - will be overridden later if appropriate
+            model.Title = page.Title;
+            model.MvcData = mvcData;
+            model.XpmMetadata = GetXpmMetadata(page);
+            if (includes.Count == 0 && model.MvcData.ViewName.Contains("Include"))
+            {
+                isInclude = true;
+            }
 
-        public ViewModel Create(object sourceEntity, Type type, List<PageModel> includes = null, MvcData mvcData = null)
-        {
-            if (sourceEntity is IPage)
+            IConditionalEntityEvaluator conditionalEntityEvaluator = SiteConfiguration.ConditionalEntityEvaluator;
+            foreach (IComponentPresentation cp in page.ComponentPresentations)
             {
-                return CreatePage((IPage) sourceEntity, type, includes, mvcData);
-            }
-            return CreateEntity(sourceEntity, type, mvcData);
-        }
-
-        protected virtual EntityModel CreateEntity(object sourceEntity, Type type, MvcData mvcData = null)
-        {
-            IComponent component = sourceEntity as IComponent;
-            Dictionary<string, string> entityData;
-            if (component == null && sourceEntity is IComponentPresentation)
-            {
-                IComponentPresentation cp = (IComponentPresentation)sourceEntity;
-                component = cp.Component;
-                entityData = GetEntityData(cp);
-            }
-            else
-            {
-                entityData = GetEntityData(component);
-            }
-            if (component != null)
-            {
-                // get schema item id from tcmuri -> tcm:1-2-8
-                string[] uriParts = component.Schema.Id.Split('-');
-                long schemaId = Convert.ToInt64(uriParts[1]);
-                MappingData mapData = new MappingData {SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString(CultureInfo.InvariantCulture),WebRequestContext.Localization)};
-                // get schema entity names (indexed by vocabulary)
-                mapData.EntityNames = mapData.SemanticSchema!=null ? mapData.SemanticSchema.GetEntityNames() : null;
-            
-                //TODO may need to merge with vocabs from embedded types
-                mapData.TargetEntitiesByPrefix = GetEntityDataFromType(type);
-                mapData.Content = component.Fields;
-                mapData.Meta = component.MetadataFields;
-                mapData.TargetType = type;
-                mapData.SourceEntity = component;
-                EntityModel model = CreateModelFromMapData(mapData);
-                model.XpmMetadata = entityData;
-                model.Id = component.Id.Split('-')[1];
-                model.MvcData = mvcData;
-                if (model is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
+                RegionModel region = GetRegionFromComponentPresentation(cp);
+                if (!model.Regions.ContainsKey(region.Name))
                 {
-                    MediaItem mediaItem = (MediaItem)model;
-                    mediaItem.Url = component.Multimedia.Url;
-                    mediaItem.FileName = component.Multimedia.FileName;
-                    mediaItem.FileSize = component.Multimedia.Size;
-                    mediaItem.MimeType = component.Multimedia.MimeType;
+                    model.Regions.Add(region);
                 }
-                return model;
 
+                MvcData entityMvcData = DD4TMappingUtilities.ResolveMvcData(cp);
+
+                EntityModel entity;
+                try
+                {
+                    Type entityType = ModelTypeRegistry.GetViewModelType(entityMvcData);
+                    entity = CreateEntityModel(cp, entityType, entityMvcData);
+                }
+                catch (Exception ex)
+                {
+                    //if there is a problem mapping the item, we replace it with an exception entity
+                    //and carry on processing - this should not cause a failure in the rendering of
+                    //the page as a whole
+                    Log.Error(ex);
+                    entity = new ExceptionEntity
+                    {
+                        Error = ex.Message,
+                        MvcData = entityMvcData // TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
+                    };
+                }
+
+                if (conditionalEntityEvaluator == null || conditionalEntityEvaluator.IncludeEntity(entity))
+                {
+                    model.Regions[region.Name].Entities.Add(entity);
+                }
             }
-            return null;
+
+            if (!isInclude)
+            {
+                foreach (PageModel include in includes)
+                {
+                    model.Includes.Add(include.Title, include);
+                }
+                model.Title = ProcessPageMetadata(page, model.Meta);
+            }
+            return model;
         }
+
+        public virtual EntityModel CreateEntityModel(IComponentPresentation cp, Type type, MvcData mvcData = null)
+        {
+            EntityModel model = CreateEntityModel(cp.Component, type);
+            model.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
+            model.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("s"));
+            model.MvcData = mvcData;
+            return model;
+        }
+
+        public virtual EntityModel CreateEntityModel(IComponent component, Type type)
+        {
+            // get schema item id from tcmuri -> tcm:1-2-8
+            string[] uriParts = component.Schema.Id.Split('-');
+            long schemaId = Convert.ToInt64(uriParts[1]);
+            MappingData mapData = new MappingData { SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString(CultureInfo.InvariantCulture), WebRequestContext.Localization) };
+            // get schema entity names (indexed by vocabulary)
+            mapData.EntityNames = mapData.SemanticSchema != null ? mapData.SemanticSchema.GetEntityNames() : null;
+
+            //TODO may need to merge with vocabs from embedded types
+            mapData.TargetEntitiesByPrefix = GetEntityDataFromType(type);
+            mapData.Content = component.Fields;
+            mapData.Meta = component.MetadataFields;
+            mapData.TargetType = type;
+            mapData.SourceEntity = component;
+            EntityModel model = CreateModelFromMapData(mapData);
+            model.XpmMetadata = GetXpmMetadata(component);
+            model.Id = component.Id.Split('-')[1];
+            if (model is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
+            {
+                MediaItem mediaItem = (MediaItem)model;
+                mediaItem.Url = component.Multimedia.Url;
+                mediaItem.FileName = component.Multimedia.FileName;
+                mediaItem.FileSize = component.Multimedia.Size;
+                mediaItem.MimeType = component.Multimedia.MimeType;
+            }
+            return model;
+
+        }
+        #endregion
 
         protected virtual EntityModel CreateModelFromMapData(MappingData mapData)
         {
             EntityModel model = (EntityModel) Activator.CreateInstance(mapData.TargetType);
-            Dictionary<string, string> propertyData = new Dictionary<string, string>();
+            Dictionary<string, string> xpmPropertyMetadata = new Dictionary<string, string>();
             Dictionary<string, List<SemanticProperty>> propertySemantics = FilterPropertySematicsByEntity(LoadPropertySemantics(mapData.TargetType),mapData);
             foreach (PropertyInfo pi in mapData.TargetType.GetProperties())
             {
@@ -110,7 +147,7 @@ namespace Sdl.Web.DD4T.Mapping
                         if (field != null && (field.Values.Count > 0 || field.EmbeddedValues.Count > 0))
                         {
                             pi.SetValue(model, GetFieldValues(field, propertyType, multival, mapData));
-                            propertyData.Add(pi.Name, GetFieldXPath(field));
+                            xpmPropertyMetadata.Add(pi.Name, GetFieldXPath(field));
                             break;
                         }
                         //Special cases
@@ -146,10 +183,8 @@ namespace Sdl.Web.DD4T.Mapping
                     }
                 }
             }
-            if (model is EntityModel)
-            {
-                ((EntityModel)model).XpmPropertyMetadata = propertyData;
-            }
+            model.XpmPropertyMetadata = xpmPropertyMetadata;
+
             return model;
         }
 
@@ -283,40 +318,28 @@ namespace Sdl.Web.DD4T.Mapping
             return field.XPath;
         }
 
-        protected virtual Dictionary<string, string> GetEntityData(IComponent comp)
+        protected virtual IDictionary<string, string> GetXpmMetadata(IComponent comp)
         {
-            var res = new Dictionary<string, string>();
+            IDictionary<string, string> result = new Dictionary<string, string>();
             if (comp != null)
             {
-                res.Add("ComponentID", comp.Id);
-                res.Add("ComponentModified", comp.RevisionDate.ToString("s"));
+                result.Add("ComponentID", comp.Id);
+                result.Add("ComponentModified", comp.RevisionDate.ToString("s"));
             }
-            return res;
+            return result;
         }
 
-        protected virtual Dictionary<string, string> GetEntityData(IComponentPresentation cp)
+        protected virtual IDictionary<string, string> GetXpmMetadata(IPage page)
         {
-            if (cp != null)
-            {
-                var res = GetEntityData(cp.Component);
-                res.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
-                res.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("s"));
-                return res;
-            }
-            return new Dictionary<string, string>();
-        }
-
-        protected virtual Dictionary<string, string> GetPageData(IPage page)
-        {
-            var res = new Dictionary<string, string>();
+            IDictionary<string, string> result = new Dictionary<string, string>();
             if (page != null)
             {
-                res.Add("PageID", page.Id);
-                res.Add("PageModified", page.RevisionDate.ToString("s"));
-                res.Add("PageTemplateID", page.PageTemplate.Id);
-                res.Add("PageTemplateModified", page.PageTemplate.RevisionDate.ToString("s"));
+                result.Add("PageID", page.Id);
+                result.Add("PageModified", page.RevisionDate.ToString("s"));
+                result.Add("PageTemplateID", page.PageTemplate.Id);
+                result.Add("PageTemplateModified", page.PageTemplate.RevisionDate.ToString("s"));
             }
-            return res;
+            return result;
         }
 
         private static object GetDates(IField field, Type modelType, bool multival)
@@ -470,10 +493,11 @@ namespace Sdl.Web.DD4T.Mapping
             if (linkedItemType == typeof(String) || linkedItemType == typeof(Link))
             {
                 //For strings and Links, we simply resolve the link to a URL
+                ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
                 List<String> urls = new List<String>();
-                foreach (var comp in items)
+                foreach (IComponent comp in items)
                 {
-                    var url = _contentResolver.ResolveLink(comp.Id);
+                    var url = linkResolver.ResolveLink(comp.Id);
                     if (url != null)
                     {
                         urls.Add(url);
@@ -536,11 +560,12 @@ namespace Sdl.Web.DD4T.Mapping
         {
             if (modelType.IsAssignableFrom(typeof(String)))
             {
+                IRichTextProcessor richTextProcessor = SiteConfiguration.RichTextProcessor;
                 if (multival)
                 {
-                    return field.Values.Select(v => _contentResolver.ResolveContent(v).ToString());
+                    return field.Values.Select(v => richTextProcessor.ProcessRichText(v));
                 }
-                return _contentResolver.ResolveContent(field.Value).ToString();
+                return richTextProcessor.ProcessRichText(field.Value);
             }
             return null;
         }
@@ -578,9 +603,9 @@ namespace Sdl.Web.DD4T.Mapping
             where T: EntityModel
         {
             List<T> list = new List<T>();
-            foreach (var comp in components)
+            foreach (IComponent comp in components)
             {
-                list.Add((T)Create(comp, typeof(T)));
+                list.Add((T)CreateEntityModel(comp, typeof(T)));
             }
             return list;
         }
@@ -642,64 +667,6 @@ namespace Sdl.Web.DD4T.Mapping
             return values;
         }
 
-        private ResourceProvider _resourceProvider;
-
-        protected virtual PageModel CreatePage(IPage page, Type type, List<PageModel> includes, MvcData mvcData = null)
-        {
-            PageModel model = new PageModel(page.Id.Split('-')[1]);
-            bool isInclude = false;
-            //default title - will be overridden later if appropriate
-            model.Title = page.Title;
-            model.MvcData = mvcData;
-            model.XpmMetadata = GetPageData(page);
-            if (includes.Count == 0 && model.MvcData.ViewName.Contains("Include"))
-            {
-                isInclude = true;
-            }
-            foreach (IComponentPresentation cp in page.ComponentPresentations)
-            {
-                if (_contentResolver.EvaluateEntity(cp))
-                {
-                    RegionModel region = GetRegionFromComponentPresentation(cp);
-                    if (!model.Regions.ContainsKey(region.Name))
-                    {
-                        model.Regions.Add(region);
-                    }
-
-                    MvcData entityMvcData = _contentResolver.ResolveMvcData(cp);
-
-                    EntityModel entity;
-                    try
-                    {
-                        Type entityType = ModelTypeRegistry.GetViewModelType(entityMvcData);
-                        entity = CreateEntity(cp, entityType, entityMvcData);
-                    }
-                    catch (Exception ex)
-                    {
-                        //if there is a problem mapping the item, we replace it with an exception entity
-                        //and carry on processing - this should not cause a failure in the rendering of
-                        //the page as a whole
-                        Log.Error(ex);
-                        entity = new ExceptionEntity
-                        {
-                            Error = ex.Message,
-                            MvcData = entityMvcData // TODO TSI-634: The regular View won't expect an ExceptionEntity model (?)
-                        };
-                    }
-
-                    model.Regions[region.Name].Entities.Add(entity);
-                }
-            }
-            if (!isInclude)
-            {
-                foreach (PageModel include in includes)
-                {
-                    model.Includes.Add(include.Title, include);
-                }
-                model.Title = ProcessPageMetadata(page, model.Meta);
-            }
-            return model;
-        }
 
         protected virtual string ProcessPageMetadata(IPage page, IDictionary<string,string> meta)
         {
@@ -805,7 +772,7 @@ namespace Sdl.Web.DD4T.Mapping
                 switch (field.Name)
                 {
                     case "internalLink":
-                        value = _contentResolver.ResolveLink(field.Value);
+                        value = SiteConfiguration.LinkResolver.ResolveLink(field.Value);
                         break;
                     case "image":
                         value = field.LinkedComponentValues[0].Multimedia.Url;
