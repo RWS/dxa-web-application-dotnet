@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="Sdl.Web.Common.Models.ViewModel">
+    <Position X="4.75" Y="0.5" Width="3" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAABACAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\ViewModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Common.Models.EntityModel">
+    <Position X="8.5" Y="4.75" Width="3.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAACAACAAAAAAAAEgABAAAAAAAAAAIAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\EntityModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Common.Models.PageModel">
+    <Position X="1" Y="8" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\PageModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Common.Models.RegionModel">
+    <Position X="5" Y="5.75" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEgAAAAAAAAAAAAIAAAAEAAAAAAAA=</HashCode>
+      <FileName>Models\RegionModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Common.Models.RegionModelSet">
+    <Position X="3.75" Y="8" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAEAAAACAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\RegionModelSet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Common.Models.EntityBase" Collapsed="true">
+    <Position X="10.25" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgACAAAAAA=</HashCode>
+      <FileName>Models\Legacy\EntityBase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="1.137" />
+  </Class>
+  <Class Name="Sdl.Web.Common.Models.PageBase">
+    <Position X="0.75" Y="2.75" Width="2.75" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAACAQAAAAAAAEAEgABAAAAAAAAAAIAAAAIACAAQAAA=</HashCode>
+      <FileName>Models\Legacy\PageBase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Sdl.Web.Common.Models.WebPage">
+    <Position X="0.5" Y="5.75" Width="3.25" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAQAAAAAAAAAAAAIAACAAAAAAAAAA=</HashCode>
+      <FileName>Models\Legacy\WebPage.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Common.Models.Region">
+    <Position X="4.75" Y="2.75" Width="2.75" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AgAAIAAAAAAICAAAAAAAAAQAAAAAAAAAAAAACAAAAAA=</HashCode>
+      <FileName>Models\Legacy\Region.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="2.096" />
+  </Class>
+  <Class Name="Sdl.Web.Common.Models.Article" Collapsed="true">
+    <Position X="8" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgAgAAAAAAAAAAAAAAABABABAAAAAAAAA=</HashCode>
+      <FileName>Models\Entity\Article.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
