@@ -343,10 +343,10 @@ namespace Sdl.Web.Mvc.Html
                 containerSize = SiteConfiguration.MediaHelper.GridSize;
             }
 
-            Log.Debug("Rendering Entity [{0}] (containerSize: {1})", entity, containerSize);
-
             MvcData mvcData = entity.MvcData;
-            var parameters = new RouteValueDictionary();
+            Log.Debug("Rendering Entity [{0}] with MVC data [{1}] (containerSize: {2}) ", entity, mvcData, containerSize);
+
+            RouteValueDictionary parameters = new RouteValueDictionary();
             int parentContainerSize = htmlHelper.ViewBag.ContainerSize;
             if (parentContainerSize == 0)
             {

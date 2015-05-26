@@ -65,7 +65,8 @@ namespace Sdl.Web.DD4T.Mapping
         public virtual PageModel GetPageModel(string url, bool addIncludes)
         {
             string cmsUrl = GetCanonicalUrl(url);
-            Log.Debug("Getting page model for URL {0} (original request: {1})", cmsUrl, url);
+            Log.Debug("Getting Page Model for URL '{0}' (original request: '{1}')", cmsUrl, url);
+
             //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
             //1. Try adding the default extension, so /news becomes /news.html
             IPage page = GetPageModelFromUrl(cmsUrl);
@@ -94,34 +95,13 @@ namespace Sdl.Web.DD4T.Mapping
         }
 
         /// <summary>
-        /// Get the model for a navigation structure
-        /// </summary>
-        /// <param name="url">The URL representing the navigation structure</param>
-        /// <returns>A navigation model for the given URL</returns>
-        public virtual SitemapItem GetNavigationModel(string url) // TODO TSI-788: Move to INavigationProvider
-        {
-            // TODO: This is a temporary measure to cache the Navigation Model per request to not retrieve and serialize 3 times per request. Comprehensive caching strategy pending
-            string cacheKey = "navigation-" + url;
-            SitemapItem result;
-            if (HttpContext.Current.Items[cacheKey] == null)
-            {
-                string navigationJsonString = GetPageContent(url);
-                result = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
-                HttpContext.Current.Items[cacheKey] = result;
-            }
-            else
-            {
-                result = (SitemapItem)HttpContext.Current.Items[cacheKey];
-            }
-            return result;
-        }
-
-        /// <summary>
         /// Populates a Content List (of Teasers) by executing the query it specifies.
         /// </summary>
         /// <param name="contentList">The Content List which specifies the query and is to be populated.</param>
         public virtual void PopulateDynamicList<T>(ContentList<T> contentList) where T:EntityModel
         {
+            Log.Debug("Populating Dynamic List [{0}]", contentList);
+
             BrokerQuery query = new BrokerQuery
             {
                 Start = contentList.Start,
@@ -155,8 +135,25 @@ namespace Sdl.Web.DD4T.Mapping
         /// <returns>The Navigation Model (Sitemap root Item).</returns>
         public virtual SitemapItem GetNavigationModel(Localization localization)
         {
-            string navUrl = SiteConfiguration.LocalizeUrl("navigation.json", localization);
-            return GetNavigationModel(navUrl); // TODO: inline method
+            Log.Debug("Getting Navigation Model for Localization [{0}]", localization);
+
+            string url = SiteConfiguration.LocalizeUrl("navigation.json", localization);
+            // TODO TSI-110: This is a temporary measure to cache the Navigation Model per request to not retrieve and serialize 3 times per request. Comprehensive caching strategy pending
+            string cacheKey = "navigation-" + url;
+            SitemapItem result;
+            if (HttpContext.Current.Items[cacheKey] == null)
+            {
+                Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", url);
+                string navigationJsonString = GetPageContent(url);
+                result = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
+                HttpContext.Current.Items[cacheKey] = result;
+            }
+            else
+            {
+                Log.Debug("Obtained Navigation Model from cache.");
+                result = (SitemapItem)HttpContext.Current.Items[cacheKey];
+            }
+            return result;
         }
 
         /// <summary>
@@ -167,6 +164,8 @@ namespace Sdl.Web.DD4T.Mapping
         /// <returns>The Navigation Links.</returns>
         public virtual NavigationLinks GetTopNavigationLinks(string requestUrlPath, Localization localization)
         {
+            Log.Debug("Getting top navigation links for URL '{0}' Localization [{1}]", requestUrlPath, localization);
+
             NavigationLinks navigationLinks = new NavigationLinks();
             SitemapItem sitemapRoot = GetNavigationModel(localization);
             foreach (SitemapItem item in sitemapRoot.Items.Where(i => i.Visible))
@@ -184,6 +183,8 @@ namespace Sdl.Web.DD4T.Mapping
         /// <returns>The Navigation Links.</returns>
         public virtual NavigationLinks GetContextNavigationLinks(string requestUrlPath, Localization localization)
         {
+            Log.Debug("Getting context navigation links for URL '{0}' Localization [{1}]", requestUrlPath, localization);
+
             NavigationLinks navigationLinks = new NavigationLinks();
             SitemapItem sitemapItem = GetNavigationModel(localization); // Start with Sitemap root Item.
             int levels = requestUrlPath.Split('/').Length;
@@ -216,6 +217,8 @@ namespace Sdl.Web.DD4T.Mapping
         /// <returns>The Navigation Links.</returns>
         public virtual NavigationLinks GetBreadcrumbNavigationLinks(string requestUrlPath, Localization localization)
         {
+            Log.Debug("Getting breadcrumb navigation links for URL '{0}' Localization [{1}]", requestUrlPath, localization);
+
             NavigationLinks navigationLinks = new NavigationLinks();
             int levels = requestUrlPath.Split('/').Length;
             SitemapItem sitemapItem = GetNavigationModel(localization); // Start with Sitemap root Item.
@@ -276,7 +279,6 @@ namespace Sdl.Web.DD4T.Mapping
 
         protected virtual string GetPageContent(string url)
         {
-            Log.Debug("DD4TContentProvider.GetPageContent: Processing request for page: {0}", url);
             string page;
             if (_pageFactory != null)
             {

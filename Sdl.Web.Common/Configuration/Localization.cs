@@ -70,5 +70,12 @@ namespace Sdl.Web.Common.Configuration
         public string Protocol { get; set; }
 
         #endregion
+
+        #region Overrides
+        public override string ToString()
+        {
+            return string.Format("{0} ('{1}')", LocalizationId, Language);
+        }
+        #endregion
     }
 }
