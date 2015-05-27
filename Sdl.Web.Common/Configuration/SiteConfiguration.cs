@@ -118,50 +118,34 @@ namespace Sdl.Web.Common.Configuration
         /// <param name="dependencyResolver">The Dependency Resolver used to get implementations for provider interfaces.</param>
         public static void InitializeProviders(IDependencyResolver dependencyResolver)
         {
-            ContentProvider = (IContentProvider)dependencyResolver.GetService(typeof(IContentProvider));
-            if (ContentProvider == null)
-            {
-                throw new DxaException("No Content Provider is configured. Check your Unity.config; it must define an implementation type for interface IContentProvider.");
-            }
+            ContentProvider = GetProvider<IContentProvider>(dependencyResolver);
+            NavigationProvider = GetProvider<INavigationProvider>(dependencyResolver);
+            LinkResolver = GetProvider<ILinkResolver>(dependencyResolver);
+            RichTextProcessor = GetProvider<IRichTextProcessor>(dependencyResolver);
+            ConditionalEntityEvaluator = GetProvider<IConditionalEntityEvaluator>(dependencyResolver, isOptional: true);
+            MediaHelper = GetProvider<IMediaHelper>(dependencyResolver);
+            StaticFileManager = GetProvider<IStaticFileManager>(dependencyResolver);
+            LocalizationManager = GetProvider<ILocalizationManager>(dependencyResolver);
+        }
 
-            NavigationProvider = (INavigationProvider)dependencyResolver.GetService(typeof(INavigationProvider));
-            if (NavigationProvider == null)
+        private static T GetProvider<T>(IDependencyResolver dependencyResolver, bool isOptional = false)
+            where T: class // interface to be more precise.
+        {
+            Type interfaceType = typeof(T);
+            T provider = (T) dependencyResolver.GetService(interfaceType);
+            if (provider == null)
             {
-                throw new DxaException("No Navigation Provider is configured. Check your Unity.config; it must define an implementation type for interface INavigationProvider.");
+                if (!isOptional)
+                {
+                    throw new DxaException(string.Format("No implementation type configured for interface {0}. Check your Unity.config.", interfaceType.Name));
+                }
+                Log.Debug("No implementation type configured for optional interface {0}.", interfaceType.Name);
             }
-
-            LinkResolver = (ILinkResolver)dependencyResolver.GetService(typeof(ILinkResolver));
-            if (LinkResolver == null)
+            else
             {
-                throw new DxaException("No Link Resolver is configured. Check your Unity.config; it must define an implementation type for interface ILinkResolver.");
+                Log.Debug("Using implementation type '{0}' for interface {1}.", provider.GetType().FullName, interfaceType.Name);
             }
-
-            RichTextProcessor = (IRichTextProcessor)dependencyResolver.GetService(typeof(IRichTextProcessor));
-            if (RichTextProcessor == null)
-            {
-                throw new DxaException("No Rich Text Processor is configured. Check your Unity.config; it must define an implementation type for interface IRichTextProcessor.");
-            }
-
-            // ConditionalEntityEvaluator is an optional provider so can be null (if not configured).
-            ConditionalEntityEvaluator = (IConditionalEntityEvaluator)dependencyResolver.GetService(typeof(IConditionalEntityEvaluator));
-            
-            MediaHelper = (IMediaHelper)dependencyResolver.GetService(typeof(IMediaHelper));
-            if (MediaHelper == null)
-            {
-                throw new DxaException("No Media Helper is configured. Check your Unity.config; it must define an implementation type for interface IMediaHelper.");
-            }
-
-            StaticFileManager = (IStaticFileManager)dependencyResolver.GetService(typeof(IStaticFileManager));
-            if (StaticFileManager == null)
-            {
-                throw new DxaException("No Static File Manager is configured. Check your Unity.config; it must define an implementation type for interface IStaticFileManager.");
-            }
-
-            LocalizationManager = (ILocalizationManager) dependencyResolver.GetService(typeof(ILocalizationManager));
-            if (LocalizationManager == null)
-            {
-                throw new DxaException("No Localization Manager is configured. Check your Unity.config; it must define an implementation type for interface ILocalizationManager.");
-            }
+            return provider;
         }
         #endregion
 

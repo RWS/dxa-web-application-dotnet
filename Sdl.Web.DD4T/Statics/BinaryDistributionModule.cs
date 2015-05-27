@@ -10,180 +10,176 @@ using System.Collections.Generic;
 
 namespace Sdl.Web.DD4T.Statics
 {
-	/// <summary>
-	/// HttpModule intercepting a request to a static resource, caches the resource to the file-system from the Broker DB
-	/// </summary>
-	public class BinaryDistributionModule : IHttpModule
+    /// <summary>
+    /// HttpModule intercepting a request to a static resource, caches the resource to the file-system from the Broker DB
+    /// </summary>
+    public class BinaryDistributionModule : IHttpModule  // TODO TSI-788: This class doesn't belong in Sdl.Web.DD4T
     {
-        #region IHttpModule
-        /// <summary>
-		/// Initialize this module. Attach the worker method to the BeginRequest event.
-		/// </summary>
-		/// <param name="application">Current HttpApplication</param>
-		public void Init(HttpApplication application) 
-        {
-            application.PreRequestHandlerExecute += DistributionModule_OnPreRequestHandlerExecute;
-			application.BeginRequest += DistributionModule_OnBeginRequest;
-		}
+        private static readonly Dictionary<string, Regex> _localizationBinaryRegexes = new Dictionary<string, Regex>();
+        private static IBinaryFileManager _binaryFileManager;
 
-		/// <summary>
-		/// Main method handling requests to the specified resource.
-		/// </summary>
-		/// <param name="o">Current HttpApplication</param>
-		/// <param name="eventArgs">Current event arguments</param>
-        public void DistributionModule_OnPreRequestHandlerExecute(object o, EventArgs eventArgs)
+
+        #region IHttpModule members
+        /// <summary>
+        /// Initialize this HttpModule.
+        /// </summary>
+        /// <param name="application">Current HttpApplication</param>
+        public void Init(HttpApplication application) 
+        {
+            application.PreRequestHandlerExecute += OnPreRequestHandlerExecute;
+            application.BeginRequest += OnBeginRequest;
+        }
+
+        /// <summary>
+        /// Dispose the HttpModule.
+        /// </summary>
+        public void Dispose()
+        {
+            // Nothing to do.
+        }
+        #endregion
+
+
+        /// <summary>
+        /// Main method handling requests to the specified resource.
+        /// </summary>
+        /// <param name="o">Current HttpApplication</param>
+        /// <param name="eventArgs">Current event arguments</param>
+        private static void OnPreRequestHandlerExecute(object o, EventArgs eventArgs)
         {
             HttpApplication application = (HttpApplication)o;
             HttpContext context = application.Context;
             HttpRequest request = context.Request;
             HttpResponse response = context.Response;
             string urlPath = request.Url.AbsolutePath;
-            if (WebRequestContext.HasNoLocalization)
-            {
-                return;
-            }
-            var staticsRootUrl = SiteConfiguration.GetLocalStaticsUrl(WebRequestContext.Localization.LocalizationId);
-            urlPath = urlPath.StartsWith("/" + staticsRootUrl) ? urlPath.Substring(staticsRootUrl.Length + 1) : urlPath;
-            if (!IsBinaryUrl.IsMatch(urlPath))
-            {
-                Log.Debug("Url {0} does not match binary url pattern, ignoring it.", urlPath);
-                return;
-            }
-            
-            if (! BinaryFileManager.ProcessRequest(request))
-            {
-                Log.Debug("Url {0} not found. Returning 404 Not Found.", urlPath);
-                response.StatusCode = 404;
-                response.SuppressContent = true;
-                application.CompleteRequest();
-                return;
-            }
-            // if we got here, the file was successfully created on file-system
-            DateTime ifModifiedSince = Convert.ToDateTime(request.Headers["If-Modified-Since"]);
-            Log.Debug("If-Modified-Since: " + ifModifiedSince);
 
-            DateTime fileLastModified = File.GetLastWriteTime(request.PhysicalPath);
-            Log.Debug("File last modified: " + fileLastModified);
-
-            if (fileLastModified.Subtract(ifModifiedSince).TotalSeconds < 1)
+            using (new Tracer(o, eventArgs, urlPath))
             {
-                Log.Debug("Sending 304 Not Modified.");
-                response.StatusCode = 304;
-                response.SuppressContent = true;
-                application.CompleteRequest();
-                return;
-            }
-
-            // Note: if the file was just created, an empty dummy might still be served by IIS
-            // To make sure the right file is sent, we will transmit the file directly within the first second of the creation
-            if (fileLastModified.AddSeconds(1).CompareTo(DateTime.Now) > 0) 
-            {
-                Log.Debug("File was created less than 1 second ago, transmitting content directly.");
-                response.Clear();
-                try
+                if (WebRequestContext.HasNoLocalization)
                 {
-                    response.TransmitFile(request.PhysicalPath);
+                    return;
                 }
-                catch (IOException ex)
+
+                string staticsRootUrl = SiteConfiguration.GetLocalStaticsUrl(WebRequestContext.Localization.LocalizationId);
+                urlPath = urlPath.StartsWith("/" + staticsRootUrl) ? urlPath.Substring(staticsRootUrl.Length + 1) : urlPath;
+                Regex binaryUrlRegex = GetBinaryUrlRegex(WebRequestContext.Localization);
+                if (!binaryUrlRegex.IsMatch(urlPath))
                 {
-                    // file probabaly accessed by a different thread in a different process
-                    Log.Error("TransmitFile failed: {0}\r\n{1}", ex.Message, ex.StackTrace);
+                    Log.Debug("URL '{0}' does not match binary URL pattern '{1}', ignoring it.", urlPath, binaryUrlRegex);
+                    return;
+                }
+
+                if (!BinaryFileManager.ProcessRequest(request))
+                {
+                    Log.Debug("No Binary found for URL '{0}'. Returning HTTP 404 (Not Found).", urlPath);
+                    response.StatusCode = 404;
+                    response.SuppressContent = true;
+                    application.CompleteRequest();
+                    return;
+                }
+                // if we got here, the file was successfully created on file-system
+                DateTime ifModifiedSince = Convert.ToDateTime(request.Headers["If-Modified-Since"]);
+                Log.Debug("If-Modified-Since: " + ifModifiedSince);
+
+                DateTime fileLastModified = File.GetLastWriteTime(request.PhysicalPath);
+                Log.Debug("File last modified: " + fileLastModified);
+
+                if (fileLastModified.Subtract(ifModifiedSince).TotalSeconds < 1)
+                {
+                    Log.Debug("Sending HTTP 304 (Not Modified).");
+                    response.StatusCode = 304;
+                    response.SuppressContent = true;
+                    application.CompleteRequest();
+                    return;
+                }
+
+                // Note: if the file was just created, an empty dummy might still be served by IIS
+                // To make sure the right file is sent, we will transmit the file directly within the first second of the creation
+                if (fileLastModified.AddSeconds(1).CompareTo(DateTime.Now) > 0)
+                {
+                    Log.Debug("File was created less than 1 second ago, transmitting content directly.");
+                    response.Clear();
+                    try
+                    {
+                        response.TransmitFile(request.PhysicalPath);
+                    }
+                    catch (IOException ex)
+                    {
+                        // file probabaly accessed by a different thread in a different process
+                        Log.Error("TransmitFile failed: {0}\r\n{1}", ex.Message, ex.StackTrace);
+                    }
                 }
             }
         }
 
-        public static void DistributionModule_OnBeginRequest(Object source, EventArgs e)
+        private static void OnBeginRequest(Object source, EventArgs e)
         {
             HttpContext context = HttpContext.Current;
             HttpRequest request = context.Request;
-            string urlPath = request.Url.AbsolutePath; 
-            if (WebRequestContext.HasNoLocalization)
-            {
-                return;
-            }
-            Log.Debug(">>DistributionModule_OnBeginRequest ({0})", urlPath);            
-            if (!IsBinaryUrl.IsMatch(urlPath))
-            {
-                Log.Debug("Url {0} does not match binary url pattern, ignoring it.", urlPath);
-                Log.Debug("<<DistributionModule_OnBeginRequest ({0})", urlPath);
-                return;
-            }
+            string urlPath = request.Url.AbsolutePath;
 
-            string realPath = Path.Combine(new[] { request.PhysicalApplicationPath, SiteConfiguration.GetLocalStaticsFolder(WebRequestContext.Localization.LocalizationId), request.Path.ToCombinePath() });
-            context.RewritePath("/" + SiteConfiguration.GetLocalStaticsFolder(WebRequestContext.Localization.LocalizationId) + request.Path);
-            if (!File.Exists(realPath))
+            using (new Tracer(source, e, urlPath))
             {
-                string dir = realPath.Substring(0, realPath.LastIndexOf("\\", StringComparison.Ordinal));
-                Log.Debug("Dir path: {0}", dir);
-                try
+                if (WebRequestContext.HasNoLocalization)
                 {
-                    if (!Directory.Exists(dir))
+                    return;
+                }
+
+                Regex binaryUrlRegex = GetBinaryUrlRegex(WebRequestContext.Localization);
+                if (!binaryUrlRegex.IsMatch(urlPath))
+                {
+                    Log.Debug("URL '{0}' does not match binary URL pattern '{1}', ignoring it.", urlPath, binaryUrlRegex);
+                    return;
+                }
+
+                string realPath = Path.Combine(new[] { request.PhysicalApplicationPath, SiteConfiguration.GetLocalStaticsFolder(WebRequestContext.Localization.LocalizationId), request.Path.ToCombinePath() });
+                context.RewritePath("/" + SiteConfiguration.GetLocalStaticsFolder(WebRequestContext.Localization.LocalizationId) + request.Path);
+                if (!File.Exists(realPath))
+                {
+                    string dir = realPath.Substring(0, realPath.LastIndexOf("\\", StringComparison.Ordinal));
+                    Log.Debug("Dir path: {0}", dir);
+                    try
                     {
-                        Directory.CreateDirectory(dir);
+                        if (!Directory.Exists(dir))
+                        {
+                            Directory.CreateDirectory(dir);
+                        }
+                        lock (NamedLocker.GetLock(realPath))
+                        {
+                            File.Create(realPath).Dispose();
+                        }
                     }
-                    lock (NamedLocker.GetLock(realPath))
+                    catch (IOException)
                     {
-                        File.Create(realPath).Dispose();
+                        // file probabaly accessed by a different thread in a different process, locking failed
+                        Log.Warn("Cannot create {0}. This can happen sporadically, let the next thread handle this.", realPath);
                     }
                 }
-                catch (IOException)
-                {
-                    // file probabaly accessed by a different thread in a different process, locking failed
-                    Log.Warn("Cannot create {0}. This can happen sporadically, let the next thread handle this.", realPath);
-                }
             }
-
-            Log.Debug("<<DistributionModule_OnBeginRequest ({0})", urlPath);
         }
 
-		/// <summary>
-		/// Do nothing
-		/// </summary>
-		public void Dispose() { }
-
-        #endregion
-
-        #region private
-        private IBinaryFileManager _binaryFileManager;
-        public virtual IBinaryFileManager BinaryFileManager 
+        #region private members
+        private static IBinaryFileManager BinaryFileManager  // TODO TSI-788: Use Dependency injection (or merge BinaryFileManager into BinaryDistributionModule)
         {
             get
             {
                 return _binaryFileManager ?? (_binaryFileManager = new BinaryFileManager());
             }
-            set
-            {
-                _binaryFileManager = value;
-            }
         }
 
-        private static Dictionary<string,Regex> _localizationBinaryRegexes = new Dictionary<string,Regex>();
-        private static readonly object RegexLock = new object();
-        private static Regex IsBinaryUrl
+        private static Regex GetBinaryUrlRegex(Localization localization)
         {
-            get
+            string localizationId = localization.LocalizationId;
+            lock (_localizationBinaryRegexes)
             {
-                var loc = WebRequestContext.Localization;
-                if (!_localizationBinaryRegexes.ContainsKey(loc.LocalizationId))
+                Regex result;
+                if (_localizationBinaryRegexes.TryGetValue(localizationId, out result))
                 {
-                    AddBinaryRegex(loc.LocalizationId,loc.MediaUrlRegex);
+                    return result;
                 }
-                return _localizationBinaryRegexes[loc.LocalizationId];
-            }
-        }
-
-        private static void AddBinaryRegex(string key, string regex)
-        {
-            lock(RegexLock)
-            {
-                if (_localizationBinaryRegexes.ContainsKey(key))
-                {
-                    _localizationBinaryRegexes[key] = new Regex(regex,RegexOptions.IgnoreCase);
-                }
-                else
-                {
-                    _localizationBinaryRegexes.Add(key, new Regex(regex,RegexOptions.IgnoreCase));
-                }
+                result = new Regex(localization.MediaUrlRegex, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                _localizationBinaryRegexes.Add(localizationId, result);
+                return result;
             }
         }
 

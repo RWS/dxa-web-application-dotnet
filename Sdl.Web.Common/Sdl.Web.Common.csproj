@@ -63,6 +63,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.Mvc.5.1.2\lib\net45\System.Web.Mvc.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\SiteConfiguration.cs" />
@@ -79,7 +80,8 @@
     <Compile Include="Interfaces\IRichTextProcessor.cs" />
     <Compile Include="Interfaces\LegacyContentResolverFacade.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />
-    <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Logging\Log.cs" />
+    <Compile Include="Logging\Tracer.cs" />
     <Compile Include="Mapping\BaseModelBuilder.cs" />
     <Compile Include="Mapping\FieldSemantics.cs" />
     <Compile Include="Mapping\SchemaSemantics.cs" />
