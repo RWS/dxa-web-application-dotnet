@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="Sdl.Web.Mvc.Controllers.BaseController">
+    <Position X="5.25" Y="0.5" Width="2.75" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Sdl.Web.Site.Areas.Core.Controllers.AdminController">
+    <Position X="9.25" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Areas\Core\Controllers\AdminController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Site.Areas.Core.Controllers.EntityController">
+    <Position X="6.75" Y="5.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Areas\Core\Controllers\EntityController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Site.Areas.Core.Controllers.ListController">
+    <Position X="6.5" Y="7.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAI=</HashCode>
+      <FileName>Areas\Core\Controllers\ListController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Site.Areas.Core.Controllers.NavigationController">
+    <Position X="9" Y="5.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAAAAAAAAAAAQAAAAAAAAAQAAAAAAAAAAQAA=</HashCode>
+      <FileName>Areas\Core\Controllers\NavigationController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Site.Areas.Core.Controllers.PageController">
+    <Position X="1.5" Y="5.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>ACEAAAAAAACQAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAA=</HashCode>
+      <FileName>Areas\Core\Controllers\PageController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Site.Areas.Core.Controllers.RegionController">
+    <Position X="4.25" Y="5.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Areas\Core\Controllers\RegionController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -6,7 +6,7 @@ using System.Web.Mvc;
 
 namespace Sdl.Web.Site.Areas.Core.Controllers
 {
-    public class ListController : BaseController
+    public class ListController : EntityController
     {
         /// <summary>
         /// Populate/Map and render a list entity model
@@ -15,11 +15,10 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         /// <param name="containerSize">The size (in grid units) of the container the entity is in</param>
         /// <returns>Rendered list entity model</returns>
         [HandleSectionError(View = "SectionError")]
-        public virtual ActionResult List(EntityModel entity, int containerSize = 0)
+        public ActionResult List(EntityModel entity, int containerSize = 0)
         {
-            SetupViewData(entity, containerSize);
-            ViewModel model = EnrichModel(entity) ?? entity;
-            return View(model.MvcData.ViewName, model);
+            // The List action is effectively just an alias for the general Entity action (we keep it for backward compatibility).
+            return Entity(entity, containerSize);
         }
 
         protected override ViewModel EnrichModel(ViewModel sourceModel)

@@ -210,6 +210,9 @@
   <ItemGroup>
     <Content Include="Views\Shared\Partials\XpmButton.cshtml" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Areas\Core\Controllers\Controllers.cd" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
