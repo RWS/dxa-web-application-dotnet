@@ -116,9 +116,9 @@ namespace Sdl.Web.Tridion.Config
 
         private static void LoadRegionsForLocalization(Localization loc)
         {
-            var key = loc.LocalizationId;
-            var url = Path.Combine(loc.Path.ToCombinePath(true), @"system\mappings\regions.json").Replace("\\", "/");
-            var jsonData = SiteConfiguration.StaticFileManager.Serialize(url, loc, true);
+            string key = loc.LocalizationId;
+            string url = Path.Combine(loc.Path.ToCombinePath(true), @"system\mappings\regions.json").Replace("\\", "/");
+            string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(url, loc).GetText();
             if (jsonData != null)
             {
                 var regions = new Dictionary<string, XpmRegion>();

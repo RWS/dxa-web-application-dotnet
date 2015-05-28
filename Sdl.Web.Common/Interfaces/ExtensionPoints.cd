@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
   <Interface Name="Sdl.Web.Common.Interfaces.IContentProvider">
-    <Position X="0.5" Y="0.75" Width="4.25" />
+    <Position X="0.5" Y="0.75" Width="5.25" />
     <Compartments>
       <Compartment Name="Properties" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAACCAAAAAAEAAAAAAAAAQAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAACCAAAAAAEAAAAAABAAQAAAAAAAAA=</HashCode>
       <FileName>Interfaces\IContentProvider.cs</FileName>
     </TypeIdentifier>
   </Interface>
@@ -18,7 +18,7 @@
     </TypeIdentifier>
   </Interface>
   <Interface Name="Sdl.Web.Common.Interfaces.INavigationProvider">
-    <Position X="5" Y="0.75" Width="6" />
+    <Position X="6" Y="0.75" Width="6" />
     <TypeIdentifier>
       <HashCode>AQAAAAQAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAA=</HashCode>
       <FileName>Interfaces\INavigationProvider.cs</FileName>

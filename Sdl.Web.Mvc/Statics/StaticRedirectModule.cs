@@ -1,8 +1,8 @@
-﻿using Sdl.Web.Common.Configuration;
+﻿using System;
+using System.Web;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Mvc.Configuration;
-using System;
-using System.Web;
 
 namespace Sdl.Web.Mvc.Statics
 {
@@ -31,9 +31,9 @@ namespace Sdl.Web.Mvc.Statics
         {
             HttpApplication application = (HttpApplication)sender;
             HttpContext context = application.Context;
-            var url = context.Request.Url.AbsolutePath;
+            string url = context.Request.Url.AbsolutePath;
             //1. Attempt to get current localization
-            var loc = WebRequestContext.Localization;
+            Localization loc = WebRequestContext.Localization;
             if (loc == null)
             {
                 WebRequestContext.HasNoLocalization = true;
@@ -52,7 +52,7 @@ namespace Sdl.Web.Mvc.Statics
                 return;
             }
             //3. Remove version from URL
-            var versionLessUrl = SiteConfiguration.RemoveVersionFromPath(url);
+            string versionLessUrl = SiteConfiguration.RemoveVersionFromPath(url);
             if (url != versionLessUrl)
             {
                 Log.Debug("Rewriting request for non-existent versioned static file {0} to {1}", url, versionLessUrl);

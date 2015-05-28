@@ -13,6 +13,7 @@ namespace Sdl.Web.Common.Interfaces
     ///     <item><see cref="GetPageModel"/> and <see cref="GetEntityModel"/> now returned strongly typed results (DXA View Models).</item>
     ///     <item>GetPageContent and GetEntityContent have been removed; these would leak the underlying data representation.</item>
     ///     <item>GetNavigationModel has been moved to a separate <see cref="INavigationProvider"/> interface.</item>
+    ///     <item><see cref="GetStaticContentItem"/> method has been added. This replaces <see cref="IStaticFileManager.Serialize"/>.</item>
     ///     <Item><see cref="ContentResolver"/> property has been deprecated, because <see cref="IContentResolver"/> is deprecated 
     ///         and the new extension points can be accessed through <see cref="Sdl.Web.Common.Configuration.SiteConfiguration"/>.</Item>
     ///     <Item><see cref="PopulateDynamicList"/> no longer returns a value; the Content List provided as parameter is populated.</Item>
@@ -37,6 +38,14 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="id">The Entity Identifier.</param>
         /// <returns>The Entity Model.</returns>
         EntityModel GetEntityModel(string id);
+
+        /// <summary>
+        /// Gets a Static Content Item (binary) for a given URL path.
+        /// </summary>
+        /// <param name="urlPath">The URL path.</param>
+        /// <param name="localization">The context Localization.</param>
+        /// <returns>The Static Content Item.</returns>
+        StaticContentItem GetStaticContentItem(string urlPath, Localization localization);
 
         /// <summary>
         /// Populates a Content List by executing the query it specifies.

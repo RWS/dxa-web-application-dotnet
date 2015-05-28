@@ -70,6 +70,7 @@
     <Compile Include="Configuration\Localization.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="DxaException.cs" />
+    <Compile Include="DxaItemNotFoundException.cs" />
     <Compile Include="Extensions\LinkExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Interfaces\IConditionalEntityEvaluator.cs" />
@@ -129,6 +130,7 @@
     <Compile Include="Models\RegionModel.cs" />
     <Compile Include="Models\Legacy\WebPage.cs" />
     <Compile Include="Models\RegionModelSet.cs" />
+    <Compile Include="Models\StaticContentItem.cs" />
     <Compile Include="Models\ViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\VersionInfo.cs" />

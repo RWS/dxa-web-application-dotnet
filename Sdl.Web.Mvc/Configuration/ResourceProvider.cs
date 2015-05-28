@@ -62,10 +62,10 @@ namespace Sdl.Web.Mvc.Configuration
         private static void LoadResourcesForLocalization(Localization loc)
         {
             Log.Debug("Loading resources for localization : {0}", loc.LocalizationId);
-            var key = loc.LocalizationId;
-            var resources = new Dictionary<string, object>();
-            var url = Path.Combine(loc.Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"resources\_all.json").Replace("\\","/");
-            var jsonData = SiteConfiguration.StaticFileManager.Serialize(url, loc, true);
+            string key = loc.LocalizationId;
+            Dictionary<string, object> resources = new Dictionary<string, object>();
+            string url = Path.Combine(loc.Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"resources\_all.json").Replace("\\","/");
+            string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(url, loc).GetText();
             if (jsonData!=null)
             {
                 //The _all.json file contains a list of all other resources files to load
@@ -74,7 +74,7 @@ namespace Sdl.Web.Mvc.Configuration
                 {
                     var type = resourceUrl.Substring(resourceUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
                     type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                    jsonData = SiteConfiguration.StaticFileManager.Serialize(resourceUrl, loc, true);
+                    jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(resourceUrl, loc).GetText();
                     if (jsonData!=null)
                     {
                         Log.Debug("Loading resources from file: {0}", resourceUrl);

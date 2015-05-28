@@ -83,13 +83,9 @@
     <Compile Include="Mapping\MappingData.cs" />
     <Compile Include="Mapping\PublicationResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Statics\BinaryDistributionModule.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Statics\BinaryFileManager.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Statics\IBinaryFileManager.cs" />
     <Compile Include="Statics\NamedLocker.cs" />
     <Compile Include="Utils\ObjectExtension.cs" />
     <Compile Include="Properties\VersionInfo.cs" />

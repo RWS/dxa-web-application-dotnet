@@ -124,9 +124,9 @@ namespace Sdl.Web.Common.Mapping
 
         private static void LoadVocabulariesForLocalization(Localization loc)
         {
-            var key = loc.LocalizationId;
-            var url = Path.Combine(loc.Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"mappings\vocabularies.json").Replace("\\", "/");
-            var jsonData = SiteConfiguration.StaticFileManager.Serialize(url, loc, true);
+            string key = loc.LocalizationId;
+            string url = Path.Combine(loc.Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"mappings\vocabularies.json").Replace("\\", "/");
+            string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(url, loc).GetText();
             if (jsonData != null)
             {
                 var vocabs = GetVocabulariesFromFile(jsonData);
@@ -162,9 +162,9 @@ namespace Sdl.Web.Common.Mapping
         
         private static void LoadIncludesForLocalization(Localization loc)
         {
-            var key = loc.LocalizationId;
-            var url = Path.Combine(loc.Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"mappings\includes.json").Replace("\\", "/");
-            var jsonData = SiteConfiguration.StaticFileManager.Serialize(url, loc, true);
+            string key = loc.LocalizationId;
+            string url = Path.Combine(loc.Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"mappings\includes.json").Replace("\\", "/");
+            string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(url, loc).GetText();
             if (jsonData!=null)
             {
                 var includes = GetIncludesFromFile(jsonData);
@@ -174,9 +174,9 @@ namespace Sdl.Web.Common.Mapping
 
         private static void LoadSemanticMapForLocalization(Localization loc)
         {
-            var key = loc.LocalizationId;
-            var url = Path.Combine(loc.Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"mappings\schemas.json").Replace("\\", "/");
-            var jsonData = SiteConfiguration.StaticFileManager.Serialize(url, loc, true);
+            string key = loc.LocalizationId;
+            string url = Path.Combine(loc.Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"mappings\schemas.json").Replace("\\", "/");
+            string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(url, loc).GetText();;
             if (jsonData != null)
             {
                 var schemas = GetSchemasFromFile(jsonData);

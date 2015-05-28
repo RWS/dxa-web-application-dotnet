@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Policy;
+using System.Text;
 using System.Web;
 using System.Web.Script.Serialization;
 using DD4T.ContentModel.Exceptions;
@@ -13,6 +14,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
+using Sdl.Web.DD4T.Statics;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Query;
 using IPage = DD4T.ContentModel.IPage;
@@ -64,34 +66,63 @@ namespace Sdl.Web.DD4T.Mapping
         /// <returns>Model corresponding to that URL</returns>
         public virtual PageModel GetPageModel(string url, bool addIncludes)
         {
-            string cmsUrl = GetCanonicalUrl(url);
-            Log.Debug("Getting Page Model for URL '{0}' (original request: '{1}')", cmsUrl, url);
-
-            //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
-            //1. Try adding the default extension, so /news becomes /news.html
-            IPage page = GetPageModelFromUrl(cmsUrl);
-            if (page == null && (url == null || (!url.EndsWith("/") && url.LastIndexOf(".", StringComparison.Ordinal) <= url.LastIndexOf("/", StringComparison.Ordinal))))
+            using (new Tracer(url, addIncludes))
             {
-                //2. Try adding the default page, so /news becomes /news/index.html
-                cmsUrl = GetCanonicalUrl(url + "/");
-                Log.Debug("No content for URL found, trying default: {0}", cmsUrl);
-                page = GetPageModelFromUrl(cmsUrl);
-            }
-            if (page == null)
-            {
-                return null;
-            }
+                string cmsUrl = GetCmUrl(url);
+                Log.Debug("Trying CM URL '{0}'", cmsUrl);
 
-            MvcData viewData = DD4TMappingUtilities.ResolveMvcData(page);
-            Type viewModeltype = ModelTypeRegistry.GetViewModelType(viewData);
-            List<PageModel> includes = addIncludes ? GetIncludesFromModel(page) : new List<PageModel>();
-            return ModelBuilder.CreatePageModel(page, viewModeltype, includes, viewData);
+                //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
+                //1. Try adding the default extension, so /news becomes /news.html
+                IPage page = GetPageModelFromUrl(cmsUrl);
+                if (page == null && (url == null || (!url.EndsWith("/") && url.LastIndexOf(".", StringComparison.Ordinal) <= url.LastIndexOf("/", StringComparison.Ordinal))))
+                {
+                    //2. Try adding the default page, so /news becomes /news/index.html
+                    cmsUrl = GetCmUrl(url + "/");
+                    Log.Debug("No content found, trying default Page CM URL: '{0}'", cmsUrl);
+                    page = GetPageModelFromUrl(cmsUrl);
+                }
+                if (page == null)
+                {
+                    return null;
+                }
+
+                MvcData viewData = DD4TMappingUtilities.ResolveMvcData(page);
+                Type viewModeltype = ModelTypeRegistry.GetViewModelType(viewData);
+                List<PageModel> includes = addIncludes ? GetIncludesFromModel(page) : new List<PageModel>();
+                return ModelBuilder.CreatePageModel(page, viewModeltype, includes, viewData);
+            }
         }
 
         //TODO TSI-803 - to get DCP content as object
         public virtual EntityModel GetEntityModel(string id)
         {
-            throw new NotImplementedException("This feature will be implemented in a future release");
+            using (new Tracer(id))
+            {
+                throw new NotImplementedException("This feature will be implemented in a future release");
+            }
+        }
+
+
+
+        /// <summary>
+        /// Gets a Static Content Item for a given URL path.
+        /// </summary>
+        /// <param name="urlPath">The URL path.</param>
+        /// <param name="localization">The context Localization.</param>
+        /// <returns>The Static Content Item.</returns>
+        public StaticContentItem GetStaticContentItem(string urlPath, Localization localization)
+        {
+            using (new Tracer(urlPath, localization))
+            {
+                string localFilePath = BinaryFileManager.Instance.GetCachedFile(urlPath, localization);
+ 
+                return new StaticContentItem(
+                    new FileStream(localFilePath, FileMode.Open),
+                    MimeMapping.GetMimeMapping(localFilePath),
+                    File.GetLastWriteTime(localFilePath), 
+                    Encoding.UTF8
+                    );
+            }
         }
 
         /// <summary>
@@ -100,28 +131,29 @@ namespace Sdl.Web.DD4T.Mapping
         /// <param name="contentList">The Content List which specifies the query and is to be populated.</param>
         public virtual void PopulateDynamicList<T>(ContentList<T> contentList) where T:EntityModel
         {
-            Log.Debug("Populating Dynamic List [{0}]", contentList);
-
-            BrokerQuery query = new BrokerQuery
+            using (new Tracer(contentList))
             {
-                Start = contentList.Start,
-                PublicationId = Int32.Parse(WebRequestContext.Localization.LocalizationId),
-                PageSize = contentList.PageSize,
-                SchemaId = MapSchema(contentList.ContentType.Key),
-                Sort = contentList.Sort.Key
-            };
+                BrokerQuery query = new BrokerQuery
+                {
+                    Start = contentList.Start,
+                    PublicationId = Int32.Parse(WebRequestContext.Localization.LocalizationId),
+                    PageSize = contentList.PageSize,
+                    SchemaId = MapSchema(contentList.ContentType.Key),
+                    Sort = contentList.Sort.Key
+                };
 
-            // TODO: For now BrokerQuery always returns Teasers
-            IEnumerable<Teaser> queryResults = query.ExecuteQuery();
+                // TODO: For now BrokerQuery always returns Teasers
+                IEnumerable<Teaser> queryResults = query.ExecuteQuery();
 
-            ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
-            foreach (Teaser item in queryResults)
-            {
-                item.Link.Url = linkResolver.ResolveLink(item.Link.Url);
+                ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
+                foreach (Teaser item in queryResults)
+                {
+                    item.Link.Url = linkResolver.ResolveLink(item.Link.Url);
+                }
+
+                contentList.ItemListElements = queryResults.Cast<T>().ToList();
+                contentList.HasMore = query.HasMore;
             }
-
-            contentList.ItemListElements = queryResults.Cast<T>().ToList();
-            contentList.HasMore = query.HasMore;
         }
 
         #endregion
@@ -135,25 +167,26 @@ namespace Sdl.Web.DD4T.Mapping
         /// <returns>The Navigation Model (Sitemap root Item).</returns>
         public virtual SitemapItem GetNavigationModel(Localization localization)
         {
-            Log.Debug("Getting Navigation Model for Localization [{0}]", localization);
-
-            string url = SiteConfiguration.LocalizeUrl("navigation.json", localization);
-            // TODO TSI-110: This is a temporary measure to cache the Navigation Model per request to not retrieve and serialize 3 times per request. Comprehensive caching strategy pending
-            string cacheKey = "navigation-" + url;
-            SitemapItem result;
-            if (HttpContext.Current.Items[cacheKey] == null)
+            using (new Tracer(localization))
             {
-                Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", url);
-                string navigationJsonString = GetPageContent(url);
-                result = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
-                HttpContext.Current.Items[cacheKey] = result;
+                string url = SiteConfiguration.LocalizeUrl("navigation.json", localization);
+                // TODO TSI-110: This is a temporary measure to cache the Navigation Model per request to not retrieve and serialize 3 times per request. Comprehensive caching strategy pending
+                string cacheKey = "navigation-" + url;
+                SitemapItem result;
+                if (HttpContext.Current.Items[cacheKey] == null)
+                {
+                    Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", url);
+                    string navigationJsonString = GetPageContent(url);
+                    result = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
+                    HttpContext.Current.Items[cacheKey] = result;
+                }
+                else
+                {
+                    Log.Debug("Obtained Navigation Model from cache.");
+                    result = (SitemapItem)HttpContext.Current.Items[cacheKey];
+                }
+                return result;
             }
-            else
-            {
-                Log.Debug("Obtained Navigation Model from cache.");
-                result = (SitemapItem)HttpContext.Current.Items[cacheKey];
-            }
-            return result;
         }
 
         /// <summary>
@@ -164,15 +197,16 @@ namespace Sdl.Web.DD4T.Mapping
         /// <returns>The Navigation Links.</returns>
         public virtual NavigationLinks GetTopNavigationLinks(string requestUrlPath, Localization localization)
         {
-            Log.Debug("Getting top navigation links for URL '{0}' Localization [{1}]", requestUrlPath, localization);
-
-            NavigationLinks navigationLinks = new NavigationLinks();
-            SitemapItem sitemapRoot = GetNavigationModel(localization);
-            foreach (SitemapItem item in sitemapRoot.Items.Where(i => i.Visible))
+            using (new Tracer(requestUrlPath, localization))
             {
-                navigationLinks.Items.Add(CreateLink((item.Title == "Index") ? sitemapRoot : item));
+                NavigationLinks navigationLinks = new NavigationLinks();
+                SitemapItem sitemapRoot = GetNavigationModel(localization);
+                foreach (SitemapItem item in sitemapRoot.Items.Where(i => i.Visible))
+                {
+                    navigationLinks.Items.Add(CreateLink((item.Title == "Index") ? sitemapRoot : item));
+                }
+                return navigationLinks;
             }
-            return navigationLinks;
         }
 
         /// <summary>
@@ -183,30 +217,31 @@ namespace Sdl.Web.DD4T.Mapping
         /// <returns>The Navigation Links.</returns>
         public virtual NavigationLinks GetContextNavigationLinks(string requestUrlPath, Localization localization)
         {
-            Log.Debug("Getting context navigation links for URL '{0}' Localization [{1}]", requestUrlPath, localization);
-
-            NavigationLinks navigationLinks = new NavigationLinks();
-            SitemapItem sitemapItem = GetNavigationModel(localization); // Start with Sitemap root Item.
-            int levels = requestUrlPath.Split('/').Length;
-            while (levels > 1 && sitemapItem.Items != null)
+            using (new Tracer(requestUrlPath, localization))
             {
-                SitemapItem newParent = sitemapItem.Items.FirstOrDefault(i => i.Type == "StructureGroup" && requestUrlPath.StartsWith(i.Url.ToLower()));
-                if (newParent == null)
+                NavigationLinks navigationLinks = new NavigationLinks();
+                SitemapItem sitemapItem = GetNavigationModel(localization); // Start with Sitemap root Item.
+                int levels = requestUrlPath.Split('/').Length;
+                while (levels > 1 && sitemapItem.Items != null)
                 {
-                    break;
+                    SitemapItem newParent = sitemapItem.Items.FirstOrDefault(i => i.Type == "StructureGroup" && requestUrlPath.StartsWith(i.Url.ToLower()));
+                    if (newParent == null)
+                    {
+                        break;
+                    }
+                    sitemapItem = newParent;
                 }
-                sitemapItem = newParent;
-            }
 
-            if (sitemapItem != null && sitemapItem.Items != null)
-            {
-                foreach (SitemapItem item in sitemapItem.Items.Where(i => i.Visible))
+                if (sitemapItem != null && sitemapItem.Items != null)
                 {
-                    navigationLinks.Items.Add(CreateLink(item));
+                    foreach (SitemapItem item in sitemapItem.Items.Where(i => i.Visible))
+                    {
+                        navigationLinks.Items.Add(CreateLink(item));
+                    }
                 }
-            }
 
-            return navigationLinks;
+                return navigationLinks;
+            }
         }
 
         /// <summary>
@@ -217,26 +252,28 @@ namespace Sdl.Web.DD4T.Mapping
         /// <returns>The Navigation Links.</returns>
         public virtual NavigationLinks GetBreadcrumbNavigationLinks(string requestUrlPath, Localization localization)
         {
-            Log.Debug("Getting breadcrumb navigation links for URL '{0}' Localization [{1}]", requestUrlPath, localization);
-
-            NavigationLinks navigationLinks = new NavigationLinks();
-            int levels = requestUrlPath.Split('/').Length;
-            SitemapItem sitemapItem = GetNavigationModel(localization); // Start with Sitemap root Item.
-            navigationLinks.Items.Add(CreateLink(sitemapItem));
-            while (levels > 1 && sitemapItem.Items != null)
+            using (new Tracer(requestUrlPath, localization))
             {
-                sitemapItem = sitemapItem.Items.FirstOrDefault(i => requestUrlPath.StartsWith(i.Url.ToLower()));
-                if (sitemapItem != null)
+
+                NavigationLinks navigationLinks = new NavigationLinks();
+                int levels = requestUrlPath.Split('/').Length;
+                SitemapItem sitemapItem = GetNavigationModel(localization); // Start with Sitemap root Item.
+                navigationLinks.Items.Add(CreateLink(sitemapItem));
+                while (levels > 1 && sitemapItem.Items != null)
                 {
-                    navigationLinks.Items.Add(CreateLink(sitemapItem));
-                    levels--;
+                    sitemapItem = sitemapItem.Items.FirstOrDefault(i => requestUrlPath.StartsWith(i.Url.ToLower()));
+                    if (sitemapItem != null)
+                    {
+                        navigationLinks.Items.Add(CreateLink(sitemapItem));
+                        levels--;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
-                else
-                {
-                    break;
-                }
+                return navigationLinks;
             }
-            return navigationLinks;
         }
 
         #endregion
@@ -260,7 +297,7 @@ namespace Sdl.Web.DD4T.Mapping
         /// </summary>
         /// <param name="url">The request URL</param>
         /// <returns>A CMS URL</returns>
-        protected virtual string GetCanonicalUrl(string url)
+        protected virtual string GetCmUrl(string url)
         {
             if (String.IsNullOrEmpty(url))
             {

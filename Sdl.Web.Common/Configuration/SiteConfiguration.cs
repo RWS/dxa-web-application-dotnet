@@ -94,14 +94,18 @@ namespace Sdl.Web.Common.Configuration
             private set; 
         }
 
+
+#pragma warning disable 618
         /// <summary>
         /// Gets the Static File Manager used for serializing and accessing static files published from the CMS (config/resources/HTML design assets etc.)
         /// </summary>
+        [Obsolete("Deprecated in DXA 1.1. Use ContentProvider.GetStaticContentItem to get static content.")]
         public static IStaticFileManager StaticFileManager
         {
             get; 
             private set;
         }
+#pragma warning restore 618
 
         /// <summary>
         /// Gets the Localization Manager used for mapping URLs to localizations/content stores
@@ -124,8 +128,10 @@ namespace Sdl.Web.Common.Configuration
             RichTextProcessor = GetProvider<IRichTextProcessor>(dependencyResolver);
             ConditionalEntityEvaluator = GetProvider<IConditionalEntityEvaluator>(dependencyResolver, isOptional: true);
             MediaHelper = GetProvider<IMediaHelper>(dependencyResolver);
-            StaticFileManager = GetProvider<IStaticFileManager>(dependencyResolver);
             LocalizationManager = GetProvider<ILocalizationManager>(dependencyResolver);
+#pragma warning disable 618
+            StaticFileManager = GetProvider<IStaticFileManager>(dependencyResolver, isOptional: true);
+#pragma warning restore 618
         }
 
         private static T GetProvider<T>(IDependencyResolver dependencyResolver, bool isOptional = false)
@@ -235,25 +241,28 @@ namespace Sdl.Web.Common.Configuration
 
         public static void Refresh(Localization loc)
         {
-            lock(_localizationUpdateLock)
+            using (new Tracer(loc))
             {
-                //refresh all localizations for this site
-                foreach(var localization in loc.SiteLocalizations)
+                lock (_localizationUpdateLock)
                 {
-                    LocalizationManager.UpdateLocalization(localization);
+                    //refresh all localizations for this site
+                    foreach (var localization in loc.SiteLocalizations)
+                    {
+                        LocalizationManager.UpdateLocalization(localization);
+                    }
                 }
             }
         }
 
         private static void LoadLocalizationDetails(Localization loc, IEnumerable<string> fileUrls)
         {
-            var key = loc.LocalizationId;
-            var config = new Dictionary<string, Dictionary<string, string>>();
+            string key = loc.LocalizationId;
+            Dictionary<string, Dictionary<string, string>> config = new Dictionary<string, Dictionary<string, string>>();
             foreach (string configUrl in fileUrls)
             {
-                var type = configUrl.Substring(configUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                string type = configUrl.Substring(configUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
                 type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                var jsonData = StaticFileManager.Serialize(configUrl, loc, true);
+                string jsonData =  ContentProvider.GetStaticContentItem(configUrl, loc).GetText();
                 if (jsonData != null)
                 {
                     Log.Debug("Loading config from file: {0} for localization {1}", configUrl, key);
@@ -269,98 +278,99 @@ namespace Sdl.Web.Common.Configuration
 
         public static Localization LoadLocalization(Localization loc, bool loadDetails = false)
         {
-            var key = loc.LocalizationId;
-            Log.Debug("Loading config for localization : {0}", key);
-            var localization = new Localization
+            using (new Tracer(loc, loadDetails))
             {
-                Path = loc.Path,
-                LocalizationId = loc.LocalizationId,
-                IsHtmlDesignPublished = true
-            };
-            var mediaPatterns = new List<string>();
-            var versionUrl = Path.Combine(loc.Path.ToCombinePath(true), @"version.json").Replace("\\", "/");
-            var versionJson = StaticFileManager.Serialize(versionUrl, loc, true);
-            if (versionJson == null)
-            {
-                //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually
-                //in which case we try to load it directly - the HTML Design is thus not published from CMS
-                var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SystemFolder, @"assets\version.json");
-                if (File.Exists(path))
+                Localization localization = new Localization
                 {
-                    versionJson = File.ReadAllText(path);
-                    localization.IsHtmlDesignPublished = false;
-                }
-            }
-            if (versionJson != null)
-            {
-                localization.Version = Json.Decode(versionJson).version;
-            }
-            var bootstrapJson = GetConfigBootstrapJson(loc);
-            if (bootstrapJson != null)
-            {
-                //The _all.json file contains a reference to all other configuration files
-                if (bootstrapJson.defaultLocalization != null && bootstrapJson.defaultLocalization)
+                    Path = loc.Path,
+                    LocalizationId = loc.LocalizationId,
+                    IsHtmlDesignPublished = true
+                };
+                List<string> mediaPatterns = new List<string>();
+                string versionUrl = Path.Combine(loc.Path.ToCombinePath(true), @"version.json").Replace("\\", "/");
+                string versionJson = ContentProvider.GetStaticContentItem(versionUrl, loc).GetText();
+                if (versionJson == null)
                 {
-                    localization.IsDefaultLocalization = true;
-                }
-                if (bootstrapJson.staging != null && bootstrapJson.staging)
-                {
-                    localization.IsStaging = true;
-                    Log.Info("Localization {0} is a staging site.",loc.LocalizationId);
-                }
-                if (bootstrapJson.mediaRoot != null)
-                {
-                    string mediaRoot = bootstrapJson.mediaRoot;
-                    if (!mediaRoot.EndsWith("/"))
+                    //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually
+                    //in which case we try to load it directly - the HTML Design is thus not published from CMS
+                    string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SystemFolder, @"assets\version.json");
+                    if (File.Exists(path))
                     {
-                        mediaRoot += "/";
-                    }
-                    Log.Debug("This is site is has media root: " + mediaRoot);
-                    mediaPatterns.Add(String.Format("^{0}{1}.*", mediaRoot, mediaRoot.EndsWith("/") ? String.Empty : "/"));
-                }
-                if (bootstrapJson.siteLocalizations != null)
-                {
-                    localization.SiteLocalizations = new List<Localization>();
-                    foreach (var item in bootstrapJson.siteLocalizations)
-                    {
-                        localization.SiteLocalizations.Add(new Localization { LocalizationId = item.id ?? item, Path = item.path, Language = item.language, IsDefaultLocalization = item.isMaster ?? false });
+                        versionJson = File.ReadAllText(path);
+                        localization.IsHtmlDesignPublished = false;
                     }
                 }
-                if (localization.IsHtmlDesignPublished)
+                if (versionJson != null)
                 {
-                    mediaPatterns.Add("^/favicon.ico");
-                    mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*", loc.Path, SystemFolder));
+                    localization.Version = Json.Decode(versionJson).version;
                 }
-                if (bootstrapJson.files != null && loadDetails)
+                dynamic bootstrapJson = GetConfigBootstrapJson(loc);
+                if (bootstrapJson != null)
                 {
-                    List<string> configFiles = new List<string>();
-                    foreach (string file in bootstrapJson.files)
+                    //The _all.json file contains a reference to all other configuration files
+                    if (bootstrapJson.defaultLocalization != null && bootstrapJson.defaultLocalization)
                     {
-                        configFiles.Add(file);
+                        localization.IsDefaultLocalization = true;
                     }
-                    LoadLocalizationDetails(loc, configFiles);
+                    if (bootstrapJson.staging != null && bootstrapJson.staging)
+                    {
+                        localization.IsStaging = true;
+                        Log.Info("Localization {0} is a staging site.", loc.LocalizationId);
+                    }
+                    if (bootstrapJson.mediaRoot != null)
+                    {
+                        string mediaRoot = bootstrapJson.mediaRoot;
+                        if (!mediaRoot.EndsWith("/"))
+                        {
+                            mediaRoot += "/";
+                        }
+                        Log.Debug("This is site is has media root: " + mediaRoot);
+                        mediaPatterns.Add(String.Format("^{0}{1}.*", mediaRoot, mediaRoot.EndsWith("/") ? String.Empty : "/"));
+                    }
+                    if (bootstrapJson.siteLocalizations != null)
+                    {
+                        localization.SiteLocalizations = new List<Localization>();
+                        foreach (var item in bootstrapJson.siteLocalizations)
+                        {
+                            localization.SiteLocalizations.Add(new Localization { LocalizationId = item.id ?? item, Path = item.path, Language = item.language, IsDefaultLocalization = item.isMaster ?? false });
+                        }
+                    }
+                    if (localization.IsHtmlDesignPublished)
+                    {
+                        mediaPatterns.Add("^/favicon.ico");
+                        mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*", loc.Path, SystemFolder));
+                    }
+                    if (bootstrapJson.files != null && loadDetails)
+                    {
+                        List<string> configFiles = new List<string>();
+                        foreach (string file in bootstrapJson.files)
+                        {
+                            configFiles.Add(file);
+                        }
+                        LoadLocalizationDetails(loc, configFiles);
+                    }
+                    mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$", loc.Path, SystemFolder));
                 }
-                mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$", loc.Path, SystemFolder));
+                localization.StaticContentUrlPattern = String.Join("|", mediaPatterns);
+                localization.Culture = GetConfig("core.culture", loc);
+                localization.Language = GetConfig("core.language", loc);
+                string formats = GetConfig("core.dataFormats", loc);
+                localization.DataFormats = formats == null ? new List<string>() : formats.Split(',').Select(f => f.Trim()).ToList();
+                Log.Debug("MediaUrlRegex for localization {0} : {1}", localization.LocalizationId, localization.StaticContentUrlPattern);
+                return localization;
             }
-            localization.MediaUrlRegex = String.Join("|", mediaPatterns);
-            localization.Culture = GetConfig("core.culture", loc);
-            localization.Language = GetConfig("core.language", loc);
-            var formats = GetConfig("core.dataFormats", loc);
-            localization.DataFormats = formats == null ? new List<string>() : formats.Split(',').Select(f => f.Trim()).ToList();
-            Log.Debug("MediaUrlRegex for localization {0} : {1}", localization.LocalizationId, localization.MediaUrlRegex);
-            return localization;
         }
 
         private static dynamic GetConfigBootstrapJson(Localization loc)
         {
-            var url = Path.Combine(loc.Path.ToCombinePath(true), SystemFolder, @"config\_all.json").Replace("\\", "/");
-            var jsonData = StaticFileManager.Serialize(url, loc, true);
+            string url = Path.Combine(loc.Path.ToCombinePath(true), SystemFolder, @"config\_all.json").Replace("\\", "/");
+            string jsonData = ContentProvider.GetStaticContentItem(url, loc).GetText();
             if (jsonData != null)
             {
                 return Json.Decode(jsonData);
             }
 
-            var ex = new Exception(String.Format("Could not load configuration bootstrap file {0} for localization {1}.", url, loc.LocalizationId));
+            Exception ex = new Exception(String.Format("Could not load configuration bootstrap file {0} for localization {1}.", url, loc.LocalizationId));
             Log.Error(ex);
             throw ex;
         }
@@ -548,7 +558,7 @@ namespace Sdl.Web.Common.Configuration
 
         #endregion
 
-        #region Deprecated Methods
+        #region Obsolete Methods
         [Obsolete("Use Localization.IsStaging property of current localization (eg via WebRequestContext.Localization.IsStaging)", true)]
         public static bool IsStaging { get; set; }
         
