@@ -225,7 +225,7 @@ namespace Sdl.Web.DD4T.Statics
                     byte[] buffer = binary.BinaryData;
                     if (dimensions != null && (dimensions.Width > 0 || dimensions.Height > 0))
                     {
-                        buffer = ResizeImageFile(buffer, dimensions, GetImageFormat(physicalPath));
+                        buffer = ResizeImage(buffer, dimensions, GetImageFormat(physicalPath));
                     }
 
                     lock (NamedLocker.GetLock(physicalPath))
@@ -265,11 +265,11 @@ namespace Sdl.Web.DD4T.Statics
             }
         }
 
-        private static byte[] ResizeImageFile(byte[] imageFile, Dimensions dimensions, ImageFormat imageFormat)
+        private static byte[] ResizeImage(byte[] imageData, Dimensions dimensions, ImageFormat imageFormat)
         {
-            using (new Tracer(imageFile, dimensions, imageFormat))
+            using (new Tracer(imageData.Length, dimensions, imageFormat))
             {
-                Image original = Image.FromStream(new MemoryStream(imageFile));
+                Image original = Image.FromStream(new MemoryStream(imageData));
 
                 //Defaults for crop position, width and target size
                 int cropX = 0, cropY = 0;
@@ -324,10 +324,10 @@ namespace Sdl.Web.DD4T.Statics
                 if (targetW == original.Width && targetH == original.Height)
                 {
                     //No resize required
-                    return imageFile;
+                    return imageData;
                 }
                 Image imgPhoto;
-                using (MemoryStream memoryStream = new MemoryStream(imageFile))
+                using (MemoryStream memoryStream = new MemoryStream(imageData))
                 {
                     imgPhoto = Image.FromStream(memoryStream);
                 }

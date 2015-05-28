@@ -344,31 +344,32 @@ namespace Sdl.Web.Mvc.Html
             }
 
             MvcData mvcData = entity.MvcData;
-            Log.Debug("Rendering Entity [{0}] with MVC data [{1}] (containerSize: {2}) ", entity, mvcData, containerSize);
-
-            RouteValueDictionary parameters = new RouteValueDictionary();
-            int parentContainerSize = htmlHelper.ViewBag.ContainerSize;
-            if (parentContainerSize == 0)
+            using (new Tracer(htmlHelper, entity, containerSize, mvcData))
             {
-                parentContainerSize = SiteConfiguration.MediaHelper.GridSize;
-            }
-            parameters["containerSize"] = (containerSize * parentContainerSize) / SiteConfiguration.MediaHelper.GridSize;
-            parameters["entity"] = entity;
-            parameters["area"] = mvcData.ControllerAreaName;
-            if (mvcData.RouteValues != null)
-            {
-                foreach (var key in mvcData.RouteValues.Keys)
+                RouteValueDictionary parameters = new RouteValueDictionary();
+                int parentContainerSize = htmlHelper.ViewBag.ContainerSize;
+                if (parentContainerSize == 0)
                 {
-                    parameters[key] = mvcData.RouteValues[key];
+                    parentContainerSize = SiteConfiguration.MediaHelper.GridSize;
                 }
+                parameters["containerSize"] = (containerSize * parentContainerSize) / SiteConfiguration.MediaHelper.GridSize;
+                parameters["entity"] = entity;
+                parameters["area"] = mvcData.ControllerAreaName;
+                if (mvcData.RouteValues != null)
+                {
+                    foreach (var key in mvcData.RouteValues.Keys)
+                    {
+                        parameters[key] = mvcData.RouteValues[key];
+                    }
+                }
+                MvcHtmlString result = htmlHelper.Action(mvcData.ActionName, mvcData.ControllerName, parameters);
+                if (WebRequestContext.IsPreview)
+                {
+                    // TODO TSI-773: don't parse entity if this is in an include page (not rendered directly, so !WebRequestContext.IsInclude)
+                    result = new MvcHtmlString(TridionMarkup.ParseEntity(result.ToString()));
+                }
+                return result;
             }
-            MvcHtmlString result = htmlHelper.Action(mvcData.ActionName, mvcData.ControllerName, parameters);
-            if (WebRequestContext.IsPreview)
-            {
-                // TODO TSI-773: don't parse entity if this is in an include page (not rendered directly, so !WebRequestContext.IsInclude)
-                result = new MvcHtmlString(TridionMarkup.ParseEntity(result.ToString()));
-            }
-            return result;
         }
 
         /// <summary>
@@ -380,14 +381,17 @@ namespace Sdl.Web.Mvc.Html
         /// <remarks>This method will throw an exception if the current Model does not represent a Region.</remarks>
         public static MvcHtmlString DxaEntities(this HtmlHelper htmlHelper, int containerSize = 0)
         {
-            RegionModel region = (RegionModel) htmlHelper.ViewData.Model;
-
-            StringBuilder resultBuilder = new StringBuilder();
-            foreach (EntityModel entity in region.Entities)
+            using (new Tracer(htmlHelper, containerSize))
             {
-                resultBuilder.Append(htmlHelper.DxaEntity(entity, containerSize));
+                RegionModel region = (RegionModel)htmlHelper.ViewData.Model;
+
+                StringBuilder resultBuilder = new StringBuilder();
+                foreach (EntityModel entity in region.Entities)
+                {
+                    resultBuilder.Append(htmlHelper.DxaEntity(entity, containerSize));
+                }
+                return new MvcHtmlString(resultBuilder.ToString());
             }
-            return new MvcHtmlString(resultBuilder.ToString());
         }
 
         /// <summary>
@@ -409,17 +413,18 @@ namespace Sdl.Web.Mvc.Html
                 containerSize = SiteConfiguration.MediaHelper.GridSize;
             }
 
-            Log.Debug("Rendering Region '{0}' (containerSize: {1})", region.Name, containerSize);
-
-            MvcData mvcData = region.MvcData;
-            MvcHtmlString result = htmlHelper.Action(mvcData.ActionName, mvcData.ControllerName, new { Region = region, containerSize = containerSize, area = mvcData.ControllerAreaName });
-
-            if (WebRequestContext.IsPreview)
+            using (new Tracer(htmlHelper, region, containerSize))
             {
-                // TODO TSI-773: don't parse region if this is a region in an include page (not rendered directly, so !WebRequestContext.IsInclude)
-                result = new MvcHtmlString(TridionMarkup.ParseRegion(result.ToString(), WebRequestContext.Localization));
+                MvcData mvcData = region.MvcData;
+                MvcHtmlString result = htmlHelper.Action(mvcData.ActionName, mvcData.ControllerName, new { Region = region, containerSize = containerSize, area = mvcData.ControllerAreaName });
+
+                if (WebRequestContext.IsPreview)
+                {
+                    // TODO TSI-773: don't parse region if this is a region in an include page (not rendered directly, so !WebRequestContext.IsInclude)
+                    result = new MvcHtmlString(TridionMarkup.ParseRegion(result.ToString(), WebRequestContext.Localization));
+                }
+                return result;
             }
-            return result;
         }
 
         /// <summary>
@@ -436,20 +441,23 @@ namespace Sdl.Web.Mvc.Html
         /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
         public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, string regionName, string emptyViewName = null, int containerSize = 0)
         {
-            // TODO TSI-779: support nested Regions
-            PageModel page = (PageModel) htmlHelper.ViewData.Model;
-            RegionModel region;
-            if (!page.Regions.TryGetValue(regionName, out region))
+            using (new Tracer(htmlHelper, regionName, emptyViewName, containerSize))
             {
-                Log.Debug("Region '{0}' not found. Using empy View '{1}'.", regionName, emptyViewName);
-                if (emptyViewName == null)
+                // TODO TSI-779: support nested Regions
+                PageModel page = (PageModel)htmlHelper.ViewData.Model;
+                RegionModel region;
+                if (!page.Regions.TryGetValue(regionName, out region))
                 {
-                    return MvcHtmlString.Empty;
+                    Log.Debug("Region '{0}' not found. Using empy View '{1}'.", regionName, emptyViewName);
+                    if (emptyViewName == null)
+                    {
+                        return MvcHtmlString.Empty;
+                    }
+                    region = new RegionModel(regionName, emptyViewName);
                 }
-                region = new RegionModel(regionName, emptyViewName);
-            }
 
-            return htmlHelper.DxaRegion(region, containerSize);
+                return htmlHelper.DxaRegion(region, containerSize);
+            }
         }
 
         /// <summary>
@@ -462,27 +470,30 @@ namespace Sdl.Web.Mvc.Html
         /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
         public static MvcHtmlString DxaRegions(this HtmlHelper htmlHelper, string exclude = null, int containerSize = 0)
         {
-            // TODO TSI-779: support nested Regions
-            PageModel page = (PageModel)htmlHelper.ViewData.Model;
-
-            IEnumerable<RegionModel> regions;
-            if (string.IsNullOrEmpty(exclude))
+            using (new Tracer(htmlHelper, exclude, containerSize))
             {
-                regions = page.Regions;
-            }
-            else
-            {
-                string[] excludedNames = exclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                regions = page.Regions.Where(r => !excludedNames.Any(n => n.Equals(r.Name, StringComparison.InvariantCultureIgnoreCase)));
-            }
+                // TODO TSI-779: support nested Regions
+                PageModel page = (PageModel)htmlHelper.ViewData.Model;
 
-            StringBuilder resultBuilder = new StringBuilder();
-            foreach (RegionModel region in regions)
-            {
-                resultBuilder.Append(htmlHelper.DxaRegion(region, containerSize));
-            }
+                IEnumerable<RegionModel> regions;
+                if (string.IsNullOrEmpty(exclude))
+                {
+                    regions = page.Regions;
+                }
+                else
+                {
+                    string[] excludedNames = exclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    regions = page.Regions.Where(r => !excludedNames.Any(n => n.Equals(r.Name, StringComparison.InvariantCultureIgnoreCase)));
+                }
 
-            return new MvcHtmlString(resultBuilder.ToString());
+                StringBuilder resultBuilder = new StringBuilder();
+                foreach (RegionModel region in regions)
+                {
+                    resultBuilder.Append(htmlHelper.DxaRegion(region, containerSize));
+                }
+
+                return new MvcHtmlString(resultBuilder.ToString());
+            }
         }
 
         #endregion
@@ -506,19 +517,20 @@ namespace Sdl.Web.Mvc.Html
 
             PageModel page = (PageModel) htmlHelper.ViewData.Model;
 
-            Log.Debug("Rendering XPM markup for Page [{0}] (isIncludePage: {1})", page, isIncludePage);
-
-            if (isIncludePage)
+            using (new Tracer(htmlHelper, isIncludePage, page))
             {
-                 return htmlHelper.Partial("Partials/XpmButton", page);
-            }
+                if (isIncludePage)
+                {
+                    return htmlHelper.Partial("Partials/XpmButton", page);
+                }
 
-            if (!page.XpmMetadata.ContainsKey("CmsUrl"))
-            {
-                page.XpmMetadata.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
-            }
+                if (!page.XpmMetadata.ContainsKey("CmsUrl"))
+                {
+                    page.XpmMetadata.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
+                }
 
-            return new MvcHtmlString(Tridion.Markup.TridionMarkup.PageMarkup(page.XpmMetadata)); 
+                return new MvcHtmlString(TridionMarkup.PageMarkup(page.XpmMetadata));
+            }
         }
 
         /// <summary>
