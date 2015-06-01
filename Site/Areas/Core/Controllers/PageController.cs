@@ -2,10 +2,12 @@
 using System.Web;
 using System.Web.Mvc;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.Controllers;
 using Sdl.Web.Mvc.Formats;
+using Sdl.Web.Tridion.ContentManager;
 
 namespace Sdl.Web.Site.Areas.Core.Controllers
 {
@@ -48,10 +50,13 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         /// <returns>null - response is redirected if the URL can be resolved</returns>
         public virtual ActionResult Resolve(string itemId, int localizationId, string defaultItemId = null, string defaultPath = null)
         {
-            string url = SiteConfiguration.LinkResolver.ResolveLink("tcm:" + itemId, localizationId);
+            // TODO TSI-801: Assuming here that itemId/defaultItemId is Item Reference ID (integer) of a Page.
+            TcmUri tcmUri = new TcmUri(Convert.ToInt32(itemId), ItemType.Page, localizationId);
+            string url = SiteConfiguration.LinkResolver.ResolveLink(tcmUri.ToString());
             if (url == null && defaultItemId != null)
             {
-                url = SiteConfiguration.LinkResolver.ResolveLink("tcm:" + defaultItemId, localizationId);
+                tcmUri = new TcmUri(Convert.ToInt32(defaultItemId), ItemType.Page, localizationId);
+                url = SiteConfiguration.LinkResolver.ResolveLink(tcmUri.ToString());
             }
             if (url == null)
             {
@@ -67,9 +72,11 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         [FormatData]
         public virtual ActionResult NotFound()
         {
-            PageModel pageModel = ContentProvider.GetPageModel(WebRequestContext.Localization.Path + "/error-404");
+            string notFoundPageUrl = WebRequestContext.Localization.Path + "/error-404";
+            PageModel pageModel = ContentProvider.GetPageModel(notFoundPageUrl);
             if (pageModel == null)
             {
+                Log.Error("Cannot get Page Model for Not Found Page (URL '{0}'); returning raw HTTP 404 response.", notFoundPageUrl);
                 throw new HttpException(404, "Page Not Found");
             }
             SetupViewData(pageModel);
