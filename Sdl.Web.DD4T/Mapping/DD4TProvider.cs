@@ -61,6 +61,7 @@ namespace Sdl.Web.DD4T.Mapping
 
         #region IContentProvider members
 #pragma warning disable 618
+        [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.LinkResolver or SiteConfiguration.RichTextProcessor to get the new extension points.")]
         public IContentResolver ContentResolver
         {
             get
@@ -72,17 +73,44 @@ namespace Sdl.Web.DD4T.Mapping
                 throw new NotSupportedException("Setting this property is not supported in DXA 1.1.");
             }
         }
+
+        /// <summary>
+        /// Gets a Page Model for a given URL.
+        /// </summary>
+        /// <param name="url">The URL.</param>
+        /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
+        /// <returns>The Page Model.</returns>
+        [Obsolete("Deprecated in DXA 1.1. Use the overload that has a Localization parameter.")]
+        public PageModel GetPageModel(string url, bool addIncludes = true)
+        {
+            return GetPageModel(url, WebRequestContext.Localization, addIncludes);
+        }
+
+        /// <summary>
+        /// Populates a Content List by executing the query it specifies.
+        /// </summary>
+        /// <param name="contentList">The Content List (of Teasers) which specifies the query and is to be populated.</param>
+        [Obsolete("Deprecated in DXA 1.1. Use the overload that has a Localization parameter.")]
+        public ContentList<Teaser> PopulateDynamicList(ContentList<Teaser> contentList)
+        {
+            PopulateDynamicList(contentList, WebRequestContext.Localization);
+            return contentList;
+        }
+
 #pragma warning restore 618
+
 
         /// <summary>
         /// Get the model for a page given the URL
         /// </summary>
         /// <param name="url">Page URL</param>
+        /// <param name="localization">The context Localization.</param>
         /// <param name="addIncludes">If true then includes will be added in the model</param>
         /// <returns>Model corresponding to that URL</returns>
-        public virtual PageModel GetPageModel(string url, bool addIncludes)
+        public virtual PageModel GetPageModel(string url, Localization localization, bool addIncludes)
         {
-            using (new Tracer(url, addIncludes))
+            // TODO TSI-775: actually use the localization parameter instead of using WebRequestContext.Localization deep-down in the implementation.
+            using (new Tracer(url, localization, addIncludes))
             {
                 string cmsUrl = GetCmUrl(url);
                 Log.Debug("Trying CM URL '{0}'", cmsUrl);
@@ -104,15 +132,15 @@ namespace Sdl.Web.DD4T.Mapping
 
                 MvcData viewData = DD4TMappingUtilities.ResolveMvcData(page);
                 Type viewModeltype = ModelTypeRegistry.GetViewModelType(viewData);
-                List<PageModel> includes = addIncludes ? GetIncludesFromModel(page) : new List<PageModel>();
+                List<PageModel> includes = addIncludes ? GetIncludesFromModel(page, localization) : new List<PageModel>();
                 return ModelBuilder.CreatePageModel(page, viewModeltype, includes, viewData);
             }
         }
 
         //TODO TSI-803 - to get DCP content as object
-        public virtual EntityModel GetEntityModel(string id)
+        public virtual EntityModel GetEntityModel(string id, Localization localization)
         {
-            using (new Tracer(id))
+            using (new Tracer(id, localization))
             {
                 throw new NotImplementedException("This feature will be implemented in a future release");
             }
@@ -145,14 +173,15 @@ namespace Sdl.Web.DD4T.Mapping
         /// Populates a Content List (of Teasers) by executing the query it specifies.
         /// </summary>
         /// <param name="contentList">The Content List which specifies the query and is to be populated.</param>
-        public virtual void PopulateDynamicList<T>(ContentList<T> contentList) where T:EntityModel
+        /// <param name="localization">The context Localization.</param>
+        public virtual void PopulateDynamicList<T>(ContentList<T> contentList, Localization localization) where T : EntityModel
         {
-            using (new Tracer(contentList))
+            using (new Tracer(contentList, localization))
             {
                 BrokerQuery query = new BrokerQuery
                 {
                     Start = contentList.Start,
-                    PublicationId = Int32.Parse(WebRequestContext.Localization.LocalizationId),
+                    PublicationId = Int32.Parse(localization.LocalizationId),
                     PageSize = contentList.PageSize,
                     SchemaId = MapSchema(contentList.ContentType.Key),
                     Sort = contentList.Sort.Key
@@ -361,16 +390,17 @@ namespace Sdl.Web.DD4T.Mapping
             return result;
         }
 
-        protected virtual List<PageModel> GetIncludesFromModel(IPage page)
+        protected virtual List<PageModel> GetIncludesFromModel(IPage page, Localization localization)
         {
             List<PageModel> result = new List<PageModel>();
-            string[] bits = page.PageTemplate.Id.Split('-');
-            List<string> includes = SemanticMapping.GetIncludes(bits[1], WebRequestContext.Localization);
+            string[] pageTemplateTcmUriParts = page.PageTemplate.Id.Split('-');
+            List<string> includes = SemanticMapping.GetIncludes(pageTemplateTcmUriParts[1], localization);
             if (includes != null)
             {
                 foreach (string include in includes)
                 {
-                    PageModel item = GetPageModel(SiteConfiguration.LocalizeUrl(include, WebRequestContext.Localization), addIncludes: false);
+                    // TODO TSI-775 Do we really need SiteConfiguration.LocalizeUrl here?
+                    PageModel item = GetPageModel(SiteConfiguration.LocalizeUrl(include, localization), localization, addIncludes: false);
                     if (item != null)
                     {
                         item.IsIncluded = true;

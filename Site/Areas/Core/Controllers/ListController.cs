@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.Controllers;
 using System.Web.Mvc;
 
@@ -38,7 +39,7 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
                 model.CurrentPage = (start / model.PageSize) + 1;
                 model.Start = start;
             }
-            ContentProvider.PopulateDynamicList(model);
+            ContentProvider.PopulateDynamicList(model, WebRequestContext.Localization);
 
             return model;
         }

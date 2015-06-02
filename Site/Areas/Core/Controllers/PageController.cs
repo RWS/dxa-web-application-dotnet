@@ -23,7 +23,7 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         public virtual ActionResult Page(string pageUrl)
         {
             bool addIncludes = ViewBag.AddIncludes ?? true;
-            PageModel pageModel = ContentProvider.GetPageModel(pageUrl, addIncludes);
+            PageModel pageModel = ContentProvider.GetPageModel(pageUrl, WebRequestContext.Localization, addIncludes);
             if (pageModel == null)
             {
                 return NotFound();
@@ -72,8 +72,8 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         [FormatData]
         public virtual ActionResult NotFound()
         {
-            string notFoundPageUrl = WebRequestContext.Localization.Path + "/error-404";
-            PageModel pageModel = ContentProvider.GetPageModel(notFoundPageUrl);
+            string notFoundPageUrl = WebRequestContext.Localization.Path + "/error-404"; // TODO TSI-775: No need to prefix with WebRequestContext.Localization.Path here (?)
+            PageModel pageModel = ContentProvider.GetPageModel(notFoundPageUrl, WebRequestContext.Localization);
             if (pageModel == null)
             {
                 Log.Error("Cannot get Page Model for Not Found Page (URL '{0}'); returning raw HTTP 404 response.", notFoundPageUrl);
