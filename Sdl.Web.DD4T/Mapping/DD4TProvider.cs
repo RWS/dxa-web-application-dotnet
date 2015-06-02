@@ -327,7 +327,7 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 url = url + Constants.DefaultExtension;
             }
-            return url;
+            return NormalizeUrl(url);
         }
 
         private static string NormalizeUrl(string url)
