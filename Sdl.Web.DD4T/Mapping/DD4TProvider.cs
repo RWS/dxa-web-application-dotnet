@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Policy;
 using System.Text;
 using System.Web;
 using System.Web.Script.Serialization;
-using DD4T.ContentModel.Exceptions;
 using DD4T.ContentModel.Factories;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
@@ -37,8 +35,26 @@ namespace Sdl.Web.DD4T.Mapping
             private set; 
         }
 
+        protected IPageFactory PageFactory
+        {
+            get
+            {
+                _pageFactory.PageProvider.PublicationId = 0; // Force the DD4T PageProvider to use our PublicationResolver to determine the Publication ID.
+                return _pageFactory;
+            }
+        }
+
         public DD4TProvider(IModelBuilder modelBuilder, IPageFactory pageFactory)
         {
+            if (modelBuilder == null)
+            {
+                throw new DxaException("No Model Builder configured.");
+            }
+            if (pageFactory == null)
+            {
+                throw new DxaException("No Page Factory configured.");
+            }
+
             ModelBuilder = modelBuilder;
             _pageFactory = pageFactory;
         }
@@ -314,40 +330,23 @@ namespace Sdl.Web.DD4T.Mapping
             return url;
         }
 
+        private static string NormalizeUrl(string url)
+        {
+            return url.StartsWith("/") ? url : ("/" + url);
+        }
+
         protected virtual string GetPageContent(string url)
         {
             string page;
-            if (_pageFactory != null)
-            {
-                if (_pageFactory.TryFindPageContent(string.Format("{0}{1}", url.StartsWith("/") ? String.Empty : "/", url), out page))
-                {
-                    return page;
-                }
-            }
-            else
-            {
-                throw new ConfigurationException("No PageFactory configured");
-            }
-
+            PageFactory.TryFindPageContent(NormalizeUrl(url), out page);
             return page;
         }
 
         protected virtual IPage GetPageModelFromUrl(string url)
         {
-            if (_pageFactory != null)
-            {
-                IPage page;
-                if (_pageFactory.TryFindPage(string.Format("{0}{1}", url.StartsWith("/") ? String.Empty : "/", url), out page))
-                {
-                    return page;
-                }
-            }
-            else
-            {
-                throw new ConfigurationException("No PageFactory configured");
-            }
-
-            return null;
+            IPage page;
+            PageFactory.TryFindPage(NormalizeUrl(url), out page);
+            return page;
         }
         
         protected virtual int MapSchema(string schemaKey)
