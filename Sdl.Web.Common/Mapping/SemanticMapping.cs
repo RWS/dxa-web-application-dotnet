@@ -24,12 +24,11 @@ namespace Sdl.Web.Common.Mapping
         /// </summary>
         public const string DefaultVocabulary = "http://www.sdl.com/web/schemas/core";
 
-        private const string MapSettingsType = "map";
-        private static readonly Dictionary<string, Dictionary<string, SemanticSchema>> SemanticMap = new Dictionary<string, Dictionary<string, SemanticSchema>>();
-        private const string VocabSettingsType = "vocab";
-        private static readonly Dictionary<string, List<SemanticVocabulary>> SemanticVocabularies = new Dictionary<string, List<SemanticVocabulary>>();
-        private const string IncludeSettingsType = "include";
-        private static readonly Dictionary<string, Dictionary<string, List<string>>> Includes = new Dictionary<string, Dictionary<string, List<string>>>();
+        private const string _mapSettingsType = "map";
+        private const string _vocabSettingsType = "vocab";
+
+        private static readonly Dictionary<string, Dictionary<string, SemanticSchema>> _semanticMap = new Dictionary<string, Dictionary<string, SemanticSchema>>();
+        private static readonly Dictionary<string, List<SemanticVocabulary>> _semanticVocabularies = new Dictionary<string, List<SemanticVocabulary>>();
 
         /// <summary>
         /// Gets semantic vocabulary by prefix.
@@ -40,13 +39,13 @@ namespace Sdl.Web.Common.Mapping
         public static string GetVocabulary(string prefix, Localization loc)
         {
             var key = loc.LocalizationId;
-            if (!SemanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(VocabSettingsType, loc.LocalizationId))
+            if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc.LocalizationId))
             {
                 LoadVocabulariesForLocalization(loc);
             }
-            if (SemanticVocabularies.ContainsKey(key))
+            if (_semanticVocabularies.ContainsKey(key))
             {
-                var vocabs = SemanticVocabularies[key];
+                var vocabs = _semanticVocabularies[key];
                 return GetVocabulary(vocabs, prefix);
             }
             Log.Error("Localization {0} does not contain prefix {1}. Check that the Publish Settings page is published and the application cache is up to date.", loc.LocalizationId, prefix);
@@ -62,41 +61,16 @@ namespace Sdl.Web.Common.Mapping
         public static string GetPrefix(string vocab, Localization loc)
         {
             var key = loc.LocalizationId;
-            if (!SemanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(VocabSettingsType, loc.LocalizationId))
+            if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc.LocalizationId))
             {
                 LoadVocabulariesForLocalization(loc);
             }
-            if (SemanticVocabularies.ContainsKey(key))
+            if (_semanticVocabularies.ContainsKey(key))
             {
-                var vocabs = SemanticVocabularies[key];
+                var vocabs = _semanticVocabularies[key];
                 return GetPrefix(vocabs, vocab);
             }
             Log.Error("Localization {0} does not contain vocabulary {1}. Check that the Publish Settings page is published and the application cache is up to date.", loc.LocalizationId, vocab);
-            return null;
-        }
-
-        /// <summary>
-        /// Gets an include by name
-        /// </summary>
-        /// <param name="pageTypeIdentifier">The include name</param>
-        /// <param name="loc">The localization</param>
-        /// <returns>The include matching the name </returns>
-        public static List<string> GetIncludes(string pageTypeIdentifier, Localization loc)
-        {
-            var key = loc.LocalizationId;
-            if (!Includes.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(IncludeSettingsType, loc.LocalizationId))
-            {
-                LoadIncludesForLocalization(loc);
-            }
-            if (Includes.ContainsKey(key))
-            {
-                var includes = Includes[key];
-                if (includes.ContainsKey(pageTypeIdentifier))
-                {
-                    return includes[pageTypeIdentifier];
-                }
-            }
-            Log.Error("Localization {0} does not contain include {1}. Check that the Publish Settings page is published and the application cache is up to date.", loc.LocalizationId, pageTypeIdentifier);
             return null;
         }
 
@@ -109,13 +83,13 @@ namespace Sdl.Web.Common.Mapping
         public static SemanticSchema GetSchema(string id, Localization loc)
         {
             var key = loc.LocalizationId;
-            if (!SemanticMap.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(MapSettingsType, loc.LocalizationId))
+            if (!_semanticMap.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_mapSettingsType, loc.LocalizationId))
             {
                 LoadSemanticMapForLocalization(loc);
             }
-            if (SemanticMap.ContainsKey(key))
+            if (_semanticMap.ContainsKey(key))
             {
-                var map = SemanticMap[key];
+                var map = _semanticMap[key];
                 return GetSchema(map, id);
             }
             Log.Error("Localization {0} does not contain semantic schema map {1}. Check that the Publish Settings page is published and the application cache is up to date.", loc.LocalizationId, id);
@@ -130,7 +104,7 @@ namespace Sdl.Web.Common.Mapping
             if (jsonData != null)
             {
                 var vocabs = GetVocabulariesFromFile(jsonData);
-                SiteConfiguration.ThreadSafeSettingsUpdate(VocabSettingsType, SemanticVocabularies, key, vocabs);
+                SiteConfiguration.ThreadSafeSettingsUpdate(_vocabSettingsType, _semanticVocabularies, key, vocabs);
             }
         }
 
@@ -160,18 +134,6 @@ namespace Sdl.Web.Common.Mapping
         }
 
         
-        private static void LoadIncludesForLocalization(Localization loc)
-        {
-            string key = loc.LocalizationId;
-            string url = Path.Combine(loc.Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"mappings\includes.json").Replace("\\", "/");
-            string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(url, loc).GetText();
-            if (jsonData!=null)
-            {
-                var includes = GetIncludesFromFile(jsonData);
-                SiteConfiguration.ThreadSafeSettingsUpdate(IncludeSettingsType, Includes, key, includes);
-            }
-        }
-
         private static void LoadSemanticMapForLocalization(Localization loc)
         {
             string key = loc.LocalizationId;
@@ -186,7 +148,7 @@ namespace Sdl.Web.Common.Mapping
                     schema.Localization = loc;
                     map.Add(schema.Id.ToString(CultureInfo.InvariantCulture), schema);
                 }
-                SiteConfiguration.ThreadSafeSettingsUpdate(MapSettingsType, SemanticMap, key, map);
+                SiteConfiguration.ThreadSafeSettingsUpdate(_mapSettingsType, _semanticMap, key, map);
             }
         }
 
@@ -198,11 +160,6 @@ namespace Sdl.Web.Common.Mapping
             }
             Log.Error("Semantic mappings for Schema '{0}' do not exist.", id);
             return null;
-        }
-
-        private static Dictionary<string, List<string>> GetIncludesFromFile(string jsonData)
-        {
-            return new JavaScriptSerializer().Deserialize<Dictionary<string,List<string>>>(jsonData);
         }
 
         private static IEnumerable<SemanticSchema> GetSchemasFromFile(string jsonData)

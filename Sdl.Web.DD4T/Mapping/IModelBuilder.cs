@@ -16,8 +16,8 @@ namespace Sdl.Web.DD4T.Mapping
     /// </remarks>
     public interface IModelBuilder
     {
-        PageModel CreatePageModel(IPage page, Type type, List<PageModel> includes, MvcData mvcData);
-        EntityModel CreateEntityModel(IComponentPresentation cp, Type type, MvcData mvcData);
+        PageModel CreatePageModel(IPage page, IEnumerable<IPage> includes);
+        EntityModel CreateEntityModel(IComponentPresentation cp);
         EntityModel CreateEntityModel(IComponent component, Type type);
     }
 }

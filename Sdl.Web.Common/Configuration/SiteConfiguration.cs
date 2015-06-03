@@ -32,10 +32,12 @@ namespace Sdl.Web.Common.Configuration
         public const string StaticsFolder = "BinaryData";
         public const string DefaultVersion = "v1.00";
 
-        private static readonly Dictionary<string, Dictionary<string, Dictionary<string, string>>> Configuration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
-
-        private static readonly object _localizationUpdateLock = new object();
         private const string _settingsType = "config";
+        private const string _includeSettingsType = "include";
+
+        private static readonly Dictionary<string, Dictionary<string, Dictionary<string, string>>> _configuration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
+        private static readonly Dictionary<string, Dictionary<string, List<string>>> _includes = new Dictionary<string, Dictionary<string, List<string>>>();
+        private static readonly object _localizationUpdateLock = new object();
 
         #region References to "providers"
         /// <summary>
@@ -143,7 +145,7 @@ namespace Sdl.Web.Common.Configuration
             {
                 if (!isOptional)
                 {
-                    throw new DxaException(string.Format("No implementation type configured for interface {0}. Check your Unity.config.", interfaceType.Name));
+                    throw new DxaException(String.Format("No implementation type configured for interface {0}. Check your Unity.config.", interfaceType.Name));
                 }
                 Log.Debug("No implementation type configured for optional interface {0}.", interfaceType.Name);
             }
@@ -188,12 +190,12 @@ namespace Sdl.Web.Common.Configuration
             {
                 LocalizationManager.UpdateLocalization(localization, true);
             }
-            return GetConfig(Configuration, key, localization.LocalizationId);
+            return GetConfig(_configuration, key, localization.LocalizationId);
         }
 
         private static bool CheckConfig(string localizationId)
         {
-            if (!Configuration.ContainsKey(localizationId) || CheckSettingsNeedRefresh(_settingsType, localizationId))
+            if (!_configuration.ContainsKey(localizationId) || CheckSettingsNeedRefresh(_settingsType, localizationId))
             {
                 return false;
             }
@@ -273,7 +275,7 @@ namespace Sdl.Web.Common.Configuration
                     Log.Error("Config file: {0} does not exist for localization {1} - skipping", configUrl, key);
                 }
             }
-            ThreadSafeSettingsUpdate(_settingsType, Configuration, key, config);
+            ThreadSafeSettingsUpdate(_settingsType, _configuration, key, config);
         }
 
         public static Localization LoadLocalization(Localization loc, bool loadDetails = false)
@@ -360,6 +362,49 @@ namespace Sdl.Web.Common.Configuration
                 return localization;
             }
         }
+
+        /// <summary>
+        /// Gets the include Page URLs for a given Page Type and Localization.
+        /// </summary>
+        /// <param name="pageTypeIdentifier">The Page Type Identifier.</param>
+        /// <param name="localization">The Localization</param>
+        /// <returns>The URLs of Include Pages</returns>
+        /// <remarks>
+        /// The concept of Include Pages will be removed in a future version of DXA.
+        /// As of DXA 1.1 Include Pages are represented as <see cref="Sdl.Web.Common.Models.PageModel.Regions"/>.
+        /// Implementations should avoid using this method directly.
+        /// </remarks>
+        public static IEnumerable<string> GetIncludePageUrls(string pageTypeIdentifier, Localization localization)
+        {
+            string key = localization.LocalizationId;
+            if (!_includes.ContainsKey(key) || CheckSettingsNeedRefresh(_includeSettingsType, localization.LocalizationId))
+            {
+                LoadIncludesForLocalization(localization);
+            }
+            if (_includes.ContainsKey(key))
+            {
+                Dictionary<string, List<string>> includes = _includes[key];
+                if (includes.ContainsKey(pageTypeIdentifier))
+                {
+                    return includes[pageTypeIdentifier];
+                }
+            }
+
+            throw new DxaException(
+                string.Format("Localization [{0}] does not contain includes for Page Type '{1}'. Check that the Publish Settings page is published and the application cache is up to date.",
+                    localization, pageTypeIdentifier)
+                );
+        }
+
+        internal static void LoadIncludesForLocalization(Localization localization)
+        {
+            string key = localization.LocalizationId;
+            string url = Path.Combine(localization.Path.ToCombinePath(true), SystemFolder, @"mappings\includes.json").Replace("\\", "/");
+            string jsonData = ContentProvider.GetStaticContentItem(url, localization).GetText();
+            Dictionary<string, List<string>> includes = new JavaScriptSerializer().Deserialize<Dictionary<string, List<string>>>(jsonData);
+            ThreadSafeSettingsUpdate(_includeSettingsType, _includes, key, includes);
+        }
+
 
         private static dynamic GetConfigBootstrapJson(Localization loc)
         {
@@ -481,7 +526,7 @@ namespace Sdl.Web.Common.Configuration
         
         public static string GetLocalStaticsFolder(string localizationId)
         {
-            return string.Format("{0}\\{1}", StaticsFolder, localizationId);
+            return String.Format("{0}\\{1}", StaticsFolder, localizationId);
         }
 
         public static string GetLocalStaticsUrl(string localizationId)
@@ -517,7 +562,7 @@ namespace Sdl.Web.Common.Configuration
             return false;
         }
 
-        public static void ThreadSafeSettingsUpdate<T>(string type, Dictionary<string,T> settings, string localizationId, T value)
+        public static void ThreadSafeSettingsUpdate<T>(string type, Dictionary<string, T> settings, string localizationId, T value)
         {
             lock (GetLocalizationLock(localizationId))
             {

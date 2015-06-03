@@ -1,31 +1,25 @@
 ﻿@model PageModel
 @{
-    bool hasLeftBar = Model.Includes.ContainsKey("Left Navigation") || Model.Regions.ContainsKey("Left");
+    bool hasLeftBar = Model.Regions.ContainsKey("Left Navigation") || Model.Regions.ContainsKey("Left");
     int mainContainerSize = hasLeftBar ? 9 : 12;
 }
-@Html.DxaRegion("Hero")
-@if (Model.Includes.ContainsKey("Content Tools"))
-{
-    foreach (RegionModel region in Model.Includes["Content Tools"].Regions)
-    {
-        @Html.DxaRegion(region)
-    }
-}
-<div class="row">
-    @if (hasLeftBar)
-    {
-    <div class="col-sm-12 col-md-3">
-        @if (Model.Includes.ContainsKey("Left Navigation"))
-        {
-            foreach (var region in Model.Includes["Left Navigation"].Regions)
+@Html.DxaRegion("Header")
+<main class="page-row page-row-expanded" role="main">
+    <div class="container-fluid page-border">
+        @Html.DxaRegion("Hero")
+        @Html.DxaRegion("Content Tools")
+        <div class="row">
+            @if (hasLeftBar)
             {
-                @Html.DxaRegion(region, containerSize: 3)
+                <div class="col-sm-12 col-md-3">
+                    @Html.DxaRegion("Left Navigation", containerSize: 3)
+                    @Html.DxaRegion("Left", containerSize: 3)
+                </div>
             }
-        }
-        @Html.DxaRegion("Left", containerSize: 3)
+            <div class="col-sm-12 col-md-@(mainContainerSize)">
+                @Html.DxaRegions(exclude: "Header,Footer,Hero,Content Tools,Left Navigation,Left", containerSize: mainContainerSize)
+            </div>
+        </div>
     </div>
-    }
-    <div class="col-sm-12 col-md-@(mainContainerSize)">
-        @Html.DxaRegions(exclude: "Hero,Left", containerSize: mainContainerSize)
-    </div>
-</div>
+</main>
+@Html.DxaRegion("Footer")

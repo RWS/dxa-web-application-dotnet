@@ -1,6 +1,9 @@
-﻿@model PageModel
+﻿@model RegionModel
 <footer id="page-footer" class="page-row">
-    @Html.DxaPageMarkup(isIncludePage: true)
+    @if (WebRequestContext.IsPreview)
+    {
+        @Html.Partial("Partials/XpmButton")
+    }
     <div class="container-fluid page-border">
         @Html.DxaRegions(exclude: "Links", containerSize: 12)
         <hr />

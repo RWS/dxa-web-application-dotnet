@@ -6,7 +6,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
+using Newtonsoft.Json.Linq;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
@@ -29,19 +31,17 @@ namespace Sdl.Web.DD4T.Mapping
 
         #region IModelBuilder members
 
-        public virtual PageModel CreatePageModel(IPage page, Type type, List<PageModel> includes, MvcData mvcData)
+        public virtual PageModel CreatePageModel(IPage page, IEnumerable<IPage> includes)
         {
-            // TODO: Use the provided type
-            PageModel model = new PageModel(page.Id.Split('-')[1]);
-            bool isInclude = false;
-            //default title - will be overridden later if appropriate
-            model.Title = page.Title;
-            model.MvcData = mvcData;
-            model.XpmMetadata = GetXpmMetadata(page);
-            if (includes.Count == 0 && model.MvcData.ViewName.Contains("Include"))
+            MvcData mvcData = GetMvcData(page);
+
+            // TODO: Derive Page Model type from MVC data
+            PageModel model = new PageModel(GetDxaIdentifierFromTcmUri(page.Id))
             {
-                isInclude = true;
-            }
+                Title = page.Title, //default title - will be overridden later if appropriate
+                MvcData = mvcData, 
+                XpmMetadata = GetXpmMetadata(page)
+            };
 
             IConditionalEntityEvaluator conditionalEntityEvaluator = SiteConfiguration.ConditionalEntityEvaluator;
             foreach (IComponentPresentation cp in page.ComponentPresentations)
@@ -52,13 +52,10 @@ namespace Sdl.Web.DD4T.Mapping
                     model.Regions.Add(region);
                 }
 
-                MvcData entityMvcData = DD4TMappingUtilities.ResolveMvcData(cp);
-
                 EntityModel entity;
                 try
                 {
-                    Type entityType = ModelTypeRegistry.GetViewModelType(entityMvcData);
-                    entity = CreateEntityModel(cp, entityType, entityMvcData);
+                    entity = CreateEntityModel(cp);
                 }
                 catch (Exception ex)
                 {
@@ -69,7 +66,7 @@ namespace Sdl.Web.DD4T.Mapping
                     entity = new ExceptionEntity
                     {
                         Error = ex.Message,
-                        MvcData = entityMvcData // TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
+                        MvcData = GetMvcData(cp)// TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
                     };
                 }
 
@@ -79,20 +76,58 @@ namespace Sdl.Web.DD4T.Mapping
                 }
             }
 
-            if (!isInclude)
+            if (includes != null )
             {
-                foreach (PageModel include in includes)
+                RegionModelSet regions = model.Regions;
+                foreach (IPage includePage in includes)
                 {
-                    model.Includes.Add(include.Title, include);
+                    PageModel includePageModel = CreatePageModel(includePage, null);
+
+                    // Model Include Page as Region:
+                    RegionModel includePageRegion = GetRegionFromIncludePage(includePage);
+                    RegionModel existingRegion;
+                    if (regions.TryGetValue(includePageRegion.Name, out existingRegion))
+                    {
+                        // Region with same name already exists; merge include Page Region.
+                        existingRegion.Regions.UnionWith(includePageModel.Regions);
+
+                        if (existingRegion.XpmMetadata != null)
+                        {
+                            existingRegion.XpmMetadata.Remove(RegionModel.IncludedFromPageIdXpmMetadataKey);
+                            existingRegion.XpmMetadata.Remove(RegionModel.IncludedFromPageTitleXpmMetadataKey);
+                            existingRegion.XpmMetadata.Remove(RegionModel.IncludedFromPageFileNameXpmMetadataKey);
+                        }
+
+                        Log.Info("Merged Include Page [{0}] into Region [{1}]. Note that merged Regions can't be edited properly in XPM (yet).", 
+                            includePageModel, existingRegion);
+                    }
+                    else
+                    {
+                        includePageRegion.Regions.UnionWith(includePageModel.Regions);
+                        regions.Add(includePageRegion);
+                    }
+
+#pragma warning disable 618
+                    // Legacy WebPage.Includes support:
+                    model.Includes.Add(includePage.Title, includePageModel);
+#pragma warning restore 618
                 }
-                model.Title = ProcessPageMetadata(page, model.Meta);
+
+                if (mvcData.ViewName != "IncludePage")
+                {
+                    model.Title = ProcessPageMetadata(page, model.Meta);
+                }
             }
+
             return model;
         }
 
-        public virtual EntityModel CreateEntityModel(IComponentPresentation cp, Type type, MvcData mvcData = null)
+        public virtual EntityModel CreateEntityModel(IComponentPresentation cp)
         {
-            EntityModel model = CreateEntityModel(cp.Component, type);
+            MvcData mvcData = GetMvcData(cp);
+            Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
+
+            EntityModel model = CreateEntityModel(cp.Component, modelType);
             model.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
             model.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("s"));
             model.MvcData = mvcData;
@@ -116,7 +151,7 @@ namespace Sdl.Web.DD4T.Mapping
             mapData.SourceEntity = component;
             EntityModel model = CreateModelFromMapData(mapData);
             model.XpmMetadata = GetXpmMetadata(component);
-            model.Id = component.Id.Split('-')[1];
+            model.Id = GetDxaIdentifierFromTcmUri(component.Id);
             if (model is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
             {
                 MediaItem mediaItem = (MediaItem)model;
@@ -799,44 +834,189 @@ namespace Sdl.Web.DD4T.Mapping
 
         private static RegionModel GetRegionFromComponentPresentation(IComponentPresentation cp)
         {
-            string name = null;
-            var module = SiteConfiguration.GetDefaultModuleName();//Default module
+            string regionName = null;
+            string module = SiteConfiguration.GetDefaultModuleName(); //Default module
             if (cp.ComponentTemplate.MetadataFields != null)
             {
                 if (cp.ComponentTemplate.MetadataFields.ContainsKey("regionView"))
                 {
-                    var bits = cp.ComponentTemplate.MetadataFields["regionView"].Value.Split(':');
-                    if (bits.Length > 1)
+                    string[] regionViewParts = cp.ComponentTemplate.MetadataFields["regionView"].Value.Split(':');
+                    if (regionViewParts.Length > 1)
                     {
-                        module = bits[0].Trim();
-                        name = bits[1].Trim();
+                        module = regionViewParts[0].Trim();
+                        regionName = regionViewParts[1].Trim();
                     }
                     else
                     {
-                        name = bits[0].Trim();
+                        regionName = regionViewParts[0].Trim();
                     }
                 }
             }
             //Fallback if no meta - use the CT title
-            if (name == null)
+            if (regionName == null)
             {
-                var match = Regex.Match(cp.ComponentTemplate.Title, @".*?\[(.*?)\]");
+                Match match = Regex.Match(cp.ComponentTemplate.Title, @".*?\[(.*?)\]");
                 if (match.Success)
                 {
-                    name = match.Groups[1].Value;
+                    regionName = match.Groups[1].Value;
                 }
             }
-            name = name ?? "Main";//default region name
+            regionName = regionName ?? "Main";//default region name
 
             MvcData mvcData = new MvcData
             {
                 AreaName = module, 
-                ViewName = name, 
+                ViewName = regionName, 
                 ControllerName = SiteConfiguration.GetRegionController(), 
                 ControllerAreaName = SiteConfiguration.GetDefaultModuleName(), 
                 ActionName = SiteConfiguration.GetRegionAction()
             };
-            return new RegionModel(name) { MvcData = mvcData };
+            return new RegionModel(regionName) { MvcData = mvcData };
+        }
+
+        private static RegionModel GetRegionFromIncludePage(IPage page)
+        {
+            string regionName = page.Title;
+
+            return new RegionModel(regionName)
+            {
+                MvcData = new MvcData
+                {
+                    AreaName = SiteConfiguration.GetDefaultModuleName(),
+                    ViewName = regionName,
+                    ControllerName = SiteConfiguration.GetRegionController(),
+                    ControllerAreaName = SiteConfiguration.GetDefaultModuleName(),
+                    ActionName = SiteConfiguration.GetRegionAction()
+                },
+                XpmMetadata = new Dictionary<string, string>()
+                {
+                    {RegionModel.IncludedFromPageIdXpmMetadataKey, page.Id},
+                    {RegionModel.IncludedFromPageTitleXpmMetadataKey, page.Title},
+                    {RegionModel.IncludedFromPageFileNameXpmMetadataKey, page.Filename}
+                }
+            };
+        }
+
+        private static string GetDxaIdentifierFromTcmUri(string tcmUri)
+        {
+            // Return the Item (Reference) ID part of the TCM URI.
+            return tcmUri.Split('-')[1];
+        }
+
+        /// <summary>
+        /// Determine MVC data such as view, controller and area name from a Page
+        /// </summary>
+        /// <param name="page">The DD4T Page object</param>
+        /// <returns>MVC data</returns>
+        private static MvcData GetMvcData(IPage page)
+        {
+            string viewName = page.PageTemplate.Title.RemoveSpaces();
+            if (page.PageTemplate.MetadataFields != null)
+            {
+                if (page.PageTemplate.MetadataFields.ContainsKey("view"))
+                {
+                    viewName = page.PageTemplate.MetadataFields["view"].Value;
+                }
+            }
+
+            MvcData mvcData = CreateViewData(viewName);
+            mvcData.ControllerName = SiteConfiguration.GetPageController();
+            mvcData.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
+            mvcData.ActionName = SiteConfiguration.GetPageAction();
+
+            return mvcData;
+        }
+
+        /// <summary>
+        /// Determine MVC data such as view, controller and area name from a Component Presentation
+        /// </summary>
+        /// <param name="cp">The DD4T Component Presentation</param>
+        /// <returns>MVC data</returns>
+        private static MvcData GetMvcData(IComponentPresentation cp)
+        {
+            IComponentTemplate template = cp.ComponentTemplate;
+            string viewName = Regex.Replace(template.Title, @"\[.*\]|\s", String.Empty);
+
+            if (template.MetadataFields != null)
+            {
+                if (template.MetadataFields.ContainsKey("view"))
+                {
+                    viewName = template.MetadataFields["view"].Value;
+                }
+            }
+
+            MvcData mvcData = CreateViewData(viewName);
+            //Defaults
+            mvcData.ControllerName = SiteConfiguration.GetEntityController();
+            mvcData.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
+            mvcData.ActionName = SiteConfiguration.GetEntityAction();
+            mvcData.RouteValues = new Dictionary<string, string>();
+
+            if (template.MetadataFields != null)
+            {
+                if (template.MetadataFields.ContainsKey("controller"))
+                {
+                    string[] controllerNameParts = template.MetadataFields["controller"].Value.Split(':');
+                    if (controllerNameParts.Length > 1)
+                    {
+                        mvcData.ControllerName = controllerNameParts[1];
+                        mvcData.ControllerAreaName = controllerNameParts[0];
+                    }
+                    else
+                    {
+                        mvcData.ControllerName = controllerNameParts[0];
+                    }
+                }
+                if (template.MetadataFields.ContainsKey("regionView"))
+                {
+                    string[] regionNameParts = template.MetadataFields["regionView"].Value.Split(':');
+                    if (regionNameParts.Length > 1)
+                    {
+                        mvcData.RegionName = regionNameParts[1];
+                        mvcData.RegionAreaName = regionNameParts[0];
+                    }
+                    else
+                    {
+                        mvcData.RegionName = regionNameParts[0];
+                        mvcData.RegionAreaName = SiteConfiguration.GetDefaultModuleName();
+                    }
+                }
+                if (template.MetadataFields.ContainsKey("action"))
+                {
+                    mvcData.ActionName = template.MetadataFields["action"].Value;
+                }
+                if (template.MetadataFields.ContainsKey("routeValues"))
+                {
+                    string[] routeValues = template.MetadataFields["routeValues"].Value.Split(',');
+                    foreach (string routeValue in routeValues)
+                    {
+                        string[] routeValueParts = routeValue.Trim().Split(':');
+                        if (routeValueParts.Length > 1 && !mvcData.RouteValues.ContainsKey(routeValueParts[0]))
+                        {
+                            mvcData.RouteValues.Add(routeValueParts[0], routeValueParts[1]);
+                        }
+                    }
+                }
+            }
+
+            return mvcData;
+        }
+
+        private static MvcData CreateViewData(string viewName)
+        {
+            string[] nameParts = viewName.Split(':');
+            string areaName;
+            if (nameParts.Length > 1)
+            {
+                areaName = nameParts[0].Trim();
+                viewName = nameParts[1].Trim();
+            }
+            else
+            {
+                areaName = SiteConfiguration.GetDefaultModuleName();
+                viewName = nameParts[0].Trim();
+            }
+            return new MvcData { ViewName = viewName, AreaName = areaName };
         }
 
     }

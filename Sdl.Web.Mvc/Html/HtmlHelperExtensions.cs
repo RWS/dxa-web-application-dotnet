@@ -428,7 +428,7 @@ namespace Sdl.Web.Mvc.Html
         }
 
         /// <summary>
-        /// Renders a Region (of the current Page Model) with a given name.
+        /// Renders a Region (of the current Page or Region Model) with a given name.
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
         /// <param name="regionName">The name of the Region to render. This object determines the View that will be used.</param>
@@ -443,16 +443,17 @@ namespace Sdl.Web.Mvc.Html
         {
             using (new Tracer(htmlHelper, regionName, emptyViewName, containerSize))
             {
-                // TODO TSI-779: support nested Regions
-                PageModel page = (PageModel)htmlHelper.ViewData.Model;
+                RegionModelSet regions = GetRegions(htmlHelper.ViewData.Model);
+
                 RegionModel region;
-                if (!page.Regions.TryGetValue(regionName, out region))
+                if (!regions.TryGetValue(regionName, out region))
                 {
-                    Log.Debug("Region '{0}' not found. Using empy View '{1}'.", regionName, emptyViewName);
                     if (emptyViewName == null)
                     {
+                        Log.Debug("Region '{0}' not found and no empty View specified. Skipping.", regionName);
                         return MvcHtmlString.Empty;
                     }
+                    Log.Debug("Region '{0}' not found. Using empty View '{1}'.", regionName, emptyViewName);
                     region = new RegionModel(regionName, emptyViewName);
                 }
 
@@ -461,7 +462,36 @@ namespace Sdl.Web.Mvc.Html
         }
 
         /// <summary>
-        /// Renders all Regions (of the current Page Model), except the ones with given names.
+        /// Renders the current (Include) Page as a Region.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <returns>The rendered HTML.</returns>
+        public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper)
+        {
+            using (new Tracer(htmlHelper))
+            {
+                PageModel pageModel = (PageModel)htmlHelper.ViewData.Model;
+
+                // Create a new Region Model which reflects the Page Model
+                string regionName = pageModel.Title;
+                MvcData mvcData = new MvcData
+                {
+                    ViewName = regionName,
+                    AreaName = SiteConfiguration.GetDefaultModuleName(),
+                    ControllerName = SiteConfiguration.GetRegionController(),
+                    ControllerAreaName = SiteConfiguration.GetDefaultModuleName(),
+                    ActionName = SiteConfiguration.GetRegionAction()
+                };
+
+                RegionModel regionModel = new RegionModel(regionName) { MvcData = mvcData };
+                regionModel.Regions.UnionWith(pageModel.Regions);
+
+                return htmlHelper.DxaRegion(regionModel);
+            }
+        }
+
+        /// <summary>
+        /// Renders all Regions (of the current Page or Region Model), except the ones with given names.
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
         /// <param name="exclude">The (comma separated) name(s) of the Regions to exclude. Can be <c>null</c> (the default) to render all Regions.</param>
@@ -472,22 +502,21 @@ namespace Sdl.Web.Mvc.Html
         {
             using (new Tracer(htmlHelper, exclude, containerSize))
             {
-                // TODO TSI-779: support nested Regions
-                PageModel page = (PageModel)htmlHelper.ViewData.Model;
+                RegionModelSet regions = GetRegions(htmlHelper.ViewData.Model);
 
-                IEnumerable<RegionModel> regions;
+                IEnumerable<RegionModel> filteredRegions;
                 if (string.IsNullOrEmpty(exclude))
                 {
-                    regions = page.Regions;
+                    filteredRegions = regions;
                 }
                 else
                 {
                     string[] excludedNames = exclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    regions = page.Regions.Where(r => !excludedNames.Any(n => n.Equals(r.Name, StringComparison.InvariantCultureIgnoreCase)));
+                    filteredRegions = regions.Where(r => !excludedNames.Any(n => n.Equals(r.Name, StringComparison.InvariantCultureIgnoreCase)));
                 }
 
                 StringBuilder resultBuilder = new StringBuilder();
-                foreach (RegionModel region in regions)
+                foreach (RegionModel region in filteredRegions)
                 {
                     resultBuilder.Append(htmlHelper.DxaRegion(region, containerSize));
                 }
@@ -504,10 +533,9 @@ namespace Sdl.Web.Mvc.Html
         /// Generates XPM markup for the current Page Model.
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
-        /// <param name="isIncludePage">Specifies whether markup for an include Page (XPM edit include page/back button) should be rendered.</param>
         /// <returns>The XPM markup for the Page.</returns>
         /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
-        public static MvcHtmlString DxaPageMarkup(this HtmlHelper htmlHelper, bool isIncludePage = false)
+        public static MvcHtmlString DxaPageMarkup(this HtmlHelper htmlHelper)
         {
             // TODO TSI-776: this method should output "semantic" attributes on the HTML element representing the Page like we do for DxaRegionMarkup, DxaEntityMarkup and DxaPropertyMarkup
             if (!WebRequestContext.Localization.IsStaging)
@@ -517,13 +545,8 @@ namespace Sdl.Web.Mvc.Html
 
             PageModel page = (PageModel) htmlHelper.ViewData.Model;
 
-            using (new Tracer(htmlHelper, isIncludePage, page))
+            using (new Tracer(htmlHelper, page))
             {
-                if (isIncludePage)
-                {
-                    return htmlHelper.Partial("Partials/XpmButton", page);
-                }
-
                 if (!page.XpmMetadata.ContainsKey("CmsUrl"))
                 {
                     page.XpmMetadata.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
@@ -693,5 +716,24 @@ namespace Sdl.Web.Mvc.Html
             return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(url, SiteConfiguration.MediaHelper.DefaultMediaAspect, widthFactor, containerSize);
         }
         #endregion
+
+        /// <summary>
+        /// Gets the Regions from a Page or Region Model.
+        /// </summary>
+        /// <param name="model">The Page Or Region Model</param>
+        /// <returns>The Regions obtained from the model.</returns>
+        private static RegionModelSet GetRegions(object model)
+        {
+            RegionModelSet result;
+            if (model is PageModel)
+            {
+                result = ((PageModel)model).Regions;
+            }
+            else
+            {
+                result = ((RegionModel)model).Regions;
+            }
+            return result;
+        }
     }
 }

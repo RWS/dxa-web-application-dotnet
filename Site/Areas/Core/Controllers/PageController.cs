@@ -37,6 +37,8 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
                 WebRequestContext.PageId = model.Id;
             }
 
+            Log.Debug("Page Request for URL '{0}' maps to Model [{1}] with View '{2}'", pageUrl, model, model.MvcData.ViewName);
+
             return View(model.MvcData.ViewName, model);
         }
 

@@ -1,4 +1,4 @@
-﻿@model PageModel
+﻿@model RegionModel
 @if (WebRequestContext.IsInclude)
 {
     <div class="xpm-button">
@@ -11,7 +11,7 @@
 else
 {
     <div class="xpm-button">
-        <a href="/system/include/@Model.Title.ToLower()" title="Edit @Model.Title" class="fa-stack fa-lg">
+        <a href="/system/include/@Model.XpmMetadata[RegionModel.IncludedFromPageFileNameXpmMetadataKey]" title="Edit @Model.XpmMetadata[RegionModel.IncludedFromPageTitleXpmMetadataKey]" class="fa-stack fa-lg">
             <i class="fa fa-square fa-stack-2x"></i>
             <i class="fa fa-pencil fa-inverse fa-stack-1x"></i>
         </a>

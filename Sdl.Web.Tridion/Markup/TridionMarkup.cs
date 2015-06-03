@@ -114,11 +114,16 @@ namespace Sdl.Web.Tridion.Markup
 
         private static string MarkRegion(string name, Localization loc, int minOccurs = 0, int maxOccurs = 0)
         {
+            XpmRegion xpmRegion = TridionConfig.GetXpmRegion(name, loc);
+            if (xpmRegion == null)
+            {
+                return String.Empty;
+            }
+
             StringBuilder allowedComponentTypes = new StringBuilder(); 
             string separator = String.Empty;
             bool first = true;
-            XpmRegion xpmRegion = TridionConfig.GetXpmRegion(name, loc);
-            foreach (var componentTypes in xpmRegion.ComponentTypes)
+            foreach (ComponentType componentTypes in xpmRegion.ComponentTypes)
             {
                 allowedComponentTypes.AppendFormat(ComponentTypeFormat, componentTypes.Schema, componentTypes.Template, separator);
                 if (first)

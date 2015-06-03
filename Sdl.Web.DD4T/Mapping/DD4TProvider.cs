@@ -112,28 +112,21 @@ namespace Sdl.Web.DD4T.Mapping
             // TODO TSI-775: actually use the localization parameter instead of using WebRequestContext.Localization deep-down in the implementation.
             using (new Tracer(url, localization, addIncludes))
             {
-                string cmsUrl = GetCmUrl(url);
-                Log.Debug("Trying CM URL '{0}'", cmsUrl);
-
                 //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
                 //1. Try adding the default extension, so /news becomes /news.html
-                IPage page = GetPageModelFromUrl(cmsUrl);
+                IPage page = GetPage(url);
                 if (page == null && (url == null || (!url.EndsWith("/") && url.LastIndexOf(".", StringComparison.Ordinal) <= url.LastIndexOf("/", StringComparison.Ordinal))))
                 {
                     //2. Try adding the default page, so /news becomes /news/index.html
-                    cmsUrl = GetCmUrl(url + "/");
-                    Log.Debug("No content found, trying default Page CM URL: '{0}'", cmsUrl);
-                    page = GetPageModelFromUrl(cmsUrl);
+                    page = GetPage(url + "/");
                 }
                 if (page == null)
                 {
-                    return null;
+                    return null; // TODO: throw DxaItemNotFoundException (?)
                 }
 
-                MvcData viewData = DD4TMappingUtilities.ResolveMvcData(page);
-                Type viewModeltype = ModelTypeRegistry.GetViewModelType(viewData);
-                List<PageModel> includes = addIncludes ? GetIncludesFromModel(page, localization) : new List<PageModel>();
-                return ModelBuilder.CreatePageModel(page, viewModeltype, includes, viewData);
+                IEnumerable<IPage> includes = addIncludes ? GetIncludesFromModel(page, localization) : new IPage[0];
+                return ModelBuilder.CreatePageModel(page, includes);
             }
         }
 
@@ -356,26 +349,35 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 url = url + Constants.DefaultExtension;
             }
-            return NormalizeUrl(url);
-        }
-
-        private static string NormalizeUrl(string url)
-        {
-            return url.StartsWith("/") ? url : ("/" + url);
+            if (!url.StartsWith("/"))
+            {
+                url = "/" + url;
+            }
+            return url;
         }
 
         protected virtual string GetPageContent(string url)
         {
-            string page;
-            PageFactory.TryFindPageContent(NormalizeUrl(url), out page);
-            return page;
+            string cmUrl = GetCmUrl(url);
+
+            using (new Tracer(url, cmUrl))
+            {
+                string result;
+                PageFactory.TryFindPageContent(GetCmUrl(url), out result);
+                return result;
+            }
         }
 
-        protected virtual IPage GetPageModelFromUrl(string url)
+        protected virtual IPage GetPage(string url)
         {
-            IPage page;
-            PageFactory.TryFindPage(NormalizeUrl(url), out page);
-            return page;
+            string cmUrl = GetCmUrl(url);
+
+            using (new Tracer(url, cmUrl))
+            {
+                IPage result;
+                PageFactory.TryFindPage(cmUrl, out result);
+                return result;
+            }
         }
         
         protected virtual int MapSchema(string schemaKey)
@@ -390,23 +392,20 @@ namespace Sdl.Web.DD4T.Mapping
             return result;
         }
 
-        protected virtual List<PageModel> GetIncludesFromModel(IPage page, Localization localization)
+        protected virtual IEnumerable<IPage> GetIncludesFromModel(IPage page, Localization localization)
         {
-            List<PageModel> result = new List<PageModel>();
+            List<IPage> result = new List<IPage>();
             string[] pageTemplateTcmUriParts = page.PageTemplate.Id.Split('-');
-            List<string> includes = SemanticMapping.GetIncludes(pageTemplateTcmUriParts[1], localization);
-            if (includes != null)
+            IEnumerable<string> includePageUrls = SiteConfiguration.GetIncludePageUrls(pageTemplateTcmUriParts[1], localization);
+            foreach (string includePageUrl in includePageUrls)
             {
-                foreach (string include in includes)
+                IPage includePage = GetPage(SiteConfiguration.LocalizeUrl(includePageUrl, localization));
+                if (includePage == null)
                 {
-                    // TODO TSI-775 Do we really need SiteConfiguration.LocalizeUrl here?
-                    PageModel item = GetPageModel(SiteConfiguration.LocalizeUrl(include, localization), localization, addIncludes: false);
-                    if (item != null)
-                    {
-                        item.IsIncluded = true;
-                        result.Add(item);
-                    }
+                    Log.Error("Include Page '{0}' not found.", includePageUrl);
+                    continue;
                 }
+                result.Add(includePage);
             }
             return result;
         }

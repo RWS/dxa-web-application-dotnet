@@ -20,16 +20,6 @@
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this Page Model is included in another Page Model.
-        /// </summary>
-        // TODO TSI-779: Remove when Page Includes are modeled as Regions.
-        public bool IsIncluded
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Initializes a new instance of PageModel.
         /// </summary>
         /// <param name="id">The identifier of the Page.</param>

@@ -168,8 +168,10 @@
     <Content Include="Areas\Core\Views\Region\Main.cshtml" />
     <Content Include="Areas\Core\Views\Region\Nav.cshtml" />
     <Content Include="Areas\Core\Views\Region\Tools.cshtml" />
-    <Content Include="Views\Shared\Footer.cshtml" />
-    <Content Include="Views\Shared\Header.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Header.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Footer.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Content Tools.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Left Navigation.cshtml" />
     <Content Include="Views\Shared\SectionError.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Partials\GoogleStaticMap.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Partials\Teaser.cshtml" />

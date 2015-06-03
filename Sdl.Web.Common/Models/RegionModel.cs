@@ -10,6 +10,23 @@ namespace Sdl.Web.Common.Models
     public class RegionModel : Region
 #pragma warning restore 618
     {
+        private readonly RegionModelSet _regions = new RegionModelSet();
+
+        /// <summary>
+        /// The XPM metadata key used for the ID of the (Include) Page from which the Region originates. Avoid using this in implementation code because it may change in a future release.
+        /// </summary>
+        public const string IncludedFromPageIdXpmMetadataKey = "IncludedFromPageID";
+
+        /// <summary>
+        /// The XPM metadata key used for the title of the (Include) Page from which the Region originates. Avoid using this in implementation code because it may change in a future release.
+        /// </summary>
+        public const string IncludedFromPageTitleXpmMetadataKey = "IncludedFromPageTitle";
+
+        /// <summary>
+        /// The XPM metadata key used for the file name of the (Include) Page from which the Region originates. Avoid using this in implementation code because it may change in a future release.
+        /// </summary>
+        public const string IncludedFromPageFileNameXpmMetadataKey = "IncludedFromPageFileName";
+
         /// <summary>
         /// Gets the Entities that the Region contains.
         /// </summary>
@@ -21,9 +38,21 @@ namespace Sdl.Web.Common.Models
             }
         }
 
+        /// <summary>
+        /// Gets the (nested) Regions within this Region.
+        /// </summary>
+        public RegionModelSet Regions
+        {
+            get
+            {
+                return _regions;
+            }
+        }
+
+
         #region Constructors
         /// <summary>
-        /// Initializes a new RegionModel instance.
+        /// Initializes a new <see cref="RegionModel"/> instance.
         /// </summary>
         /// <param name="name">The name of the Region.</param>
         public RegionModel(string name)
@@ -32,7 +61,7 @@ namespace Sdl.Web.Common.Models
         }
 
         /// <summary>
-        /// Initializes a new RegionModel instance for an empty/non-existing Region.
+        /// Initializes a new <see cref="RegionModel"/> instance for an empty/non-existing Region.
         /// </summary>
         /// <param name="name">The name of the Region.</param>
         /// <param name="viewName">The name of the View to use to render the Region.</param>

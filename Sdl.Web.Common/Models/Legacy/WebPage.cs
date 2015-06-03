@@ -3,12 +3,15 @@ using System.Collections.Generic;
 
 namespace Sdl.Web.Common.Models
 {
+#pragma warning disable 618
     /// <summary>
     /// Legacy Model for the data that is used to render a web page.
     /// </summary>
     [Obsolete("Deprecated in DXA 1.1. Use class PageModel instead.")]
     public class WebPage : PageBase
     {
+        private readonly Dictionary<string, IPage> _includes = new Dictionary<string, IPage>(); 
+
         /// <summary>
         /// Gets or sets the URL of the Page.
         /// </summary>
@@ -30,11 +33,13 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Gets or sets the Page Includes. The dictionary keys are the include names.
         /// </summary>
-        public IDictionary<string, PageModel> Includes
+        [Obsolete("Deprecated in DXA 1.1. Page Includes are now modeled as Regions, so use PageModel.Regions instead.")]
+        public Dictionary<string, IPage> Includes
         {
-            // TODO TSI-779: Model Includes as Regions
-            get; 
-            private set;
+            get
+            {
+                return _includes;
+            }
         }
 
         /// <summary>
@@ -45,7 +50,7 @@ namespace Sdl.Web.Common.Models
             : base(id)
         {
             Meta = new Dictionary<string, string>();
-            Includes = new Dictionary<string, PageModel>();
         }
     }
+#pragma warning restore 618
 }
