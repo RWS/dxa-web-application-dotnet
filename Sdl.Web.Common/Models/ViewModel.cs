@@ -10,7 +10,7 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// The (internal) Vocabulary URI used for semantic mapping of some of the Core Entity Models.
         /// </summary>
-        public const string CoreVocabulary = "http://www.sdl.com/web/schemas/core"; //TODO: make internal?
+        public const string CoreVocabulary = "http://www.sdl.com/web/schemas/core";
 
         /// <summary>
         /// Gets or sets MVC data used to determine which View to use.

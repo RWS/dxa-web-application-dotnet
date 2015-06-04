@@ -423,7 +423,7 @@ namespace Sdl.Web.DD4T.Mapping
             var components = items as IList<IComponent> ?? items.ToList();
             if (components.Any())
             {
-                // TODO find better way to determine image or video
+                // TODO TSI-247: find better way to determine image or video
                 string schemaTitle = components.First().Schema.Title;
                 if (modelType.IsAssignableFrom(typeof(YouTubeVideo)) && schemaTitle.ToLower().Contains("youtube"))
                 {
@@ -452,7 +452,7 @@ namespace Sdl.Web.DD4T.Mapping
 
                     return GetImages(components)[0];
                 }
-                // TODO handle other types
+                // TODO TSI-247: handle other types
             }
             return null;
         }

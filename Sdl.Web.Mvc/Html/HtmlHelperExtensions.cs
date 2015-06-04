@@ -611,7 +611,6 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
         public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, string propertyName, int index = 0)
         {
-            // TODO TSI-777: autogenerate index (?)
             EntityModel entity = (EntityModel) htmlHelper.ViewData.Model;
             return Markup.RenderPropertyAttributes(entity, propertyName, index);
         }
@@ -638,7 +637,6 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
         public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, Expression<Func<object>> propertyExpression, int index = 0)
         {
-            // TODO TSI-777: autogenerate index (?)
             MemberExpression memberExpression = propertyExpression.Body as MemberExpression;
             if (memberExpression == null)
             {

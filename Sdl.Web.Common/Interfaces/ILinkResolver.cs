@@ -11,7 +11,6 @@
         /// </summary>
         /// <param name="sourceUri">The source URI (TCM URI or site URL)</param>
         /// <returns>The resolved URL.</returns>
-        // TODO TSI-788: Use type System.Uri (for clarity)?
         string ResolveLink(string sourceUri);
 
         /// <summary>
@@ -20,7 +19,6 @@
         /// <param name="sourceUri">The source URI (TCM URI or site URL)</param>
         /// <param name="localizationId">The Localization ID.</param>
         /// <returns>The resolved URL.</returns>
-        // TODO TSI-788: Use type System.Uri (for clarity)?
         string ResolveLink(string sourceUri, int localizationId);
      
     }

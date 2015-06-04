@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Web;
 using System.Web.Mvc;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -23,9 +24,15 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         public virtual ActionResult Page(string pageUrl)
         {
             bool addIncludes = ViewBag.AddIncludes ?? true;
-            PageModel pageModel = ContentProvider.GetPageModel(pageUrl, WebRequestContext.Localization, addIncludes);
-            if (pageModel == null)
+
+            PageModel pageModel;
+            try
             {
+                pageModel = ContentProvider.GetPageModel(pageUrl, WebRequestContext.Localization, addIncludes);
+            }
+            catch (DxaItemNotFoundException ex)
+            {
+                Log.Error(ex);
                 return NotFound();
             }
 
@@ -75,12 +82,18 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         public virtual ActionResult NotFound()
         {
             string notFoundPageUrl = WebRequestContext.Localization.Path + "/error-404"; // TODO TSI-775: No need to prefix with WebRequestContext.Localization.Path here (?)
-            PageModel pageModel = ContentProvider.GetPageModel(notFoundPageUrl, WebRequestContext.Localization);
-            if (pageModel == null)
+
+            PageModel pageModel;
+            try
             {
-                Log.Error("Cannot get Page Model for Not Found Page (URL '{0}'); returning raw HTTP 404 response.", notFoundPageUrl);
-                throw new HttpException(404, "Page Not Found");
+                pageModel = ContentProvider.GetPageModel(notFoundPageUrl, WebRequestContext.Localization);
             }
+            catch (DxaItemNotFoundException ex)
+            {
+                Log.Error(ex);
+                throw new HttpException(404, ex.Message);
+            }
+
             SetupViewData(pageModel);
             ViewModel model = EnrichModel(pageModel) ?? pageModel;
             Response.StatusCode = 404;

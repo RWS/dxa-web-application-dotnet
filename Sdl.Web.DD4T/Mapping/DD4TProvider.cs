@@ -101,12 +101,13 @@ namespace Sdl.Web.DD4T.Mapping
 
 
         /// <summary>
-        /// Get the model for a page given the URL
+        /// Gets a Page Model for a given URL.
         /// </summary>
-        /// <param name="url">Page URL</param>
+        /// <param name="url">The URL.</param>
         /// <param name="localization">The context Localization.</param>
-        /// <param name="addIncludes">If true then includes will be added in the model</param>
-        /// <returns>Model corresponding to that URL</returns>
+        /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
+        /// <returns>The Page Model.</returns>
+        /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given URL.</exception>
         public virtual PageModel GetPageModel(string url, Localization localization, bool addIncludes)
         {
             // TODO TSI-775: actually use the localization parameter instead of using WebRequestContext.Localization deep-down in the implementation.
@@ -122,7 +123,7 @@ namespace Sdl.Web.DD4T.Mapping
                 }
                 if (page == null)
                 {
-                    return null; // TODO: throw DxaItemNotFoundException (?)
+                    throw new DxaItemNotFoundException(url);
                 }
 
                 IEnumerable<IPage> includes = addIncludes ? GetIncludesFromModel(page, localization) : new IPage[0];
@@ -130,12 +131,18 @@ namespace Sdl.Web.DD4T.Mapping
             }
         }
 
-        //TODO TSI-803 - to get DCP content as object
+        /// <summary>
+        /// Gets an Entity Model for a given Entity Identifier.
+        /// </summary>
+        /// <param name="id">The Entity Identifier.</param>
+        /// <param name="localization">The context Localization.</param>
+        /// <returns>The Entity Model.</returns>
+        /// <exception cref="DxaItemNotFoundException">If no Entity Model exists for the given URL.</exception>
         public virtual EntityModel GetEntityModel(string id, Localization localization)
         {
             using (new Tracer(id, localization))
             {
-                throw new NotImplementedException("This feature will be implemented in a future release");
+                throw new NotImplementedException("This feature will be implemented in a future release"); // TODO TSI-803
             }
         }
 

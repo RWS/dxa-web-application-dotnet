@@ -51,6 +51,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="localization">The context Localization.</param>
         /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
         /// <returns>The Page Model.</returns>
+        /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given URL.</exception>
         PageModel GetPageModel(string url, Localization localization, bool addIncludes = true);
 
         /// <summary>
@@ -59,6 +60,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="id">The Entity Identifier.</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The Entity Model.</returns>
+        /// <exception cref="DxaItemNotFoundException">If no Entity Model exists for the given URL.</exception>
         EntityModel GetEntityModel(string id, Localization localization);
 
         /// <summary>
@@ -67,6 +69,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="urlPath">The URL path.</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The Static Content Item.</returns>
+        /// <exception cref="DxaItemNotFoundException">If no Static Content Item exists for the given URL.</exception>
         StaticContentItem GetStaticContentItem(string urlPath, Localization localization);
 
         /// <summary>
