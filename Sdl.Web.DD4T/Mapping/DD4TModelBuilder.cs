@@ -558,7 +558,7 @@ namespace Sdl.Web.DD4T.Mapping
                 return urls[0];
             }
 
-            //TODO is reflection the only way to do this?
+            //TODO TSI-247: should not use reflection for invoking our own private methods.
             MethodInfo method = GetType().GetMethod("GetCompLink" + (multival ? "s" : String.Empty), BindingFlags.NonPublic | BindingFlags.Instance);
             method = method.MakeGenericMethod(new[] { linkedItemType });
             return method.Invoke(this, new object[] { items });
@@ -648,9 +648,10 @@ namespace Sdl.Web.DD4T.Mapping
         /// <remarks>
         /// Called via reflection in <see cref="GetMultiComponentLinks(IEnumerable{IComponent}, Type, bool)"/>.
         /// </remarks>
-        private T GetCompLink<T>(IEnumerable<IComponent> components)
+        private T GetCompLink<T>(IEnumerable<IComponent> components) 
             where T: EntityModel
         {
+            // TODO TSI-247
             return GetCompLinks<T>(components)[0];
         }
 
