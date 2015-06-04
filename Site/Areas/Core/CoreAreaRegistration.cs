@@ -15,6 +15,7 @@ namespace Sdl.Web.Site.Areas.Core
 
         protected override void RegisterAllViewModels()
         {
+            // Entity Views
             RegisterViewModel("Accordion", typeof(ItemList));
             RegisterViewModel("Article", typeof(Article));
             RegisterViewModel("Carousel", typeof(ItemList));
@@ -36,17 +37,23 @@ namespace Sdl.Web.Site.Areas.Core
             RegisterViewModel("TeaserHero-ImageOverlay", typeof(Teaser));
             RegisterViewModel("TeaserMap", typeof(Teaser));
             RegisterViewModel("YouTubeVideo", typeof(YouTubeVideo));
+
             RegisterViewModel("List", typeof(ContentList<Teaser>), "List");
             RegisterViewModel("PagedList", typeof(ContentList<Teaser>), "List");
             RegisterViewModel("ThumbnailList", typeof(ContentList<Teaser>), "List");
+
             RegisterViewModel("Breadcrumb", typeof(NavigationLinks), "Navigation");
             RegisterViewModel("LeftNavigation", typeof(NavigationLinks), "Navigation");
             RegisterViewModel("SiteMap", typeof(SitemapItem), "Navigation");
             RegisterViewModel("SiteMapXml", typeof(SitemapItem), "Navigation");
             RegisterViewModel("TopNavigation", typeof(NavigationLinks), "Navigation");
+
+            // Page Views
             RegisterViewModel("GeneralPage", typeof(PageModel), "Page");
             RegisterViewModel("IncludePage", typeof(PageModel), "Page");
             RegisterViewModel("RedirectPage", typeof(PageModel), "Page");
+
+            // Region Views
             RegisterViewModel("2-Column", typeof(RegionModel), "Region");
             RegisterViewModel("3-Column", typeof(RegionModel), "Region");
             RegisterViewModel("4-Column", typeof(RegionModel), "Region");
@@ -58,6 +65,12 @@ namespace Sdl.Web.Site.Areas.Core
             RegisterViewModel("Main", typeof(RegionModel), "Region");
             RegisterViewModel("Nav", typeof(RegionModel), "Region");
             RegisterViewModel("Tools", typeof(RegionModel), "Region");
-        }        
+
+            // Region Views for Include Pages
+            RegisterViewModel("Header", typeof(RegionModel), "Region");
+            RegisterViewModel("Footer", typeof(RegionModel), "Region");
+            RegisterViewModel("Left Navigation", typeof(RegionModel), "Region");
+            RegisterViewModel("Content Tools", typeof(RegionModel), "Region");
+        }
     }
 }
