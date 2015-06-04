@@ -124,16 +124,19 @@ namespace Sdl.Web.Common.Configuration
         /// <param name="dependencyResolver">The Dependency Resolver used to get implementations for provider interfaces.</param>
         public static void InitializeProviders(IDependencyResolver dependencyResolver)
         {
-            ContentProvider = GetProvider<IContentProvider>(dependencyResolver);
-            NavigationProvider = GetProvider<INavigationProvider>(dependencyResolver);
-            LinkResolver = GetProvider<ILinkResolver>(dependencyResolver);
-            RichTextProcessor = GetProvider<IRichTextProcessor>(dependencyResolver);
-            ConditionalEntityEvaluator = GetProvider<IConditionalEntityEvaluator>(dependencyResolver, isOptional: true);
-            MediaHelper = GetProvider<IMediaHelper>(dependencyResolver);
-            LocalizationManager = GetProvider<ILocalizationManager>(dependencyResolver);
+            using (new Tracer())
+            {
+                ContentProvider = GetProvider<IContentProvider>(dependencyResolver);
+                NavigationProvider = GetProvider<INavigationProvider>(dependencyResolver);
+                LinkResolver = GetProvider<ILinkResolver>(dependencyResolver);
+                RichTextProcessor = GetProvider<IRichTextProcessor>(dependencyResolver);
+                ConditionalEntityEvaluator = GetProvider<IConditionalEntityEvaluator>(dependencyResolver, isOptional: true);
+                MediaHelper = GetProvider<IMediaHelper>(dependencyResolver);
+                LocalizationManager = GetProvider<ILocalizationManager>(dependencyResolver);
 #pragma warning disable 618
-            StaticFileManager = GetProvider<IStaticFileManager>(dependencyResolver, isOptional: true);
+                StaticFileManager = GetProvider<IStaticFileManager>(dependencyResolver, isOptional: true);
 #pragma warning restore 618
+            }
         }
 
         private static T GetProvider<T>(IDependencyResolver dependencyResolver, bool isOptional = false)
@@ -161,17 +164,11 @@ namespace Sdl.Web.Common.Configuration
         /// <summary>
         /// A registry of View Path -> View Model Type mappings to enable the correct View Model to be mapped for a given View
         /// </summary>
-        [Obsolete("Dropped in DXA 1.1. Use ModelTypeRegistry.GetViewModelType instead.")]
+        [Obsolete("Dropped in DXA 1.1. Use ModelTypeRegistry.GetViewModelType instead.", true)]
         public static Dictionary<string, Type> ViewModelRegistry
         {
-            get
-            {
-                throw new NotSupportedException("SiteConfiguration.ViewModelRegistry is dropped in DXA 1.1. Use ModelTypeRegistry.GetViewModelType instead.");
-            }
-            set
-            {
-                throw new NotSupportedException("SiteConfiguration.ViewModelRegistry is dropped in DXA 1.1.");
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -182,15 +179,19 @@ namespace Sdl.Web.Common.Configuration
         /// <returns>The configuration matching the key for the given localization</returns>
         public static string GetConfig(string key, Localization localization = null)
         {
-            if (localization == null)
+            using (new Tracer(key, localization))
             {
-                localization = LocalizationManager.GetContextLocalization();
+                if (localization == null)
+                {
+                    localization = LocalizationManager.GetContextLocalization();
+                }
+                if (!CheckConfig(localization.LocalizationId))
+                {
+                    LocalizationManager.UpdateLocalization(localization, true);
+                }
+                return GetConfig(_configuration, key, localization.LocalizationId);
             }
-            if (!CheckConfig(localization.LocalizationId))
-            {
-                LocalizationManager.UpdateLocalization(localization, true);
-            }
-            return GetConfig(_configuration, key, localization.LocalizationId);
+
         }
 
         private static bool CheckConfig(string localizationId)
@@ -326,7 +327,7 @@ namespace Sdl.Web.Common.Configuration
                         {
                             mediaRoot += "/";
                         }
-                        Log.Debug("This is site is has media root: " + mediaRoot);
+                        Log.Debug("This site has media root: " + mediaRoot);
                         mediaPatterns.Add(String.Format("^{0}{1}.*", mediaRoot, mediaRoot.EndsWith("/") ? String.Empty : "/"));
                     }
                     if (bootstrapJson.siteLocalizations != null)
@@ -376,27 +377,30 @@ namespace Sdl.Web.Common.Configuration
         /// </remarks>
         public static IEnumerable<string> GetIncludePageUrls(string pageTypeIdentifier, Localization localization)
         {
-            string key = localization.LocalizationId;
-            if (!_includes.ContainsKey(key) || CheckSettingsNeedRefresh(_includeSettingsType, localization.LocalizationId))
+            using (new Tracer(pageTypeIdentifier, localization))
             {
-                LoadIncludesForLocalization(localization);
-            }
-            if (_includes.ContainsKey(key))
-            {
-                Dictionary<string, List<string>> includes = _includes[key];
-                if (includes.ContainsKey(pageTypeIdentifier))
+                string key = localization.LocalizationId;
+                if (!_includes.ContainsKey(key) || CheckSettingsNeedRefresh(_includeSettingsType, localization.LocalizationId))
                 {
-                    return includes[pageTypeIdentifier];
+                    LoadIncludesForLocalization(localization);
                 }
-            }
+                if (_includes.ContainsKey(key))
+                {
+                    Dictionary<string, List<string>> includes = _includes[key];
+                    if (includes.ContainsKey(pageTypeIdentifier))
+                    {
+                        return includes[pageTypeIdentifier];
+                    }
+                }
 
-            throw new DxaException(
-                string.Format("Localization [{0}] does not contain includes for Page Type '{1}'. Check that the Publish Settings page is published and the application cache is up to date.",
-                    localization, pageTypeIdentifier)
-                );
+                throw new DxaException(
+                    string.Format("Localization [{0}] does not contain includes for Page Type '{1}'. Check that the Publish Settings page is published and the application cache is up to date.",
+                        localization, pageTypeIdentifier)
+                    );
+            }
         }
 
-        internal static void LoadIncludesForLocalization(Localization localization)
+        private static void LoadIncludesForLocalization(Localization localization)
         {
             string key = localization.LocalizationId;
             string url = Path.Combine(localization.Path.ToCombinePath(true), SystemFolder, @"mappings\includes.json").Replace("\\", "/");
@@ -410,14 +414,12 @@ namespace Sdl.Web.Common.Configuration
         {
             string url = Path.Combine(loc.Path.ToCombinePath(true), SystemFolder, @"config\_all.json").Replace("\\", "/");
             string jsonData = ContentProvider.GetStaticContentItem(url, loc).GetText();
-            if (jsonData != null)
+            if (jsonData == null)
             {
-                return Json.Decode(jsonData);
+                throw new DxaException(string.Format("Could not load configuration bootstrap file '{0}' for Localization [{1}].", url, loc));
             }
 
-            Exception ex = new Exception(String.Format("Could not load configuration bootstrap file {0} for localization {1}.", url, loc.LocalizationId));
-            Log.Error(ex);
-            throw ex;
+            return Json.Decode(jsonData);
         }
 
         private static Dictionary<string, string> GetConfigFromFile(string jsonData)
@@ -459,7 +461,7 @@ namespace Sdl.Web.Common.Configuration
         {
             return "Core";
         }
-        
+
         /// <summary>
         /// Adds a View->View Model Type mapping to the view model registry
         /// </summary>

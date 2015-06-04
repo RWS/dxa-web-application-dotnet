@@ -29,20 +29,22 @@ namespace Sdl.Web.Common.Models
         /// <param name="modelType">The model Type used by the View.</param>
         public static void RegisterViewModel(MvcData viewData, Type modelType)
         {
-            lock (_viewToModelTypeMapping)
+            using (new Tracer(viewData, modelType))
             {
-                if (_viewToModelTypeMapping.ContainsKey(viewData))
+                lock (_viewToModelTypeMapping)
                 {
-                    Log.Warn("View '{0}' registered multiple times.", viewData);
-                    return;
-                }
+                    if (_viewToModelTypeMapping.ContainsKey(viewData))
+                    {
+                        Log.Warn("View '{0}' registered multiple times.", viewData);
+                        return;
+                    }
 
-                _viewToModelTypeMapping.Add(viewData, modelType);
-                Log.Debug("Registered View '{0}' using Model type '{1}'.", viewData, modelType.FullName);
+                    _viewToModelTypeMapping.Add(viewData, modelType);
 
-                if (!_modelTypeToSemanticInfoMapping.ContainsKey(modelType))
-                {
-                    RegisterModelType(modelType);
+                    if (!_modelTypeToSemanticInfoMapping.ContainsKey(modelType))
+                    {
+                        RegisterModelType(modelType);
+                    }
                 }
             }
         }
@@ -54,26 +56,29 @@ namespace Sdl.Web.Common.Models
         /// <param name="viewVirtualPath">The (virtual) path to the View file.</param>
         public static void RegisterViewModel(MvcData viewData, string viewVirtualPath)
         {
-            lock (_viewToModelTypeMapping)
+            using (new Tracer(viewData, viewVirtualPath))
             {
-                if (_viewToModelTypeMapping.ContainsKey(viewData))
+                lock (_viewToModelTypeMapping)
                 {
-                    Log.Warn("View '{0}' registered multiple times. Virtual Path: '{1}'", viewData, viewVirtualPath);
-                    return;
-                }
-
-                try
-                {
-                    Type compiledViewType = BuildManager.GetCompiledType(viewVirtualPath);
-                    if (!compiledViewType.BaseType.IsGenericType)
+                    if (_viewToModelTypeMapping.ContainsKey(viewData))
                     {
-                        throw new DxaException("View is not strongly typed. Please ensure you use the @model directive.");
+                        Log.Warn("View '{0}' registered multiple times. Virtual Path: '{1}'", viewData, viewVirtualPath);
+                        return;
                     }
-                    RegisterViewModel(viewData, compiledViewType.BaseType.GetGenericArguments()[0]);
-                }
-                catch (Exception ex)
-                {
-                    throw new DxaException(string.Format("Error occurred while compiling View '{0}'", viewVirtualPath), ex);
+
+                    try
+                    {
+                        Type compiledViewType = BuildManager.GetCompiledType(viewVirtualPath);
+                        if (!compiledViewType.BaseType.IsGenericType)
+                        {
+                            throw new DxaException("View is not strongly typed. Please ensure you use the @model directive.");
+                        }
+                        RegisterViewModel(viewData, compiledViewType.BaseType.GetGenericArguments()[0]);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new DxaException(string.Format("Error occurred while compiling View '{0}'", viewVirtualPath), ex);
+                    }
                 }
             }
         }
@@ -109,6 +114,7 @@ namespace Sdl.Web.Common.Models
         /// <returns>The semantic types.</returns>
         public static string[] GetSemanticTypes(Type modelType, out IDictionary<string, string> prefixMappings)
         {
+            // No Tracer here to reduce trace noise.
             SemanticInfo semanticInfo = GetSemanticInfo(modelType);
             prefixMappings = semanticInfo.PrefixMappings;
             return semanticInfo.SemanticTypes.ToArray();
@@ -122,6 +128,7 @@ namespace Sdl.Web.Common.Models
         /// <returns>The semantic property names or <c>null</c> if no semantic property names have been registered for the given property.</returns>
         public static string[] GetSemanticPropertyNames(Type modelType, string propertyName)
         {
+            // No Tracer here to reduce trace noise.
             SemanticInfo semanticInfo = GetSemanticInfo(modelType);
 
             IList<string> semanticPropertyNames;
@@ -134,23 +141,22 @@ namespace Sdl.Web.Common.Models
 
         private static SemanticInfo RegisterModelType(Type modelType)
         {
-            SemanticInfo semanticInfo = ExtractSemanticInfo(modelType);
-            _modelTypeToSemanticInfoMapping.Add(modelType, semanticInfo);
-
-            if (semanticInfo.SemanticTypes.Any())
+            using (new Tracer())
             {
-                Log.Debug("Registered Model type '{0}' with semantic type(s) '{1}'.", modelType.FullName, string.Join(" ", semanticInfo.SemanticTypes));
-                foreach (KeyValuePair<string, IList<string>> kvp in semanticInfo.SemanticProperties)
+                SemanticInfo semanticInfo = ExtractSemanticInfo(modelType);
+                _modelTypeToSemanticInfoMapping.Add(modelType, semanticInfo);
+
+                if (semanticInfo.SemanticTypes.Any())
                 {
-                    Log.Debug("\tRegistered property '{0}' as semantic property '{1}'", kvp.Key, string.Join(" ", kvp.Value));
+                    Log.Debug("Model type '{0}' has semantic type(s) '{1}'.", modelType.FullName, string.Join(" ", semanticInfo.SemanticTypes));
+                    foreach (KeyValuePair<string, IList<string>> kvp in semanticInfo.SemanticProperties)
+                    {
+                        Log.Debug("\tRegistered property '{0}' as semantic property '{1}'", kvp.Key, string.Join(" ", kvp.Value));
+                    }
                 }
-            }
-            else
-            {
-                Log.Debug("Registered Model type '{0}' without semantic type(s).", modelType.FullName);
-            }
 
-            return semanticInfo;
+                return semanticInfo;
+            }
         }
 
         private static SemanticInfo GetSemanticInfo(Type modelType)

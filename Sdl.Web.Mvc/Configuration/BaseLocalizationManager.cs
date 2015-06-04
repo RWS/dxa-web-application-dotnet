@@ -1,9 +1,9 @@
-﻿using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Mvc.Configuration
 {
@@ -24,26 +24,28 @@ namespace Sdl.Web.Mvc.Configuration
 
         public virtual Localization GetLocalizationFromUri(Uri uri)
         {
-            if (_uniqueLocalizations == null)
+            using (new Tracer(uri))
             {
-                throw new Exception("No Localizations Loaded");
-            }
-            string url = uri + "/";
-            foreach (var rootUrl in _urlToLocalizationIdMap.Keys)
-            {
-                if (url.ToLower().StartsWith(rootUrl))
+                if (_uniqueLocalizations == null)
                 {
-                    var locId = _urlToLocalizationIdMap[rootUrl];
-                    var loc = _uniqueLocalizations[locId];
-                    if (loc.Culture == null)
-                    {
-                        UpdateLocalization(loc.LocalizationId);
-                    }
-                    Log.Debug("Request for {0} is from localization {1}", uri, locId);
-                    return _uniqueLocalizations[locId];
+                    throw new Exception("No Localizations Loaded");
                 }
+                string url = uri + "/";
+                foreach (string rootUrl in _urlToLocalizationIdMap.Keys)
+                {
+                    if (url.ToLower().StartsWith(rootUrl))
+                    {
+                        string locId = _urlToLocalizationIdMap[rootUrl];
+                        Localization loc = _uniqueLocalizations[locId];
+                        if (loc.Culture == null)
+                        {
+                            UpdateLocalization(loc.LocalizationId);
+                        }
+                        return _uniqueLocalizations[locId];
+                    }
+                }
+                return null;
             }
-            return null;
         }
 
         public virtual Localization GetLocalizationFromId(string localizationId)
@@ -98,34 +100,40 @@ namespace Sdl.Web.Mvc.Configuration
         
         public virtual void UpdateLocalization(string localizationId, bool loadDetails = false)
         {
-            var loc = GetLocalizationFromId(localizationId);
-            if (loc != null)
+            using (new Tracer(localizationId, loadDetails))
             {
-                UpdateLocalization(loc, loadDetails);
+                Localization loc = GetLocalizationFromId(localizationId);
+                if (loc != null)
+                {
+                    UpdateLocalization(loc, loadDetails);
+                }
             }
         }
 
         public virtual void UpdateLocalization(Localization loc, bool loadDetails = false)
         {
-            loc = SiteConfiguration.LoadLocalization(loc, loadDetails);
-            var key = loc.LocalizationId;
-            lock (_localizationLock)
+            using (new Tracer(loc, loadDetails))
             {
-                if (_uniqueLocalizations.ContainsKey(key))
+                loc = SiteConfiguration.LoadLocalization(loc, loadDetails);
+                var key = loc.LocalizationId;
+                lock (_localizationLock)
                 {
-                    _uniqueLocalizations[key] = loc;
-                }
-                else
-                {
-                    _uniqueLocalizations.Add(key, loc);
-                }
-                if (!_refreshData.ContainsKey(key))
-                {
-                    _refreshData.Add(key, DateTime.Now);
-                }
-                else
-                {
-                    _refreshData[key] = DateTime.Now;
+                    if (_uniqueLocalizations.ContainsKey(key))
+                    {
+                        _uniqueLocalizations[key] = loc;
+                    }
+                    else
+                    {
+                        _uniqueLocalizations.Add(key, loc);
+                    }
+                    if (!_refreshData.ContainsKey(key))
+                    {
+                        _refreshData.Add(key, DateTime.Now);
+                    }
+                    else
+                    {
+                        _refreshData[key] = DateTime.Now;
+                    }
                 }
             }
         }

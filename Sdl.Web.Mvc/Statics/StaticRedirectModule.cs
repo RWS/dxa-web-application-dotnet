@@ -31,32 +31,41 @@ namespace Sdl.Web.Mvc.Statics
         {
             HttpApplication application = (HttpApplication)sender;
             HttpContext context = application.Context;
+            HttpRequest request = context.Request;
+            HttpResponse response = context.Response;
             string url = context.Request.Url.AbsolutePath;
-            //1. Attempt to get current localization
-            Localization loc = WebRequestContext.Localization;
-            if (loc == null)
+
+            using (new Tracer(sender,e, url))
             {
-                WebRequestContext.HasNoLocalization = true;
-                //if unsuccesful, log an information message, but carry on - there may be assets managed outside of the CMS managed URLs
-                Log.Info("Request URL {0} does not map to a localization managed by this web application.", HttpContext.Current.Request.Url);
-            }
-            else
-            {
-                Log.Debug("Request URL {0} maps to localization {1}", HttpContext.Current.Request.Url, loc.LocalizationId);
-            }
-            //2. Block direct access to BinaryData folder
-            if (url.StartsWith("/" + SiteConfiguration.StaticsFolder + "/"))
-            {
-                context.Response.StatusCode = 404;
-                context.Response.End();
-                return;
-            }
-            //3. Remove version from URL
-            string versionLessUrl = SiteConfiguration.RemoveVersionFromPath(url);
-            if (url != versionLessUrl)
-            {
-                Log.Debug("Rewriting request for non-existent versioned static file {0} to {1}", url, versionLessUrl);
-                context.RewritePath(versionLessUrl);
+                //1. Attempt to get current localization
+                Localization loc = WebRequestContext.Localization;
+                if (loc == null)
+                {
+                    WebRequestContext.HasNoLocalization = true;
+                    //if unsuccesful, log an information message, but carry on - there may be assets managed outside of the CMS managed URLs
+                    Log.Warn("Request URL '{0}' does not map to a Localization managed by this web application.", HttpContext.Current.Request.Url);
+                }
+                else
+                {
+                    Log.Debug("Request URL '{0}' maps to Localization [{1}]", request.Url, loc);
+                }
+
+                //2. Block direct access to BinaryData folder
+                if (url.StartsWith("/" + SiteConfiguration.StaticsFolder + "/"))
+                {
+                    Log.Warn("Attempt to directly access the static content cache through URL '{0}'. Sending HTTP 404 (Not Found) response.", url);
+                    response.StatusCode = 404;
+                    response.End();
+                    return;
+                }
+
+                //3. Remove version from URL
+                string versionLessUrl = SiteConfiguration.RemoveVersionFromPath(url);
+                if (url != versionLessUrl)
+                {
+                    Log.Debug("Rewriting versioned static content URL '{0}' to '{1}'", url, versionLessUrl);
+                    context.RewritePath(versionLessUrl);
+                }
             }
         }
 
