@@ -15,7 +15,7 @@ namespace Sdl.Web.Mvc.Formats
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            var formatter = DataFormatters.GetFormatter(filterContext);
+            IDataFormatter formatter = DataFormatters.GetFormatter(filterContext);
             if (formatter != null)
             {
                 filterContext.Controller.ViewBag.DataFormatter = formatter;
@@ -26,7 +26,7 @@ namespace Sdl.Web.Mvc.Formats
 
         public override void OnActionExecuted(ActionExecutedContext filterContext)
         {
-            var formatter = filterContext.Controller.ViewBag.DataFormatter as IDataFormatter;
+            IDataFormatter formatter = filterContext.Controller.ViewBag.DataFormatter as IDataFormatter;
             if (formatter != null)
             {
                 object model = filterContext.Controller.ViewData.Model;

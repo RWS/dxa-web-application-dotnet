@@ -31,11 +31,11 @@ namespace Sdl.Web.Common.Mapping
         {
             bool addedDefaults = false;
             Dictionary<string, KeyValuePair<string, string>> res = new Dictionary<string, KeyValuePair<string, string>>();
-            foreach (var attr in type.GetCustomAttributes())
+            foreach (Attribute attr in type.GetCustomAttributes())
             {
                 if (attr is SemanticEntityAttribute)
                 {
-                    var semantics = (SemanticEntityAttribute)attr;
+                    SemanticEntityAttribute semantics = (SemanticEntityAttribute)attr;
                     // we can only support mapping to a single semantic entity, the derived type is set first, so that is what we use
                     if (!res.ContainsKey(semantics.Prefix))
                     {
@@ -44,7 +44,7 @@ namespace Sdl.Web.Common.Mapping
                 }
                 if (attr is SemanticDefaultsAttribute)
                 {
-                    var semantics = (SemanticDefaultsAttribute)attr;
+                    SemanticDefaultsAttribute semantics = (SemanticDefaultsAttribute)attr;
                     res.Add(semantics.Prefix, new KeyValuePair<string,string>(semantics.Vocab, String.Empty));
                     addedDefaults = true;
                 }
@@ -52,7 +52,7 @@ namespace Sdl.Web.Common.Mapping
             //Add default vocab if none was specified on entity
             if (!addedDefaults)
             {
-                var semantics = new SemanticDefaultsAttribute();
+                SemanticDefaultsAttribute semantics = new SemanticDefaultsAttribute();
                 res.Add(semantics.Prefix, new KeyValuePair<string, string>(semantics.Vocab, String.Empty));
             }
             return res;
@@ -61,11 +61,11 @@ namespace Sdl.Web.Common.Mapping
         protected virtual Dictionary<string, string> GetEntitiesFromType(Type type)
         {
             Dictionary<string,string> res = new Dictionary<string,string>();
-            foreach (var attr in type.GetCustomAttributes())
+            foreach (Attribute attr in type.GetCustomAttributes())
             {
                 if (attr is SemanticEntityAttribute)
                 {
-                    var semantics = (SemanticEntityAttribute)attr;
+                    SemanticEntityAttribute semantics = (SemanticEntityAttribute)attr;
                     res.Add(semantics.Prefix, semantics.EntityName);
                 }
             }
@@ -75,9 +75,9 @@ namespace Sdl.Web.Common.Mapping
         protected virtual Dictionary<string, List<SemanticProperty>> LoadPropertySemantics(Type type)
         {
             //The default prefix is empty - this implies that the prefix should be inherited from the parent object default prefix
-            var defaultPrefix = String.Empty;
-            var mapAllProperties = true;
-            foreach (var attr in type.GetCustomAttributes())
+            string defaultPrefix = String.Empty;
+            bool mapAllProperties = true;
+            foreach (Attribute attr in type.GetCustomAttributes())
             {
                 if (attr is SemanticDefaultsAttribute)
                 {
@@ -90,24 +90,24 @@ namespace Sdl.Web.Common.Mapping
             {
                 if (!EntityPropertySemantics.ContainsKey(type))
                 {
-                    var result = new Dictionary<string, List<SemanticProperty>>();
-                    foreach (var pi in type.GetProperties())
+                    Dictionary<string, List<SemanticProperty>> result = new Dictionary<string, List<SemanticProperty>>();
+                    foreach (PropertyInfo pi in type.GetProperties())
                     {
-                        var name = pi.Name;
+                        string name = pi.Name;
                         //flag to indicate we have processed a default mapping, or we explicitly should ignore this property when mapping
                         bool ignore = false;
-                        foreach (var attr in pi.GetCustomAttributes(true))
+                        foreach (object attr in pi.GetCustomAttributes(true))
                         {
                             if (attr is SemanticPropertyAttribute)
                             {
-                                var propertySemantics = (SemanticPropertyAttribute)attr;
+                                SemanticPropertyAttribute propertySemantics = (SemanticPropertyAttribute)attr;
                                 if (!propertySemantics.IgnoreMapping)
                                 {
                                     if (!result.ContainsKey(name))
                                     {
                                         result.Add(name, new List<SemanticProperty>());
                                     }
-                                    var bits = ((SemanticPropertyAttribute)attr).PropertyName.Split(':');
+                                    string[] bits = ((SemanticPropertyAttribute)attr).PropertyName.Split(':');
                                     if (bits.Length > 1)
                                     {
                                         result[name].Add(new SemanticProperty(bits[0], bits[1]));
@@ -146,7 +146,7 @@ namespace Sdl.Web.Common.Mapping
         {
             //This is where we map model class property names to Tridion schema xml field names
             //Which is: the property name with the first character lower case and the last character removed if its an 's' and a List<> type (so Paragraphs becomes paragraph etc.)
-            var name = pi.Name.Substring(0, 1).ToLower() + pi.Name.Substring(1);
+            string name = pi.Name.Substring(0, 1).ToLower() + pi.Name.Substring(1);
             if (pi.PropertyType.IsGenericType && pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>) && name.EndsWith("s"))
             {
                 name = name.Substring(0,name.Length-1);

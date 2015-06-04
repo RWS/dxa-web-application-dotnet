@@ -45,19 +45,19 @@ namespace Sdl.Web.Tridion.Config
         {
             lock (LocalizationLock)
             {
-                var rootApplicationFolder = AppDomain.CurrentDomain.BaseDirectory;
+                string rootApplicationFolder = AppDomain.CurrentDomain.BaseDirectory;
                 _localizations = new List<Dictionary<string, string>>();
                 string path = Path.Combine(rootApplicationFolder, @"bin\config\cd_dynamic_conf.xml");
                 XDocument config = XDocument.Load(path);
                 // sorting Publications by Path in decending order so default Path ("/" or "") is last in list
                 // using Path of first Host element found in a Publication, assuming the Paths of all of these Host elements will be equal
-                var publications = config.Descendants("Publications").First();
-                var sortedPublications = publications.Elements().OrderByDescending(e => e.Element("Host").Attribute("Path").Value); 
+                XElement publications = config.Descendants("Publications").First();
+                IOrderedEnumerable<XElement> sortedPublications = publications.Elements().OrderByDescending(e => e.Element("Host").Attribute("Path").Value); 
                 publications.ReplaceAll(sortedPublications);
-                foreach (var pub in config.Descendants("Publication"))
+                foreach (XElement pub in config.Descendants("Publication"))
                 {
                     // there could be multiple Host elements per Publication, add them all
-                    foreach (var host in pub.Elements("Host"))
+                    foreach (XElement host in pub.Elements("Host"))
                     {
                         _localizations.Add(GetLocalization(host));                        
                     }
@@ -67,7 +67,7 @@ namespace Sdl.Web.Tridion.Config
 
         private static Dictionary<string, string> GetLocalization(XElement xElement)
         {
-            var res = new Dictionary<string,string>();
+            Dictionary<string, string> res = new Dictionary<string,string>();
             if (xElement.Attribute("Protocol") != null)
             {
                 res.Add("Protocol", xElement.Attribute("Protocol").Value);
@@ -97,14 +97,14 @@ namespace Sdl.Web.Tridion.Config
         /// <returns>The XPM region matching the name for the given module</returns>
         public static XpmRegion GetXpmRegion(string name, Localization loc)
         {
-            var key = loc.LocalizationId;
+            string key = loc.LocalizationId;
             if (!XpmRegions.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(RegionSettingsType,loc.LocalizationId))
             {
                 LoadRegionsForLocalization(loc);
             }
             if (XpmRegions.ContainsKey(key))
             {
-                var regionData = XpmRegions[key];
+                Dictionary<string, XpmRegion> regionData = XpmRegions[key];
                 if (regionData.ContainsKey(name))
                 {
                     return regionData[name];
@@ -121,8 +121,8 @@ namespace Sdl.Web.Tridion.Config
             string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(url, loc).GetText();
             if (jsonData != null)
             {
-                var regions = new Dictionary<string, XpmRegion>();
-                foreach (var region in GetRegionsFromFile(jsonData))
+                Dictionary<string, XpmRegion> regions = new Dictionary<string, XpmRegion>();
+                foreach (XpmRegion region in GetRegionsFromFile(jsonData))
                 {
                     regions.Add(region.Region, region);
                 }

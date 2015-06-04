@@ -176,7 +176,7 @@ namespace Sdl.Web.DD4T.Mapping
                 Type propertyType = multival ? pi.PropertyType.GetGenericArguments()[0] : pi.PropertyType;
                 if (propertySemantics.ContainsKey(pi.Name))
                 {
-                    foreach (var info in propertySemantics[pi.Name])
+                    foreach (SemanticProperty info in propertySemantics[pi.Name])
                     {
                         IField field = GetFieldFromSemantics(mapData, info);
                         if (field != null && (field.Values.Count > 0 || field.EmbeddedValues.Count > 0))
@@ -226,11 +226,11 @@ namespace Sdl.Web.DD4T.Mapping
         protected virtual Dictionary<string, List<SemanticProperty>> FilterPropertySematicsByEntity(Dictionary<string, List<SemanticProperty>> semantics, MappingData mapData)
         {
             Dictionary<string, List<SemanticProperty>> filtered = new Dictionary<string, List<SemanticProperty>>();
-            foreach (var item in semantics)
+            foreach (KeyValuePair<string, List<SemanticProperty>> item in semantics)
             {
                 filtered.Add(item.Key, new List<SemanticProperty>());
                 List<SemanticProperty> defaultProperties = new List<SemanticProperty>();
-                foreach (var prop in item.Value)
+                foreach (SemanticProperty prop in item.Value)
                 {
                     //Default prefix is always OK, but should be added last
                     if (String.IsNullOrEmpty(prop.Prefix))
@@ -240,7 +240,7 @@ namespace Sdl.Web.DD4T.Mapping
                     else
                     {
                         //Filter out any properties belonging to other entities than the source entity
-                        var entityData = GetEntityData(prop.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
+                        KeyValuePair<string, string>? entityData = GetEntityData(prop.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
                         if (entityData != null && mapData.EntityNames!=null)
                         {
                             if (mapData.EntityNames.Contains(entityData.Value.Key))
@@ -260,11 +260,11 @@ namespace Sdl.Web.DD4T.Mapping
 
         private static IField GetFieldFromSemantics(MappingData mapData, SemanticProperty info)
         {
-            var entityData = GetEntityData(info.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
+            KeyValuePair<string, string>? entityData = GetEntityData(info.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
             if (entityData != null)
             {
                 // determine field semantics
-                var vocab = entityData.Value.Key;
+                string vocab = entityData.Value.Key;
                 string prefix = SemanticMapping.GetPrefix(vocab,WebRequestContext.Localization);
                 if (prefix != null && mapData.EntityNames!=null)
                 {
@@ -311,7 +311,7 @@ namespace Sdl.Web.DD4T.Mapping
                     embedLevel--;
                 }
             }
-            var bits = path.Split('/');
+            string[] bits = path.Split('/');
             if (fields.ContainsKey(bits[0]))
             {
                 if (bits.Length > 1)
@@ -420,7 +420,7 @@ namespace Sdl.Web.DD4T.Mapping
 
         private static object GetMultiMediaLinks(IEnumerable<IComponent> items, Type modelType, bool multival)
         {
-            var components = items as IList<IComponent> ?? items.ToList();
+            IList<IComponent> components = items as IList<IComponent> ?? items.ToList();
             if (components.Any())
             {
                 // TODO TSI-247: find better way to determine image or video
@@ -479,7 +479,7 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 //For booleans we assume the keyword key or value can be converted to bool
                 List<bool> res = new List<bool>();
-                foreach (var kw in items)
+                foreach (IKeyword kw in items)
                 {
                     bool val;
                     Boolean.TryParse(String.IsNullOrEmpty(kw.Key) ? kw.Title : kw.Key, out val);
@@ -532,7 +532,7 @@ namespace Sdl.Web.DD4T.Mapping
                 List<String> urls = new List<String>();
                 foreach (IComponent comp in items)
                 {
-                    var url = linkResolver.ResolveLink(comp.Id);
+                    string url = linkResolver.ResolveLink(comp.Id);
                     if (url != null)
                     {
                         urls.Add(url);
@@ -577,11 +577,11 @@ namespace Sdl.Web.DD4T.Mapping
                     EmbedLevel = mapData.EmbedLevel + 1
                 };
             //This is a bit weird, but necessary as we cannot return List<object>, we need to get the right type
-            var result = (IList)typeof(List<>).MakeGenericType(propertyType).GetConstructor(Type.EmptyTypes).Invoke(null);
+            IList result = (IList)typeof(List<>).MakeGenericType(propertyType).GetConstructor(Type.EmptyTypes).Invoke(null);
             foreach (IFieldSet fields in field.EmbeddedValues)
             {
                 embedMapData.Content = fields;
-                var model = CreateModelFromMapData(embedMapData);
+                EntityModel model = CreateModelFromMapData(embedMapData);
                 if (model != null)
                 {
                     result.Add(model);
@@ -658,19 +658,19 @@ namespace Sdl.Web.DD4T.Mapping
         protected Dictionary<string, string> GetAllFieldsAsDictionary(IComponent component)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
-            foreach (var fieldname in component.Fields.Keys)
+            foreach (string fieldname in component.Fields.Keys)
             {
                 if (!values.ContainsKey(fieldname))
                 {
                     //special case for multival embedded name/value pair fields
                     if (fieldname == "settings" && component.Fields[fieldname].FieldType == FieldType.Embedded)
                     {
-                        foreach (var embedFieldset in component.Fields[fieldname].EmbeddedValues)
+                        foreach (IFieldSet embedFieldset in component.Fields[fieldname].EmbeddedValues)
                         {
-                            var key = embedFieldset.ContainsKey("name") ? embedFieldset["name"].Value : null;
+                            string key = embedFieldset.ContainsKey("name") ? embedFieldset["name"].Value : null;
                             if (key != null)
                             {
-                                var value = embedFieldset.ContainsKey("value") ? embedFieldset["value"].Value : null;
+                                string value = embedFieldset.ContainsKey("value") ? embedFieldset["value"].Value : null;
                                 if (!values.ContainsKey(key))
                                 {
                                     values.Add(key, value);
@@ -681,7 +681,7 @@ namespace Sdl.Web.DD4T.Mapping
                     //Default is to add the value as plain text
                     else
                     {
-                        var val = component.Fields[fieldname].Value;
+                        string val = component.Fields[fieldname].Value;
                         if (val != null)
                         {
                             values.Add(fieldname, val);
@@ -689,11 +689,11 @@ namespace Sdl.Web.DD4T.Mapping
                     }
                 }
             }
-            foreach (var fieldname in component.MetadataFields.Keys)
+            foreach (string fieldname in component.MetadataFields.Keys)
             {
                 if (!values.ContainsKey(fieldname))
                 {
-                    var val = component.MetadataFields[fieldname].Value;
+                    string val = component.MetadataFields[fieldname].Value;
                     if (val != null)
                     {
                         values.Add(fieldname, val);
@@ -709,7 +709,7 @@ namespace Sdl.Web.DD4T.Mapping
             //First grab metadata from the page
             if (page.MetadataFields != null)
             {
-                foreach (var field in page.MetadataFields.Values)
+                foreach (IField field in page.MetadataFields.Values)
                 {
                     ProcessMetadataField(field, meta);
                 }
@@ -722,9 +722,9 @@ namespace Sdl.Web.DD4T.Mapping
             if (title == null || description == null)
             {
                 bool first = true;
-                foreach (var cp in page.ComponentPresentations)
+                foreach (IComponentPresentation cp in page.ComponentPresentations)
                 {
-                    var region = GetRegionFromComponentPresentation(cp);
+                    RegionModel region = GetRegionFromComponentPresentation(cp);
                     // determine title and description from first component in 'main' region
                     if (first && region.Name.Equals(TridionConfig.RegionForPageTitleComponent))
                     {
@@ -795,8 +795,8 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 if (field.EmbeddedValues!=null && field.EmbeddedValues.Count>0)
                 {
-                    var subfields = field.EmbeddedValues[0];
-                    foreach (var subfield in subfields.Values)
+                    IFieldSet subfields = field.EmbeddedValues[0];
+                    foreach (IField subfield in subfields.Values)
                     {
                         ProcessMetadataField(subfield, meta);
                     }

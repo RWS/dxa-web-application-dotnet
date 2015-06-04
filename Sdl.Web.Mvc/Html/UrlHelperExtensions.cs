@@ -1,4 +1,5 @@
-﻿using Sdl.Web.Mvc.Configuration;
+﻿using Sdl.Web.Common.Configuration;
+using Sdl.Web.Mvc.Configuration;
 using System;
 using System.Linq;
 using System.Web.Mvc;
@@ -19,7 +20,7 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>A localized, versioned URL</returns>
         public static string VersionedContent(this UrlHelper helper, string path, string localization = "")
         {
-            var loc = WebRequestContext.Localization;
+            Localization loc = WebRequestContext.Localization;
             if (!path.StartsWith("/"))
             {
                 path = "/" + path;
@@ -27,7 +28,7 @@ namespace Sdl.Web.Mvc.Html
             string version = loc.Version;
             if (String.IsNullOrEmpty(localization) && WebRequestContext.Localization.SiteLocalizations != null && WebRequestContext.Localization.SiteLocalizations.Count > 0)
             {
-                var defaultLoc = WebRequestContext.Localization.SiteLocalizations.FirstOrDefault(l => l.IsDefaultLocalization) ?? WebRequestContext.Localization;
+                Localization defaultLoc = WebRequestContext.Localization.SiteLocalizations.FirstOrDefault(l => l.IsDefaultLocalization) ?? WebRequestContext.Localization;
                 localization = defaultLoc.Path;
             }
             if (!String.IsNullOrEmpty(version))

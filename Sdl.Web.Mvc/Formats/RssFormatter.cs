@@ -14,7 +14,7 @@ namespace Sdl.Web.Mvc.Formats
 
         public override ActionResult FormatData(ControllerContext controllerContext, object model)
         {
-            var feed = GetData(model);
+            SyndicationFeed feed = GetData(model);
             return feed == null ? null : new FeedResult(new Rss20FeedFormatter(feed)) { ContentType = "application/rss+xml" };
         }
     }

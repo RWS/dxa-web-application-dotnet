@@ -36,7 +36,7 @@ namespace Sdl.Web.Tridion.Context
         { 
             get 
             { 
-                var val = GetIntValue(ClaimUris.UriBrowserDisplayWidth);
+                int val = GetIntValue(ClaimUris.UriBrowserDisplayWidth);
                 //The context engine uses a default of 800, which we override to 1024
                 if (val == 800 && IsUsingDefaults)
                 {

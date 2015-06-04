@@ -59,7 +59,7 @@ namespace Sdl.Web.DD4T.Mapping
 
         private string ResolveRichText(XmlDocument doc)
         {
-            var nsmgr = new XmlNamespaceManager(doc.NameTable);
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
             nsmgr.AddNamespace("xhtml", "http://www.w3.org/1999/xhtml");
             nsmgr.AddNamespace("xlink", "http://www.w3.org/1999/xlink");
 
@@ -84,7 +84,7 @@ namespace Sdl.Web.DD4T.Mapping
                 if (!string.IsNullOrEmpty(linkUrl))
                 {
                     // add href
-                    var href = doc.CreateAttribute("href");
+                    XmlAttribute href = doc.CreateAttribute("href");
                     href.Value = linkUrl;
                     link.Attributes.Append(href);
 
@@ -125,7 +125,7 @@ namespace Sdl.Web.DD4T.Mapping
                     if (SiteConfiguration.MediaHelper.ShowVideoPlaceholders)
                     {
                         // we have a placeholder image
-                        var placeholderImgUrl = SiteConfiguration.MediaHelper.GetResponsiveImageUrl(src, 0, "100%");
+                        string placeholderImgUrl = SiteConfiguration.MediaHelper.GetResponsiveImageUrl(src, 0, "100%");
                         element = HtmlHelperExtensions.GetYouTubePlaceholder(id, placeholderImgUrl, headline, null, "span", true);
                     }
                     else
@@ -137,7 +137,7 @@ namespace Sdl.Web.DD4T.Mapping
                     XmlDocument temp = new XmlDocument();
                     temp.LoadXml(element);
                     temp.DocumentElement.SetAttribute("xmlns", "http://www.w3.org/1999/xhtml");
-                    var video = doc.ImportNode(temp.DocumentElement, true);
+                    XmlNode video = doc.ImportNode(temp.DocumentElement, true);
 
                     // replace youtube element with actual html
                     youtube.ParentNode.ReplaceChild(video, youtube);
@@ -149,18 +149,18 @@ namespace Sdl.Web.DD4T.Mapping
 
         private void ApplyHashIfApplicable(XmlNode link)
         {
-            var target = link.Attributes["target"].IfNotNull(attr => attr.Value.ToLower());
+            string target = link.Attributes["target"].IfNotNull(attr => attr.Value.ToLower());
 
             if("anchored" == target) 
             {
-                var href = link.Attributes["href"].Value;
+                string href = link.Attributes["href"].Value;
 
-                var samePage = string.Equals(href,
+                bool samePage = string.Equals(href,
                     HttpContext.Current.Request.Url.AbsolutePath,
                     StringComparison.OrdinalIgnoreCase
                 );
                 
-                var hash = GetLinkName(link).IfNotNull(s => '#' + s.Replace(" ", "_").ToLower());
+                string hash = GetLinkName(link).IfNotNull(s => '#' + s.Replace(" ", "_").ToLower());
                 link.Attributes["href"].Value = (!samePage ? href : string.Empty) + hash;
                 link.Attributes["target"].Value = !samePage ? "_top" : string.Empty;
             }
@@ -168,7 +168,7 @@ namespace Sdl.Web.DD4T.Mapping
 
         private string GetLinkName(XmlNode link)
         {
-            var componentUri = link.Attributes["xlink:href"].IfNotNull(attr => attr.Value);
+            string componentUri = link.Attributes["xlink:href"].IfNotNull(attr => attr.Value);
             
             return _componentFactory.GetComponent(componentUri).IfNotNull(c => c.Title)
                 ?? link.Attributes["title"].IfNotNull(attr => attr.Value);

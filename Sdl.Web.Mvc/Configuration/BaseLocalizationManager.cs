@@ -68,18 +68,18 @@ namespace Sdl.Web.Mvc.Configuration
             {
                 _uniqueLocalizations = new Dictionary<string, Localization>();
                 _urlToLocalizationIdMap = new Dictionary<string, string>();
-                foreach (var loc in localizations)
+                foreach (Dictionary<string, string> loc in localizations)
                 {
-                    var locId = loc["LocalizationId"];
-                    var localization = new Localization
+                    string locId = loc["LocalizationId"];
+                    Localization localization = new Localization
                     {
                         Path = (!loc.ContainsKey("Path") || loc["Path"] == "/") ? String.Empty : loc["Path"].ToLower(),
                         LocalizationId = locId
                     };
-                    var protocol = !loc.ContainsKey("Protocol") ? "http" : loc["Protocol"].ToLower();
-                    var domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_dynamic_conf" : loc["Domain"].ToLower();
-                    var port = !loc.ContainsKey("Port") ? String.Empty : loc["Port"];
-                    var baseUrl = GetBaseUrl(protocol, domain, port, localization.Path);
+                    string protocol = !loc.ContainsKey("Protocol") ? "http" : loc["Protocol"].ToLower();
+                    string domain = !loc.ContainsKey("Domain") ? "no-domain-in-cd_dynamic_conf" : loc["Domain"].ToLower();
+                    string port = !loc.ContainsKey("Port") ? String.Empty : loc["Port"];
+                    string baseUrl = GetBaseUrl(protocol, domain, port, localization.Path);
                     if (!baseUrl.EndsWith("/"))
                     {
                         baseUrl += "/";
@@ -115,7 +115,7 @@ namespace Sdl.Web.Mvc.Configuration
             using (new Tracer(loc, loadDetails))
             {
                 loc = SiteConfiguration.LoadLocalization(loc, loadDetails);
-                var key = loc.LocalizationId;
+                string key = loc.LocalizationId;
                 lock (_localizationLock)
                 {
                     if (_uniqueLocalizations.ContainsKey(key))

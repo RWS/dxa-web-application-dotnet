@@ -1,4 +1,6 @@
-﻿using Sdl.Web.Common.Models;
+﻿using System.Collections.Specialized;
+using System.Reflection;
+using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using System;
 using System.Collections.Generic;
@@ -14,8 +16,8 @@ namespace Sdl.Web.Mvc.Formats
             PageModel page = model as PageModel;
             if (page!=null)
             {
-                var description = page.Meta.ContainsKey("description") ? page.Meta["description"] : null;
-                var url = RemoveFormatFromUrl();
+                string description = page.Meta.ContainsKey("description") ? page.Meta["description"] : null;
+                string url = RemoveFormatFromUrl();
                 SyndicationFeed feed = new SyndicationFeed(page.Title, description, new Uri(url))
                 {
                     Language = WebRequestContext.Localization.Culture,
@@ -28,7 +30,7 @@ namespace Sdl.Web.Mvc.Formats
 
         private string RemoveFormatFromUrl()
         {
-            var filtered = HttpUtility.ParseQueryString(HttpContext.Current.Request.QueryString.ToString());
+            NameValueCollection filtered = HttpUtility.ParseQueryString(HttpContext.Current.Request.QueryString.ToString());
             filtered.Remove("format");
             return HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path) + (filtered.Count>0 ?  "?" + filtered : "");
         }
@@ -59,7 +61,7 @@ namespace Sdl.Web.Mvc.Formats
 
         private IEnumerable<Teaser> GetEntityItems(EntityModel entity)
         {
-            var res = new List<Teaser>();
+            List<Teaser> res = new List<Teaser>();
             //1. Check if entity is a teaser, if add it
             if (entity is Teaser)
             {
@@ -76,8 +78,8 @@ namespace Sdl.Web.Mvc.Formats
                 else
                 {
                     //3. Last resort, try to find some suitable properties using reflection
-                    var teaser = new Teaser();
-                    foreach (var pi in entity.GetType().GetProperties())
+                    Teaser teaser = new Teaser();
+                    foreach (PropertyInfo pi in entity.GetType().GetProperties())
                     {
                         switch (pi.Name)
                         {
@@ -86,7 +88,7 @@ namespace Sdl.Web.Mvc.Formats
                                 teaser.Headline = pi.GetValue(entity) as String;
                                 break;
                             case "Date":
-                                var date = pi.GetValue(entity) as DateTime?;
+                                DateTime? date = pi.GetValue(entity) as DateTime?;
                                 if (date != null)
                                     teaser.Date = date;
                                 break;
@@ -97,7 +99,7 @@ namespace Sdl.Web.Mvc.Formats
                                 teaser.Link = pi.GetValue(entity) as Link;
                                 break;
                             case "Url":
-                                var url = pi.GetValue(entity) as String;
+                                string url = pi.GetValue(entity) as String;
                                 if (url != null)
                                     teaser.Link = new Link { Url = url };
                                 break;
@@ -116,11 +118,11 @@ namespace Sdl.Web.Mvc.Formats
         {
             Type type = entity.GetType();
             bool isList = false;
-            foreach (var attr in type.GetCustomAttributes(true))
+            foreach (object attr in type.GetCustomAttributes(true))
             {
                 if (attr is SemanticEntityAttribute)
                 {
-                    var semantics = (SemanticEntityAttribute)attr;
+                    SemanticEntityAttribute semantics = (SemanticEntityAttribute)attr;
                     isList = semantics.Vocab == "http://schema.org/" && semantics.EntityName == "ItemList";
                     if (isList)
                     {
@@ -130,7 +132,7 @@ namespace Sdl.Web.Mvc.Formats
             }
             if (isList)
             {
-                foreach(var pi in type.GetProperties())
+                foreach(PropertyInfo pi in type.GetProperties())
                 {
                     if (pi.PropertyType == typeof(List<Teaser>))
                     {
@@ -143,7 +145,7 @@ namespace Sdl.Web.Mvc.Formats
 
         private SyndicationItem GetSyndicationItemFromTeaser(Teaser item)
         {
-            var si = new SyndicationItem();
+            SyndicationItem si = new SyndicationItem();
             if (item.Headline != null)
             {
                 si.Title = new TextSyndicationContent(item.Headline);

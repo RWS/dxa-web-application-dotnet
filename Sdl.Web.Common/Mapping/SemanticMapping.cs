@@ -38,14 +38,14 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>Semantic vocabulary for the given prefix</returns>
         public static string GetVocabulary(string prefix, Localization loc)
         {
-            var key = loc.LocalizationId;
+            string key = loc.LocalizationId;
             if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc.LocalizationId))
             {
                 LoadVocabulariesForLocalization(loc);
             }
             if (_semanticVocabularies.ContainsKey(key))
             {
-                var vocabs = _semanticVocabularies[key];
+                List<SemanticVocabulary> vocabs = _semanticVocabularies[key];
                 return GetVocabulary(vocabs, prefix);
             }
             Log.Error("Localization {0} does not contain prefix {1}. Check that the Publish Settings page is published and the application cache is up to date.", loc.LocalizationId, prefix);
@@ -60,14 +60,14 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>Prefix for this semantic vocabulary</returns>
         public static string GetPrefix(string vocab, Localization loc)
         {
-            var key = loc.LocalizationId;
+            string key = loc.LocalizationId;
             if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc.LocalizationId))
             {
                 LoadVocabulariesForLocalization(loc);
             }
             if (_semanticVocabularies.ContainsKey(key))
             {
-                var vocabs = _semanticVocabularies[key];
+                List<SemanticVocabulary> vocabs = _semanticVocabularies[key];
                 return GetPrefix(vocabs, vocab);
             }
             Log.Error("Localization {0} does not contain vocabulary {1}. Check that the Publish Settings page is published and the application cache is up to date.", loc.LocalizationId, vocab);
@@ -82,14 +82,14 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>The semantic schema matching the id for the given module</returns>
         public static SemanticSchema GetSchema(string id, Localization loc)
         {
-            var key = loc.LocalizationId;
+            string key = loc.LocalizationId;
             if (!_semanticMap.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_mapSettingsType, loc.LocalizationId))
             {
                 LoadSemanticMapForLocalization(loc);
             }
             if (_semanticMap.ContainsKey(key))
             {
-                var map = _semanticMap[key];
+                Dictionary<string, SemanticSchema> map = _semanticMap[key];
                 return GetSchema(map, id);
             }
             Log.Error("Localization {0} does not contain semantic schema map {1}. Check that the Publish Settings page is published and the application cache is up to date.", loc.LocalizationId, id);
@@ -103,7 +103,7 @@ namespace Sdl.Web.Common.Mapping
             string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(url, loc).GetText();
             if (jsonData != null)
             {
-                var vocabs = GetVocabulariesFromFile(jsonData);
+                List<SemanticVocabulary> vocabs = GetVocabulariesFromFile(jsonData);
                 SiteConfiguration.ThreadSafeSettingsUpdate(_vocabSettingsType, _semanticVocabularies, key, vocabs);
             }
         }
@@ -141,9 +141,9 @@ namespace Sdl.Web.Common.Mapping
             string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(url, loc).GetText();;
             if (jsonData != null)
             {
-                var schemas = GetSchemasFromFile(jsonData);
-                var map = new Dictionary<string, SemanticSchema>();
-                foreach (var schema in schemas)
+                IEnumerable<SemanticSchema> schemas = GetSchemasFromFile(jsonData);
+                Dictionary<string, SemanticSchema> map = new Dictionary<string, SemanticSchema>();
+                foreach (SemanticSchema schema in schemas)
                 {
                     schema.Localization = loc;
                     map.Add(schema.Id.ToString(CultureInfo.InvariantCulture), schema);

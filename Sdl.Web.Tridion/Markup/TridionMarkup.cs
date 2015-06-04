@@ -25,7 +25,7 @@ namespace Sdl.Web.Tridion.Markup
         {
             HtmlDocument html = new HtmlDocument();
             html.LoadHtml(String.Format("<html>{0}</html>", regionHtml));
-            var entity = html.DocumentNode.SelectSingleNode("//*[@data-region]");
+            HtmlNode entity = html.DocumentNode.SelectSingleNode("//*[@data-region]");
             if (entity != null)
             {
                 string name = ReadAndRemoveAttribute(entity, "data-region");
@@ -43,13 +43,13 @@ namespace Sdl.Web.Tridion.Markup
             HtmlNode.ElementsFlags.Remove("option");
             HtmlDocument html = new HtmlDocument();
             html.LoadHtml(String.Format("<html>{0}</html>", entityHtml));
-            var entities = html.DocumentNode.SelectNodes("//*[@data-componentid]");
-            var dummyTemplateId = NullUri;
-            var dummyTemplateModified = Epoch;
+            HtmlNodeCollection entities = html.DocumentNode.SelectNodes("//*[@data-componentid]");
+            string dummyTemplateId = NullUri;
+            string dummyTemplateModified = Epoch;
             string isRepositoryPublished = "false";
             if (entities != null)
             {
-                foreach (var entity in entities)
+                foreach (HtmlNode entity in entities)
                 {
                     string compId = ReadAndRemoveAttribute(entity, "data-componentid");
                     string compModified = ReadAndRemoveAttribute(entity, "data-componentmodified", Epoch);
@@ -76,12 +76,12 @@ namespace Sdl.Web.Tridion.Markup
                     }
                     //string lastProperty = "";
                     //int index = 1;
-                    var properties = entity.SelectNodes("//*[@data-xpath]");
+                    HtmlNodeCollection properties = entity.SelectNodes("//*[@data-xpath]");
                     if (properties != null && properties.Count > 0)
                     {
-                        foreach (var property in properties)
+                        foreach (HtmlNode property in properties)
                         {
-                            var xpath = ReadAndRemoveAttribute(property, "data-xpath");
+                            string xpath = ReadAndRemoveAttribute(property, "data-xpath");
                             //TODO index of mv fields
                             //index = propName == lastProperty ? index+1 : 1;
                             //lastProperty = propName;
@@ -105,7 +105,7 @@ namespace Sdl.Web.Tridion.Markup
         {
             if (entity.Attributes.Contains(name))
             {
-                var attr = entity.Attributes[name];
+                HtmlAttribute attr = entity.Attributes[name];
                 entity.Attributes.Remove(attr);
                 return attr.Value;
             }
@@ -144,11 +144,11 @@ namespace Sdl.Web.Tridion.Markup
 
         public static string PageMarkup(IDictionary<string,string> pageData)
         {
-            var pageId = pageData.ContainsKey("PageID") ? pageData["PageID"] : null;
-            var pageTemplateId = pageData.ContainsKey("PageTemplateID") ? pageData["PageTemplateID"] : null;
-            var pageDate = pageData.ContainsKey("PageModified") ? pageData["PageModified"] : null;
-            var pageTemplateDate = pageData.ContainsKey("PageTemplateModified") ? pageData["PageTemplateModified"] : null;
-            var cmsUrl = pageData.ContainsKey("CmsUrl") ? pageData["CmsUrl"] : null;
+            string pageId = pageData.ContainsKey("PageID") ? pageData["PageID"] : null;
+            string pageTemplateId = pageData.ContainsKey("PageTemplateID") ? pageData["PageTemplateID"] : null;
+            string pageDate = pageData.ContainsKey("PageModified") ? pageData["PageModified"] : null;
+            string pageTemplateDate = pageData.ContainsKey("PageTemplateModified") ? pageData["PageTemplateModified"] : null;
+            string cmsUrl = pageData.ContainsKey("CmsUrl") ? pageData["CmsUrl"] : null;
             // remove trailing slash from cmsUrl if available
             if (!String.IsNullOrEmpty(cmsUrl) && cmsUrl.EndsWith("/"))
             {

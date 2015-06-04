@@ -244,7 +244,7 @@ namespace Sdl.Web.Mvc.Html
             if (video.Url != null && SiteConfiguration.MediaHelper.ShowVideoPlaceholders)
             {
                 //we have a placeholder image
-                var placeholderImgUrl = SiteConfiguration.MediaHelper.GetResponsiveImageUrl(video.Url, aspect, widthFactor, containerSize);
+                string placeholderImgUrl = SiteConfiguration.MediaHelper.GetResponsiveImageUrl(video.Url, aspect, widthFactor, containerSize);
                 return new MvcHtmlString(GetYouTubePlaceholder(video.YouTubeId, placeholderImgUrl, video.Headline, cssClass));
             }
 
@@ -267,7 +267,7 @@ namespace Sdl.Web.Mvc.Html
             // TODO: this does not contain any XPM markup
             // TODO: configurize the mime type to Font Awesome mapping
             // filetypes supported by http://fortawesome.github.io/Font-Awesome/icons/#file-type
-            var mimeTypes = new Dictionary<string, string>
+            Dictionary<string, string> mimeTypes = new Dictionary<string, string>
                 {
                     {"application/ms-excel", "excel"},
                     {"application/pdf", "pdf"},
@@ -357,7 +357,7 @@ namespace Sdl.Web.Mvc.Html
                 parameters["area"] = mvcData.ControllerAreaName;
                 if (mvcData.RouteValues != null)
                 {
-                    foreach (var key in mvcData.RouteValues.Keys)
+                    foreach (string key in mvcData.RouteValues.Keys)
                     {
                         parameters[key] = mvcData.RouteValues[key];
                     }

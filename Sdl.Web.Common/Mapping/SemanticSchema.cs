@@ -50,7 +50,7 @@ namespace Sdl.Web.Common.Mapping
         public ILookup<string, string> GetEntityNames()
         {
             List<KeyValuePair<string, string>> entityNames = new List<KeyValuePair<string, string>>();
-            foreach (var schemaSemantics in Semantics)
+            foreach (SchemaSemantics schemaSemantics in Semantics)
             {
                 string vocab = SemanticMapping.GetVocabulary(schemaSemantics.Prefix, Localization);
                 entityNames.Add(new KeyValuePair<string, string>(vocab, schemaSemantics.Entity));
@@ -66,9 +66,9 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>Schema field or one of its embedded fields that match with the given semantics, null if a match cannot be found</returns>
         public SemanticSchemaField FindFieldBySemantics(FieldSemantics fieldSemantics)
         {
-            foreach (var field in Fields)
+            foreach (SemanticSchemaField field in Fields)
             {
-                var matchingField = field.FindFieldBySemantics(fieldSemantics);
+                SemanticSchemaField matchingField = field.FindFieldBySemantics(fieldSemantics);
                 if (matchingField != null)
                 {
                     return matchingField;

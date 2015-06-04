@@ -25,12 +25,12 @@ namespace Sdl.Web.Mvc.Formats
         public static List<string> GetValidTypes(ControllerContext controllerContext, List<string> allowedTypes)
         {
             List<string> res = new List<string>();
-            var acceptTypes = controllerContext.HttpContext.Request.AcceptTypes;
+            string[] acceptTypes = controllerContext.HttpContext.Request.AcceptTypes;
             if (acceptTypes!=null)
             {
-                foreach (var type in acceptTypes)
+                foreach (string type in acceptTypes)
                 {
-                    foreach (var mediaType in allowedTypes)
+                    foreach (string mediaType in allowedTypes)
                     {
                         if (type.Contains(mediaType))
                         {
@@ -64,9 +64,9 @@ namespace Sdl.Web.Mvc.Formats
             double topScore = GetHtmlAcceptScore(controllerContext);
             if (topScore<1.0)
             {
-                foreach (var key in Formatters.Keys)
+                foreach (string key in Formatters.Keys)
                 {
-                    var score = Formatters[key].Score(controllerContext);
+                    double score = Formatters[key].Score(controllerContext);
                     if (score > topScore)
                     {
                         topScore = score;
@@ -84,14 +84,14 @@ namespace Sdl.Web.Mvc.Formats
         private static double GetHtmlAcceptScore(ControllerContext controllerContext)
         {
             double score = 0.0;
-            var acceptTypes = controllerContext.HttpContext.Request.AcceptTypes;
+            string[] acceptTypes = controllerContext.HttpContext.Request.AcceptTypes;
             if (acceptTypes!=null)
             {
-                foreach (var type in acceptTypes)
+                foreach (string type in acceptTypes)
                 {
                     if (type.Contains("html"))
                     {
-                        var thisScore = GetScoreFromAcceptString(type);
+                        double thisScore = GetScoreFromAcceptString(type);
                         if (thisScore > score)
                         {
                             score = thisScore;

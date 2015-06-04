@@ -58,11 +58,11 @@ namespace Sdl.Web.Tridion.Context
             if (File.Exists(path))
             {
                 XDocument families = XDocument.Load(path);
-                foreach (var i in families.Descendants("devicefamily"))
+                foreach (XElement i in families.Descendants("devicefamily"))
                 {
                     string family = i.Attribute("name").Value;
                     bool inFamily = true;
-                    foreach (var c in i.Descendants("condition"))
+                    foreach (XElement c in i.Descendants("condition"))
                     {
                         Uri uri = new Uri(c.Attribute("uri").Value);
                         string expectedValue = c.Attribute("value").Value;

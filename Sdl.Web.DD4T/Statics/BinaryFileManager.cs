@@ -376,8 +376,8 @@ namespace Sdl.Web.DD4T.Statics
             Regex re = new Regex(@"_(w(\d+))?(_h(\d+))?(_n)?\.");
             if (re.IsMatch(path))
             {
-                var match = re.Match(path);
-                var dim = match.Groups[2].ToString();
+                Match match = re.Match(path);
+                string dim = match.Groups[2].ToString();
                 if (!String.IsNullOrEmpty(dim))
                 {
                     dimensions.Width = Convert.ToInt32(dim);

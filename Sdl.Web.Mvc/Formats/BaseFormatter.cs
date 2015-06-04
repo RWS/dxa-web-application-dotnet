@@ -32,9 +32,9 @@ namespace Sdl.Web.Mvc.Formats
             List<string> validTypes = DataFormatters.GetValidTypes(controllerContext,_mediaTypes);
             if (validTypes.Any())
             {
-                foreach(var type in validTypes)
+                foreach(string type in validTypes)
                 {
-                    var thisScore = DataFormatters.GetScoreFromAcceptString(type);
+                    double thisScore = DataFormatters.GetScoreFromAcceptString(type);
                     if (thisScore>score)
                     {
                         score = thisScore;

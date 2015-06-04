@@ -210,7 +210,7 @@ namespace Sdl.Web.Mvc.Controllers
             {
                 MvcData mvcData = entity.MvcData;
 
-                var tempRequestContext = new RequestContext(HttpContext, new RouteData());
+                RequestContext tempRequestContext = new RequestContext(HttpContext, new RouteData());
                 tempRequestContext.RouteData.DataTokens["Area"] = mvcData.ControllerAreaName;
                 tempRequestContext.RouteData.Values["controller"] = mvcData.ControllerName;
                 tempRequestContext.RouteData.Values["area"] = mvcData.ControllerAreaName;

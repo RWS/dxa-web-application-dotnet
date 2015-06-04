@@ -72,7 +72,7 @@ namespace Sdl.Web.Mvc.Configuration
         {
             get
             {
-                var val = GetFromContextStore("ScreenWidth");
+                object val = GetFromContextStore("ScreenWidth");
                 return val == null ? (ScreenWidth)AddToContextStore("ScreenWidth", CalculateScreenWidth()) : (ScreenWidth)val;
             }
         }

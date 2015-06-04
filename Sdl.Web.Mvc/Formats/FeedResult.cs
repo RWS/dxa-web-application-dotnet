@@ -1,5 +1,6 @@
 ﻿using System.ServiceModel.Syndication;
 using System.Text;
+using System.Web;
 using System.Web.Mvc;
 using System.Xml;
 
@@ -19,12 +20,12 @@ namespace Sdl.Web.Mvc.Formats
 
         public override void ExecuteResult(ControllerContext context)
         {
-            var response = context.HttpContext.Response;
+            HttpResponseBase response = context.HttpContext.Response;
 
             response.ContentType = ContentType;
             response.ContentEncoding = ContentEncoding;
 
-            using (var writer = new XmlTextWriter(response.Output))
+            using (XmlTextWriter writer = new XmlTextWriter(response.Output))
             {
                 writer.Formatting = Formatting.Indented;
                 Formatter.WriteTo(writer);

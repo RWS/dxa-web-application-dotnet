@@ -79,7 +79,7 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>True if this field contains given semantics, false otherwise</returns>
         public bool ContainsSemantics(FieldSemantics fieldSemantics)
         {
-            foreach (var property in Semantics)
+            foreach (FieldSemantics property in Semantics)
             {
                 // TODO add proper Equals implementation in FieldSemantics
                 if (property.Property.Equals(fieldSemantics.Property) &&
@@ -105,7 +105,7 @@ namespace Sdl.Web.Common.Mapping
                 return this;
             }
 
-            foreach (var embeddedField in Fields)
+            foreach (SemanticSchemaField embeddedField in Fields)
             {
                 SemanticSchemaField field = embeddedField.FindFieldBySemantics(fieldSemantics);
                 if (field != null)

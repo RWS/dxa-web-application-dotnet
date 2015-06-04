@@ -208,14 +208,14 @@ namespace Sdl.Web.Common.Configuration
             string error;
             if (config.ContainsKey(type))
             {
-                var subConfig = config[type];
-                var bits = key.Split('.');
+                Dictionary<string, Dictionary<string, string>> subConfig = config[type];
+                string[] bits = key.Split('.');
                 if (bits.Length >= 2)
                 {
                     //We actually allow more than one . in the key (for example core.schemas.article) in this case the section
                     //is the part up to the last dot and the key is the part after it.
-                    var sectionbit = key.Substring(0, key.LastIndexOf(".", StringComparison.Ordinal));
-                    var keybit = bits[bits.Length - 1];
+                    string sectionbit = key.Substring(0, key.LastIndexOf(".", StringComparison.Ordinal));
+                    string keybit = bits[bits.Length - 1];
                     if (subConfig.ContainsKey(sectionbit))
                     {
                         if (subConfig[sectionbit].ContainsKey(keybit))
@@ -249,7 +249,7 @@ namespace Sdl.Web.Common.Configuration
                 lock (_localizationUpdateLock)
                 {
                     //refresh all localizations for this site
-                    foreach (var localization in loc.SiteLocalizations)
+                    foreach (Localization localization in loc.SiteLocalizations)
                     {
                         LocalizationManager.UpdateLocalization(localization);
                     }
@@ -333,7 +333,7 @@ namespace Sdl.Web.Common.Configuration
                     if (bootstrapJson.siteLocalizations != null)
                     {
                         localization.SiteLocalizations = new List<Localization>();
-                        foreach (var item in bootstrapJson.siteLocalizations)
+                        foreach (dynamic item in bootstrapJson.siteLocalizations)
                         {
                             localization.SiteLocalizations.Add(new Localization { LocalizationId = item.id ?? item, Path = item.path, Language = item.language, IsDefaultLocalization = item.isMaster ?? false });
                         }
@@ -580,7 +580,7 @@ namespace Sdl.Web.Common.Configuration
             {
                 RefreshStates.Add(localizationId, new Dictionary<string, DateTime>());
             }
-            var states = RefreshStates[localizationId];
+            Dictionary<string, DateTime> states = RefreshStates[localizationId];
             if (states.ContainsKey(type))
             {
                 states[type] = DateTime.Now;

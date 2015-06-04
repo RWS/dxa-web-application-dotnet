@@ -35,7 +35,7 @@ namespace Sdl.Web.Mvc.Html
             string height = aspect == 0 ? String.Empty : ((int)Math.Ceiling(width / aspect)).ToString(CultureInfo.InvariantCulture);
             //Build the URL
             url = SiteConfiguration.MakeFullUrl(url, WebRequestContext.Localization);
-            var prefix = SingleSiteToken;
+            string prefix = SingleSiteToken;
             if (url.StartsWith("http"))
             {
                 prefix = "";

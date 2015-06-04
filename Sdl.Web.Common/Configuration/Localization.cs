@@ -112,7 +112,7 @@ namespace Sdl.Web.Common.Configuration
         {
             if (HttpContext.Current!=null)
             {
-                var uri = HttpContext.Current.Request.Url;
+                Uri uri = HttpContext.Current.Request.Url;
                 return uri.GetLeftPart(UriPartial.Authority) + Path;
             }
             return null;

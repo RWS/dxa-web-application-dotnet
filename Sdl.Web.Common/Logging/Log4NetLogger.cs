@@ -23,7 +23,7 @@ namespace Sdl.Web.Common.Logging
             ILog log = LogManager.GetLogger("Trace");
             if (log.IsInfoEnabled)
             {
-                var url = "[none]";
+                string url = "[none]";
                 try
                 {
                     url = HttpContext.Current.Request.RawUrl;
@@ -32,7 +32,7 @@ namespace Sdl.Web.Common.Logging
                 {
                     //ignore - we are in a non request context
                 }
-                var message = String.Format(messageFormat ?? "", parameters);
+                string message = String.Format(messageFormat ?? "", parameters);
                 log.InfoFormat(TraceFormat, url, type, (DateTime.Now - start).TotalMilliseconds, message);
             }
         }

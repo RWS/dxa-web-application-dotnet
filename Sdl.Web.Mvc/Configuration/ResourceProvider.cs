@@ -23,7 +23,7 @@ namespace Sdl.Web.Mvc.Configuration
         public object GetObject(string resourceKey, CultureInfo culture)
         {
             //Ignore the culture - we read this from the RequestContext
-            var dictionary = GetResourceCache();
+            IDictionary dictionary = GetResourceCache();
             if (!dictionary.Contains(resourceKey))
             {
                 //default is to return resource key, to aid troubleshooting
@@ -44,14 +44,14 @@ namespace Sdl.Web.Mvc.Configuration
 
         public IDictionary Resources(Localization localization)
         {
-            var key = localization.LocalizationId;
+            string key = localization.LocalizationId;
             //Load resources if they are not already loaded, or if they are out of date and need refreshing
             if (!_resources.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_settingsType,localization.LocalizationId))
             {
                 LoadResourcesForLocalization(localization);
                 if (!_resources.ContainsKey(key))
                 {
-                    var ex = new Exception(String.Format("No resources can be found for localization {0}. Check that the localization path is correct and the resources have been published.", localization.LocalizationId));
+                    Exception ex = new Exception(String.Format("No resources can be found for localization {0}. Check that the localization path is correct and the resources have been published.", localization.LocalizationId));
                     Log.Error(ex);
                     throw ex;
                 }
@@ -69,16 +69,16 @@ namespace Sdl.Web.Mvc.Configuration
             if (jsonData!=null)
             {
                 //The _all.json file contains a list of all other resources files to load
-                var bootstrapJson = Json.Decode(jsonData);
+                dynamic bootstrapJson = Json.Decode(jsonData);
                 foreach (string resourceUrl in bootstrapJson.files)
                 {
-                    var type = resourceUrl.Substring(resourceUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                    string type = resourceUrl.Substring(resourceUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
                     type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
                     jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(resourceUrl, loc).GetText();
                     if (jsonData!=null)
                     {
                         Log.Debug("Loading resources from file: {0}", resourceUrl);
-                        foreach (var item in GetResourcesFromFile(jsonData))
+                        foreach (KeyValuePair<string, object> item in GetResourcesFromFile(jsonData))
                         {
                             //we ensure resource key uniqueness by adding the type (which comes from the filename)
                             resources.Add(String.Format("{0}.{1}", type, item.Key), item.Value);
