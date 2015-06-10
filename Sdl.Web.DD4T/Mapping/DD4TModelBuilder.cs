@@ -372,20 +372,27 @@ namespace Sdl.Web.DD4T.Mapping
         {
             try
             {
+                // Convert.ChangeType cannot convert non-nullable types to nullable types, so don't try that.
+                Type bareModelType = modelType;
+                if (modelType.IsGenericType && modelType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                {
+                    bareModelType = modelType.GenericTypeArguments[0];
+                }
+
                 IList mappedValues = CreateGenericList(modelType);
                 switch (field.FieldType)
                 {
                     case FieldType.Date:
                         foreach (DateTime value in field.DateTimeValues)
                         {
-                            mappedValues.Add(Convert.ChangeType(value, modelType));
+                            mappedValues.Add(Convert.ChangeType(value, bareModelType));
                         }
                         break;
 
                     case FieldType.Number:
                         foreach (Double value in field.NumericValues)
                         {
-                            mappedValues.Add(Convert.ChangeType(value, modelType));
+                            mappedValues.Add(Convert.ChangeType(value, bareModelType));
                         }
                         break;
 
@@ -422,7 +429,7 @@ namespace Sdl.Web.DD4T.Mapping
                     default:
                         foreach (string value in field.Values)
                         {
-                            mappedValues.Add(Convert.ChangeType(value, modelType));
+                            mappedValues.Add(Convert.ChangeType(value, bareModelType));
                         }
                         break;
                 }
