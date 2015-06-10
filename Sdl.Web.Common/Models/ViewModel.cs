@@ -8,9 +8,14 @@ namespace Sdl.Web.Common.Models
     public abstract class ViewModel
     {
         /// <summary>
-        /// The (internal) Vocabulary URI used for semantic mapping of some of the Core Entity Models.
+        /// The internal/built-in Vocabulary ID used for semantic/CM mapping.
         /// </summary>
         public const string CoreVocabulary = "http://www.sdl.com/web/schemas/core";
+
+        /// <summary>
+        /// The Vocabulary ID for types defined by schema.org.
+        /// </summary>
+        public const string SchemaOrgVocabulary = "http://schema.org/"; 
 
         /// <summary>
         /// Gets or sets MVC data used to determine which View to use.

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Sdl.Web.Common.Models
 {
-    [SemanticEntity(Vocab = "http://schema.org/", EntityName= "Article", Prefix= "s", Public=true)]
+    [SemanticEntity(Vocab = SchemaOrgVocabulary, EntityName= "Article", Prefix= "s", Public=true)]
     public class Article : EntityModel
     {
         [SemanticProperty("s:headline")]

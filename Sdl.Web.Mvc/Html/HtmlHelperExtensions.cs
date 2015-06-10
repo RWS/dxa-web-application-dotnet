@@ -670,15 +670,11 @@ namespace Sdl.Web.Mvc.Html
 
         // TODO: These are not HtmlHelper extension methods; move to another class.
         #region TODO
-        public static string GetYouTubeUrl(string videoId)
-        {
-            return String.Format("https://www.youtube.com/embed/{0}?version=3&enablejsapi=1", videoId);
-        }
 
         public static string GetYouTubeEmbed(string videoId, string cssClass = null)
         {
             TagBuilder builder = new TagBuilder("iframe");
-            builder.Attributes.Add("src", GetYouTubeUrl(videoId));
+            builder.Attributes.Add("src", String.Format("https://www.youtube.com/embed/{0}?version=3&enablejsapi=1", videoId));
             builder.Attributes.Add("id", SiteConfiguration.GetUniqueId("video"));
             builder.Attributes.Add("allowfullscreen", "true");
             builder.Attributes.Add("frameborder", "0");
@@ -699,16 +695,19 @@ namespace Sdl.Web.Mvc.Html
             return String.Format("<{4} class=\"embed-video\"><img src=\"{1}\" alt=\"{2}\"{5}><button type=\"button\" data-video=\"{0}\" class=\"{3}\"><i class=\"fa fa-play-circle\"></i></button></{4}>", videoId, imageUrl, altText, cssClass, elementName, closing);
         }
 
+        [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.MediaHelper.GetResponsiveImageUrl instead.")]
         public static string GetResponsiveImageUrl(string url)
         {
             return GetResponsiveImageUrl(url, SiteConfiguration.MediaHelper.DefaultMediaFill);
         }
 
+        [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.MediaHelper.GetResponsiveImageUrl instead.")]
         public static string GetResponsiveImageUrl(string url, double aspect, int containerSize = 0)
         {
             return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(url, aspect, SiteConfiguration.MediaHelper.DefaultMediaFill, containerSize);
         }
 
+        [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.MediaHelper.GetResponsiveImageUrl instead.")]
         public static string GetResponsiveImageUrl(string url, string widthFactor, int containerSize = 0)
         {
             return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(url, SiteConfiguration.MediaHelper.DefaultMediaAspect, widthFactor, containerSize);

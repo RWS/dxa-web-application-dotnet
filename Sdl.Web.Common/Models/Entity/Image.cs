@@ -1,6 +1,6 @@
 ﻿namespace Sdl.Web.Common.Models
 {
-    [SemanticEntity("http://schema.org/", "MediaObject", "s")]
+    [SemanticEntity(SchemaOrgVocabulary, "ImageObject", Prefix = "s", Public = true)]
     public class Image : MediaItem
     {
         [SemanticProperty("s:name")]
