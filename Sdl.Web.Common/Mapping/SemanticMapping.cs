@@ -31,6 +31,29 @@ namespace Sdl.Web.Common.Mapping
         private static readonly Dictionary<string, List<SemanticVocabulary>> _semanticVocabularies = new Dictionary<string, List<SemanticVocabulary>>();
 
         /// <summary>
+        /// Gets a qualified (semantic) type name consisting of vocabulary ID and (local) type name.
+        /// </summary>
+        /// <param name="typeName">The (local) type name.</param>
+        /// <param name="vocab">The vocabulary ID or <c>null</c> for the default/core vocabulary.</param>
+        /// <returns>The qualified type name.</returns>
+        public static string GetQualifiedTypeName(string typeName, string vocab = null)
+        {
+            return string.Format("{0}:{1}", vocab ?? DefaultVocabulary, typeName);
+        }
+
+        /// <summary>
+        /// Gets a qualified (semantic) type name consisting of vocabulary ID and (local) type name.
+        /// </summary>
+        /// <param name="typeName">The (local) type name.</param>
+        /// <param name="prefix">The vocabulary prefix.</param>
+        /// <param name="localization">The context Localization.</param>
+        /// <returns>The qualified type name.</returns>
+        public static string GetQualifiedTypeName(string typeName, string prefix, Localization localization)
+        {
+            return GetQualifiedTypeName(typeName, GetVocabulary(prefix, localization));
+        }
+
+        /// <summary>
         /// Gets semantic vocabulary by prefix.
         /// </summary>
         /// <param name="prefix">The prefix</param>
@@ -87,13 +110,18 @@ namespace Sdl.Web.Common.Mapping
             {
                 LoadSemanticMapForLocalization(loc);
             }
-            if (_semanticMap.ContainsKey(key))
+
+            try
             {
-                Dictionary<string, SemanticSchema> map = _semanticMap[key];
-                return GetSchema(map, id);
+                return _semanticMap[key][id];
             }
-            Log.Error("Localization {0} does not contain semantic schema map {1}. Check that the Publish Settings page is published and the application cache is up to date.", loc.LocalizationId, id);
-            return null;
+            catch (Exception)
+            {
+                throw new DxaException(
+                    string.Format("Semantic schema {0} not defined in Localization [{1}]. Check that the Publish Settings page is published and the application cache is up to date.", 
+                    id, loc)
+                    );
+            }
         }
 
         private static void LoadVocabulariesForLocalization(Localization loc)
@@ -150,16 +178,6 @@ namespace Sdl.Web.Common.Mapping
                 }
                 SiteConfiguration.ThreadSafeSettingsUpdate(_mapSettingsType, _semanticMap, key, map);
             }
-        }
-
-        private static SemanticSchema GetSchema(IReadOnlyDictionary<string, SemanticSchema> mapping, string id)
-        {            
-            if (mapping.ContainsKey(id))
-            {
-                return mapping[id];
-            }
-            Log.Error("Semantic mappings for Schema '{0}' do not exist.", id);
-            return null;
         }
 
         private static IEnumerable<SemanticSchema> GetSchemasFromFile(string jsonData)

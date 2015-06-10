@@ -48,6 +48,9 @@ namespace Sdl.Web.Site.Areas.Core
             RegisterViewModel("SiteMapXml", typeof(SitemapItem), "Navigation");
             RegisterViewModel("TopNavigation", typeof(NavigationLinks), "Navigation");
 
+            // Entity Models without view
+            RegisterViewModel(typeof(Image));
+
             // Page Views
             RegisterViewModel("GeneralPage", typeof(PageModel), "Page");
             RegisterViewModel("IncludePage", typeof(PageModel), "Page");

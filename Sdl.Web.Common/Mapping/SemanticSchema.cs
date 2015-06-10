@@ -1,6 +1,6 @@
-﻿using Sdl.Web.Common.Configuration;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Mapping
 {
@@ -10,6 +10,8 @@ namespace Sdl.Web.Common.Mapping
     /// </summary>
     public class SemanticSchema
     {
+        private string[] _semanticTypeNames; 
+
         /// <summary>
         /// Schema (item) ID.
         /// </summary>
@@ -76,6 +78,19 @@ namespace Sdl.Web.Common.Mapping
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Gets semantic type names (qualified with Vocabulary ID) for the Schema.
+        /// </summary>
+        /// <returns>The semantic type names.</returns>
+        public string[] GetSemanticTypeNames()
+        {
+            if (_semanticTypeNames == null)
+            {
+                _semanticTypeNames = Semantics.Select(s => SemanticMapping.GetQualifiedTypeName(s.Entity, s.Prefix, Localization)).ToArray();
+            }
+            return _semanticTypeNames;
         }
     }
 }

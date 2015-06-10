@@ -28,12 +28,23 @@ namespace Sdl.Web.Mvc.Configuration
         }
 
         /// <summary>
-        /// Explicitly register a view model
+        /// Registers a View Model without associated View.
         /// </summary>
-        /// <param name="viewName">The name of the view (eg SearchResults)</param>
+        /// <param name="modelType">The View Model type.</param>
+        /// <remarks>
+        /// </remarks>
+        protected void RegisterViewModel(Type modelType)
+        {
+            ModelTypeRegistry.RegisterViewModel(null, modelType);
+        }
+
+        /// <summary>
+        /// Registers a View Model and associated View.
+        /// </summary>
+        /// <param name="viewName">The name of the View.</param>
         /// <param name="modelType">The view model type</param>
         /// <param name="controllerName">The controller name (eg Search)</param>
-        protected virtual void RegisterViewModel(string viewName, Type modelType, string controllerName = "Entity")
+        protected void RegisterViewModel(string viewName, Type modelType, string controllerName = "Entity")
         {
             MvcData mvcData = new MvcData { AreaName = AreaName, ControllerName = controllerName, ViewName = viewName };
             ModelTypeRegistry.RegisterViewModel(mvcData, modelType);

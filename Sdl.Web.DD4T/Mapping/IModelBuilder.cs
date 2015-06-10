@@ -18,6 +18,6 @@ namespace Sdl.Web.DD4T.Mapping
     {
         PageModel CreatePageModel(IPage page, IEnumerable<IPage> includes);
         EntityModel CreateEntityModel(IComponentPresentation cp);
-        EntityModel CreateEntityModel(IComponent component, Type type);
+        EntityModel CreateEntityModel(IComponent component, Type baseModelType);
     }
 }

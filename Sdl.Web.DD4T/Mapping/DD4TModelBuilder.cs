@@ -4,9 +4,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Security.Policy;
 using System.Text.RegularExpressions;
+using System.Web.Configuration;
 using DD4T.ContentModel;
 using Newtonsoft.Json.Linq;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
@@ -134,24 +137,30 @@ namespace Sdl.Web.DD4T.Mapping
             return model;
         }
 
-        public virtual EntityModel CreateEntityModel(IComponent component, Type type)
-        {
-            // get schema item id from tcmuri -> tcm:1-2-8
-            string[] uriParts = component.Schema.Id.Split('-');
-            long schemaId = Convert.ToInt64(uriParts[1]);
-            MappingData mapData = new MappingData { SemanticSchema = SemanticMapping.GetSchema(schemaId.ToString(CultureInfo.InvariantCulture), WebRequestContext.Localization) };
-            // get schema entity names (indexed by vocabulary)
-            mapData.EntityNames = mapData.SemanticSchema != null ? mapData.SemanticSchema.GetEntityNames() : null;
 
-            //TODO may need to merge with vocabs from embedded types
-            mapData.TargetEntitiesByPrefix = GetEntityDataFromType(type);
-            mapData.Content = component.Fields;
-            mapData.Meta = component.MetadataFields;
-            mapData.TargetType = type;
-            mapData.SourceEntity = component;
-            EntityModel model = CreateModelFromMapData(mapData);
-            model.XpmMetadata = GetXpmMetadata(component);
+        public virtual EntityModel CreateEntityModel(IComponent component, Type baseModelType)
+        {
+            string[] schemaTcmUriParts = component.Schema.Id.Split('-');
+            SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaTcmUriParts[1], WebRequestContext.Localization); // TODO TSI-775
+
+            // The semantic mapping may resolve to a more specific model type than specified by the View Model itself (e.g. Image instead of just MediaItem for Teaser.Media)
+            Type modelType = GetModelTypeFromSemanticMapping(semanticSchema, baseModelType);
+
+            MappingData mappingData = new MappingData
+            {
+                SemanticSchema = semanticSchema,
+                EntityNames = semanticSchema.GetEntityNames(),
+                TargetEntitiesByPrefix = GetEntityDataFromType(modelType),
+                Content = component.Fields,
+                Meta = component.MetadataFields,
+                TargetType = modelType,
+                SourceEntity = component
+            };
+
+            EntityModel model = CreateEntityModel(mappingData);
             model.Id = GetDxaIdentifierFromTcmUri(component.Id);
+            model.XpmMetadata = GetXpmMetadata(component);
+
             if (model is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
             {
                 MediaItem mediaItem = (MediaItem)model;
@@ -160,17 +169,29 @@ namespace Sdl.Web.DD4T.Mapping
                 mediaItem.FileSize = component.Multimedia.Size;
                 mediaItem.MimeType = component.Multimedia.MimeType;
             }
-            return model;
 
+            if (model is Link)
+            {
+                Link link = (Link) model;
+                if (string.IsNullOrEmpty(link.Url))
+                {
+                    link.Url = SiteConfiguration.LinkResolver.ResolveLink(component.Id);
+                }
+            }
+
+            return model;
         }
         #endregion
 
-        protected virtual EntityModel CreateModelFromMapData(MappingData mapData)
+        protected virtual EntityModel CreateEntityModel(MappingData mappingData)
         {
-            EntityModel model = (EntityModel) Activator.CreateInstance(mapData.TargetType);
+            Type modelType = mappingData.TargetType; // TODO: why is this not a separate parameter?
+            // TODO TSI-247: Model Type may have to be more specific than the View Model properties type (e.g. Image instead of just MediaItem)
+
+            EntityModel model = (EntityModel)Activator.CreateInstance(modelType);
             Dictionary<string, string> xpmPropertyMetadata = new Dictionary<string, string>();
-            Dictionary<string, List<SemanticProperty>> propertySemantics = FilterPropertySematicsByEntity(LoadPropertySemantics(mapData.TargetType),mapData);
-            foreach (PropertyInfo pi in mapData.TargetType.GetProperties())
+            Dictionary<string, List<SemanticProperty>> propertySemantics = FilterPropertySematicsByEntity(LoadPropertySemantics(modelType), mappingData);
+            foreach (PropertyInfo pi in modelType.GetProperties())
             {
                 bool multival = pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
                 Type propertyType = multival ? pi.PropertyType.GetGenericArguments()[0] : pi.PropertyType;
@@ -178,42 +199,50 @@ namespace Sdl.Web.DD4T.Mapping
                 {
                     foreach (SemanticProperty info in propertySemantics[pi.Name])
                     {
-                        IField field = GetFieldFromSemantics(mapData, info);
+                        IField field = GetFieldFromSemantics(mappingData, info);
                         if (field != null && (field.Values.Count > 0 || field.EmbeddedValues.Count > 0))
                         {
-                            pi.SetValue(model, GetFieldValues(field, propertyType, multival, mapData));
+                            pi.SetValue(model, MapFieldValues(field, propertyType, multival, mappingData));
                             xpmPropertyMetadata.Add(pi.Name, GetFieldXPath(field));
                             break;
                         }
-                        //Special cases
-                        if (mapData.SourceEntity!=null)
+
+                        // Special mapping cases require SourceEntity to be set
+                        if (mappingData.SourceEntity == null)
                         {
-                            bool processed = false;
+                            continue;
+                        }
+
+                        bool processed = false;
+                        if (info.PropertyName == "_self")
+                        {
                             //Map the whole entity to an image property, or a resolved link to the entity to a Url field
-                            if (info.PropertyName == "_self")
+                            if (typeof(MediaItem).IsAssignableFrom(propertyType) || typeof(Link).IsAssignableFrom(propertyType) || propertyType == typeof(String))
                             {
-                                if (propertyType == typeof(MediaItem) && mapData.SourceEntity.Multimedia != null)
+                                object mappedSelf = MapComponent(mappingData.SourceEntity, propertyType);
+                                if (multival)
                                 {
-                                     pi.SetValue(model, GetMultiMediaLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
-                                     processed = true;
+                                    IList genericList = CreateGenericList(propertyType);
+                                    genericList.Add(mappedSelf);
+                                    pi.SetValue(model, genericList);
                                 }
-                                else if (propertyType == typeof(Link) || propertyType == typeof(String))
+                                else
                                 {
-                                    pi.SetValue(model, GetMultiComponentLinks(new List<IComponent> { mapData.SourceEntity }, propertyType, multival));
-                                    processed = true;    
+                                    pi.SetValue(model, mappedSelf);
                                 }
-                            }
-                            //Map all fields into a single (Dictionary) property
-                            else if (info.PropertyName == "_all" && pi.PropertyType == typeof(Dictionary<string,string>))
-                            {
-                                pi.SetValue(model, GetAllFieldsAsDictionary(mapData.SourceEntity));
                                 processed = true;
                             }
+                        }
+                        else if (info.PropertyName == "_all" && pi.PropertyType == typeof(Dictionary<string,string>))
+                        {
+                            //Map all fields into a single (Dictionary) property
+                            pi.SetValue(model, GetAllFieldsAsDictionary(mappingData.SourceEntity));
+                            processed = true;
+                        }
 
-                            if (processed)
-                            {
-                                break;
-                            }
+                        if (processed)
+                        {
+                            break;
                         }
                     }
                 }
@@ -325,26 +354,92 @@ namespace Sdl.Web.DD4T.Mapping
             return null;
         }
 
-        private object GetFieldValues(IField field, Type propertyType, bool multival, MappingData mapData)
+
+        private static IList CreateGenericList(Type listItemType)
         {
-            switch (field.FieldType)
+            ConstructorInfo genericListConstructor = typeof(List<>).MakeGenericType(listItemType).GetConstructor(Type.EmptyTypes);
+            if (genericListConstructor == null)
             {
-                case (FieldType.Date):
-                    return GetDates(field, propertyType, multival);
-                case (FieldType.Number):
-                    return GetNumbers(field, propertyType, multival);
-                case (FieldType.MultiMediaLink):
-                    return GetMultiMediaLinks(field, propertyType, multival);
-                case (FieldType.ComponentLink):
-                    return GetMultiComponentLinks(field, propertyType, multival);
-                case (FieldType.Embedded):
-                    return GetMultiEmbedded(field, propertyType, multival, mapData);
-                case (FieldType.Keyword):
-                    return GetMultiKeywords(field, propertyType, multival);
-                case (FieldType.Xhtml):
-                    return GetMultiLineStrings(field, propertyType, multival);
-                default:
-                    return GetStrings(field, propertyType, multival);
+                // This should never happen.
+                throw new DxaException(string.Format("Unable get constructor for generic list of '{0}'.", listItemType.FullName));
+            }
+
+            return (IList)genericListConstructor.Invoke(null);
+        }
+
+
+        private object MapFieldValues(IField field, Type modelType, bool multival, MappingData mapData)
+        {
+            try
+            {
+                IList mappedValues = CreateGenericList(modelType);
+                switch (field.FieldType)
+                {
+                    case FieldType.Date:
+                        foreach (DateTime value in field.DateTimeValues)
+                        {
+                            mappedValues.Add(Convert.ChangeType(value, modelType));
+                        }
+                        break;
+
+                    case FieldType.Number:
+                        foreach (Double value in field.NumericValues)
+                        {
+                            mappedValues.Add(Convert.ChangeType(value, modelType));
+                        }
+                        break;
+
+                    case FieldType.MultiMediaLink:
+                    case FieldType.ComponentLink:
+                        foreach (IComponent value in field.LinkedComponentValues)
+                        {
+                            mappedValues.Add(MapComponent(value, modelType));
+                        }
+                        break;
+
+                    case FieldType.Embedded:
+                        foreach (IFieldSet value in field.EmbeddedValues)
+                        {
+                            mappedValues.Add(MapEmbeddedFields(value, modelType, mapData));
+                        }
+                        break;
+
+                    case FieldType.Keyword:
+                        foreach (IKeyword value in field.Keywords)
+                        {
+                            mappedValues.Add(MapKeyword(value, modelType));
+                        }
+                        break;
+
+                    case FieldType.Xhtml:
+                        IRichTextProcessor richTextProcessor = SiteConfiguration.RichTextProcessor;
+                        foreach (string value in field.Values)
+                        {
+                            mappedValues.Add(richTextProcessor.ProcessRichText(value));
+                        }
+                        break;
+
+                    default:
+                        foreach (string value in field.Values)
+                        {
+                            mappedValues.Add(Convert.ChangeType(value, modelType));
+                        }
+                        break;
+                }
+
+                if (multival)
+                {
+                    return mappedValues;
+                }
+                else
+                {
+                    return mappedValues.Count == 0 ? null : mappedValues[0];
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw new DxaException(string.Format("Unable to map field '{0}' to property of type '{1}'.", field.Name, modelType.FullName), ex);
             }
         }
 
@@ -377,282 +472,64 @@ namespace Sdl.Web.DD4T.Mapping
             return result;
         }
 
-        private static object GetDates(IField field, Type modelType, bool multival)
+        protected virtual object MapKeyword(IKeyword keyword, Type modelType)
         {
-            if (modelType.IsAssignableFrom(typeof(DateTime)))
+            // TODO TSI-811: Keyword mapping should also be generic rather than hard-coded like below
+            string displayText = string.IsNullOrEmpty(keyword.Description) ? keyword.Title : keyword.Description;
+            if (modelType == typeof(Tag))
             {
-                if (multival)
+                return new Tag
                 {
-                    return field.DateTimeValues;
-                }
-
-                return field.DateTimeValues[0];
-            }
-            return null;
-        }
-
-        private static object GetNumbers(IField field, Type modelType, bool multival)
-        {
-            if (modelType.IsAssignableFrom(typeof(Double)))
-            {
-                if (multival)
-                {
-                    return field.NumericValues;
-                }
-
-                return field.NumericValues[0];
-            }
-            if (modelType.IsAssignableFrom(typeof(Int32)))
-            {
-                if (multival)
-                {
-                    return field.NumericValues.Select(d=>(int)Math.Round(d));
-                }
-                return (int)Math.Round(field.NumericValues[0]);
-            }
-            return null;
-        }
-
-        private static object GetMultiMediaLinks(IField field, Type modelType, bool multival)
-        {
-            return GetMultiMediaLinks(field.LinkedComponentValues, modelType, multival);
-        }
-
-        private static object GetMultiMediaLinks(IEnumerable<IComponent> items, Type modelType, bool multival)
-        {
-            IList<IComponent> components = items as IList<IComponent> ?? items.ToList();
-            if (components.Any())
-            {
-                // TODO TSI-247: find better way to determine image or video
-                string schemaTitle = components.First().Schema.Title;
-                if (modelType.IsAssignableFrom(typeof(YouTubeVideo)) && schemaTitle.ToLower().Contains("youtube"))
-                {
-                    if (multival)
-                    {
-                        return GetYouTubeVideos(components);
-                    }
-
-                    return GetYouTubeVideos(components)[0];
-                }
-                if (modelType.IsAssignableFrom(typeof(Download)) && schemaTitle.ToLower().Contains("download"))
-                {
-                    if (multival)
-                    {
-                        return GetDownloads(components);
-                    }
-
-                    return GetDownloads(components)[0];
-                }
-                if (modelType.IsAssignableFrom(typeof(Image)))
-                {
-                    if (multival)
-                    {
-                        return GetImages(components);
-                    }
-
-                    return GetImages(components)[0];
-                }
-                // TODO TSI-247: handle other types
-            }
-            return null;
-        }
-
-        private object GetMultiKeywords(IField field, Type linkedItemType, bool multival)
-        {
-            return GetMultiKeywords(field.Keywords, linkedItemType, multival);
-        }
-
-        private object GetMultiKeywords(IEnumerable<IKeyword> items, Type linkedItemType, bool multival)
-        {
-            //What to do depends on the target type
-            if (linkedItemType == typeof(Tag))
-            {
-                List<Tag> res = items.Select(k => new Tag {DisplayText=GetKeywordDisplayText(k),Key=GetKeywordKey(k),TagCategory=k.TaxonomyId}).ToList();
-                if (multival)
-                {
-                    return res;
-                }
-
-                return res[0];
+                    DisplayText = displayText,
+                    Key = string.IsNullOrEmpty(keyword.Key) ? keyword.Id : keyword.Key,
+                    TagCategory = keyword.TaxonomyId
+                };
             } 
-            if (linkedItemType == typeof(bool))
+            else if (modelType == typeof(bool))
             {
                 //For booleans we assume the keyword key or value can be converted to bool
-                List<bool> res = new List<bool>();
-                foreach (IKeyword kw in items)
-                {
-                    bool val;
-                    Boolean.TryParse(String.IsNullOrEmpty(kw.Key) ? kw.Title : kw.Key, out val);
-                    res.Add(val);
-                }
-                if (multival)
-                {
-                    return res;
-                }
-
-                return res[0];
+                return Boolean.Parse(String.IsNullOrEmpty(keyword.Key) ? keyword.Title : keyword.Key);
             }
-
-            if (linkedItemType == typeof(String))
+            else if (modelType == typeof(string))
             {
-                //List<String> res = items.Select(k=>GetKeywordDisplayText(k)).ToList();
-                List<String> res = items.Select(GetKeywordDisplayText).ToList();
-                if (multival)
-                {
-                    return res;
-                }
-
-                return res[0];
+                return displayText;
             }
-            return null;
-        }
-
-        private static string GetKeywordKey(IKeyword k)
-        {
-            return !String.IsNullOrEmpty(k.Key) ? k.Key : k.Id;
-        }
-
-        private static string GetKeywordDisplayText(IKeyword k)
-        {
-            return !String.IsNullOrEmpty(k.Description) ? k.Description : k.Title;
-        }
-        
-        private object GetMultiComponentLinks(IField field, Type linkedItemType, bool multival)
-        {
-            return GetMultiComponentLinks(field.LinkedComponentValues, linkedItemType, multival);
-        }
-
-        private object GetMultiComponentLinks(IEnumerable<IComponent> items, Type linkedItemType, bool multival)
-        {
-            //What to do depends on the target type
-            if (linkedItemType == typeof(String) || linkedItemType == typeof(Link))
+            else
             {
-                //For strings and Links, we simply resolve the link to a URL
-                ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
-                List<String> urls = new List<String>();
-                foreach (IComponent comp in items)
-                {
-                    string url = linkResolver.ResolveLink(comp.Id);
-                    if (url != null)
-                    {
-                        urls.Add(url);
-                    }
-                }
-                if (urls.Count == 0)
-                {
-                    return null;
-                }
-                if (linkedItemType == typeof(Link))
-                {
-                    if (multival)
-                    {
-                        return urls.Select(u => new Link { Url = u }).ToList();
-                    }
-                    return new Link { Url = urls[0] };
-                }
-                if (multival)
-                {
-                    return urls;
-                }
-                
-                return urls[0];
+                throw new DxaException(string.Format("Cannot map Keyword to type '{0}'. The type must be Tag, bool or string.", modelType));
             }
-
-            //TODO TSI-247: should not use reflection for invoking our own private methods.
-            MethodInfo method = GetType().GetMethod("GetCompLink" + (multival ? "s" : String.Empty), BindingFlags.NonPublic | BindingFlags.Instance);
-            method = method.MakeGenericMethod(new[] { linkedItemType });
-            return method.Invoke(this, new object[] { items });
         }
 
-        private object GetMultiEmbedded(IField field, Type propertyType, bool multival, MappingData mapData)
+        protected virtual object MapComponent(IComponent component, Type modelType)
         {
-            MappingData embedMapData = new MappingData
+            if (modelType == typeof(string))
+            {
+                return SiteConfiguration.LinkResolver.ResolveLink(component.Id);
+            }
+
+            if (!modelType.IsSubclassOf(typeof(EntityModel)))
+            {
+                throw new DxaException(string.Format("Cannot map a Component to type '{0}'. The type must be String or a subclass of EntityModel.", modelType));
+            }
+
+            return CreateEntityModel(component, modelType);
+        }
+
+        private EntityModel MapEmbeddedFields(IFieldSet embeddedFields, Type modelType, MappingData mapData)
+        {
+            MappingData embeddedMappingData = new MappingData
                 {
-                    TargetType = propertyType,
+                    TargetType = modelType,
+                    Content = embeddedFields,
                     Meta = null,
-                    EntityNames = mapData.EntityNames,
+                    EntityNames = mapData.EntityNames, // TODO: should this not be re-determined for the embedded model type?
                     ParentDefaultPrefix = mapData.ParentDefaultPrefix,
-                    TargetEntitiesByPrefix = mapData.TargetEntitiesByPrefix,
-                    SemanticSchema = mapData.SemanticSchema,
+                    TargetEntitiesByPrefix = mapData.TargetEntitiesByPrefix, // TODO: should this not be re-determined for the embedded model type?
+                    SemanticSchema = mapData.SemanticSchema, // TODO: should this not be re-determined for the embedded model type?
                     EmbedLevel = mapData.EmbedLevel + 1
                 };
-            //This is a bit weird, but necessary as we cannot return List<object>, we need to get the right type
-            IList result = (IList)typeof(List<>).MakeGenericType(propertyType).GetConstructor(Type.EmptyTypes).Invoke(null);
-            foreach (IFieldSet fields in field.EmbeddedValues)
-            {
-                embedMapData.Content = fields;
-                EntityModel model = CreateModelFromMapData(embedMapData);
-                if (model != null)
-                {
-                    result.Add(model);
-                }
-            }
-            return result.Count == 0 ? null : (multival ? result : result[0]);
 
-        }
-
-        object GetMultiLineStrings(IField field, Type modelType, bool multival)
-        {
-            if (modelType.IsAssignableFrom(typeof(String)))
-            {
-                IRichTextProcessor richTextProcessor = SiteConfiguration.RichTextProcessor;
-                if (multival)
-                {
-                    return field.Values.Select(v => richTextProcessor.ProcessRichText(v));
-                }
-                return richTextProcessor.ProcessRichText(field.Value);
-            }
-            return null;
-        }
-
-        static object GetStrings(IField field, Type modelType, bool multival)
-        {
-            if (modelType.IsAssignableFrom(typeof(String)))
-            {
-                if (multival)
-                {
-                    return field.Values;
-                }
-                return field.Value;
-            }
-            return null;
-        }
-
-        private static List<Image> GetImages(IEnumerable<IComponent> components)
-        {
-            return components.Select(c => new Image { Url = c.Multimedia.Url, FileName = c.Multimedia.FileName, FileSize = c.Multimedia.Size, MimeType = c.Multimedia.MimeType}).ToList();
-        }
-
-        private static List<YouTubeVideo> GetYouTubeVideos(IEnumerable<IComponent> components)
-        {
-            return components.Select(c => new YouTubeVideo { Url = c.Multimedia.Url, FileSize = c.Multimedia.Size, MimeType = c.Multimedia.MimeType, YouTubeId = c.MetadataFields["youTubeId"].Value }).ToList();
-        }
-
-        private static List<Download> GetDownloads(IEnumerable<IComponent> components)
-        {
-            //todo this contains hardcoded metadata while we would expect this to semantiaclly ma
-            return components.Select(c => new Download { Url = c.Multimedia.Url, FileName = c.Multimedia.FileName, FileSize = c.Multimedia.Size, MimeType = c.Multimedia.MimeType, Description = (c.MetadataFields.ContainsKey("description") ? c.MetadataFields["description"].Value : null) }).ToList();
-        }
-
-        private List<T> GetCompLinks<T>(IEnumerable<IComponent> components) 
-            where T: EntityModel
-        {
-            List<T> list = new List<T>();
-            foreach (IComponent comp in components)
-            {
-                list.Add((T)CreateEntityModel(comp, typeof(T)));
-            }
-            return list;
-        }
-
-        /// <remarks>
-        /// Called via reflection in <see cref="GetMultiComponentLinks(IEnumerable{IComponent}, Type, bool)"/>.
-        /// </remarks>
-        private T GetCompLink<T>(IEnumerable<IComponent> components) 
-            where T: EntityModel
-        {
-            // TODO TSI-247
-            return GetCompLinks<T>(components)[0];
+            return CreateEntityModel(embeddedMappingData);
         }
 
         protected Dictionary<string, string> GetAllFieldsAsDictionary(IComponent component)

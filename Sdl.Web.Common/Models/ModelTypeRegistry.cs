@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web.Compilation;
+using System.Web.UI.WebControls;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Mapping;
 
 namespace Sdl.Web.Common.Models
 {
@@ -14,18 +16,20 @@ namespace Sdl.Web.Common.Models
     {
         private static readonly IDictionary<MvcData, Type> _viewToModelTypeMapping = new Dictionary<MvcData, Type>();
         private static readonly IDictionary<Type, SemanticInfo> _modelTypeToSemanticInfoMapping = new Dictionary<Type, SemanticInfo>();
+        private static readonly IDictionary<string, ISet<Type>> _semanticTypeToModelTypesMapping = new Dictionary<string, ISet<Type>>();
 
         private class SemanticInfo
         {
             internal readonly IDictionary<string, string> PrefixMappings = new Dictionary<string, string>();
-            internal readonly IList<string> SemanticTypes = new List<string>();
+            internal readonly IList<string> PublicSemanticTypes = new List<string>();
+            internal readonly IList<string> MappedSemanticTypes = new List<string>(); 
             internal readonly IDictionary<string, IList<string>> SemanticProperties = new Dictionary<string, IList<string>>();
         }
 
         /// <summary>
-        /// Registers a View Model mapping for a given View and Model combination.
+        /// Registers a View Model and associated View.
         /// </summary>
-        /// <param name="viewData">The data for the View to register.</param>
+        /// <param name="viewData">The data for the View to register or <c>null</c> if only the Model Type is to be registered.</param>
         /// <param name="modelType">The model Type used by the View.</param>
         public static void RegisterViewModel(MvcData viewData, Type modelType)
         {
@@ -33,13 +37,15 @@ namespace Sdl.Web.Common.Models
             {
                 lock (_viewToModelTypeMapping)
                 {
-                    if (_viewToModelTypeMapping.ContainsKey(viewData))
+                    if (viewData != null)
                     {
-                        Log.Warn("View '{0}' registered multiple times.", viewData);
-                        return;
+                        if (_viewToModelTypeMapping.ContainsKey(viewData))
+                        {
+                            Log.Warn("View '{0}' registered multiple times.", viewData);
+                            return;
+                        }
+                        _viewToModelTypeMapping.Add(viewData, modelType);
                     }
-
-                    _viewToModelTypeMapping.Add(viewData, modelType);
 
                     if (!_modelTypeToSemanticInfoMapping.ContainsKey(modelType))
                     {
@@ -117,7 +123,7 @@ namespace Sdl.Web.Common.Models
             // No Tracer here to reduce trace noise.
             SemanticInfo semanticInfo = GetSemanticInfo(modelType);
             prefixMappings = semanticInfo.PrefixMappings;
-            return semanticInfo.SemanticTypes.ToArray();
+            return semanticInfo.PublicSemanticTypes.ToArray();
         }
 
         /// <summary>
@@ -139,16 +145,39 @@ namespace Sdl.Web.Common.Models
             return null;
         }
 
+        /// <summary>
+        /// Gets the Model Types mapped to a given semantic type name.
+        /// </summary>
+        /// <param name="semanticTypeName">The semantic type name qualified with vocabulary ID.</param>
+        /// <returns>The mapped model types or <c>null</c> if no Model types are registered for the given semantic type name.</returns>
+        public static IEnumerable<Type> GetMappedModelTypes(string semanticTypeName)
+        {
+            ISet<Type> mappedModelTypes;
+            _semanticTypeToModelTypesMapping.TryGetValue(semanticTypeName, out mappedModelTypes);
+            return mappedModelTypes;
+        }
+
         private static SemanticInfo RegisterModelType(Type modelType)
         {
-            using (new Tracer())
+            using (new Tracer(modelType))
             {
                 SemanticInfo semanticInfo = ExtractSemanticInfo(modelType);
                 _modelTypeToSemanticInfoMapping.Add(modelType, semanticInfo);
 
-                if (semanticInfo.SemanticTypes.Any())
+                foreach (string semanticTypeName in semanticInfo.MappedSemanticTypes)
                 {
-                    Log.Debug("Model type '{0}' has semantic type(s) '{1}'.", modelType.FullName, string.Join(" ", semanticInfo.SemanticTypes));
+                    ISet<Type> mappedModelTypes;
+                    if (!_semanticTypeToModelTypesMapping.TryGetValue(semanticTypeName, out mappedModelTypes))
+                    {
+                        mappedModelTypes = new HashSet<Type>();
+                        _semanticTypeToModelTypesMapping.Add(semanticTypeName, mappedModelTypes);
+                    }
+                    mappedModelTypes.Add(modelType);
+                }
+
+                if (semanticInfo.PublicSemanticTypes.Any())
+                {
+                    Log.Debug("Model type '{0}' has semantic type(s) '{1}'.", modelType.FullName, string.Join(" ", semanticInfo.PublicSemanticTypes));
                     foreach (KeyValuePair<string, IList<string>> kvp in semanticInfo.SemanticProperties)
                     {
                         Log.Debug("\tRegistered property '{0}' as semantic property '{1}'", kvp.Key, string.Join(" ", kvp.Value));
@@ -173,10 +202,16 @@ namespace Sdl.Web.Common.Models
         private static SemanticInfo ExtractSemanticInfo(Type modelType)
         {
             SemanticInfo semanticInfo = new SemanticInfo();
+            
+            // Built-in semantic type mapping
+            string bareTypeName = modelType.Name.Split('`')[0]; // Type name without generic type parameters (if any)
+            semanticInfo.MappedSemanticTypes.Add(SemanticMapping.GetQualifiedTypeName(bareTypeName));
 
             // Extract semantic info from SemanticEntity attributes on the Model Type.
             foreach (SemanticEntityAttribute attribute in modelType.GetCustomAttributes(true).Where(a => a is SemanticEntityAttribute))
             {
+                semanticInfo.MappedSemanticTypes.Add(SemanticMapping.GetQualifiedTypeName(attribute.EntityName, attribute.Vocab));
+
                 if (!attribute.Public || string.IsNullOrEmpty(attribute.Prefix))
                     continue;
 
@@ -198,7 +233,7 @@ namespace Sdl.Web.Common.Models
                     semanticInfo.PrefixMappings.Add(prefix, attribute.Vocab);
                 }
 
-                semanticInfo.SemanticTypes.Add(String.Format("{0}:{1}", prefix, attribute.EntityName));
+                semanticInfo.PublicSemanticTypes.Add(String.Format("{0}:{1}", prefix, attribute.EntityName));
             }
 
             // Extract semantic info from SemanticEntity attributes on the Model Type's properties
