@@ -1,4 +1,5 @@
-﻿using Sdl.Web.Common.Configuration;
+﻿using System.IO;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Mvc.Configuration;
@@ -10,12 +11,9 @@ namespace Sdl.Web.Mvc.Html
     /// <summary>
     /// Media helpers are used to write out image/video URLs and to set responsive design features (screensize breakpoints etc.)
     /// </summary>
-    public abstract class BaseMediaHelper : IMediaHelper
+    public class BaseMediaHelper : IMediaHelper
     {
-        //To be implemented
-        public abstract string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0);        
-
-        protected BaseMediaHelper()
+        public BaseMediaHelper()
         {
             //The Golden Ratio is our default aspect
             DefaultMediaAspect = 1.62;
@@ -31,52 +29,90 @@ namespace Sdl.Web.Mvc.Html
             MediumScreenBreakpoint = 940;
             SmallScreenBreakpoint = 480;
             ShowVideoPlaceholders = true;
+
+            ImageResizeUrlFormat = "{0}{1}{2}_n{3}";
         }
 
         /// <summary>
         /// The grid size used (also set in LESS: @grid-columns: 12)
         /// </summary>
-        public int GridSize { get; set; }
-        
+        public int GridSize
+        {
+            get; 
+            protected set;
+        }
+
         /// <summary>
         /// Large screensize breakpoint (also set in LESS: @screen-lg: 1140px)
         /// </summary>
-        public int LargeScreenBreakpoint { get; set; }
-        
+        public int LargeScreenBreakpoint
+        {
+            get; 
+            protected set;
+        }
+
         /// <summary>
         /// Medium screensize breakpoint (also set in LESS: @screen-md: 940px)
         /// </summary>
-        public int MediumScreenBreakpoint { get; set; }
+        public int MediumScreenBreakpoint
+        {
+            get; 
+            protected set;
+        }
 
         /// <summary>
         /// Small screensize breakpoint (also set in LESS: @screen-sm: 480px)
         /// </summary>
-        public int SmallScreenBreakpoint { get; set; }
-        
+        public int SmallScreenBreakpoint
+        {
+            get; 
+            protected set;
+        }
+
         /// <summary>
         /// Show placeholder images on videos before they are viewed
         /// </summary>
-        public bool ShowVideoPlaceholders { get; set; }
-        
+        public bool ShowVideoPlaceholders
+        {
+            get; 
+            protected set;
+        }
+
         /// <summary>
         /// Default aspect ratio when rendering images/video (if none specified in the view code. Default is the golden ratio: 1.62)
         /// </summary>
-        public double DefaultMediaAspect{ get; set; }
+        public double DefaultMediaAspect
+        {
+            get; 
+            protected set;
+        }
 
         /// <summary>
         /// Default Media fill when rendering images/video (if none specified in the view code. Default is 100%)
         /// </summary>
-        public string DefaultMediaFill { get; set; }
+        public string DefaultMediaFill
+        {
+            get; 
+            protected set;
+        }
 
         /// <summary>
         /// Format string used for resized image URLs
         /// </summary>
-        public string ImageResizeUrlFormat { get; set; }
+        public string ImageResizeUrlFormat
+        {
+            get; 
+            protected set;
+        }
 
         /// <summary>
         /// A set of fixed widths for resized/responsive images - to optimize caching (default is 160, 320, 640, 1024, 2048)
         /// </summary>
-        public static List<int> ImageWidths { get; set; }
+        public static List<int> ImageWidths
+        {
+            get; 
+            protected set;
+        }
          
         /// <summary>
         /// Calulated the responsive media width based on client display size and pixel ration, grid container size and width factor. 
@@ -152,6 +188,40 @@ namespace Sdl.Web.Mvc.Html
         {
             int width = GetResponsiveWidth(widthFactor, containerSize);
             return (int)Math.Ceiling(width / aspect);
+        }
+
+        /// <summary>
+        /// Get a responsive image URL
+        /// </summary>
+        /// <param name="url">Normal URL of the image</param>
+        /// <param name="aspect">Aspect ratio to display</param>
+        /// <param name="widthFactor">Width factor for the image (eg 100% or 250)</param>
+        /// <param name="containerSize">Size (in grid units) of container element</param>
+        /// <returns>A responsive image URL based on the passed parameters and client browser width and pixel ratio</returns>
+        public virtual string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0)
+        {
+            string h = null;
+            int width = GetResponsiveWidth(widthFactor, containerSize);
+            //Round the width to the nearest set limit point - important as we do not want 
+            //to swamp the cache with lots of different sized versions of the same image
+            for (int i = 0; i < ImageWidths.Count; i++)
+            {
+                if (width <= ImageWidths[i] || i == ImageWidths.Count - 1)
+                {
+                    width = ImageWidths[i];
+                    break;
+                }
+            }
+            string w = String.Format("_w{0}", width);
+            //Height is calculated from the aspect ratio (0 means preserve aspect ratio)
+            if (aspect != 0)
+            {
+                h = String.Format("_h{0}", (int)Math.Ceiling(width / aspect));
+            }
+            //Build the URL
+            string extension = Path.GetExtension(url);
+            url = url.Substring(0, url.LastIndexOf(".", StringComparison.Ordinal));
+            return String.Format(ImageResizeUrlFormat, url, w, h, extension);
         }
 
     }
