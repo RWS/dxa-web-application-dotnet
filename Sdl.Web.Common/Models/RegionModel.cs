@@ -64,13 +64,13 @@ namespace Sdl.Web.Common.Models
         /// Initializes a new <see cref="RegionModel"/> instance for an empty/non-existing Region.
         /// </summary>
         /// <param name="name">The name of the Region.</param>
-        /// <param name="viewName">The name of the View to use to render the Region.</param>
-        public RegionModel(string name, string viewName) 
+        /// <param name="qualifiedViewName">The qualified name of the View to use to render the Region. Format: format AreaName:ControllerName:ViewName.</param>
+        public RegionModel(string name, string qualifiedViewName) 
             : base(name)
         {
-            MvcData = new MvcData
+            MvcData = new MvcData(qualifiedViewName)
             {
-                ViewName = viewName
+                ActionName = "Region"
             };
         }
         #endregion

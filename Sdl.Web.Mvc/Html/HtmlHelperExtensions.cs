@@ -416,7 +416,11 @@ namespace Sdl.Web.Mvc.Html
             using (new Tracer(htmlHelper, region, containerSize))
             {
                 MvcData mvcData = region.MvcData;
-                MvcHtmlString result = htmlHelper.Action(mvcData.ActionName, mvcData.ControllerName, new { Region = region, containerSize = containerSize, area = mvcData.ControllerAreaName });
+                string actionName = mvcData.ActionName ?? SiteConfiguration.GetRegionAction();
+                string controllerName = mvcData.ControllerName ?? SiteConfiguration.GetRegionController();
+                string controllerAreaName = mvcData.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName();
+
+                MvcHtmlString result = htmlHelper.Action(actionName, controllerName, new { Region = region, containerSize = containerSize, area = controllerAreaName });
 
                 if (WebRequestContext.IsPreview)
                 {

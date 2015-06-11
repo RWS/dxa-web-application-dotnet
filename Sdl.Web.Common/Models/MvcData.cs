@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
 {
@@ -16,6 +17,46 @@ namespace Sdl.Web.Common.Models
         public string RegionAreaName { get; set; }
         public Dictionary<string, string> RouteValues { get; set; }
 
+        #region Constructors
+        /// <summary>
+        /// Initializes a new empty <see cref="MvcData"/> instance.
+        /// </summary>
+        public MvcData()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="MvcData"/> instance for a given qualified View name.
+        /// </summary>
+        /// <param name="qualifiedViewName">The qualified View name with format AreaName:ControllerName:ViewName.</param>
+        public MvcData(string qualifiedViewName)
+        {
+            string[] qualifiedViewNameParts = qualifiedViewName.Split(':');
+            switch (qualifiedViewNameParts.Length)
+            {
+                case 1:
+                    AreaName = SiteConfiguration.GetDefaultModuleName();
+                    ViewName = qualifiedViewNameParts[0];
+                    break;
+                case 2:
+                    AreaName = qualifiedViewNameParts[0];
+                    ViewName = qualifiedViewNameParts[1];
+                    break;
+                case 3:
+                    AreaName = qualifiedViewNameParts[0];
+                    ControllerName = qualifiedViewNameParts[1];
+                    ViewName = qualifiedViewNameParts[2];
+                    break;
+                default:
+                    throw new DxaException(
+                        string.Format("Invalid format for Qualified View Name: '{0}'. Format must be 'ViewName' or 'AreaName:ViewName' or 'AreaName:ControllerName:Vieweame.'", 
+                            qualifiedViewName)
+                            );
+            }
+        }
+        #endregion
+
+        #region Overrides
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
         /// </summary>
@@ -66,6 +107,7 @@ namespace Sdl.Web.Common.Models
             // TODO: what about the other properties?
             return string.Format("{0}:{1}:{2}", AreaName, ControllerName, ViewName);
         }
+        #endregion
 
         private static int SafeHashCode(object obj)
         {
