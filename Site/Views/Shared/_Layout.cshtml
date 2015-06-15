@@ -1,4 +1,4 @@
-﻿@model Sdl.Web.Common.Models.WebPage
+﻿@model PageModel
 <!DOCTYPE html>
 <!--[if lt IE 7]><html class="no-js lt-ie9 lt-ie8 lt-ie7"><![endif]-->
 <!--[if IE 7]><html class="no-js lt-ie9 lt-ie8"><![endif]-->
@@ -21,23 +21,13 @@
     <![endif]-->
 </head>
 <body>
-    @if (Model.Includes.ContainsKey("Header"))
-    {
-        @Html.Partial("Header", Model.Includes["Header"])
-    }
-    <main class="page-row page-row-expanded" role="main">
-		<div class="container-fluid page-border">
-			@RenderBody()
-		</div>
-    </main>
-    @if (Model.Includes.ContainsKey("Footer"))
-    {
-        @Html.Partial("Footer", Model.Includes["Footer"])
-    }
+    @RenderBody()
+
     <script src="@Url.VersionedContent("/assets/scripts/main.js")"></script>
-    @if (ViewBag.Renderer!=null)
+    @if (WebRequestContext.IsPreview)
     {
-        @ViewBag.Renderer.RenderPageData(Model, Html)
+        <script src="@Url.VersionedContent("/assets/scripts/xpm.js")"></script>
     }
+    @Html.DxaPageMarkup()
 </body>
 </html>

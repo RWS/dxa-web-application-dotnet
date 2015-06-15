@@ -1,6 +1,6 @@
 ﻿@model Location
 @{
-    var queryString = SiteConfiguration.GetConfig("core.mapsApiKey");
+    var queryString = SiteConfiguration.GetConfig("core.mapsApiKey",WebRequestContext.Localization);
     if (String.IsNullOrEmpty(queryString) || queryString=="xxx")
     {
         queryString = "";

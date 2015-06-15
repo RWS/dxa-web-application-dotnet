@@ -1,7 +1,7 @@
 ﻿namespace Sdl.Web.Common.Models
 {
     [SemanticEntity(EntityName = "NotificationBar", Prefix = "nb", Vocab = CoreVocabulary)]
-    public class Notification : EntityBase
+    public class Notification : EntityModel
     {
         public string Headline { get; set; }
         public string Text { get; set; }

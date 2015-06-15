@@ -1,5 +1,2 @@
-﻿@model Region
-@foreach (var item in Model.Items)
-{
-    @ViewBag.Renderer.RenderEntity(item, Html)
-}
+﻿@model RegionModel
+@Html.DxaEntities()

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Mapping
 {
@@ -9,6 +10,8 @@ namespace Sdl.Web.Common.Mapping
     /// </summary>
     public class SemanticSchema
     {
+        private string[] _semanticTypeNames; 
+
         /// <summary>
         /// Schema (item) ID.
         /// </summary>
@@ -29,6 +32,9 @@ namespace Sdl.Web.Common.Mapping
         /// </summary>
         public List<SchemaSemantics> Semantics { get; set; }
 
+
+        public Localization Localization { get; set; }
+
         /// <summary>
         /// Initializes a new empty instance of the <see cref="SemanticSchema"/> class.
         /// </summary>
@@ -46,9 +52,9 @@ namespace Sdl.Web.Common.Mapping
         public ILookup<string, string> GetEntityNames()
         {
             List<KeyValuePair<string, string>> entityNames = new List<KeyValuePair<string, string>>();
-            foreach (var schemaSemantics in Semantics)
+            foreach (SchemaSemantics schemaSemantics in Semantics)
             {
-                string vocab = SemanticMapping.GetVocabulary(schemaSemantics.Prefix);
+                string vocab = SemanticMapping.GetVocabulary(schemaSemantics.Prefix, Localization);
                 entityNames.Add(new KeyValuePair<string, string>(vocab, schemaSemantics.Entity));
             }
 
@@ -62,9 +68,9 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>Schema field or one of its embedded fields that match with the given semantics, null if a match cannot be found</returns>
         public SemanticSchemaField FindFieldBySemantics(FieldSemantics fieldSemantics)
         {
-            foreach (var field in Fields)
+            foreach (SemanticSchemaField field in Fields)
             {
-                var matchingField = field.FindFieldBySemantics(fieldSemantics);
+                SemanticSchemaField matchingField = field.FindFieldBySemantics(fieldSemantics);
                 if (matchingField != null)
                 {
                     return matchingField;
@@ -72,6 +78,19 @@ namespace Sdl.Web.Common.Mapping
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Gets semantic type names (qualified with Vocabulary ID) for the Schema.
+        /// </summary>
+        /// <returns>The semantic type names.</returns>
+        public string[] GetSemanticTypeNames()
+        {
+            if (_semanticTypeNames == null)
+            {
+                _semanticTypeNames = Semantics.Select(s => SemanticMapping.GetQualifiedTypeName(s.Entity, s.Prefix, Localization)).ToArray();
+            }
+            return _semanticTypeNames;
         }
     }
 }

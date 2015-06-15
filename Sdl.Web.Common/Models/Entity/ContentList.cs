@@ -3,8 +3,8 @@ using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Models
 {
-    [SemanticEntity(Vocab = "http://schema.org", EntityName = "ItemList", Prefix = "s", Public = true)]
-    public class ContentList<T> : EntityBase
+    [SemanticEntity(Vocab = SchemaOrgVocabulary, EntityName = "ItemList", Prefix = "s", Public = true)]
+    public class ContentList<T> : EntityModel
     {
         //TODO add concept of filtering/query (filter options and active filters/query)
         [SemanticProperty("s:headline")]

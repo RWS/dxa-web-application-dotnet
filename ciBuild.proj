@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.5">
+
+    <PropertyGroup>
+        <!-- Input parameters -->
+        <Version Condition="'$(VERSION)' == ''">0.0.0.0</Version>
+        <Version Condition="'$(VERSION)' != ''">$(VERSION)</Version>
+        <BuildConfiguration>Release</BuildConfiguration>
+        <ProjectDirectory>$(MSBuildProjectDirectory)</ProjectDirectory>
+        <CdTestDeployFolder>\\saintjohn01.ams.dev\C$\inetpub\wwwroot\GitVersion</CdTestDeployFolder>
+        
+        <!--Tools-->
+        <MsBuildExe>C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe</MsBuildExe>
+  </PropertyGroup>
+
+
+  <!-- =============================================================================================================================================  -->
+  <Target Name="Build">
+    <Message Text="Start build..." Importance="high" />
+        
+        <CallTarget Targets="PrepareBuild"/>
+        <CallTarget Targets="PackageBuild"/>
+    </Target>
+
+    <!-- =============================================================================================================================================  -->
+    <Target Name="PrepareBuild">
+        <Message Text="Preparing build..." Importance="high" />
+
+        <Exec Command="_tools\RestorePackages Site.sln" WorkingDirectory="$(ProjectDirectory)" />
+    </Target>
+
+    <!-- =============================================================================================================================================  -->
+    <Target Name="PackageBuild">
+        <Message Text="Running build commands..." Importance="high" />
+
+        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.DD4T\Sdl.Web.DD4T.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
+        <MSBuild Projects="$(ProjectDirectory)\Site\Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
+    </Target>
+
+     <!-- =============================================================================================================================================  -->
+    <Target Name="DeployOutput">
+      <Message Text="Deploying output to '$(CdTestDeployFolder)'..." />
+
+      <ItemGroup>
+        <ConfigFiles Include="$(ProjectDirectory)\Site\*.config" />
+        <ViewFiles Include="$(ProjectDirectory)\Site\Views\**\*" />
+        <AreaFiles Include="$(ProjectDirectory)\Site\Areas\**\*" />
+        <BinFiles Include="$(ProjectDirectory)\Site\bin\*" />
+      </ItemGroup>
+
+      <Copy SourceFiles="@(ConfigFiles)" DestinationFolder="$(CdTestDeployFolder)" />
+      <Copy SourceFiles="@(ViewFiles)" DestinationFolder="$(CdTestDeployFolder)\Views\%(RecursiveDir)" />
+      <Copy SourceFiles="@(AreaFiles)" DestinationFolder="$(CdTestDeployFolder)\Areas\%(RecursiveDir)" />
+      <Copy SourceFiles="@(BinFiles)" DestinationFolder="$(CdTestDeployFolder)\bin\%(RecursiveDir)" />
+    </Target>
+ 
+</Project>

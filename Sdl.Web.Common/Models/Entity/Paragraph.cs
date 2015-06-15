@@ -1,6 +1,6 @@
 ﻿namespace Sdl.Web.Common.Models
 {
-    public class Paragraph : EntityBase
+    public class Paragraph : EntityModel
     {
         public string Subheading { get; set; }
         public string Content { get; set; }

@@ -1,7 +1,7 @@
 ﻿namespace Sdl.Web.Common.Models
 {
-    [SemanticEntity(Vocab = "http://schema.org", EntityName = "Place", Prefix = "s", Public = true)]
-    public class Place : EntityBase
+    [SemanticEntity(Vocab = SchemaOrgVocabulary, EntityName = "Place", Prefix = "s", Public = true)]
+    public class Place : EntityModel
     {
         [SemanticProperty("s:name")]
         public string Name { get; set; }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Sdl.Web.Common.Configuration;
+using Sdl.Web.Mvc.Configuration;
+using System;
 using System.Globalization;
 
 namespace Sdl.Web.Mvc.Html
@@ -9,9 +11,10 @@ namespace Sdl.Web.Mvc.Html
     public class ContextualMediaHelper : BaseMediaHelper
     {
         public string ImageResizeRoute { get; set; }
-        public ContextualMediaHelper() : base()
+        private const string SingleSiteToken = "source/site";
+        public ContextualMediaHelper()
         {
-            ImageResizeUrlFormat = "/{0}/scale/{1}x{2}/source/site{3}";
+            ImageResizeUrlFormat = "/{0}/scale/{1}x{2}/{3}{4}";
             ImageResizeRoute = "cid";
         }
 
@@ -31,7 +34,18 @@ namespace Sdl.Web.Mvc.Html
             //Height is calculated from the aspect ratio (0 means preserve aspect ratio)
             string height = aspect == 0 ? String.Empty : ((int)Math.Ceiling(width / aspect)).ToString(CultureInfo.InvariantCulture);
             //Build the URL
-            return String.Format(ImageResizeUrlFormat, ImageResizeRoute, width, height, url);
+            url = SiteConfiguration.MakeFullUrl(url, WebRequestContext.Localization);
+            string prefix = SingleSiteToken;
+            if (url.StartsWith("http"))
+            {
+                prefix = "";
+                if (url.StartsWith("https"))
+                {
+                    prefix = "https/";
+                }
+                url = url.Substring(url.IndexOf("://", StringComparison.Ordinal) + 3);
+            }
+            return String.Format(ImageResizeUrlFormat, ImageResizeRoute, width, height, prefix, url);
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿@model ContentList<Teaser>
-<div @Markup.Entity(Model)>
+<div @Html.DxaEntityMarkup()>
     @if (Model.Headline!=null)
     {
-        <h3 @Markup.Property(Model,"Headline")>@Model.Headline</h3>
+        <h3 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h3>
     }
     <ul>
         @foreach (var item in Model.ItemListElements)
@@ -27,7 +27,7 @@
     </ul>
     @if (Model.Link.IsValidLink())
     {
-        <p @Markup.Property(Model, "Link.LinkText")>
+        <p @Html.DxaPropertyMarkup(() => Model.Link)>
             <a href="@Model.Link.Url" title="@Model.Link.AlternateText">@(Model.Link.LinkText ?? Html.Resource("core.readMoreLinkText")) <i class="fa fa-chevron-right"></i></a>
         </p>
     }

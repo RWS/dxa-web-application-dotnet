@@ -1,5 +1,5 @@
 ﻿@model NavigationLinks
-<ul class="nav navbar-nav main-nav" @Markup.Entity(Model)>
+<ul class="nav navbar-nav main-nav" @Html.DxaEntityMarkup()>
     @foreach (Link item in Model.Items)
     {
         <li class="@(Request.Url.LocalPath.StartsWith(item.Url) ? "active" : "")">

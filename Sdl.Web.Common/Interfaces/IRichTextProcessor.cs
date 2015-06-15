@@ -1,0 +1,22 @@
+﻿namespace Sdl.Web.Common.Interfaces
+{
+    /// <summary>
+    /// Interface for Rich Text Processor extension point.
+    /// </summary>
+    public interface IRichTextProcessor
+    {
+        /// <summary>
+        /// Processes rich text (XHTML) content.
+        /// </summary>
+        /// <param name="xhtml">The rich text content (XHTML fragment) to be processed.</param>
+        /// <returns>The processed rich text content.</returns>
+        /// <remarks>
+        /// Typical rich text processing tasks: 
+        /// <list type="bullet">
+        ///     <item>Convert XHTML to plain HTML</item>
+        ///     <item>Resolve inline links</item>
+        /// </list>
+        /// </remarks>
+        string ProcessRichText(string xhtml);
+    }
+}

@@ -1,7 +1,4 @@
-﻿@model Region
-<div id="info-bar" @Markup.Region(Model)>
-    @foreach (var item in Model.Items)
-    {
-        @ViewBag.Renderer.RenderEntity(item, Html)
-    }
+﻿@model RegionModel
+<div id="info-bar" @Html.DxaRegionMarkup()>
+    @Html.DxaEntities()
 </div>

@@ -1,290 +1,129 @@
 ﻿using System;
-using System.Globalization;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
+using System.Web.Routing;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Mvc.Configuration;
-using Sdl.Web.Mvc.ContentProvider;
-using System.IO;
+using Sdl.Web.Common.Models.Common;
+using Sdl.Web.Mvc.Html;
 
 namespace Sdl.Web.Mvc.Controllers
 {
     /// <summary>
-    /// Base controller containing main controller actions (Page, PageRaw, Region, Entity, Navigation, List etc.)
+    /// Abstract base class for DXA Controllers 
     /// </summary>
     public abstract class BaseController : Controller
     {
-        public virtual IContentProvider ContentProvider { get; set; }
-        public virtual IRenderer Renderer { get; set; }
-        public virtual ModelType ModelType { get; set; }
+        private IContentProvider _contentProvider;
+#pragma warning disable 618
+        private IRenderer _renderer = new BaseRenderer();
 
-        public BaseController()
+        [Obsolete("Renderers are deprecated in DXA 1.1. Rendering should be done using DXA 1.1 HtmlHelper extension methods.")]
+        protected IRenderer Renderer
         {
-            //default model type
-            ModelType = ModelType.Entity;
+            get
+            {
+                return _renderer;
+            }
+            set
+            {
+                // To support (deprecated) Dependency Injection
+                _renderer = value;
+            }
+        }
+#pragma warning restore 618
+
+        /// <summary>
+        /// Gets or sets the Content Provider.
+        /// </summary>
+        /// <remarks>
+        /// Setting this property is no longer needed, but setter is kept for backwards compatibility.
+        /// </remarks>
+        protected IContentProvider ContentProvider
+        {
+            get
+            {
+                if (_contentProvider == null)
+                {
+                    _contentProvider = SiteConfiguration.ContentProvider;
+                }
+                return _contentProvider;
+            }
+            set
+            {
+                // To support (deprecated) Dependency Injection
+                _contentProvider = value;
+            }
+        }
+
+        [Obsolete("Deprecated in DXA 1.1. The Model Type should be determined using the ViewModel class hierarchy.")]
+        protected ModelType ModelType
+        {
+            get; 
+            set;
         }
 
         /// <summary>
-        /// Given a page URL, load the corresponding Page Model, Map it to the View Model and render it
+        /// This is the method to override if you need to add custom model population logic, 
+        /// first calling the base class and then adding your own logic
         /// </summary>
-        /// <param name="pageUrl">The page URL</param>
-        /// <returns>Rendered Page View Model</returns>
-        public virtual ActionResult Page(string pageUrl)
+        /// <param name="model">The model which you wish to add data to</param>
+        /// <returns>A fully populated view model combining CMS content with other data</returns>
+        protected virtual ViewModel EnrichModel(ViewModel model)
         {
-            ModelType = ModelType.Page;
-            var page = ContentProvider.GetPageModel(pageUrl);
-            if (page == null)
+            //Check if an exception was generated when creating the model, so now is the time to throw it
+            if (model is ExceptionEntity)
             {
-                return NotFound();
+                throw new Exception(((ExceptionEntity)model).Error);
             }
-            var viewData = GetViewData(page);
-            SetupViewData(0, viewData);
-            var model = ProcessModel(page, GetViewType(viewData)) ?? page;
-            if (model is WebPage)
-            {
-                WebRequestContext.PageId = ((WebPage)model).Id;
-            }
-            return View(viewData.ViewName, model);
+#pragma warning disable 618
+            return (ViewModel) ProcessModel(model, model.GetType()); // To support legacy overrides
+#pragma warning restore 618
         }
 
-        /// <summary>
-        /// Given a page URL, load the corresponding raw content and write it to the response
-        /// </summary>
-        /// <param name="pageUrl">The page URL</param>
-        /// <returns>raw page content</returns>
-        public virtual ActionResult PageRaw(string pageUrl = null)
-        {
-            pageUrl = pageUrl ?? Request.Url.AbsolutePath;
-            var rawContent = ContentProvider.GetPageContent(pageUrl);
-            if (rawContent == null)
-            {
-                return NotFound();
-            }
-            return GetRawActionResult(Path.GetExtension(pageUrl).Substring(1), rawContent);
-        }
-
-        /// <summary>
-        /// Render a file not found page
-        /// </summary>
-        /// <returns>404 page or HttpException if there is none</returns>
-        public virtual ActionResult NotFound()
-        {
-            var page = ContentProvider.GetPageModel(WebRequestContext.Localization.Path + "/error-404");
-            if (page == null)
-            {
-                throw new HttpException(404, "Page Not Found");
-            }
-            var viewData = GetViewData(page);
-            SetupViewData(0, viewData);
-            var model = ProcessModel(page, GetViewType(viewData)) ?? page;
-            Response.StatusCode = 404;
-            return View(viewData.ViewName, model);
-        }
         
         /// <summary>
-        /// Map and render a region model
+        /// This is the method to override if you need to add custom model population logic, first calling the base class and then adding your own logic
         /// </summary>
-        /// <param name="region">The region model</param>
-        /// <param name="containerSize">The size (in grid units) of the container the region is in</param>
-        /// <returns>Rendered region model</returns>
-        [HandleSectionError(View = "SectionError")]
-        public virtual ActionResult Region(IRegion region, int containerSize = 0)
-        {
-            ModelType = ModelType.Region;
-            var viewData = GetViewData(region);
-            SetupViewData(containerSize, viewData);
-            var model = ProcessModel(region, GetViewType(viewData)) ?? region;
-            return View(viewData.ViewName, model);
-        }
-
-        /// <summary>
-        /// Map and render an entity model
-        /// </summary>
-        /// <param name="entity">The entity model</param>
-        /// <param name="containerSize">The size (in grid units) of the container the entity is in</param>
-        /// <returns>Rendered entity model</returns>
-        [HandleSectionError(View = "SectionError")]
-        public virtual ActionResult Entity(object entity, int containerSize = 0)
-        {
-            ModelType = ModelType.Entity;
-            var viewData = GetViewData(entity);
-            SetupViewData(containerSize, viewData);
-            var model = ProcessModel(entity, GetViewType(viewData)) ?? entity;
-            return View(viewData.ViewName, model);
-        }
-
-        /// <summary>
-        /// Populate/Map and render a list entity model
-        /// </summary>
-        /// <param name="entity">The list entity model</param>
-        /// <param name="containerSize">The size (in grid units) of the container the entity is in</param>
-        /// <returns>Rendered list entity model</returns>
-        [HandleSectionError(View = "SectionError")]
-        public virtual ActionResult List(object entity, int containerSize = 0)
-        {
-            ModelType = ModelType.Entity;
-            var viewData = GetViewData(entity);
-            SetupViewData(containerSize, viewData);
-            var model = ProcessList(entity, GetViewType(viewData)) ?? entity;
-            return View(viewData.ViewName, model);
-        }
-
-        /// <summary>
-        /// Populate and render a navigation entity model
-        /// </summary>
-        /// <param name="entity">The navigation entity</param>
-        /// <param name="navType">The type of navigation to render</param>
-        /// <param name="containerSize">The size (in grid units) of the container the navigation element is in</param>
-        /// <returns></returns>
-        [HandleSectionError(View = "SectionError")]
-        public virtual ActionResult Navigation(object entity, string navType, int containerSize = 0)
-        {
-            ModelType = ModelType.Entity;
-            var viewData = GetViewData(entity);
-            SetupViewData(containerSize, viewData);
-            var model = ProcessNavigation(entity, GetViewType(viewData), navType) ?? entity;
-            return View(viewData.ViewName, model);
-        }
-
-        /// <summary>
-        /// Populate and render an XML site map
-        /// </summary>
-        /// <param name="entity">The sitemap entity</param>
-        /// <returns>Rendered XML sitemap</returns>
-        public virtual ActionResult SiteMap(object entity=null)
-        {
-            var model = ContentProvider.GetNavigationModel(SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization));
-            var viewData = GetViewData(entity);
-            if (viewData.ViewName != null)
-            {
-                SetupViewData(0, viewData);
-                return View(viewData.ViewName, model);
-            }
-            else
-            {
-                return View("SiteMapXml", model);
-            }
-        }
-
-        /// <summary>
-        /// Resolve a item ID into a url and redirect to that URL
-        /// </summary>
-        /// <param name="itemId">The item id to resolve</param>
-        /// <param name="localization">The site localization in which to resolve the URL</param>
-        /// <returns>null - response is redirected if the URL can be resolved</returns>
-        public virtual ActionResult Resolve(string itemId, string localization, string defaultItemId = null)
-        {
-            var url = ContentProvider.ContentResolver.ResolveLink("tcm:" + itemId, localization);
-            if (url == null && defaultItemId!=null)
-            {
-                url = ContentProvider.ContentResolver.ResolveLink("tcm:" + defaultItemId, localization);
-            }
-            if (url == null)
-            {
-                var bits = itemId.Split(':');
-                if (bits.Length > 1)
-                {
-                    bits = bits[1].Split('-');
-                    foreach (var loc in SiteConfiguration.Localizations.Values)
-                    {
-                        if (loc.LocalizationId == bits[0])
-                        {
-                            url = loc.Path;
-                        }
-                    }
-                }
-            }
-            if (url == null)
-            {
-                if (localization == null)
-                {
-                    url = SiteConfiguration.DefaultLocalization;
-                }
-                else
-                {
-                    var loc = SiteConfiguration.Localizations.Values.FirstOrDefault(l => l.LocalizationId.ToString(CultureInfo.InvariantCulture) == localization);
-                    if (loc != null)
-                    {
-                        url = String.IsNullOrEmpty(loc.Path) ? "/" : loc.Path;
-                    }
-                }
-            }
-            if (url != null)
-            {
-                Response.Redirect(url, true);
-            }
-            return null;
-        }
-
-        //This is the method to override if you need to add custom model population logic, first calling the base class and then adding your own logic
+        /// <param name="sourceModel">The model to process</param>
+        /// <param name="type">The type of view model required</param>
+        /// <returns>A processed view model</returns>
+        [Obsolete("Deprecated in DXA 1.1. Override EnrichModel instead.")]
         protected virtual object ProcessModel(object sourceModel, Type type)
         {
-            return ContentProvider.MapModel(sourceModel, ModelType, type);
+            // NOTE: Intentionally loosely typed for backwards compatibility; this was part of the V1.0 (semi-)public API
+
+            return sourceModel;
         }
 
-        protected virtual object ProcessList(object sourceModel, Type type)
-        {
-            var model = ProcessModel(sourceModel, type);
-            var list = model as ContentList<Teaser>;
-            if (list != null)
-            {
-                if (list.ItemListElements.Count == 0)
-                {
-                    //we need to run a query to populate the list
-                    int start = GetRequestParameter<int>("start");
-                    if (list.Id == Request.Params["id"])
-                    {
-                        //we only take the start from the query string if there is also an id parameter matching the model entity id
-                        //this means that we are sure that the paging is coming from the right entity (if there is more than one paged list on the page)
-                        list.CurrentPage = (start / list.PageSize) + 1;
-                        list.Start = start;
-                    }
-                    ContentProvider.PopulateDynamicList(list);
-                }
-                model = list;
-            }
-            return model;
-        }
-
-        protected virtual object ProcessNavigation(object sourceModel, Type type, string navType)
-        {
-            var navigationUrl = SiteConfiguration.LocalizeUrl("navigation.json", WebRequestContext.Localization);
-            var model = ProcessModel(sourceModel, type);
-            var nav = model as NavigationLinks;
-            NavigationLinks links = new NavigationLinks();
-            switch (navType)
-            {
-                case "Top":
-                    links = new NavigationBuilder { ContentProvider = ContentProvider, NavigationUrl = navigationUrl }.BuildTopNavigation(Request.Url.LocalPath);
-                    break;
-                case "Left":
-                    links = new NavigationBuilder { ContentProvider = ContentProvider, NavigationUrl = navigationUrl }.BuildContextNavigation(Request.Url.LocalPath);
-                    break;
-                case "Breadcrumb":
-                    links = new NavigationBuilder { ContentProvider = ContentProvider, NavigationUrl = navigationUrl }.BuildBreadcrumb(Request.Url.LocalPath);
-                    break;
-            }
-            if (nav != null)
-            {
-                links.EntityData = nav.EntityData;
-                links.PropertyData = nav.PropertyData;
-            }
-            return links;
-        }
-        
         protected virtual ActionResult GetRawActionResult(string type, string rawContent)
         {
-            var contentType = type == "json" ? "application/json" : "text/" + type;
-            return this.Content(rawContent, contentType);
+            string contentType;
+            switch (type)
+            {
+                case "json":
+                    contentType = "application/json";
+                    break;
+                case "xml":
+                case "rss":
+                case "atom":
+                    contentType = type.Equals("xml") ? "text/xml" : String.Format("application/{0}+xml", type);
+                    break;
+                default:
+                    contentType = "text/" + type;
+                    break;
+            }
+            return Content(rawContent, contentType);
         }
 
         protected virtual void SetupViewData(int containerSize = 0, MvcData viewData = null)
         {
+#pragma warning disable 618
+            // To support (deprecated) use of ViewBag.Renderer in Views.
             ViewBag.Renderer = Renderer;
+#pragma warning restore 618
+
             ViewBag.ContainerSize = containerSize;
             if (viewData != null)
             {
@@ -294,33 +133,38 @@ namespace Sdl.Web.Mvc.Controllers
             }
         }
 
-        protected virtual Type GetViewType(MvcData viewData)
+        protected virtual void SetupViewData(ViewModel viewModel, int containerSize = 0)
         {
-            var key = String.Format("{0}:{1}", viewData.AreaName, viewData.ViewName);
-            if (!SiteConfiguration.ViewModelRegistry.ContainsKey(key))
+#pragma warning disable 618
+            // Set the (deprecated) ModelType property based on the View Model type.
+            if (viewModel is PageModel)
             {
-                var viewEngineResult = ViewEngines.Engines.FindPartialView(ControllerContext, viewData.ViewName);
-                if (viewEngineResult.View == null)
-                {
-                    Log.Error("Could not find view {0} in locations: {1}", viewData.ViewName, String.Join(",", viewEngineResult.SearchedLocations));
-                    throw new Exception(String.Format("Missing view: {0}", viewData.ViewName));
-                }
-
-                //This is the only way to get the view model type from the view and thus prevent the need to configure this somewhere
-                var path = ((BuildManagerCompiledView)viewEngineResult.View).ViewPath;
-                SiteConfiguration.AddViewModelToRegistry(viewData, path);
+                ModelType = ModelType.Page;
             }
-            return SiteConfiguration.ViewModelRegistry[key];
+            else if (viewModel is RegionModel)
+            {
+                ModelType = ModelType.Region;
+            }
+#pragma warning restore 618
+
+            SetupViewData(containerSize, viewModel.MvcData);
         }
 
-        protected virtual MvcData GetViewData(object sourceModel)
+        [Obsolete("Deprecated in DXA 1.1.")]
+        protected virtual Type GetViewType(MvcData viewData)
         {
-            return ContentProvider.ContentResolver.ResolveMvcData(sourceModel);
+            return ModelTypeRegistry.GetViewModelType(viewData);
+        }
+
+        [Obsolete("Deprecated in DXA 1.1. Use ViewModel.MvcData directly.")]
+        protected virtual MvcData GetViewData(ViewModel viewModel)
+        {
+            return viewModel == null ? null : viewModel.MvcData;
         }
 
         protected virtual T GetRequestParameter<T>(string name)
         {
-            var val = Request.Params[name];
+            string val = Request.Params[name];
             if (!String.IsNullOrEmpty(val))
             {
                 try
@@ -334,5 +178,67 @@ namespace Sdl.Web.Mvc.Controllers
             }
             return default(T);
         }
+
+        public virtual object ProcessPageModel(PageModel model)
+        {
+            // For each entity in the page which has a custom controller action (so is likely
+            // to enrich the CMS managed model with additional data) we call the 
+            // controller ProcessModel method, and update our model with the enriched
+            // data
+            if (model != null)
+            {
+                foreach (RegionModel region in model.Regions)
+                {
+                    for (int i = 0; i < region.Entities.Count; i++)
+                    {
+                        EntityModel entity = region.Entities[i];
+                        if (entity != null && entity.MvcData != null)
+                        {
+                            region.Entities[i] = ProcessEntityModel(entity);                            
+                        }
+                    }
+                }
+            }
+            return model;
+        }
+
+        public virtual EntityModel ProcessEntityModel(EntityModel entity)
+        {
+            //Enrich a base (CMS managed) entity with additional data by calling the
+            //appropriate custom controller's ProcessModel method
+            if (entity!=null && IsCustomAction(entity.MvcData))
+            {
+                MvcData mvcData = entity.MvcData;
+
+                RequestContext tempRequestContext = new RequestContext(HttpContext, new RouteData());
+                tempRequestContext.RouteData.DataTokens["Area"] = mvcData.ControllerAreaName;
+                tempRequestContext.RouteData.Values["controller"] = mvcData.ControllerName;
+                tempRequestContext.RouteData.Values["area"] = mvcData.ControllerAreaName;
+                tempRequestContext.HttpContext = HttpContext;
+                BaseController controller = ControllerBuilder.Current.GetControllerFactory().CreateController(tempRequestContext, mvcData.ControllerName) as BaseController;
+                try
+                {
+                    if (controller != null)
+                    {
+                        controller.ControllerContext = new ControllerContext(HttpContext, tempRequestContext.RouteData, controller);
+                        return (EntityModel) controller.EnrichModel(entity);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex);
+                    return new ExceptionEntity { Error = ex.Message };
+                }
+            }
+            return entity;
+        }
+
+        protected virtual bool IsCustomAction(MvcData mvcData)
+        {
+            return mvcData.ActionName != SiteConfiguration.GetEntityAction() 
+                || mvcData.ControllerName != SiteConfiguration.GetEntityController() 
+                || mvcData.ControllerAreaName != SiteConfiguration.GetDefaultModuleName();
+        }
+
     }
 }

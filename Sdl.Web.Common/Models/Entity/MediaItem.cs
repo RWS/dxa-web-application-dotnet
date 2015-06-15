@@ -1,7 +1,7 @@
 ﻿namespace Sdl.Web.Common.Models
 {
-    [SemanticEntity(Vocab = "http://schema.org", EntityName = "MediaObject", Prefix = "s", Public = true)]
-    public class MediaItem : EntityBase
+    [SemanticEntity(Vocab = SchemaOrgVocabulary, EntityName = "MediaObject", Prefix = "s", Public = true)]
+    public class MediaItem : EntityModel
     {
         [SemanticProperty("s:contentUrl")]
         public string Url { get; set; }

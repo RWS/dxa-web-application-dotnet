@@ -12,10 +12,10 @@ namespace Sdl.Web.Mvc.Controllers
         {
             base.OnException(filterContext);
             Log.Error(filterContext.Exception);
-            var data = new ViewDataDictionary(new HandleErrorInfo(filterContext.Exception, (string)filterContext.RouteData.Values["controller"], (string)filterContext.RouteData.Values["action"]));
+            ViewDataDictionary data = new ViewDataDictionary(new HandleErrorInfo(filterContext.Exception, (string)filterContext.RouteData.Values["controller"], (string)filterContext.RouteData.Values["action"]));
             filterContext.Result = new ViewResult { ViewName = View, ViewData = data };
             filterContext.ExceptionHandled = true;
             filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
-        }
+        } 
     }
 }

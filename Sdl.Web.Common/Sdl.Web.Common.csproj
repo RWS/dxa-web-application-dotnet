@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' Or '$(Configuration)|$(Platform)' == 'Tridion71Debug|AnyCPU'   ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -21,7 +21,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' Or '$(Configuration)|$(Platform)' == 'Tridion71Release|AnyCPU'  ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -36,6 +36,15 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Tridion71Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Tridion71Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net">
@@ -54,15 +63,26 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.Mvc.5.1.2\lib\net45\System.Web.Mvc.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\SiteConfiguration.cs" />
     <Compile Include="Configuration\Localization.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="DxaException.cs" />
+    <Compile Include="DxaItemNotFoundException.cs" />
     <Compile Include="Extensions\LinkExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Interfaces\IConditionalEntityEvaluator.cs" />
     <Compile Include="Interfaces\IContentResolver.cs" />
+    <Compile Include="Interfaces\ILinkResolver.cs" />
+    <Compile Include="Interfaces\ILocalizationManager.cs" />
+    <Compile Include="Interfaces\INavigationProvider.cs" />
+    <Compile Include="Interfaces\IRichTextProcessor.cs" />
+    <Compile Include="Interfaces\LegacyContentResolverFacade.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />
-    <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Logging\Log.cs" />
+    <Compile Include="Logging\Tracer.cs" />
     <Compile Include="Mapping\BaseModelBuilder.cs" />
     <Compile Include="Mapping\FieldSemantics.cs" />
     <Compile Include="Mapping\SchemaSemantics.cs" />
@@ -71,15 +91,17 @@
     <Compile Include="Mapping\SemanticSchema.cs" />
     <Compile Include="Mapping\SemanticSchemaField.cs" />
     <Compile Include="Mapping\SemanticVocabulary.cs" />
+    <Compile Include="Models\Entity\ExceptionEntity.cs" />
+    <Compile Include="Models\EntityModel.cs" />
     <Compile Include="Models\Entity\Configuration.cs" />
-    <Compile Include="Models\Interfaces\IPage.cs" />
-    <Compile Include="Models\Interfaces\IEntity.cs" />
+    <Compile Include="Models\Legacy\IPage.cs" />
+    <Compile Include="Models\Legacy\IEntity.cs" />
     <Compile Include="Interfaces\IMediaHelper.cs" />
-    <Compile Include="Models\Interfaces\IRegion.cs" />
-    <Compile Include="Models\Common\SemanticAttributes.cs" />
+    <Compile Include="Models\Legacy\IRegion.cs" />
+    <Compile Include="Models\SemanticAttributes.cs" />
     <Compile Include="Models\Entity\Download.cs" />
-    <Compile Include="Models\Common\EntityBase.cs" />
-    <Compile Include="Models\Common\Enums.cs" />
+    <Compile Include="Models\Legacy\EntityBase.cs" />
+    <Compile Include="Models\Legacy\ModelType.cs" />
     <Compile Include="Models\Entity\Image.cs" />
     <Compile Include="Models\Entity\Link.cs" />
     <Compile Include="Models\Entity\Location.cs" />
@@ -87,7 +109,7 @@
     <Compile Include="Models\Entity\Paragraph.cs" />
     <Compile Include="Models\Entity\Tag.cs" />
     <Compile Include="Models\Entity\TagLink.cs" />
-    <Compile Include="Models\Common\MvcData.cs" />
+    <Compile Include="Models\MvcData.cs" />
     <Compile Include="Models\Entity\YouTubeVideo.cs" />
     <Compile Include="Models\Entity\Article.cs" />
     <Compile Include="Models\Entity\ItemList.cs" />
@@ -98,18 +120,25 @@
     <Compile Include="Models\Entity\Teaser.cs" />
     <Compile Include="Interfaces\IContentProvider.cs" />
     <Compile Include="Interfaces\ILogger.cs" />
-    <Compile Include="Interfaces\IModelBuilder.cs" />
     <Compile Include="Interfaces\IRenderer.cs" />
     <Compile Include="Interfaces\IStaticFileManager.cs" />
-    <Compile Include="Models\Navigation\NavigationLinks.cs" />
-    <Compile Include="Models\Navigation\SitemapItem.cs" />
-    <Compile Include="Models\Page\PageBase.cs" />
-    <Compile Include="Models\Page\Region.cs" />
-    <Compile Include="Models\Page\WebPage.cs" />
+    <Compile Include="Models\Entity\NavigationLinks.cs" />
+    <Compile Include="Models\Entity\SitemapItem.cs" />
+    <Compile Include="Models\PageModel.cs" />
+    <Compile Include="Models\Legacy\PageBase.cs" />
+    <Compile Include="Models\Legacy\Region.cs" />
+    <Compile Include="Models\RegionModel.cs" />
+    <Compile Include="Models\Legacy\WebPage.cs" />
+    <Compile Include="Models\RegionModelSet.cs" />
+    <Compile Include="Models\StaticContentItem.cs" />
+    <Compile Include="Models\ViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\VersionInfo.cs" />
+    <Compile Include="Models\ModelTypeRegistry.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Interfaces\ExtensionPoints.cd" />
+    <None Include="Models\ViewModels.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

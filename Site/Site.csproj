@@ -2,7 +2,7 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">Tridion71Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>
     </ProductVersion>
@@ -14,15 +14,15 @@
     <RootNamespace>Sdl.Web.Site</RootNamespace>
     <AssemblyName>Sdl.Web.Site</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>true</UseIISExpress>
+    <MvcBuildViews>true</MvcBuildViews>
+    <UseIISExpress>false</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <TargetFrameworkProfile />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' Or '$(Configuration)|$(Platform)' == 'Tridion71Debug|AnyCPU'  ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -32,7 +32,7 @@
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' Or '$(Configuration)|$(Platform)' == 'Tridion71Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\</OutputPath>
@@ -42,9 +42,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DD4T.Providers.SDLTridion2013">
-      <HintPath>..\packages\DD4T-Tridion-2013sp1.1.31.1\lib\DD4T.Providers.SDLTridion2013.dll</HintPath>
-    </Reference>
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
@@ -71,12 +68,15 @@
     <Reference Include="System.Web.Mvc, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.Mvc.5.1.2\lib\net45\System.Web.Mvc.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.Razor.3.1.2\lib\net45\System.Web.Razor.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Web.Routing">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.WebPages.3.1.2\lib\net45\System.Web.WebPages.dll</HintPath>
@@ -86,6 +86,8 @@
       <HintPath>..\packages\Microsoft.AspNet.WebPages.3.1.2\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Configuration" />
+    <Reference Include="System.XML" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="Unity.Mvc5">
       <HintPath>..\packages\Unity.Mvc5.1.1\lib\net45\Unity.Mvc5.dll</HintPath>
     </Reference>
@@ -93,7 +95,6 @@
   <ItemGroup>
     <Compile Include="Areas\Core\Controllers\AdminController.cs" />
     <Compile Include="Areas\Core\CoreAreaRegistration.cs" />
-    <Compile Include="Areas\GoogleAnalytics\GoogleAnalyticsAreaRegistration.cs" />
     <Compile Include="Areas\Core\Controllers\EntityController.cs" />
     <Compile Include="Areas\Core\Controllers\ListController.cs" />
     <Compile Include="Areas\Core\Controllers\NavigationController.cs">
@@ -117,6 +118,7 @@
     </Content>
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="Log.config" />
     <Content Include="Areas\Core\Views\web.config" />
@@ -142,7 +144,6 @@
     <Content Include="Areas\Core\Views\Entity\TeaserHero-ImageOverlay.cshtml" />
     <Content Include="Areas\Core\Views\Entity\TeaserMap.cshtml" />
     <Content Include="Areas\Core\Views\Entity\YouTubeVideo.cshtml" />
-    <Content Include="Areas\GoogleAnalytics\Views\Entity\GoogleAnalytics.cshtml" />
     <Content Include="Areas\Core\Views\List\List.cshtml" />
     <Content Include="Areas\Core\Views\List\PagedList.cshtml" />
     <Content Include="Areas\Core\Views\List\Partials\Pager.cshtml" />
@@ -167,24 +168,21 @@
     <Content Include="Areas\Core\Views\Region\Main.cshtml" />
     <Content Include="Areas\Core\Views\Region\Nav.cshtml" />
     <Content Include="Areas\Core\Views\Region\Tools.cshtml" />
-    <Content Include="Views\Shared\Footer.cshtml" />
-    <Content Include="Views\Shared\Header.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Header.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Footer.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Content Tools.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Left Navigation.cshtml" />
     <Content Include="Views\Shared\SectionError.cshtml" />
-    <Content Include="Areas\GoogleAnalytics\Views\web.config">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="Areas\Core\Views\Entity\Partials\GoogleStaticMap.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Partials\Teaser.cshtml" />
     <Content Include="Areas\Core\Views\Navigation\SiteMapXml.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Partials\Teaser-ImageOverlay.cshtml" />
-    <None Include="Properties\PublishProfiles\Distribution %28GIT version%29.pubxml" />
-    <None Include="Properties\PublishProfiles\Distribution.pubxml" />
-    <None Include="Properties\PublishProfiles\Staging %28GIT version%29.pubxml" />
-    <Content Include="Unity.config" />
+    <Content Include="Unity.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Views\web.config">
       <SubType>Designer</SubType>
     </Content>
-    <None Include="Properties\PublishProfiles\Staging %28Stable demo version%29.pubxml" />
     <Content Include="Views\Shared\ServerError.cshtml" />
   </ItemGroup>
   <ItemGroup>
@@ -198,10 +196,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sdl.Web.DD4T\Sdl.Web.DD4T.csproj">
-      <Project>{360aec0a-3367-486a-885f-7931f32234c1}</Project>
-      <Name>Sdl.Web.DD4T</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Sdl.Web.Mvc\Sdl.Web.Mvc.csproj">
       <Project>{923b2009-9a0b-4425-88a5-bf7af25c8f8b}</Project>
       <Name>Sdl.Web.Mvc</Name>
@@ -215,6 +209,12 @@
       <Name>Sdl.Web.Tridion</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\Partials\XpmButton.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Areas\Core\Controllers\Controllers.cd" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -225,6 +225,15 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Tridion71Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
@@ -240,7 +249,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>59860</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:59860/</IISUrl>
+          <IISUrl>http://localhost:8080/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
@@ -260,4 +269,13 @@
     <WriteLinesToFile Condition=" '$(AsmVersion)' != '' " File="Properties\VersionInfo.cs" Overwrite="True" Lines="[assembly: System.Reflection.AssemblyVersion(&quot;$(AsmVersion)&quot;)]  // Generated by build%0a[assembly: System.Reflection.AssemblyInformationalVersion(&quot;$(AsmVersion)&quot;)]  // Generated by build" />
     <WriteLinesToFile Condition=" '$(FileVersion)' != '' " File="Properties\VersionInfo.cs" Overwrite="False" Lines="[assembly: System.Reflection.AssemblyFileVersion(&quot;$(FileVersion)&quot;)]  // Generated by build" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>copy "$(ProjectDir)\..\_references\dd4t-update\*.dll" "$(TargetDir)" /y
+copy "$(ProjectDir)\..\Sdl.Web.DD4T\bin\$(ConfigurationName)\*.*" "$(TargetDir)" /y
+</PreBuildEvent>
+  </PropertyGroup>
 </Project>

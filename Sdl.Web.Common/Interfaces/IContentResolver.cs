@@ -1,7 +1,9 @@
-﻿using Sdl.Web.Common.Models;
+﻿using System;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Interfaces
 {
+    [Obsolete("Deprecated in DXA 1.1. Use ILinkResolver and/or IRichTextProcessor instead. Custom Content Resolvers have to be rewritten using these new extension points.")]
     public interface IContentResolver
     {
         string DefaultExtensionLessPageName { get; set; }

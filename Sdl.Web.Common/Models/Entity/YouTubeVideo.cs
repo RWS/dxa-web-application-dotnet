@@ -1,5 +1,6 @@
 ﻿namespace Sdl.Web.Common.Models
 {
+    [SemanticEntity(SchemaOrgVocabulary, "VideoObject", Prefix = "s", Public = true)]
     public class YouTubeVideo : MediaItem
     {
         public string Headline { get; set; }

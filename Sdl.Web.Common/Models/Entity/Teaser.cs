@@ -7,7 +7,7 @@ namespace Sdl.Web.Common.Models
     [SemanticEntity(EntityName = "Image", Prefix = "i", Vocab = CoreVocabulary)]
     [SemanticEntity(EntityName = "Article", Prefix = "a", Vocab = CoreVocabulary)]
     [SemanticEntity(EntityName = "Place", Prefix = "p", Vocab = CoreVocabulary)]
-    public class Teaser : EntityBase
+    public class Teaser : EntityModel
     {
         //A teaser can be mapped from an article or place, in which case the link should be to the item itself
         [SemanticProperty("a:_self")]

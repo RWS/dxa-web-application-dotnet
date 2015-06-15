@@ -1,8 +1,8 @@
 ﻿@model YouTubeVideo
-<div class="video" @Markup.Entity(Model)> 
+<div class="video" @Html.DxaEntityMarkup()> 
     @if (Model.Headline!=null)
     {
-        <h3 @Markup.Property(Model, "Headline")>@Model.Headline</h3>
+        <h3 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h3>
     }   
     @Html.Media(Model, "100%")
 </div>

@@ -1,17 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Mvc.Html;
+using System.Web.Routing;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Tridion.Markup;
 
 namespace Sdl.Web.Mvc.Html
 {
     /// <summary>
-    /// HtmlHelper extension methods for use in Views
+    /// <see cref="HtmlHelper"/> extension methods for use in (Razor) Views.
     /// </summary>
+    /// <remarks>
+    /// These extension methods are available on the built-in <c>@Html</c> object.
+    /// For example: <code>@Html.DxaRegions(exclude: "Logo")</code>
+    /// </remarks>
     public static class HtmlHelperExtensions
     {
         /// <summary>
@@ -23,7 +35,7 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>Formatted date</returns>
         public static string Date(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
         {
-            return date != null ? ((DateTime)date).ToString(format, new CultureInfo(SiteConfiguration.GetConfig("core.culture", WebRequestContext.Localization.Path))) : null;
+            return date != null ? ((DateTime)date).ToString(format, WebRequestContext.Localization.CultureInfo) : null;
         }
 
         /// <summary>
@@ -51,7 +63,7 @@ namespace Sdl.Web.Mvc.Html
                     return String.Format(htmlHelper.Resource("core.xDaysAgoText"), dayDiff);
                 }
 
-                return ((DateTime)date).ToString(format, new CultureInfo(SiteConfiguration.GetConfig("core.culture", WebRequestContext.Localization.Path)));
+                return ((DateTime)date).ToString(format, WebRequestContext.Localization.CultureInfo);
             }
             return null;
         }
@@ -64,7 +76,7 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The config value</returns>
         public static string Config(this HtmlHelper htmlHelper, string configName)
         {
-            return SiteConfiguration.GetConfig(configName, WebRequestContext.Localization.Path);
+            return SiteConfiguration.GetConfig(configName, WebRequestContext.Localization);
         }
 
         /// <summary>
@@ -166,7 +178,7 @@ namespace Sdl.Web.Mvc.Html
                 builder.Attributes.Add("width", imgWidth);
             }
             builder.Attributes.Add("alt", image.AlternateText);
-            builder.Attributes.Add("data-aspect", (Math.Truncate(aspect * 100) / 100).ToString());
+            builder.Attributes.Add("data-aspect", (Math.Truncate(aspect * 100) / 100).ToString(CultureInfo.InvariantCulture));
             if (!String.IsNullOrEmpty(cssClass))
             {
                 builder.Attributes.Add("class", cssClass);
@@ -216,7 +228,7 @@ namespace Sdl.Web.Mvc.Html
         /// Write out an youtube video item
         /// </summary>
         /// <param name="helper"></param>
-        /// <param name="media">The video item to write out</param>
+        /// <param name="video">The video item to write out</param>
         /// <param name="widthFactor">The factor to apply to the width - can be % (eg "100%") or absolute (eg "120")</param>
         /// <param name="aspect">The aspect ratio for the video</param>
         /// <param name="cssClass">Css class to apply</param>
@@ -232,7 +244,7 @@ namespace Sdl.Web.Mvc.Html
             if (video.Url != null && SiteConfiguration.MediaHelper.ShowVideoPlaceholders)
             {
                 //we have a placeholder image
-                var placeholderImgUrl = SiteConfiguration.MediaHelper.GetResponsiveImageUrl(video.Url, aspect, widthFactor, containerSize);
+                string placeholderImgUrl = SiteConfiguration.MediaHelper.GetResponsiveImageUrl(video.Url, aspect, widthFactor, containerSize);
                 return new MvcHtmlString(GetYouTubePlaceholder(video.YouTubeId, placeholderImgUrl, video.Headline, cssClass));
             }
 
@@ -255,7 +267,7 @@ namespace Sdl.Web.Mvc.Html
             // TODO: this does not contain any XPM markup
             // TODO: configurize the mime type to Font Awesome mapping
             // filetypes supported by http://fortawesome.github.io/Font-Awesome/icons/#file-type
-            var mimeTypes = new Dictionary<string, string>
+            Dictionary<string, string> mimeTypes = new Dictionary<string, string>
                 {
                     {"application/ms-excel", "excel"},
                     {"application/pdf", "pdf"},
@@ -311,15 +323,362 @@ namespace Sdl.Web.Mvc.Html
             return Media(helper, media, null, aspect, cssClass);
         }
 
-        public static string GetYouTubeUrl(string videoId)
+        #region Region/Entity rendering extension methods
+        /// <summary>
+        /// Renders a given Entity Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="entity">The Entity to render.</param>
+        /// <param name="containerSize">TODO</param>
+        /// <returns>The rendered HTML or an empty string if <paramref name="entity"/> is <c>null</c>.</returns>
+        public static MvcHtmlString DxaEntity(this HtmlHelper htmlHelper, EntityModel entity, int containerSize = 0)
         {
-            return String.Format("https://www.youtube.com/embed/{0}?version=3&enablejsapi=1", videoId);
+            if (entity == null)
+            {
+                return MvcHtmlString.Empty;
+            }
+
+            if (containerSize == 0)
+            {
+                containerSize = SiteConfiguration.MediaHelper.GridSize;
+            }
+
+            MvcData mvcData = entity.MvcData;
+            using (new Tracer(htmlHelper, entity, containerSize, mvcData))
+            {
+                RouteValueDictionary parameters = new RouteValueDictionary();
+                int parentContainerSize = htmlHelper.ViewBag.ContainerSize;
+                if (parentContainerSize == 0)
+                {
+                    parentContainerSize = SiteConfiguration.MediaHelper.GridSize;
+                }
+                parameters["containerSize"] = (containerSize * parentContainerSize) / SiteConfiguration.MediaHelper.GridSize;
+                parameters["entity"] = entity;
+                parameters["area"] = mvcData.ControllerAreaName;
+                if (mvcData.RouteValues != null)
+                {
+                    foreach (string key in mvcData.RouteValues.Keys)
+                    {
+                        parameters[key] = mvcData.RouteValues[key];
+                    }
+                }
+                MvcHtmlString result = htmlHelper.Action(mvcData.ActionName, mvcData.ControllerName, parameters);
+                if (WebRequestContext.IsPreview)
+                {
+                    // TODO TSI-773: don't parse entity if this is in an include page (not rendered directly, so !WebRequestContext.IsInclude)
+                    result = new MvcHtmlString(TridionMarkup.ParseEntity(result.ToString()));
+                }
+                return result;
+            }
         }
+
+        /// <summary>
+        /// Renders all Entities in the current Region Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="containerSize">TODO</param>
+        /// <returns>The rendered HTML.</returns>
+        /// <remarks>This method will throw an exception if the current Model does not represent a Region.</remarks>
+        public static MvcHtmlString DxaEntities(this HtmlHelper htmlHelper, int containerSize = 0)
+        {
+            using (new Tracer(htmlHelper, containerSize))
+            {
+                RegionModel region = (RegionModel)htmlHelper.ViewData.Model;
+
+                StringBuilder resultBuilder = new StringBuilder();
+                foreach (EntityModel entity in region.Entities)
+                {
+                    resultBuilder.Append(htmlHelper.DxaEntity(entity, containerSize));
+                }
+                return new MvcHtmlString(resultBuilder.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Renders a given Region Model
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="region">The Region Model to render. This object determines the View that will be used.</param>
+        /// <param name="containerSize">TODO</param>
+        /// <returns>The rendered HTML or an empty string if <paramref name="region"/> is <c>null</c>.</returns>
+        public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, RegionModel region, int containerSize = 0)
+        {
+            if (region == null)
+            {
+                return MvcHtmlString.Empty;
+            }
+
+            if (containerSize == 0)
+            {
+                containerSize = SiteConfiguration.MediaHelper.GridSize;
+            }
+
+            using (new Tracer(htmlHelper, region, containerSize))
+            {
+                MvcData mvcData = region.MvcData;
+                string actionName = mvcData.ActionName ?? SiteConfiguration.GetRegionAction();
+                string controllerName = mvcData.ControllerName ?? SiteConfiguration.GetRegionController();
+                string controllerAreaName = mvcData.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName();
+
+                MvcHtmlString result = htmlHelper.Action(actionName, controllerName, new { Region = region, containerSize = containerSize, area = controllerAreaName });
+
+                if (WebRequestContext.IsPreview)
+                {
+                    // TODO TSI-773: don't parse region if this is a region in an include page (not rendered directly, so !WebRequestContext.IsInclude)
+                    result = new MvcHtmlString(TridionMarkup.ParseRegion(result.ToString(), WebRequestContext.Localization));
+                }
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Renders a Region (of the current Page or Region Model) with a given name.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="regionName">The name of the Region to render. This object determines the View that will be used.</param>
+        /// <param name="emptyViewName">
+        /// The name of the View to use when no Region with the given name is found in the Page Model (i.e. no Entities exist in the given Region). 
+        /// If <c>null</c> (the default) then nothing will be rendered in that case. 
+        /// </param>
+        /// <param name="containerSize">TODO</param>
+        /// <returns>The rendered HTML or an empty string if no Region with a given name is found and <paramref name="emptyViewName"/> is <c>null</c>.</returns>
+        /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
+        public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, string regionName, string emptyViewName = null, int containerSize = 0)
+        {
+            using (new Tracer(htmlHelper, regionName, emptyViewName, containerSize))
+            {
+                RegionModelSet regions = GetRegions(htmlHelper.ViewData.Model);
+
+                RegionModel region;
+                if (!regions.TryGetValue(regionName, out region))
+                {
+                    if (emptyViewName == null)
+                    {
+                        Log.Debug("Region '{0}' not found and no empty View specified. Skipping.", regionName);
+                        return MvcHtmlString.Empty;
+                    }
+                    Log.Debug("Region '{0}' not found. Using empty View '{1}'.", regionName, emptyViewName);
+                    region = new RegionModel(regionName, emptyViewName);
+                }
+
+                return htmlHelper.DxaRegion(region, containerSize);
+            }
+        }
+
+        /// <summary>
+        /// Renders the current (Include) Page as a Region.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <returns>The rendered HTML.</returns>
+        public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper)
+        {
+            using (new Tracer(htmlHelper))
+            {
+                PageModel pageModel = (PageModel)htmlHelper.ViewData.Model;
+
+                // Create a new Region Model which reflects the Page Model
+                string regionName = pageModel.Title;
+                MvcData mvcData = new MvcData
+                {
+                    ViewName = regionName,
+                    AreaName = SiteConfiguration.GetDefaultModuleName(),
+                    ControllerName = SiteConfiguration.GetRegionController(),
+                    ControllerAreaName = SiteConfiguration.GetDefaultModuleName(),
+                    ActionName = SiteConfiguration.GetRegionAction()
+                };
+
+                RegionModel regionModel = new RegionModel(regionName) { MvcData = mvcData };
+                regionModel.Regions.UnionWith(pageModel.Regions);
+
+                return htmlHelper.DxaRegion(regionModel);
+            }
+        }
+
+        /// <summary>
+        /// Renders all Regions (of the current Page or Region Model), except the ones with given names.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="exclude">The (comma separated) name(s) of the Regions to exclude. Can be <c>null</c> (the default) to render all Regions.</param>
+        /// <param name="containerSize">TODO</param>
+        /// <returns>The rendered HTML.</returns>
+        /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
+        public static MvcHtmlString DxaRegions(this HtmlHelper htmlHelper, string exclude = null, int containerSize = 0)
+        {
+            using (new Tracer(htmlHelper, exclude, containerSize))
+            {
+                RegionModelSet regions = GetRegions(htmlHelper.ViewData.Model);
+
+                IEnumerable<RegionModel> filteredRegions;
+                if (string.IsNullOrEmpty(exclude))
+                {
+                    filteredRegions = regions;
+                }
+                else
+                {
+                    string[] excludedNames = exclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    filteredRegions = regions.Where(r => !excludedNames.Any(n => n.Equals(r.Name, StringComparison.InvariantCultureIgnoreCase)));
+                }
+
+                StringBuilder resultBuilder = new StringBuilder();
+                foreach (RegionModel region in filteredRegions)
+                {
+                    resultBuilder.Append(htmlHelper.DxaRegion(region, containerSize));
+                }
+
+                return new MvcHtmlString(resultBuilder.ToString());
+            }
+        }
+
+        #endregion
+
+        #region Semantic markup extension methods
+
+        /// <summary>
+        /// Generates XPM markup for the current Page Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <returns>The XPM markup for the Page.</returns>
+        /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
+        public static MvcHtmlString DxaPageMarkup(this HtmlHelper htmlHelper)
+        {
+            // TODO TSI-776: this method should output "semantic" attributes on the HTML element representing the Page like we do for DxaRegionMarkup, DxaEntityMarkup and DxaPropertyMarkup
+            if (!WebRequestContext.Localization.IsStaging)
+            {
+                return MvcHtmlString.Empty;
+            }
+
+            PageModel page = (PageModel) htmlHelper.ViewData.Model;
+
+            using (new Tracer(htmlHelper, page))
+            {
+                if (!page.XpmMetadata.ContainsKey("CmsUrl"))
+                {
+                    page.XpmMetadata.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
+                }
+
+                return new MvcHtmlString(TridionMarkup.PageMarkup(page.XpmMetadata));
+            }
+        }
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for the current Region Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <returns>The HTML/RDFa attributes for the Region. These should be included in an HTML start tag.</returns>
+        /// <remarks>This method will throw an exception if the current Model does not represent a Region.</remarks>
+        public static MvcHtmlString DxaRegionMarkup(this HtmlHelper htmlHelper)
+        {
+            RegionModel region = (RegionModel) htmlHelper.ViewData.Model;
+            return htmlHelper.DxaRegionMarkup(region);
+        }
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for a given Region Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="region">The Region Model to generate semantic markup for.</param>
+        /// <returns>The HTML/RDFa attributes for the Region. These should be included in an HTML start tag.</returns>
+        public static MvcHtmlString DxaRegionMarkup(this HtmlHelper htmlHelper, RegionModel region)
+        {
+            return Markup.RenderRegionAttributes(region);
+        }
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for the current Entity Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <returns>The HTML/RDFa attributes for the Entity. These should be included in an HTML start tag.</returns>
+        /// <remarks>This method will throw an exception if the current Model does not represent an Entity.</remarks>
+        public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper)
+        {
+            EntityModel entity = (EntityModel) htmlHelper.ViewData.Model;
+            return htmlHelper.DxaEntityMarkup(entity);
+        }
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for a given Entity Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="entity">The Entity Model to generate semantic markup for.</param>
+        /// <returns>The HTML/RDFa attributes for the Entity. These should be included in an HTML start tag.</returns>
+        public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper, EntityModel entity)
+        {
+            return Markup.RenderEntityAttributes(entity);
+        }
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for a given property of the current Entity Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="propertyName">The name of the property.</param>
+        /// <param name="index">The index of the property value (for multi-value properties).</param>
+        /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
+        public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, string propertyName, int index = 0)
+        {
+            EntityModel entity = (EntityModel) htmlHelper.ViewData.Model;
+            return Markup.RenderPropertyAttributes(entity, propertyName, index);
+        }
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for a given property of a given Entity Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="entity">The Entity Model.</param>
+        /// <param name="propertyName">The name of the property.</param>
+        /// <param name="index">The index of the property value (for multi-value properties).</param>
+        /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
+        public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, EntityModel entity, string propertyName, int index = 0)
+        {
+            return Markup.RenderPropertyAttributes(entity, propertyName, index);
+        }
+
+        /// <summary>
+        /// Generates semantic markup (HTML/RDFa attributes) for a given property.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="propertyExpression">A parameterless lambda expression which evaluates to a property of the current Entity Model.</param>
+        /// <param name="index">The index of the property value (for multi-value properties).</param>
+        /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
+        public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, Expression<Func<object>> propertyExpression, int index = 0)
+        {
+            MemberExpression memberExpression = propertyExpression.Body as MemberExpression;
+            if (memberExpression == null)
+            {
+                UnaryExpression boxingExpression = propertyExpression.Body as UnaryExpression;
+                if (boxingExpression != null)
+                {
+                    memberExpression = boxingExpression.Operand as MemberExpression;
+                }
+            }
+            if (memberExpression == null)
+            {
+                throw new DxaException(
+                    string.Format("Unexpected expression provided to DxaPropertyMarkup: {0}. Expecting a lambda which evaluates to an Entity Model property.", propertyExpression.Body.GetType().Name)
+                    );
+            }
+
+            Expression<Func<object>> entityExpression = Expression.Lambda<Func<object>>(memberExpression.Expression);
+            Func<object> entityLambda = entityExpression.Compile();
+            object entity = entityLambda.Invoke();
+            EntityModel entityModel = entity as EntityModel;
+            if (entityModel == null)
+            {
+                throw new DxaException(
+                    string.Format("Unexpected type used in DxaPropertyMarkup expression: {0}. Expecting a lambda which evaluates to an Entity Model property.", entity)
+                    );
+            }
+
+            return Markup.RenderPropertyAttributes(entityModel, memberExpression.Member, index);
+        }
+        #endregion
+
+        // TODO: These are not HtmlHelper extension methods; move to another class.
+        #region TODO
 
         public static string GetYouTubeEmbed(string videoId, string cssClass = null)
         {
             TagBuilder builder = new TagBuilder("iframe");
-            builder.Attributes.Add("src", GetYouTubeUrl(videoId));
+            builder.Attributes.Add("src", String.Format("https://www.youtube.com/embed/{0}?version=3&enablejsapi=1", videoId));
             builder.Attributes.Add("id", SiteConfiguration.GetUniqueId("video"));
             builder.Attributes.Add("allowfullscreen", "true");
             builder.Attributes.Add("frameborder", "0");
@@ -340,19 +699,42 @@ namespace Sdl.Web.Mvc.Html
             return String.Format("<{4} class=\"embed-video\"><img src=\"{1}\" alt=\"{2}\"{5}><button type=\"button\" data-video=\"{0}\" class=\"{3}\"><i class=\"fa fa-play-circle\"></i></button></{4}>", videoId, imageUrl, altText, cssClass, elementName, closing);
         }
 
+        [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.MediaHelper.GetResponsiveImageUrl instead.")]
         public static string GetResponsiveImageUrl(string url)
         {
             return GetResponsiveImageUrl(url, SiteConfiguration.MediaHelper.DefaultMediaFill);
         }
 
+        [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.MediaHelper.GetResponsiveImageUrl instead.")]
         public static string GetResponsiveImageUrl(string url, double aspect, int containerSize = 0)
         {
             return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(url, aspect, SiteConfiguration.MediaHelper.DefaultMediaFill, containerSize);
         }
 
+        [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.MediaHelper.GetResponsiveImageUrl instead.")]
         public static string GetResponsiveImageUrl(string url, string widthFactor, int containerSize = 0)
         {
             return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(url, SiteConfiguration.MediaHelper.DefaultMediaAspect, widthFactor, containerSize);
+        }
+        #endregion
+
+        /// <summary>
+        /// Gets the Regions from a Page or Region Model.
+        /// </summary>
+        /// <param name="model">The Page Or Region Model</param>
+        /// <returns>The Regions obtained from the model.</returns>
+        private static RegionModelSet GetRegions(object model)
+        {
+            RegionModelSet result;
+            if (model is PageModel)
+            {
+                result = ((PageModel)model).Regions;
+            }
+            else
+            {
+                result = ((RegionModel)model).Regions;
+            }
+            return result;
         }
     }
 }

@@ -1,9 +1,7 @@
-﻿using System;
-using System.Linq;
-using System.Web;
-using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Logging;
+﻿using Sdl.Web.Common.Configuration;
 using Sdl.Web.Tridion.Context;
+using System;
+using System.Web;
 
 namespace Sdl.Web.Mvc.Configuration
 {
@@ -22,7 +20,26 @@ namespace Sdl.Web.Mvc.Configuration
             get
             {
                 return (Localization)GetFromContextStore("Localization") ?? (Localization)AddToContextStore("Localization", GetCurrentLocalization());
-            }       
+            }
+            set
+            {
+                AddToContextStore("Localization", value);
+            }
+        }
+
+        /// <summary>
+        /// True if the current request is for a resource outside the scope of a particular localization
+        /// </summary>
+        public static bool HasNoLocalization
+        {
+            get
+            {
+                return (bool?)GetFromContextStore("IsDeveloperMode") ?? false;
+            }
+            set
+            {
+                AddToContextStore("IsDeveloperMode", value);
+            }
         }
 
         /// <summary>
@@ -55,7 +72,7 @@ namespace Sdl.Web.Mvc.Configuration
         {
             get
             {
-                var val = GetFromContextStore("ScreenWidth");
+                object val = GetFromContextStore("ScreenWidth");
                 return val == null ? (ScreenWidth)AddToContextStore("ScreenWidth", CalculateScreenWidth()) : (ScreenWidth)val;
             }
         }
@@ -63,12 +80,22 @@ namespace Sdl.Web.Mvc.Configuration
         /// <summary>
         /// The current request URL
         /// </summary>
-        /// <returns></returns>
         public static string RequestUrl
         {
             get
             {
                 return HttpContext.Current.Request.Url.ToString();
+            }
+        }
+
+        /// <summary>
+        /// String array of client-supported MIME accept types
+        /// </summary>
+        public static string[] AcceptTypes
+        {
+            get 
+            { 
+                return HttpContext.Current.Request.AcceptTypes;
             }
         }
 
@@ -94,8 +121,24 @@ namespace Sdl.Web.Mvc.Configuration
         {
             get
             {
-                return (bool?)GetFromContextStore("IsDeveloperMode") ?? (bool)AddToContextStore("IsDeveloperMode", Localization.Domain.Equals("localhost"));
+                return (bool?)GetFromContextStore("IsDeveloperMode") ?? (bool)AddToContextStore("IsDeveloperMode", GetIsDeveloperMode());
             }
+        }
+
+        private static bool GetIsDeveloperMode()
+        {
+            try
+            {
+                if (HttpContext.Current != null)
+                {
+                    return HttpContext.Current.Request.Url.Host.ToLower() == "localhost";
+                }
+            }
+            catch (Exception)
+            {
+                //Do nothing
+            }
+            return false;
         }
 
         /// <summary>
@@ -106,7 +149,19 @@ namespace Sdl.Web.Mvc.Configuration
             //For now we cannot reliably detect when we are in experience manager, so we set this to be true whenever we are in staging
             get
             {
-                return (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", SiteConfiguration.IsStaging);
+                return (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", Localization.IsStaging);
+            }
+        }
+
+        /// <summary>
+        /// True if the request is an include page
+        /// </summary>
+        public static bool IsInclude
+        {
+            // if request url contains "system/include" the include page is requested directly
+            get
+            {
+                return (bool?)GetFromContextStore("IsInclude") ?? (bool)AddToContextStore("IsInclude", RequestUrl.Contains("system/include/"));
             }
         }
 
@@ -130,35 +185,11 @@ namespace Sdl.Web.Mvc.Configuration
 
         protected static Localization GetCurrentLocalization()
         {
-            //If theres a single localization use that regardless
-            if (SiteConfiguration.Localizations.Count == 1)
+            if (HttpContext.Current != null)
             {
-                return SiteConfiguration.Localizations.SingleOrDefault().Value;
+                return SiteConfiguration.LocalizationManager.GetLocalizationFromUri(HttpContext.Current.Request.Url);
             }
-            try
-            {
-                if (HttpContext.Current != null)
-                {
-                    var uri = HttpContext.Current.Request.Path;
-                    if (uri.StartsWith("/" + SiteConfiguration.StaticsFolder))
-                    {
-                        uri = uri.Substring(SiteConfiguration.StaticsFolder.Length + 1);
-                    }
-                    foreach (var loc in SiteConfiguration.Localizations.Values)
-                    {
-                        if (uri==loc.Path || uri.StartsWith(loc.Path + "/"))
-                        {
-                            Log.Debug("Request for {0} is from localization {1} ('{2}')", uri, loc.LocalizationId, loc.Path);
-                            return loc;
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                //Do nothing - In some cases we do not have a request (loading config on app start etc.) - we fallback on a default localization
-            }
-            return new Localization { LocalizationId = "0", Culture = "en-US", Path = String.Empty };
+            return null;
         }
         
         protected static object GetFromContextStore(string key)

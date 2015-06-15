@@ -10,7 +10,7 @@ namespace Sdl.Web.DD4T.Mapping
         {
             if (url != null)
             {
-                var pos = url.LastIndexOf(".", StringComparison.Ordinal);
+                int pos = url.LastIndexOf(".", StringComparison.Ordinal);
                 if (pos > url.LastIndexOf("/", StringComparison.Ordinal))
                 {
                     url = url.Substring(0, pos);
