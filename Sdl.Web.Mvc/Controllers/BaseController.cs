@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
@@ -73,9 +74,11 @@ namespace Sdl.Web.Mvc.Controllers
         protected virtual ViewModel EnrichModel(ViewModel model)
         {
             //Check if an exception was generated when creating the model, so now is the time to throw it
-            if (model is ExceptionEntity)
+            // TODO: shouldn't we just render the ExceptionEntity using an Exception View?
+            ExceptionEntity exceptionEntity = model as ExceptionEntity;
+            if (exceptionEntity != null)
             {
-                throw new Exception(((ExceptionEntity)model).Error);
+                throw exceptionEntity.Exception;
             }
 #pragma warning disable 618
             return (ViewModel) ProcessModel(model, model.GetType()); // To support legacy overrides
@@ -227,7 +230,7 @@ namespace Sdl.Web.Mvc.Controllers
                 catch (Exception ex)
                 {
                     Log.Error(ex);
-                    return new ExceptionEntity { Error = ex.Message };
+                    return new ExceptionEntity(ex); // TODO: What about MvcData?
                 }
             }
             return entity;

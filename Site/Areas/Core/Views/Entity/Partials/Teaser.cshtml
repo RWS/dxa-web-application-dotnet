@@ -21,7 +21,7 @@
             @Model.Headline
         }
     </h3>
-    <p class="teaser-description @Model.GetFormatOption("descriptionStyle")" @Html.DxaPropertyMarkup(() => Model.Text)>@Html.Raw(Model.Text)</p>
+    <p class="teaser-description @Model.GetFormatOption("descriptionStyle")" @Html.DxaPropertyMarkup(() => Model.Text)>@Html.DxaRichText(Model.Text)</p>
     @if (Model.Link.IsValidLink())
     {
         <a class="@linkStyle" href="@Model.Link.Url" title="@Model.Link.AlternateText" @Html.DxaPropertyMarkup(() => Model.Link)>

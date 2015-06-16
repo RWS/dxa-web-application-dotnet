@@ -1,4 +1,10 @@
 ﻿@model Download
 <div @Html.DxaEntityMarkup()>
-    @Html.Media(Model)
+    <div class="download-list">
+        <i class="fa @Model.GetIconClass()"></i>
+        <div>
+            <a href="@Model.Url">@Model.FileName</a> <small class="size">(@Model.GetFriendlyFileSize())</small>
+            @if (!string.IsNullOrEmpty(Model.Description)) { <small>@Model.Description</small> }
+        </div>
+    </div>
 </div>

@@ -131,7 +131,7 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="httpContext">The HttpContext</param>
         /// <param name="sizeInBytes">The file size in bytes</param>
         /// <returns>File size string (eg 132 MB)</returns>
-        public static object FriendlyFileSize(this HtmlHelper httpContext, long sizeInBytes)
+        public static string FriendlyFileSize(this HtmlHelper httpContext, long sizeInBytes)
         {
             string[] sizes = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
             double len = sizeInBytes;
@@ -142,7 +142,7 @@ namespace Sdl.Web.Mvc.Html
                 len = len / 1024;
             }
 
-            return String.Format("{0} {1}", Math.Ceiling(len), sizes[order]);
+            return string.Format("{0} {1}", Math.Ceiling(len), sizes[order]);
         }
         
         /// <summary>
@@ -157,37 +157,18 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>Complete img tag with all required attributes</returns>
         public static MvcHtmlString Image(this HtmlHelper helper, Image image, string widthFactor, double aspect, string cssClass = null, int containerSize = 0)
         {
-            if (image == null || String.IsNullOrEmpty(image.Url))
+            using (new Tracer(helper, image, widthFactor, aspect, cssClass, containerSize))
             {
-                return null;
+                if (image == null || String.IsNullOrEmpty(image.Url))
+                {
+                    return MvcHtmlString.Empty;
+                }
+                return new MvcHtmlString(image.ToHtml(widthFactor, aspect, cssClass, containerSize));
             }
-
-            string imgWidth = widthFactor;
-            if (widthFactor == null)
-            {
-                widthFactor = SiteConfiguration.MediaHelper.DefaultMediaFill;
-            }
-
-            //We read the container size (based on bootstrap grid) from the view bag
-            //This means views can be independent of where they are rendered and do not
-            //need to know their width
-            TagBuilder builder = new TagBuilder("img");
-            builder.Attributes.Add("src", SiteConfiguration.MediaHelper.GetResponsiveImageUrl(image.Url, aspect, widthFactor, containerSize));
-            if (!String.IsNullOrEmpty(imgWidth))
-            {
-                builder.Attributes.Add("width", imgWidth);
-            }
-            builder.Attributes.Add("alt", image.AlternateText);
-            builder.Attributes.Add("data-aspect", (Math.Truncate(aspect * 100) / 100).ToString(CultureInfo.InvariantCulture));
-            if (!String.IsNullOrEmpty(cssClass))
-            {
-                builder.Attributes.Add("class", cssClass);
-            }
-            return new MvcHtmlString(builder.ToString(TagRenderMode.SelfClosing));
         }
 
         /// <summary>
-        /// Write out an media item with a responsive url
+        /// Write out a media item with a responsive url
         /// </summary>
         /// <param name="helper"></param>
         /// <param name="media">The media item to write out</param>
@@ -198,31 +179,34 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>Complete media markup with all required attributes</returns>
         public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, string widthFactor, double aspect, string cssClass = null, int containerSize = 0)
         {
-            if (media == null)
+            using (new Tracer(helper, media, widthFactor, aspect, cssClass, containerSize))
             {
-                return null;
+                if (media == null)
+                {
+                    return MvcHtmlString.Empty;
+                }
+                //We read the container size (based on bootstrap grid) from the view bag
+                //This means views can be independent of where they are rendered and do not
+                //need to know their width
+                if (containerSize == 0)
+                {
+                    containerSize = helper.ViewBag.ContainerSize;
+                }
+
+                return new MvcHtmlString(media.ToHtml(widthFactor, aspect, cssClass, containerSize));
             }
-            //We read the container size (based on bootstrap grid) from the view bag
-            //This means views can be independent of where they are rendered and do not
-            //need to know their width
-            if (containerSize == 0)
-            {
-                containerSize = helper.ViewBag.ContainerSize;
-            }
-            if (media is Image)
-            {
-                return Image(helper, (Image)media, widthFactor, aspect, cssClass, containerSize);
-            }
-            if (media is YouTubeVideo)
-            {
-                return YouTubeVideo(helper, (YouTubeVideo)media, widthFactor, aspect, cssClass, containerSize);
-            }
-            if (media is Download)
-            {
-                return Download(helper, (Download)media);
-            }
-            return null;
         }
+
+        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, string widthFactor = null, string cssClass = null)
+        {
+            return Media(helper, media, widthFactor, SiteConfiguration.MediaHelper.DefaultMediaAspect, cssClass);
+        }
+
+        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, double aspect, string cssClass = null)
+        {
+            return Media(helper, media, null, aspect, cssClass);
+        }
+
 
         /// <summary>
         /// Write out an youtube video item
@@ -234,21 +218,17 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="cssClass">Css class to apply</param>
         /// <param name="containerSize">The size (in grid column units) of the containing element</param>
         /// <returns>Complete video markup with all required attributes</returns>
-        public static MvcHtmlString YouTubeVideo(HtmlHelper helper, YouTubeVideo video, string widthFactor, double aspect, string cssClass, int containerSize)
+        [Obsolete("Deprecated in DXA 1.1. This method renders HTML which may have to be customized. Use Html.DxaEntity to render the YouTubeVideo Model with an appropriate View instead.")]
+        public static MvcHtmlString YouTubeVideo(this HtmlHelper helper, YouTubeVideo video, string widthFactor, double aspect, string cssClass, int containerSize)
         {
-            if (video == null || String.IsNullOrEmpty(video.YouTubeId))
+            using (new Tracer(helper, video, widthFactor, aspect, cssClass, containerSize))
             {
-                return null;
+                if (video == null || string.IsNullOrEmpty(video.YouTubeId))
+                {
+                    return MvcHtmlString.Empty;
+                }
+                return new MvcHtmlString(video.ToHtml(widthFactor, aspect, cssClass, containerSize));
             }
-
-            if (video.Url != null && SiteConfiguration.MediaHelper.ShowVideoPlaceholders)
-            {
-                //we have a placeholder image
-                string placeholderImgUrl = SiteConfiguration.MediaHelper.GetResponsiveImageUrl(video.Url, aspect, widthFactor, containerSize);
-                return new MvcHtmlString(GetYouTubePlaceholder(video.YouTubeId, placeholderImgUrl, video.Headline, cssClass));
-            }
-
-            return new MvcHtmlString(GetYouTubeEmbed(video.YouTubeId, cssClass));
         }
 
         /// <summary>
@@ -257,70 +237,17 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="helper"></param>
         /// <param name="download">The download item to render</param>
         /// <returns></returns>
+        [Obsolete("Deprecated in DXA 1.1. This method renders HTML which may have to be customized. Use Html.DxaEntity to render the Download Model with an appropriate View instead.")]
         public static MvcHtmlString Download(this HtmlHelper helper, Download download)
         {
-            if (download == null || String.IsNullOrEmpty(download.Url))
+            using (new Tracer(helper, download))
             {
-                return null;
-            }
-
-            // TODO: this does not contain any XPM markup
-            // TODO: configurize the mime type to Font Awesome mapping
-            // filetypes supported by http://fortawesome.github.io/Font-Awesome/icons/#file-type
-            Dictionary<string, string> mimeTypes = new Dictionary<string, string>
+                if (download == null || string.IsNullOrEmpty(download.Url))
                 {
-                    {"application/ms-excel", "excel"},
-                    {"application/pdf", "pdf"},
-                    {"application/x-wav", "audio"},
-                    {"audio/x-mpeg", "audio"},
-                    {"application/msword", "word"},
-                    {"text/rtf", "word"},
-                    {"application/zip", "archive"},
-                    {"image/gif", "image"},
-                    {"image/jpeg", "image"},
-                    {"image/png", "image"},
-                    {"image/x-bmp", "image"},
-                    {"text/plain", "text"},
-                    {"text/css", "code"},
-                    {"application/x-javascript", "code"},
-                    {"application/ms-powerpoint", "powerpoint"},
-                    {"video/vnd.rn-realmedia", "video"},
-                    {"video/quicktime", "video"},
-                    {"video/mpeg", "video"}
-                }; 
-            string fileType = null;
-            if (mimeTypes.ContainsKey(download.MimeType))
-            {
-                fileType = mimeTypes[download.MimeType];
+                    return MvcHtmlString.Empty;
+                }
+                return new MvcHtmlString(download.ToHtml(null));
             }
-            string iconClass = (fileType == null ? "fa-file" : String.Format("fa-file-{0}-o", fileType));
-            string friendlyFileSize = helper.FriendlyFileSize(download.FileSize).ToString();
-            string descriptionHtml = (!String.IsNullOrEmpty(download.Description) ? String.Format("<small>{0}</small>", download.Description) : String.Empty);
-            // TODO: use partial view instead of hardcoding HTML
-            string downloadHtml = String.Format(@"
-                <div class=""download-list"">
-                    <i class=""fa {0}""></i>
-                    <div>
-                        <a href=""{1}"">{2}</a> <small class=""size"">({3})</small>
-                        {4}
-                    </div>
-                </div>", iconClass, download.Url, download.FileName, friendlyFileSize, descriptionHtml);
-            return new MvcHtmlString(downloadHtml);
-        }
-
-        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media)
-        {
-            return Media(helper, media, null);
-        }
-
-        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, string widthFactor, string cssClass = null)
-        {
-            return Media(helper, media, widthFactor, SiteConfiguration.MediaHelper.DefaultMediaAspect, cssClass);
-        }
-        
-        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, double aspect, string cssClass = null)
-        {
-            return Media(helper, media, null, aspect, cssClass);
         }
 
         #region Region/Entity rendering extension methods
@@ -329,7 +256,7 @@ namespace Sdl.Web.Mvc.Html
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
         /// <param name="entity">The Entity to render.</param>
-        /// <param name="containerSize">TODO</param>
+        /// <param name="containerSize">The size (in grid column units) of the containing element.</param>
         /// <returns>The rendered HTML or an empty string if <paramref name="entity"/> is <c>null</c>.</returns>
         public static MvcHtmlString DxaEntity(this HtmlHelper htmlHelper, EntityModel entity, int containerSize = 0)
         {
@@ -346,6 +273,10 @@ namespace Sdl.Web.Mvc.Html
             MvcData mvcData = entity.MvcData;
             using (new Tracer(htmlHelper, entity, containerSize, mvcData))
             {
+                string actionName = mvcData.ActionName ?? SiteConfiguration.GetEntityAction();
+                string controllerName = mvcData.ControllerName ?? SiteConfiguration.GetEntityController();
+                string controllerAreaName = mvcData.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName();
+
                 RouteValueDictionary parameters = new RouteValueDictionary();
                 int parentContainerSize = htmlHelper.ViewBag.ContainerSize;
                 if (parentContainerSize == 0)
@@ -354,7 +285,7 @@ namespace Sdl.Web.Mvc.Html
                 }
                 parameters["containerSize"] = (containerSize * parentContainerSize) / SiteConfiguration.MediaHelper.GridSize;
                 parameters["entity"] = entity;
-                parameters["area"] = mvcData.ControllerAreaName;
+                parameters["area"] = controllerAreaName;
                 if (mvcData.RouteValues != null)
                 {
                     foreach (string key in mvcData.RouteValues.Keys)
@@ -362,7 +293,7 @@ namespace Sdl.Web.Mvc.Html
                         parameters[key] = mvcData.RouteValues[key];
                     }
                 }
-                MvcHtmlString result = htmlHelper.Action(mvcData.ActionName, mvcData.ControllerName, parameters);
+                MvcHtmlString result = htmlHelper.Action(actionName, controllerName, parameters);
                 if (WebRequestContext.IsPreview)
                 {
                     // TODO TSI-773: don't parse entity if this is in an include page (not rendered directly, so !WebRequestContext.IsInclude)
@@ -376,7 +307,7 @@ namespace Sdl.Web.Mvc.Html
         /// Renders all Entities in the current Region Model.
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
-        /// <param name="containerSize">TODO</param>
+        /// <param name="containerSize">The size (in grid column units) of the containing element.</param>
         /// <returns>The rendered HTML.</returns>
         /// <remarks>This method will throw an exception if the current Model does not represent a Region.</remarks>
         public static MvcHtmlString DxaEntities(this HtmlHelper htmlHelper, int containerSize = 0)
@@ -399,7 +330,7 @@ namespace Sdl.Web.Mvc.Html
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
         /// <param name="region">The Region Model to render. This object determines the View that will be used.</param>
-        /// <param name="containerSize">TODO</param>
+        /// <param name="containerSize">The size (in grid column units) of the containing element.</param>
         /// <returns>The rendered HTML or an empty string if <paramref name="region"/> is <c>null</c>.</returns>
         public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, RegionModel region, int containerSize = 0)
         {
@@ -440,7 +371,7 @@ namespace Sdl.Web.Mvc.Html
         /// The name of the View to use when no Region with the given name is found in the Page Model (i.e. no Entities exist in the given Region). 
         /// If <c>null</c> (the default) then nothing will be rendered in that case. 
         /// </param>
-        /// <param name="containerSize">TODO</param>
+        /// <param name="containerSize">The size (in grid column units) of the containing element.</param>
         /// <returns>The rendered HTML or an empty string if no Region with a given name is found and <paramref name="emptyViewName"/> is <c>null</c>.</returns>
         /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
         public static MvcHtmlString DxaRegion(this HtmlHelper htmlHelper, string regionName, string emptyViewName = null, int containerSize = 0)
@@ -499,7 +430,7 @@ namespace Sdl.Web.Mvc.Html
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
         /// <param name="exclude">The (comma separated) name(s) of the Regions to exclude. Can be <c>null</c> (the default) to render all Regions.</param>
-        /// <param name="containerSize">TODO</param>
+        /// <param name="containerSize">The size (in grid column units) of the containing element.</param>
         /// <returns>The rendered HTML.</returns>
         /// <remarks>This method will throw an exception if the current Model does not represent a Page.</remarks>
         public static MvcHtmlString DxaRegions(this HtmlHelper htmlHelper, string exclude = null, int containerSize = 0)
@@ -672,50 +603,63 @@ namespace Sdl.Web.Mvc.Html
         }
         #endregion
 
-        // TODO: These are not HtmlHelper extension methods; move to another class.
-        #region TODO
-
-        public static string GetYouTubeEmbed(string videoId, string cssClass = null)
+        /// <summary>
+        /// Renders a given <see cref="RichText"/> instance as HTML.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="richText">The <see cref="RichText"/> instance to render. If the rich text contains Entity Models, those will be rendered using applicable Views.</param>
+        /// <returns>The rendered HTML.</returns>
+        public static MvcHtmlString DxaRichText(this HtmlHelper htmlHelper, RichText richText)
         {
-            TagBuilder builder = new TagBuilder("iframe");
-            builder.Attributes.Add("src", String.Format("https://www.youtube.com/embed/{0}?version=3&enablejsapi=1", videoId));
-            builder.Attributes.Add("id", SiteConfiguration.GetUniqueId("video"));
-            builder.Attributes.Add("allowfullscreen", "true");
-            builder.Attributes.Add("frameborder", "0");
-
-            if (!String.IsNullOrEmpty(cssClass))
+            if (richText == null)
             {
-                builder.Attributes.Add("class", cssClass);
+                return MvcHtmlString.Empty;
             }
 
-            return builder.ToString(TagRenderMode.SelfClosing);
+            StringBuilder htmlBuilder = new StringBuilder();
+            foreach (IRichTextFragment richTextFragment in richText.Fragments)
+            {
+                EntityModel entityModel = richTextFragment as EntityModel;
+                string htmlFragment = (entityModel == null) ? richTextFragment.ToHtml() : htmlHelper.DxaEntity(entityModel).ToString();
+                htmlBuilder.Append(htmlFragment);
+            }
+
+            return new MvcHtmlString(htmlBuilder.ToString());
         }
 
+
+        #region Obsolete
+
+        [Obsolete("Not supported in DXA 1.1. Use Html.Media or YouTubeVideo.ToHtml instead.", error: true)]
+        public static string GetYouTubeEmbed(string videoId, string cssClass = null)
+        {
+            throw new NotSupportedException("Not supported in DXA 1.1. Use Html.Media or YouTubeVideo.ToHtml instead.");
+        }
+
+        [Obsolete("Not supported in DXA 1.1. Use Html.Media or YouTubeVideo.ToHtml instead.", error: true)]
         public static string GetYouTubePlaceholder(string videoId, string imageUrl, string altText = null, string cssClass = null, string elementName = "div", bool xmlCompliant = false)
         {
-            string closing = xmlCompliant ? "/" : String.Empty;
-
-            // TODO: consider using partial view
-            return String.Format("<{4} class=\"embed-video\"><img src=\"{1}\" alt=\"{2}\"{5}><button type=\"button\" data-video=\"{0}\" class=\"{3}\"><i class=\"fa fa-play-circle\"></i></button></{4}>", videoId, imageUrl, altText, cssClass, elementName, closing);
+            throw new NotSupportedException("Not supported in DXA 1.1. Use Html.Media or YouTubeVideo.ToHtml instead.");
         }
 
-        [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.MediaHelper.GetResponsiveImageUrl instead.")]
+        [Obsolete("Deprecated in DXA 1.1. Use Url.ResponsiveImage instead.")]
         public static string GetResponsiveImageUrl(string url)
         {
             return GetResponsiveImageUrl(url, SiteConfiguration.MediaHelper.DefaultMediaFill);
         }
 
-        [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.MediaHelper.GetResponsiveImageUrl instead.")]
+        [Obsolete("Deprecated in DXA 1.1. Use Url.ResponsiveImage instead.")]
         public static string GetResponsiveImageUrl(string url, double aspect, int containerSize = 0)
         {
             return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(url, aspect, SiteConfiguration.MediaHelper.DefaultMediaFill, containerSize);
         }
 
-        [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.MediaHelper.GetResponsiveImageUrl instead.")]
+        [Obsolete("Deprecated in DXA 1.1. Use Url.ResponsiveImage instead.")]
         public static string GetResponsiveImageUrl(string url, string widthFactor, int containerSize = 0)
         {
             return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(url, SiteConfiguration.MediaHelper.DefaultMediaAspect, widthFactor, containerSize);
         }
+
         #endregion
 
         /// <summary>

@@ -127,6 +127,11 @@ namespace Sdl.Web.Mvc.Html
                 //default is full width
                 containerSize = SiteConfiguration.MediaHelper.GridSize;
             }
+            if (string.IsNullOrEmpty(widthFactor))
+            {
+                widthFactor = DefaultMediaFill;
+            }
+
             double width = 0;
             //For absolute fill factors, we should have a number
             if (!widthFactor.EndsWith("%"))

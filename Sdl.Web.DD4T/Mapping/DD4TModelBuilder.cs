@@ -4,11 +4,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Security.Policy;
 using System.Text.RegularExpressions;
-using System.Web.Configuration;
 using DD4T.ContentModel;
-using Newtonsoft.Json.Linq;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
@@ -66,10 +63,9 @@ namespace Sdl.Web.DD4T.Mapping
                     //and carry on processing - this should not cause a failure in the rendering of
                     //the page as a whole
                     Log.Error(ex);
-                    entity = new ExceptionEntity
+                    entity = new ExceptionEntity(ex)
                     {
-                        Error = ex.Message,
-                        MvcData = GetMvcData(cp)// TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
+                        MvcData = GetMvcData(cp) // TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
                     };
                 }
 
@@ -186,7 +182,6 @@ namespace Sdl.Web.DD4T.Mapping
         protected virtual EntityModel CreateEntityModel(MappingData mappingData)
         {
             Type modelType = mappingData.TargetType; // TODO: why is this not a separate parameter?
-            // TODO TSI-247: Model Type may have to be more specific than the View Model properties type (e.g. Image instead of just MediaItem)
 
             EntityModel model = (EntityModel)Activator.CreateInstance(modelType);
             Dictionary<string, string> xpmPropertyMetadata = new Dictionary<string, string>();
@@ -422,14 +417,23 @@ namespace Sdl.Web.DD4T.Mapping
                         IRichTextProcessor richTextProcessor = SiteConfiguration.RichTextProcessor;
                         foreach (string value in field.Values)
                         {
-                            mappedValues.Add(richTextProcessor.ProcessRichText(value));
+                            RichText richText = richTextProcessor.ProcessRichText(value);
+                            if (modelType == typeof(string))
+                            {
+                                mappedValues.Add(richText.ToString());
+                            }
+                            else
+                            {
+                                mappedValues.Add(richText);
+                            }
                         }
                         break;
 
                     default:
                         foreach (string value in field.Values)
                         {
-                            mappedValues.Add(Convert.ChangeType(value, bareModelType));
+                            object mappedValue = (modelType == typeof(RichText)) ? new RichText(value) : Convert.ChangeType(value, bareModelType);
+                            mappedValues.Add(mappedValue);
                         }
                         break;
                 }
@@ -782,7 +786,7 @@ namespace Sdl.Web.DD4T.Mapping
             };
         }
 
-        private static string GetDxaIdentifierFromTcmUri(string tcmUri)
+        internal static string GetDxaIdentifierFromTcmUri(string tcmUri)
         {
             // Return the Item (Reference) ID part of the TCM URI.
             return tcmUri.Split('-')[1];

@@ -40,7 +40,7 @@
                         {
                             <div class="tab-pane @(i==0 ? "active" : String.Empty)" id="@TabId(i)" @Html.DxaPropertyMarkup(() => Model.ItemListElements, i++)>
                                 <div @Html.DxaPropertyMarkup(() => element.Text)>
-                                    @Html.Raw(element.Text)
+                                    @Html.DxaRichText(element.Text)
                                 </div>
                                 @if (element.Media != null)
                                 {

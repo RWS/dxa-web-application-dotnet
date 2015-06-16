@@ -33,7 +33,7 @@
                     @if (para.Content!=null)
                     {
                         <div @Html.DxaPropertyMarkup(() => para.Content)>
-                            @Html.Raw(para.Content)
+                            @Html.DxaRichText(para.Content)
                         </div>
                     }
                     @if (para.Media!=null)

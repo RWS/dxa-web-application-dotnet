@@ -132,7 +132,7 @@ namespace Sdl.Web.Mvc.Html
             }
 
             string xpath;
-            if (WebRequestContext.IsPreview && entityModel.XpmPropertyMetadata.TryGetValue(propertyName, out xpath))
+            if (WebRequestContext.IsPreview && entityModel.XpmPropertyMetadata != null && entityModel.XpmPropertyMetadata.TryGetValue(propertyName, out xpath))
             {
                 string predicate = xpath.EndsWith("]") ? string.Empty : string.Format("[{0}]", index + 1);
                 markup += string.Format(" data-xpath=\"{0}{1}\"", HttpUtility.HtmlAttributeEncode(xpath), predicate);
