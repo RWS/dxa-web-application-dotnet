@@ -22,7 +22,7 @@ namespace Sdl.Web.Mvc.Html
         private const string _tcmUriNull = "tcm:0-0-0";
         private const string _epoch = "1970-01-01T00:00:00";
 
-        public static string ParseRegion(string regionHtml, Localization loc)
+        internal static string ParseRegion(string regionHtml, Localization loc)
         {
             HtmlDocument html = new HtmlDocument();
             html.LoadHtml(String.Format("<html>{0}</html>", regionHtml));
@@ -38,7 +38,7 @@ namespace Sdl.Web.Mvc.Html
             return html.DocumentNode.SelectSingleNode("/html").InnerHtml;
         }
 
-        public static string ParseEntity(string entityHtml)
+        internal static string ParseEntity(string entityHtml)
         {
             //HTML Agility pack drops closing option tags for some reason (bug?)
             HtmlNode.ElementsFlags.Remove("option");
