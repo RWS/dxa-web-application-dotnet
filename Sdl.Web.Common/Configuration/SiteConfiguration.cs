@@ -41,7 +41,7 @@ namespace Sdl.Web.Common.Configuration
 
         #region References to "providers"
         /// <summary>
-        /// Gets the Content Provider used for obtaining the Page and Entity Models
+        /// Gets the Content Provider used for obtaining the Page and Entity Models and Static Content.
         /// </summary>
         public static IContentProvider ContentProvider
         {
@@ -51,8 +51,18 @@ namespace Sdl.Web.Common.Configuration
 
         /// <summary>
         /// Gets the Content Provider used for obtaining the Navigation Models
-        /// </summary>
+        /// </summary>.
         public static INavigationProvider NavigationProvider
+        {
+            get;
+            private set;
+        }
+
+
+        /// <summary>
+        /// Gets the Context Claims Provider.
+        /// </summary>
+        public static IContextClaimsProvider ContextClaimsProvider
         {
             get;
             private set;
@@ -128,6 +138,7 @@ namespace Sdl.Web.Common.Configuration
             {
                 ContentProvider = GetProvider<IContentProvider>(dependencyResolver);
                 NavigationProvider = GetProvider<INavigationProvider>(dependencyResolver);
+                ContextClaimsProvider = GetProvider<IContextClaimsProvider>(dependencyResolver);
                 LinkResolver = GetProvider<ILinkResolver>(dependencyResolver);
                 RichTextProcessor = GetProvider<IRichTextProcessor>(dependencyResolver);
                 ConditionalEntityEvaluator = GetProvider<IConditionalEntityEvaluator>(dependencyResolver, isOptional: true);

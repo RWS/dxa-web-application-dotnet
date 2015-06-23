@@ -75,6 +75,11 @@
   <ItemGroup>
     <Compile Include="Configuration\BaseAreaRegistration.cs" />
     <Compile Include="Configuration\BaseLocalizationManager.cs" />
+    <Compile Include="Context\BrowserClaims.cs" />
+    <Compile Include="Context\ContextClaims.cs" />
+    <Compile Include="Context\ContextEngine.cs" />
+    <Compile Include="Context\DeviceClaims.cs" />
+    <Compile Include="Context\OperatingSystemClaims.cs" />
     <Compile Include="Formats\FeedResult.cs" />
     <Compile Include="Formats\FormatDataAttribute.cs" />
     <Compile Include="Controllers\NoCacheAttribute.cs" />
@@ -113,6 +118,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Context\ContextEngine.cd" />
     <None Include="Html\MvcExtensions.cd" />
     <None Include="packages.config" />
   </ItemGroup>

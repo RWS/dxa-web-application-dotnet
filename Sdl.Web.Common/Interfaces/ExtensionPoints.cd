@@ -45,5 +45,12 @@
       <FileName>Interfaces\IMediaHelper.cs</FileName>
     </TypeIdentifier>
   </Interface>
+  <Interface Name="Sdl.Web.Common.Interfaces.IContextClaimsProvider">
+    <Position X="7" Y="5" Width="4.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\IContextClaimsProvider.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

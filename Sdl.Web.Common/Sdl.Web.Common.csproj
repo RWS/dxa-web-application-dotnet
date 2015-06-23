@@ -75,6 +75,7 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Interfaces\IConditionalEntityEvaluator.cs" />
     <Compile Include="Interfaces\IContentResolver.cs" />
+    <Compile Include="Interfaces\IContextClaimsProvider.cs" />
     <Compile Include="Interfaces\ILinkResolver.cs" />
     <Compile Include="Interfaces\ILocalizationManager.cs" />
     <Compile Include="Interfaces\INavigationProvider.cs" />

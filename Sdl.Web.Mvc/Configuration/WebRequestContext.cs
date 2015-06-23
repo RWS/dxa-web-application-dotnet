@@ -1,5 +1,6 @@
-﻿using Sdl.Web.Common.Configuration;
-using Sdl.Web.Tridion.Context;
+﻿using System.Net;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Mvc.Context;
 using System;
 using System.Web;
 
@@ -10,7 +11,7 @@ namespace Sdl.Web.Mvc.Configuration
     /// </summary>
     public class WebRequestContext
     {
-        private const int MaxWidth = 1024;
+        private const int _maxWidth = 1024;
 
         /// <summary>
         /// The current request localization
@@ -61,7 +62,9 @@ namespace Sdl.Web.Mvc.Configuration
             get
             {
                 //Pixel Ratio can be non-integer value (if zoom is applied to browser) - so we use a min of 1, and otherwise round when calculating max width
-                return (int?)GetFromContextStore("MaxMediaWidth") ?? (int)AddToContextStore("MaxMediaWidth", Convert.ToInt32(Math.Max(1.0, ContextEngine.Device.PixelRatio) * Math.Min(ContextEngine.Browser.DisplayWidth, MaxWidth)));
+                double pixelRatio = ContextEngine.GetClaims<DeviceClaims>().PixelRatio;
+                int displayWidth = IsContextCookiePresent ? ContextEngine.GetClaims<BrowserClaims>().DisplayWidth : 1024;
+                return (int?)GetFromContextStore("MaxMediaWidth") ?? (int)AddToContextStore("MaxMediaWidth", Convert.ToInt32(Math.Max(1.0, pixelRatio) * Math.Min(displayWidth, _maxWidth)));
             }
         }
 
@@ -167,7 +170,7 @@ namespace Sdl.Web.Mvc.Configuration
 
         protected static ScreenWidth CalculateScreenWidth()
         {
-            int width = ContextEngine.Browser.DisplayWidth;
+            int width = IsContextCookiePresent ? ContextEngine.GetClaims<BrowserClaims>().DisplayWidth : 1024;
             if (width < SiteConfiguration.MediaHelper.SmallScreenBreakpoint)
             {
                 return ScreenWidth.ExtraSmall;
@@ -205,5 +208,15 @@ namespace Sdl.Web.Mvc.Configuration
             }
             return value;
         }
+
+        private static bool IsContextCookiePresent
+        {
+            get
+            {
+                HttpContext httpContext = HttpContext.Current;
+                return (httpContext != null) && (httpContext.Request.Cookies["context"] != null);
+            }
+        }
+
     }
 }

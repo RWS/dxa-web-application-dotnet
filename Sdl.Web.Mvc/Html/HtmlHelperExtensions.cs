@@ -297,7 +297,7 @@ namespace Sdl.Web.Mvc.Html
                 if (WebRequestContext.IsPreview)
                 {
                     // TODO TSI-773: don't parse entity if this is in an include page (not rendered directly, so !WebRequestContext.IsInclude)
-                    result = new MvcHtmlString(TridionMarkup.ParseEntity(result.ToString()));
+                    result = new MvcHtmlString(XpmMarkup.ParseEntity(result.ToString()));
                 }
                 return result;
             }
@@ -356,7 +356,7 @@ namespace Sdl.Web.Mvc.Html
                 if (WebRequestContext.IsPreview)
                 {
                     // TODO TSI-773: don't parse region if this is a region in an include page (not rendered directly, so !WebRequestContext.IsInclude)
-                    result = new MvcHtmlString(TridionMarkup.ParseRegion(result.ToString(), WebRequestContext.Localization));
+                    result = new MvcHtmlString(XpmMarkup.ParseRegion(result.ToString(), WebRequestContext.Localization));
                 }
                 return result;
             }
@@ -487,7 +487,7 @@ namespace Sdl.Web.Mvc.Html
                     page.XpmMetadata.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
                 }
 
-                return new MvcHtmlString(TridionMarkup.PageMarkup(page.XpmMetadata));
+                return new MvcHtmlString(XpmMarkup.PageMarkup(page.XpmMetadata));
             }
         }
 
