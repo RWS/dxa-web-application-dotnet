@@ -47,6 +47,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HtmlAgilityPack">
+      <HintPath>..\packages\HtmlAgilityPack.1.4.6\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -90,6 +93,7 @@
     <Compile Include="Formats\JsonFormatter.cs" />
     <Compile Include="Formats\BaseFormatter.cs" />
     <Compile Include="Formats\DataFormatters.cs" />
+    <Compile Include="Html\XpmMarkup.cs" />
     <Compile Include="Properties\VersionInfo.cs" />
     <Compile Include="Configuration\WebRequestContext.cs" />
     <Compile Include="Controllers\HandleSectionErrorAttribute.cs" />
@@ -111,10 +115,6 @@
     <ProjectReference Include="..\Sdl.Web.Common\Sdl.Web.Common.csproj">
       <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
       <Name>Sdl.Web.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj">
-      <Project>{ae4651df-a42f-4863-a0e1-870eacf3d072}</Project>
-      <Name>Sdl.Web.Tridion</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

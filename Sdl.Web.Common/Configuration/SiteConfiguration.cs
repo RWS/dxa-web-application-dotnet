@@ -13,7 +13,7 @@ using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Configuration
 {
-    public enum ScreenWidth
+    public enum ScreenWidth // TODO: move to a separate file (in Sdl.Web.Mvc ?)
     {
         ExtraSmall,
         Small,
@@ -34,7 +34,9 @@ namespace Sdl.Web.Common.Configuration
 
         private const string _settingsType = "config";
         private const string _includeSettingsType = "include";
+        private const string _regionSettingsType = "regions";
 
+        private static readonly Dictionary<string, Dictionary<string, XpmRegion>> _xpmRegions = new Dictionary<string, Dictionary<string, XpmRegion>>();
         private static readonly Dictionary<string, Dictionary<string, Dictionary<string, string>>> _configuration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
         private static readonly Dictionary<string, Dictionary<string, List<string>>> _includes = new Dictionary<string, Dictionary<string, List<string>>>();
         private static readonly object _localizationUpdateLock = new object();
@@ -405,7 +407,7 @@ namespace Sdl.Web.Common.Configuration
                 }
 
                 throw new DxaException(
-                    string.Format("Localization [{0}] does not contain includes for Page Type '{1}'. Check that the Publish Settings page is published and the application cache is up to date.",
+                    String.Format("Localization [{0}] does not contain includes for Page Type '{1}'. Check that the Publish Settings page is published and the application cache is up to date.",
                         localization, pageTypeIdentifier)
                     );
             }
@@ -427,7 +429,7 @@ namespace Sdl.Web.Common.Configuration
             string jsonData = ContentProvider.GetStaticContentItem(url, loc).GetText();
             if (jsonData == null)
             {
-                throw new DxaException(string.Format("Could not load configuration bootstrap file '{0}' for Localization [{1}].", url, loc));
+                throw new DxaException(String.Format("Could not load configuration bootstrap file '{0}' for Localization [{1}].", url, loc));
             }
 
             return Json.Decode(jsonData);
@@ -667,5 +669,47 @@ namespace Sdl.Web.Common.Configuration
         [Obsolete("Localizations are now loaded on demand in the web application so this is no longer available. Use the SiteConfiguration.LocalizationResolver.GetLocalizationByUri or GetLocalizationById methods", true)]
         public static Dictionary<string, Localization> Localizations { get; set; }        
         #endregion
+
+
+        /// <summary>
+        /// Gets a XPM region by name.
+        /// </summary>
+        /// <param name="name">The region name</param>
+        /// <param name="loc"></param>
+        /// <returns>The XPM region matching the name for the given module</returns>
+        public static XpmRegion GetXpmRegion(string name, Localization loc)
+        {
+            string key = loc.LocalizationId;
+            if (!_xpmRegions.ContainsKey(key) || CheckSettingsNeedRefresh(_regionSettingsType,loc.LocalizationId))
+            {
+                LoadRegionsForLocalization(loc);
+            }
+            if (_xpmRegions.ContainsKey(key))
+            {
+                Dictionary<string, XpmRegion> regionData = _xpmRegions[key];
+                if (regionData.ContainsKey(name))
+                {
+                    return regionData[name];
+                }
+            }
+            Log.Warn("XPM Region '{0}' does not exist in localization {1}.", name, loc.LocalizationId);
+            return null;
+        }
+
+        private static void LoadRegionsForLocalization(Localization loc)
+        {
+            string key = loc.LocalizationId;
+            string url = Path.Combine(loc.Path.ToCombinePath(true), @"system\mappings\regions.json").Replace("\\", "/");
+            string jsonData = ContentProvider.GetStaticContentItem(url, loc).GetText();
+            if (jsonData != null)
+            {
+                Dictionary<string, XpmRegion> regions = new JavaScriptSerializer().Deserialize<List<XpmRegion>>(jsonData).ToDictionary(region => region.Region);
+                ThreadSafeSettingsUpdate(_regionSettingsType, _xpmRegions, key, regions);
+            }
+            else
+            {
+                Log.Error("Region file: {0} does not exist for localization {1}. Check that the Publish Settings page has been published in this publication.", url, loc.LocalizationId);
+            }
+        }
     }
 }

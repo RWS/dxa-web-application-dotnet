@@ -1,8 +1,7 @@
-﻿namespace Sdl.Web.Tridion.Markup
+﻿namespace Sdl.Web.Common.Configuration
 {
     /// <summary>
-    /// Class for deserialized json component type.
-    /// {"Schema":"tcm:4-208-8","Template":"tcm:4-206-32"}
+    /// Represents an (XPM) Component Type as configured in regions.json.
     /// </summary>
     public class ComponentType
     {
@@ -15,10 +14,5 @@
         /// Component Template URI.
         /// </summary>
         public string Template { get; set; }
-
-        /// <summary>
-        /// Initializes a new empty instance of the <see cref="ComponentType"/> class.
-        /// </summary>
-        public ComponentType() { }
     }
 }

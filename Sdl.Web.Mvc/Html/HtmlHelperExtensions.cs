@@ -13,7 +13,6 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
-using Sdl.Web.Tridion.Markup;
 
 namespace Sdl.Web.Mvc.Html
 {

@@ -57,9 +57,6 @@
       <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="HtmlAgilityPack">
-      <HintPath>..\packages\HtmlAgilityPack.1.4.6\lib\Net45\HtmlAgilityPack.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
@@ -73,9 +70,6 @@
     <Compile Include="Context\AdfContextClaimsProvider.cs" />
     <Compile Include="Config\TridionConfig.cs" />
     <Compile Include="Linking\TridionLinkResolver.cs" />
-    <Compile Include="Markup\ComponentType.cs" />
-    <Compile Include="Markup\XpmMarkup.cs" />
-    <Compile Include="Markup\XpmRegion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query\BrokerQuery.cs" />
     <Compile Include="Properties\VersionInfo.cs" />

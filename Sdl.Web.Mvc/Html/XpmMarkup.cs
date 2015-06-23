@@ -1,13 +1,15 @@
-﻿using HtmlAgilityPack;
-using Sdl.Web.Common.Configuration;
-using Sdl.Web.Tridion.Config;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using HtmlAgilityPack;
+using Sdl.Web.Common.Configuration;
 
-namespace Sdl.Web.Tridion.Markup
+namespace Sdl.Web.Mvc.Html
 {
-    public static class XpmMarkup
+    /// <summary>
+    /// Internal class used to add XPM markup to the HTML output.
+    /// </summary>
+    internal static class XpmMarkup
     {
         private const string _xpmPageSettingsMarkup = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\"}} -->";
         private const string _xpmPageScript = "<script type=\"text/javascript\" language=\"javascript\" defer=\"defer\" src=\"{0}/WebUI/Editors/SiteEdit/Views/Bootstrap/Bootstrap.aspx?mode=js\" id=\"tridion.siteedit\"></script>";
@@ -113,7 +115,7 @@ namespace Sdl.Web.Tridion.Markup
 
         private static string MarkRegion(string name, Localization loc, int minOccurs = 0, int maxOccurs = 0)
         {
-            XpmRegion xpmRegion = TridionConfig.GetXpmRegion(name, loc);
+            XpmRegion xpmRegion = SiteConfiguration.GetXpmRegion(name, loc);
             if (xpmRegion == null)
             {
                 return String.Empty;
