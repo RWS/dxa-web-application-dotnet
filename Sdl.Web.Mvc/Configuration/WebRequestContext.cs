@@ -188,11 +188,11 @@ namespace Sdl.Web.Mvc.Configuration
 
         protected static Localization GetCurrentLocalization()
         {
-            if (HttpContext.Current != null)
+            if (HttpContext.Current == null)
             {
-                return SiteConfiguration.LocalizationManager.GetLocalizationFromUri(HttpContext.Current.Request.Url);
+                return null;
             }
-            return null;
+            return SiteConfiguration.LocalizationResolver.ResolveLocalization(HttpContext.Current.Request.Url);
         }
         
         protected static object GetFromContextStore(string key)

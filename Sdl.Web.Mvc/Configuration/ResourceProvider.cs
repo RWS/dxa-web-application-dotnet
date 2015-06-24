@@ -46,7 +46,7 @@ namespace Sdl.Web.Mvc.Configuration
         {
             string key = localization.LocalizationId;
             //Load resources if they are not already loaded, or if they are out of date and need refreshing
-            if (!_resources.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_settingsType,localization.LocalizationId))
+            if (!_resources.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_settingsType, localization))
             {
                 LoadResourcesForLocalization(localization);
                 if (!_resources.ContainsKey(key))

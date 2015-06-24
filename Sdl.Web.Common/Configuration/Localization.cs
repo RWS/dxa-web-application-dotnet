@@ -108,6 +108,48 @@ namespace Sdl.Web.Common.Configuration
             set;
         }
 
+        /// <summary>
+        /// Gets the date/time at which this <see cref="Localization"/> was last (re-)loaded.
+        /// </summary>
+        public DateTime LastLoaded
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Ensures that the <see cref="Localization"/> is initialized.
+        /// </summary>
+        public void EnsureInitialized()
+        {
+            using (new Tracer())
+            {
+                lock (this)
+                {
+                    if (LastLoaded == DateTime.MinValue)
+                    {
+                        SiteConfiguration.LoadLocalization(this, loadDetails: false); // TODO
+                        LastLoaded = DateTime.Now;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Forces a full reload of the <see cref="Localization"/>.
+        /// </summary>
+        public void Refresh()
+        {
+            using (new Tracer())
+            {
+                lock (this)
+                {
+                    SiteConfiguration.LoadLocalization(this, loadDetails: true); // TODO
+                    LastLoaded = DateTime.Now;
+                }
+            }
+        }
+
         public string GetBaseUrl() 
         {
             if (HttpContext.Current!=null)

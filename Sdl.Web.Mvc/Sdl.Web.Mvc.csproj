@@ -90,7 +90,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\BaseAreaRegistration.cs" />
-    <Compile Include="Configuration\BaseLocalizationManager.cs" />
     <Compile Include="Context\BrowserClaims.cs" />
     <Compile Include="Context\ContextClaims.cs" />
     <Compile Include="Context\ContextEngine.cs" />

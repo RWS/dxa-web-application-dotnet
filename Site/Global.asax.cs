@@ -100,10 +100,7 @@ namespace Sdl.Web.Site
         {
             InitializeDependencyInjection();
             SiteConfiguration.InitializeProviders(DependencyResolver.Current);
-            //Optionally preload list of localizations for this application
-            // TODO TSI-744: this requires a reference to Sdl.Web.Tridion (which is not intended as public API)
-            SiteConfiguration.LocalizationManager.SetLocalizations(TridionConfig.PublicationMap);
-            //Optionally set data formatters to allow pages to be rendered in data formats
+
             DataFormatters.Formatters.Add("json", new JsonFormatter());
             DataFormatters.Formatters.Add("rss", new RssFormatter());
             DataFormatters.Formatters.Add("atom", new AtomFormatter());

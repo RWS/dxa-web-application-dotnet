@@ -33,7 +33,7 @@ namespace Sdl.Web.Tridion.Config
             }
         }
 
-        public static void LoadLocalizations()
+        private static void LoadLocalizations()
         {
             lock (LocalizationLock)
             {
@@ -51,7 +51,7 @@ namespace Sdl.Web.Tridion.Config
                     // there could be multiple Host elements per Publication, add them all
                     foreach (XElement host in pub.Elements("Host"))
                     {
-                        _localizations.Add(GetLocalization(host));                        
+                        _localizations.Add(GetLocalization(host));
                     }
                 }
             }

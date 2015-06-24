@@ -36,10 +36,19 @@ namespace Sdl.Web.Common.Configuration
         private const string _includeSettingsType = "include";
         private const string _regionSettingsType = "regions";
 
+
+        // TODO: move this configuration state to class Localization instead of maintaining loc.ID mappings of everything here.
         private static readonly Dictionary<string, Dictionary<string, XpmRegion>> _xpmRegions = new Dictionary<string, Dictionary<string, XpmRegion>>();
         private static readonly Dictionary<string, Dictionary<string, Dictionary<string, string>>> _configuration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
         private static readonly Dictionary<string, Dictionary<string, List<string>>> _includes = new Dictionary<string, Dictionary<string, List<string>>>();
         private static readonly object _localizationUpdateLock = new object();
+
+        //A set of refresh states, keyed by localization id and then type (eg "config", "resources" etc.) 
+        private static readonly Dictionary<string, Dictionary<string, DateTime>> _refreshStates = new Dictionary<string, Dictionary<string, DateTime>>();
+        //A set of locks to use, one per localization
+        private static readonly Dictionary<string, object> _localizationLocks = new Dictionary<string, object>();
+        //A global lock
+        private static readonly object _lock = new object();
 
         #region References to "providers"
         /// <summary>
@@ -122,11 +131,11 @@ namespace Sdl.Web.Common.Configuration
 #pragma warning restore 618
 
         /// <summary>
-        /// Gets the Localization Manager used for mapping URLs to localizations/content stores
+        /// Gets the Localization Resolver used for mapping URLs to Localizations.
         /// </summary>
-        public static ILocalizationManager LocalizationManager
+        public static ILocalizationResolver LocalizationResolver
         {
-            get; 
+            get;
             private set;
         }
 
@@ -145,7 +154,7 @@ namespace Sdl.Web.Common.Configuration
                 RichTextProcessor = GetProvider<IRichTextProcessor>(dependencyResolver);
                 ConditionalEntityEvaluator = GetProvider<IConditionalEntityEvaluator>(dependencyResolver, isOptional: true);
                 MediaHelper = GetProvider<IMediaHelper>(dependencyResolver);
-                LocalizationManager = GetProvider<ILocalizationManager>(dependencyResolver);
+                LocalizationResolver = GetProvider<ILocalizationResolver>(dependencyResolver);
 #pragma warning disable 618
                 StaticFileManager = GetProvider<IStaticFileManager>(dependencyResolver, isOptional: true);
 #pragma warning restore 618
@@ -173,7 +182,6 @@ namespace Sdl.Web.Common.Configuration
         }
         #endregion
 
-
         /// <summary>
         /// A registry of View Path -> View Model Type mappings to enable the correct View Model to be mapped for a given View
         /// </summary>
@@ -190,32 +198,20 @@ namespace Sdl.Web.Common.Configuration
         /// <param name="key">The configuration key, in the format "section.name" (eg "Environment.CmsUrl")</param>
         /// <param name="localization">The localization to get config for</param>
         /// <returns>The configuration matching the key for the given localization</returns>
-        public static string GetConfig(string key, Localization localization = null)
+        public static string GetConfig(string key, Localization localization)
         {
             using (new Tracer(key, localization))
             {
-                if (localization == null)
+                if (!_configuration.ContainsKey(localization.LocalizationId) || CheckSettingsNeedRefresh(_settingsType, localization))
                 {
-                    localization = LocalizationManager.GetContextLocalization();
+                    localization.Refresh();
                 }
-                if (!CheckConfig(localization.LocalizationId))
-                {
-                    LocalizationManager.UpdateLocalization(localization, true);
-                }
+
                 return GetConfig(_configuration, key, localization.LocalizationId);
             }
 
         }
 
-        private static bool CheckConfig(string localizationId)
-        {
-            if (!_configuration.ContainsKey(localizationId) || CheckSettingsNeedRefresh(_settingsType, localizationId))
-            {
-                return false;
-            }
-            return true;
-        }
-        
         private static string GetConfig(IReadOnlyDictionary<string, Dictionary<string, Dictionary<string, string>>> config, string key, string type, bool global = false)
         {
             string error;
@@ -264,7 +260,7 @@ namespace Sdl.Web.Common.Configuration
                     //refresh all localizations for this site
                     foreach (Localization localization in loc.SiteLocalizations)
                     {
-                        LocalizationManager.UpdateLocalization(localization);
+                        localization.Refresh();
                     }
                 }
             }
@@ -292,19 +288,14 @@ namespace Sdl.Web.Common.Configuration
             ThreadSafeSettingsUpdate(_settingsType, _configuration, key, config);
         }
 
-        public static Localization LoadLocalization(Localization loc, bool loadDetails = false)
+        public static void LoadLocalization(Localization localization, bool loadDetails = false)
         {
-            using (new Tracer(loc, loadDetails))
+            using (new Tracer(localization, loadDetails))
             {
-                Localization localization = new Localization
-                {
-                    Path = loc.Path,
-                    LocalizationId = loc.LocalizationId,
-                    IsHtmlDesignPublished = true
-                };
+                localization.IsHtmlDesignPublished = true;
                 List<string> mediaPatterns = new List<string>();
-                string versionUrl = Path.Combine(loc.Path.ToCombinePath(true), @"version.json").Replace("\\", "/");
-                string versionJson = ContentProvider.GetStaticContentItem(versionUrl, loc).GetText();
+                string versionUrl = Path.Combine(localization.Path.ToCombinePath(true), @"version.json").Replace("\\", "/");
+                string versionJson = ContentProvider.GetStaticContentItem(versionUrl, localization).GetText();
                 if (versionJson == null)
                 {
                     //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually
@@ -320,7 +311,7 @@ namespace Sdl.Web.Common.Configuration
                 {
                     localization.Version = Json.Decode(versionJson).version;
                 }
-                dynamic bootstrapJson = GetConfigBootstrapJson(loc);
+                dynamic bootstrapJson = GetConfigBootstrapJson(localization);
                 if (bootstrapJson != null)
                 {
                     //The _all.json file contains a reference to all other configuration files
@@ -331,7 +322,7 @@ namespace Sdl.Web.Common.Configuration
                     if (bootstrapJson.staging != null && bootstrapJson.staging)
                     {
                         localization.IsStaging = true;
-                        Log.Info("Localization {0} is a staging site.", loc.LocalizationId);
+                        Log.Info("Localization {0} is a staging site.", localization.LocalizationId);
                     }
                     if (bootstrapJson.mediaRoot != null)
                     {
@@ -354,7 +345,7 @@ namespace Sdl.Web.Common.Configuration
                     if (localization.IsHtmlDesignPublished)
                     {
                         mediaPatterns.Add("^/favicon.ico");
-                        mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*", loc.Path, SystemFolder));
+                        mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*", localization.Path, SystemFolder));
                     }
                     if (bootstrapJson.files != null && loadDetails)
                     {
@@ -363,17 +354,16 @@ namespace Sdl.Web.Common.Configuration
                         {
                             configFiles.Add(file);
                         }
-                        LoadLocalizationDetails(loc, configFiles);
+                        LoadLocalizationDetails(localization, configFiles);
                     }
-                    mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$", loc.Path, SystemFolder));
+                    mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$", localization.Path, SystemFolder));
                 }
                 localization.StaticContentUrlPattern = String.Join("|", mediaPatterns);
-                localization.Culture = GetConfig("core.culture", loc);
-                localization.Language = GetConfig("core.language", loc);
-                string formats = GetConfig("core.dataFormats", loc);
+                localization.Culture = GetConfig("core.culture", localization);
+                localization.Language = GetConfig("core.language", localization);
+                string formats = GetConfig("core.dataFormats", localization);
                 localization.DataFormats = formats == null ? new List<string>() : formats.Split(',').Select(f => f.Trim()).ToList();
                 Log.Debug("MediaUrlRegex for localization {0} : {1}", localization.LocalizationId, localization.StaticContentUrlPattern);
-                return localization;
             }
         }
 
@@ -393,7 +383,7 @@ namespace Sdl.Web.Common.Configuration
             using (new Tracer(pageTypeIdentifier, localization))
             {
                 string key = localization.LocalizationId;
-                if (!_includes.ContainsKey(key) || CheckSettingsNeedRefresh(_includeSettingsType, localization.LocalizationId))
+                if (!_includes.ContainsKey(key) || CheckSettingsNeedRefresh(_includeSettingsType, localization))
                 {
                     LoadIncludesForLocalization(localization);
                 }
@@ -560,19 +550,19 @@ namespace Sdl.Web.Common.Configuration
         }
         
         #region Thread Safe Settings Update Helper Methods
-        
-        //A set of refresh states, keyed by localization id and then type (eg "config", "resources" etc.) 
-        private static readonly Dictionary<string, Dictionary<string, DateTime>> RefreshStates = new Dictionary<string, Dictionary<string, DateTime>>();
-        //A set of locks to use, one per localization
-        private static readonly Dictionary<string, object> LocalizationLocks = new Dictionary<string, object>();
-        //A global lock
-        private static readonly object Lock = new object();
-        
+
+        [Obsolete("Deprecated in DXA 1.1. Use the overload that takes a Localization instance.")]
         public static bool CheckSettingsNeedRefresh(string type, string localizationId)
         {
-            if (RefreshStates.ContainsKey(localizationId))
+            return CheckSettingsNeedRefresh(type, LocalizationResolver.GetLocalization(localizationId));
+        }
+        
+        public static bool CheckSettingsNeedRefresh(string type, Localization localization)
+        {
+            string localizationId = localization.LocalizationId;
+            if (_refreshStates.ContainsKey(localizationId))
             {
-                return RefreshStates[localizationId].ContainsKey(type) && RefreshStates[localizationId][type] < LocalizationManager.GetLastLocalizationRefresh(localizationId);
+                return _refreshStates[localizationId].ContainsKey(type) && _refreshStates[localizationId][type] < localization.LastLoaded;
             }
             return false;
         }
@@ -589,11 +579,11 @@ namespace Sdl.Web.Common.Configuration
         private static void UpdateRefreshState(string localizationId, string type)
         {
             //Update is already done under a localization lock, so we don't need to lock again here
-            if (!RefreshStates.ContainsKey(localizationId))
+            if (!_refreshStates.ContainsKey(localizationId))
             {
-                RefreshStates.Add(localizationId, new Dictionary<string, DateTime>());
+                _refreshStates.Add(localizationId, new Dictionary<string, DateTime>());
             }
-            Dictionary<string, DateTime> states = RefreshStates[localizationId];
+            Dictionary<string, DateTime> states = _refreshStates[localizationId];
             if (states.ContainsKey(type))
             {
                 states[type] = DateTime.Now;
@@ -606,14 +596,14 @@ namespace Sdl.Web.Common.Configuration
 
         private static object GetLocalizationLock(string localizationId)
         {
-            if (!LocalizationLocks.ContainsKey(localizationId))
+            if (!_localizationLocks.ContainsKey(localizationId))
             {
-                lock (Lock)
+                lock (_lock)
                 {
-                    LocalizationLocks.Add(localizationId, new object());
+                    _localizationLocks.Add(localizationId, new object());
                 }
             }
-            return LocalizationLocks[localizationId];
+            return _localizationLocks[localizationId];
         }
 
         #endregion
@@ -680,7 +670,7 @@ namespace Sdl.Web.Common.Configuration
         public static XpmRegion GetXpmRegion(string name, Localization loc)
         {
             string key = loc.LocalizationId;
-            if (!_xpmRegions.ContainsKey(key) || CheckSettingsNeedRefresh(_regionSettingsType,loc.LocalizationId))
+            if (!_xpmRegions.ContainsKey(key) || CheckSettingsNeedRefresh(_regionSettingsType,loc))
             {
                 LoadRegionsForLocalization(loc);
             }
