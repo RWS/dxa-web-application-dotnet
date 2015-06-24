@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Web;
+using System.Linq;
 
 namespace Sdl.Web.Mvc.Context
 {
@@ -51,15 +52,37 @@ namespace Sdl.Web.Mvc.Context
         {
             object claimValue;
             _claims.TryGetValue(GetClaimName(propertyName), out claimValue);
+            return CastValue<T>(claimValue);
+        }
 
-            if (claimValue == null || claimValue is T)
+        /// <summary>
+        /// Get typed values of a claim with a given property name.
+        /// </summary>
+        /// <typeparam name="T">The type of the individual claim values; an enumerable of this type will be returned.</typeparam>
+        /// <param name="propertyName">The property name.</param>
+        /// <returns>The values of the claim.</returns>
+        public T[] GetClaimValues<T>(string propertyName)
+        {
+            object claimValue;
+            _claims.TryGetValue(GetClaimName(propertyName), out claimValue);
+            return (claimValue == null) ? null : (from object item in (IEnumerable) claimValue select CastValue<T>(item)).ToArray();
+        }
+
+        private static T CastValue<T>(object value)
+        {
+            if (value == null || value is T)
             {
-                return (T) claimValue;
+                return (T) value;
+            }
+            else if (typeof(T) == typeof(string))
+            {
+                return (T) (object) value.ToString();
             }
             else
             {
-                return (T) Convert.ChangeType(claimValue, typeof(T));
+                return (T) Convert.ChangeType(value, typeof(T));
             }
         }
+
     }
 }

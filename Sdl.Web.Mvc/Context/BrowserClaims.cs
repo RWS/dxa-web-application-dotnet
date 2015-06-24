@@ -48,25 +48,17 @@
 
         public string[] ImageFormatSupport
         {
-            get
-            {
-                string imageFormatSupport = GetClaimValue<string>("imageFormatSupport");
-                return imageFormatSupport == null ? null : imageFormatSupport.Split(',');
-            }
+            get { return GetClaimValues<string>("imageFormatSupport"); }
         }
 
         public string[] InputDevices
         {
-            get
-            {
-                string inputDevices = GetClaimValue<string>("inputDevices");
-                return inputDevices == null ? null : inputDevices.Split(',');
-            }
+            get { return GetClaimValues<string>("inputDevices"); }
         }
 
-        public string InputModeSupport
+        public string[] InputModeSupport
         {
-            get { return GetClaimValue<string>("inputModeSupport"); }
+            get { return GetClaimValues<string>("inputModeSupport"); }
         }
 
         public string JsVersion
@@ -74,9 +66,9 @@
             get { return GetClaimValue<string>("jsVersion"); }
         }
 
-        public string MarkupSupport
+        public string[] MarkupSupport
         {
-            get { return GetClaimValue<string>("markupSupport"); }
+            get { return GetClaimValues<string>("markupSupport"); }
         }
 
         public string Model
@@ -89,18 +81,14 @@
             get { return GetClaimValue<string>("preferredHtmlContentType"); }
         }
 
-        public string ScriptSupport
+        public string[] ScriptSupport
         {
-            get { return GetClaimValue<string>("scriptSupport"); }
+            get { return GetClaimValues<string>("scriptSupport"); }
         }
 
         public string[] StylesheetSupport
         {
-            get
-            {
-                string stylesheetSupport = GetClaimValue<string>("stylesheetSupport");
-                return stylesheetSupport == null ? null : stylesheetSupport.Split(',');
-            }
+            get { return GetClaimValues<string>("stylesheetSupport"); }
         }
 
         public string Variant
