@@ -368,7 +368,8 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="regionName">The name of the Region to render. This object determines the View that will be used.</param>
         /// <param name="emptyViewName">
         /// The name of the View to use when no Region with the given name is found in the Page Model (i.e. no Entities exist in the given Region). 
-        /// If <c>null</c> (the default) then nothing will be rendered in that case. 
+        /// If <c>null</c> (the default) then nothing will be rendered in that case.
+        /// If the View is not in the Core Area, the View name has to be in the format AreaName:ViewName. 
         /// </param>
         /// <param name="containerSize">The size (in grid column units) of the containing element.</param>
         /// <returns>The rendered HTML or an empty string if no Region with a given name is found and <paramref name="emptyViewName"/> is <c>null</c>.</returns>
