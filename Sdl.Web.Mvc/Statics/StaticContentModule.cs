@@ -1,22 +1,18 @@
 ﻿using System;
-using System.IO;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Web;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
-using System.Collections.Generic;
 
 namespace Sdl.Web.Mvc.Statics
 {
     /// <summary>
-    /// HttpModule intercepting requests for static content items, retrieving those from the Content Provider and returning the (binary) content.
+    /// HttpModule handling requests for static content items, including versioned URL rewriting.
     /// </summary>
-    public class StaticContentDistributionModule : IHttpModule
+    public class StaticContentModule : IHttpModule
     {
         #region IHttpModule members
         /// <summary>
@@ -25,6 +21,7 @@ namespace Sdl.Web.Mvc.Statics
         /// <param name="application">Current HttpApplication</param>
         public void Init(HttpApplication application) 
         {
+            application.BeginRequest += BeginRequest;
             application.PreRequestHandlerExecute += OnPreRequestHandlerExecute;
         }
 
@@ -37,6 +34,42 @@ namespace Sdl.Web.Mvc.Statics
         }
         #endregion
 
+        private static void BeginRequest(object sender, EventArgs e)
+        {
+            HttpApplication application = (HttpApplication)sender;
+            HttpContext context = application.Context;
+            HttpRequest request = context.Request;
+            HttpResponse response = context.Response;
+            string url = context.Request.Url.AbsolutePath;
+
+            using (new Tracer(sender, e, url))
+            {
+                // Attempt to determine Localization
+                try
+                {
+                    Localization localization = WebRequestContext.Localization;
+                    Log.Debug("Request URL '{0}' maps to Localization [{1}]", request.Url, localization);
+                }
+                catch (DxaUnknownLocalizationException ex)
+                {
+                    SendNotFoundResponse(ex.Message, response);
+                }
+
+                // Prevent direct access to BinaryData folder
+                if (url.StartsWith("/" + SiteConfiguration.StaticsFolder + "/"))
+                {
+                    SendNotFoundResponse(string.Format("Attempt to directly access the static content cache through URL '{0}'", url), response);
+                }
+
+                // Rewrite versioned URLs
+                string versionLessUrl = SiteConfiguration.RemoveVersionFromPath(url);
+                if (url != versionLessUrl)
+                {
+                    Log.Debug("Rewriting versioned static content URL '{0}' to '{1}'", url, versionLessUrl);
+                    context.RewritePath(versionLessUrl);
+                }
+            }
+        }
 
         /// <summary>
         /// Event handler that gets triggered just before the ASP.NET Request Handler gets executed.
@@ -54,11 +87,6 @@ namespace Sdl.Web.Mvc.Statics
 
             using (new Tracer(sender, eventArgs, urlPath, ifModifiedSince))
             {
-                if (WebRequestContext.HasNoLocalization)
-                {
-                    return;
-                }
-
                 Localization localization = WebRequestContext.Localization;
                 string staticsRootUrl = SiteConfiguration.GetLocalStaticsUrl(localization.LocalizationId);
                 urlPath = urlPath.StartsWith("/" + staticsRootUrl) ? urlPath.Substring(staticsRootUrl.Length + 1) : urlPath;
@@ -86,16 +114,24 @@ namespace Sdl.Web.Mvc.Statics
                         }
                     }
                 }
-                catch (DxaItemNotFoundException e)
+                catch (DxaItemNotFoundException ex)
                 {
-                    Log.Warn("{0}. Returning HTTP 404 (Not Found).", e.Message);
-                    response.StatusCode = (int) HttpStatusCode.NotFound;
-                    response.SuppressContent = true;
+                    SendNotFoundResponse(ex.Message, response);
                 }
 
                 // Terminate the HTTP pipeline.
-                application.CompleteRequest(); // TODO: use response.End() instead?
+                application.CompleteRequest();
             }
+
+        }
+
+        private static void SendNotFoundResponse(string message, HttpResponse httpResponse)
+        {
+            Log.Warn("{0}. Sending HTTP 404 (Not Found) response.", message);
+            httpResponse.StatusCode = (int)HttpStatusCode.NotFound;
+            httpResponse.ContentType = "text/plain";
+            httpResponse.Write(message);
+            httpResponse.End(); // This terminates the HTTP processing pipeline
         }
     }
 }
