@@ -31,10 +31,8 @@ namespace Sdl.Web.Common.Configuration
         public const string StaticsFolder = "BinaryData";
         public const string DefaultVersion = "v1.00";
 
-        private const string _configSettingsType = "config";
         private const string _includeSettingsType = "include";
         private const string _regionSettingsType = "regions";
-
 
         // TODO: move this configuration state to class Localization instead of maintaining loc.ID mappings of everything here.
         private static readonly Dictionary<string, Dictionary<string, XpmRegion>> _xpmRegions = new Dictionary<string, Dictionary<string, XpmRegion>>();
@@ -179,37 +177,6 @@ namespace Sdl.Web.Common.Configuration
         }
         #endregion
 
-        /// <summary>
-        /// A registry of View Path -> View Model Type mappings to enable the correct View Model to be mapped for a given View
-        /// </summary>
-        [Obsolete("Dropped in DXA 1.1. Use ModelTypeRegistry.GetViewModelType instead.", true)]
-        public static Dictionary<string, Type> ViewModelRegistry
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets a (localized) configuration setting
-        /// </summary>
-        /// <param name="key">The configuration key, in the format "section.name" (eg "Environment.CmsUrl")</param>
-        /// <param name="localization">The localization to get config for</param>
-        /// <returns>The configuration matching the key for the given localization</returns>
-        [Obsolete("Deprecated in DXA 1.1 Use Localization.GetConfigValue instead.")]
-        public static string GetConfig(string key, Localization localization) // TODO: deprecate (move to class Localization)
-        {
-            using (new Tracer(key, localization))
-            {
-                return localization.GetConfigValue(key);
-            }
-
-        }
-
-        [Obsolete("Dropped in DXA 1.1. Use Localization.Refresh instead.", error: true)]
-        public static void Refresh(Localization localization = null)
-        {
-        }
-
 
         /// <summary>
         /// Gets the include Page URLs for a given Page Type and Localization.
@@ -290,29 +257,6 @@ namespace Sdl.Web.Common.Configuration
         public static string GetDefaultModuleName()
         {
             return "Core";
-        }
-
-        /// <summary>
-        /// Adds a View->View Model Type mapping to the view model registry
-        /// </summary>
-        /// <param name="viewData">The View Data used to determine the registry key and model type</param>
-        /// <param name="viewPath">The path to the view</param>
-        [Obsolete("Method is deprecated in DXA 1.1. Use BaseAreaRegistration.RegisterViewModel instead.")]
-        public static void AddViewModelToRegistry(MvcData viewData, string viewPath)
-        {
-            ModelTypeRegistry.RegisterViewModel(viewData, viewPath);
-        }
-
-        [Obsolete("Method is deprecated in DXA 1.1. Use ModelTypeRegistry instead.")]
-        public static string GetViewModelRegistryKey(MvcData mvcData)
-        {
-            return String.Format("{0}:{1}:{2}", mvcData.AreaName, mvcData.ControllerName, mvcData.ViewName);
-        }
-
-        [Obsolete("Method is deprecated in DXA 1.1. Use BaseAreaRegistration.RegisterViewModel instead.")]
-        public static void AddViewModelToRegistry(MvcData mvcData, Type modelType)
-        {
-            ModelTypeRegistry.RegisterViewModel(mvcData, modelType);
         }
 
         /// <summary>
@@ -440,7 +384,70 @@ namespace Sdl.Web.Common.Configuration
 
         #endregion
 
-        #region Obsolete Methods
+
+        #region Obsolete 
+        /// <summary>
+        /// A registry of View Path -> View Model Type mappings to enable the correct View Model to be mapped for a given View
+        /// </summary>
+        [Obsolete("Dropped in DXA 1.1. Use ModelTypeRegistry.GetViewModelType instead.", true)]
+        public static Dictionary<string, Type> ViewModelRegistry
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Adds a View->View Model Type mapping to the view model registry
+        /// </summary>
+        /// <param name="viewData">The View Data used to determine the registry key and model type</param>
+        /// <param name="viewPath">The path to the view</param>
+        [Obsolete("Method is deprecated in DXA 1.1. Use BaseAreaRegistration.RegisterViewModel instead.")]
+        public static void AddViewModelToRegistry(MvcData viewData, string viewPath)
+        {
+            ModelTypeRegistry.RegisterViewModel(viewData, viewPath);
+        }
+
+        [Obsolete("Method is deprecated in DXA 1.1. Use ModelTypeRegistry instead.")]
+        public static string GetViewModelRegistryKey(MvcData mvcData)
+        {
+            return String.Format("{0}:{1}:{2}", mvcData.AreaName, mvcData.ControllerName, mvcData.ViewName);
+        }
+
+        [Obsolete("Method is deprecated in DXA 1.1. Use BaseAreaRegistration.RegisterViewModel instead.")]
+        public static void AddViewModelToRegistry(MvcData mvcData, Type modelType)
+        {
+            ModelTypeRegistry.RegisterViewModel(mvcData, modelType);
+        }
+
+
+        /// <summary>
+        /// Gets a (localized) configuration setting
+        /// </summary>
+        /// <param name="key">The configuration key, in the format "section.name" (eg "Environment.CmsUrl")</param>
+        /// <param name="localization">The localization to get config for</param>
+        /// <returns>The configuration matching the key for the given localization</returns>
+        [Obsolete("Deprecated in DXA 1.1 Use Localization.GetConfigValue instead.")]
+        public static string GetConfig(string key, Localization localization)
+        {
+            using (new Tracer(key, localization))
+            {
+                return localization.GetConfigValue(key);
+            }
+
+        }
+
+        [Obsolete("Dropped in DXA 1.1. Use Localization.GetConfigValue instead.", error: true)]
+        public static string GetConfig(string key)
+        {
+            return null;
+        }
+
+        [Obsolete("Dropped in DXA 1.1. Use Localization.Refresh instead.", error: true)]
+        public static void Refresh(Localization localization = null)
+        {
+        }
+
+
         [Obsolete("Use Localization.IsStaging property of current localization (eg via WebRequestContext.Localization.IsStaging)", true)]
         public static bool IsStaging { get; set; }
         
