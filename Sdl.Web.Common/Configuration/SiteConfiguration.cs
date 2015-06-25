@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web.Helpers;
 using System.Web.Mvc;
 using System.Web.Script.Serialization;
 using Sdl.Web.Common.Extensions;
@@ -32,16 +31,14 @@ namespace Sdl.Web.Common.Configuration
         public const string StaticsFolder = "BinaryData";
         public const string DefaultVersion = "v1.00";
 
-        private const string _settingsType = "config";
+        private const string _configSettingsType = "config";
         private const string _includeSettingsType = "include";
         private const string _regionSettingsType = "regions";
 
 
         // TODO: move this configuration state to class Localization instead of maintaining loc.ID mappings of everything here.
         private static readonly Dictionary<string, Dictionary<string, XpmRegion>> _xpmRegions = new Dictionary<string, Dictionary<string, XpmRegion>>();
-        private static readonly Dictionary<string, Dictionary<string, Dictionary<string, string>>> _configuration = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
         private static readonly Dictionary<string, Dictionary<string, List<string>>> _includes = new Dictionary<string, Dictionary<string, List<string>>>();
-        private static readonly object _localizationUpdateLock = new object();
 
         //A set of refresh states, keyed by localization id and then type (eg "config", "resources" etc.) 
         private static readonly Dictionary<string, Dictionary<string, DateTime>> _refreshStates = new Dictionary<string, Dictionary<string, DateTime>>();
@@ -172,11 +169,11 @@ namespace Sdl.Web.Common.Configuration
                 {
                     throw new DxaException(String.Format("No implementation type configured for interface {0}. Check your Unity.config.", interfaceType.Name));
                 }
-                Log.Debug("No implementation type configured for optional interface {0}.", interfaceType.Name);
+                Log.Info("No implementation type configured for optional interface {0}.", interfaceType.Name);
             }
             else
             {
-                Log.Debug("Using implementation type '{0}' for interface {1}.", provider.GetType().FullName, interfaceType.Name);
+                Log.Info("Using implementation type '{0}' for interface {1}.", provider.GetType().FullName, interfaceType.Name);
             }
             return provider;
         }
@@ -198,174 +195,21 @@ namespace Sdl.Web.Common.Configuration
         /// <param name="key">The configuration key, in the format "section.name" (eg "Environment.CmsUrl")</param>
         /// <param name="localization">The localization to get config for</param>
         /// <returns>The configuration matching the key for the given localization</returns>
-        public static string GetConfig(string key, Localization localization)
+        [Obsolete("Deprecated in DXA 1.1 Use Localization.GetConfigValue instead.")]
+        public static string GetConfig(string key, Localization localization) // TODO: deprecate (move to class Localization)
         {
             using (new Tracer(key, localization))
             {
-                if (!_configuration.ContainsKey(localization.LocalizationId) || CheckSettingsNeedRefresh(_settingsType, localization))
-                {
-                    localization.Refresh();
-                }
-
-                return GetConfig(_configuration, key, localization.LocalizationId);
+                return localization.GetConfigValue(key);
             }
 
         }
 
-        private static string GetConfig(IReadOnlyDictionary<string, Dictionary<string, Dictionary<string, string>>> config, string key, string type, bool global = false)
+        [Obsolete("Dropped in DXA 1.1. Use Localization.Refresh instead.", error: true)]
+        public static void Refresh(Localization localization = null)
         {
-            string error;
-            if (config.ContainsKey(type))
-            {
-                Dictionary<string, Dictionary<string, string>> subConfig = config[type];
-                string[] bits = key.Split('.');
-                if (bits.Length >= 2)
-                {
-                    //We actually allow more than one . in the key (for example core.schemas.article) in this case the section
-                    //is the part up to the last dot and the key is the part after it.
-                    string sectionbit = key.Substring(0, key.LastIndexOf(".", StringComparison.Ordinal));
-                    string keybit = bits[bits.Length - 1];
-                    if (subConfig.ContainsKey(sectionbit))
-                    {
-                        if (subConfig[sectionbit].ContainsKey(keybit))
-                        {
-                            return subConfig[sectionbit][keybit];
-                        }
-                        error = String.Format("Configuration key {0} does not exist in section {1}", keybit, sectionbit);
-                    }
-                    else
-                    {
-                        error = String.Format("Configuration section {0} does not exist", sectionbit);
-                    }
-                }
-                else
-                {
-                    error = String.Format("Configuration key {0} is in the wrong format. It should be in the format [section].[key], for example \"environment.cmsurl\"", key);
-                }
-            }
-            else
-            {
-                error = String.Format("Configuration for {0} '{1}' does not exist.", global ? "module" : "localization", type);
-            }
-            Log.Error(error);
-            return null;
         }
 
-        public static void Refresh(Localization loc)
-        {
-            using (new Tracer(loc))
-            {
-                lock (_localizationUpdateLock)
-                {
-                    //refresh all localizations for this site
-                    foreach (Localization localization in loc.SiteLocalizations)
-                    {
-                        localization.Refresh();
-                    }
-                }
-            }
-        }
-
-        private static void LoadLocalizationDetails(Localization loc, IEnumerable<string> fileUrls)
-        {
-            string key = loc.LocalizationId;
-            Dictionary<string, Dictionary<string, string>> config = new Dictionary<string, Dictionary<string, string>>();
-            foreach (string configUrl in fileUrls)
-            {
-                string type = configUrl.Substring(configUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
-                type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                string jsonData =  ContentProvider.GetStaticContentItem(configUrl, loc).GetText();
-                if (jsonData != null)
-                {
-                    Log.Debug("Loading config from file: {0} for localization {1}", configUrl, key);
-                    config.Add(type, GetConfigFromFile(jsonData));
-                }
-                else
-                {
-                    Log.Error("Config file: {0} does not exist for localization {1} - skipping", configUrl, key);
-                }
-            }
-            ThreadSafeSettingsUpdate(_settingsType, _configuration, key, config);
-        }
-
-        public static void LoadLocalization(Localization localization, bool loadDetails = false)
-        {
-            using (new Tracer(localization, loadDetails))
-            {
-                localization.IsHtmlDesignPublished = true;
-                List<string> mediaPatterns = new List<string>();
-                string versionUrl = Path.Combine(localization.Path.ToCombinePath(true), @"version.json").Replace("\\", "/");
-                string versionJson = ContentProvider.GetStaticContentItem(versionUrl, localization).GetText();
-                if (versionJson == null)
-                {
-                    //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually
-                    //in which case we try to load it directly - the HTML Design is thus not published from CMS
-                    string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SystemFolder, @"assets\version.json");
-                    if (File.Exists(path))
-                    {
-                        versionJson = File.ReadAllText(path);
-                        localization.IsHtmlDesignPublished = false;
-                    }
-                }
-                if (versionJson != null)
-                {
-                    localization.Version = Json.Decode(versionJson).version;
-                }
-                dynamic bootstrapJson = GetConfigBootstrapJson(localization);
-                if (bootstrapJson != null)
-                {
-                    //The _all.json file contains a reference to all other configuration files
-                    if (bootstrapJson.defaultLocalization != null && bootstrapJson.defaultLocalization)
-                    {
-                        localization.IsDefaultLocalization = true;
-                    }
-                    if (bootstrapJson.staging != null && bootstrapJson.staging)
-                    {
-                        localization.IsStaging = true;
-                        Log.Info("Localization {0} is a staging site.", localization.LocalizationId);
-                    }
-                    if (bootstrapJson.mediaRoot != null)
-                    {
-                        string mediaRoot = bootstrapJson.mediaRoot;
-                        if (!mediaRoot.EndsWith("/"))
-                        {
-                            mediaRoot += "/";
-                        }
-                        Log.Debug("This site has media root: " + mediaRoot);
-                        mediaPatterns.Add(String.Format("^{0}{1}.*", mediaRoot, mediaRoot.EndsWith("/") ? String.Empty : "/"));
-                    }
-                    if (bootstrapJson.siteLocalizations != null)
-                    {
-                        localization.SiteLocalizations = new List<Localization>();
-                        foreach (dynamic item in bootstrapJson.siteLocalizations)
-                        {
-                            localization.SiteLocalizations.Add(new Localization { LocalizationId = item.id ?? item, Path = item.path, Language = item.language, IsDefaultLocalization = item.isMaster ?? false });
-                        }
-                    }
-                    if (localization.IsHtmlDesignPublished)
-                    {
-                        mediaPatterns.Add("^/favicon.ico");
-                        mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*", localization.Path, SystemFolder));
-                    }
-                    if (bootstrapJson.files != null && loadDetails)
-                    {
-                        List<string> configFiles = new List<string>();
-                        foreach (string file in bootstrapJson.files)
-                        {
-                            configFiles.Add(file);
-                        }
-                        LoadLocalizationDetails(localization, configFiles);
-                    }
-                    mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$", localization.Path, SystemFolder));
-                }
-                localization.StaticContentUrlPattern = String.Join("|", mediaPatterns);
-                localization.Culture = GetConfig("core.culture", localization);
-                localization.Language = GetConfig("core.language", localization);
-                string formats = GetConfig("core.dataFormats", localization);
-                localization.DataFormats = formats == null ? new List<string>() : formats.Split(',').Select(f => f.Trim()).ToList();
-                Log.Debug("MediaUrlRegex for localization {0} : {1}", localization.LocalizationId, localization.StaticContentUrlPattern);
-            }
-        }
 
         /// <summary>
         /// Gets the include Page URLs for a given Page Type and Localization.
@@ -412,23 +256,6 @@ namespace Sdl.Web.Common.Configuration
             ThreadSafeSettingsUpdate(_includeSettingsType, _includes, key, includes);
         }
 
-
-        private static dynamic GetConfigBootstrapJson(Localization loc)
-        {
-            string url = Path.Combine(loc.Path.ToCombinePath(true), SystemFolder, @"config\_all.json").Replace("\\", "/");
-            string jsonData = ContentProvider.GetStaticContentItem(url, loc).GetText();
-            if (jsonData == null)
-            {
-                throw new DxaException(String.Format("Could not load configuration bootstrap file '{0}' for Localization [{1}].", url, loc));
-            }
-
-            return Json.Decode(jsonData);
-        }
-
-        private static Dictionary<string, string> GetConfigFromFile(string jsonData)
-        {
-            return new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(jsonData);
-        }
 
         public static string GetPageController()
         {
@@ -557,17 +384,22 @@ namespace Sdl.Web.Common.Configuration
             return CheckSettingsNeedRefresh(type, LocalizationResolver.GetLocalization(localizationId));
         }
         
-        public static bool CheckSettingsNeedRefresh(string type, Localization localization)
+        public static bool CheckSettingsNeedRefresh(string type, Localization localization) // TODO: Move to class Localization
         {
-            string localizationId = localization.LocalizationId;
-            if (_refreshStates.ContainsKey(localizationId))
+            Dictionary<string, DateTime> localizationRefreshStates;
+            if (!_refreshStates.TryGetValue(localization.LocalizationId, out localizationRefreshStates))
             {
-                return _refreshStates[localizationId].ContainsKey(type) && _refreshStates[localizationId][type] < localization.LastLoaded;
+                return false;
             }
-            return false;
+            DateTime settingsRefresh;
+            if (!localizationRefreshStates.TryGetValue(type, out settingsRefresh))
+            {
+                return false;
+            }
+            return settingsRefresh.AddSeconds(1) < localization.LastRefresh;
         }
 
-        public static void ThreadSafeSettingsUpdate<T>(string type, Dictionary<string, T> settings, string localizationId, T value)
+        public static void ThreadSafeSettingsUpdate<T>(string type, Dictionary<string, T> settings, string localizationId, T value) // TODO
         {
             lock (GetLocalizationLock(localizationId))
             {
@@ -576,7 +408,7 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
-        private static void UpdateRefreshState(string localizationId, string type)
+        private static void UpdateRefreshState(string localizationId, string type) // TODO
         {
             //Update is already done under a localization lock, so we don't need to lock again here
             if (!_refreshStates.ContainsKey(localizationId))
@@ -635,11 +467,6 @@ namespace Sdl.Web.Common.Configuration
 
         [Obsolete("Use Version property of current Localization instead. Eg WebRequestContext.Localization.Version.", true)]
         public static string SiteVersion { get; set; }
-
-        [Obsolete("Use Refresh(Localization) - settings refresh can no longer be applied globally, only for a particular Localization at a time", true)]
-        public static void Refresh()
-        {
-        }
 
         [Obsolete("Configuration is now lazy loaded on demand per localization, so there is no need to call Load.", true)]
         public static void Load(string applicationRoot)

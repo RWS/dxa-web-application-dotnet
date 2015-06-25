@@ -73,9 +73,13 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="htmlHelper">HtmlHelper</param>
         /// <param name="configName">The config key (eg core.cmsUrl)</param>
         /// <returns>The config value</returns>
+        [Obsolete("Deprecated in DXA 1.1. Use Localization.GetConfigValue instead.")]
         public static string Config(this HtmlHelper htmlHelper, string configName)
         {
-            return SiteConfiguration.GetConfig(configName, WebRequestContext.Localization);
+            using (new Tracer(htmlHelper, configName))
+            {
+                return WebRequestContext.Localization.GetConfigValue(configName);
+            }
         }
 
         /// <summary>
@@ -484,7 +488,7 @@ namespace Sdl.Web.Mvc.Html
             {
                 if (!page.XpmMetadata.ContainsKey("CmsUrl"))
                 {
-                    page.XpmMetadata.Add("CmsUrl", SiteConfiguration.GetConfig("core.cmsurl", WebRequestContext.Localization));
+                    page.XpmMetadata.Add("CmsUrl", WebRequestContext.Localization.GetConfigValue("core.cmsurl"));
                 }
 
                 return new MvcHtmlString(XpmMarkup.PageMarkup(page.XpmMetadata));

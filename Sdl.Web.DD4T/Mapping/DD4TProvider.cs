@@ -392,7 +392,7 @@ namespace Sdl.Web.DD4T.Mapping
             string[] schemaKeyParts = schemaKey.Split('.');
             string moduleName = schemaKeyParts.Length > 1 ? schemaKeyParts[0] : SiteConfiguration.CoreModuleName;
             schemaKey = schemaKeyParts.Length > 1 ? schemaKeyParts[1] : schemaKeyParts[0];
-            string schemaId = SiteConfiguration.GetConfig(String.Format("{0}.schemas.{1}",moduleName, schemaKey ),WebRequestContext.Localization);
+            string schemaId = WebRequestContext.Localization.GetConfigValue(string.Format("{0}.schemas.{1}", moduleName, schemaKey));
 
             int result;
             Int32.TryParse(schemaId, out result);
