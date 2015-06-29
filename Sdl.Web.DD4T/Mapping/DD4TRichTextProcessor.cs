@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mime;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
 using DD4T.ContentModel.Factories;
@@ -19,6 +22,8 @@ namespace Sdl.Web.DD4T.Mapping
     /// </summary>
     public class DD4TRichTextProcessor : IRichTextProcessor
     {
+        private const string _embeddedEntityProcessingInstructionName = "EmbeddedEntity";
+        private static readonly Regex _embeddedEntityProcessingInstructionRegex = new Regex(@"<\?EmbeddedEntity\s\?>", RegexOptions.Compiled);
         private readonly IComponentFactory _componentFactory;
 
         public DD4TRichTextProcessor(IComponentFactory componentFactory)
@@ -40,7 +45,7 @@ namespace Sdl.Web.DD4T.Mapping
         ///     <item>Resolve inline links</item>
         /// </list>
         /// </remarks>
-        public string ProcessRichText(string xhtml)
+        public RichText ProcessRichText(string xhtml)
         {
             try
             {
@@ -51,13 +56,13 @@ namespace Sdl.Web.DD4T.Mapping
             catch (XmlException ex)
             {
                 Log.Warn("An error occurred parsing XHTML fragment; rich text processing is skipped: {0}\nXHTML fragment:\n{1}", ex.Message, xhtml);
-                return xhtml;
+                return new RichText(xhtml);
             }
         }
 
         #endregion
 
-        private string ResolveRichText(XmlDocument doc)
+        private RichText ResolveRichText(XmlDocument doc)
         {
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
             nsmgr.AddNamespace("xhtml", "http://www.w3.org/1999/xhtml");
@@ -111,40 +116,50 @@ namespace Sdl.Web.DD4T.Mapping
                 }
             }
 
-            // resolve youtube videos
-            foreach (XmlNode youtube in doc.SelectNodes("//img[@data-youTubeId]", nsmgr))
+            // Resolve embedded YouTube videos
+            List<EntityModel> embeddedEntities = new List<EntityModel>();
+            foreach (XmlElement youTubeImgElement in doc.SelectNodes("//img[@data-youTubeId][@xlink:href]", nsmgr))
             {
-                string uri = youtube.Attributes["xlink:href"].IfNotNull(attr => attr.Value);
-                string id = youtube.Attributes["data-youTubeId"].IfNotNull(attr => attr.Value);
-                string headline = youtube.Attributes["data-headline"].IfNotNull(attr => attr.Value);
-                string src = youtube.Attributes["src"].IfNotNull(attr => attr.Value);
-                if (!string.IsNullOrEmpty(uri))
+                YouTubeVideo youTubeVideo = new YouTubeVideo
                 {
-                    // call media helper for youtube video like is done in the view 
-                    string element;
-                    if (SiteConfiguration.MediaHelper.ShowVideoPlaceholders)
-                    {
-                        // we have a placeholder image
-                        string placeholderImgUrl = SiteConfiguration.MediaHelper.GetResponsiveImageUrl(src, 0, "100%");
-                        element = HtmlHelperExtensions.GetYouTubePlaceholder(id, placeholderImgUrl, headline, null, "span", true);
-                    }
-                    else
-                    {
-                        element = HtmlHelperExtensions.GetYouTubeEmbed(id);                        
-                    }
+                    Id =  DD4TModelBuilder.GetDxaIdentifierFromTcmUri(youTubeImgElement.GetAttribute("xlink:href")), 
+                    Url = youTubeImgElement.GetAttribute("src"),
+                    YouTubeId = youTubeImgElement.GetAttribute("data-youTubeId"),
+                    Headline = youTubeImgElement.GetAttribute("data-headline"),
+                    IsEmbedded = true,
+                    MvcData = new MvcData("Core:Entity:YouTubeVideo")
+                };
+                embeddedEntities.Add(youTubeVideo);
 
-                    // convert the element (which is a string) to an xmlnode 
-                    XmlDocument temp = new XmlDocument();
-                    temp.LoadXml(element);
-                    temp.DocumentElement.SetAttribute("xmlns", "http://www.w3.org/1999/xhtml");
-                    XmlNode video = doc.ImportNode(temp.DocumentElement, true);
-
-                    // replace youtube element with actual html
-                    youtube.ParentNode.ReplaceChild(video, youtube);
-                }
+                // Replace YouTube img element with marker XML processing instruction 
+                youTubeImgElement.ParentNode.ReplaceChild(
+                    doc.CreateProcessingInstruction(_embeddedEntityProcessingInstructionName, string.Empty), 
+                    youTubeImgElement
+                    );
             }
 
-            return doc.DocumentElement.InnerXml;
+            // Split the XHTML into fragments based on marker XML processing instructions.
+            string xhtml = doc.DocumentElement.InnerXml;
+            IList<IRichTextFragment> richTextFragments = new List<IRichTextFragment>();
+            int lastFragmentIndex = 0;
+            int i = 0;
+            foreach (Match embeddedEntityMatch in _embeddedEntityProcessingInstructionRegex.Matches(xhtml))
+            {
+                int embeddedEntityIndex = embeddedEntityMatch.Index;
+                if (embeddedEntityIndex > lastFragmentIndex)
+                {
+                    richTextFragments.Add(new RichTextFragment(xhtml.Substring(lastFragmentIndex, embeddedEntityIndex - lastFragmentIndex)));
+                }
+                richTextFragments.Add(embeddedEntities[i++]);
+                lastFragmentIndex = embeddedEntityIndex + embeddedEntityMatch.Length;
+            }
+            if (lastFragmentIndex < xhtml.Length)
+            {
+                // Final text fragment
+                richTextFragments.Add(new RichTextFragment(xhtml.Substring(lastFragmentIndex)));
+            }
+
+            return new RichText(richTextFragments);
         }
 
         private void ApplyHashIfApplicable(XmlNode link)

@@ -21,7 +21,7 @@
                                 @if (element.Text != null)
                                 {
                                     <div @Html.DxaPropertyMarkup(() => element.Text)>
-                                        @Html.Raw(element.Text)
+                                        @Html.DxaRichText(element.Text)
                                     </div>
                                 }
                                 @if (element.Media != null)

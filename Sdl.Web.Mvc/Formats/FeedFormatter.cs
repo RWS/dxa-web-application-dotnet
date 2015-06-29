@@ -152,7 +152,7 @@ namespace Sdl.Web.Mvc.Formats
             }
             if (item.Text != null)
             {
-                si.Summary = new TextSyndicationContent(item.Text);
+                si.Summary = new TextSyndicationContent(item.Text.ToString());
             }
             if (item.Link != null && item.Link.Url!=null && item.Link.Url.StartsWith("http"))
             {

@@ -57,7 +57,7 @@ namespace Sdl.Web.Common.Interfaces
 
         public object ResolveContent(object content, object resolveInstruction = null)
         {
-            return SiteConfiguration.RichTextProcessor.ProcessRichText((string) content);
+            return SiteConfiguration.RichTextProcessor.ProcessRichText((string) content).ToString();
         }
 
         public MvcData ResolveMvcData(object data)

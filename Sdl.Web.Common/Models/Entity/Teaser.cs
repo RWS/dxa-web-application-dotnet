@@ -23,7 +23,7 @@ namespace Sdl.Web.Common.Models
         public MediaItem Media { get; set; }
         [SemanticProperty("content")]
         [SemanticProperty("a:introText")]
-        public string Text { get; set; }
+        public RichText Text { get; set; }
         public DateTime? Date { get; set; }
         public Location Location { get; set; }
         //To store formatting options for the teaser (link style etc.)

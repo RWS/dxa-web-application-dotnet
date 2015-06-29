@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" GroupingSetting="Access" MembersFormat="FullSignature">
+  <Class Name="Sdl.Web.Mvc.Context.ContextClaims">
+    <Position X="3.75" Y="0.75" Width="4" />
+    <Compartments>
+      <Compartment Name="Private" Collapsed="true" />
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAgAACAAAAAAAAAAEAAAAAAAAAAAAAgAEA=</HashCode>
+      <FileName>Context\ContextClaims.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Mvc.Context.ContextEngine">
+    <Position X="0.5" Y="0.75" Width="2.75" />
+    <Compartments>
+      <Compartment Name="Private" Collapsed="true" />
+      <Compartment Name="Internal" Collapsed="true" />
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAAAAgAAAAAIAAMAAAAAAQAAAAAAAAAkAAA=</HashCode>
+      <FileName>Context\ContextEngine.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Mvc.Context.BrowserClaims">
+    <Position X="1.25" Y="4" Width="3" />
+    <TypeIdentifier>
+      <HashCode>IBAAQEAAIAAAEAAAgAAAACAAAgCgAABAAQgAABACAEQ=</HashCode>
+      <FileName>Context\BrowserClaims.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Mvc.Context.DeviceClaims">
+    <Position X="4.75" Y="4" Width="2" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAABAAAAAIAAAAAAQAAACgAABAAQkAAAAAAEA=</HashCode>
+      <FileName>Context\DeviceClaims.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sdl.Web.Mvc.Context.OperatingSystemClaims">
+    <Position X="7.25" Y="4" Width="2" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAACAAABAAAgAAAAAAEA=</HashCode>
+      <FileName>Context\OperatingSystemClaims.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -62,7 +62,7 @@ namespace Sdl.Web.Common.Mapping
         public static string GetVocabulary(string prefix, Localization loc)
         {
             string key = loc.LocalizationId;
-            if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc.LocalizationId))
+            if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc))
             {
                 LoadVocabulariesForLocalization(loc);
             }
@@ -84,7 +84,7 @@ namespace Sdl.Web.Common.Mapping
         public static string GetPrefix(string vocab, Localization loc)
         {
             string key = loc.LocalizationId;
-            if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc.LocalizationId))
+            if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc))
             {
                 LoadVocabulariesForLocalization(loc);
             }
@@ -106,7 +106,7 @@ namespace Sdl.Web.Common.Mapping
         public static SemanticSchema GetSchema(string id, Localization loc)
         {
             string key = loc.LocalizationId;
-            if (!_semanticMap.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_mapSettingsType, loc.LocalizationId))
+            if (!_semanticMap.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_mapSettingsType, loc))
             {
                 LoadSemanticMapForLocalization(loc);
             }

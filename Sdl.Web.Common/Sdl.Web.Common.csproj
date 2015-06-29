@@ -45,6 +45,19 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <DocumentationFile>bin\Release\Sdl.Web.Common.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Tridion71Release|AnyCPU'">
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net">
@@ -66,17 +79,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\ComponentType.cs" />
     <Compile Include="Configuration\SiteConfiguration.cs" />
     <Compile Include="Configuration\Localization.cs" />
+    <Compile Include="Configuration\XpmRegion.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="DxaException.cs" />
     <Compile Include="DxaItemNotFoundException.cs" />
+    <Compile Include="DxaUnkownLocalizationException.cs" />
     <Compile Include="Extensions\LinkExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Interfaces\IConditionalEntityEvaluator.cs" />
     <Compile Include="Interfaces\IContentResolver.cs" />
+    <Compile Include="Interfaces\IContextClaimsProvider.cs" />
     <Compile Include="Interfaces\ILinkResolver.cs" />
-    <Compile Include="Interfaces\ILocalizationManager.cs" />
+    <Compile Include="Interfaces\ILocalizationResolver.cs" />
     <Compile Include="Interfaces\INavigationProvider.cs" />
     <Compile Include="Interfaces\IRichTextProcessor.cs" />
     <Compile Include="Interfaces\LegacyContentResolverFacade.cs" />
@@ -98,6 +115,7 @@
     <Compile Include="Models\Legacy\IEntity.cs" />
     <Compile Include="Interfaces\IMediaHelper.cs" />
     <Compile Include="Models\Legacy\IRegion.cs" />
+    <Compile Include="Models\RichText.cs" />
     <Compile Include="Models\SemanticAttributes.cs" />
     <Compile Include="Models\Entity\Download.cs" />
     <Compile Include="Models\Legacy\EntityBase.cs" />

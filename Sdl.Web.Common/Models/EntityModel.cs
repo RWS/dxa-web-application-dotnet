@@ -6,7 +6,7 @@ namespace Sdl.Web.Common.Models
     /// <summary>
     /// Abstract base class for View Models for Entities.
     /// </summary>
-    public abstract class EntityModel : ViewModel
+    public abstract class EntityModel : ViewModel, IRichTextFragment
     {
         private string _id = string.Empty;
 
@@ -44,6 +44,34 @@ namespace Sdl.Web.Common.Models
             get;
             set;
         }
+
+        #region IRichTextFragment Members
+
+        /// <summary>
+        /// Gets an HTML representation of the Entity Model.
+        /// </summary>
+        /// <returns>An HTML representation.</returns>
+        /// <remarks>
+        /// This method is used when the <see cref="EntityModel"/> is part of a <see cref="RichText"/> instance which is mapped to a string property.
+        /// In this case HTML rendering happens during model mapping (by means of this method), which is not ideal.
+        /// Preferably, the model property should be of type <see cref="RichText"/> and the View should use @Html.DxaRichText() to get the rich text rendered as HTML.
+        /// </remarks>
+        /// <exception cref="NotSupportedException">
+        /// This method must be overridden in a concrete <see cref="EntityModel"/> subclass which is to be embedded in rich text.
+        /// For example, see <see cref="YouTubeVideo.ToHtml"/>.
+        /// </exception>
+        public virtual string ToHtml()
+        {
+            throw new NotSupportedException(
+                string.Format("Direct rendering of View Model type '{0}' to HTML is not supported." + 
+                " Consider using View Model property of type RichText in combination with @Html.DxaRichText() in view code to avoid direct rendering to HTML." +
+                " Alternatively, override method {0}.ToHtml().", 
+                GetType().FullName)
+                );
+        }
+
+        #endregion
+
 
         #region Overrides
 

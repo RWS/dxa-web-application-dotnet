@@ -12,7 +12,7 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         public ActionResult Refresh()
         {
             //trigger a reload of config/resources/mappings
-            SiteConfiguration.Refresh(WebRequestContext.Localization);
+            WebRequestContext.Localization.Refresh(allSiteLocalizations: true);
             return Redirect("~" + WebRequestContext.Localization.Path + "/");
         }
 	}

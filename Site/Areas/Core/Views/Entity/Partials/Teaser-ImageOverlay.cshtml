@@ -27,16 +27,16 @@
         @* 1x1px transparent GIF *@
         <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="100%">
     }
-    @if (!String.IsNullOrEmpty(Model.Headline) || !String.IsNullOrEmpty(Model.Text))
+    @if (!String.IsNullOrEmpty(Model.Headline) || !RichText.IsNullOrEmpty(Model.Text))
     {
         <div class="overlay overlay-tl ribbon">
         @if(!String.IsNullOrEmpty(Model.Headline))
         {
             <h2 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h2>
         }
-        @if(!String.IsNullOrEmpty(Model.Text))
+        @if(!RichText.IsNullOrEmpty(Model.Text))
         {
-            <div @Html.DxaPropertyMarkup(() => Model.Text)>@Html.Raw(Model.Text.Replace(". ", "<br/>"))</div>
+            <div @Html.DxaPropertyMarkup(() => Model.Text)>@Html.DxaRichText(Model.Text)</div>
         }
         </div>
     }

@@ -5,6 +5,7 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Mvc.Configuration;
 using System;
 using System.Collections.Generic;
+using Sdl.Web.Mvc.Context;
 
 namespace Sdl.Web.Mvc.Html
 {
@@ -125,8 +126,13 @@ namespace Sdl.Web.Mvc.Html
             if (containerSize == 0)
             {
                 //default is full width
-                containerSize = SiteConfiguration.MediaHelper.GridSize;
+                containerSize = GridSize;
             }
+            if (string.IsNullOrEmpty(widthFactor))
+            {
+                widthFactor = DefaultMediaFill;
+            }
+
             double width = 0;
             //For absolute fill factors, we should have a number
             if (!widthFactor.EndsWith("%"))
@@ -139,7 +145,7 @@ namespace Sdl.Web.Mvc.Html
                 }
                 else
                 {
-                    width = width * WebRequestContext.ContextEngine.Device.PixelRatio;
+                    width = width * WebRequestContext.ContextEngine.GetClaims<DeviceClaims>().PixelRatio;
                 }
             }
             //For percentage fill factors, we need to do some calculation of container size etc.
