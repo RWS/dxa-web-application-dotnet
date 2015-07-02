@@ -296,11 +296,12 @@ namespace Sdl.Web.Mvc.Html
                         parameters[key] = mvcData.RouteValues[key];
                     }
                 }
+
                 MvcHtmlString result = htmlHelper.Action(actionName, controllerName, parameters);
-                if (WebRequestContext.IsPreview)
+                // If the Entity is being rendered inside a Region (typical), we don't have to transform the XPM markup attributes here; it will be done in DxaRegion.
+                if (!(htmlHelper.ViewData.Model is RegionModel) && WebRequestContext.IsPreview)
                 {
-                    // TODO TSI-773: don't parse entity if this is in an include page (not rendered directly, so !WebRequestContext.IsInclude)
-                    result = new MvcHtmlString(XpmMarkup.ParseEntity(result.ToString()));
+                    result = new MvcHtmlString(Markup.TransformXpmMarkupAttributes(result.ToString()));
                 }
                 return result;
             }
@@ -358,8 +359,7 @@ namespace Sdl.Web.Mvc.Html
 
                 if (WebRequestContext.IsPreview)
                 {
-                    // TODO TSI-773: don't parse region if this is a region in an include page (not rendered directly, so !WebRequestContext.IsInclude)
-                    result = new MvcHtmlString(XpmMarkup.ParseRegion(result.ToString(), WebRequestContext.Localization));
+                    result = new MvcHtmlString(Markup.TransformXpmMarkupAttributes(result.ToString()));
                 }
                 return result;
             }
@@ -486,12 +486,7 @@ namespace Sdl.Web.Mvc.Html
 
             using (new Tracer(htmlHelper, page))
             {
-                if (!page.XpmMetadata.ContainsKey("CmsUrl"))
-                {
-                    page.XpmMetadata.Add("CmsUrl", WebRequestContext.Localization.GetConfigValue("core.cmsurl"));
-                }
-
-                return new MvcHtmlString(XpmMarkup.PageMarkup(page.XpmMetadata));
+                return new MvcHtmlString(page.GetXpmMarkup(WebRequestContext.Localization));
             }
         }
 

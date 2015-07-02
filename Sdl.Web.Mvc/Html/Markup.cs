@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using HtmlAgilityPack;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -17,6 +17,38 @@ namespace Sdl.Web.Mvc.Html
     /// </summary>
     public static class Markup
     {
+        private const string _xpmMarkupHtmlAttrName = "data-xpm";
+        private const string _xpmMarkupXPath = "//*[@" + _xpmMarkupHtmlAttrName + "]";
+        private const string _xpmFieldMarkup = "<!-- Start Component Field: {{\"XPath\":\"{0}\"}} -->";
+
+        private class XpmMarkupMap : Dictionary<string, string>
+        {
+            private int _index;
+
+            internal string AddXpmMarkup(string xpmMarkup)
+            {
+                string index = Convert.ToString(_index++);
+                Add(index, xpmMarkup);
+                return index;
+            }
+
+            internal static XpmMarkupMap Current 
+            {
+                get
+                {
+                    const string httpContextItemName = "XpmMarkupMap";
+                    HttpContext httpContext = HttpContext.Current;
+                    XpmMarkupMap result = httpContext.Items[httpContextItemName] as XpmMarkupMap;
+                    if (result == null)
+                    {
+                        result = new XpmMarkupMap();
+                        httpContext.Items[httpContextItemName] = result;
+                    }
+                    return result;
+                }
+            }
+        }
+
         #region Obsolete Public API
 #pragma warning disable 618
 
@@ -65,33 +97,33 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
         internal static MvcHtmlString RenderEntityAttributes(EntityModel entityModel)
         {
-            StringBuilder markupBuilder = new StringBuilder();
+            string markup = String.Empty;
 
             IDictionary<string, string> prefixMappings;
             string[] semanticTypes = ModelTypeRegistry.GetSemanticTypes(entityModel.GetType(), out prefixMappings);
             if (semanticTypes.Any())
             {
-                markupBuilder.AppendFormat(
+                markup = String.Format(
                     "prefix=\"{0}\" typeof=\"{1}\"",
-                    string.Join(" ", prefixMappings.Select(pm => string.Format("{0}: {1}", pm.Key, pm.Value))), 
+                    String.Join(" ", prefixMappings.Select(pm => String.Format("{0}: {1}", pm.Key, pm.Value))), 
                     String.Join(" ", semanticTypes)
                     );
             }
 
-            if (WebRequestContext.IsPreview && (entityModel.XpmMetadata != null))
+            if (WebRequestContext.IsPreview)
             {
-                foreach (KeyValuePair<string, string> item in entityModel.XpmMetadata)
+                string xpmMarkupAttr = RenderXpmMarkupAttribute(entityModel);
+                if (string.IsNullOrEmpty(markup))
                 {
-                    if (markupBuilder.Length > 0)
-                    {
-                        markupBuilder.Append(" ");
-                    }
-                    // add data- attributes using all lowercase chars, since that is what we look for in ParseComponentPresentation
-                    markupBuilder.AppendFormat("data-{0}=\"{1}\"", item.Key.ToLowerInvariant(), HttpUtility.HtmlAttributeEncode(item.Value));
+                    markup = xpmMarkupAttr;
+                }
+                else
+                {
+                    markup += " " + xpmMarkupAttr;
                 }
             }
 
-            return new MvcHtmlString(markupBuilder.ToString());
+            return new MvcHtmlString(markup);
         }
 
         /// <summary>
@@ -107,7 +139,7 @@ namespace Sdl.Web.Mvc.Html
             if (propertyInfo == null)
             {
                 throw new DxaException(
-                    string.Format("Entity Type '{0}' does not have a property named '{1}'.", entityModel.GetType().Name, propertyName)
+                    String.Format("Entity Type '{0}' does not have a property named '{1}'.", entityModel.GetType().Name, propertyName)
                     );
             }
             return RenderPropertyAttributes(entityModel, propertyInfo, index);
@@ -122,20 +154,26 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
         internal static MvcHtmlString RenderPropertyAttributes(EntityModel entityModel, MemberInfo propertyInfo, int index = 0)
         {
-            string markup = string.Empty;
+            string markup = String.Empty;
             string propertyName = propertyInfo.Name;
 
             string[] semanticPropertyNames = ModelTypeRegistry.GetSemanticPropertyNames(propertyInfo.DeclaringType, propertyName);
             if (semanticPropertyNames != null && semanticPropertyNames.Any())
             {
-                markup = string.Format("property=\"{0}\"", string.Join(" ", semanticPropertyNames));
+                markup = String.Format("property=\"{0}\"", String.Join(" ", semanticPropertyNames));
             }
 
-            string xpath;
-            if (WebRequestContext.IsPreview && entityModel.XpmPropertyMetadata != null && entityModel.XpmPropertyMetadata.TryGetValue(propertyName, out xpath))
+            if (WebRequestContext.IsPreview)
             {
-                string predicate = xpath.EndsWith("]") ? string.Empty : string.Format("[{0}]", index + 1);
-                markup += string.Format(" data-xpath=\"{0}{1}\"", HttpUtility.HtmlAttributeEncode(xpath), predicate);
+                string xpmMarkupAttr = RenderXpmMarkupAttribute(entityModel, propertyName, index);
+                if (string.IsNullOrEmpty(markup))
+                {
+                    markup = xpmMarkupAttr;
+                }
+                else
+                {
+                    markup += " " + xpmMarkupAttr;
+                }
             }
 
             Log.Debug("Rendered markup for Entity [{0}] Property '{1}': {2}", entityModel, propertyName, markup);
@@ -151,14 +189,91 @@ namespace Sdl.Web.Mvc.Html
         internal static MvcHtmlString RenderRegionAttributes(RegionModel regionModel)
         {
             // TODO: "Region" is not a valid semantic type!
-            string markup = string.Format("typeof=\"{0}\" resource=\"{1}\"", "Region", regionModel.Name);
+            string markup = String.Format("typeof=\"{0}\" resource=\"{1}\"", "Region", regionModel.Name);
 
             if (WebRequestContext.IsPreview)
             {
-                markup += string.Format(" data-region=\"{0}\"", regionModel.Name);
+                markup += " " + RenderXpmMarkupAttribute(regionModel);
             }
 
             return new MvcHtmlString(markup);
+        }
+
+
+        /// <summary>
+        /// Renders a temporary HTML attribute containing the XPM markup for a given View Model or property.
+        /// </summary>
+        /// <seealso cref="TransformXpmMarkupAttributes"/>
+        private static string RenderXpmMarkupAttribute(ViewModel viewModel, string propertyName = null, int index = 0)
+        {
+            string xpmMarkup;
+            if (propertyName == null)
+            {
+                // Region/Entity markup
+                xpmMarkup = viewModel.GetXpmMarkup(WebRequestContext.Localization);
+            }
+            else
+            {
+                // Property markup
+                EntityModel entityModel = (EntityModel) viewModel;
+                string xpath;
+                if (entityModel.XpmPropertyMetadata != null && entityModel.XpmPropertyMetadata.TryGetValue(propertyName, out xpath))
+                {
+                    string predicate = xpath.EndsWith("]") ? string.Empty : string.Format("[{0}]", index + 1);
+                    xpmMarkup = string.Format(_xpmFieldMarkup, HttpUtility.HtmlAttributeEncode(xpath + predicate));
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+
+            // Instead of jamming the entire XPM markup in an HTML attribute, we only put in a reference to the XPM markup.
+            string xpmMarkupRef = XpmMarkupMap.Current.AddXpmMarkup(xpmMarkup);
+
+            return string.Format("{0}=\"{1}\"", _xpmMarkupHtmlAttrName, xpmMarkupRef);
+        }
+
+        /// <summary>
+        /// Transforms XPM markup contained in HTML attributes to HTML comments inside the HTML elements.
+        /// </summary>
+        /// <param name="htmlFragment">The HTML fragment to tranform.</param>
+        /// <returns>The transformed HTML fragment.</returns>
+        internal static string TransformXpmMarkupAttributes(string htmlFragment)
+        {
+            //HTML Agility pack drops closing option tags for some reason (bug?)
+            HtmlNode.ElementsFlags.Remove("option");
+
+            HtmlDocument htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(String.Format("<html>{0}</html>", htmlFragment));
+            HtmlNode rootElement = htmlDoc.DocumentNode.FirstChild;
+            HtmlNodeCollection elementsWithXpmMarkup = rootElement.SelectNodes(_xpmMarkupXPath);
+            if (elementsWithXpmMarkup != null)
+            {
+                XpmMarkupMap xpmMarkupMap = XpmMarkupMap.Current;
+                foreach (HtmlNode elementWithXpmMarkup in elementsWithXpmMarkup)
+                {
+                    string xpmMarkupRef = ReadAndRemoveAttribute(elementWithXpmMarkup, _xpmMarkupHtmlAttrName);
+                    string xpmMarkup = xpmMarkupMap[xpmMarkupRef];
+                    // TODO: XPM markup may be multiple HTML comments (e.g. SmartTargetRegion)
+                    HtmlCommentNode xpmMarkupNode = htmlDoc.CreateComment(xpmMarkup);
+                    elementWithXpmMarkup.ChildNodes.Insert(0, xpmMarkupNode);
+                }
+            }
+            return rootElement.InnerHtml;
+        }
+
+
+        private static string ReadAndRemoveAttribute(HtmlNode htmlElement, string attributeName)
+        {
+            if (!htmlElement.Attributes.Contains(attributeName))
+            {
+                return string.Empty;
+            }
+
+            HtmlAttribute attr = htmlElement.Attributes[attributeName];
+            htmlElement.Attributes.Remove(attr);
+            return HttpUtility.HtmlDecode(attr.Value);
         }
     }
 }

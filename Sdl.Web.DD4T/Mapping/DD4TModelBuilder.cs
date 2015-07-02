@@ -129,6 +129,7 @@ namespace Sdl.Web.DD4T.Mapping
             EntityModel model = CreateEntityModel(cp.Component, modelType);
             model.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
             model.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("s"));
+            model.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "1" : "0");
             model.MvcData = mvcData;
             return model;
         }

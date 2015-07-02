@@ -9,7 +9,7 @@ namespace Sdl.Web.Common.Models
     /// </summary>
     [Obsolete("Deprecated in DXA 1.1. Use class RegionModel instead.")]
 #pragma warning disable 618
-    public class Region : ViewModel, IRegion
+    public abstract class Region : ViewModel, IRegion
 #pragma warning restore 618
     {
         private readonly string _name;

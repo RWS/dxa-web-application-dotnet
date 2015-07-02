@@ -8,7 +8,7 @@ namespace Sdl.Web.Common.Models
     /// Legacy base class for page content, used for includes and other 'non-concrete' pages. 
     /// </summary>
     [Obsolete("Deprecated in DXA 1.1. Use class PageModel instead.")]
-    public class PageBase : ViewModel, IPage
+    public abstract class PageBase : ViewModel, IPage
     {
         private readonly string _id;
         protected readonly RegionModelSet _regions = new RegionModelSet();

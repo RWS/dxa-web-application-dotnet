@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
 {
@@ -36,5 +37,12 @@ namespace Sdl.Web.Common.Models
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets the rendered XPM markup
+        /// </summary>
+        /// <param name="localization">The context Localization.</param>
+        /// <returns>The XPM markup.</returns>
+        public abstract string GetXpmMarkup(Localization localization);
     }
 }

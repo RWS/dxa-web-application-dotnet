@@ -105,7 +105,6 @@
     <Compile Include="Formats\JsonFormatter.cs" />
     <Compile Include="Formats\BaseFormatter.cs" />
     <Compile Include="Formats\DataFormatters.cs" />
-    <Compile Include="Html\XpmMarkup.cs" />
     <Compile Include="Properties\VersionInfo.cs" />
     <Compile Include="Configuration\WebRequestContext.cs" />
     <Compile Include="Controllers\HandleSectionErrorAttribute.cs" />
