@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Web.UI;
 using DD4T.ContentModel;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
@@ -15,7 +16,6 @@ using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Common;
 using Sdl.Web.Mvc.Configuration;
-using Sdl.Web.Tridion.Config;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.DD4T.Mapping
@@ -27,6 +27,13 @@ namespace Sdl.Web.DD4T.Mapping
     {
         // TODO: while it works perfectly well, this class is in need of some refactoring to make its behaviour a bit more understandable and maintainable,
         // as its currently very easy to get lost in the semantic mapping logic
+
+        private const string _standardMetadataXmlFieldName = "standardMeta";
+        private const string _standardMetadataTitleXmlFieldName = "name";
+        private const string _standardMetadataDescriptionXmlFieldName = "description";
+        private const string _regionForPageTitleComponent = "Main";
+        private const string _componentXmlFieldNameForPageTitle = "headline";
+
         private ResourceProvider _resourceProvider;
 
         #region IModelBuilder members
@@ -42,14 +49,30 @@ namespace Sdl.Web.DD4T.Mapping
                 MvcData = mvcData, 
                 XpmMetadata = GetXpmMetadata(page)
             };
+            RegionModelSet regions = model.Regions;
 
+            // Create predefined Regions from Page Template Metadata
+            CreatePredefinedRegions(regions, page.PageTemplate);
+
+            // Create Regions/Entities from Component Presentations
             IConditionalEntityEvaluator conditionalEntityEvaluator = SiteConfiguration.ConditionalEntityEvaluator;
             foreach (IComponentPresentation cp in page.ComponentPresentations)
             {
-                RegionModel region = GetRegionFromComponentPresentation(cp);
-                if (!model.Regions.ContainsKey(region.Name))
+                MvcData cpRegionMvcData = GetRegionMvcData(cp);
+                RegionModel region;
+                if (regions.TryGetValue(cpRegionMvcData.ViewName, out region))
                 {
-                    model.Regions.Add(region);
+                    // Region already exists in Page Model; MVC data should match.
+                    if (!region.MvcData.Equals(cpRegionMvcData))
+                    {
+                        Log.Warn("Region '{0}' is defined with conflicting MVC data: [{1} and [{2}]. Using the former.", region.Name, region.MvcData, cpRegionMvcData);
+                    }
+                }
+                else
+                {
+                    // Region does not exist in Page Model yet; create Region Model and add it.
+                    region = CreateRegionModel(cpRegionMvcData);
+                    regions.Add(region);
                 }
 
                 EntityModel entity;
@@ -71,13 +94,13 @@ namespace Sdl.Web.DD4T.Mapping
 
                 if (conditionalEntityEvaluator == null || conditionalEntityEvaluator.IncludeEntity(entity))
                 {
-                    model.Regions[region.Name].Entities.Add(entity);
+                    region.Entities.Add(entity);
                 }
             }
 
+            // Create Regions from Include Pages
             if (includes != null )
             {
-                RegionModelSet regions = model.Regions;
                 foreach (IPage includePage in includes)
                 {
                     PageModel includePageModel = CreatePageModel(includePage, null);
@@ -170,7 +193,7 @@ namespace Sdl.Web.DD4T.Mapping
             if (model is Link)
             {
                 Link link = (Link) model;
-                if (string.IsNullOrEmpty(link.Url))
+                if (String.IsNullOrEmpty(link.Url))
                 {
                     link.Url = SiteConfiguration.LinkResolver.ResolveLink(component.Id);
                 }
@@ -229,7 +252,7 @@ namespace Sdl.Web.DD4T.Mapping
                                 processed = true;
                             }
                         }
-                        else if (info.PropertyName == "_all" && pi.PropertyType == typeof(Dictionary<string,string>))
+                        else if (info.PropertyName == "_all" && pi.PropertyType == typeof(Dictionary<string, string>))
                         {
                             //Map all fields into a single (Dictionary) property
                             pi.SetValue(model, GetAllFieldsAsDictionary(mappingData.SourceEntity));
@@ -310,7 +333,7 @@ namespace Sdl.Web.DD4T.Mapping
             return null;
         }
 
-        private static KeyValuePair<string,string>? GetEntityData(string prefix, Dictionary<string,KeyValuePair<string,string>> entityData, string defaultPrefix)
+        private static KeyValuePair<string, string>? GetEntityData(string prefix, Dictionary<string, KeyValuePair<string, string>> entityData, string defaultPrefix)
         {
             if (defaultPrefix != null && String.IsNullOrEmpty(prefix))
             {
@@ -357,7 +380,7 @@ namespace Sdl.Web.DD4T.Mapping
             if (genericListConstructor == null)
             {
                 // This should never happen.
-                throw new DxaException(string.Format("Unable get constructor for generic list of '{0}'.", listItemType.FullName));
+                throw new DxaException(String.Format("Unable get constructor for generic list of '{0}'.", listItemType.FullName));
             }
 
             return (IList)genericListConstructor.Invoke(null);
@@ -451,7 +474,7 @@ namespace Sdl.Web.DD4T.Mapping
             }
             catch (Exception ex)
             {
-                throw new DxaException(string.Format("Unable to map field '{0}' to property of type '{1}'.", field.Name, modelType.FullName), ex);
+                throw new DxaException(String.Format("Unable to map field '{0}' to property of type '{1}'.", field.Name, modelType.FullName), ex);
             }
         }
 
@@ -487,13 +510,13 @@ namespace Sdl.Web.DD4T.Mapping
         protected virtual object MapKeyword(IKeyword keyword, Type modelType)
         {
             // TODO TSI-811: Keyword mapping should also be generic rather than hard-coded like below
-            string displayText = string.IsNullOrEmpty(keyword.Description) ? keyword.Title : keyword.Description;
+            string displayText = String.IsNullOrEmpty(keyword.Description) ? keyword.Title : keyword.Description;
             if (modelType == typeof(Tag))
             {
                 return new Tag
                 {
                     DisplayText = displayText,
-                    Key = string.IsNullOrEmpty(keyword.Key) ? keyword.Id : keyword.Key,
+                    Key = String.IsNullOrEmpty(keyword.Key) ? keyword.Id : keyword.Key,
                     TagCategory = keyword.TaxonomyId
                 };
             } 
@@ -508,7 +531,7 @@ namespace Sdl.Web.DD4T.Mapping
             }
             else
             {
-                throw new DxaException(string.Format("Cannot map Keyword to type '{0}'. The type must be Tag, bool or string.", modelType));
+                throw new DxaException(String.Format("Cannot map Keyword to type '{0}'. The type must be Tag, bool or string.", modelType));
             }
         }
 
@@ -521,7 +544,7 @@ namespace Sdl.Web.DD4T.Mapping
 
             if (!modelType.IsSubclassOf(typeof(EntityModel)))
             {
-                throw new DxaException(string.Format("Cannot map a Component to type '{0}'. The type must be String or a subclass of EntityModel.", modelType));
+                throw new DxaException(String.Format("Cannot map a Component to type '{0}'. The type must be String or a subclass of EntityModel.", modelType));
             }
 
             return CreateEntityModel(component, modelType);
@@ -593,7 +616,7 @@ namespace Sdl.Web.DD4T.Mapping
         }
 
 
-        protected virtual string ProcessPageMetadata(IPage page, IDictionary<string,string> meta)
+        protected virtual string ProcessPageMetadata(IPage page, IDictionary<string, string> meta)
         {
             //First grab metadata from the page
             if (page.MetadataFields != null)
@@ -613,28 +636,28 @@ namespace Sdl.Web.DD4T.Mapping
                 bool first = true;
                 foreach (IComponentPresentation cp in page.ComponentPresentations)
                 {
-                    RegionModel region = GetRegionFromComponentPresentation(cp);
+                    MvcData regionMvcData = GetRegionMvcData(cp);
                     // determine title and description from first component in 'main' region
-                    if (first && region.Name.Equals(TridionConfig.RegionForPageTitleComponent))
+                    if (first && regionMvcData.ViewName.Equals(_regionForPageTitleComponent))
                     {
                         first = false;
                         IFieldSet metadata = cp.Component.MetadataFields;
                         IFieldSet fields = cp.Component.Fields;
-                        if (metadata.ContainsKey(TridionConfig.StandardMetadataXmlFieldName) && metadata[TridionConfig.StandardMetadataXmlFieldName].EmbeddedValues.Count > 0)
+                        if (metadata.ContainsKey(_standardMetadataXmlFieldName) && metadata[_standardMetadataXmlFieldName].EmbeddedValues.Count > 0)
                         {
-                            IFieldSet standardMeta = metadata[TridionConfig.StandardMetadataXmlFieldName].EmbeddedValues[0];
-                            if (title == null && standardMeta.ContainsKey(TridionConfig.StandardMetadataTitleXmlFieldName))
+                            IFieldSet standardMeta = metadata[_standardMetadataXmlFieldName].EmbeddedValues[0];
+                            if (title == null && standardMeta.ContainsKey(_standardMetadataTitleXmlFieldName))
                             {
-                                title = standardMeta[TridionConfig.StandardMetadataTitleXmlFieldName].Value;
+                                title = standardMeta[_standardMetadataTitleXmlFieldName].Value;
                             }
-                            if (description == null && standardMeta.ContainsKey(TridionConfig.StandardMetadataDescriptionXmlFieldName))
+                            if (description == null && standardMeta.ContainsKey(_standardMetadataDescriptionXmlFieldName))
                             {
-                                description = standardMeta[TridionConfig.StandardMetadataDescriptionXmlFieldName].Value;
+                                description = standardMeta[_standardMetadataDescriptionXmlFieldName].Value;
                             }
                         }
-                        if (title == null && fields.ContainsKey(TridionConfig.ComponentXmlFieldNameForPageTitle))
+                        if (title == null && fields.ContainsKey(_componentXmlFieldNameForPageTitle))
                         {
-                            title = fields[TridionConfig.ComponentXmlFieldNameForPageTitle].Value;
+                            title = fields[_componentXmlFieldNameForPageTitle].Value;
                         }
                         //Try to find an image
                         if (image == null && fields.ContainsKey("image"))
@@ -722,7 +745,21 @@ namespace Sdl.Web.DD4T.Mapping
             return _resourceProvider.GetObject(name, CultureInfo.CurrentUICulture).ToString();
         }
 
-        private static RegionModel GetRegionFromComponentPresentation(IComponentPresentation cp)
+        private static void InitializeRegionMvcData(MvcData regionMvcData)
+        {
+            if (String.IsNullOrEmpty(regionMvcData.ControllerName))
+            {
+                regionMvcData.ControllerName = SiteConfiguration.GetRegionController();
+                regionMvcData.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
+            }
+            else if (String.IsNullOrEmpty(regionMvcData.ControllerAreaName))
+            {
+                regionMvcData.ControllerAreaName = regionMvcData.AreaName;
+            }
+            regionMvcData.ActionName = SiteConfiguration.GetRegionAction();
+        }
+
+        private static MvcData GetRegionMvcData(IComponentPresentation cp)
         {
             string regionName = null;
             string module = SiteConfiguration.GetDefaultModuleName(); //Default module
@@ -753,31 +790,21 @@ namespace Sdl.Web.DD4T.Mapping
             }
             regionName = regionName ?? "Main";//default region name
 
-            MvcData mvcData = new MvcData
-            {
-                AreaName = module, 
-                ViewName = regionName, 
-                ControllerName = SiteConfiguration.GetRegionController(), 
-                ControllerAreaName = SiteConfiguration.GetDefaultModuleName(), 
-                ActionName = SiteConfiguration.GetRegionAction()
-            };
-            return new RegionModel(regionName) { MvcData = mvcData };
+            MvcData regionMvcData = new MvcData { AreaName = module, ViewName = regionName };
+            InitializeRegionMvcData(regionMvcData);
+            return regionMvcData;
         }
 
         private static RegionModel GetRegionFromIncludePage(IPage page)
         {
             string regionName = page.Title;
 
+            MvcData regionMvcData = new MvcData(regionName);
+            InitializeRegionMvcData(regionMvcData);
+
             return new RegionModel(regionName)
             {
-                MvcData = new MvcData
-                {
-                    AreaName = SiteConfiguration.GetDefaultModuleName(),
-                    ViewName = regionName,
-                    ControllerName = SiteConfiguration.GetRegionController(),
-                    ControllerAreaName = SiteConfiguration.GetDefaultModuleName(),
-                    ActionName = SiteConfiguration.GetRegionAction()
-                },
+                MvcData = regionMvcData,
                 XpmMetadata = new Dictionary<string, string>()
                 {
                     {RegionModel.IncludedFromPageIdXpmMetadataKey, page.Id},
@@ -786,6 +813,47 @@ namespace Sdl.Web.DD4T.Mapping
                 }
             };
         }
+
+        /// <summary>
+        /// Creates a Region Model of class <see cref="RegionModel"/> or a subclass associated with the given Region View.
+        /// </summary>
+        private static RegionModel CreateRegionModel(MvcData regionMvcData)
+        {
+            Type regionModelType = ModelTypeRegistry.GetViewModelType(regionMvcData);
+            RegionModel regionModel = (RegionModel) Activator.CreateInstance(regionModelType, regionMvcData.ViewName);
+            regionModel.MvcData = regionMvcData;
+            return regionModel;
+        }
+
+        /// <summary>
+        /// Creates predefined Regions from Page Template metadata.
+        /// </summary>
+        private static void CreatePredefinedRegions(RegionModelSet regions, IPageTemplate pageTemplate)
+        {
+            IFieldSet ptMetadataFields = pageTemplate.MetadataFields;
+            IField regionsField;
+            if (ptMetadataFields == null || !ptMetadataFields.TryGetValue("regions", out regionsField))
+            {
+                Log.Debug("No Region metadata defined for Page Template '{0}'.", pageTemplate.Id);
+                return;
+            }
+
+            foreach (IFieldSet regionMetadataFields in regionsField.EmbeddedValues)
+            {
+                IField regionViewNameField;
+                if (!regionMetadataFields.TryGetValue("view", out regionViewNameField))
+                {
+                    Log.Warn("Region metadata without 'view' field encountered in metadata of Page Template '{0}'.", pageTemplate.Id);
+                    continue;
+                }
+
+                MvcData regionMvcData = new MvcData(regionViewNameField.Value);
+                InitializeRegionMvcData(regionMvcData);
+                RegionModel regionModel = CreateRegionModel(regionMvcData);
+                regions.Add(regionModel);
+            }
+        }
+
 
         internal static string GetDxaIdentifierFromTcmUri(string tcmUri)
         {
@@ -908,6 +976,5 @@ namespace Sdl.Web.DD4T.Mapping
             }
             return new MvcData { ViewName = viewName, AreaName = areaName };
         }
-
     }
 }
