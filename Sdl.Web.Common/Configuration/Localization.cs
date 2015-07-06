@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
 using Sdl.Web.Common.Extensions;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Common.Configuration
@@ -250,18 +251,21 @@ namespace Sdl.Web.Common.Configuration
                         }
                         if (bootstrapJson.siteLocalizations != null)
                         {
+                            ILocalizationResolver localizationResolver = SiteConfiguration.LocalizationResolver;
                             SiteLocalizations = new List<Localization>();
                             foreach (dynamic item in bootstrapJson.siteLocalizations)
                             {
-                                SiteLocalizations.Add(
-                                    new Localization
-                                    {
-                                        LocalizationId = item.id ?? item,
-                                        Path = item.path,
-                                        Language = item.language,
-                                        IsDefaultLocalization = item.isMaster ?? false
-                                    }
-                                    );
+                                string localizationId = item.id ?? item;
+                                try
+                                {
+                                    Localization siteLocalization = localizationResolver.GetLocalization(localizationId);
+                                    siteLocalization.IsDefaultLocalization = item.isMaster ?? false;
+                                    SiteLocalizations.Add(siteLocalization);
+                                }
+                                catch (DxaUnknownLocalizationException)
+                                {
+                                    Log.Error("Unknown localization ID '{0}' specified in SiteLocalizations for Localization [{1}].", localizationId, this);
+                                }
                             }
                         }
                         if (IsHtmlDesignPublished)
