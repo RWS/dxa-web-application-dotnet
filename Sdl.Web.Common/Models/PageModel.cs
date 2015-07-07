@@ -17,6 +17,7 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Gets the Page Regions.
         /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
         public new RegionModelSet Regions
         {
             get

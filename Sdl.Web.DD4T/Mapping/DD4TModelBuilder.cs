@@ -38,17 +38,9 @@ namespace Sdl.Web.DD4T.Mapping
 
         #region IModelBuilder members
 
-        public virtual PageModel CreatePageModel(IPage page, IEnumerable<IPage> includes)
+        public virtual PageModel CreatePageModel(IPage page, IEnumerable<IPage> includes, Localization localization)
         {
-            MvcData mvcData = GetMvcData(page);
-
-            // TODO: Derive Page Model type from MVC data
-            PageModel model = new PageModel(GetDxaIdentifierFromTcmUri(page.Id))
-            {
-                Title = page.Title, //default title - will be overridden later if appropriate
-                MvcData = mvcData, 
-                XpmMetadata = GetXpmMetadata(page)
-            };
+            PageModel model = CreatePageModel(page, localization); 
             RegionModelSet regions = model.Regions;
 
             // Create predefined Regions from Page Template Metadata
@@ -65,7 +57,7 @@ namespace Sdl.Web.DD4T.Mapping
                     // Region already exists in Page Model; MVC data should match.
                     if (!region.MvcData.Equals(cpRegionMvcData))
                     {
-                        Log.Warn("Region '{0}' is defined with conflicting MVC data: [{1} and [{2}]. Using the former.", region.Name, region.MvcData, cpRegionMvcData);
+                        Log.Warn("Region '{0}' is defined with conflicting MVC data: [{1}] and [{2}]. Using the former.", region.Name, region.MvcData, cpRegionMvcData);
                     }
                 }
                 else
@@ -78,7 +70,7 @@ namespace Sdl.Web.DD4T.Mapping
                 EntityModel entity;
                 try
                 {
-                    entity = CreateEntityModel(cp);
+                    entity = CreateEntityModel(cp, localization);
                 }
                 catch (Exception ex)
                 {
@@ -103,7 +95,7 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 foreach (IPage includePage in includes)
                 {
-                    PageModel includePageModel = CreatePageModel(includePage, null);
+                    PageModel includePageModel = CreatePageModel(includePage, null, localization);
 
                     // Model Include Page as Region:
                     RegionModel includePageRegion = GetRegionFromIncludePage(includePage);
@@ -135,7 +127,7 @@ namespace Sdl.Web.DD4T.Mapping
 #pragma warning restore 618
                 }
 
-                if (mvcData.ViewName != "IncludePage")
+                if (model.MvcData.ViewName != "IncludePage")
                 {
                     model.Title = ProcessPageMetadata(page, model.Meta);
                 }
@@ -144,12 +136,12 @@ namespace Sdl.Web.DD4T.Mapping
             return model;
         }
 
-        public virtual EntityModel CreateEntityModel(IComponentPresentation cp)
+        public virtual EntityModel CreateEntityModel(IComponentPresentation cp, Localization localization)
         {
             MvcData mvcData = GetMvcData(cp);
             Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
-            EntityModel model = CreateEntityModel(cp.Component, modelType);
+            EntityModel model = CreateEntityModel(cp.Component, modelType, localization);
             model.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
             model.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("s"));
             model.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "1" : "0");
@@ -158,10 +150,10 @@ namespace Sdl.Web.DD4T.Mapping
         }
 
 
-        public virtual EntityModel CreateEntityModel(IComponent component, Type baseModelType)
+        public virtual EntityModel CreateEntityModel(IComponent component, Type baseModelType, Localization localization)
         {
             string[] schemaTcmUriParts = component.Schema.Id.Split('-');
-            SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaTcmUriParts[1], WebRequestContext.Localization); // TODO TSI-775
+            SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaTcmUriParts[1], localization);
 
             // The semantic mapping may resolve to a more specific model type than specified by the View Model itself (e.g. Image instead of just MediaItem for Teaser.Media)
             Type modelType = GetModelTypeFromSemanticMapping(semanticSchema, baseModelType);
@@ -174,10 +166,11 @@ namespace Sdl.Web.DD4T.Mapping
                 Content = component.Fields,
                 Meta = component.MetadataFields,
                 TargetType = modelType,
-                SourceEntity = component
+                SourceEntity = component,
+                Localization = localization
             };
 
-            EntityModel model = CreateEntityModel(mappingData);
+            EntityModel model = (EntityModel) CreateViewModel(mappingData);
             model.Id = GetDxaIdentifierFromTcmUri(component.Id);
             model.XpmMetadata = GetXpmMetadata(component);
 
@@ -203,13 +196,73 @@ namespace Sdl.Web.DD4T.Mapping
         }
         #endregion
 
-        protected virtual EntityModel CreateEntityModel(MappingData mappingData)
+
+        private PageModel CreatePageModel(IPage page, Localization localization)
+        {
+            MvcData pageMvcData = GetMvcData(page);
+            Type pageModelType = ModelTypeRegistry.GetViewModelType(pageMvcData);
+            string pageId = GetDxaIdentifierFromTcmUri(page.Id);
+            ISchema pageMetadataSchema = page.Schema;
+
+            PageModel pageModel;
+            if (pageModelType == typeof(PageModel))
+            {
+                // Standard Page Model
+                pageModel = new PageModel(pageId);
+            }
+            else if (pageMetadataSchema == null)
+            {
+                // Custom Page Model but no Page metadata that can be mapped; simply create a Page Model instance of the right type.
+                pageModel = (PageModel)Activator.CreateInstance(pageModelType, pageId);
+            }
+            else
+            {
+                // Custom Page Model and Page metadata is present; do full-blown model mapping.
+                string[] schemaTcmUriParts = pageMetadataSchema.Id.Split('-');
+                SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaTcmUriParts[1], localization);
+
+                MappingData mappingData = new MappingData
+                {
+                    TargetType = pageModelType,
+                    SemanticSchema = semanticSchema,
+                    EntityNames = semanticSchema.GetEntityNames(),
+                    TargetEntitiesByPrefix = GetEntityDataFromType(pageModelType),
+                    Meta = page.MetadataFields,
+                    ModelId = pageId,
+                    Localization = localization
+                };
+
+                pageModel = (PageModel) CreateViewModel(mappingData);
+            }
+
+            pageModel.MvcData = pageMvcData;
+            pageModel.XpmMetadata = GetXpmMetadata(page);
+            pageModel.Title = page.Title;
+
+            return pageModel;
+        }
+
+
+        protected virtual ViewModel CreateViewModel(MappingData mappingData)
         {
             Type modelType = mappingData.TargetType; // TODO: why is this not a separate parameter?
 
-            EntityModel model = (EntityModel)Activator.CreateInstance(modelType);
+
+            ViewModel model;
+            if (string.IsNullOrEmpty(mappingData.ModelId))
+            {
+                // Use parameterless constructor
+                model = (ViewModel)Activator.CreateInstance(modelType);
+            }
+            else
+            {
+                // Pass model Identifier in constructor.
+                model = (ViewModel)Activator.CreateInstance(modelType, mappingData.ModelId);
+            }
+
             Dictionary<string, string> xpmPropertyMetadata = new Dictionary<string, string>();
-            Dictionary<string, List<SemanticProperty>> propertySemantics = FilterPropertySematicsByEntity(LoadPropertySemantics(modelType), mappingData);
+            Dictionary<string, List<SemanticProperty>> propertySemantics = LoadPropertySemantics(modelType);
+            propertySemantics = FilterPropertySemanticsByEntity(propertySemantics, mappingData);
             foreach (PropertyInfo pi in modelType.GetProperties())
             {
                 bool multival = pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
@@ -238,7 +291,7 @@ namespace Sdl.Web.DD4T.Mapping
                             //Map the whole entity to an image property, or a resolved link to the entity to a Url field
                             if (typeof(MediaItem).IsAssignableFrom(propertyType) || typeof(Link).IsAssignableFrom(propertyType) || propertyType == typeof(String))
                             {
-                                object mappedSelf = MapComponent(mappingData.SourceEntity, propertyType);
+                                object mappedSelf = MapComponent(mappingData.SourceEntity, propertyType, mappingData.Localization);
                                 if (multival)
                                 {
                                     IList genericList = CreateGenericList(propertyType);
@@ -266,42 +319,44 @@ namespace Sdl.Web.DD4T.Mapping
                     }
                 }
             }
-            model.XpmPropertyMetadata = xpmPropertyMetadata;
+
+            EntityModel entityModel = model as EntityModel;
+            if (entityModel != null)
+            {
+                entityModel.XpmPropertyMetadata = xpmPropertyMetadata;
+            }
 
             return model;
         }
 
-        protected virtual Dictionary<string, List<SemanticProperty>> FilterPropertySematicsByEntity(Dictionary<string, List<SemanticProperty>> semantics, MappingData mapData)
+        protected virtual Dictionary<string, List<SemanticProperty>> FilterPropertySemanticsByEntity(Dictionary<string, List<SemanticProperty>> propertySemantics, MappingData mapData)
         {
             Dictionary<string, List<SemanticProperty>> filtered = new Dictionary<string, List<SemanticProperty>>();
-            foreach (KeyValuePair<string, List<SemanticProperty>> item in semantics)
+            foreach (KeyValuePair<string, List<SemanticProperty>> property in propertySemantics)
             {
-                filtered.Add(item.Key, new List<SemanticProperty>());
+                filtered.Add(property.Key, new List<SemanticProperty>());
                 List<SemanticProperty> defaultProperties = new List<SemanticProperty>();
-                foreach (SemanticProperty prop in item.Value)
+                foreach (SemanticProperty semanticProperty in property.Value)
                 {
                     //Default prefix is always OK, but should be added last
-                    if (String.IsNullOrEmpty(prop.Prefix))
+                    if (string.IsNullOrEmpty(semanticProperty.Prefix))
                     {
-                        defaultProperties.Add(prop);
+                        defaultProperties.Add(semanticProperty);
                     }
                     else
                     {
                         //Filter out any properties belonging to other entities than the source entity
-                        KeyValuePair<string, string>? entityData = GetEntityData(prop.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
-                        if (entityData != null && mapData.EntityNames!=null)
+                        KeyValuePair<string, string>? entityData = GetEntityData(semanticProperty.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
+                        if (entityData != null && mapData.EntityNames!=null && mapData.EntityNames.Contains(entityData.Value.Key))
                         {
-                            if (mapData.EntityNames.Contains(entityData.Value.Key))
+                            if (mapData.EntityNames[entityData.Value.Key].First() == entityData.Value.Value)
                             {
-                                if (mapData.EntityNames[entityData.Value.Key].First() == entityData.Value.Value)
-                                {
-                                    filtered[item.Key].Add(prop);
-                                }
+                                filtered[property.Key].Add(semanticProperty);
                             }
                         }
                     }
                 }
-                filtered[item.Key].AddRange(defaultProperties);
+                filtered[property.Key].AddRange(defaultProperties);
             }
             return filtered;
         }
@@ -419,7 +474,7 @@ namespace Sdl.Web.DD4T.Mapping
                     case FieldType.ComponentLink:
                         foreach (IComponent value in field.LinkedComponentValues)
                         {
-                            mappedValues.Add(MapComponent(value, modelType));
+                            mappedValues.Add(MapComponent(value, modelType, mapData.Localization));
                         }
                         break;
 
@@ -535,7 +590,7 @@ namespace Sdl.Web.DD4T.Mapping
             }
         }
 
-        protected virtual object MapComponent(IComponent component, Type modelType)
+        protected virtual object MapComponent(IComponent component, Type modelType, Localization localization)
         {
             if (modelType == typeof(string))
             {
@@ -547,10 +602,10 @@ namespace Sdl.Web.DD4T.Mapping
                 throw new DxaException(String.Format("Cannot map a Component to type '{0}'. The type must be String or a subclass of EntityModel.", modelType));
             }
 
-            return CreateEntityModel(component, modelType);
+            return CreateEntityModel(component, modelType, localization);
         }
 
-        private EntityModel MapEmbeddedFields(IFieldSet embeddedFields, Type modelType, MappingData mapData)
+        private ViewModel MapEmbeddedFields(IFieldSet embeddedFields, Type modelType, MappingData mapData)
         {
             MappingData embeddedMappingData = new MappingData
                 {
@@ -561,10 +616,11 @@ namespace Sdl.Web.DD4T.Mapping
                     ParentDefaultPrefix = mapData.ParentDefaultPrefix,
                     TargetEntitiesByPrefix = mapData.TargetEntitiesByPrefix, // TODO: should this not be re-determined for the embedded model type?
                     SemanticSchema = mapData.SemanticSchema, // TODO: should this not be re-determined for the embedded model type?
-                    EmbedLevel = mapData.EmbedLevel + 1
+                    EmbedLevel = mapData.EmbedLevel + 1,
+                    Localization = mapData.Localization
                 };
 
-            return CreateEntityModel(embeddedMappingData);
+            return CreateViewModel(embeddedMappingData);
         }
 
         protected Dictionary<string, string> GetAllFieldsAsDictionary(IComponent component)
@@ -832,7 +888,7 @@ namespace Sdl.Web.DD4T.Mapping
         {
             IFieldSet ptMetadataFields = pageTemplate.MetadataFields;
             IField regionsField;
-            if (ptMetadataFields == null || !ptMetadataFields.TryGetValue("regions", out regionsField))
+            if (ptMetadataFields == null || !ptMetadataFields.TryGetValue("regions", out regionsField)) // TODO: "region" instead of "regions"
             {
                 Log.Debug("No Region metadata defined for Page Template '{0}'.", pageTemplate.Id);
                 return;

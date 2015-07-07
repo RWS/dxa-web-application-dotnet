@@ -15,7 +15,8 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Gets or sets the URL of the Page.
         /// </summary>
-        public string Url
+        [SemanticProperty(IgnoreMapping = true)]
+        public string Url // TODO: remove?
         {
             get; 
             set;
@@ -24,6 +25,7 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Gets or sets the Page metadata which is typically rendered as HTML meta tags (name/value pairs).
         /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
         public IDictionary<string, string> Meta
         {
             get;
@@ -33,6 +35,7 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Gets or sets the Page Includes. The dictionary keys are the include names.
         /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
         [Obsolete("Deprecated in DXA 1.1. Page Includes are now modeled as Regions, so use PageModel.Regions instead.")]
         public Dictionary<string, IPage> Includes
         {

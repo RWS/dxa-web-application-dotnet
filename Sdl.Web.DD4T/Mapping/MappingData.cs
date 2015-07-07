@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DD4T.ContentModel;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Mapping;
 
 namespace Sdl.Web.DD4T.Mapping
@@ -17,5 +18,17 @@ namespace Sdl.Web.DD4T.Mapping
         public string ParentDefaultPrefix { get; set; }
         public int EmbedLevel { get; set; }
         public IComponent SourceEntity { get; set; }
+
+        public string ModelId
+        {
+            get;
+            set;
+        }
+
+        public Localization Localization
+        {
+            get;
+            set;
+        }
     }
 }

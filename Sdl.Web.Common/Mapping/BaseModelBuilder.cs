@@ -76,55 +76,49 @@ namespace Sdl.Web.Common.Mapping
 
         protected virtual Dictionary<string, List<SemanticProperty>> LoadPropertySemantics(Type type)
         {
-            //The default prefix is empty - this implies that the prefix should be inherited from the parent object default prefix
-            string defaultPrefix = String.Empty;
-            bool mapAllProperties = true;
-            foreach (Attribute attr in type.GetCustomAttributes())
-            {
-                if (attr is SemanticDefaultsAttribute)
-                {
-                    defaultPrefix = ((SemanticDefaultsAttribute)attr).Prefix;
-                    mapAllProperties = ((SemanticDefaultsAttribute)attr).MapAllProperties;
-                    break;
-                }
-            }
             lock (SemanticsLock)
             {
                 if (!EntityPropertySemantics.ContainsKey(type))
                 {
+                    //The default prefix is empty - this implies that the prefix should be inherited from the parent object default prefix
+                    string defaultPrefix = String.Empty;
+                    bool mapAllProperties = true;
+                    SemanticDefaultsAttribute semanticDefaultsAttr = type.GetCustomAttributes().OfType<SemanticDefaultsAttribute>().FirstOrDefault();
+                    if (semanticDefaultsAttr != null)
+                    {
+                        defaultPrefix = semanticDefaultsAttr.Prefix;
+                        mapAllProperties = semanticDefaultsAttr.MapAllProperties;
+                    }
+
                     Dictionary<string, List<SemanticProperty>> result = new Dictionary<string, List<SemanticProperty>>();
                     foreach (PropertyInfo pi in type.GetProperties())
                     {
                         string name = pi.Name;
                         //flag to indicate we have processed a default mapping, or we explicitly should ignore this property when mapping
                         bool ignore = false;
-                        foreach (object attr in pi.GetCustomAttributes(true))
+                        foreach (SemanticPropertyAttribute semanticPropertyAttr in pi.GetCustomAttributes(true).OfType<SemanticPropertyAttribute>())
                         {
-                            if (attr is SemanticPropertyAttribute)
+                            if (!semanticPropertyAttr.IgnoreMapping)
                             {
-                                SemanticPropertyAttribute propertySemantics = (SemanticPropertyAttribute)attr;
-                                if (!propertySemantics.IgnoreMapping)
+                                if (!result.ContainsKey(name))
                                 {
-                                    if (!result.ContainsKey(name))
-                                    {
-                                        result.Add(name, new List<SemanticProperty>());
-                                    }
-                                    string[] bits = ((SemanticPropertyAttribute)attr).PropertyName.Split(':');
-                                    if (bits.Length > 1)
-                                    {
-                                        result[name].Add(new SemanticProperty(bits[0], bits[1]));
-                                    }
-                                    else
-                                    {
-                                        //Add the default prefix and set the ignore flag - so no need to apply default mapping using property name
-                                        result[name].Add(new SemanticProperty(defaultPrefix, bits[0]));
-                                        ignore = true;
-                                    }
+                                    result.Add(name, new List<SemanticProperty>());
+                                }
+                                string[] propertyNameParts = semanticPropertyAttr.PropertyName.Split(':');
+                                if (propertyNameParts.Length > 1)
+                                {
+                                    result[name].Add(new SemanticProperty(propertyNameParts[0], propertyNameParts[1]));
                                 }
                                 else
                                 {
+                                    //Add the default prefix and set the ignore flag - so no need to apply default mapping using property name
+                                    result[name].Add(new SemanticProperty(defaultPrefix, propertyNameParts[0]));
                                     ignore = true;
                                 }
+                            }
+                            else
+                            {
+                                ignore = true;
                             }
                         }
                         if (!ignore && mapAllProperties)

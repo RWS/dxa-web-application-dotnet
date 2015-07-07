@@ -1,4 +1,5 @@
 ﻿using DD4T.ContentModel;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Models;
 using System;
 using System.Collections.Generic;
@@ -16,8 +17,8 @@ namespace Sdl.Web.DD4T.Mapping
     /// </remarks>
     public interface IModelBuilder
     {
-        PageModel CreatePageModel(IPage page, IEnumerable<IPage> includes);
-        EntityModel CreateEntityModel(IComponentPresentation cp);
-        EntityModel CreateEntityModel(IComponent component, Type baseModelType);
+        PageModel CreatePageModel(IPage page, IEnumerable<IPage> includes, Localization localization);
+        EntityModel CreateEntityModel(IComponentPresentation cp, Localization localization);
+        EntityModel CreateEntityModel(IComponent component, Type baseModelType, Localization localization);
     }
 }

@@ -127,7 +127,7 @@ namespace Sdl.Web.DD4T.Mapping
                 }
 
                 IEnumerable<IPage> includes = addIncludes ? GetIncludesFromModel(page, localization) : new IPage[0];
-                return ModelBuilder.CreatePageModel(page, includes);
+                return ModelBuilder.CreatePageModel(page, includes, localization);
             }
         }
 
