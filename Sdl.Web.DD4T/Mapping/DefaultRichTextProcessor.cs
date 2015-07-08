@@ -1,32 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mime;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
 using DD4T.ContentModel.Factories;
-using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DD4T.Utils;
-using Sdl.Web.Mvc.Html;
-using Sdl.Web.Tridion.Linking;
 
 namespace Sdl.Web.DD4T.Mapping
 {
     /// <summary>
-    /// Default (DD4T-based) Rich Text Processor implementation
+    /// Default Rich Text Processor implementation (DD4T-based).
     /// </summary>
-    public class DD4TRichTextProcessor : IRichTextProcessor
+    public class DefaultRichTextProcessor : IRichTextProcessor
     {
         private const string _embeddedEntityProcessingInstructionName = "EmbeddedEntity";
         private static readonly Regex _embeddedEntityProcessingInstructionRegex = new Regex(@"<\?EmbeddedEntity\s\?>", RegexOptions.Compiled);
         private readonly IComponentFactory _componentFactory;
 
-        public DD4TRichTextProcessor(IComponentFactory componentFactory)
+        public DefaultRichTextProcessor(IComponentFactory componentFactory)
         {
             _componentFactory = componentFactory;
         }
@@ -122,7 +118,7 @@ namespace Sdl.Web.DD4T.Mapping
             {
                 YouTubeVideo youTubeVideo = new YouTubeVideo
                 {
-                    Id =  DD4TModelBuilder.GetDxaIdentifierFromTcmUri(youTubeImgElement.GetAttribute("xlink:href")), 
+                    Id =  DefaultModelBuilder.GetDxaIdentifierFromTcmUri(youTubeImgElement.GetAttribute("xlink:href")), 
                     Url = youTubeImgElement.GetAttribute("src"),
                     YouTubeId = youTubeImgElement.GetAttribute("data-youTubeId"),
                     Headline = youTubeImgElement.GetAttribute("data-headline"),

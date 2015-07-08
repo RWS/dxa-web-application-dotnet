@@ -11,14 +11,15 @@ namespace Sdl.Web.DD4T.Mapping
     /// Interface for (DD4T-based) Model builders (advanced extension point).
     /// </summary>
     /// <remarks>
-    /// Although an interface with a same name existed in STRI 1.0, this interface is not compatible (it is more strongly typed).
-    /// Preferably, this extension point should not be used in implementations, because it is DD4T specific and will disappear in DXA 2.0.
-    /// It is kept in DXA 1.1 as an emergency measure in case the default DD4TModelBuilder is insufficient.
+    /// Although an interface with a same name existed in STRI 1.0, this interface is not compatible.
+    /// Preferably, this extension point should not be used in implementations, because it is DD4T specific and will change in DXA 2.0.
+    /// It is kept in DXA 1.1 for advanced (SDL-owned) modules like the Smart Target module.
     /// </remarks>
+    /// <seealso cref="ModelBuilderPipeline"/>
     public interface IModelBuilder
     {
-        PageModel CreatePageModel(IPage page, IEnumerable<IPage> includes, Localization localization);
-        EntityModel CreateEntityModel(IComponentPresentation cp, Localization localization);
-        EntityModel CreateEntityModel(IComponent component, Type baseModelType, Localization localization);
+        void BuildPageModel(ref PageModel pageModel, IPage page, IEnumerable<IPage> includes, Localization localization);
+        void BuildEntityModel(ref EntityModel entityModel, IComponentPresentation cp, Localization localization);
+        void BuildEntityModel(ref EntityModel entityModel, IComponent component, Type baseModelType, Localization localization);
     }
 }

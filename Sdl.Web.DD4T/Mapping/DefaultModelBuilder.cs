@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Web.UI;
 using DD4T.ContentModel;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
@@ -21,9 +20,14 @@ using IPage = DD4T.ContentModel.IPage;
 namespace Sdl.Web.DD4T.Mapping
 {
     /// <summary>
-    /// Model Builder implementation for DD4T - this contains the logic for mapping DD4T objects to View Models
+    /// Default Model Builder implementation (DD4T-based).
     /// </summary>
-    public class DD4TModelBuilder : BaseModelBuilder, IModelBuilder
+    /// <remarks>
+    /// Typically this model builder is the only one in the <see cref="ModelBuilderPipeline"/>, but advanced modules (like the SmartTarget module)
+    /// may add their own model builder to the pipeline (to post-process the resulting Strongly Typed View Models).
+    /// Note that the default model building creates the View Models and ignores any existing ones so should normally be the first in the pipeline.
+    /// </remarks>
+    public class DefaultModelBuilder : BaseModelBuilder, IModelBuilder
     {
         // TODO: while it works perfectly well, this class is in need of some refactoring to make its behaviour a bit more understandable and maintainable,
         // as its currently very easy to get lost in the semantic mapping logic
@@ -38,161 +42,167 @@ namespace Sdl.Web.DD4T.Mapping
 
         #region IModelBuilder members
 
-        public virtual PageModel CreatePageModel(IPage page, IEnumerable<IPage> includes, Localization localization)
+        public virtual void BuildPageModel(ref PageModel pageModel, IPage page, IEnumerable<IPage> includes, Localization localization)
         {
-            PageModel model = CreatePageModel(page, localization); 
-            RegionModelSet regions = model.Regions;
-
-            // Create predefined Regions from Page Template Metadata
-            CreatePredefinedRegions(regions, page.PageTemplate);
-
-            // Create Regions/Entities from Component Presentations
-            IConditionalEntityEvaluator conditionalEntityEvaluator = SiteConfiguration.ConditionalEntityEvaluator;
-            foreach (IComponentPresentation cp in page.ComponentPresentations)
+            using (new Tracer(pageModel, page, includes, localization))
             {
-                MvcData cpRegionMvcData = GetRegionMvcData(cp);
-                RegionModel region;
-                if (regions.TryGetValue(cpRegionMvcData.ViewName, out region))
+                pageModel = CreatePageModel(page, localization);
+                RegionModelSet regions = pageModel.Regions;
+
+                // Create predefined Regions from Page Template Metadata
+                CreatePredefinedRegions(regions, page.PageTemplate);
+
+                // Create Regions/Entities from Component Presentations
+                IConditionalEntityEvaluator conditionalEntityEvaluator = SiteConfiguration.ConditionalEntityEvaluator;
+                foreach (IComponentPresentation cp in page.ComponentPresentations)
                 {
-                    // Region already exists in Page Model; MVC data should match.
-                    if (!region.MvcData.Equals(cpRegionMvcData))
+                    MvcData cpRegionMvcData = GetRegionMvcData(cp);
+                    RegionModel region;
+                    if (regions.TryGetValue(cpRegionMvcData.ViewName, out region))
                     {
-                        Log.Warn("Region '{0}' is defined with conflicting MVC data: [{1}] and [{2}]. Using the former.", region.Name, region.MvcData, cpRegionMvcData);
-                    }
-                }
-                else
-                {
-                    // Region does not exist in Page Model yet; create Region Model and add it.
-                    region = CreateRegionModel(cpRegionMvcData);
-                    regions.Add(region);
-                }
-
-                EntityModel entity;
-                try
-                {
-                    entity = CreateEntityModel(cp, localization);
-                }
-                catch (Exception ex)
-                {
-                    //if there is a problem mapping the item, we replace it with an exception entity
-                    //and carry on processing - this should not cause a failure in the rendering of
-                    //the page as a whole
-                    Log.Error(ex);
-                    entity = new ExceptionEntity(ex)
-                    {
-                        MvcData = GetMvcData(cp) // TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
-                    };
-                }
-
-                if (conditionalEntityEvaluator == null || conditionalEntityEvaluator.IncludeEntity(entity))
-                {
-                    region.Entities.Add(entity);
-                }
-            }
-
-            // Create Regions from Include Pages
-            if (includes != null )
-            {
-                foreach (IPage includePage in includes)
-                {
-                    PageModel includePageModel = CreatePageModel(includePage, null, localization);
-
-                    // Model Include Page as Region:
-                    RegionModel includePageRegion = GetRegionFromIncludePage(includePage);
-                    RegionModel existingRegion;
-                    if (regions.TryGetValue(includePageRegion.Name, out existingRegion))
-                    {
-                        // Region with same name already exists; merge include Page Region.
-                        existingRegion.Regions.UnionWith(includePageModel.Regions);
-
-                        if (existingRegion.XpmMetadata != null)
+                        // Region already exists in Page Model; MVC data should match.
+                        if (!region.MvcData.Equals(cpRegionMvcData))
                         {
-                            existingRegion.XpmMetadata.Remove(RegionModel.IncludedFromPageIdXpmMetadataKey);
-                            existingRegion.XpmMetadata.Remove(RegionModel.IncludedFromPageTitleXpmMetadataKey);
-                            existingRegion.XpmMetadata.Remove(RegionModel.IncludedFromPageFileNameXpmMetadataKey);
+                            Log.Warn("Region '{0}' is defined with conflicting MVC data: [{1}] and [{2}]. Using the former.", region.Name, region.MvcData, cpRegionMvcData);
                         }
-
-                        Log.Info("Merged Include Page [{0}] into Region [{1}]. Note that merged Regions can't be edited properly in XPM (yet).", 
-                            includePageModel, existingRegion);
                     }
                     else
                     {
-                        includePageRegion.Regions.UnionWith(includePageModel.Regions);
-                        regions.Add(includePageRegion);
+                        // Region does not exist in Page Model yet; create Region Model and add it.
+                        region = CreateRegionModel(cpRegionMvcData);
+                        regions.Add(region);
                     }
 
+                    EntityModel entity;
+                    try
+                    {
+                        entity = ModelBuilderPipeline.CreateEntityModel(cp, localization);
+                    }
+                    catch (Exception ex)
+                    {
+                        //if there is a problem mapping the item, we replace it with an exception entity
+                        //and carry on processing - this should not cause a failure in the rendering of
+                        //the page as a whole
+                        Log.Error(ex);
+                        entity = new ExceptionEntity(ex)
+                        {
+                            MvcData = GetMvcData(cp) // TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
+                        };
+                    }
+
+                    if (conditionalEntityEvaluator == null || conditionalEntityEvaluator.IncludeEntity(entity))
+                    {
+                        region.Entities.Add(entity);
+                    }
+                }
+
+                // Create Regions from Include Pages
+                if (includes != null)
+                {
+                    foreach (IPage includePage in includes)
+                    {
+                        PageModel includePageModel = ModelBuilderPipeline.CreatePageModel(includePage, null, localization);
+
+                        // Model Include Page as Region:
+                        RegionModel includePageRegion = GetRegionFromIncludePage(includePage);
+                        RegionModel existingRegion;
+                        if (regions.TryGetValue(includePageRegion.Name, out existingRegion))
+                        {
+                            // Region with same name already exists; merge include Page Region.
+                            existingRegion.Regions.UnionWith(includePageModel.Regions);
+
+                            if (existingRegion.XpmMetadata != null)
+                            {
+                                existingRegion.XpmMetadata.Remove(RegionModel.IncludedFromPageIdXpmMetadataKey);
+                                existingRegion.XpmMetadata.Remove(RegionModel.IncludedFromPageTitleXpmMetadataKey);
+                                existingRegion.XpmMetadata.Remove(RegionModel.IncludedFromPageFileNameXpmMetadataKey);
+                            }
+
+                            Log.Info("Merged Include Page [{0}] into Region [{1}]. Note that merged Regions can't be edited properly in XPM (yet).",
+                                includePageModel, existingRegion);
+                        }
+                        else
+                        {
+                            includePageRegion.Regions.UnionWith(includePageModel.Regions);
+                            regions.Add(includePageRegion);
+                        }
+
 #pragma warning disable 618
-                    // Legacy WebPage.Includes support:
-                    model.Includes.Add(includePage.Title, includePageModel);
+                        // Legacy WebPage.Includes support:
+                        pageModel.Includes.Add(includePage.Title, includePageModel);
 #pragma warning restore 618
-                }
+                    }
 
-                if (model.MvcData.ViewName != "IncludePage")
-                {
-                    model.Title = ProcessPageMetadata(page, model.Meta);
+                    if (pageModel.MvcData.ViewName != "IncludePage")
+                    {
+                        pageModel.Title = ProcessPageMetadata(page, pageModel.Meta);
+                    }
                 }
             }
-
-            return model;
         }
 
-        public virtual EntityModel CreateEntityModel(IComponentPresentation cp, Localization localization)
+        public virtual void BuildEntityModel(ref EntityModel entityModel, IComponentPresentation cp, Localization localization)
         {
-            MvcData mvcData = GetMvcData(cp);
-            Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
+            using (new Tracer(entityModel, cp, localization))
+            {
+                MvcData mvcData = GetMvcData(cp);
+                Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
-            EntityModel model = CreateEntityModel(cp.Component, modelType, localization);
-            model.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
-            model.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("s"));
-            model.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "1" : "0");
-            model.MvcData = mvcData;
-            return model;
+                // NOTE: not using ModelBuilderPipeline here, but directly calling our own implementation.
+                BuildEntityModel(ref entityModel, cp.Component, modelType, localization);
+
+                entityModel.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
+                entityModel.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("s"));
+                entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "1" : "0");
+                entityModel.MvcData = mvcData;
+            }
         }
 
 
-        public virtual EntityModel CreateEntityModel(IComponent component, Type baseModelType, Localization localization)
+        public virtual void BuildEntityModel(ref EntityModel entityModel, IComponent component, Type baseModelType, Localization localization)
         {
-            string[] schemaTcmUriParts = component.Schema.Id.Split('-');
-            SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaTcmUriParts[1], localization);
-
-            // The semantic mapping may resolve to a more specific model type than specified by the View Model itself (e.g. Image instead of just MediaItem for Teaser.Media)
-            Type modelType = GetModelTypeFromSemanticMapping(semanticSchema, baseModelType);
-
-            MappingData mappingData = new MappingData
+            using (new Tracer(entityModel, component, baseModelType, localization))
             {
-                SemanticSchema = semanticSchema,
-                EntityNames = semanticSchema.GetEntityNames(),
-                TargetEntitiesByPrefix = GetEntityDataFromType(modelType),
-                Content = component.Fields,
-                Meta = component.MetadataFields,
-                TargetType = modelType,
-                SourceEntity = component,
-                Localization = localization
-            };
+                string[] schemaTcmUriParts = component.Schema.Id.Split('-');
+                SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaTcmUriParts[1], localization);
 
-            EntityModel model = (EntityModel) CreateViewModel(mappingData);
-            model.Id = GetDxaIdentifierFromTcmUri(component.Id);
-            model.XpmMetadata = GetXpmMetadata(component);
+                // The semantic mapping may resolve to a more specific model type than specified by the View Model itself (e.g. Image instead of just MediaItem for Teaser.Media)
+                Type modelType = GetModelTypeFromSemanticMapping(semanticSchema, baseModelType);
 
-            if (model is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
-            {
-                MediaItem mediaItem = (MediaItem)model;
-                mediaItem.Url = component.Multimedia.Url;
-                mediaItem.FileName = component.Multimedia.FileName;
-                mediaItem.FileSize = component.Multimedia.Size;
-                mediaItem.MimeType = component.Multimedia.MimeType;
-            }
-
-            if (model is Link)
-            {
-                Link link = (Link) model;
-                if (String.IsNullOrEmpty(link.Url))
+                MappingData mappingData = new MappingData
                 {
-                    link.Url = SiteConfiguration.LinkResolver.ResolveLink(component.Id);
+                    SemanticSchema = semanticSchema,
+                    EntityNames = semanticSchema.GetEntityNames(),
+                    TargetEntitiesByPrefix = GetEntityDataFromType(modelType),
+                    Content = component.Fields,
+                    Meta = component.MetadataFields,
+                    TargetType = modelType,
+                    SourceEntity = component,
+                    Localization = localization
+                };
+
+                entityModel = (EntityModel)CreateViewModel(mappingData);
+                entityModel.Id = GetDxaIdentifierFromTcmUri(component.Id);
+                entityModel.XpmMetadata = GetXpmMetadata(component);
+
+                if (entityModel is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
+                {
+                    MediaItem mediaItem = (MediaItem)entityModel;
+                    mediaItem.Url = component.Multimedia.Url;
+                    mediaItem.FileName = component.Multimedia.FileName;
+                    mediaItem.FileSize = component.Multimedia.Size;
+                    mediaItem.MimeType = component.Multimedia.MimeType;
+                }
+
+                if (entityModel is Link)
+                {
+                    Link link = (Link)entityModel;
+                    if (String.IsNullOrEmpty(link.Url))
+                    {
+                        link.Url = SiteConfiguration.LinkResolver.ResolveLink(component.Id);
+                    }
                 }
             }
-
-            return model;
         }
         #endregion
 
@@ -602,7 +612,7 @@ namespace Sdl.Web.DD4T.Mapping
                 throw new DxaException(String.Format("Cannot map a Component to type '{0}'. The type must be String or a subclass of EntityModel.", modelType));
             }
 
-            return CreateEntityModel(component, modelType, localization);
+            return ModelBuilderPipeline.CreateEntityModel(component, modelType, localization);
         }
 
         private ViewModel MapEmbeddedFields(IFieldSet embeddedFields, Type modelType, MappingData mapData)

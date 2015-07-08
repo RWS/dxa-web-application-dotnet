@@ -10,7 +10,6 @@ using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DD4T.Statics;
 using Sdl.Web.Mvc.Configuration;
@@ -20,20 +19,11 @@ using IPage = DD4T.ContentModel.IPage;
 namespace Sdl.Web.DD4T.Mapping
 {
     /// <summary>
-    /// Default (DD4T-based) Content Provider and Navigation Provider implementation.
+    /// Default Content Provider and Navigation Provider implementation (DD4T-based).
     /// </summary>
-    public class DD4TProvider : IContentProvider, INavigationProvider
+    public class DefaultProvider : IContentProvider, INavigationProvider
     {
         private readonly IPageFactory _pageFactory;
-
-        /// <summary>
-        /// Model Builder used to map DD4T types to DXA View Models.
-        /// </summary>
-        protected IModelBuilder ModelBuilder 
-        { 
-            get; 
-            private set; 
-        }
 
         protected IPageFactory PageFactory
         {
@@ -44,18 +34,13 @@ namespace Sdl.Web.DD4T.Mapping
             }
         }
 
-        public DD4TProvider(IModelBuilder modelBuilder, IPageFactory pageFactory)
+        public DefaultProvider(IPageFactory pageFactory)
         {
-            if (modelBuilder == null)
-            {
-                throw new DxaException("No Model Builder configured.");
-            }
             if (pageFactory == null)
             {
                 throw new DxaException("No Page Factory configured.");
             }
 
-            ModelBuilder = modelBuilder;
             _pageFactory = pageFactory;
         }
 
@@ -126,8 +111,9 @@ namespace Sdl.Web.DD4T.Mapping
                     throw new DxaItemNotFoundException(url);
                 }
 
-                IEnumerable<IPage> includes = addIncludes ? GetIncludesFromModel(page, localization) : new IPage[0];
-                return ModelBuilder.CreatePageModel(page, includes, localization);
+                IPage[] includes = addIncludes ? GetIncludesFromModel(page, localization).ToArray() : new IPage[0];
+
+                return ModelBuilderPipeline.CreatePageModel(page, includes, localization);
             }
         }
 
