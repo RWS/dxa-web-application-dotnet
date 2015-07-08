@@ -135,7 +135,7 @@ namespace Sdl.Web.Tridion.Mapping
 
                     if (pageModel.MvcData.ViewName != "IncludePage")
                     {
-                        pageModel.Title = ProcessPageMetadata(page, pageModel.Meta);
+                        pageModel.Title = ProcessPageMetadata(page, pageModel.Meta, localization);
                     }
                 }
             }
@@ -378,7 +378,7 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 // determine field semantics
                 string vocab = entityData.Value.Key;
-                string prefix = SemanticMapping.GetPrefix(vocab,WebRequestContext.Localization);
+                string prefix = SemanticMapping.GetPrefix(vocab, mapData.Localization);
                 if (prefix != null && mapData.EntityNames!=null)
                 {
                     string property = info.PropertyName;
@@ -682,7 +682,7 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
 
-        protected virtual string ProcessPageMetadata(IPage page, IDictionary<string, string> meta)
+        protected virtual string ProcessPageMetadata(IPage page, IDictionary<string, string> meta, Localization localization)
         {
             //First grab metadata from the page
             if (page.MetadataFields != null)
@@ -746,17 +746,17 @@ namespace Sdl.Web.Tridion.Mapping
             }
             meta.Add("twitter:card", "summary");
             meta.Add("og:title", title);
-            meta.Add("og:url", WebRequestContext.RequestUrl);
+            // TODO: if the URL is really needed, it should be added higher up (e.g. in the View code):  meta.Add("og:url", WebRequestContext.RequestUrl);
             //TODO is this always article?
             meta.Add("og:type", "article");
-            meta.Add("og:locale", WebRequestContext.Localization.Culture);
+            meta.Add("og:locale", localization.Culture);
             if (description != null)
             {
                 meta.Add("og:description", description);
             }
             if (image != null)
             {
-                image = WebRequestContext.Localization.GetBaseUrl() + image;
+                image = localization.GetBaseUrl() + image;
                 meta.Add("og:image", image);
             }
             if (!meta.ContainsKey("description"))

@@ -95,7 +95,6 @@ namespace Sdl.Web.Tridion.Mapping
         /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given URL.</exception>
         public virtual PageModel GetPageModel(string url, Localization localization, bool addIncludes)
         {
-            // TODO TSI-775: actually use the localization parameter instead of using WebRequestContext.Localization deep-down in the implementation.
             using (new Tracer(url, localization, addIncludes))
             {
                 //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
@@ -169,7 +168,7 @@ namespace Sdl.Web.Tridion.Mapping
                     Start = contentList.Start,
                     PublicationId = Int32.Parse(localization.LocalizationId),
                     PageSize = contentList.PageSize,
-                    SchemaId = MapSchema(contentList.ContentType.Key),
+                    SchemaId = MapSchema(contentList.ContentType.Key, localization),
                     Sort = contentList.Sort.Key
                 };
 
@@ -373,12 +372,12 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
         
-        protected virtual int MapSchema(string schemaKey)
+        protected virtual int MapSchema(string schemaKey, Localization localization)
         {
             string[] schemaKeyParts = schemaKey.Split('.');
             string moduleName = schemaKeyParts.Length > 1 ? schemaKeyParts[0] : SiteConfiguration.CoreModuleName;
             schemaKey = schemaKeyParts.Length > 1 ? schemaKeyParts[1] : schemaKeyParts[0];
-            string schemaId = WebRequestContext.Localization.GetConfigValue(string.Format("{0}.schemas.{1}", moduleName, schemaKey));
+            string schemaId = localization.GetConfigValue(string.Format("{0}.schemas.{1}", moduleName, schemaKey));
 
             int result;
             Int32.TryParse(schemaId, out result);
