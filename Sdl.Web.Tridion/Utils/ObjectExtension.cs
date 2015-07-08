@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sdl.Web.DD4T.Utils
+namespace Sdl.Web.Tridion.Utils
 {
     public static class ObjectExtension
     {

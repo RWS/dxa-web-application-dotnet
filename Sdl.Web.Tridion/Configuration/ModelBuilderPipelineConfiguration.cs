@@ -1,9 +1,9 @@
 ﻿using System.Configuration;
 
-namespace Sdl.Web.DD4T.Configuration
+namespace Sdl.Web.Tridion.Configuration
 {
     /// <summary>
-    /// Represents the configuration section for <see cref="Sdl.Web.DD4T.Mapping.ModelBuilderPipeline"/> configuration.
+    /// Represents the configuration section for <see cref="Sdl.Web.Tridion.Mapping.ModelBuilderPipeline"/> configuration.
     /// </summary>
     public class ModelBuilderPipelineConfiguration : ConfigurationSection
     {

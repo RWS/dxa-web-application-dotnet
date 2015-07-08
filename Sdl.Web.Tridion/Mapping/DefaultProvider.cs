@@ -11,12 +11,12 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
-using Sdl.Web.DD4T.Statics;
+using Sdl.Web.Tridion.Statics;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Query;
 using IPage = DD4T.ContentModel.IPage;
 
-namespace Sdl.Web.DD4T.Mapping
+namespace Sdl.Web.Tridion.Mapping
 {
     /// <summary>
     /// Default Content Provider and Navigation Provider implementation (DD4T-based).

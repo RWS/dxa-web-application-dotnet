@@ -9,9 +9,9 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
-using Sdl.Web.DD4T.Utils;
+using Sdl.Web.Tridion.Utils;
 
-namespace Sdl.Web.DD4T.Mapping
+namespace Sdl.Web.Tridion.Mapping
 {
     /// <summary>
     /// Default Rich Text Processor implementation (DD4T-based).

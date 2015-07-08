@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using IPage = DD4T.ContentModel.IPage;
 
-namespace Sdl.Web.DD4T.Mapping
+namespace Sdl.Web.Tridion.Mapping
 {
     /// <summary>
     /// Interface for (DD4T-based) Model builders (advanced extension point).

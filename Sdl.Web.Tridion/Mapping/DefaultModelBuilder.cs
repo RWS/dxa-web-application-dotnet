@@ -17,7 +17,7 @@ using Sdl.Web.Common.Models.Common;
 using Sdl.Web.Mvc.Configuration;
 using IPage = DD4T.ContentModel.IPage;
 
-namespace Sdl.Web.DD4T.Mapping
+namespace Sdl.Web.Tridion.Mapping
 {
     /// <summary>
     /// Default Model Builder implementation (DD4T-based).

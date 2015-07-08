@@ -5,10 +5,10 @@ using DD4T.ContentModel;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
-using Sdl.Web.DD4T.Configuration;
+using Sdl.Web.Tridion.Configuration;
 using IPage = DD4T.ContentModel.IPage;
 
-namespace Sdl.Web.DD4T.Mapping
+namespace Sdl.Web.Tridion.Mapping
 {
     /// <summary>
     /// Represents a pipeline/chain of configured Strongly Typed View Model Builders (DD4T-based).

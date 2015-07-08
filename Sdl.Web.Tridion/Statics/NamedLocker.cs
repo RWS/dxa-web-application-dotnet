@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 
-namespace Sdl.Web.DD4T.Statics
+namespace Sdl.Web.Tridion.Statics
 {
     /// <summary>
     /// NamedLocker using ConcurrentDictionary.

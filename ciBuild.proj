@@ -33,7 +33,7 @@
     <Target Name="PackageBuild">
         <Message Text="Running build commands..." Importance="high" />
 
-        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.DD4T\Sdl.Web.DD4T.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
+        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
         <MSBuild Projects="$(ProjectDirectory)\Site\Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
     </Target>
 

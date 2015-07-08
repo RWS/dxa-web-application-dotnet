@@ -1,6 +1,6 @@
 ﻿using System.Configuration;
 
-namespace Sdl.Web.DD4T.Configuration
+namespace Sdl.Web.Tridion.Configuration
 {
     /// <summary>
     /// Represents the configuration settings for a Model Builder.

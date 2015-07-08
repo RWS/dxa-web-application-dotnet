@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Configuration;
 
-namespace Sdl.Web.DD4T.Configuration
+namespace Sdl.Web.Tridion.Configuration
 {
     /// <summary>
     /// Represents a collection of configured Model Builders.

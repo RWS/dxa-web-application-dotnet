@@ -204,10 +204,6 @@
       <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
       <Name>Sdl.Web.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj">
-      <Project>{ae4651df-a42f-4863-a0e1-870eacf3d072}</Project>
-      <Name>Sdl.Web.Tridion</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Shared\Partials\XpmButton.cshtml" />
@@ -275,7 +271,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>copy "$(ProjectDir)\..\_references\dd4t-update\*.dll" "$(TargetDir)" /y
-copy "$(ProjectDir)\..\Sdl.Web.DD4T\bin\$(ConfigurationName)\*.*" "$(TargetDir)" /y
+copy "$(ProjectDir)\..\Sdl.Web.Tridion\bin\$(ConfigurationName)\*.*" "$(TargetDir)" /y
 </PreBuildEvent>
   </PropertyGroup>
 </Project>

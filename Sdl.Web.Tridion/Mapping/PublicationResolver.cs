@@ -2,7 +2,7 @@
 using DD4T.ContentModel.Contracts.Resolvers;
 using Sdl.Web.Mvc.Configuration;
 
-namespace Sdl.Web.DD4T.Mapping
+namespace Sdl.Web.Tridion.Mapping
 {
     public class PublicationResolver : IPublicationResolver
     {
