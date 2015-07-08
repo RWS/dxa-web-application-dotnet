@@ -95,7 +95,6 @@
     <Compile Include="ContentManager\TcmUri.cs" />
     <Compile Include="Statics\BinaryFileManager.cs" />
     <Compile Include="Statics\NamedLocker.cs" />
-    <Compile Include="Utils\ObjectExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Context\Families.xml">

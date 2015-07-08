@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
+using DD4T.ContentModel;
 using DD4T.ContentModel.Factories;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Tridion.Utils;
 
 namespace Sdl.Web.Tridion.Mapping
 {
@@ -66,49 +66,51 @@ namespace Sdl.Web.Tridion.Mapping
 
             // resolve links which haven't been resolved
             ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
-            foreach (XmlNode link in doc.SelectNodes("//a[@xlink:href[starts-with(string(.),'tcm:')]][@href='' or not(@href)]", nsmgr))
+            foreach (XmlElement linkElement in doc.SelectNodes("//a[@xlink:href[starts-with(string(.),'tcm:')]][@href='' or not(@href)]", nsmgr))
             {
                 // does this link already have a resolved href?
-                string linkUrl = link.Attributes["href"].IfNotNull(attr => attr.Value);
-                if (String.IsNullOrEmpty(linkUrl))
+                string linkUrl = linkElement.GetAttribute("href");
+                if (string.IsNullOrEmpty(linkUrl))
                 {
                     // DD4T BinaryPublisher resolves these links and adds a src rather than a href, let's try that
-                    linkUrl = link.Attributes["src"].IfNotNull(attr => attr.Value);
+                    linkUrl = linkElement.GetAttribute("src");
                     // lets remove that invalid attribute directly 
-                    link.Attributes.Remove(link.Attributes["src"]);
+                    linkElement.RemoveAttribute("src");
                 }
-                if (String.IsNullOrEmpty(linkUrl))
+                if (string.IsNullOrEmpty(linkUrl))
                 {
                     // assume dynamic component link and try to resolve
-                    linkUrl = link.Attributes["xlink:href"].IfNotNull(attr => linkResolver.ResolveLink(attr.Value));                    
+                    string tcmUri = linkElement.GetAttribute("xlink:href");
+                    if (!string.IsNullOrEmpty(tcmUri))
+                    {
+                        linkUrl = linkResolver.ResolveLink(tcmUri);
+                    }
                 }                
                 if (!string.IsNullOrEmpty(linkUrl))
                 {
                     // add href
-                    XmlAttribute href = doc.CreateAttribute("href");
-                    href.Value = linkUrl;
-                    link.Attributes.Append(href);
+                    linkElement.SetAttribute("href", linkUrl);
 
-                    ApplyHashIfApplicable(link);
+                    ApplyHashIfApplicable(linkElement);
 
                     // remove all xlink attributes
-                    foreach (XmlAttribute xlinkAttr in link.SelectNodes("//@xlink:*", nsmgr))
+                    foreach (XmlAttribute xlinkAttr in linkElement.SelectNodes("//@xlink:*", nsmgr))
                     {
-                        link.Attributes.Remove(xlinkAttr);
+                        linkElement.Attributes.Remove(xlinkAttr);
                     }
                 }
                 else
                 {
                     // copy child nodes of link so we keep them
-                    link.ChildNodes.Cast<XmlNode>()
-                        .Select(link.RemoveChild)
+                    linkElement.ChildNodes.Cast<XmlNode>()
+                        .Select(linkElement.RemoveChild)
                         .ToList()
                         .ForEach(child => 
                         {
-                            link.ParentNode.InsertBefore(child, link);
+                            linkElement.ParentNode.InsertBefore(child, linkElement);
                         });
                     // remove link node
-                    link.ParentNode.RemoveChild(link);
+                    linkElement.ParentNode.RemoveChild(linkElement);
                 }
             }
 
@@ -158,32 +160,39 @@ namespace Sdl.Web.Tridion.Mapping
             return new RichText(richTextFragments);
         }
 
-        private void ApplyHashIfApplicable(XmlNode link)
+        private void ApplyHashIfApplicable(XmlElement linkElement)
         {
-            string target = link.Attributes["target"].IfNotNull(attr => attr.Value.ToLower());
-
-            if("anchored" == target) 
+            string target = linkElement.GetAttribute("target").ToLower();
+            if (target != "anchored")
             {
-                string href = link.Attributes["href"].Value;
-
-                bool samePage = string.Equals(href,
-                    HttpContext.Current.Request.Url.AbsolutePath,
-                    StringComparison.OrdinalIgnoreCase
-                );
-                
-                string hash = GetLinkName(link).IfNotNull(s => '#' + s.Replace(" ", "_").ToLower());
-                link.Attributes["href"].Value = (!samePage ? href : string.Empty) + hash;
-                link.Attributes["target"].Value = !samePage ? "_top" : string.Empty;
+                return;
             }
+
+            string href = linkElement.GetAttribute("href");
+
+            bool samePage = string.Equals(href,
+                    HttpContext.Current.Request.Url.AbsolutePath, // TODO: should not be using HttpContext at this level
+                    StringComparison.OrdinalIgnoreCase
+                    );
+
+            string linkTitle = GetLinkTitle(linkElement);
+
+            string fragmentId = string.Empty;
+            if (!string.IsNullOrEmpty(linkTitle))
+            {
+                fragmentId = '#' + linkTitle.Replace(" ", "_").ToLower();
+            }
+
+            linkElement.SetAttribute("href", (!samePage ? href : string.Empty) + fragmentId);
+            linkElement.SetAttribute("target", !samePage ? "_top" : string.Empty);
         }
 
-        private string GetLinkName(XmlNode link)
+        private string GetLinkTitle(XmlElement linkElement)
         {
-            string componentUri = link.Attributes["xlink:href"].IfNotNull(attr => attr.Value);
-            
-            return _componentFactory.GetComponent(componentUri).IfNotNull(c => c.Title)
-                ?? link.Attributes["title"].IfNotNull(attr => attr.Value);
+            string componentUri = linkElement.GetAttribute("xlink:href");
+            IComponent component = _componentFactory.GetComponent(componentUri);
+            return (component == null) ? linkElement.GetAttribute("title") : component.Title;
         }
 
-    }   
+    }
 }
