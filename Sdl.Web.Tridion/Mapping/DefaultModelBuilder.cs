@@ -155,6 +155,10 @@ namespace Sdl.Web.Tridion.Mapping
                 entityModel.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("s"));
                 entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "1" : "0");
                 entityModel.MvcData = mvcData;
+                if (cp.IsDynamic)
+                {
+                    entityModel.Id = GetDxaIdentifierFromTcmUri(cp.Component.Id, cp.ComponentTemplate.Id);
+                }
             }
         }
 
@@ -921,10 +925,15 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
 
-        internal static string GetDxaIdentifierFromTcmUri(string tcmUri)
+        internal static string GetDxaIdentifierFromTcmUri(string tcmUri, string templateTcmUri = null)
         {
             // Return the Item (Reference) ID part of the TCM URI.
-            return tcmUri.Split('-')[1];
+            string result = tcmUri.Split('-')[1];
+            if (templateTcmUri != null)
+            {
+                result += "-" + templateTcmUri.Split('-')[1];
+            }
+            return result;
         }
 
         /// <summary>

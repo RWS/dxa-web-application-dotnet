@@ -25,15 +25,6 @@ namespace Sdl.Web.Common.Models
             }
             set
             {
-                // The identifier is effectively immutable, but having a setter makes it more convenient (and backward compatible).
-                if (!string.IsNullOrEmpty(_id))
-                {
-                    throw new DxaException("Cannot change the identifier of an Entity.");
-                }
-                if (string.IsNullOrEmpty(value))
-                {
-                    throw new DxaException("An Entity must have a non-empty identifier.");
-                }
                 _id = value;
             }
         }
