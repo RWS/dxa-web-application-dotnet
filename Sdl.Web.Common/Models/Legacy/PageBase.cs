@@ -8,7 +8,7 @@ namespace Sdl.Web.Common.Models
     /// Legacy base class for page content, used for includes and other 'non-concrete' pages. 
     /// </summary>
     [Obsolete("Deprecated in DXA 1.1. Use class PageModel instead.")]
-    public class PageBase : ViewModel, IPage
+    public abstract class PageBase : ViewModel, IPage
     {
         private readonly string _id;
         protected readonly RegionModelSet _regions = new RegionModelSet();
@@ -17,6 +17,7 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Gets or sets the identifier for the Page.
         /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
         public string Id
         {
             get
@@ -38,6 +39,7 @@ namespace Sdl.Web.Common.Models
             set;
         }
 
+        [SemanticProperty(IgnoreMapping = true)]
         [Obsolete("Deprecated in DXA 1.1. Use PageModel.Regions instead.")]
         public Dictionary<string, IRegion> Regions
         {
@@ -54,6 +56,7 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// For storing system data (for example page id and modified date for xpm markup).
         /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
         [Obsolete("Deprecated in DXA 1.1. Use property XpmMetadata instead.")]
         public Dictionary<string, string> PageData
         {
@@ -67,6 +70,7 @@ namespace Sdl.Web.Common.Models
             }
         }
 
+        [SemanticProperty(IgnoreMapping = true)]
         [Obsolete("Deprecated in DXA 1.1. Use property MvcData instead.")]
         public MvcData AppData
         {

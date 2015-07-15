@@ -2,7 +2,7 @@
 using DD4T.ContentModel.Factories;
 using DD4T.Factories;
 
-namespace Sdl.Web.DD4T.Mapping
+namespace Sdl.Web.Tridion.Mapping
 {
     public class ExtensionlessLinkFactory : LinkFactory, ILinkFactory
     {

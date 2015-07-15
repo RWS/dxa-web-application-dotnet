@@ -74,7 +74,7 @@ namespace Sdl.Web.Tridion
                 }
                 catch (Exception)
                 {
-                    throw new DxaUnknownLocalizationException(string.Format("No matching Localization found for URL '{0}'.", url));
+                    throw new DxaUnknownLocalizationException(string.Format("No matching Localization found for URL '{0}'", url));
                 }
 
                 result.EnsureInitialized();
@@ -95,7 +95,7 @@ namespace Sdl.Web.Tridion
                 Localization result;
                 if (!_knownLocalizations.TryGetValue(localizationId, out result))
                 {
-                    throw new DxaUnknownLocalizationException(string.Format("No Localization found with ID '{0}'.", localizationId));
+                    throw new DxaUnknownLocalizationException(string.Format("No Localization found with ID '{0}'", localizationId));
                 }
 
                 result.EnsureInitialized();

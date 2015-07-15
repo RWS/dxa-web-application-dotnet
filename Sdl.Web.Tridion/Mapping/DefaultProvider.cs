@@ -10,30 +10,20 @@ using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
-using Sdl.Web.DD4T.Statics;
+using Sdl.Web.Tridion.Statics;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Query;
 using IPage = DD4T.ContentModel.IPage;
 
-namespace Sdl.Web.DD4T.Mapping
+namespace Sdl.Web.Tridion.Mapping
 {
     /// <summary>
-    /// Default (DD4T-based) Content Provider and Navigation Provider implementation.
+    /// Default Content Provider and Navigation Provider implementation (DD4T-based).
     /// </summary>
-    public class DD4TProvider : IContentProvider, INavigationProvider
+    public class DefaultProvider : IContentProvider, INavigationProvider
     {
         private readonly IPageFactory _pageFactory;
-
-        /// <summary>
-        /// Model Builder used to map DD4T types to DXA View Models.
-        /// </summary>
-        protected IModelBuilder ModelBuilder 
-        { 
-            get; 
-            private set; 
-        }
 
         protected IPageFactory PageFactory
         {
@@ -44,18 +34,13 @@ namespace Sdl.Web.DD4T.Mapping
             }
         }
 
-        public DD4TProvider(IModelBuilder modelBuilder, IPageFactory pageFactory)
+        public DefaultProvider(IPageFactory pageFactory)
         {
-            if (modelBuilder == null)
-            {
-                throw new DxaException("No Model Builder configured.");
-            }
             if (pageFactory == null)
             {
                 throw new DxaException("No Page Factory configured.");
             }
 
-            ModelBuilder = modelBuilder;
             _pageFactory = pageFactory;
         }
 
@@ -110,7 +95,6 @@ namespace Sdl.Web.DD4T.Mapping
         /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given URL.</exception>
         public virtual PageModel GetPageModel(string url, Localization localization, bool addIncludes)
         {
-            // TODO TSI-775: actually use the localization parameter instead of using WebRequestContext.Localization deep-down in the implementation.
             using (new Tracer(url, localization, addIncludes))
             {
                 //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
@@ -126,8 +110,9 @@ namespace Sdl.Web.DD4T.Mapping
                     throw new DxaItemNotFoundException(url);
                 }
 
-                IEnumerable<IPage> includes = addIncludes ? GetIncludesFromModel(page, localization) : new IPage[0];
-                return ModelBuilder.CreatePageModel(page, includes);
+                IPage[] includes = addIncludes ? GetIncludesFromModel(page, localization).ToArray() : new IPage[0];
+
+                return ModelBuilderPipeline.CreatePageModel(page, includes, localization);
             }
         }
 
@@ -183,7 +168,7 @@ namespace Sdl.Web.DD4T.Mapping
                     Start = contentList.Start,
                     PublicationId = Int32.Parse(localization.LocalizationId),
                     PageSize = contentList.PageSize,
-                    SchemaId = MapSchema(contentList.ContentType.Key),
+                    SchemaId = MapSchema(contentList.ContentType.Key, localization),
                     Sort = contentList.Sort.Key
                 };
 
@@ -387,12 +372,12 @@ namespace Sdl.Web.DD4T.Mapping
             }
         }
         
-        protected virtual int MapSchema(string schemaKey)
+        protected virtual int MapSchema(string schemaKey, Localization localization)
         {
             string[] schemaKeyParts = schemaKey.Split('.');
             string moduleName = schemaKeyParts.Length > 1 ? schemaKeyParts[0] : SiteConfiguration.CoreModuleName;
             schemaKey = schemaKeyParts.Length > 1 ? schemaKeyParts[1] : schemaKeyParts[0];
-            string schemaId = WebRequestContext.Localization.GetConfigValue(string.Format("{0}.schemas.{1}", moduleName, schemaKey));
+            string schemaId = localization.GetConfigValue(string.Format("{0}.schemas.{1}", moduleName, schemaKey));
 
             int result;
             Int32.TryParse(schemaId, out result);

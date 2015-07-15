@@ -8,7 +8,6 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.Controllers;
 using Sdl.Web.Mvc.Formats;
-using Sdl.Web.Tridion.ContentManager;
 
 namespace Sdl.Web.Site.Areas.Core.Controllers
 {
@@ -60,12 +59,10 @@ namespace Sdl.Web.Site.Areas.Core.Controllers
         public virtual ActionResult Resolve(string itemId, int localizationId, string defaultItemId = null, string defaultPath = null)
         {
             // TODO TSI-801: Assuming here that itemId/defaultItemId is Item Reference ID (integer) of a Page.
-            TcmUri tcmUri = new TcmUri(Convert.ToInt32(itemId), ItemType.Page, localizationId);
-            string url = SiteConfiguration.LinkResolver.ResolveLink(tcmUri.ToString());
+            string url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}-64", localizationId, itemId));
             if (url == null && defaultItemId != null)
             {
-                tcmUri = new TcmUri(Convert.ToInt32(defaultItemId), ItemType.Page, localizationId);
-                url = SiteConfiguration.LinkResolver.ResolveLink(tcmUri.ToString());
+                url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}-64", localizationId, defaultItemId));
             }
             if (url == null)
             {

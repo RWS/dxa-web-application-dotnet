@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
 {
@@ -8,6 +9,8 @@ namespace Sdl.Web.Common.Models
     /// </summary>
     public abstract class EntityModel : ViewModel, IRichTextFragment
     {
+        private const string _xpmComponentPresentationMarkup = "<!-- Start Component Presentation: {{\"ComponentID\" : \"{0}\", \"ComponentModified\" : \"{1}\", \"ComponentTemplateID\" : \"{2}\", \"ComponentTemplateModified\" : \"{3}\", \"IsRepositoryPublished\" : {4}}} -->";
+
         private string _id = string.Empty;
 
         /// <summary>
@@ -22,15 +25,6 @@ namespace Sdl.Web.Common.Models
             }
             set
             {
-                // The identifier is effectively immutable, but having a setter makes it more convenient (and backward compatible).
-                if (!string.IsNullOrEmpty(_id))
-                {
-                    throw new DxaException("Cannot change the identifier of an Entity.");
-                }
-                if (string.IsNullOrEmpty(value))
-                {
-                    throw new DxaException("An Entity must have a non-empty identifier.");
-                }
                 _id = value;
             }
         }
@@ -74,6 +68,29 @@ namespace Sdl.Web.Common.Models
 
 
         #region Overrides
+
+        /// <summary>
+        /// Gets the rendered XPM markup
+        /// </summary>
+        /// <param name="localization">The context Localization.</param>
+        /// <returns>The XPM markup.</returns>
+        public override string GetXpmMarkup(Localization localization)
+        {
+            if (XpmMetadata == null)
+            {
+                return string.Empty;
+            }
+
+            // TODO: Consider data-driven approach (i.e. just render all XpmMetadata key/value pairs)
+            return string.Format(
+                _xpmComponentPresentationMarkup, 
+                XpmMetadata["ComponentID"], 
+                XpmMetadata["ComponentModified"], 
+                XpmMetadata["ComponentTemplateID"], 
+                XpmMetadata["ComponentTemplateModified"], 
+                XpmMetadata["IsRepositoryPublished"]
+                );
+        }
 
         /// <summary>
         /// Determines whether the specified object is equal to the current Entity Model.

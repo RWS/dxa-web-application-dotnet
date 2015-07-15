@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
 {
@@ -10,6 +14,9 @@ namespace Sdl.Web.Common.Models
     public class RegionModel : Region
 #pragma warning restore 618
     {
+        private const string _xpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], minOccurs: {2}}} -->";
+        private const string _xpmComponentTypeMarkup = "{{schema: \"{0}\", template: \"{1}\"}}";
+
         private readonly RegionModelSet _regions = new RegionModelSet();
 
         /// <summary>
@@ -76,6 +83,29 @@ namespace Sdl.Web.Common.Models
         #endregion
 
         #region Overrides
+
+        /// <summary>
+        /// Gets the rendered XPM markup
+        /// </summary>
+        /// <param name="localization">The context Localization.</param>
+        /// <returns>The XPM markup.</returns>
+        public override string GetXpmMarkup(Localization localization)
+        {
+            XpmRegion xpmRegion = SiteConfiguration.GetXpmRegion(Name, localization);
+            if (xpmRegion == null)
+            {
+                return string.Empty;
+            }
+
+            // TODO: obtain MinOccurs & MaxOccurs from regions.json
+            return string.Format(
+                _xpmRegionMarkup, 
+                Name, 
+                string.Join(", ", xpmRegion.ComponentTypes.Select(ct => string.Format(_xpmComponentTypeMarkup, ct.Schema, ct.Template))), 
+                0);
+
+        }
+
         /// <summary>
         /// Determines whether the specified object is equal to the current Region Model, i.e. it has the same name.
         /// </summary>

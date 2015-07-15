@@ -1,13 +1,8 @@
-﻿using Sdl.Web.Common.Configuration;
+﻿using System;
+using System.IO;
+using System.Web.Mvc;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Mvc;
 
 namespace Sdl.Web.Mvc.Configuration
 {
@@ -20,7 +15,7 @@ namespace Sdl.Web.Mvc.Configuration
         {
             //Default Route - required for sub actions (region/entity/navigation etc.)
             context.MapRoute(
-                this.AreaName + "_Default",
+                AreaName + "_Default",
                 "{controller}/{action}/{id}",
                 new { controller = "Entity", action = "Entity", id = UrlParameter.Optional }
             );

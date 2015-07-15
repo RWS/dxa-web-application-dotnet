@@ -1,17 +1,15 @@
-﻿using Microsoft.Practices.ServiceLocation;
-using Microsoft.Practices.Unity;
-using Microsoft.Practices.Unity.Configuration;
-using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common.Logging;
-using Sdl.Web.Mvc.Formats;
-using Sdl.Web.Site.Areas.Core.Controllers;
-using Sdl.Web.Tridion.Config;
-using System;
+﻿using System;
 using System.Web;
 using System.Web.Configuration;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Microsoft.Practices.ServiceLocation;
+using Microsoft.Practices.Unity;
+using Microsoft.Practices.Unity.Configuration;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Mvc.Formats;
+using Sdl.Web.Site.Areas.Core.Controllers;
 using Unity.Mvc5;
 
 namespace Sdl.Web.Site
