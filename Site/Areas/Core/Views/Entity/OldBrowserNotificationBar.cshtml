@@ -1,6 +1,6 @@
 ﻿@model Notification
 <!--[if lt IE 8]>
-    <div id="incompability" class="container-fluid page-border" @Html.DxaEntityMarkup()>
+    <div id="incompability" class="container-fluid page-border @Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
         <div class="row">
             <div class="col-sm-9">
                 <div class="h4" @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</div>

@@ -16,6 +16,8 @@ namespace Sdl.Web.Common.Models
         public string RegionName { get; set; }
         public string RegionAreaName { get; set; }
         public Dictionary<string, string> RouteValues { get; set; }
+        public string HtmlId { get; set; }
+        public string HtmlClasses { get; set; }
 
         #region Constructors
         /// <summary>

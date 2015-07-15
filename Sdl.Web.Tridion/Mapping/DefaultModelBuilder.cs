@@ -15,6 +15,7 @@ using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Common;
 using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Tridion.Extensions;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.Tridion.Mapping
@@ -32,11 +33,11 @@ namespace Sdl.Web.Tridion.Mapping
         // TODO: while it works perfectly well, this class is in need of some refactoring to make its behaviour a bit more understandable and maintainable,
         // as its currently very easy to get lost in the semantic mapping logic
 
-        private const string _standardMetadataXmlFieldName = "standardMeta";
-        private const string _standardMetadataTitleXmlFieldName = "name";
-        private const string _standardMetadataDescriptionXmlFieldName = "description";
-        private const string _regionForPageTitleComponent = "Main";
-        private const string _componentXmlFieldNameForPageTitle = "headline";
+        private const string StandardMetadataXmlFieldName = "standardMeta";
+        private const string StandardMetadataTitleXmlFieldName = "name";
+        private const string StandardMetadataDescriptionXmlFieldName = "description";
+        private const string RegionForPageTitleComponent = "Main";
+        private const string ComponentXmlFieldNameForPageTitle = "headline";
 
         private ResourceProvider _resourceProvider;
 
@@ -535,10 +536,8 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     return mappedValues;
                 }
-                else
-                {
-                    return mappedValues.Count == 0 ? null : mappedValues[0];
-                }
+                
+                return mappedValues.Count == 0 ? null : mappedValues[0];
 
             }
             catch (Exception ex)
@@ -589,19 +588,19 @@ namespace Sdl.Web.Tridion.Mapping
                     TagCategory = keyword.TaxonomyId
                 };
             } 
-            else if (modelType == typeof(bool))
+            
+            if (modelType == typeof(bool))
             {
                 //For booleans we assume the keyword key or value can be converted to bool
                 return Boolean.Parse(String.IsNullOrEmpty(keyword.Key) ? keyword.Title : keyword.Key);
             }
-            else if (modelType == typeof(string))
+            
+            if (modelType == typeof(string))
             {
                 return displayText;
             }
-            else
-            {
-                throw new DxaException(String.Format("Cannot map Keyword to type '{0}'. The type must be Tag, bool or string.", modelType));
-            }
+
+            throw new DxaException(String.Format("Cannot map Keyword to type '{0}'. The type must be Tag, bool or string.", modelType));
         }
 
         protected virtual object MapComponent(IComponent component, Type modelType, Localization localization)
@@ -708,26 +707,26 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     MvcData regionMvcData = GetRegionMvcData(cp);
                     // determine title and description from first component in 'main' region
-                    if (first && regionMvcData.ViewName.Equals(_regionForPageTitleComponent))
+                    if (first && regionMvcData.ViewName.Equals(RegionForPageTitleComponent))
                     {
                         first = false;
                         IFieldSet metadata = cp.Component.MetadataFields;
                         IFieldSet fields = cp.Component.Fields;
-                        if (metadata.ContainsKey(_standardMetadataXmlFieldName) && metadata[_standardMetadataXmlFieldName].EmbeddedValues.Count > 0)
+                        if (metadata.ContainsKey(StandardMetadataXmlFieldName) && metadata[StandardMetadataXmlFieldName].EmbeddedValues.Count > 0)
                         {
-                            IFieldSet standardMeta = metadata[_standardMetadataXmlFieldName].EmbeddedValues[0];
-                            if (title == null && standardMeta.ContainsKey(_standardMetadataTitleXmlFieldName))
+                            IFieldSet standardMeta = metadata[StandardMetadataXmlFieldName].EmbeddedValues[0];
+                            if (title == null && standardMeta.ContainsKey(StandardMetadataTitleXmlFieldName))
                             {
-                                title = standardMeta[_standardMetadataTitleXmlFieldName].Value;
+                                title = standardMeta[StandardMetadataTitleXmlFieldName].Value;
                             }
-                            if (description == null && standardMeta.ContainsKey(_standardMetadataDescriptionXmlFieldName))
+                            if (description == null && standardMeta.ContainsKey(StandardMetadataDescriptionXmlFieldName))
                             {
-                                description = standardMeta[_standardMetadataDescriptionXmlFieldName].Value;
+                                description = standardMeta[StandardMetadataDescriptionXmlFieldName].Value;
                             }
                         }
-                        if (title == null && fields.ContainsKey(_componentXmlFieldNameForPageTitle))
+                        if (title == null && fields.ContainsKey(ComponentXmlFieldNameForPageTitle))
                         {
-                            title = fields[_componentXmlFieldNameForPageTitle].Value;
+                            title = fields[ComponentXmlFieldNameForPageTitle].Value;
                         }
                         //Try to find an image
                         if (image == null && fields.ContainsKey("image"))
@@ -751,7 +750,7 @@ namespace Sdl.Web.Tridion.Mapping
             meta.Add("twitter:card", "summary");
             meta.Add("og:title", title);
             // TODO: if the URL is really needed, it should be added higher up (e.g. in the View code):  meta.Add("og:url", WebRequestContext.RequestUrl);
-            //TODO is this always article?
+            // TODO: is this always article?
             meta.Add("og:type", "article");
             meta.Add("og:locale", localization.Culture);
             if (description != null)
@@ -767,7 +766,7 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 meta.Add("description", description ?? title);
             }
-            //TODO meta.Add("fb:admins", Configuration.GetConfig("core.fbadmins");
+            // TODO: meta.Add("fb:admins", Configuration.GetConfig("core.fbadmins");
             return title + titlePostfix;
         }
 
@@ -875,7 +874,7 @@ namespace Sdl.Web.Tridion.Mapping
             return new RegionModel(regionName)
             {
                 MvcData = regionMvcData,
-                XpmMetadata = new Dictionary<string, string>()
+                XpmMetadata = new Dictionary<string, string>
                 {
                     {RegionModel.IncludedFromPageIdXpmMetadataKey, page.Id},
                     {RegionModel.IncludedFromPageTitleXpmMetadataKey, page.Title},
@@ -943,19 +942,36 @@ namespace Sdl.Web.Tridion.Mapping
         /// <returns>MVC data</returns>
         private static MvcData GetMvcData(IPage page)
         {
-            string viewName = page.PageTemplate.Title.RemoveSpaces();
-            if (page.PageTemplate.MetadataFields != null)
+            IPageTemplate template = page.PageTemplate;
+            string viewName = template.Title.RemoveSpaces();
+
+            if (template.MetadataFields != null)
             {
-                if (page.PageTemplate.MetadataFields.ContainsKey("view"))
+                if (template.MetadataFields.ContainsKey("view"))
                 {
-                    viewName = page.PageTemplate.MetadataFields["view"].Value;
+                    viewName = template.MetadataFields["view"].Value;
                 }
             }
 
             MvcData mvcData = CreateViewData(viewName);
+            // defaults
             mvcData.ControllerName = SiteConfiguration.GetPageController();
             mvcData.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
             mvcData.ActionName = SiteConfiguration.GetPageAction();
+
+            if (template.MetadataFields != null)
+            {
+                if (template.MetadataFields.ContainsKey("htmlId"))
+                {
+                    // strip illegal characters to ensure valid html in the view
+                    mvcData.HtmlId = template.MetadataFields["htmlId"].Value.StripIllegalCharacters(@"[^\w\-]");
+                }
+                if (template.MetadataFields.ContainsKey("htmlClasses"))
+                {
+                    // strip illegal characters to ensure valid html in the view (allow spaces for multiple classes)
+                    mvcData.HtmlClasses = template.MetadataFields["htmlClasses"].Value.StripIllegalCharacters(@"[^\w\-\ ]");
+                }
+            }
 
             return mvcData;
         }
@@ -979,7 +995,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             MvcData mvcData = CreateViewData(viewName);
-            //Defaults
+            // defaults
             mvcData.ControllerName = SiteConfiguration.GetEntityController();
             mvcData.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
             mvcData.ActionName = SiteConfiguration.GetEntityAction();
@@ -1030,10 +1046,21 @@ namespace Sdl.Web.Tridion.Mapping
                         }
                     }
                 }
+                if (template.MetadataFields.ContainsKey("htmlId"))
+                {
+                    // strip illegal characters to ensure valid html in the view
+                    mvcData.HtmlId = template.MetadataFields["htmlId"].Value.StripIllegalCharacters(@"[^\w\-]");
+                }
+                if (template.MetadataFields.ContainsKey("htmlClasses"))
+                {
+                    // strip illegal characters to ensure valid html in the view (allow spaces for multiple classes)
+                    mvcData.HtmlClasses = template.MetadataFields["htmlClasses"].Value.StripIllegalCharacters(@"[^\w\-\ ]");
+                }
             }
 
             return mvcData;
         }
+
 
         private static MvcData CreateViewData(string viewName)
         {

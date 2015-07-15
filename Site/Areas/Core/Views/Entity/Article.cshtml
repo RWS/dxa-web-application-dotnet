@@ -1,6 +1,6 @@
 ﻿@model Article
-<article class="rich-text" @Html.DxaEntityMarkup()>
-    @if (Model.Image != null && WebRequestContext.ScreenWidth!=ScreenWidth.ExtraSmall)
+<article id="@Model.MvcData.HtmlId" class="rich-text @Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
+    @if (Model.Image != null && WebRequestContext.ScreenWidth != ScreenWidth.ExtraSmall)
     {
         <div class="hero" @Html.DxaPropertyMarkup(() => Model.Image)>
             @Html.Media(Model.Image, 3.3)
@@ -13,7 +13,7 @@
     {
         <h1 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
     }
-    @if (Model.Date!=null)
+    @if (Model.Date != null)
     {
         <div class="meta" @Html.DxaPropertyMarkup(() => Model.Date)>
             @Html.Date(Model.Date)
@@ -22,25 +22,25 @@
     <div class="content">
         @if (Model.ArticleBody != null)
         {
-            int i=0;
+            int i = 0;
             foreach (var para in Model.ArticleBody)
             {
                 <div @Html.DxaPropertyMarkup(() => Model.ArticleBody, i++)>
-                    @if (para.Subheading!=null)
+                    @if (para.Subheading != null)
                     {
                         <h3 @Html.DxaPropertyMarkup(() => para.Subheading)>@para.Subheading</h3>
                     }
-                    @if (para.Content!=null)
+                    @if (para.Content != null)
                     {
                         <div @Html.DxaPropertyMarkup(() => para.Content)>
                             @Html.DxaRichText(para.Content)
                         </div>
                     }
-                    @if (para.Media!=null)
+                    @if (para.Media != null)
                     {
                         <figure @Html.DxaPropertyMarkup(() => para.Media)>
-                            @Html.Media(para.Media, "100%", 0) 
-                            @if (para.Caption!=null)
+                            @Html.Media(para.Media, "100%", 0)
+                            @if (para.Caption != null)
                             {
                                 <figcaption @Html.DxaPropertyMarkup(() => para.Caption)>
                                     @para.Caption
