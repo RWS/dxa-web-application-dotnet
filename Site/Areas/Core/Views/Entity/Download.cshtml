@@ -1,10 +1,11 @@
 ﻿@model Download
-<div @Html.DxaEntityMarkup()>
+<div id="@Model.MvcData.HtmlId" class="@Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
     <div class="download-list">
         <i class="fa @Model.GetIconClass()"></i>
         <div>
             <a href="@Model.Url">@Model.FileName</a> <small class="size">(@Model.GetFriendlyFileSize())</small>
-            @if (!string.IsNullOrEmpty(Model.Description)) { <small>@Model.Description</small> }
+            @if (!string.IsNullOrEmpty(Model.Description))
+            { <small>@Model.Description</small> }
         </div>
     </div>
 </div>

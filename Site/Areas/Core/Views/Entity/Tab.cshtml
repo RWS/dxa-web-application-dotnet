@@ -3,7 +3,7 @@
 {
     @(Model.Id + "_" + index)
 }
-<article class="rich-text" @Html.DxaEntityMarkup()>
+<article id="@Model.MvcData.HtmlId" class="rich-text @Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
     <div class="content">
         @if (Model.Headline != null)
         {
