@@ -1,5 +1,4 @@
-﻿using System;
-using Sdl.Web.Common;
+﻿using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Tridion.ContentManager;
 using Tridion.ContentDelivery.Web.Linking;

@@ -22,7 +22,7 @@ namespace Sdl.Web.Tridion.Mapping
     /// <seealso cref="IModelBuilder"/>
     public static class ModelBuilderPipeline
     {
-        private static readonly IEnumerable<IModelBuilder> _modelBuilders;
+        private static readonly IEnumerable<IModelBuilder> ModelBuilders;
 
         /// <summary>
         /// Initializes the Model Builder Pipeline (class constructor).
@@ -58,7 +58,7 @@ namespace Sdl.Web.Tridion.Mapping
                     modelBuilders.Add(new DefaultModelBuilder());
                 }
 
-                _modelBuilders = modelBuilders;
+                ModelBuilders = modelBuilders;
             }
         }
 
@@ -75,7 +75,7 @@ namespace Sdl.Web.Tridion.Mapping
             using (new Tracer(page, includes, localization))
             {
                 PageModel pageModel = null;
-                foreach (IModelBuilder modelBuilder in _modelBuilders)
+                foreach (IModelBuilder modelBuilder in ModelBuilders)
                 {
                     modelBuilder.BuildPageModel(ref pageModel, page, includes, localization);
                 }
@@ -95,7 +95,7 @@ namespace Sdl.Web.Tridion.Mapping
             using (new Tracer(cp, localization))
             {
                 EntityModel entityModel = null;
-                foreach (IModelBuilder modelBuilder in _modelBuilders)
+                foreach (IModelBuilder modelBuilder in ModelBuilders)
                 {
                     modelBuilder.BuildEntityModel(ref entityModel, cp, localization);
                 }
@@ -116,7 +116,7 @@ namespace Sdl.Web.Tridion.Mapping
             using (new Tracer(component, baseModelType, localization))
             {
                 EntityModel entityModel = null;
-                foreach (IModelBuilder modelBuilder in _modelBuilders)
+                foreach (IModelBuilder modelBuilder in ModelBuilders)
                 {
                     modelBuilder.BuildEntityModel(ref entityModel, component, baseModelType, localization);
                 }
