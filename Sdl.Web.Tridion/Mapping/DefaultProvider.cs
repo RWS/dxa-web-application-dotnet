@@ -26,9 +26,8 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class DefaultProvider : IContentProvider, INavigationProvider
     {
-
-        private readonly IComponentFactory _componentFactory;
         private readonly IPageFactory _pageFactory;
+        private readonly IComponentFactory _componentFactory;
 
         protected IPageFactory PageFactory
         {
@@ -39,17 +38,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        public DefaultProvider(IComponentFactory componentFactory)
-        {
-            if (componentFactory == null)
-            {
-                throw new DxaException("No Component Factory configured.");
-            }
-
-            _componentFactory = componentFactory;
-        }
-
-        public DefaultProvider(IPageFactory pageFactory)
+        public DefaultProvider(IPageFactory pageFactory, IComponentFactory componentFactory)
         {
             if (pageFactory == null)
             {
@@ -57,6 +46,13 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             _pageFactory = pageFactory;
+
+            if (componentFactory == null)
+            {
+                throw new DxaException("No Component Factory configured.");
+            }
+
+            _componentFactory = componentFactory;
         }
 
         #region IContentProvider members
