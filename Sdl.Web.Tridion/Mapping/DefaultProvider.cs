@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Script.Serialization;
+using DD4T.ContentModel;
 using DD4T.ContentModel.Factories;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
@@ -14,6 +15,8 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Statics;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Query;
+using Tridion.ContentDelivery.DynamicContent.Query;
+using Tridion.ContentDelivery.Meta;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.Tridion.Mapping
@@ -24,6 +27,7 @@ namespace Sdl.Web.Tridion.Mapping
     public class DefaultProvider : IContentProvider, INavigationProvider
     {
         private readonly IPageFactory _pageFactory;
+        private readonly IComponentFactory _componentFactory;
 
         protected IPageFactory PageFactory
         {
@@ -34,7 +38,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        public DefaultProvider(IPageFactory pageFactory)
+        public DefaultProvider(IPageFactory pageFactory, IComponentFactory componentFactory)
         {
             if (pageFactory == null)
             {
@@ -42,6 +46,13 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             _pageFactory = pageFactory;
+
+            if (componentFactory == null)
+            {
+                throw new DxaException("No Component Factory configured.");
+            }
+
+            _componentFactory = componentFactory;
         }
 
         #region IContentProvider members
@@ -127,6 +138,53 @@ namespace Sdl.Web.Tridion.Mapping
         {
             using (new Tracer(id, localization))
             {
+                // Entity Identifier of a DCP is ComponentId-TemplateId
+                if (id.Contains('-'))
+                {
+                    string[] identifiers = id.Split('-');
+                    string componentUri = string.Format("tcm:{0}-{1}", localization.LocalizationId, identifiers[0]);
+                    string templateUri = string.Format("tcm:{0}-{1}-32", localization.LocalizationId, identifiers[1]);
+
+                    IComponent component;
+                    if (_componentFactory.TryGetComponent(componentUri, out component, templateUri))
+                    {
+                        //var componentTcmUri = new TcmUri(componentUri);
+                        var templateTcmUri = new TcmUri(templateUri);
+
+                        var publicationCriteria = new PublicationCriteria(templateTcmUri.PublicationId);
+                        var itemReferenceCriteria = new ItemReferenceCriteria(templateTcmUri.ItemId);
+                        var itemTypeTypeCriteria = new ItemTypeCriteria(32);
+
+                        var query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(
+                            CriteriaFactory.And(new Criteria[] { publicationCriteria, itemReferenceCriteria, itemTypeTypeCriteria }));
+
+                        var results = query.ExecuteEntityQuery();
+                        if (results != null)
+                        {
+                            var componentPresentation = new ComponentPresentation
+                            {
+                                Component = component as Component,
+                                IsDynamic = true
+                            };
+
+                            var templateMeta = (ITemplateMeta)results.FirstOrDefault();
+                            var template = new ComponentTemplate
+                            {
+                                Id = templateUri,
+                                Title = templateMeta.Title,
+                                OutputFormat = templateMeta.OutputFormat
+                            };
+
+                            componentPresentation.ComponentTemplate = template;
+                            return ModelBuilderPipeline.CreateEntityModel(componentPresentation, localization);
+                        }
+                    }
+                    else
+                    {
+                        throw new DxaItemNotFoundException(id);
+                    }
+                }
+                
                 throw new NotImplementedException("This feature will be implemented in a future release"); // TODO TSI-803
             }
         }

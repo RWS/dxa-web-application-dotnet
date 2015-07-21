@@ -10,7 +10,7 @@ namespace Sdl.Web.Tridion.Context
 {
     public class AdfContextClaimsProvider : IContextClaimsProvider
     {
-        private const string _contextClaimPrefix = "taf:claim:context:";
+        private const string ContextClaimPrefix = "taf:claim:context:";
 
         #region IContextClaimsProvider Members
 
@@ -23,7 +23,7 @@ namespace Sdl.Web.Tridion.Context
         {
             using (new Tracer(aspectName))
             {
-                string claimNamePrefix = _contextClaimPrefix;
+                string claimNamePrefix = ContextClaimPrefix;
                 if (!string.IsNullOrEmpty(aspectName))
                 {
                     claimNamePrefix += aspectName + ":";
@@ -37,7 +37,7 @@ namespace Sdl.Web.Tridion.Context
                     {
                         continue;
                     }
-                    string propertyName = claimName.Substring(_contextClaimPrefix.Length).Replace(':', '.');
+                    string propertyName = claimName.Substring(ContextClaimPrefix.Length).Replace(':', '.');
                     result.Add(propertyName, claim.Value);
                 }
 

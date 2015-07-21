@@ -8,21 +8,21 @@ namespace Sdl.Web.Tridion.Configuration
     public class ModelBuilderPipelineConfiguration : ConfigurationSection
     {
         public const string SectionName = "modelBuilderPipeline";
-        private const string _defaultCollectionName = "";
+        private const string DefaultCollectionName = "";
 
         /// <summary>
         /// Gets or sets the collection of configured Model Builders.
         /// </summary>
-        [ConfigurationProperty(_defaultCollectionName, IsDefaultCollection = true)]
+        [ConfigurationProperty(DefaultCollectionName, IsDefaultCollection = true)]
         public ModelBuilderCollection ModelBuilders
         {
             get
             {
-                return this[_defaultCollectionName] as ModelBuilderCollection;
+                return this[DefaultCollectionName] as ModelBuilderCollection;
             }
             set
             {
-                this[_defaultCollectionName] = value;
+                this[DefaultCollectionName] = value;
             }
         }
     }
