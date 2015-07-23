@@ -9,7 +9,7 @@ namespace Sdl.Web.Common.Models
     /// </summary>
     public abstract class EntityModel : ViewModel, IRichTextFragment
     {
-        private const string _xpmComponentPresentationMarkup = "<!-- Start Component Presentation: {{\"ComponentID\" : \"{0}\", \"ComponentModified\" : \"{1}\", \"ComponentTemplateID\" : \"{2}\", \"ComponentTemplateModified\" : \"{3}\", \"IsRepositoryPublished\" : {4}}} -->";
+        private const string XpmComponentPresentationMarkup = "<!-- Start Component Presentation: {{\"ComponentID\" : \"{0}\", \"ComponentModified\" : \"{1}\", \"ComponentTemplateID\" : \"{2}\", \"ComponentTemplateModified\" : \"{3}\", \"IsRepositoryPublished\" : {4}}} -->";
 
         private string _id = string.Empty;
 
@@ -83,7 +83,7 @@ namespace Sdl.Web.Common.Models
 
             // TODO: Consider data-driven approach (i.e. just render all XpmMetadata key/value pairs)
             return string.Format(
-                _xpmComponentPresentationMarkup, 
+                XpmComponentPresentationMarkup, 
                 XpmMetadata["ComponentID"], 
                 XpmMetadata["ComponentModified"], 
                 XpmMetadata["ComponentTemplateID"], 
