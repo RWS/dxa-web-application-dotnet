@@ -57,12 +57,20 @@ namespace Sdl.Web.Common.Models
             }
         }
 
-        // ECL items need to use ECL URI rather than TCM URI in XPM markup
+        /// <summary>
+        /// Gets the rendered XPM markup
+        /// </summary>
+        /// <remarks>
+        /// ECL items will use ECL URI rather than TCM URI in XPM markup
+        /// </remarks>
+        /// <param name="localization">The context Localization.</param>
+        /// <returns>The XPM markup.</returns>
         public override string GetXpmMarkup(Localization localization)
         {
             // TODO: ECL mimetype might become a real mimetype, in that case we can't use it here anymore
             if (EclMimeType.Equals(MimeType))
             {
+                // replace TCM URI with ECL URI
                 return base.GetXpmMarkup(localization).Replace(String.Format("tcm:{0}-{1}", localization.LocalizationId, Id), EclUri);
             }
             return base.GetXpmMarkup(localization);
