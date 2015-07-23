@@ -47,9 +47,10 @@ namespace Sdl.Web.Common.Models
         {
             get
             {
-                // TODO: ECL mimetype should actually be a real mimetype, in that case we can't use it here anymore
+                // TODO: ECL mimetype might become a real mimetype, in that case we can't use it here anymore
                 if (EclMimeType.Equals(MimeType) && FileName.EndsWith(".ecl"))
                 {
+                    // build ECL URI from filename (filename: 8-mm-204-dist-file.ecl ECL URI: ecl:8-mm-204-dist-file)
                     return String.Format("ecl:{0}", FileName.Replace(".ecl", String.Empty));
                 }
                 return null;
@@ -59,7 +60,7 @@ namespace Sdl.Web.Common.Models
         // ECL items need to use ECL URI rather than TCM URI in XPM markup
         public override string GetXpmMarkup(Localization localization)
         {
-            // TODO: ECL mimetype should actually be a real mimetype, in that case we can't use it here anymore
+            // TODO: ECL mimetype might become a real mimetype, in that case we can't use it here anymore
             if (EclMimeType.Equals(MimeType))
             {
                 return base.GetXpmMarkup(localization).Replace(String.Format("tcm:{0}-{1}", localization.LocalizationId, Id), EclUri);
