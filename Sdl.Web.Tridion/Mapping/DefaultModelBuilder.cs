@@ -893,6 +893,7 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 if (cp.ComponentTemplate.MetadataFields.ContainsKey("regionView"))
                 {
+                    // split region view on colon, use first part as area (module) name
                     string[] regionViewParts = cp.ComponentTemplate.MetadataFields["regionView"].Value.Split(':');
                     if (regionViewParts.Length > 1)
                     {
@@ -905,16 +906,26 @@ namespace Sdl.Web.Tridion.Mapping
                     }
                 }
             }
-            //Fallback if no meta - use the CT title
+
+            // fallback if no meta - use the CT title
             if (regionName == null)
             {
                 Match match = Regex.Match(cp.ComponentTemplate.Title, @".*?\[(.*?)\]");
                 if (match.Success)
                 {
                     regionName = match.Groups[1].Value;
+
+                    // split region view on colon, use first part as area (module) name
+                    string[] regionViewParts = regionName.Split(':');
+                    if (regionViewParts.Length > 1)
+                    {
+                        module = regionViewParts[0].Trim();
+                        regionName = regionViewParts[1].Trim();
+                    }
                 }
             }
-            regionName = regionName ?? "Main";//default region name
+
+            regionName = regionName ?? "Main"; // default region name
 
             MvcData regionMvcData = new MvcData { AreaName = module, ViewName = regionName };
             InitializeRegionMvcData(regionMvcData);
