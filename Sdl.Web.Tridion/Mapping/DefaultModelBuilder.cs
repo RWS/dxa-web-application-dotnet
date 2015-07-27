@@ -64,6 +64,8 @@ namespace Sdl.Web.Tridion.Mapping
                     if (cp.IsDynamic)
                     {
                         // this is a workaround for the PageFactory not populating the Fields property of Dynamic Component Presentations in the Page model
+                        // loading the DCP from the Broker will not get the CT metadata, so the region will be determined from the CT title
+                        // TODO: find a way to load the CT metadata for a DCP
                         fullyLoadedCp = LoadDcp(cp.Component.Id, cp.ComponentTemplate.Id);
                         Log.Debug("Loading DCP {0}, {1}", cp.Component.Id, cp.ComponentTemplate.Id);
                     }
@@ -224,9 +226,22 @@ namespace Sdl.Web.Tridion.Mapping
         }
         #endregion
 
+        /// <summary>
+        /// Load Dynamic Component Presentation as a workaround for the PageFactory not populating the Fields property of Dynamic Component Presentations in the Page model
+        /// </summary>
+        /// <param name="componentUri">Component URI</param>
+        /// <param name="templateUri">Component Template URI</param>
+        /// <returns>DD4T ContentModel ComponentPresentation</returns>
+        /// <remarks>
+        /// Similair to <see cref="DefaultProvider.GetEntityModel(string, Localization)"/>, 
+        /// but we need an IComponentPresentation here and should not recursively call 
+        /// <see cref="BuildEntityModel(ref EntityModel, IComponentPresentation, Localization)"/>. 
+        /// Loading the DCP from the Broker will not get the CT metadata, so the region will be determined from the CT title. 
+        /// TODO: find a way to load the CT metadata for a DCP
+        /// </remarks>
         private static IComponentPresentation LoadDcp(string componentUri, string templateUri)
         {
-            // TODO: should this not be in a Provider?
+            // TODO: should this not be a methond in the DefaultProvider instead?
             using (new Tracer(componentUri, templateUri))
             {
                 ComponentFactory componentFactory = new ComponentFactory();
@@ -893,17 +908,7 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 if (cp.ComponentTemplate.MetadataFields.ContainsKey("regionView"))
                 {
-                    // split region view on colon, use first part as area (module) name
-                    string[] regionViewParts = cp.ComponentTemplate.MetadataFields["regionView"].Value.Split(':');
-                    if (regionViewParts.Length > 1)
-                    {
-                        module = regionViewParts[0].Trim();
-                        regionName = regionViewParts[1].Trim();
-                    }
-                    else
-                    {
-                        regionName = regionViewParts[0].Trim();
-                    }
+                    regionName = DetermineRegionViewNameAndModule(cp.ComponentTemplate.MetadataFields["regionView"].Value, out module);
                 }
             }
 
@@ -913,15 +918,7 @@ namespace Sdl.Web.Tridion.Mapping
                 Match match = Regex.Match(cp.ComponentTemplate.Title, @".*?\[(.*?)\]");
                 if (match.Success)
                 {
-                    regionName = match.Groups[1].Value;
-
-                    // split region view on colon, use first part as area (module) name
-                    string[] regionViewParts = regionName.Split(':');
-                    if (regionViewParts.Length > 1)
-                    {
-                        module = regionViewParts[0].Trim();
-                        regionName = regionViewParts[1].Trim();
-                    }
+                    regionName = DetermineRegionViewNameAndModule(match.Groups[1].Value, out module);
                 }
             }
 
@@ -930,6 +927,33 @@ namespace Sdl.Web.Tridion.Mapping
             MvcData regionMvcData = new MvcData { AreaName = module, ViewName = regionName };
             InitializeRegionMvcData(regionMvcData);
             return regionMvcData;
+        }
+
+        /// <summary>
+        /// Split out region view and module from region name.
+        /// </summary>
+        /// <param name="regionName">The region name (can contain a module prefixed to it module:region)</param>
+        /// <param name="module">Returns the module name, will use default if no module name is prefixed, <see cref="SiteConfiguration.GetDefaultModuleName()"/></param>
+        /// <returns>Region view name</returns>
+        /// <remarks>TODO: replace this method with something like <see cref="CreateViewData(string)"/></remarks>
+        private static string DetermineRegionViewNameAndModule(string regionName, out string module)
+        {
+            module = SiteConfiguration.GetDefaultModuleName(); // default module
+
+            if (!String.IsNullOrEmpty(regionName))
+            {
+                // split region view on colon, use first part as area (module) name
+                string[] regionViewParts = regionName.Split(':');
+                if (regionViewParts.Length > 1)
+                {
+                    module = regionViewParts[0].Trim();
+                    return regionViewParts[1].Trim();
+                }
+                
+                return regionViewParts[0].Trim();
+            }
+
+            return null;
         }
 
         private static RegionModel GetRegionFromIncludePage(IPage page)
@@ -1069,6 +1093,7 @@ namespace Sdl.Web.Tridion.Mapping
             mvcData.ActionName = SiteConfiguration.GetEntityAction();
             mvcData.RouteValues = new Dictionary<string, string>();
 
+            // TODO: remove code duplication of splitting area and controller/region names
             if (template.MetadataFields != null)
             {
                 if (template.MetadataFields.ContainsKey("controller"))
@@ -1128,7 +1153,6 @@ namespace Sdl.Web.Tridion.Mapping
 
             return mvcData;
         }
-
 
         private static MvcData CreateViewData(string viewName)
         {
