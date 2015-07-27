@@ -179,10 +179,8 @@ namespace Sdl.Web.Tridion.Mapping
                             return ModelBuilderPipeline.CreateEntityModel(componentPresentation, localization);
                         }
                     }
-                    else
-                    {
-                        throw new DxaItemNotFoundException(id);
-                    }
+                    
+                    throw new DxaItemNotFoundException(id);
                 }
                 
                 throw new NotImplementedException("This feature will be implemented in a future release"); // TODO TSI-803

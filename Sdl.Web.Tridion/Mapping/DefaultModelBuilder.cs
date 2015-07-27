@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
+using DD4T.Factories;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
@@ -16,6 +17,8 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Common;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Extensions;
+using Tridion.ContentDelivery.DynamicContent.Query;
+using Tridion.ContentDelivery.Meta;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.Tridion.Mapping
@@ -57,7 +60,16 @@ namespace Sdl.Web.Tridion.Mapping
                 IConditionalEntityEvaluator conditionalEntityEvaluator = SiteConfiguration.ConditionalEntityEvaluator;
                 foreach (IComponentPresentation cp in page.ComponentPresentations)
                 {
-                    MvcData cpRegionMvcData = GetRegionMvcData(cp);
+                    IComponentPresentation fullyLoadedCp = cp;
+                    if (cp.IsDynamic)
+                    {
+                        // this is a workaround for the PageFactory not populating the Fields property of Dynamic Component Presentations in the Page model
+                        fullyLoadedCp = LoadDcp(cp.Component.Id, cp.ComponentTemplate.Id);
+                        Log.Debug("Loading DCP {0}, {1}", cp.Component.Id, cp.ComponentTemplate.Id);
+                    }
+
+
+                    MvcData cpRegionMvcData = GetRegionMvcData(fullyLoadedCp);
                     RegionModel region;
                     if (regions.TryGetValue(cpRegionMvcData.ViewName, out region))
                     {
@@ -77,7 +89,7 @@ namespace Sdl.Web.Tridion.Mapping
                     EntityModel entity;
                     try
                     {
-                        entity = ModelBuilderPipeline.CreateEntityModel(cp, localization);
+                        entity = ModelBuilderPipeline.CreateEntityModel(fullyLoadedCp, localization);
                     }
                     catch (Exception ex)
                     {
@@ -87,7 +99,7 @@ namespace Sdl.Web.Tridion.Mapping
                         Log.Error(ex);
                         entity = new ExceptionEntity(ex)
                         {
-                            MvcData = GetMvcData(cp) // TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
+                            MvcData = GetMvcData(fullyLoadedCp) // TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
                         };
                     }
 
@@ -150,19 +162,20 @@ namespace Sdl.Web.Tridion.Mapping
                 Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
                 // NOTE: not using ModelBuilderPipeline here, but directly calling our own implementation.
-                BuildEntityModel(ref entityModel, cp.Component, modelType, localization);
+                BuildEntityModel(ref entityModel, cp.Component, modelType, localization);                    
 
                 entityModel.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
                 entityModel.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("s"));
                 entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "1" : "0");
                 entityModel.MvcData = mvcData;
+
                 if (cp.IsDynamic)
                 {
+                    // update Entity Identifier to that of a DCP
                     entityModel.Id = GetDxaIdentifierFromTcmUri(cp.Component.Id, cp.ComponentTemplate.Id);
                 }
             }
         }
-
 
         public virtual void BuildEntityModel(ref EntityModel entityModel, IComponent component, Type baseModelType, Localization localization)
         {
@@ -211,6 +224,50 @@ namespace Sdl.Web.Tridion.Mapping
         }
         #endregion
 
+        private static IComponentPresentation LoadDcp(string componentUri, string templateUri)
+        {
+            // TODO: should this not be in a Provider?
+            using (new Tracer(componentUri, templateUri))
+            {
+                ComponentFactory componentFactory = new ComponentFactory();
+                IComponent component;
+                if (componentFactory.TryGetComponent(componentUri, out component, templateUri))
+                {
+                    //var componentTcmUri = new TcmUri(componentUri);
+                    var templateTcmUri = new TcmUri(templateUri);
+
+                    var publicationCriteria = new PublicationCriteria(templateTcmUri.PublicationId);
+                    var itemReferenceCriteria = new ItemReferenceCriteria(templateTcmUri.ItemId);
+                    var itemTypeTypeCriteria = new ItemTypeCriteria(32);
+
+                    var query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(
+                        CriteriaFactory.And(new Criteria[] { publicationCriteria, itemReferenceCriteria, itemTypeTypeCriteria }));
+
+                    var results = query.ExecuteEntityQuery();
+                    if (results != null)
+                    {
+                        var componentPresentation = new ComponentPresentation
+                        {
+                            Component = component as Component,
+                            IsDynamic = true
+                        };
+
+                        var templateMeta = (ITemplateMeta)results.FirstOrDefault();
+                        var template = new ComponentTemplate
+                        {
+                            Id = templateUri,
+                            Title = templateMeta.Title,
+                            OutputFormat = templateMeta.OutputFormat
+                        };
+
+                        componentPresentation.ComponentTemplate = template;
+                        return componentPresentation;
+                    }
+                }
+
+                throw new DxaItemNotFoundException(GetDxaIdentifierFromTcmUri(componentUri, templateUri));
+            }
+        }
 
         private PageModel CreatePageModel(IPage page, Localization localization)
         {
