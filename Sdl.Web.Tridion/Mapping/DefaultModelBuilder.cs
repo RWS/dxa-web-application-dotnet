@@ -241,7 +241,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// </remarks>
         private static IComponentPresentation LoadDcp(string componentUri, string templateUri)
         {
-            // TODO: should this not be a methond in the DefaultProvider instead?
+            // TODO: should this not be a method in the DefaultProvider instead?
             using (new Tracer(componentUri, templateUri))
             {
                 ComponentFactory componentFactory = new ComponentFactory();
@@ -1149,6 +1149,18 @@ namespace Sdl.Web.Tridion.Mapping
                     // strip illegal characters to ensure valid html in the view (allow spaces for multiple classes)
                     mvcData.HtmlClasses = template.MetadataFields["htmlClasses"].Value.StripIllegalCharacters(@"[^\w\-\ ]");
                 }
+            }
+            else
+            {
+                // fallback if no meta - use the CT title to determine region view name and area name
+                Match match = Regex.Match(template.Title, @".*?\[(.*?)\]");
+                if (match.Success)
+                {
+                    string module;
+                    string regionName = DetermineRegionViewNameAndModule(match.Groups[1].Value, out module);
+                    mvcData.RegionName = regionName;
+                    mvcData.RegionAreaName = module;
+                }                
             }
 
             return mvcData;
