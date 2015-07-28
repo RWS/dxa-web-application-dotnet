@@ -74,15 +74,13 @@ namespace Sdl.Web.Mvc.Context
             {
                 return (T) value;
             }
-            else if (typeof(T) == typeof(string))
+
+            if (typeof(T) == typeof(string))
             {
                 return (T) (object) value.ToString();
             }
-            else
-            {
-                return (T) Convert.ChangeType(value, typeof(T));
-            }
-        }
 
+            return (T) Convert.ChangeType(value, typeof(T));
+        }
     }
 }
