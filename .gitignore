@@ -5,3 +5,4 @@ bin
 *.suo
 packages/
 web/
+.vs/

@@ -31,19 +31,19 @@ namespace Sdl.Web.Common.Configuration
         public const string StaticsFolder = "BinaryData";
         public const string DefaultVersion = "v1.00";
 
-        private const string _includeSettingsType = "include";
-        private const string _regionSettingsType = "regions";
+        private const string IncludeSettingsType = "include";
+        private const string RegionSettingsType = "regions";
 
         // TODO: move this configuration state to class Localization instead of maintaining loc.ID mappings of everything here.
-        private static readonly Dictionary<string, Dictionary<string, XpmRegion>> _xpmRegions = new Dictionary<string, Dictionary<string, XpmRegion>>();
-        private static readonly Dictionary<string, Dictionary<string, List<string>>> _includes = new Dictionary<string, Dictionary<string, List<string>>>();
+        private static readonly Dictionary<string, Dictionary<string, XpmRegion>> XpmRegions = new Dictionary<string, Dictionary<string, XpmRegion>>();
+        private static readonly Dictionary<string, Dictionary<string, List<string>>> Includes = new Dictionary<string, Dictionary<string, List<string>>>();
 
         //A set of refresh states, keyed by localization id and then type (eg "config", "resources" etc.) 
-        private static readonly Dictionary<string, Dictionary<string, DateTime>> _refreshStates = new Dictionary<string, Dictionary<string, DateTime>>();
+        private static readonly Dictionary<string, Dictionary<string, DateTime>> RefreshStates = new Dictionary<string, Dictionary<string, DateTime>>();
         //A set of locks to use, one per localization
-        private static readonly Dictionary<string, object> _localizationLocks = new Dictionary<string, object>();
+        private static readonly Dictionary<string, object> LocalizationLocks = new Dictionary<string, object>();
         //A global lock
-        private static readonly object _lock = new object();
+        private static readonly object Lock = new object();
 
         #region References to "providers"
         /// <summary>
@@ -194,13 +194,13 @@ namespace Sdl.Web.Common.Configuration
             using (new Tracer(pageTypeIdentifier, localization))
             {
                 string key = localization.LocalizationId;
-                if (!_includes.ContainsKey(key) || CheckSettingsNeedRefresh(_includeSettingsType, localization))
+                if (!Includes.ContainsKey(key) || CheckSettingsNeedRefresh(IncludeSettingsType, localization))
                 {
                     LoadIncludesForLocalization(localization);
                 }
-                if (_includes.ContainsKey(key))
+                if (Includes.ContainsKey(key))
                 {
-                    Dictionary<string, List<string>> includes = _includes[key];
+                    Dictionary<string, List<string>> includes = Includes[key];
                     if (includes.ContainsKey(pageTypeIdentifier))
                     {
                         return includes[pageTypeIdentifier];
@@ -220,7 +220,7 @@ namespace Sdl.Web.Common.Configuration
             string url = Path.Combine(localization.Path.ToCombinePath(true), SystemFolder, @"mappings\includes.json").Replace("\\", "/");
             string jsonData = ContentProvider.GetStaticContentItem(url, localization).GetText();
             Dictionary<string, List<string>> includes = new JavaScriptSerializer().Deserialize<Dictionary<string, List<string>>>(jsonData);
-            ThreadSafeSettingsUpdate(_includeSettingsType, _includes, key, includes);
+            ThreadSafeSettingsUpdate(IncludeSettingsType, Includes, key, includes);
         }
 
 
@@ -331,7 +331,7 @@ namespace Sdl.Web.Common.Configuration
         public static bool CheckSettingsNeedRefresh(string type, Localization localization) // TODO: Move to class Localization
         {
             Dictionary<string, DateTime> localizationRefreshStates;
-            if (!_refreshStates.TryGetValue(localization.LocalizationId, out localizationRefreshStates))
+            if (!RefreshStates.TryGetValue(localization.LocalizationId, out localizationRefreshStates))
             {
                 return false;
             }
@@ -355,11 +355,11 @@ namespace Sdl.Web.Common.Configuration
         private static void UpdateRefreshState(string localizationId, string type) // TODO
         {
             //Update is already done under a localization lock, so we don't need to lock again here
-            if (!_refreshStates.ContainsKey(localizationId))
+            if (!RefreshStates.ContainsKey(localizationId))
             {
-                _refreshStates.Add(localizationId, new Dictionary<string, DateTime>());
+                RefreshStates.Add(localizationId, new Dictionary<string, DateTime>());
             }
-            Dictionary<string, DateTime> states = _refreshStates[localizationId];
+            Dictionary<string, DateTime> states = RefreshStates[localizationId];
             if (states.ContainsKey(type))
             {
                 states[type] = DateTime.Now;
@@ -372,14 +372,14 @@ namespace Sdl.Web.Common.Configuration
 
         private static object GetLocalizationLock(string localizationId)
         {
-            if (!_localizationLocks.ContainsKey(localizationId))
+            if (!LocalizationLocks.ContainsKey(localizationId))
             {
-                lock (_lock)
+                lock (Lock)
                 {
-                    _localizationLocks.Add(localizationId, new object());
+                    LocalizationLocks.Add(localizationId, new object());
                 }
             }
-            return _localizationLocks[localizationId];
+            return LocalizationLocks[localizationId];
         }
 
         #endregion
@@ -504,13 +504,13 @@ namespace Sdl.Web.Common.Configuration
         public static XpmRegion GetXpmRegion(string name, Localization loc)
         {
             string key = loc.LocalizationId;
-            if (!_xpmRegions.ContainsKey(key) || CheckSettingsNeedRefresh(_regionSettingsType,loc))
+            if (!XpmRegions.ContainsKey(key) || CheckSettingsNeedRefresh(RegionSettingsType,loc))
             {
                 LoadRegionsForLocalization(loc);
             }
-            if (_xpmRegions.ContainsKey(key))
+            if (XpmRegions.ContainsKey(key))
             {
-                Dictionary<string, XpmRegion> regionData = _xpmRegions[key];
+                Dictionary<string, XpmRegion> regionData = XpmRegions[key];
                 if (regionData.ContainsKey(name))
                 {
                     return regionData[name];
@@ -528,7 +528,7 @@ namespace Sdl.Web.Common.Configuration
             if (jsonData != null)
             {
                 Dictionary<string, XpmRegion> regions = new JavaScriptSerializer().Deserialize<List<XpmRegion>>(jsonData).ToDictionary(region => region.Region);
-                ThreadSafeSettingsUpdate(_regionSettingsType, _xpmRegions, key, regions);
+                ThreadSafeSettingsUpdate(RegionSettingsType, XpmRegions, key, regions);
             }
             else
             {

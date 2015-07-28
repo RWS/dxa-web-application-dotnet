@@ -1,5 +1,5 @@
 ﻿@model ItemList
-<div id="carousel-@Model.Id" class="carousel slide" data-ride="carousel" data-interval="5000" @Html.DxaEntityMarkup()>
+<div id="carousel-@Model.Id" class="carousel slide @Model.MvcData.HtmlClasses" data-ride="carousel" data-interval="5000" @Html.DxaEntityMarkup()>
     <ol class="carousel-indicators">
         @if (Model.ItemListElements!=null)
         {

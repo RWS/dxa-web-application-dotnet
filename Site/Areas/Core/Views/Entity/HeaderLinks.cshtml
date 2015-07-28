@@ -1,9 +1,9 @@
 ﻿@model LinkList<Link>
-@if (Model.Links!=null && Model.Links.Count>0)
+@if (Model.Links != null && Model.Links.Count > 0)
 {
-    <ul class="nav navbar-nav utility-nav" @Html.DxaEntityMarkup()>
-        @{ int index = 0; }   
-        @foreach(var link in Model.Links)
+    <ul id="@Model.MvcData.HtmlId" class="nav navbar-nav utility-nav @Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
+        @{ int index = 0; }
+        @foreach (var link in Model.Links)
         {
             <li @Html.DxaPropertyMarkup(() => Model.Links, index)>
                 <a href="@link.Url" title="@link.AlternateText">@link.LinkText</a>

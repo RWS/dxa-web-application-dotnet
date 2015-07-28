@@ -18,8 +18,8 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class DefaultRichTextProcessor : IRichTextProcessor
     {
-        private const string _embeddedEntityProcessingInstructionName = "EmbeddedEntity";
-        private static readonly Regex _embeddedEntityProcessingInstructionRegex = new Regex(@"<\?EmbeddedEntity\s\?>", RegexOptions.Compiled);
+        private const string EmbeddedEntityProcessingInstructionName = "EmbeddedEntity";
+        private static readonly Regex EmbeddedEntityProcessingInstructionRegex = new Regex(@"<\?EmbeddedEntity\s\?>", RegexOptions.Compiled);
         private readonly IComponentFactory _componentFactory;
 
         public DefaultRichTextProcessor(IComponentFactory componentFactory)
@@ -131,7 +131,7 @@ namespace Sdl.Web.Tridion.Mapping
 
                 // Replace YouTube img element with marker XML processing instruction 
                 youTubeImgElement.ParentNode.ReplaceChild(
-                    doc.CreateProcessingInstruction(_embeddedEntityProcessingInstructionName, string.Empty), 
+                    doc.CreateProcessingInstruction(EmbeddedEntityProcessingInstructionName, string.Empty), 
                     youTubeImgElement
                     );
             }
@@ -141,7 +141,7 @@ namespace Sdl.Web.Tridion.Mapping
             IList<IRichTextFragment> richTextFragments = new List<IRichTextFragment>();
             int lastFragmentIndex = 0;
             int i = 0;
-            foreach (Match embeddedEntityMatch in _embeddedEntityProcessingInstructionRegex.Matches(xhtml))
+            foreach (Match embeddedEntityMatch in EmbeddedEntityProcessingInstructionRegex.Matches(xhtml))
             {
                 int embeddedEntityIndex = embeddedEntityMatch.Index;
                 if (embeddedEntityIndex > lastFragmentIndex)

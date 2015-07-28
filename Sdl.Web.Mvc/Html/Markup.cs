@@ -17,9 +17,9 @@ namespace Sdl.Web.Mvc.Html
     /// </summary>
     public static class Markup
     {
-        private const string _xpmMarkupHtmlAttrName = "data-xpm";
-        private const string _xpmMarkupXPath = "//*[@" + _xpmMarkupHtmlAttrName + "]";
-        private const string _xpmFieldMarkup = "<!-- Start Component Field: {{\"XPath\":\"{0}\"}} -->";
+        private const string XpmMarkupHtmlAttrName = "data-xpm";
+        private const string XpmMarkupXPath = "//*[@" + XpmMarkupHtmlAttrName + "]";
+        private const string XpmFieldMarkup = "<!-- Start Component Field: {{\"XPath\":\"{0}\"}} -->";
 
         private class XpmMarkupMap : Dictionary<string, string>
         {
@@ -220,7 +220,7 @@ namespace Sdl.Web.Mvc.Html
                 if (entityModel.XpmPropertyMetadata != null && entityModel.XpmPropertyMetadata.TryGetValue(propertyName, out xpath))
                 {
                     string predicate = xpath.EndsWith("]") ? string.Empty : string.Format("[{0}]", index + 1);
-                    xpmMarkup = string.Format(_xpmFieldMarkup, HttpUtility.HtmlAttributeEncode(xpath + predicate));
+                    xpmMarkup = string.Format(XpmFieldMarkup, HttpUtility.HtmlAttributeEncode(xpath + predicate));
                 }
                 else
                 {
@@ -231,7 +231,7 @@ namespace Sdl.Web.Mvc.Html
             // Instead of jamming the entire XPM markup in an HTML attribute, we only put in a reference to the XPM markup.
             string xpmMarkupRef = XpmMarkupMap.Current.AddXpmMarkup(xpmMarkup);
 
-            return string.Format("{0}=\"{1}\"", _xpmMarkupHtmlAttrName, xpmMarkupRef);
+            return string.Format("{0}=\"{1}\"", XpmMarkupHtmlAttrName, xpmMarkupRef);
         }
 
         /// <summary>
@@ -247,13 +247,13 @@ namespace Sdl.Web.Mvc.Html
             HtmlDocument htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(String.Format("<html>{0}</html>", htmlFragment));
             HtmlNode rootElement = htmlDoc.DocumentNode.FirstChild;
-            HtmlNodeCollection elementsWithXpmMarkup = rootElement.SelectNodes(_xpmMarkupXPath);
+            HtmlNodeCollection elementsWithXpmMarkup = rootElement.SelectNodes(XpmMarkupXPath);
             if (elementsWithXpmMarkup != null)
             {
                 XpmMarkupMap xpmMarkupMap = XpmMarkupMap.Current;
                 foreach (HtmlNode elementWithXpmMarkup in elementsWithXpmMarkup)
                 {
-                    string xpmMarkupRef = ReadAndRemoveAttribute(elementWithXpmMarkup, _xpmMarkupHtmlAttrName);
+                    string xpmMarkupRef = ReadAndRemoveAttribute(elementWithXpmMarkup, XpmMarkupHtmlAttrName);
                     string xpmMarkup = xpmMarkupMap[xpmMarkupRef];
                     // TODO: XPM markup may be multiple HTML comments (e.g. SmartTargetRegion)
                     HtmlCommentNode xpmMarkupNode = htmlDoc.CreateComment(xpmMarkup);
