@@ -187,7 +187,7 @@ namespace Sdl.Web.Tridion.Mapping
                 SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaTcmUriParts[1], localization);
 
                 // The semantic mapping may resolve to a more specific model type than specified by the View Model itself (e.g. Image instead of just MediaItem for Teaser.Media)
-                Type modelType = GetModelTypeFromSemanticMapping(semanticSchema, baseModelType);
+                Type modelType = semanticSchema.GetModelTypeFromSemanticMapping(baseModelType);
 
                 MappingData mappingData = new MappingData
                 {
@@ -583,7 +583,7 @@ namespace Sdl.Web.Tridion.Mapping
                         IRichTextProcessor richTextProcessor = SiteConfiguration.RichTextProcessor;
                         foreach (string value in field.Values)
                         {
-                            RichText richText = richTextProcessor.ProcessRichText(value);
+                            RichText richText = richTextProcessor.ProcessRichText(value, mapData.Localization);
                             if (modelType == typeof(string))
                             {
                                 mappedValues.Add(richText.ToString());

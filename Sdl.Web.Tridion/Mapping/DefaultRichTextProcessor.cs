@@ -9,6 +9,7 @@ using DD4T.ContentModel.Factories;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Tridion.Mapping
@@ -33,6 +34,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// Processes rich text (XHTML) content.
         /// </summary>
         /// <param name="xhtml">The rich text content (XHTML fragment) to be processed.</param>
+        /// <param name="localization">Context localization.</param>
         /// <returns>The processed rich text content.</returns>
         /// <remarks>
         /// Typical rich text processing tasks: 
@@ -41,13 +43,13 @@ namespace Sdl.Web.Tridion.Mapping
         ///     <item>Resolve inline links</item>
         /// </list>
         /// </remarks>
-        public RichText ProcessRichText(string xhtml)
+        public RichText ProcessRichText(string xhtml, Localization localization)
         {
             try
             {
                 XmlDocument xhtmlDoc = new XmlDocument();
                 xhtmlDoc.LoadXml(String.Format("<xhtml>{0}</xhtml>", xhtml));
-                return ResolveRichText(xhtmlDoc);
+                return ResolveRichText(xhtmlDoc, localization);
             }
             catch (XmlException ex)
             {
@@ -58,7 +60,7 @@ namespace Sdl.Web.Tridion.Mapping
 
         #endregion
 
-        private RichText ResolveRichText(XmlDocument doc)
+        private RichText ResolveRichText(XmlDocument doc, Localization localization)
         {
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
             nsmgr.AddNamespace("xhtml", "http://www.w3.org/1999/xhtml");
@@ -114,25 +116,23 @@ namespace Sdl.Web.Tridion.Mapping
                 }
             }
 
-            // Resolve embedded YouTube videos
+            // Resolve embedded media items
             List<EntityModel> embeddedEntities = new List<EntityModel>();
-            foreach (XmlElement youTubeImgElement in doc.SelectNodes("//img[@data-youTubeId][@xlink:href]", nsmgr))
+            foreach (XmlElement imgElement in doc.SelectNodes("//img[@data-schemaUri]", nsmgr))
             {
-                YouTubeVideo youTubeVideo = new YouTubeVideo
-                {
-                    Id =  DefaultModelBuilder.GetDxaIdentifierFromTcmUri(youTubeImgElement.GetAttribute("xlink:href")), 
-                    Url = youTubeImgElement.GetAttribute("src"),
-                    YouTubeId = youTubeImgElement.GetAttribute("data-youTubeId"),
-                    Headline = youTubeImgElement.GetAttribute("data-headline"),
-                    IsEmbedded = true,
-                    MvcData = new MvcData("Core:Entity:YouTubeVideo")
-                };
-                embeddedEntities.Add(youTubeVideo);
+                string[] schemaTcmUriParts = imgElement.GetAttribute("data-schemaUri").Split('-');
+                SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaTcmUriParts[1], localization);
 
-                // Replace YouTube img element with marker XML processing instruction 
-                youTubeImgElement.ParentNode.ReplaceChild(
-                    doc.CreateProcessingInstruction(EmbeddedEntityProcessingInstructionName, string.Empty), 
-                    youTubeImgElement
+                // The semantic mapping may resolve to a more specific model type than specified here (e.g. YouTubeVideo instead of just MediaItem)
+                Type modelType = semanticSchema.GetModelTypeFromSemanticMapping(typeof(MediaItem));
+                MediaItem mediaItem = (MediaItem)Activator.CreateInstance(modelType);
+                mediaItem.ReadFromXhtmlElement(imgElement);
+                embeddedEntities.Add(mediaItem);
+
+                // Replace img element with marker XML processing instruction 
+                imgElement.ParentNode.ReplaceChild(
+                    doc.CreateProcessingInstruction(EmbeddedEntityProcessingInstructionName, String.Empty),
+                    imgElement
                     );
             }
 
