@@ -116,9 +116,9 @@ namespace Sdl.Web.Tridion.Mapping
                 }
             }
 
-            // Resolve embedded media items (youtube videos and eclitems)
+            // Resolve embedded media items
             List<EntityModel> embeddedEntities = new List<EntityModel>();
-            foreach (XmlElement imgElement in doc.SelectNodes("//img[@data-youTubeId or @data-eclUri][@xlink:href]", nsmgr))
+            foreach (XmlElement imgElement in doc.SelectNodes("//img[@data-schemaUri]", nsmgr))
             {
                 string[] schemaTcmUriParts = imgElement.GetAttribute("data-schemaUri").Split('-');
                 SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaTcmUriParts[1], localization);
@@ -127,7 +127,6 @@ namespace Sdl.Web.Tridion.Mapping
                 Type modelType = semanticSchema.GetModelTypeFromSemanticMapping(typeof(MediaItem));
                 MediaItem mediaItem = (MediaItem)Activator.CreateInstance(modelType);
                 mediaItem.ReadFromXhtmlElement(imgElement);
-
                 embeddedEntities.Add(mediaItem);
 
                 // Replace img element with marker XML processing instruction 

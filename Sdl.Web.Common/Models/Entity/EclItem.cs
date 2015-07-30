@@ -10,6 +10,7 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         public string EclUri
         {
+            // TODO: read ECL URI from published data (currently only available for ECL items embedded in RTF, so lets use the filename for now)
             get
             {
                 // build ECL URI from filename (filename: 8-mm-204-dist-file.ecl ECL URI: ecl:8-mm-204-dist-file)
@@ -33,5 +34,11 @@ namespace Sdl.Web.Common.Models
 
         // TODO: provide default implementation of ToHtml using the ECL Template Fragment
         //public override string ToHtml(string widthFactor, double aspect = 0, string cssClass = null, int containerSize = 0)
+
+        //public override void ReadFromXhtmlElement(XmlElement xhtmlElement)
+        //{
+        //    base.ReadFromXhtmlElement(xhtmlElement);
+        //    EclUri = xhtmlElement.GetAttribute("eclUri");
+        //}
     }
 }

@@ -26,8 +26,7 @@ namespace Sdl.Web.Common.Mapping
             {
                 _entityPropertySemantics = value;
             }
-        }
-        
+        }        
 
         protected virtual Dictionary<string, KeyValuePair<string, string>> GetEntityDataFromType(Type type)
         {

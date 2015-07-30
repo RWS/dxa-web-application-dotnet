@@ -95,7 +95,7 @@ namespace Sdl.Web.Common.Models
         public abstract string ToHtml(string widthFactor, double aspect = 0, string cssClass = null, int containerSize = 0);
 
         /// <summary>
-        /// Read base properties from XHTML element.
+        /// Read properties from XHTML element.
         /// </summary>
         /// <param name="xhtmlElement">XHTML element</param>
         public virtual void ReadFromXhtmlElement(XmlElement xhtmlElement)

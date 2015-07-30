@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Sdl.Web.Common.Models
 {
@@ -53,6 +52,5 @@ namespace Sdl.Web.Common.Models
                 throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property MvcData instead.");
             }
         }
-
     }
 }

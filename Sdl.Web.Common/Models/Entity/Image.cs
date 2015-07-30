@@ -34,13 +34,14 @@ namespace Sdl.Web.Common.Models
         }
 
         /// <summary>
-        /// Set view name in MvcData.
+        /// Read additional properties from XHTML element, and set view name in MvcData.
         /// </summary>
         /// <param name="xhtmlElement">XHTML element</param>
         public override void ReadFromXhtmlElement(XmlElement xhtmlElement)
         {
             base.ReadFromXhtmlElement(xhtmlElement);
 
+            AlternateText = xhtmlElement.GetAttribute("alt");
             MvcData = new MvcData("Core:Entity:Image");
         }
     }
