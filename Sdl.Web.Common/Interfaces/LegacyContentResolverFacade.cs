@@ -57,7 +57,7 @@ namespace Sdl.Web.Common.Interfaces
 
         public object ResolveContent(object content, object resolveInstruction = null)
         {
-            return SiteConfiguration.RichTextProcessor.ProcessRichText((string) content).ToString();
+            throw new NotSupportedException("ResolveContent is not supported in DXA 1.1.");
         }
 
         public MvcData ResolveMvcData(object data)

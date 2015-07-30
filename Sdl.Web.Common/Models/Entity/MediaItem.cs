@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Sdl.Web.Common.Configuration;
+using System.Xml;
 
 namespace Sdl.Web.Common.Models
 {
@@ -35,7 +35,7 @@ namespace Sdl.Web.Common.Models
         public string Url { get; set; }
         public string FileName { get; set; }
         [SemanticProperty("s:contentSize")]
-        public int FileSize { get; set; }
+        public long FileSize { get; set; }
         public string MimeType { get; set; }
         public bool IsEmbedded { get; set; }
 
@@ -93,5 +93,24 @@ namespace Sdl.Web.Common.Models
         /// Both cases should be avoided, since HTML rendering should be done in View code rather than in Model code.
         /// </remarks>
         public abstract string ToHtml(string widthFactor, double aspect = 0, string cssClass = null, int containerSize = 0);
+
+        /// <summary>
+        /// Read base properties from XHTML element.
+        /// </summary>
+        /// <param name="xhtmlElement">XHTML element</param>
+        public virtual void ReadFromXhtmlElement(XmlElement xhtmlElement)
+        {
+            // Return the Item (Reference) ID part of the TCM URI.
+            Id = xhtmlElement.GetAttribute("xlink:href").Split('-')[1];
+            Url = xhtmlElement.GetAttribute("src");
+            FileName = xhtmlElement.GetAttribute("data-multimediaFileName");
+            string size = xhtmlElement.GetAttribute("data-multimediaFileSize");
+            if (!String.IsNullOrEmpty(size))
+            {
+                FileSize = Convert.ToInt64(size);
+            }
+            MimeType = xhtmlElement.GetAttribute("data-multimediaMimeType");
+            IsEmbedded = true;
+        }
     }
 }

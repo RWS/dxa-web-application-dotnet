@@ -5,8 +5,6 @@ namespace Sdl.Web.Common.Models
 {
     public  abstract class EclItem : MediaItem
     {
-        private const string EclMimeType = "application/externalcontentlibrary";
-
         /// <summary>
         /// ECL URI for External Content Library Components (null for normal multimedia Components)
         /// </summary>
@@ -14,13 +12,8 @@ namespace Sdl.Web.Common.Models
         {
             get
             {
-                // TODO: ECL mimetype might become a real mimetype, in that case we can't use it here anymore
-                if (EclMimeType.Equals(MimeType) && FileName.EndsWith(".ecl"))
-                {
-                    // build ECL URI from filename (filename: 8-mm-204-dist-file.ecl ECL URI: ecl:8-mm-204-dist-file)
-                    return String.Format("ecl:{0}", FileName.Replace(".ecl", String.Empty));
-                }
-                return null;
+                // build ECL URI from filename (filename: 8-mm-204-dist-file.ecl ECL URI: ecl:8-mm-204-dist-file)
+                return String.Format("ecl:{0}", FileName.Replace(".ecl", String.Empty));
             }
         }
 
@@ -34,13 +27,8 @@ namespace Sdl.Web.Common.Models
         /// <returns>The XPM markup.</returns>
         public override string GetXpmMarkup(Localization localization)
         {
-            // TODO: ECL mimetype might become a real mimetype, in that case we can't use it here anymore
-            if (EclMimeType.Equals(MimeType))
-            {
-                // replace TCM URI with ECL URI
-                return base.GetXpmMarkup(localization).Replace(String.Format("tcm:{0}-{1}", localization.LocalizationId, Id), EclUri);
-            }
-            return base.GetXpmMarkup(localization);
+            // replace TCM URI with ECL URI
+            return base.GetXpmMarkup(localization).Replace(String.Format("tcm:{0}-{1}", localization.LocalizationId, Id), EclUri);
         }
 
         // TODO: provide default implementation of ToHtml using the ECL Template Fragment

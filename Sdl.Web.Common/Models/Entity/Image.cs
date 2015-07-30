@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Xml;
 using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
@@ -32,5 +33,15 @@ namespace Sdl.Web.Common.Models
                 responsiveImageUrl, AlternateText, dataAspect, widthAttr, classAttr);
         }
 
+        /// <summary>
+        /// Set view name in MvcData.
+        /// </summary>
+        /// <param name="xhtmlElement">XHTML element</param>
+        public override void ReadFromXhtmlElement(XmlElement xhtmlElement)
+        {
+            base.ReadFromXhtmlElement(xhtmlElement);
+
+            MvcData = new MvcData("Core:Entity:Image");
+        }
     }
 }

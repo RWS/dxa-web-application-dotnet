@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml;
 
 namespace Sdl.Web.Common.Models
 {
@@ -34,6 +35,17 @@ namespace Sdl.Web.Common.Models
                     </div>
                 </div>", 
                 GetIconClass(), Url, FileName, GetFriendlyFileSize(), descriptionHtml);
+        }
+
+        /// <summary>
+        /// Set view name in MvcData.
+        /// </summary>
+        /// <param name="xhtmlElement">XHTML element</param>
+        public override void ReadFromXhtmlElement(XmlElement xhtmlElement)
+        {
+            base.ReadFromXhtmlElement(xhtmlElement);
+
+            MvcData = new MvcData("Core:Entity:Download");
         }
     }
 }
