@@ -136,6 +136,14 @@ namespace Sdl.Web.Tridion.Mapping
                     );
             }
 
+            // resolve embedded ecl items
+            embeddedEntities = new List<EntityModel>();
+            foreach (XmlElement eclImgElement in doc.SelectNodes("//img[@data-eclUri][@xlink:href]", nsmgr))
+            {
+                string semanticSchema = eclImgElement.GetAttribute("data-semanticSchema");
+                // TODO: use model mapping to find correct model and add it as is done above for youtube video
+            }
+
             // Split the XHTML into fragments based on marker XML processing instructions.
             string xhtml = doc.DocumentElement.InnerXml;
             IList<IRichTextFragment> richTextFragments = new List<IRichTextFragment>();

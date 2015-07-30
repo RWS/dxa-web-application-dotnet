@@ -108,6 +108,7 @@
     <Compile Include="Mapping\SemanticSchema.cs" />
     <Compile Include="Mapping\SemanticSchemaField.cs" />
     <Compile Include="Mapping\SemanticVocabulary.cs" />
+    <Compile Include="Models\Entity\EclItem.cs" />
     <Compile Include="Models\Entity\ExceptionEntity.cs" />
     <Compile Include="Models\EntityModel.cs" />
     <Compile Include="Models\Entity\Configuration.cs" />

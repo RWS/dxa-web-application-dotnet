@@ -12,12 +12,6 @@ namespace Sdl.Web.Common.Models
         public int Width { get { return 640; } }
         public int Height { get { return 390; } }
 
-        public bool IsEmbedded
-        {
-            get;
-            set;
-        }
-
         /// <summary>
         /// Renders an HTML representation of the Media Item.
         /// </summary>
