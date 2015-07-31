@@ -6,9 +6,11 @@ using Sdl.Web.Common.Configuration;
 namespace Sdl.Web.Common.Models
 {
     [SemanticEntity(SchemaOrgVocabulary, "ImageObject", Prefix = "s", Public = true)]
+    [SemanticEntity(CoreVocabulary, "Image", Prefix = "c")]
     public class Image : MediaItem
     {
         [SemanticProperty("s:name")]
+        [SemanticProperty("c:altText")]
         public string AlternateText { get; set; }
 
         /// <summary>

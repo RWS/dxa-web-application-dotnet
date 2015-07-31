@@ -4,9 +4,7 @@ using System.Xml;
 
 namespace Sdl.Web.Common.Models
 {
-    // removed MediaObject Semantic mapping since the models using this are already specifying it with a more detailed type 
-    // we can specify additional types like this, but I'm not sure what the value of that is in this case, so lets drop it
-    //[SemanticEntity(Vocab = SchemaOrgVocabulary, EntityName = "MediaObject", Prefix = "s", Public = true)]
+    [SemanticEntity(Vocab = SchemaOrgVocabulary, EntityName = "MediaObject", Prefix = "s", Public = true)]
     public abstract class MediaItem : EntityModel
     {
         private static readonly IDictionary<string, string> FontAwesomeMimeTypeToIconClassMapping = new Dictionary<string, string>
