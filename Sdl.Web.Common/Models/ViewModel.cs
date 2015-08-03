@@ -29,6 +29,16 @@ namespace Sdl.Web.Common.Models
         }
 
         /// <summary>
+        /// Gets or sets HTML CSS classes for use in View top level HTML element.
+        /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
+        public string HtmlClasses
+        {
+            get;
+            set;            
+        }
+
+        /// <summary>
         /// Gets or sets metadata used to render XPM markup
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]

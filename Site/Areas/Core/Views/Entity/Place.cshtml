@@ -3,7 +3,7 @@
     var width = Model.Location != null ? "6" : "12";
     var daddr = Model.Location != null ? (Model.Location.Query ?? String.Format("{0},{1}", Model.Location.Latitude, Model.Location.Longitude)): null;
 }
-<div id="@Model.MvcData.HtmlId" class="@Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
+<div class="@Model.HtmlClasses" @Html.DxaEntityMarkup()>
     @if (Model.Image != null && WebRequestContext.ScreenWidth != ScreenWidth.ExtraSmall)
     {
         <div class="hero" @Html.DxaPropertyMarkup(() => Model.Image)>

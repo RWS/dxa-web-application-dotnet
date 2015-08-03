@@ -4,7 +4,7 @@
     var isButton = linkStyle.Contains("btn");
     var widthFactor = WebRequestContext.ScreenWidth == ScreenWidth.ExtraSmall ? "160px" : "100%";
 }
-<div id="@Model.MvcData.HtmlId" class="teaser @Model.GetFormatOption("style") @Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
+<div class="teaser @Model.GetFormatOption("style") @Model.HtmlClasses" @Html.DxaEntityMarkup()>
     @if (Model.Media != null)
     {
         <div @Html.DxaPropertyMarkup(() => Model.Media)>

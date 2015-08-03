@@ -1,5 +1,5 @@
 ﻿@model LinkList<Link>
-<ul id="@Model.MvcData.HtmlId" class="list-inline text-center @Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
+<ul class="list-inline text-center @Model.HtmlClasses" @Html.DxaEntityMarkup()>
     @if (Model.Headline != null)
     {
         <li>

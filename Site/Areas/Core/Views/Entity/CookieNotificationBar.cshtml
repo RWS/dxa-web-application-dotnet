@@ -1,5 +1,5 @@
 ﻿@model Notification
-<div id="cookie" class="container-fluid page-border @Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
+<div id="cookie" class="container-fluid page-border @Model.HtmlClasses" @Html.DxaEntityMarkup()>
     <div class="row">
         <div class="col-sm-9">
             <div class="h4" @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</div>

@@ -171,6 +171,15 @@ namespace Sdl.Web.Tridion.Mapping
                 entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "1" : "0");
                 entityModel.MvcData = mvcData;
 
+                // add html classes to model from metadata
+                // TODO: move to CreateViewModel so it can be merged with the same code for a Page/PageTemplate
+                IComponentTemplate template = cp.ComponentTemplate;
+                if (template.MetadataFields != null && template.MetadataFields.ContainsKey("htmlClasses"))
+                {
+                    // strip illegal characters to ensure valid html in the view (allow spaces for multiple classes)
+                    entityModel.HtmlClasses = template.MetadataFields["htmlClasses"].Value.StripIllegalCharacters(@"[^\w\-\ ]");
+                }
+
                 if (cp.IsDynamic)
                 {
                     // update Entity Identifier to that of a DCP
@@ -325,6 +334,15 @@ namespace Sdl.Web.Tridion.Mapping
             pageModel.MvcData = pageMvcData;
             pageModel.XpmMetadata = GetXpmMetadata(page);
             pageModel.Title = page.Title;
+
+            // add html classes to model from metadata
+            // TODO: move to CreateViewModel so it can be merged with the same code for a Component/ComponentTemplate
+            IPageTemplate template = page.PageTemplate;
+            if (template.MetadataFields != null && template.MetadataFields.ContainsKey("htmlClasses"))
+            {
+                // strip illegal characters to ensure valid html in the view (allow spaces for multiple classes)
+                pageModel.HtmlClasses = template.MetadataFields["htmlClasses"].Value.StripIllegalCharacters(@"[^\w\-\ ]");
+            }
 
             return pageModel;
         }
@@ -1051,20 +1069,6 @@ namespace Sdl.Web.Tridion.Mapping
             mvcData.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
             mvcData.ActionName = SiteConfiguration.GetPageAction();
 
-            if (template.MetadataFields != null)
-            {
-                if (template.MetadataFields.ContainsKey("htmlId"))
-                {
-                    // strip illegal characters to ensure valid html in the view
-                    mvcData.HtmlId = template.MetadataFields["htmlId"].Value.StripIllegalCharacters(@"[^\w\-]");
-                }
-                if (template.MetadataFields.ContainsKey("htmlClasses"))
-                {
-                    // strip illegal characters to ensure valid html in the view (allow spaces for multiple classes)
-                    mvcData.HtmlClasses = template.MetadataFields["htmlClasses"].Value.StripIllegalCharacters(@"[^\w\-\ ]");
-                }
-            }
-
             return mvcData;
         }
 
@@ -1138,16 +1142,6 @@ namespace Sdl.Web.Tridion.Mapping
                             mvcData.RouteValues.Add(routeValueParts[0], routeValueParts[1]);
                         }
                     }
-                }
-                if (template.MetadataFields.ContainsKey("htmlId"))
-                {
-                    // strip illegal characters to ensure valid html in the view
-                    mvcData.HtmlId = template.MetadataFields["htmlId"].Value.StripIllegalCharacters(@"[^\w\-]");
-                }
-                if (template.MetadataFields.ContainsKey("htmlClasses"))
-                {
-                    // strip illegal characters to ensure valid html in the view (allow spaces for multiple classes)
-                    mvcData.HtmlClasses = template.MetadataFields["htmlClasses"].Value.StripIllegalCharacters(@"[^\w\-\ ]");
                 }
             }
             else

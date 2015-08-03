@@ -1,5 +1,5 @@
 ﻿@model Teaser
-<div id="@Model.MvcData.HtmlId" class="@Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
+<div class="@Model.HtmlClasses" @Html.DxaEntityMarkup()>
     <a class="navbar-logo" href="@Model.Link.Url" title="@Model.Link.LinkText">
         @if (Model != null && Model.Media is Image)
         {
