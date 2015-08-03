@@ -113,7 +113,7 @@ namespace Sdl.Web.Mvc.Html
             if (WebRequestContext.IsPreview)
             {
                 string xpmMarkupAttr = RenderXpmMarkupAttribute(entityModel);
-                if (string.IsNullOrEmpty(markup))
+                if (String.IsNullOrEmpty(markup))
                 {
                     markup = xpmMarkupAttr;
                 }
@@ -166,7 +166,7 @@ namespace Sdl.Web.Mvc.Html
             if (WebRequestContext.IsPreview)
             {
                 string xpmMarkupAttr = RenderXpmMarkupAttribute(entityModel, propertyName, index);
-                if (string.IsNullOrEmpty(markup))
+                if (String.IsNullOrEmpty(markup))
                 {
                     markup = xpmMarkupAttr;
                 }
@@ -211,6 +211,10 @@ namespace Sdl.Web.Mvc.Html
             {
                 // Region/Entity markup
                 xpmMarkup = viewModel.GetXpmMarkup(WebRequestContext.Localization);
+                if (String.IsNullOrEmpty(xpmMarkup))
+                {
+                    return String.Empty;
+                }
             }
             else
             {
@@ -219,19 +223,19 @@ namespace Sdl.Web.Mvc.Html
                 string xpath;
                 if (entityModel.XpmPropertyMetadata != null && entityModel.XpmPropertyMetadata.TryGetValue(propertyName, out xpath))
                 {
-                    string predicate = xpath.EndsWith("]") ? string.Empty : string.Format("[{0}]", index + 1);
-                    xpmMarkup = string.Format(XpmFieldMarkup, HttpUtility.HtmlAttributeEncode(xpath + predicate));
+                    string predicate = xpath.EndsWith("]") ? String.Empty : String.Format("[{0}]", index + 1);
+                    xpmMarkup = String.Format(XpmFieldMarkup, HttpUtility.HtmlAttributeEncode(xpath + predicate));
                 }
                 else
                 {
-                    return string.Empty;
+                    return String.Empty;
                 }
             }
 
             // Instead of jamming the entire XPM markup in an HTML attribute, we only put in a reference to the XPM markup.
             string xpmMarkupRef = XpmMarkupMap.Current.AddXpmMarkup(xpmMarkup);
 
-            return string.Format("{0}=\"{1}\"", XpmMarkupHtmlAttrName, xpmMarkupRef);
+            return String.Format("{0}=\"{1}\"", XpmMarkupHtmlAttrName, xpmMarkupRef);
         }
 
         /// <summary>
@@ -255,9 +259,15 @@ namespace Sdl.Web.Mvc.Html
                 {
                     string xpmMarkupRef = ReadAndRemoveAttribute(elementWithXpmMarkup, XpmMarkupHtmlAttrName);
                     string xpmMarkup = xpmMarkupMap[xpmMarkupRef];
-                    // TODO: XPM markup may be multiple HTML comments (e.g. SmartTargetRegion)
+
+                    if (String.IsNullOrEmpty(xpmMarkup))
+                    {
+                        continue;
+                    }
+
                     HtmlCommentNode xpmMarkupNode = htmlDoc.CreateComment(xpmMarkup);
                     elementWithXpmMarkup.ChildNodes.Insert(0, xpmMarkupNode);
+
                 }
             }
             return rootElement.InnerHtml;
