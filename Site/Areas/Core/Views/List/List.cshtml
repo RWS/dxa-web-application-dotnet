@@ -1,5 +1,6 @@
 ﻿@model ContentList<Teaser>
-<div @Html.DxaEntityMarkup()>
+
+<div class="@Model.HtmlClasses" @Html.DxaEntityMarkup()>
     @if (Model.Headline!=null)
     {
         <h3 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h3>

@@ -1,4 +1,5 @@
 ﻿@model Article
+
 <article class="rich-text @Model.HtmlClasses" @Html.DxaEntityMarkup()>
     @if (Model.Image != null && WebRequestContext.ScreenWidth != ScreenWidth.ExtraSmall)
     {
