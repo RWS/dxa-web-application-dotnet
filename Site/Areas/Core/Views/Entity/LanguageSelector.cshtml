@@ -7,7 +7,7 @@
         var excludedLocalizations = new List<string>();
         if (Model.Settings.ContainsKey("suppressLocalizations"))
         {
-            excludedLocalizations = Model.Settings["suppressLocalizations"].Split(',').Select(l => ("/" + l.Trim())).ToList();
+            excludedLocalizations = Model.Settings["suppressLocalizations"].Split(",").Select(l => ("/" + l.Trim())).ToList();
         }
         foreach (var loc in siteLocalizations)
         {
