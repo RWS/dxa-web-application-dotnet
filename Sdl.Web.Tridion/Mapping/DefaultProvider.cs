@@ -310,7 +310,7 @@ namespace Sdl.Web.Tridion.Mapping
                 int levels = requestUrlPath.Split('/').Length;
                 while (levels > 1 && sitemapItem.Items != null)
                 {
-                    SitemapItem newParent = sitemapItem.Items.FirstOrDefault(i => i.Type == "StructureGroup" && requestUrlPath.StartsWith(i.Url.ToLower()));
+                    SitemapItem newParent = sitemapItem.Items.FirstOrDefault(i => i.Type == "StructureGroup" && requestUrlPath.StartsWith(i.Url, StringComparison.InvariantCultureIgnoreCase));
                     if (newParent == null)
                     {
                         break;
@@ -347,7 +347,7 @@ namespace Sdl.Web.Tridion.Mapping
                 navigationLinks.Items.Add(CreateLink(sitemapItem));
                 while (levels > 1 && sitemapItem.Items != null)
                 {
-                    sitemapItem = sitemapItem.Items.FirstOrDefault(i => requestUrlPath.StartsWith(i.Url.ToLower()));
+                    sitemapItem = sitemapItem.Items.FirstOrDefault(i => requestUrlPath.StartsWith(i.Url, StringComparison.InvariantCultureIgnoreCase));
                     if (sitemapItem != null)
                     {
                         navigationLinks.Items.Add(CreateLink(sitemapItem));
