@@ -371,9 +371,14 @@ namespace Sdl.Web.Tridion.Mapping
         /// <returns>The Link Entity Model.</returns>
         protected static Link CreateLink(SitemapItem sitemapItem)
         {
+            string url = sitemapItem.Url;
+            if (url.StartsWith("tcm:"))
+            {
+                url = SiteConfiguration.LinkResolver.ResolveLink(url);
+            }
             return new Link
             {
-                Url = SiteConfiguration.LinkResolver.ResolveLink(sitemapItem.Url),
+                Url = url,
                 LinkText = sitemapItem.Title
             };
         }
