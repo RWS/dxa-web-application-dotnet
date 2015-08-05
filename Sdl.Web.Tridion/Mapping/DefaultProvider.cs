@@ -26,34 +26,6 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class DefaultProvider : IContentProvider, INavigationProvider
     {
-        private readonly IPageFactory _pageFactory;
-        private readonly IComponentFactory _componentFactory;
-
-        protected IPageFactory PageFactory
-        {
-            get
-            {
-                _pageFactory.PageProvider.PublicationId = 0; // Force the DD4T PageProvider to use our PublicationResolver to determine the Publication ID.
-                return _pageFactory;
-            }
-        }
-
-        public DefaultProvider(IPageFactory pageFactory, IComponentFactory componentFactory)
-        {
-            if (pageFactory == null)
-            {
-                throw new DxaException("No Page Factory configured.");
-            }
-
-            _pageFactory = pageFactory;
-
-            if (componentFactory == null)
-            {
-                throw new DxaException("No Component Factory configured.");
-            }
-
-            _componentFactory = componentFactory;
-        }
 
         #region IContentProvider members
 #pragma warning disable 618
@@ -110,11 +82,11 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
                 //1. Try adding the default extension, so /news becomes /news.html
-                IPage page = GetPage(url);
+                IPage page = GetPage(url, localization);
                 if (page == null && (url == null || (!url.EndsWith("/") && url.LastIndexOf(".", StringComparison.Ordinal) <= url.LastIndexOf("/", StringComparison.Ordinal))))
                 {
                     //2. Try adding the default page, so /news becomes /news/index.html
-                    page = GetPage(url + "/");
+                    page = GetPage(url + "/", localization);
                 }
                 if (page == null)
                 {
@@ -145,8 +117,9 @@ namespace Sdl.Web.Tridion.Mapping
                     string componentUri = string.Format("tcm:{0}-{1}", localization.LocalizationId, identifiers[0]);
                     string templateUri = string.Format("tcm:{0}-{1}-32", localization.LocalizationId, identifiers[1]);
 
+                    IComponentFactory componentFactory = DD4TFactoryCache.GetComponentFactory(localization);
                     IComponent component;
-                    if (_componentFactory.TryGetComponent(componentUri, out component, templateUri))
+                    if (componentFactory.TryGetComponent(componentUri, out component, templateUri))
                     {
                         //var componentTcmUri = new TcmUri(componentUri);
                         var templateTcmUri = new TcmUri(templateUri);
@@ -262,7 +235,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (HttpContext.Current.Items[cacheKey] == null)
                 {
                     Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", url);
-                    string navigationJsonString = GetPageContent(url);
+                    string navigationJsonString = GetPageContent(url, localization);
                     result = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
                     HttpContext.Current.Items[cacheKey] = result;
                 }
@@ -409,26 +382,28 @@ namespace Sdl.Web.Tridion.Mapping
             return url;
         }
 
-        protected virtual string GetPageContent(string url)
+        protected virtual string GetPageContent(string url, Localization localization)
         {
             string cmUrl = GetCmUrl(url);
 
             using (new Tracer(url, cmUrl))
             {
+                IPageFactory pageFactory = DD4TFactoryCache.GetPageFactory(localization);
                 string result;
-                PageFactory.TryFindPageContent(GetCmUrl(url), out result);
+                pageFactory.TryFindPageContent(GetCmUrl(url), out result);
                 return result;
             }
         }
 
-        protected virtual IPage GetPage(string url)
+        protected virtual IPage GetPage(string url, Localization localization)
         {
             string cmUrl = GetCmUrl(url);
 
             using (new Tracer(url, cmUrl))
             {
+                IPageFactory pageFactory = DD4TFactoryCache.GetPageFactory(localization);
                 IPage result;
-                PageFactory.TryFindPage(cmUrl, out result);
+                pageFactory.TryFindPage(cmUrl, out result);
                 return result;
             }
         }
@@ -452,7 +427,7 @@ namespace Sdl.Web.Tridion.Mapping
             IEnumerable<string> includePageUrls = SiteConfiguration.GetIncludePageUrls(pageTemplateTcmUriParts[1], localization);
             foreach (string includePageUrl in includePageUrls)
             {
-                IPage includePage = GetPage(SiteConfiguration.LocalizeUrl(includePageUrl, localization));
+                IPage includePage = GetPage(SiteConfiguration.LocalizeUrl(includePageUrl, localization), localization);
                 if (includePage == null)
                 {
                     Log.Error("Include Page '{0}' not found.", includePageUrl);

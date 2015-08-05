@@ -21,12 +21,6 @@ namespace Sdl.Web.Tridion.Mapping
     {
         private const string EmbeddedEntityProcessingInstructionName = "EmbeddedEntity";
         private static readonly Regex EmbeddedEntityProcessingInstructionRegex = new Regex(@"<\?EmbeddedEntity\s\?>", RegexOptions.Compiled);
-        private readonly IComponentFactory _componentFactory;
-
-        public DefaultRichTextProcessor(IComponentFactory componentFactory)
-        {
-            _componentFactory = componentFactory;
-        }
 
         #region IRichTextProcessor Members
 
@@ -93,7 +87,7 @@ namespace Sdl.Web.Tridion.Mapping
                     // add href
                     linkElement.SetAttribute("href", linkUrl);
 
-                    ApplyHashIfApplicable(linkElement);
+                    ApplyHashIfApplicable(linkElement, localization);
 
                     // remove all xlink attributes
                     foreach (XmlAttribute xlinkAttr in linkElement.SelectNodes("//@xlink:*", nsmgr))
@@ -160,7 +154,7 @@ namespace Sdl.Web.Tridion.Mapping
             return new RichText(richTextFragments);
         }
 
-        private void ApplyHashIfApplicable(XmlElement linkElement)
+        private static void ApplyHashIfApplicable(XmlElement linkElement, Localization localization)
         {
             string target = linkElement.GetAttribute("target").ToLower();
             if (target != "anchored")
@@ -175,7 +169,7 @@ namespace Sdl.Web.Tridion.Mapping
                     StringComparison.OrdinalIgnoreCase
                     );
 
-            string linkTitle = GetLinkTitle(linkElement);
+            string linkTitle = GetLinkTitle(linkElement, localization);
 
             string fragmentId = string.Empty;
             if (!string.IsNullOrEmpty(linkTitle))
@@ -187,10 +181,11 @@ namespace Sdl.Web.Tridion.Mapping
             linkElement.SetAttribute("target", !samePage ? "_top" : string.Empty);
         }
 
-        private string GetLinkTitle(XmlElement linkElement)
+        private static string GetLinkTitle(XmlElement linkElement, Localization localization)
         {
             string componentUri = linkElement.GetAttribute("xlink:href");
-            IComponent component = _componentFactory.GetComponent(componentUri);
+            IComponentFactory componentFactory = DD4TFactoryCache.GetComponentFactory(localization);
+            IComponent component = componentFactory.GetComponent(componentUri);
             return (component == null) ? linkElement.GetAttribute("title") : component.Title;
         }
 

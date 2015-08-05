@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
-using DD4T.Factories;
+using DD4T.ContentModel.Factories;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
@@ -66,7 +66,7 @@ namespace Sdl.Web.Tridion.Mapping
                         // this is a workaround for the PageFactory not populating the Fields property of Dynamic Component Presentations in the Page model
                         // loading the DCP from the Broker will not get the CT metadata, so the region will be determined from the CT title
                         // TODO: find a way to load the CT metadata for a DCP
-                        fullyLoadedCp = LoadDcp(cp.Component.Id, cp.ComponentTemplate.Id);
+                        fullyLoadedCp = LoadDcp(cp.Component.Id, cp.ComponentTemplate.Id, localization);
                         Log.Debug("Loading DCP {0}, {1}", cp.Component.Id, cp.ComponentTemplate.Id);
                     }
 
@@ -240,20 +240,21 @@ namespace Sdl.Web.Tridion.Mapping
         /// </summary>
         /// <param name="componentUri">Component URI</param>
         /// <param name="templateUri">Component Template URI</param>
+        /// <param name="localization">The context Localization.</param>
         /// <returns>DD4T ContentModel ComponentPresentation</returns>
         /// <remarks>
-        /// Similair to <see cref="DefaultProvider.GetEntityModel(string, Localization)"/>, 
+        /// Similar to <see cref="DefaultProvider.GetEntityModel(string, Localization)"/>, 
         /// but we need an IComponentPresentation here and should not recursively call 
         /// <see cref="BuildEntityModel(ref EntityModel, IComponentPresentation, Localization)"/>. 
         /// Loading the DCP from the Broker will not get the CT metadata, so the region will be determined from the CT title. 
         /// TODO: find a way to load the CT metadata for a DCP
         /// </remarks>
-        private static IComponentPresentation LoadDcp(string componentUri, string templateUri)
+        private static IComponentPresentation LoadDcp(string componentUri, string templateUri, Localization localization)
         {
             // TODO: should this not be a method in the DefaultProvider instead?
-            using (new Tracer(componentUri, templateUri))
+            using (new Tracer(componentUri, templateUri, localization))
             {
-                ComponentFactory componentFactory = new ComponentFactory();
+                IComponentFactory componentFactory = DD4TFactoryCache.GetComponentFactory(localization);
                 IComponent component;
                 if (componentFactory.TryGetComponent(componentUri, out component, templateUri))
                 {
