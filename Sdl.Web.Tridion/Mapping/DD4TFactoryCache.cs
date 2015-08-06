@@ -23,7 +23,8 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     pageFactory = new PageFactory
                     {
-                        PublicationResolver = new PublicationResolver(localization)
+                        PublicationResolver = new PublicationResolver(localization),
+                        LinkFactory = new ExtensionlessLinkFactory()
                     };
                     _pageFactories.Add(localization.LocalizationId, pageFactory);
                 }

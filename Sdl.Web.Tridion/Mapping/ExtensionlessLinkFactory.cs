@@ -4,9 +4,9 @@ using DD4T.Factories;
 
 namespace Sdl.Web.Tridion.Mapping
 {
-    public class ExtensionlessLinkFactory : LinkFactory, ILinkFactory
+    internal class ExtensionlessLinkFactory : LinkFactory, ILinkFactory
     {
-        protected virtual string RemoveExtension(string url)
+        private static string RemoveExtension(string url)
         {
             if (url != null)
             {
