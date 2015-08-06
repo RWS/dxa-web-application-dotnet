@@ -118,7 +118,7 @@ namespace Sdl.Web.Tridion.Mapping
                 string[] idParts = id.Split('-');
                 if (idParts.Length != 2)
                 {
-                    throw new DxaException(String.Format("Invalid Entity Identifier '{0}'. Must be in format ComponentID-TemplateID."));
+                    throw new DxaException(String.Format("Invalid Entity Identifier '{0}'. Must be in format ComponentID-TemplateID.", id));
                 }
 
                 string componentUri = string.Format("tcm:{0}-{1}", localization.LocalizationId, idParts[0]);
