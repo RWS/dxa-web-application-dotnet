@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
-using DD4T.ContentModel.Factories;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
@@ -17,8 +16,6 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Common;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Extensions;
-using Tridion.ContentDelivery.DynamicContent.Query;
-using Tridion.ContentDelivery.Meta;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.Tridion.Mapping
@@ -60,18 +57,7 @@ namespace Sdl.Web.Tridion.Mapping
                 IConditionalEntityEvaluator conditionalEntityEvaluator = SiteConfiguration.ConditionalEntityEvaluator;
                 foreach (IComponentPresentation cp in page.ComponentPresentations)
                 {
-                    IComponentPresentation fullyLoadedCp = cp;
-                    if (cp.IsDynamic)
-                    {
-                        // this is a workaround for the PageFactory not populating the Fields property of Dynamic Component Presentations in the Page model
-                        // loading the DCP from the Broker will not get the CT metadata, so the region will be determined from the CT title
-                        // TODO: find a way to load the CT metadata for a DCP
-                        fullyLoadedCp = LoadDcp(cp.Component.Id, cp.ComponentTemplate.Id, localization);
-                        Log.Debug("Loading DCP {0}, {1}", cp.Component.Id, cp.ComponentTemplate.Id);
-                    }
-
-
-                    MvcData cpRegionMvcData = GetRegionMvcData(fullyLoadedCp);
+                    MvcData cpRegionMvcData = GetRegionMvcData(cp);
                     RegionModel region;
                     if (regions.TryGetValue(cpRegionMvcData.ViewName, out region))
                     {
@@ -91,7 +77,7 @@ namespace Sdl.Web.Tridion.Mapping
                     EntityModel entity;
                     try
                     {
-                        entity = ModelBuilderPipeline.CreateEntityModel(fullyLoadedCp, localization);
+                        entity = ModelBuilderPipeline.CreateEntityModel(cp, localization);
                     }
                     catch (Exception ex)
                     {
@@ -101,7 +87,7 @@ namespace Sdl.Web.Tridion.Mapping
                         Log.Error(ex);
                         entity = new ExceptionEntity(ex)
                         {
-                            MvcData = GetMvcData(fullyLoadedCp) // TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
+                            MvcData = GetMvcData(cp) // TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
                         };
                     }
 
@@ -234,65 +220,6 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
         #endregion
-
-        /// <summary>
-        /// Load Dynamic Component Presentation as a workaround for the PageFactory not populating the Fields property of Dynamic Component Presentations in the Page model
-        /// </summary>
-        /// <param name="componentUri">Component URI</param>
-        /// <param name="templateUri">Component Template URI</param>
-        /// <param name="localization">The context Localization.</param>
-        /// <returns>DD4T ContentModel ComponentPresentation</returns>
-        /// <remarks>
-        /// Similar to <see cref="DefaultProvider.GetEntityModel(string, Localization)"/>, 
-        /// but we need an IComponentPresentation here and should not recursively call 
-        /// <see cref="BuildEntityModel(ref EntityModel, IComponentPresentation, Localization)"/>. 
-        /// Loading the DCP from the Broker will not get the CT metadata, so the region will be determined from the CT title. 
-        /// TODO: find a way to load the CT metadata for a DCP
-        /// </remarks>
-        private static IComponentPresentation LoadDcp(string componentUri, string templateUri, Localization localization)
-        {
-            // TODO: should this not be a method in the DefaultProvider instead?
-            using (new Tracer(componentUri, templateUri, localization))
-            {
-                IComponentFactory componentFactory = DD4TFactoryCache.GetComponentFactory(localization);
-                IComponent component;
-                if (componentFactory.TryGetComponent(componentUri, out component, templateUri))
-                {
-                    //var componentTcmUri = new TcmUri(componentUri);
-                    var templateTcmUri = new TcmUri(templateUri);
-
-                    var publicationCriteria = new PublicationCriteria(templateTcmUri.PublicationId);
-                    var itemReferenceCriteria = new ItemReferenceCriteria(templateTcmUri.ItemId);
-                    var itemTypeTypeCriteria = new ItemTypeCriteria(32);
-
-                    var query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(
-                        CriteriaFactory.And(new Criteria[] { publicationCriteria, itemReferenceCriteria, itemTypeTypeCriteria }));
-
-                    var results = query.ExecuteEntityQuery();
-                    if (results != null)
-                    {
-                        var componentPresentation = new ComponentPresentation
-                        {
-                            Component = component as Component,
-                            IsDynamic = true
-                        };
-
-                        var templateMeta = (ITemplateMeta)results.FirstOrDefault();
-                        var template = new ComponentTemplate
-                        {
-                            Id = templateUri,
-                            Title = templateMeta.Title,
-                            OutputFormat = templateMeta.OutputFormat
-                        };
-
-                        componentPresentation.ComponentTemplate = template;
-                        return componentPresentation;
-                    }
-                }
-
-                throw new DxaItemNotFoundException(GetDxaIdentifierFromTcmUri(componentUri, templateUri));
-            }
-        }
 
         private PageModel CreatePageModel(IPage page, Localization localization)
         {
