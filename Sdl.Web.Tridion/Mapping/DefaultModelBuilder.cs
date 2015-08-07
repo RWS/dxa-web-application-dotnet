@@ -153,8 +153,8 @@ namespace Sdl.Web.Tridion.Mapping
                 BuildEntityModel(ref entityModel, cp.Component, modelType, localization);                    
 
                 entityModel.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
-                entityModel.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("s"));
-                entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "1" : "0");
+                entityModel.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
+                entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "true" : "false");
                 entityModel.MvcData = mvcData;
 
                 // add html classes to model from metadata
@@ -575,7 +575,7 @@ namespace Sdl.Web.Tridion.Mapping
             if (comp != null)
             {
                 result.Add("ComponentID", comp.Id);
-                result.Add("ComponentModified", comp.RevisionDate.ToString("s"));
+                result.Add("ComponentModified", comp.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
             }
             return result;
         }
@@ -586,9 +586,9 @@ namespace Sdl.Web.Tridion.Mapping
             if (page != null)
             {
                 result.Add("PageID", page.Id);
-                result.Add("PageModified", page.RevisionDate.ToString("s"));
+                result.Add("PageModified", page.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
                 result.Add("PageTemplateID", page.PageTemplate.Id);
-                result.Add("PageTemplateModified", page.PageTemplate.RevisionDate.ToString("s"));
+                result.Add("PageTemplateModified", page.PageTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
             }
             return result;
         }
