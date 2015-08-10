@@ -79,7 +79,8 @@ namespace Sdl.Web.Tridion.Mapping
                     string tcmUri = linkElement.GetAttribute("xlink:href");
                     if (!string.IsNullOrEmpty(tcmUri))
                     {
-                        linkUrl = linkResolver.ResolveLink(tcmUri);
+                        // Try to resolve directly to Binary content of MM Component.
+                        linkUrl = linkResolver.ResolveLink(tcmUri, resolveToBinary: true);
                     }
                 }                
                 if (!string.IsNullOrEmpty(linkUrl))

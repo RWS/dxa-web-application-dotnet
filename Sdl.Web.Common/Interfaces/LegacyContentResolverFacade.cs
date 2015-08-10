@@ -51,8 +51,10 @@ namespace Sdl.Web.Common.Interfaces
 
         public string ResolveLink(object linkData, object resolveInstruction = null)
         {
-            int localizationId = resolveInstruction == null ? 0 : Convert.ToInt32(resolveInstruction);
-            return SiteConfiguration.LinkResolver.ResolveLink((string) linkData, localizationId);
+            string localizationId = resolveInstruction as string;
+            Localization contextLocalization = (localizationId == null) ? null : SiteConfiguration.LocalizationResolver.GetLocalization(localizationId);
+
+            return SiteConfiguration.LinkResolver.ResolveLink((string) linkData, localization: contextLocalization);
         }
 
         public object ResolveContent(object content, object resolveInstruction = null)
