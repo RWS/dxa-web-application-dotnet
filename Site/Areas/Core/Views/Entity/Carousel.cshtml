@@ -1,5 +1,5 @@
 ﻿@model ItemList
-<div id="carousel-@Model.Id" class="carousel slide @Model.MvcData.HtmlClasses" data-ride="carousel" data-interval="5000" @Html.DxaEntityMarkup()>
+<div id="carousel-@Model.Id" class="carousel slide @Model.HtmlClasses" data-ride="carousel" data-interval="5000" @Html.DxaEntityMarkup()>
     <ol class="carousel-indicators">
         @if (Model.ItemListElements!=null)
         {
@@ -23,9 +23,9 @@
     </div>
     <!-- Controls -->
     <a class="left carousel-control" href="#carousel-@Model.Id" data-slide="prev">
-        <i class='fa fa-chevron-left carousel-icon-left'></i>
+        <i class="fa fa-chevron-left carousel-icon-left"></i>
     </a>
     <a class="right carousel-control" href="#carousel-@Model.Id" data-slide="next">
-        <i class='fa fa-chevron-right carousel-icon-right'></i>
+        <i class="fa fa-chevron-right carousel-icon-right"></i>
     </a>
 </div>

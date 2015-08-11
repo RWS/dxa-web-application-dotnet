@@ -1,4 +1,6 @@
-﻿using Sdl.Web.Common;
+﻿using System;
+using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Tridion.ContentManager;
 using Tridion.ContentDelivery.Web.Linking;
@@ -16,19 +18,10 @@ namespace Sdl.Web.Tridion.Linking
         /// Resolves a link URI (TCM URI or site URL) to a normalized site URL.
         /// </summary>
         /// <param name="sourceUri">The source URI (TCM URI or site URL)</param>
+        /// <param name="resolveToBinary">Specifies whether a link to a Multimedia Component should be resolved directly to its Binary (<c>true</c>) or as a regular Component link.</param>
+        /// <param name="localization">The context Localization (optional, since the TCM URI already contains a Publication ID, but this allows resolving in a different context).</param>
         /// <returns>The resolved URL.</returns>
-        public string ResolveLink(string sourceUri)
-        {
-            return ResolveLink(sourceUri, 0);
-        }
-
-        /// <summary>
-        /// Resolves a link URI (TCM URI or site URL) to a normalized site URL in context of a given Localization.
-        /// </summary>
-        /// <param name="sourceUri">The source URI (TCM URI or site URL)</param>
-        /// <param name="localizationId">The Localization ID.</param>
-        /// <returns>The resolved URL.</returns>
-        public string ResolveLink(string sourceUri, int localizationId)
+        public string ResolveLink(string sourceUri, bool resolveToBinary = false, Localization localization = null)
         {
             if (sourceUri == null)
             {
@@ -39,7 +32,7 @@ namespace Sdl.Web.Tridion.Linking
             if (sourceUri.StartsWith("tcm:"))
             {
                 TcmUri tcmUri = new TcmUri(sourceUri);
-                url = ResolveLink(tcmUri, localizationId, false);
+                url = ResolveLink(tcmUri, resolveToBinary, localization);
             }
             else
             {
@@ -58,15 +51,24 @@ namespace Sdl.Web.Tridion.Linking
             return url;
         }
         #endregion
-        
-        private static string ResolveLink(TcmUri tcmUri, int localizationId, bool isBinary)
+
+        private static string ResolveLink(TcmUri tcmUri, bool resolveToBinary, Localization localization)
         {
+            int localizationId = (localization == null) ? 0 : Convert.ToInt32(localization.LocalizationId);
             switch (tcmUri.ItemType)
             {
                 case ItemType.Page:
                     return ResolvePageLink(tcmUri, localizationId);
+
                 case ItemType.Component:
-                    return isBinary ? ResolveBinaryLink(tcmUri, localizationId) : ResolveComponentLink(tcmUri, localizationId);
+                    // If requested (resolveToBinary = true), try to resolve Binary Link first.
+                    string binaryLink = null;
+                    if (resolveToBinary)
+                    {
+                        binaryLink = ResolveBinaryLink(tcmUri, localizationId);
+                    }
+                    return binaryLink ?? ResolveComponentLink(tcmUri, localizationId);
+
                 default:
                     throw new DxaException("Unexpected item type in TCM URI: " + tcmUri);
             }

@@ -33,6 +33,7 @@ namespace Sdl.Web.Site.Areas.Core
             RegisterViewModel("FooterLinks", typeof(LinkList<Link>));
             RegisterViewModel("HeaderLinks", typeof(LinkList<Link>));
             RegisterViewModel("HeaderLogo", typeof(Teaser));
+            RegisterViewModel("Image", typeof(Image));
             RegisterViewModel("LanguageSelector", typeof(Configuration));
             RegisterViewModel("OldBrowserNotificationBar", typeof(Notification));
             RegisterViewModel("Place", typeof(Place));
@@ -55,9 +56,6 @@ namespace Sdl.Web.Site.Areas.Core
             RegisterViewModel("SiteMap", typeof(SitemapItem), "Navigation");
             RegisterViewModel("SiteMapXml", typeof(SitemapItem), "Navigation");
             RegisterViewModel("TopNavigation", typeof(NavigationLinks), "Navigation");
-
-            // Entity Models without view
-            RegisterViewModel(typeof(Image));
 
             // Page Views
             RegisterViewModel("GeneralPage", typeof(PageModel), "Page");

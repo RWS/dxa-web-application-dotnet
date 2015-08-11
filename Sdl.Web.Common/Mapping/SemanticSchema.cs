@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Mapping
 {
@@ -91,6 +94,55 @@ namespace Sdl.Web.Common.Mapping
                 _semanticTypeNames = Semantics.Select(s => SemanticMapping.GetQualifiedTypeName(s.Entity, s.Prefix, Localization)).ToArray();
             }
             return _semanticTypeNames;
+        }
+
+        /// <summary>
+        /// Determine a Model Type based on semantic mappings (and a given base model type).
+        /// </summary>
+        /// <param name="baseModelType">The base type as obtained from the View Model.</param>
+        /// <returns>The given base Model Type or a subclass if a more specific class can be resolved via semantic mapping.</returns>
+        /// <remarks>
+        /// This method makes it possible (for example) to let the <see cref="Teaser.Media"/> property get an instance of <see cref="Image"/> 
+        /// rather than just <see cref="MediaItem"/> (the type of the View Model property).
+        /// </remarks>
+        public Type GetModelTypeFromSemanticMapping(Type baseModelType)
+        {
+            Type[] foundAmbiguousMappings = null;
+            string[] semanticTypeNames = GetSemanticTypeNames();
+            foreach (string semanticTypeName in semanticTypeNames)
+            {
+                IEnumerable<Type> mappedModelTypes = ModelTypeRegistry.GetMappedModelTypes(semanticTypeName);
+                if (mappedModelTypes == null)
+                {
+                    continue;
+                }
+
+                Type[] matchingModelTypes = mappedModelTypes.Where(t => baseModelType.IsAssignableFrom(t)).ToArray();
+                if (matchingModelTypes.Length == 1)
+                {
+                    // Exactly one matching model type; return it.
+                    return matchingModelTypes[0];
+                }
+                
+                if (matchingModelTypes.Length > 1)
+                {
+                    // Multiple candidate models types found. Continue scanning; maybe we'll find a unique one for another semantic type.
+                    foundAmbiguousMappings = matchingModelTypes;
+                }
+            }
+
+            if (foundAmbiguousMappings == null)
+            {
+                Log.Warn("No semantic mapping found between Schema {0} ({1}) and model type '{2}'. Sticking with model type.",
+                        Id, String.Join(", ", semanticTypeNames), baseModelType.FullName);
+            }
+            else
+            {
+                Log.Warn("Ambiguous semantic mappings found between Schema {0} ({1}) and model type '{2}'. Found types: {3}. Sticking with model type.",
+                        Id, String.Join(", ", semanticTypeNames), String.Join(", ", foundAmbiguousMappings.Select(t => t.FullName)), baseModelType.FullName);
+            }
+
+            return baseModelType;
         }
     }
 }

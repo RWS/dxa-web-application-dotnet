@@ -15,7 +15,7 @@ using DD4T.Factories.Caching;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Tridion.Mapping;
 using Image = System.Drawing.Image; // TODO: Shouldn't use System.Drawing namespace in a web application.
 
 namespace Sdl.Web.Tridion.Statics
@@ -27,7 +27,6 @@ namespace Sdl.Web.Tridion.Statics
     {
         private static readonly BinaryFileManager _instance = new BinaryFileManager();
         private ICacheAgent _cacheAgent;
-        private IBinaryFactory _binaryFactory;
 
         #region Inner classes
         internal class Dimensions
@@ -99,10 +98,10 @@ namespace Sdl.Web.Tridion.Statics
                 DateTime? lastPublishedDate = CacheAgent.Load(cacheKey) as DateTime?;
                 if (lastPublishedDate == null)
                 {
-                    BinaryFactory.BinaryProvider.PublicationId = Int32.Parse(localization.LocalizationId);
+                    IBinaryFactory binaryFactory = DD4TFactoryCache.GetBinaryFactory(localization);
                     try
                     {
-                        DateTime lpb = BinaryFactory.FindLastPublishedDate(urlPath);
+                        DateTime lpb = binaryFactory.FindLastPublishedDate(urlPath);
                         if (lpb != DateTime.MinValue.AddSeconds(1)) // this is the secret code for 'does not exist'
                         {
                             lastPublishedDate = lpb;
@@ -151,10 +150,10 @@ namespace Sdl.Web.Tridion.Statics
                 // the normal situation (where a binary is still in Tridion and it is present on the file system already and it is up to date) is now covered
                 // Let's handle the exception situations. 
                 IBinary binary;
-                BinaryFactory.BinaryProvider.PublicationId = Int32.Parse(localization.LocalizationId);
                 try
                 {
-                    BinaryFactory.TryFindBinary(urlPath, out binary);
+                    IBinaryFactory binaryFactory = DD4TFactoryCache.GetBinaryFactory(localization);
+                    binaryFactory.TryFindBinary(urlPath, out binary);
                 }
                 catch (BinaryNotFoundException)
                 {
@@ -185,18 +184,6 @@ namespace Sdl.Web.Tridion.Statics
         private static string GetFilePathFromUrl(string urlPath, Localization loc)
         {
             return HttpContext.Current.Server.MapPath("~/" + SiteConfiguration.GetLocalStaticsFolder(loc.LocalizationId) + urlPath);
-        }
-
-        protected virtual IBinaryFactory BinaryFactory
-        {
-            get
-            {
-                return _binaryFactory ?? (_binaryFactory = new BinaryFactory());
-            }
-            set
-            {
-                _binaryFactory = value;
-            }
         }
 
         /// <summary>

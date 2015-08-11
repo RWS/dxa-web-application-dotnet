@@ -1,5 +1,5 @@
 ﻿@model ItemList
-<article id="@Model.MvcData.HtmlId" class="rich-text @Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
+<article class="rich-text @Model.HtmlClasses" @Html.DxaEntityMarkup()>
     <div class="content">
         @if (Model.Headline != null)
         {

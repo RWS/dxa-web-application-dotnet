@@ -17,6 +17,7 @@ using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Query;
 using Tridion.ContentDelivery.DynamicContent.Query;
 using Tridion.ContentDelivery.Meta;
+using IItem = Tridion.ContentDelivery.Meta.IItem;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.Tridion.Mapping
@@ -26,34 +27,6 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class DefaultProvider : IContentProvider, INavigationProvider
     {
-        private readonly IPageFactory _pageFactory;
-        private readonly IComponentFactory _componentFactory;
-
-        protected IPageFactory PageFactory
-        {
-            get
-            {
-                _pageFactory.PageProvider.PublicationId = 0; // Force the DD4T PageProvider to use our PublicationResolver to determine the Publication ID.
-                return _pageFactory;
-            }
-        }
-
-        public DefaultProvider(IPageFactory pageFactory, IComponentFactory componentFactory)
-        {
-            if (pageFactory == null)
-            {
-                throw new DxaException("No Page Factory configured.");
-            }
-
-            _pageFactory = pageFactory;
-
-            if (componentFactory == null)
-            {
-                throw new DxaException("No Component Factory configured.");
-            }
-
-            _componentFactory = componentFactory;
-        }
 
         #region IContentProvider members
 #pragma warning disable 618
@@ -110,16 +83,17 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
                 //1. Try adding the default extension, so /news becomes /news.html
-                IPage page = GetPage(url);
+                IPage page = GetPage(url, localization);
                 if (page == null && (url == null || (!url.EndsWith("/") && url.LastIndexOf(".", StringComparison.Ordinal) <= url.LastIndexOf("/", StringComparison.Ordinal))))
                 {
                     //2. Try adding the default page, so /news becomes /news/index.html
-                    page = GetPage(url + "/");
+                    page = GetPage(url + "/", localization);
                 }
                 if (page == null)
                 {
                     throw new DxaItemNotFoundException(url);
                 }
+                FullyLoadDynamicComponentPresentations(page, localization);
 
                 IPage[] includes = addIncludes ? GetIncludesFromModel(page, localization).ToArray() : new IPage[0];
 
@@ -130,60 +104,63 @@ namespace Sdl.Web.Tridion.Mapping
         /// <summary>
         /// Gets an Entity Model for a given Entity Identifier.
         /// </summary>
-        /// <param name="id">The Entity Identifier.</param>
+        /// <param name="id">The Entity Identifier in format ComponentID-TemplateID.</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The Entity Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Entity Model exists for the given URL.</exception>
+        /// <remarks>
+        /// Since we can't obtain CT metadata for DCPs, we obtain the View Name from the CT Title.
+        /// </remarks>
         public virtual EntityModel GetEntityModel(string id, Localization localization)
         {
             using (new Tracer(id, localization))
             {
-                // Entity Identifier of a DCP is ComponentId-TemplateId
-                if (id.Contains('-'))
+                string[] idParts = id.Split('-');
+                if (idParts.Length != 2)
                 {
-                    string[] identifiers = id.Split('-');
-                    string componentUri = string.Format("tcm:{0}-{1}", localization.LocalizationId, identifiers[0]);
-                    string templateUri = string.Format("tcm:{0}-{1}-32", localization.LocalizationId, identifiers[1]);
+                    throw new DxaException(String.Format("Invalid Entity Identifier '{0}'. Must be in format ComponentID-TemplateID.", id));
+                }
 
-                    IComponent component;
-                    if (_componentFactory.TryGetComponent(componentUri, out component, templateUri))
-                    {
-                        //var componentTcmUri = new TcmUri(componentUri);
-                        var templateTcmUri = new TcmUri(templateUri);
+                string componentUri = string.Format("tcm:{0}-{1}", localization.LocalizationId, idParts[0]);
+                string templateUri = string.Format("tcm:{0}-{1}-32", localization.LocalizationId, idParts[1]);
 
-                        var publicationCriteria = new PublicationCriteria(templateTcmUri.PublicationId);
-                        var itemReferenceCriteria = new ItemReferenceCriteria(templateTcmUri.ItemId);
-                        var itemTypeTypeCriteria = new ItemTypeCriteria(32);
-
-                        var query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(
-                            CriteriaFactory.And(new Criteria[] { publicationCriteria, itemReferenceCriteria, itemTypeTypeCriteria }));
-
-                        var results = query.ExecuteEntityQuery();
-                        if (results != null)
-                        {
-                            var componentPresentation = new ComponentPresentation
-                            {
-                                Component = component as Component,
-                                IsDynamic = true
-                            };
-
-                            var templateMeta = (ITemplateMeta)results.FirstOrDefault();
-                            var template = new ComponentTemplate
-                            {
-                                Id = templateUri,
-                                Title = templateMeta.Title,
-                                OutputFormat = templateMeta.OutputFormat
-                            };
-
-                            componentPresentation.ComponentTemplate = template;
-                            return ModelBuilderPipeline.CreateEntityModel(componentPresentation, localization);
-                        }
-                    }
-                    
+                IComponentFactory componentFactory = DD4TFactoryCache.GetComponentFactory(localization);
+                IComponent component;
+                if (!componentFactory.TryGetComponent(componentUri, out component, templateUri))
+                {
                     throw new DxaItemNotFoundException(id);
                 }
-                
-                throw new NotImplementedException("This feature will be implemented in a future release"); // TODO TSI-803
+
+                TcmUri templateTcmUri = new TcmUri(templateUri);
+                Criteria[] criteria = new Criteria[]
+                {
+                    new PublicationCriteria(templateTcmUri.PublicationId),
+                    new ItemReferenceCriteria(templateTcmUri.ItemId),
+                    new ItemTypeCriteria(32)
+                };
+
+                var query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(CriteriaFactory.And(criteria));
+                IItem[] results = query.ExecuteEntityQuery();
+                ITemplateMeta templateMeta = (ITemplateMeta) results.FirstOrDefault();
+                if (templateMeta == null)
+                {
+                    throw new DxaException(String.Format("Cannot find Component Template metadata for '{0}'", templateUri));
+                }
+
+                IComponentPresentation componentPresentation = new ComponentPresentation
+                {
+                    Component = (Component) component,
+                    ComponentTemplate = new ComponentTemplate
+                    {
+                        Id = templateUri,
+                        Title = templateMeta.Title,
+                        OutputFormat = templateMeta.OutputFormat
+                        // NOTE: we can't obtain CT metadata for DCPs, so ensure that the (qualified) View Name is in the CT title.
+                    },
+                    IsDynamic = true
+                };
+
+                return ModelBuilderPipeline.CreateEntityModel(componentPresentation, localization);
             }
         }
 
@@ -262,7 +239,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (HttpContext.Current.Items[cacheKey] == null)
                 {
                     Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", url);
-                    string navigationJsonString = GetPageContent(url);
+                    string navigationJsonString = GetPageContent(url, localization);
                     result = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
                     HttpContext.Current.Items[cacheKey] = result;
                 }
@@ -310,7 +287,7 @@ namespace Sdl.Web.Tridion.Mapping
                 int levels = requestUrlPath.Split('/').Length;
                 while (levels > 1 && sitemapItem.Items != null)
                 {
-                    SitemapItem newParent = sitemapItem.Items.FirstOrDefault(i => i.Type == "StructureGroup" && requestUrlPath.StartsWith(i.Url.ToLower()));
+                    SitemapItem newParent = sitemapItem.Items.FirstOrDefault(i => i.Type == "StructureGroup" && requestUrlPath.StartsWith(i.Url, StringComparison.InvariantCultureIgnoreCase));
                     if (newParent == null)
                     {
                         break;
@@ -347,7 +324,7 @@ namespace Sdl.Web.Tridion.Mapping
                 navigationLinks.Items.Add(CreateLink(sitemapItem));
                 while (levels > 1 && sitemapItem.Items != null)
                 {
-                    sitemapItem = sitemapItem.Items.FirstOrDefault(i => requestUrlPath.StartsWith(i.Url.ToLower()));
+                    sitemapItem = sitemapItem.Items.FirstOrDefault(i => requestUrlPath.StartsWith(i.Url, StringComparison.InvariantCultureIgnoreCase));
                     if (sitemapItem != null)
                     {
                         navigationLinks.Items.Add(CreateLink(sitemapItem));
@@ -371,9 +348,14 @@ namespace Sdl.Web.Tridion.Mapping
         /// <returns>The Link Entity Model.</returns>
         protected static Link CreateLink(SitemapItem sitemapItem)
         {
+            string url = sitemapItem.Url;
+            if (url.StartsWith("tcm:"))
+            {
+                url = SiteConfiguration.LinkResolver.ResolveLink(url);
+            }
             return new Link
             {
-                Url = SiteConfiguration.LinkResolver.ResolveLink(sitemapItem.Url),
+                Url = url,
                 LinkText = sitemapItem.Title
             };
         }
@@ -404,26 +386,28 @@ namespace Sdl.Web.Tridion.Mapping
             return url;
         }
 
-        protected virtual string GetPageContent(string url)
+        protected virtual string GetPageContent(string url, Localization localization)
         {
             string cmUrl = GetCmUrl(url);
 
             using (new Tracer(url, cmUrl))
             {
+                IPageFactory pageFactory = DD4TFactoryCache.GetPageFactory(localization);
                 string result;
-                PageFactory.TryFindPageContent(GetCmUrl(url), out result);
+                pageFactory.TryFindPageContent(GetCmUrl(url), out result);
                 return result;
             }
         }
 
-        protected virtual IPage GetPage(string url)
+        protected virtual IPage GetPage(string url, Localization localization)
         {
             string cmUrl = GetCmUrl(url);
 
             using (new Tracer(url, cmUrl))
             {
+                IPageFactory pageFactory = DD4TFactoryCache.GetPageFactory(localization);
                 IPage result;
-                PageFactory.TryFindPage(cmUrl, out result);
+                pageFactory.TryFindPage(cmUrl, out result);
                 return result;
             }
         }
@@ -447,15 +431,31 @@ namespace Sdl.Web.Tridion.Mapping
             IEnumerable<string> includePageUrls = SiteConfiguration.GetIncludePageUrls(pageTemplateTcmUriParts[1], localization);
             foreach (string includePageUrl in includePageUrls)
             {
-                IPage includePage = GetPage(SiteConfiguration.LocalizeUrl(includePageUrl, localization));
+                IPage includePage = GetPage(SiteConfiguration.LocalizeUrl(includePageUrl, localization), localization);
                 if (includePage == null)
                 {
                     Log.Error("Include Page '{0}' not found.", includePageUrl);
                     continue;
                 }
+                FullyLoadDynamicComponentPresentations(includePage, localization);
                 result.Add(includePage);
             }
             return result;
+        }
+
+        /// <summary>
+        /// Ensures that the Component Fields of DCPs on the Page are populated.
+        /// </summary>
+        private static void FullyLoadDynamicComponentPresentations(IPage page, Localization localization)
+        {
+            using (new Tracer(page, localization))
+            {
+                foreach (ComponentPresentation dcp in page.ComponentPresentations.Where(cp => cp.IsDynamic).OfType<ComponentPresentation>())
+                {
+                    IComponentFactory componentFactory = DD4TFactoryCache.GetComponentFactory(localization);
+                    dcp.Component = (Component)componentFactory.GetComponent(dcp.Component.Id, dcp.ComponentTemplate.Id);
+                }
+            }
         }
     }
 }

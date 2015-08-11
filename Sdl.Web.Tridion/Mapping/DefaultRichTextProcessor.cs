@@ -9,6 +9,7 @@ using DD4T.ContentModel.Factories;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Tridion.Mapping
@@ -20,12 +21,6 @@ namespace Sdl.Web.Tridion.Mapping
     {
         private const string EmbeddedEntityProcessingInstructionName = "EmbeddedEntity";
         private static readonly Regex EmbeddedEntityProcessingInstructionRegex = new Regex(@"<\?EmbeddedEntity\s\?>", RegexOptions.Compiled);
-        private readonly IComponentFactory _componentFactory;
-
-        public DefaultRichTextProcessor(IComponentFactory componentFactory)
-        {
-            _componentFactory = componentFactory;
-        }
 
         #region IRichTextProcessor Members
 
@@ -33,6 +28,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// Processes rich text (XHTML) content.
         /// </summary>
         /// <param name="xhtml">The rich text content (XHTML fragment) to be processed.</param>
+        /// <param name="localization">Context localization.</param>
         /// <returns>The processed rich text content.</returns>
         /// <remarks>
         /// Typical rich text processing tasks: 
@@ -41,13 +37,13 @@ namespace Sdl.Web.Tridion.Mapping
         ///     <item>Resolve inline links</item>
         /// </list>
         /// </remarks>
-        public RichText ProcessRichText(string xhtml)
+        public RichText ProcessRichText(string xhtml, Localization localization)
         {
             try
             {
                 XmlDocument xhtmlDoc = new XmlDocument();
                 xhtmlDoc.LoadXml(String.Format("<xhtml>{0}</xhtml>", xhtml));
-                return ResolveRichText(xhtmlDoc);
+                return ResolveRichText(xhtmlDoc, localization);
             }
             catch (XmlException ex)
             {
@@ -58,7 +54,7 @@ namespace Sdl.Web.Tridion.Mapping
 
         #endregion
 
-        private RichText ResolveRichText(XmlDocument doc)
+        private RichText ResolveRichText(XmlDocument doc, Localization localization)
         {
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
             nsmgr.AddNamespace("xhtml", "http://www.w3.org/1999/xhtml");
@@ -83,7 +79,8 @@ namespace Sdl.Web.Tridion.Mapping
                     string tcmUri = linkElement.GetAttribute("xlink:href");
                     if (!string.IsNullOrEmpty(tcmUri))
                     {
-                        linkUrl = linkResolver.ResolveLink(tcmUri);
+                        // Try to resolve directly to Binary content of MM Component.
+                        linkUrl = linkResolver.ResolveLink(tcmUri, resolveToBinary: true);
                     }
                 }                
                 if (!string.IsNullOrEmpty(linkUrl))
@@ -91,7 +88,7 @@ namespace Sdl.Web.Tridion.Mapping
                     // add href
                     linkElement.SetAttribute("href", linkUrl);
 
-                    ApplyHashIfApplicable(linkElement);
+                    ApplyHashIfApplicable(linkElement, localization);
 
                     // remove all xlink attributes
                     foreach (XmlAttribute xlinkAttr in linkElement.SelectNodes("//@xlink:*", nsmgr))
@@ -114,25 +111,23 @@ namespace Sdl.Web.Tridion.Mapping
                 }
             }
 
-            // Resolve embedded YouTube videos
+            // Resolve embedded media items
             List<EntityModel> embeddedEntities = new List<EntityModel>();
-            foreach (XmlElement youTubeImgElement in doc.SelectNodes("//img[@data-youTubeId][@xlink:href]", nsmgr))
+            foreach (XmlElement imgElement in doc.SelectNodes("//img[@data-schemaUri]", nsmgr))
             {
-                YouTubeVideo youTubeVideo = new YouTubeVideo
-                {
-                    Id =  DefaultModelBuilder.GetDxaIdentifierFromTcmUri(youTubeImgElement.GetAttribute("xlink:href")), 
-                    Url = youTubeImgElement.GetAttribute("src"),
-                    YouTubeId = youTubeImgElement.GetAttribute("data-youTubeId"),
-                    Headline = youTubeImgElement.GetAttribute("data-headline"),
-                    IsEmbedded = true,
-                    MvcData = new MvcData("Core:Entity:YouTubeVideo")
-                };
-                embeddedEntities.Add(youTubeVideo);
+                string[] schemaTcmUriParts = imgElement.GetAttribute("data-schemaUri").Split('-');
+                SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaTcmUriParts[1], localization);
 
-                // Replace YouTube img element with marker XML processing instruction 
-                youTubeImgElement.ParentNode.ReplaceChild(
-                    doc.CreateProcessingInstruction(EmbeddedEntityProcessingInstructionName, string.Empty), 
-                    youTubeImgElement
+                // The semantic mapping may resolve to a more specific model type than specified here (e.g. YouTubeVideo instead of just MediaItem)
+                Type modelType = semanticSchema.GetModelTypeFromSemanticMapping(typeof(MediaItem));
+                MediaItem mediaItem = (MediaItem)Activator.CreateInstance(modelType);
+                mediaItem.ReadFromXhtmlElement(imgElement);
+                embeddedEntities.Add(mediaItem);
+
+                // Replace img element with marker XML processing instruction 
+                imgElement.ParentNode.ReplaceChild(
+                    doc.CreateProcessingInstruction(EmbeddedEntityProcessingInstructionName, String.Empty),
+                    imgElement
                     );
             }
 
@@ -160,7 +155,7 @@ namespace Sdl.Web.Tridion.Mapping
             return new RichText(richTextFragments);
         }
 
-        private void ApplyHashIfApplicable(XmlElement linkElement)
+        private static void ApplyHashIfApplicable(XmlElement linkElement, Localization localization)
         {
             string target = linkElement.GetAttribute("target").ToLower();
             if (target != "anchored")
@@ -175,7 +170,7 @@ namespace Sdl.Web.Tridion.Mapping
                     StringComparison.OrdinalIgnoreCase
                     );
 
-            string linkTitle = GetLinkTitle(linkElement);
+            string linkTitle = GetLinkTitle(linkElement, localization);
 
             string fragmentId = string.Empty;
             if (!string.IsNullOrEmpty(linkTitle))
@@ -187,10 +182,11 @@ namespace Sdl.Web.Tridion.Mapping
             linkElement.SetAttribute("target", !samePage ? "_top" : string.Empty);
         }
 
-        private string GetLinkTitle(XmlElement linkElement)
+        private static string GetLinkTitle(XmlElement linkElement, Localization localization)
         {
             string componentUri = linkElement.GetAttribute("xlink:href");
-            IComponent component = _componentFactory.GetComponent(componentUri);
+            IComponentFactory componentFactory = DD4TFactoryCache.GetComponentFactory(localization);
+            IComponent component = componentFactory.GetComponent(componentUri);
             return (component == null) ? linkElement.GetAttribute("title") : component.Title;
         }
 

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
-using DD4T.Factories;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
@@ -17,8 +16,6 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Common;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Extensions;
-using Tridion.ContentDelivery.DynamicContent.Query;
-using Tridion.ContentDelivery.Meta;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.Tridion.Mapping
@@ -60,18 +57,7 @@ namespace Sdl.Web.Tridion.Mapping
                 IConditionalEntityEvaluator conditionalEntityEvaluator = SiteConfiguration.ConditionalEntityEvaluator;
                 foreach (IComponentPresentation cp in page.ComponentPresentations)
                 {
-                    IComponentPresentation fullyLoadedCp = cp;
-                    if (cp.IsDynamic)
-                    {
-                        // this is a workaround for the PageFactory not populating the Fields property of Dynamic Component Presentations in the Page model
-                        // loading the DCP from the Broker will not get the CT metadata, so the region will be determined from the CT title
-                        // TODO: find a way to load the CT metadata for a DCP
-                        fullyLoadedCp = LoadDcp(cp.Component.Id, cp.ComponentTemplate.Id);
-                        Log.Debug("Loading DCP {0}, {1}", cp.Component.Id, cp.ComponentTemplate.Id);
-                    }
-
-
-                    MvcData cpRegionMvcData = GetRegionMvcData(fullyLoadedCp);
+                    MvcData cpRegionMvcData = GetRegionMvcData(cp);
                     RegionModel region;
                     if (regions.TryGetValue(cpRegionMvcData.ViewName, out region))
                     {
@@ -91,7 +77,7 @@ namespace Sdl.Web.Tridion.Mapping
                     EntityModel entity;
                     try
                     {
-                        entity = ModelBuilderPipeline.CreateEntityModel(fullyLoadedCp, localization);
+                        entity = ModelBuilderPipeline.CreateEntityModel(cp, localization);
                     }
                     catch (Exception ex)
                     {
@@ -101,7 +87,7 @@ namespace Sdl.Web.Tridion.Mapping
                         Log.Error(ex);
                         entity = new ExceptionEntity(ex)
                         {
-                            MvcData = GetMvcData(fullyLoadedCp) // TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
+                            MvcData = GetMvcData(cp) // TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
                         };
                     }
 
@@ -167,9 +153,18 @@ namespace Sdl.Web.Tridion.Mapping
                 BuildEntityModel(ref entityModel, cp.Component, modelType, localization);                    
 
                 entityModel.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
-                entityModel.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("s"));
-                entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "1" : "0");
+                entityModel.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
+                entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "true" : "false");
                 entityModel.MvcData = mvcData;
+
+                // add html classes to model from metadata
+                // TODO: move to CreateViewModel so it can be merged with the same code for a Page/PageTemplate
+                IComponentTemplate template = cp.ComponentTemplate;
+                if (template.MetadataFields != null && template.MetadataFields.ContainsKey("htmlClasses"))
+                {
+                    // strip illegal characters to ensure valid html in the view (allow spaces for multiple classes)
+                    entityModel.HtmlClasses = template.MetadataFields["htmlClasses"].Value.StripIllegalCharacters(@"[^\w\-\ ]");
+                }
 
                 if (cp.IsDynamic)
                 {
@@ -187,7 +182,7 @@ namespace Sdl.Web.Tridion.Mapping
                 SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaTcmUriParts[1], localization);
 
                 // The semantic mapping may resolve to a more specific model type than specified by the View Model itself (e.g. Image instead of just MediaItem for Teaser.Media)
-                Type modelType = GetModelTypeFromSemanticMapping(semanticSchema, baseModelType);
+                Type modelType = semanticSchema.GetModelTypeFromSemanticMapping(baseModelType);
 
                 MappingData mappingData = new MappingData
                 {
@@ -225,64 +220,6 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
         #endregion
-
-        /// <summary>
-        /// Load Dynamic Component Presentation as a workaround for the PageFactory not populating the Fields property of Dynamic Component Presentations in the Page model
-        /// </summary>
-        /// <param name="componentUri">Component URI</param>
-        /// <param name="templateUri">Component Template URI</param>
-        /// <returns>DD4T ContentModel ComponentPresentation</returns>
-        /// <remarks>
-        /// Similair to <see cref="DefaultProvider.GetEntityModel(string, Localization)"/>, 
-        /// but we need an IComponentPresentation here and should not recursively call 
-        /// <see cref="BuildEntityModel(ref EntityModel, IComponentPresentation, Localization)"/>. 
-        /// Loading the DCP from the Broker will not get the CT metadata, so the region will be determined from the CT title. 
-        /// TODO: find a way to load the CT metadata for a DCP
-        /// </remarks>
-        private static IComponentPresentation LoadDcp(string componentUri, string templateUri)
-        {
-            // TODO: should this not be a methond in the DefaultProvider instead?
-            using (new Tracer(componentUri, templateUri))
-            {
-                ComponentFactory componentFactory = new ComponentFactory();
-                IComponent component;
-                if (componentFactory.TryGetComponent(componentUri, out component, templateUri))
-                {
-                    //var componentTcmUri = new TcmUri(componentUri);
-                    var templateTcmUri = new TcmUri(templateUri);
-
-                    var publicationCriteria = new PublicationCriteria(templateTcmUri.PublicationId);
-                    var itemReferenceCriteria = new ItemReferenceCriteria(templateTcmUri.ItemId);
-                    var itemTypeTypeCriteria = new ItemTypeCriteria(32);
-
-                    var query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(
-                        CriteriaFactory.And(new Criteria[] { publicationCriteria, itemReferenceCriteria, itemTypeTypeCriteria }));
-
-                    var results = query.ExecuteEntityQuery();
-                    if (results != null)
-                    {
-                        var componentPresentation = new ComponentPresentation
-                        {
-                            Component = component as Component,
-                            IsDynamic = true
-                        };
-
-                        var templateMeta = (ITemplateMeta)results.FirstOrDefault();
-                        var template = new ComponentTemplate
-                        {
-                            Id = templateUri,
-                            Title = templateMeta.Title,
-                            OutputFormat = templateMeta.OutputFormat
-                        };
-
-                        componentPresentation.ComponentTemplate = template;
-                        return componentPresentation;
-                    }
-                }
-
-                throw new DxaItemNotFoundException(GetDxaIdentifierFromTcmUri(componentUri, templateUri));
-            }
-        }
 
         private PageModel CreatePageModel(IPage page, Localization localization)
         {
@@ -325,6 +262,15 @@ namespace Sdl.Web.Tridion.Mapping
             pageModel.MvcData = pageMvcData;
             pageModel.XpmMetadata = GetXpmMetadata(page);
             pageModel.Title = page.Title;
+
+            // add html classes to model from metadata
+            // TODO: move to CreateViewModel so it can be merged with the same code for a Component/ComponentTemplate
+            IPageTemplate template = page.PageTemplate;
+            if (template.MetadataFields != null && template.MetadataFields.ContainsKey("htmlClasses"))
+            {
+                // strip illegal characters to ensure valid html in the view (allow spaces for multiple classes)
+                pageModel.HtmlClasses = template.MetadataFields["htmlClasses"].Value.StripIllegalCharacters(@"[^\w\-\ ]");
+            }
 
             return pageModel;
         }
@@ -583,7 +529,7 @@ namespace Sdl.Web.Tridion.Mapping
                         IRichTextProcessor richTextProcessor = SiteConfiguration.RichTextProcessor;
                         foreach (string value in field.Values)
                         {
-                            RichText richText = richTextProcessor.ProcessRichText(value);
+                            RichText richText = richTextProcessor.ProcessRichText(value, mapData.Localization);
                             if (modelType == typeof(string))
                             {
                                 mappedValues.Add(richText.ToString());
@@ -629,7 +575,7 @@ namespace Sdl.Web.Tridion.Mapping
             if (comp != null)
             {
                 result.Add("ComponentID", comp.Id);
-                result.Add("ComponentModified", comp.RevisionDate.ToString("s"));
+                result.Add("ComponentModified", comp.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
             }
             return result;
         }
@@ -640,9 +586,9 @@ namespace Sdl.Web.Tridion.Mapping
             if (page != null)
             {
                 result.Add("PageID", page.Id);
-                result.Add("PageModified", page.RevisionDate.ToString("s"));
+                result.Add("PageModified", page.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
                 result.Add("PageTemplateID", page.PageTemplate.Id);
-                result.Add("PageTemplateModified", page.PageTemplate.RevisionDate.ToString("s"));
+                result.Add("PageTemplateModified", page.PageTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
             }
             return result;
         }
@@ -1051,20 +997,6 @@ namespace Sdl.Web.Tridion.Mapping
             mvcData.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
             mvcData.ActionName = SiteConfiguration.GetPageAction();
 
-            if (template.MetadataFields != null)
-            {
-                if (template.MetadataFields.ContainsKey("htmlId"))
-                {
-                    // strip illegal characters to ensure valid html in the view
-                    mvcData.HtmlId = template.MetadataFields["htmlId"].Value.StripIllegalCharacters(@"[^\w\-]");
-                }
-                if (template.MetadataFields.ContainsKey("htmlClasses"))
-                {
-                    // strip illegal characters to ensure valid html in the view (allow spaces for multiple classes)
-                    mvcData.HtmlClasses = template.MetadataFields["htmlClasses"].Value.StripIllegalCharacters(@"[^\w\-\ ]");
-                }
-            }
-
             return mvcData;
         }
 
@@ -1139,16 +1071,18 @@ namespace Sdl.Web.Tridion.Mapping
                         }
                     }
                 }
-                if (template.MetadataFields.ContainsKey("htmlId"))
+            }
+            else
+            {
+                // fallback if no meta - use the CT title to determine region view name and area name
+                Match match = Regex.Match(template.Title, @".*?\[(.*?)\]");
+                if (match.Success)
                 {
-                    // strip illegal characters to ensure valid html in the view
-                    mvcData.HtmlId = template.MetadataFields["htmlId"].Value.StripIllegalCharacters(@"[^\w\-]");
-                }
-                if (template.MetadataFields.ContainsKey("htmlClasses"))
-                {
-                    // strip illegal characters to ensure valid html in the view (allow spaces for multiple classes)
-                    mvcData.HtmlClasses = template.MetadataFields["htmlClasses"].Value.StripIllegalCharacters(@"[^\w\-\ ]");
-                }
+                    string module;
+                    string regionName = DetermineRegionViewNameAndModule(match.Groups[1].Value, out module);
+                    mvcData.RegionName = regionName;
+                    mvcData.RegionAreaName = module;
+                }                
             }
 
             return mvcData;

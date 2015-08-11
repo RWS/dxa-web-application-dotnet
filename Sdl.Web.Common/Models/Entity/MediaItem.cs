@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using Sdl.Web.Common.Configuration;
+using System.Xml;
 
 namespace Sdl.Web.Common.Models
 {
-    // removed MediaObject Semantic mapping since the models using this are already specifying it with a more detailed type 
-    // we can specify additional types like this, but I'm not sure what the value of that is in this case, so lets drop it
-    //[SemanticEntity(Vocab = SchemaOrgVocabulary, EntityName = "MediaObject", Prefix = "s", Public = true)]
+    [SemanticEntity(Vocab = SchemaOrgVocabulary, EntityName = "MediaObject", Prefix = "s", Public = true)]
     public abstract class MediaItem : EntityModel
     {
-        private const string EclMimeType = "application/externalcontentlibrary";
-
         private static readonly IDictionary<string, string> FontAwesomeMimeTypeToIconClassMapping = new Dictionary<string, string>
         {
             {"application/ms-excel", "excel"},
@@ -37,44 +33,9 @@ namespace Sdl.Web.Common.Models
         public string Url { get; set; }
         public string FileName { get; set; }
         [SemanticProperty("s:contentSize")]
-        public int FileSize { get; set; }
+        public long FileSize { get; set; }
         public string MimeType { get; set; }
-
-        /// <summary>
-        /// ECL URI for External Content Library Components (null for normal multimedia Components)
-        /// </summary>
-        public string EclUri
-        {
-            get
-            {
-                // TODO: ECL mimetype might become a real mimetype, in that case we can't use it here anymore
-                if (EclMimeType.Equals(MimeType) && FileName.EndsWith(".ecl"))
-                {
-                    // build ECL URI from filename (filename: 8-mm-204-dist-file.ecl ECL URI: ecl:8-mm-204-dist-file)
-                    return String.Format("ecl:{0}", FileName.Replace(".ecl", String.Empty));
-                }
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Gets the rendered XPM markup
-        /// </summary>
-        /// <remarks>
-        /// ECL items will use ECL URI rather than TCM URI in XPM markup
-        /// </remarks>
-        /// <param name="localization">The context Localization.</param>
-        /// <returns>The XPM markup.</returns>
-        public override string GetXpmMarkup(Localization localization)
-        {
-            // TODO: ECL mimetype might become a real mimetype, in that case we can't use it here anymore
-            if (EclMimeType.Equals(MimeType))
-            {
-                // replace TCM URI with ECL URI
-                return base.GetXpmMarkup(localization).Replace(String.Format("tcm:{0}-{1}", localization.LocalizationId, Id), EclUri);
-            }
-            return base.GetXpmMarkup(localization);
-        }
+        public bool IsEmbedded { get; set; }
 
         /// <summary>
         /// Gets the file size with units.
@@ -130,5 +91,24 @@ namespace Sdl.Web.Common.Models
         /// Both cases should be avoided, since HTML rendering should be done in View code rather than in Model code.
         /// </remarks>
         public abstract string ToHtml(string widthFactor, double aspect = 0, string cssClass = null, int containerSize = 0);
+
+        /// <summary>
+        /// Read properties from XHTML element.
+        /// </summary>
+        /// <param name="xhtmlElement">XHTML element</param>
+        public virtual void ReadFromXhtmlElement(XmlElement xhtmlElement)
+        {
+            // Return the Item (Reference) ID part of the TCM URI.
+            Id = xhtmlElement.GetAttribute("xlink:href").Split('-')[1];
+            Url = xhtmlElement.GetAttribute("src");
+            FileName = xhtmlElement.GetAttribute("data-multimediaFileName");
+            string size = xhtmlElement.GetAttribute("data-multimediaFileSize");
+            if (!String.IsNullOrEmpty(size))
+            {
+                FileSize = Convert.ToInt64(size);
+            }
+            MimeType = xhtmlElement.GetAttribute("data-multimediaMimeType");
+            IsEmbedded = true;
+        }
     }
 }

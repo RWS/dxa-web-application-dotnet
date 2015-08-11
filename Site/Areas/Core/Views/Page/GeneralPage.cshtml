@@ -4,7 +4,7 @@
     int mainContainerSize = hasLeftBar ? 9 : 12;
 }
 @Html.DxaRegion("Header")
-<main id="@Model.MvcData.HtmlId" class="page-row page-row-expanded @Model.MvcData.HtmlClasses" role="main">
+<main class="page-row page-row-expanded @Model.HtmlClasses" role="main">
     <div class="container-fluid page-border">
         @Html.DxaRegion("Hero")
         @Html.DxaRegion("Content Tools")

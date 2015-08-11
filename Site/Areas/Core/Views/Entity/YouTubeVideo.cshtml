@@ -1,7 +1,7 @@
 ﻿@model YouTubeVideo
 @if (Model.IsEmbedded)
 {
-    <div id="@Model.MvcData.HtmlId" class="embed-video @Model.MvcData.HtmlClasses">
+    <div class="embed-video @Model.HtmlClasses">
         <img src="@Url.ResponsiveImage(Model.Url, 0, "100%")" alt="@Model.Headline">
         <button type="button" data-video="@Model.YouTubeId">
             <i class="fa fa-play-circle"></i>
@@ -10,7 +10,7 @@
 }
 else
 {
-    <div id="@Model.MvcData.HtmlId" class="video @Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
+    <div class="video @Model.HtmlClasses" @Html.DxaEntityMarkup()>
         @if (Model.Headline != null)
         {
             <h3 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h3>

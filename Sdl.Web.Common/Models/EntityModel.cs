@@ -7,11 +7,57 @@ namespace Sdl.Web.Common.Models
     /// <summary>
     /// Abstract base class for View Models for Entities.
     /// </summary>
-    public abstract class EntityModel : ViewModel, IRichTextFragment
+#pragma warning disable 618
+    public abstract class EntityModel : ViewModel, IRichTextFragment, IEntity
+#pragma warning restore 618
     {
         private const string XpmComponentPresentationMarkup = "<!-- Start Component Presentation: {{\"ComponentID\" : \"{0}\", \"ComponentModified\" : \"{1}\", \"ComponentTemplateID\" : \"{2}\", \"ComponentTemplateModified\" : \"{3}\", \"IsRepositoryPublished\" : {4}}} -->";
 
         private string _id = string.Empty;
+
+        #region IEntity members (obsolete)
+        [SemanticProperty(IgnoreMapping = true)]
+        [Obsolete("Deprecated in DXA 1.1. Use property XpmMetadata instead.")]
+        public Dictionary<string, string> EntityData
+        {
+            get
+            {
+                return XpmMetadata as Dictionary<string, string>;
+            }
+            set
+            {
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property XpmMetadata instead.");
+            }
+        }
+
+        [SemanticProperty(IgnoreMapping = true)]
+        [Obsolete("Deprecated in DXA 1.1. Use property XpmPropertyMetadata instead.")]
+        public Dictionary<string, string> PropertyData
+        {
+            get
+            {
+                return XpmPropertyMetadata as Dictionary<string, string>;
+            }
+            set
+            {
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property XpmPropertyMetadata instead.");
+            }
+        }
+
+        [SemanticProperty(IgnoreMapping = true)]
+        [Obsolete("Deprecated in DXA 1.1. Use property MvcData instead.")]
+        public MvcData AppData
+        {
+            get
+            {
+                return MvcData;
+            }
+            set
+            {
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property MvcData instead.");
+            }
+        }
+        #endregion
 
         /// <summary>
         /// Gets or sets the identifier for the Entity.

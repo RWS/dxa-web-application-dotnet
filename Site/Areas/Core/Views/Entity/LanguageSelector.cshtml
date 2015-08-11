@@ -22,7 +22,7 @@
 }
 @if (redirectId != null && filteredLocalizations.Count > 1)
 {
-    <div id="@Model.MvcData.HtmlId" class="@Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
+    <div class="@Model.HtmlClasses" @Html.DxaEntityMarkup()>
         <select class="selectpicker" data-width="auto">
             @foreach (var loc in filteredLocalizations)
             {

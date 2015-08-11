@@ -6,68 +6,59 @@
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAACAAAAAAIAAAAAABACAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAACAAAAAAIAAAAAABACAAAAAAAABgAAAAAA=</HashCode>
       <FileName>Models\ViewModel.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Sdl.Web.Common.Models.EntityModel">
-    <Position X="9.5" Y="2.75" Width="3.5" />
+    <Position X="9.5" Y="3.5" Width="3.5" />
     <Compartments>
       <Compartment Name="Fields" Collapsed="true" />
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAECAACAAAAAAAAEgABAAAAAAAAAAIAAAAAAAAAAAAA=</HashCode>
+      <HashCode>BAECAACAAAAAAAAEgABAAAAAAAAAAIAAAggBCAAAAAA=</HashCode>
       <FileName>Models\EntityModel.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="Sdl.Web.Common.Models.PageModel">
-    <Position X="1" Y="8.25" Width="2.25" />
+    <Position X="1" Y="8.75" Width="2.25" />
     <Compartments>
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAQAAAAAAAAIAAAAAAAAAAAAAAIAAAAABAAAAAAA=</HashCode>
       <FileName>Models\PageModel.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Sdl.Web.Common.Models.RegionModel">
-    <Position X="5" Y="5.75" Width="2.25" />
+    <Position X="5" Y="6.5" Width="2.25" />
     <Compartments>
       <Compartment Name="Methods" Collapsed="true" />
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AACgAQAAAAAAAAAEgAAAAAAAAAAAEIAAAAEAAAAQAAA=</HashCode>
+      <HashCode>AACgAQAAAAAQAAAEkAAAAAAAAAAAEIAAAAEBAAAQAAA=</HashCode>
       <FileName>Models\RegionModel.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Sdl.Web.Common.Models.RegionModelSet">
-    <Position X="4" Y="8" Width="1.75" />
+    <Position X="4.25" Y="9" Width="1.75" />
     <TypeIdentifier>
       <HashCode>CAAAAAAAAAAEAAAACAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Models\RegionModelSet.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Sdl.Web.Common.Models.EntityBase" Collapsed="true">
-    <Position X="12.75" Y="5.5" Width="1.5" />
-    <InheritanceLine Type="Sdl.Web.Common.Models.EntityModel" ManuallyRouted="true">
-      <Path>
-        <Point X="11.25" Y="4.694" />
-        <Point X="11.25" Y="5.104" />
-        <Point X="13.5" Y="5.104" />
-        <Point X="13.5" Y="5.5" />
-      </Path>
-    </InheritanceLine>
+    <Position X="13.5" Y="6.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgACAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Models\Legacy\EntityBase.cs</FileName>
     </TypeIdentifier>
-    <Lollipop Position="1.137" />
   </Class>
   <Class Name="Sdl.Web.Common.Models.PageBase">
-    <Position X="0.75" Y="2.75" Width="2.75" />
+    <Position X="0.75" Y="3.25" Width="2.75" />
     <Compartments>
       <Compartment Name="Methods" Collapsed="true" />
       <Compartment Name="Fields" Collapsed="true" />
@@ -79,7 +70,7 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="Sdl.Web.Common.Models.WebPage">
-    <Position X="0.5" Y="5.75" Width="3.25" />
+    <Position X="0.5" Y="6.25" Width="3.25" />
     <Compartments>
       <Compartment Name="Methods" Collapsed="true" />
       <Compartment Name="Fields" Collapsed="true" />
@@ -90,7 +81,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Sdl.Web.Common.Models.Region">
-    <Position X="4.75" Y="2.75" Width="2.75" />
+    <Position X="4.75" Y="3.25" Width="2.75" />
     <Compartments>
       <Compartment Name="Fields" Collapsed="true" />
       <Compartment Name="Methods" Collapsed="true" />
@@ -102,51 +93,43 @@
     <Lollipop Position="2.096" />
   </Class>
   <Class Name="Sdl.Web.Common.Models.Article" Collapsed="true">
-    <Position X="8" Y="5.5" Width="1.5" />
-    <InheritanceLine Type="Sdl.Web.Common.Models.EntityModel" ManuallyRouted="true">
-      <Path>
-        <Point X="11.25" Y="4.694" />
-        <Point X="11.25" Y="5.111" />
-        <Point X="8.75" Y="5.111" />
-        <Point X="8.75" Y="5.5" />
-      </Path>
-    </InheritanceLine>
+    <Position X="8" Y="6.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAgAgAAAAAAAAAAAAAAABABABAAAAAAAAA=</HashCode>
       <FileName>Models\Entity\Article.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Sdl.Web.Common.Models.MediaItem">
-    <Position X="10" Y="5.5" Width="2.5" />
+    <Position X="10" Y="6.75" Width="2.5" />
     <Compartments>
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAEAAAAABAAAAARAAAAAAAAAAAAQAAAgCAAAAABAAAA=</HashCode>
+      <HashCode>AAEAAACABAAAAARAhAAAAAAAAAAAAAAgCAAAAABAAAA=</HashCode>
       <FileName>Models\Entity\MediaItem.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Sdl.Web.Common.Models.Image">
-    <Position X="7.75" Y="9" Width="1.75" />
+    <Position X="7.75" Y="10.5" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAEAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAEAAABAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Models\Entity\Image.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Sdl.Web.Common.Models.YouTubeVideo">
-    <Position X="10" Y="9" Width="2.5" />
+    <Position X="10" Y="10.5" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>IAEAAACABAAAAAAAAAAAAEAAAAAAAAAAABAAAAAAAAA=</HashCode>
+      <HashCode>IAEAAAAABAAAAAAABAAAAEAAAAAAAAAAABAAAAAAAAA=</HashCode>
       <FileName>Models\Entity\YouTubeVideo.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Sdl.Web.Common.Models.Download">
-    <Position X="13" Y="9" Width="2.25" />
+    <Position X="13" Y="10.5" Width="2.25" />
     <Compartments>
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAEAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAEAAAAAAAAgAAAABAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Models\Entity\Download.cs</FileName>
     </TypeIdentifier>
   </Class>

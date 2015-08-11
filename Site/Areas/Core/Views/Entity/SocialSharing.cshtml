@@ -3,7 +3,7 @@
     int i = 0;
     var pageUrl = Url.Encode(Request.Url.ToString());
 }
-<div id="@Model.MvcData.HtmlId" class="share-buttons clearfix @Model.MvcData.HtmlClasses" @Html.DxaEntityMarkup()>
+<div class="share-buttons clearfix @Model.HtmlClasses" @Html.DxaEntityMarkup()>
     @Html.Resource("core.shareOnSocialCaption")
     <ul>
         @foreach (var link in Model.Links)

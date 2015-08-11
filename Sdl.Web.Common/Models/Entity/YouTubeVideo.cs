@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml;
 using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
@@ -8,15 +9,9 @@ namespace Sdl.Web.Common.Models
     {
         public string Headline { get; set; }
         public string YouTubeId { get; set; }
-        // TODO determine correct width and height or allow to be set
+        // TODO: determine correct width and height or allow to be set
         public int Width { get { return 640; } }
         public int Height { get { return 390; } }
-
-        public bool IsEmbedded
-        {
-            get;
-            set;
-        }
 
         /// <summary>
         /// Renders an HTML representation of the Media Item.
@@ -39,16 +34,28 @@ namespace Sdl.Web.Common.Models
                         YouTubeId, Guid.NewGuid().ToString("N"), null
                         );
             }
-            else
-            {
-                string htmlTagName = IsEmbedded ? "span" : "div";
-                string placeholderImageUrl = string.IsNullOrEmpty(Url) ? null : SiteConfiguration.MediaHelper.GetResponsiveImageUrl(Url, aspect, widthFactor, containerSize);
 
-                return string.Format(
-                        "<{4} class=\"embed-video\"><img src=\"{1}\" alt=\"{2}\"><button type=\"button\" data-video=\"{0}\" class=\"{3}\"><i class=\"fa fa-play-circle\"></i></button></{4}>",
-                        YouTubeId, placeholderImageUrl, Headline, (string) null, htmlTagName
-                        );
-            }
+            string htmlTagName = IsEmbedded ? "span" : "div";
+            string placeholderImageUrl = string.IsNullOrEmpty(Url) ? null : SiteConfiguration.MediaHelper.GetResponsiveImageUrl(Url, aspect, widthFactor, containerSize);
+
+            return string.Format(
+                    "<{4} class=\"embed-video\"><img src=\"{1}\" alt=\"{2}\"><button type=\"button\" data-video=\"{0}\" class=\"{3}\"><i class=\"fa fa-play-circle\"></i></button></{4}>",
+                    YouTubeId, placeholderImageUrl, Headline, (string) null, htmlTagName
+                    );
+        }
+
+        /// <summary>
+        /// Read additional properties from XHTML element, and set view name in MvcData.
+        /// </summary>
+        /// <param name="xhtmlElement">XHTML element</param>
+        public override void ReadFromXhtmlElement(XmlElement xhtmlElement)
+        {
+            // initialize base
+            base.ReadFromXhtmlElement(xhtmlElement);
+
+            YouTubeId = xhtmlElement.GetAttribute("data-youTubeId");
+            Headline = xhtmlElement.GetAttribute("data-headline");
+            MvcData = new MvcData("Core:Entity:YouTubeVideo");
         }
     }
 }

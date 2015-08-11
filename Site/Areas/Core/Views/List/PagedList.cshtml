@@ -1,9 +1,10 @@
 ﻿@model ContentList<Teaser>
-<div class='rich-text' @Html.DxaEntityMarkup()>
+
+<div class="rich-text @Model.HtmlClasses" @Html.DxaEntityMarkup()>
     @if (Model.Headline != null)
     {
-	    <div class='page-header page-header-top'>
-		    <h1 class='h3' @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
+	    <div class="page-header page-header-top">
+		    <h1 class="h3" @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
 	    </div>
     }
     @if (Model.ItemListElements.Count > 0)
