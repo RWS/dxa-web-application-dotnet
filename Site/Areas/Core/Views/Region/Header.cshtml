@@ -1,0 +1,21 @@
+﻿@model RegionModel
+@Html.DxaRegion("Info")
+<header id="page-header" class="navbar navbar-default">
+    @if (WebRequestContext.IsPreview)
+    {
+        @Html.Partial("Partials/XpmButton")
+    }
+    <div class="container-fluid page-border">
+        <div class="row">
+            <div class="col-xs-12" role="navigation">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    @Html.DxaRegion("Logo")
+                </div>
+                @Html.DxaRegions(exclude: "Logo,Info", containerSize: 12)
+            </div>
+        </div>
+    </div>
+</header>

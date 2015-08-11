@@ -1,0 +1,17 @@
+﻿@model CustomRegionModel
+<div class="region" @Html.DxaRegionMarkup()>
+    <h3>Rendered @Model with Region View "Test:CustomRegionModelTest"</h3>
+    
+    @if (Model.Regions.Count > 0)
+    {
+        <h4>Nested Regions</h4>
+        <div>
+            @Html.DxaRegions()
+        </div>
+    }
+
+    <h4>Entities</h4>
+    <div>
+        @Html.DxaEntities()
+    </div>
+</div>

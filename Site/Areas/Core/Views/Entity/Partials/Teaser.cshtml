@@ -1,0 +1,35 @@
+﻿@model Teaser
+@{
+    var linkStyle = Model.GetFormatOption("linkStyle", "teaser-link");
+    var isButton = linkStyle.Contains("btn");
+    var widthFactor = WebRequestContext.ScreenWidth == ScreenWidth.ExtraSmall ? "160px" : "100%";
+}
+<div class="teaser @Model.GetFormatOption("style") @Model.HtmlClasses" @Html.DxaEntityMarkup()>
+    @if (Model.Media != null)
+    {
+        <div @Html.DxaPropertyMarkup(() => Model.Media)>
+            @Html.Media(Model.Media, widthFactor, 1.62, "teaser-img loader-img")
+        </div>
+    }
+    <h3 class="teaser-heading @Model.GetFormatOption("headingStyle")" @Html.DxaPropertyMarkup(() => Model.Headline)>
+        @if (Model.Link.IsValidLink())
+        {
+            <a href="@Model.Link.Url">@Model.Headline</a>
+        }
+        else
+        {
+            @Model.Headline
+        }
+    </h3>
+    <p class="teaser-description @Model.GetFormatOption("descriptionStyle")" @Html.DxaPropertyMarkup(() => Model.Text)>@Html.DxaRichText(Model.Text)</p>
+    @if (Model.Link.IsValidLink())
+    {
+        <a class="@linkStyle" href="@Model.Link.Url" title="@Model.Link.AlternateText" @Html.DxaPropertyMarkup(() => Model.Link)>
+            @(Model.Link.LinkText ?? Html.Resource("core.readMoreLinkText"))
+            @if (!isButton)
+            {
+                <i class="fa fa-chevron-right"></i>
+            }
+        </a>
+    }
+</div>

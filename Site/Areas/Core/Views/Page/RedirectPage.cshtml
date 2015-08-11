@@ -1,0 +1,13 @@
+﻿@model PageModel
+@{
+    string edit = Request.QueryString["edit"];
+    var redirectUrl = Model.Meta.ContainsKey("externalLink") ? Model.Meta["externalLink"] : (Model.Meta.ContainsKey("internalLink") ? Model.Meta["internalLink"] : null);
+    if (edit == null && !String.IsNullOrEmpty(redirectUrl))
+    {
+        Response.Redirect(redirectUrl, true);
+    }
+    else
+    {
+        <strong>@Html.Resource("core.redirectEditorHintText"): @(redirectUrl)</strong>
+    }
+}

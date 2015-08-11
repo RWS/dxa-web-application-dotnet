@@ -1,0 +1,18 @@
+﻿@model Teaser
+<div class="@Model.HtmlClasses" @Html.DxaEntityMarkup()>
+    <h3 @Html.DxaPropertyMarkup(() => Model.Headline)>
+        @if (Model.Link.IsValidLink())
+        {
+            <a href="@Model.Link.Url">@Model.Headline</a>
+        }
+        else
+        {
+            @Model.Headline
+        }
+    </h3>
+    @if (Model.Location != null)
+    {
+        @* TODO: set MapWidth dynamicly in Partials/GoogleStaticMap based on aspect ratio *@
+        @Html.Partial("Partials/GoogleStaticMap", Model.Location, new ViewDataDictionary { { "MarkerName", Model.Headline }, { "MapHeight", "160" }, { "MapWidth", "311" } })
+    }
+</div>

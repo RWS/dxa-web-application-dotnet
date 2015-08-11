@@ -1,0 +1,35 @@
+﻿@model ContentList<Teaser>
+
+<div class="@Model.HtmlClasses" @Html.DxaEntityMarkup()>
+    @if (Model.Headline!=null)
+    {
+        <h3 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h3>
+    }
+    <ul>
+        @foreach (var item in Model.ItemListElements)
+        {
+            <li>
+                @if (item.Link.IsValidLink())
+                {
+                    <a href="@item.Link.Url" title="@item.Link.AlternateText">
+                        @(item.Headline ?? item.Link.Url)
+                    </a>
+                }
+                else
+                {
+                    @item.Headline
+                }
+                @if (item.Date != null)
+                {
+                    <time class="meta small">[@Html.DateDiff(item.Date,"d MMM yyyy")]</time>
+                }
+            </li>
+        }
+    </ul>
+    @if (Model.Link.IsValidLink())
+    {
+        <p @Html.DxaPropertyMarkup(() => Model.Link)>
+            <a href="@Model.Link.Url" title="@Model.Link.AlternateText">@(Model.Link.LinkText ?? Html.Resource("core.readMoreLinkText")) <i class="fa fa-chevron-right"></i></a>
+        </p>
+    }
+</div>

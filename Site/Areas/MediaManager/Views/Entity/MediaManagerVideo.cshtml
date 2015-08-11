@@ -1,0 +1,16 @@
+﻿@model Sdl.Web.Modules.MediaManager.Models.MediaManagerVideo
+@if (Model.IsEmbedded)
+{
+    <div class="embed-video @Model.HtmlClasses">
+        @Html.Media(Model)
+    </div>
+}
+else
+{
+    <div class="video @Model.HtmlClasses" @Html.DxaEntityMarkup()>
+        @* it is possible to use @Html.Media(Model) here like in the embedded example, now we use the model properties directly to produce a media manager video embed script *@
+        <div id="@Model.Guid"></div>
+        <script src="@Model.ScriptUrl&trgt=@Model.Guid&responsive=true"></script>
+    </div>
+}
+

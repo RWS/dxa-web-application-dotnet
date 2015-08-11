@@ -1,0 +1,46 @@
+﻿@model ItemList
+<article class="rich-text @Model.HtmlClasses" @Html.DxaEntityMarkup()>
+    <div class="content">
+        @if (Model.Headline != null)
+        {
+            <h1 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
+        }
+        @if (Model.ItemListElements.Count > 0)
+        {
+            int i = 0;
+            <div class="panel-group responsive-accordion" id="@Model.Id">
+                @foreach (Teaser element in Model.ItemListElements)
+                {
+                    string collapseId = Model.Id + "_" + i;
+                    <div class="panel panel-default" @Html.DxaPropertyMarkup(() => Model.ItemListElements, i++)>
+                        <div class="panel-heading" data-toggle="collapse" data-target="#@collapseId" data-parent="#@Model.Id">
+                            <h4 class="panel-title" @Html.DxaPropertyMarkup(() => element.Headline)>@element.Headline</h4>
+                        </div>
+                        <div id="@collapseId" class="panel-collapse collapse @(i==1 ? "in" : String.Empty)">
+                            <div class="panel-body">
+                                @if (element.Text != null)
+                                {
+                                    <div @Html.DxaPropertyMarkup(() => element.Text)>
+                                        @Html.DxaRichText(element.Text)
+                                    </div>
+                                }
+                                @if (element.Media != null)
+                                {
+                                    <figure @Html.DxaPropertyMarkup(() => element.Media)>
+                                        @Html.Media(element.Media)
+                                    </figure>
+                                }
+                                @if (element.Link.IsValidLink())
+                                {
+                                    <p @Html.DxaPropertyMarkup(() => element.Link)>
+                                        <a href="@element.Link.Url" title="@element.Link.AlternateText" class="btn btn-primary">@(element.Link.LinkText ?? Html.Resource("core.readMoreLinkText"))</a>
+                                    </p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</article>

@@ -1,0 +1,8 @@
+BinaryData
+obj
+bin
+*.user
+*.suo
+packages/
+web/
+.vs/

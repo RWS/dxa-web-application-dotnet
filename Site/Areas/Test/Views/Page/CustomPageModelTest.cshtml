@@ -1,0 +1,35 @@
+﻿@model CustomPageModel
+<html>
+    <head>
+        <title>@Model.Title</title>
+        <style>
+            .region { border: solid; }
+            .entity { border: dashed thin; }
+            td { border: solid thin; }
+        </style>
+    </head>
+    <body>
+        <h1>Rendered @Model with Page View "Test:CustomPageModelTest"</h1>
+        
+        <h2>Custom Page Model properties</h2>
+        <table>
+            <tr>
+                <td>TestProperty1</td>
+                <td>@Model.TestProperty1</td>
+            </tr>
+        </table>
+
+        <h2>Regions</h2>
+        <div>
+            @Html.DxaRegions()
+        </div>
+        
+        <!-- Epilogue -->
+        <script src="@Url.VersionedContent("/assets/scripts/main.js")"></script>
+        @if (WebRequestContext.IsPreview)
+        {
+            <script src="@Url.VersionedContent("/assets/scripts/xpm.js")"></script>
+        }
+        @Html.DxaPageMarkup()
+    </body>
+</html>

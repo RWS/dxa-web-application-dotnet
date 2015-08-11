@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{923B2009-9A0B-4425-88A5-BF7AF25C8F8B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Sdl.Web.Mvc</RootNamespace>
+    <AssemblyName>Sdl.Web.Mvc</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' Or '$(Configuration)|$(Platform)' == 'Tridion71Debug|AnyCPU'   ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' Or '$(Configuration)|$(Platform)' == 'Tridion71Release|AnyCPU'   ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Tridion71Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Tridion71Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <DocumentationFile>bin\Release\Sdl.Web.Mvc.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Tridion71Release|AnyCPU'">
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="HtmlAgilityPack">
+      <HintPath>..\packages\HtmlAgilityPack.1.4.6\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.1.2\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.1.2\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.1.2\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Configuration\BaseAreaRegistration.cs" />
+    <Compile Include="Context\BrowserClaims.cs" />
+    <Compile Include="Context\ContextClaims.cs" />
+    <Compile Include="Context\ContextEngine.cs" />
+    <Compile Include="Context\DeviceClaims.cs" />
+    <Compile Include="Context\OperatingSystemClaims.cs" />
+    <Compile Include="Formats\FeedResult.cs" />
+    <Compile Include="Formats\FormatDataAttribute.cs" />
+    <Compile Include="Controllers\NoCacheAttribute.cs" />
+    <Compile Include="Formats\FeedFormatter.cs" />
+    <Compile Include="Formats\AtomFormatter.cs" />
+    <Compile Include="Formats\RssFormatter.cs" />
+    <Compile Include="Formats\JsonNetResult.cs" />
+    <Compile Include="Formats\JsonFormatter.cs" />
+    <Compile Include="Formats\BaseFormatter.cs" />
+    <Compile Include="Formats\DataFormatters.cs" />
+    <Compile Include="Properties\VersionInfo.cs" />
+    <Compile Include="Configuration\WebRequestContext.cs" />
+    <Compile Include="Controllers\HandleSectionErrorAttribute.cs" />
+    <Compile Include="Html\BaseMediaHelper.cs" />
+    <Compile Include="Html\ContextualMediaHelper.cs" />
+    <Compile Include="Html\Markup.cs" />
+    <Compile Include="Configuration\ResourceProviderFactory.cs" />
+    <Compile Include="Configuration\ResourceProvider.cs" />
+    <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Html\BaseRenderer.cs" />
+    <Compile Include="Html\HtmlHelperExtensions.cs" />
+    <Compile Include="Html\UrlHelperExtensions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Statics\BaseStaticFileManager.cs" />
+    <Compile Include="Statics\StaticContentModule.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sdl.Web.Common\Sdl.Web.Common.csproj">
+      <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
+      <Name>Sdl.Web.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Context\ContextEngine.cd" />
+    <None Include="Html\MvcExtensions.cd" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <Target Name="BeforeBuild">
+    <WriteLinesToFile Condition=" '$(AsmVersion)' != '' " File="Properties\VersionInfo.cs" Overwrite="True" Lines="[assembly: System.Reflection.AssemblyVersion(&quot;$(AsmVersion)&quot;)]  // Generated by build%0a[assembly: System.Reflection.AssemblyInformationalVersion(&quot;$(AsmVersion)&quot;)]  // Generated by build" />
+    <WriteLinesToFile Condition=" '$(FileVersion)' != '' " File="Properties\VersionInfo.cs" Overwrite="False" Lines="[assembly: System.Reflection.AssemblyFileVersion(&quot;$(FileVersion)&quot;)]  // Generated by build" />
+  </Target>
+</Project>

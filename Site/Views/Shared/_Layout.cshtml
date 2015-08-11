@@ -1,0 +1,33 @@
+﻿@model PageModel
+<!DOCTYPE html>
+<!--[if lt IE 7]><html class="no-js lt-ie9 lt-ie8 lt-ie7"><![endif]-->
+<!--[if IE 7]><html class="no-js lt-ie9 lt-ie8"><![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie9"><![endif]-->
+<!--[if gt IE 8]><!--><html class="no-js"><!--<![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@Model.Title</title>
+    @foreach (var meta in Model.Meta)
+    {
+        <meta name="@meta.Key" content="@meta.Value">
+    }
+    <link rel="stylesheet" href="@Url.VersionedContent("/assets/css/main.css")">
+    <script src="@Url.VersionedContent("/assets/scripts/header.js")"></script>
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="@Url.VersionedContent("/assets/scripts/ie.js")"></script>
+    <![endif]-->
+</head>
+<body>
+    @RenderBody()
+
+    <script src="@Url.VersionedContent("/assets/scripts/main.js")"></script>
+    @if (WebRequestContext.IsPreview)
+    {
+        <script src="@Url.VersionedContent("/assets/scripts/xpm.js")"></script>
+    }
+    @Html.DxaPageMarkup()
+</body>
+</html>

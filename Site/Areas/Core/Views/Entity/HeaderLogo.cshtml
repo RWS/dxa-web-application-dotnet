@@ -1,0 +1,13 @@
+﻿@model Teaser
+<div class="@Model.HtmlClasses" @Html.DxaEntityMarkup()>
+    <a class="navbar-logo" href="@Model.Link.Url" title="@Model.Link.LinkText">
+        @if (Model != null && Model.Media is Image)
+        {
+            var image = Model.Media as Image;
+            @* TODO: set span to display:inline-block for better experience in XPM? *@
+            <span @Html.DxaPropertyMarkup(() => Model.Media)>
+                <img src="@image.Url" alt="@image.AlternateText" height="80">
+            </span>
+        }
+    </a>
+</div>

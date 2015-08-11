@@ -1,0 +1,9 @@
+﻿@model NavigationLinks
+<ul class="nav navbar-nav main-nav" @Html.DxaEntityMarkup()>
+    @foreach (Link item in Model.Items)
+    {
+        <li class="@(Request.Url.LocalPath.StartsWith(item.Url) ? "active" : "")">
+            <a href="@item.Url" title="@item.AlternateText">@item.LinkText</a>
+        </li>
+    }
+</ul>
