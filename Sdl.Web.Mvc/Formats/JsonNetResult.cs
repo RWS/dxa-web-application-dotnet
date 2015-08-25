@@ -23,7 +23,12 @@ namespace Sdl.Web.Mvc.Formats
 
         public JsonNetResult()
         {
-            SerializerSettings = new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore};
+            SerializerSettings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects
+            };
         }
 
         public override void ExecuteResult(ControllerContext context)
