@@ -23,7 +23,12 @@ namespace Sdl.Web.Mvc.Formats
 
         public JsonNetResult()
         {
-            SerializerSettings = new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore};
+            SerializerSettings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects
+            };
         }
 
         public override void ExecuteResult(ControllerContext context)
@@ -33,9 +38,7 @@ namespace Sdl.Web.Mvc.Formats
 
             HttpResponseBase response = context.HttpContext.Response;
 
-            response.ContentType = !string.IsNullOrEmpty(ContentType)
-              ? ContentType
-              : "application/json";
+            response.ContentType = !string.IsNullOrEmpty(ContentType) ? ContentType : "application/json";
 
             if (ContentEncoding != null)
                 response.ContentEncoding = ContentEncoding;
@@ -44,6 +47,7 @@ namespace Sdl.Web.Mvc.Formats
             {
                 JsonTextWriter writer = new JsonTextWriter(response.Output) { Formatting = Formatting };
                 JsonSerializer serializer = JsonSerializer.Create(SerializerSettings);
+
                 serializer.Serialize(writer, Data);
                 writer.Flush();
             }
