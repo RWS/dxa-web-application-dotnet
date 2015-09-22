@@ -9,7 +9,6 @@ using Microsoft.Practices.Unity.Configuration;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Mvc.Formats;
-using Sdl.Web.Site.Areas.Core.Controllers;
 using Unity.Mvc5;
 
 namespace Sdl.Web.Site
@@ -145,7 +144,7 @@ namespace Sdl.Web.Site
             routeData.Values.Add("area", "Core");
             routeData.Values.Add("action", "ServerError");
             Server.ClearError();
-            IController controller = new PageController();
+            IController controller = new Sdl.Web.Mvc.Controllers.PageController();
             controller.Execute(new RequestContext(new HttpContextWrapper(Context), routeData));
         }
     }

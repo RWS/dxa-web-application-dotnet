@@ -97,13 +97,6 @@
   <ItemGroup>
     <Compile Include="Areas\Core\Controllers\AdminController.cs" />
     <Compile Include="Areas\Core\CoreAreaRegistration.cs" />
-    <Compile Include="Areas\Core\Controllers\EntityController.cs" />
-    <Compile Include="Areas\Core\Controllers\ListController.cs" />
-    <Compile Include="Areas\Core\Controllers\NavigationController.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Areas\Core\Controllers\PageController.cs" />
-    <Compile Include="Areas\Core\Controllers\RegionController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -211,9 +204,6 @@
     <Content Include="Views\Shared\Partials\XpmButton.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Areas\Core\Controllers\Controllers.cd" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Areas\Core\Views\Entity\Image.cshtml" />
   </ItemGroup>
   <PropertyGroup>
@@ -250,7 +240,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>59860</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:59860/</IISUrl>
+          <IISUrl>http://localhost:8081/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

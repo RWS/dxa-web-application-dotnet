@@ -6,10 +6,9 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
-using Sdl.Web.Mvc.Controllers;
 using Sdl.Web.Mvc.Formats;
 
-namespace Sdl.Web.Site.Areas.Core.Controllers
+namespace Sdl.Web.Mvc.Controllers
 {
     public class PageController : BaseController
     {
