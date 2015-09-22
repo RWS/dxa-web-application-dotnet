@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Text;
 using System.Web.Mvc;
 using System.Web.Routing;
-using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
@@ -243,5 +243,23 @@ namespace Sdl.Web.Mvc.Controllers
                 || mvcData.ControllerAreaName != SiteConfiguration.GetDefaultModuleName();
         }
 
+        /// <summary>
+        /// Creates a JSON Result which uses the JSON.NET serializer.
+        /// </summary>
+        /// <remarks>
+        /// By default, ASP.NET MVC uses the JavaScriptSerializer to serialize objects to JSON.
+        /// By overriding this method, we ensure that the (more powerful and faster) JSON.NET serializer is used when <see cref="BaseController"/>-derived
+        /// controller uses the standard ASP.NET MVC Json method to return a JSON result.
+        /// </remarks>.
+        protected override JsonResult Json(object data, string contentType, Encoding contentEncoding, JsonRequestBehavior behavior)
+        {
+            return new Sdl.Web.Mvc.Formats.JsonNetResult
+            {
+                Data = data,
+                ContentType = contentType,
+                ContentEncoding = contentEncoding,
+                JsonRequestBehavior = behavior
+            };
+        }
     }
 }
