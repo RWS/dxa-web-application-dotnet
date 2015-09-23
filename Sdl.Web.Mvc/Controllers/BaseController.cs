@@ -182,50 +182,38 @@ namespace Sdl.Web.Mvc.Controllers
             return default(T);
         }
 
-        public virtual object ProcessPageModel(PageModel model)
+        /// <summary>
+        /// Enriches a given Entity Model using an appropriate (custom) Controller.
+        /// </summary>
+        /// <param name="entity">The Entity Model to enrich.</param>
+        /// <returns>The enriched Entity Model.</returns>
+        /// <remarks>
+        /// This method is different from <see cref="EnrichModel"/> in that it doesn't expect the current Controller to be able to enrich the Entity Model;
+        /// it creates a Controller associated with the Entity Model for that purpose.
+        /// It is used by <see cref="PageController.EnrichEmbeddedModels"/>.
+        /// </remarks>
+        protected EntityModel EnrichEntityModel(EntityModel entity)
         {
-            // For each entity in the page which has a custom controller action (so is likely
-            // to enrich the CMS managed model with additional data) we call the 
-            // controller ProcessModel method, and update our model with the enriched
-            // data
-            if (model != null)
+            if (entity == null || entity.MvcData == null || !IsCustomAction(entity.MvcData))
             {
-                foreach (RegionModel region in model.Regions)
-                {
-                    for (int i = 0; i < region.Entities.Count; i++)
-                    {
-                        EntityModel entity = region.Entities[i];
-                        if (entity != null && entity.MvcData != null)
-                        {
-                            region.Entities[i] = ProcessEntityModel(entity);                            
-                        }
-                    }
-                }
+                return entity;
             }
-            return model;
-        }
 
-        public virtual EntityModel ProcessEntityModel(EntityModel entity)
-        {
-            //Enrich a base (CMS managed) entity with additional data by calling the
-            //appropriate custom controller's ProcessModel method
-            if (entity!=null && IsCustomAction(entity.MvcData))
+            MvcData mvcData = entity.MvcData;
+            using (new Tracer(entity, mvcData))
             {
-                MvcData mvcData = entity.MvcData;
-
                 RequestContext tempRequestContext = new RequestContext(HttpContext, new RouteData());
                 tempRequestContext.RouteData.DataTokens["Area"] = mvcData.ControllerAreaName;
                 tempRequestContext.RouteData.Values["controller"] = mvcData.ControllerName;
                 tempRequestContext.RouteData.Values["area"] = mvcData.ControllerAreaName;
                 tempRequestContext.HttpContext = HttpContext;
-                BaseController controller = ControllerBuilder.Current.GetControllerFactory().CreateController(tempRequestContext, mvcData.ControllerName) as BaseController;
+
                 try
                 {
-                    if (controller != null)
-                    {
-                        controller.ControllerContext = new ControllerContext(HttpContext, tempRequestContext.RouteData, controller);
-                        return (EntityModel) controller.EnrichModel(entity);
-                    }
+                    // Note: Entity Controllers don't have to inherit from EntityController per se, but they must inherit from BaseController.
+                    BaseController entityController = (BaseController) ControllerBuilder.Current.GetControllerFactory().CreateController(tempRequestContext, mvcData.ControllerName);
+                    entityController.ControllerContext = new ControllerContext(HttpContext, tempRequestContext.RouteData, entityController);
+                    return (EntityModel) entityController.EnrichModel(entity);
                 }
                 catch (Exception ex)
                 {
@@ -233,13 +221,12 @@ namespace Sdl.Web.Mvc.Controllers
                     return new ExceptionEntity(ex); // TODO: What about MvcData?
                 }
             }
-            return entity;
         }
 
-        protected virtual bool IsCustomAction(MvcData mvcData)
+        private static bool IsCustomAction(MvcData mvcData)
         {
-            return mvcData.ActionName != SiteConfiguration.GetEntityAction() 
-                || mvcData.ControllerName != SiteConfiguration.GetEntityController() 
+            return mvcData.ActionName != SiteConfiguration.GetEntityAction()
+                || mvcData.ControllerName != SiteConfiguration.GetEntityController()
                 || mvcData.ControllerAreaName != SiteConfiguration.GetDefaultModuleName();
         }
 

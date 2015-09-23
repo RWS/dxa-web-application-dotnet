@@ -26,26 +26,16 @@ namespace Sdl.Web.Mvc.Formats
 
         public override void OnActionExecuted(ActionExecutedContext filterContext)
         {
-            IDataFormatter formatter = filterContext.Controller.ViewBag.DataFormatter as IDataFormatter;
-            if (formatter != null)
+            ControllerBase controller = filterContext.Controller;
+            IDataFormatter formatter = controller.ViewBag.DataFormatter as IDataFormatter;
+
+            // Once we got here, we expect the View Model to be enriched already, but in case of a Page Model,
+            // the embedded Region/Entity Models won't be enriched yet.
+            if (formatter != null && formatter.ProcessModel && controller is PageController)
             {
-                object model = filterContext.Controller.ViewData.Model;
-                if (formatter.ProcessModel)
-                {
-                    BaseController controller = filterContext.Controller as BaseController;
-                    if (controller!=null)
-                    {
-                        if (model is PageModel)
-                        {
-                            model = controller.ProcessPageModel((PageModel)model);
-                        }
-                        else
-                        {
-                            model = controller.ProcessEntityModel(model as EntityModel) ?? model;
-                        }
-                    }
-                }
-                ActionResult result = formatter.FormatData(filterContext, model);
+                PageModel pageModel = controller.ViewData.Model as PageModel;
+                ((PageController) controller).EnrichEmbeddedModels(pageModel);
+                ActionResult result = formatter.FormatData(filterContext, pageModel);
                 if (result != null)
                 {
                     filterContext.Result = result;
