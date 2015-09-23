@@ -924,10 +924,15 @@ namespace Sdl.Web.Tridion.Mapping
         /// <summary>
         /// Creates a Region Model of class <see cref="RegionModel"/> or a subclass associated with the given Region View.
         /// </summary>
-        private static RegionModel CreateRegionModel(MvcData regionMvcData)
+        private static RegionModel CreateRegionModel(MvcData regionMvcData, string regionName = null)
         {
+            if (string.IsNullOrEmpty(regionName))
+            {
+                regionName = regionMvcData.ViewName;
+            }
+
             Type regionModelType = ModelTypeRegistry.GetViewModelType(regionMvcData);
-            RegionModel regionModel = (RegionModel) Activator.CreateInstance(regionModelType, regionMvcData.ViewName);
+            RegionModel regionModel = (RegionModel) Activator.CreateInstance(regionModelType, regionName);
             regionModel.MvcData = regionMvcData;
             return regionModel;
         }
@@ -954,9 +959,16 @@ namespace Sdl.Web.Tridion.Mapping
                     continue;
                 }
 
+                string regionName = null;
+                IField regionNameField;
+                if (regionMetadataFields.TryGetValue("name", out regionNameField))
+                {
+                    regionName = regionNameField.Value;
+                }
+
                 MvcData regionMvcData = new MvcData(regionViewNameField.Value);
                 InitializeRegionMvcData(regionMvcData);
-                RegionModel regionModel = CreateRegionModel(regionMvcData);
+                RegionModel regionModel = CreateRegionModel(regionMvcData, regionName);
                 regions.Add(regionModel);
             }
         }
