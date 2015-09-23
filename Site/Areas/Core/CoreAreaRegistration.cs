@@ -15,14 +15,6 @@ namespace Sdl.Web.Site.Areas.Core
 
         protected override void RegisterAllViewModels()
         {
-<<<<<<< HEAD
-            //Default Route - required for sub actions (region/entity/navigation etc.)
-            context.MapRoute(
-                "Core_Default", 
-                "{controller}/{action}/{id}", 
-                new { controller = "Home", action = "Index", id = UrlParameter.Optional }
-            );
-=======
             // Entity Views
             RegisterViewModel("Accordion", typeof(ItemList));
             RegisterViewModel("Article", typeof(Article));
@@ -80,7 +72,6 @@ namespace Sdl.Web.Site.Areas.Core
             RegisterViewModel("Footer", typeof(RegionModel), "Region");
             RegisterViewModel("Left Navigation", typeof(RegionModel), "Region");
             RegisterViewModel("Content Tools", typeof(RegionModel), "Region");
->>>>>>> develop
         }
     }
 }
