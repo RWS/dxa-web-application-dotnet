@@ -202,16 +202,18 @@ namespace Sdl.Web.Mvc.Controllers
             MvcData mvcData = entity.MvcData;
             using (new Tracer(entity, mvcData))
             {
+                string controllerName = mvcData.ControllerName ?? SiteConfiguration.GetEntityController();
+                string controllerAreaName = mvcData.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName();
+
                 RequestContext tempRequestContext = new RequestContext(HttpContext, new RouteData());
-                tempRequestContext.RouteData.DataTokens["Area"] = mvcData.ControllerAreaName;
-                tempRequestContext.RouteData.Values["controller"] = mvcData.ControllerName;
-                tempRequestContext.RouteData.Values["area"] = mvcData.ControllerAreaName;
-                tempRequestContext.HttpContext = HttpContext;
+                tempRequestContext.RouteData.DataTokens["Area"] = controllerAreaName;
+                tempRequestContext.RouteData.Values["controller"] = controllerName;
+                tempRequestContext.RouteData.Values["area"] = controllerAreaName;
 
                 try
                 {
                     // Note: Entity Controllers don't have to inherit from EntityController per se, but they must inherit from BaseController.
-                    BaseController entityController = (BaseController) ControllerBuilder.Current.GetControllerFactory().CreateController(tempRequestContext, mvcData.ControllerName);
+                    BaseController entityController = (BaseController) ControllerBuilder.Current.GetControllerFactory().CreateController(tempRequestContext, controllerName);
                     entityController.ControllerContext = new ControllerContext(HttpContext, tempRequestContext.RouteData, entityController);
                     return (EntityModel) entityController.EnrichModel(entity);
                 }
