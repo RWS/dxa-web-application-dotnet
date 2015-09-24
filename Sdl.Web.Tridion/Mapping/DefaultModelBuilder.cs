@@ -58,8 +58,9 @@ namespace Sdl.Web.Tridion.Mapping
                 foreach (IComponentPresentation cp in page.ComponentPresentations)
                 {
                     MvcData cpRegionMvcData = GetRegionMvcData(cp);
+                    string regionName = cpRegionMvcData.RegionName ?? cpRegionMvcData.ViewName;
                     RegionModel region;
-                    if (regions.TryGetValue(cpRegionMvcData.ViewName, out region))
+                    if (regions.TryGetValue(regionName, out region))
                     {
                         // Region already exists in Page Model; MVC data should match.
                         if (!region.MvcData.Equals(cpRegionMvcData))
@@ -848,58 +849,42 @@ namespace Sdl.Web.Tridion.Mapping
 
         private static MvcData GetRegionMvcData(IComponentPresentation cp)
         {
-            string regionName = null;
-            string module = SiteConfiguration.GetDefaultModuleName(); //Default module
-            if (cp.ComponentTemplate.MetadataFields != null)
-            {
-                if (cp.ComponentTemplate.MetadataFields.ContainsKey("regionView"))
-                {
-                    regionName = DetermineRegionViewNameAndModule(cp.ComponentTemplate.MetadataFields["regionView"].Value, out module);
-                }
-            }
+            IComponentTemplate ct = cp.ComponentTemplate;
 
-            // fallback if no meta - use the CT title
-            if (regionName == null)
+            string regionViewName = null;
+            IField regionViewNameField;
+            if (ct.MetadataFields != null && ct.MetadataFields.TryGetValue("regionView", out regionViewNameField))
             {
-                Match match = Regex.Match(cp.ComponentTemplate.Title, @".*?\[(.*?)\]");
+                regionViewName = regionViewNameField.Value;
+            }
+            else
+            {
+                // Fallback if no CT metadata found: try to extract Region View name from CT title
+                Match match = Regex.Match(ct.Title, @".*?\[(.+?)\]");
                 if (match.Success)
                 {
-                    regionName = DetermineRegionViewNameAndModule(match.Groups[1].Value, out module);
+                    regionViewName = match.Groups[1].Value;
                 }
             }
 
-            regionName = regionName ?? "Main"; // default region name
-
-            MvcData regionMvcData = new MvcData { AreaName = module, ViewName = regionName };
-            InitializeRegionMvcData(regionMvcData);
-            return regionMvcData;
-        }
-
-        /// <summary>
-        /// Split out region view and module from region name.
-        /// </summary>
-        /// <param name="regionName">The region name (can contain a module prefixed to it module:region)</param>
-        /// <param name="module">Returns the module name, will use default if no module name is prefixed, <see cref="SiteConfiguration.GetDefaultModuleName()"/></param>
-        /// <returns>Region view name</returns>
-        /// <remarks>TODO: replace this method with something like <see cref="CreateViewData(string)"/></remarks>
-        private static string DetermineRegionViewNameAndModule(string regionName, out string module)
-        {
-            module = SiteConfiguration.GetDefaultModuleName(); // default module
-
-            if (!String.IsNullOrEmpty(regionName))
+            if (String.IsNullOrEmpty(regionViewName))
             {
-                // split region view on colon, use first part as area (module) name
-                string[] regionViewParts = regionName.Split(':');
-                if (regionViewParts.Length > 1)
-                {
-                    module = regionViewParts[0].Trim();
-                    return regionViewParts[1].Trim();
-                }
-                
-                return regionViewParts[0].Trim();
+                regionViewName = "Main";
             }
 
-            return null;
+            MvcData regionMvcData = new MvcData(regionViewName);
+            InitializeRegionMvcData(regionMvcData);
+
+            IField regionNameField;
+            if (ct.MetadataFields != null && ct.MetadataFields.TryGetValue("regionName", out regionNameField))
+            {
+                if (!String.IsNullOrEmpty(regionNameField.Value))
+                {
+                    regionMvcData.RegionName = regionNameField.Value;
+                }
+            }
+
+            return regionMvcData;
         }
 
         private static RegionModel GetRegionFromIncludePage(IPage page)
@@ -924,16 +909,17 @@ namespace Sdl.Web.Tridion.Mapping
         /// <summary>
         /// Creates a Region Model of class <see cref="RegionModel"/> or a subclass associated with the given Region View.
         /// </summary>
-        private static RegionModel CreateRegionModel(MvcData regionMvcData, string regionName = null)
+        private static RegionModel CreateRegionModel(MvcData regionMvcData)
         {
-            if (string.IsNullOrEmpty(regionName))
-            {
-                regionName = regionMvcData.ViewName;
-            }
+            string regionName = regionMvcData.RegionName ?? regionMvcData.ViewName;
 
             Type regionModelType = ModelTypeRegistry.GetViewModelType(regionMvcData);
             RegionModel regionModel = (RegionModel) Activator.CreateInstance(regionModelType, regionName);
-            regionModel.MvcData = regionMvcData;
+            regionModel.MvcData = new MvcData(regionMvcData)
+            {
+                RegionName = null // Suppress RegionName in the final model.
+            };
+
             return regionModel;
         }
 
@@ -959,16 +945,16 @@ namespace Sdl.Web.Tridion.Mapping
                     continue;
                 }
 
-                string regionName = null;
-                IField regionNameField;
-                if (regionMetadataFields.TryGetValue("name", out regionNameField))
-                {
-                    regionName = regionNameField.Value;
-                }
-
                 MvcData regionMvcData = new MvcData(regionViewNameField.Value);
                 InitializeRegionMvcData(regionMvcData);
-                RegionModel regionModel = CreateRegionModel(regionMvcData, regionName);
+
+                IField regionNameField;
+                if (regionMetadataFields.TryGetValue("name", out regionNameField) && !String.IsNullOrEmpty(regionNameField.Value))
+                {
+                    regionMvcData.RegionName = regionNameField.Value;
+                }
+
+                RegionModel regionModel = CreateRegionModel(regionMvcData);
                 regions.Add(regionModel);
             }
         }
@@ -992,24 +978,26 @@ namespace Sdl.Web.Tridion.Mapping
         /// <returns>MVC data</returns>
         private static MvcData GetMvcData(IPage page)
         {
-            IPageTemplate template = page.PageTemplate;
-            string viewName = template.Title.RemoveSpaces();
+            IPageTemplate pt = page.PageTemplate;
 
-            if (template.MetadataFields != null)
+            string viewName;
+            IField viewNameField;
+            if (pt.MetadataFields != null && pt.MetadataFields.TryGetValue("view", out viewNameField))
             {
-                if (template.MetadataFields.ContainsKey("view"))
-                {
-                    viewName = template.MetadataFields["view"].Value;
-                }
+                viewName = viewNameField.Value;
+            }
+            else
+            {
+                // Fallback if no View name is defined in PT Metadata: get View name from PT Title.
+                viewName = pt.Title.RemoveSpaces();
             }
 
-            MvcData mvcData = CreateViewData(viewName);
-            // defaults
-            mvcData.ControllerName = SiteConfiguration.GetPageController();
-            mvcData.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
-            mvcData.ActionName = SiteConfiguration.GetPageAction();
-
-            return mvcData;
+            return new MvcData(viewName)
+            {
+                ControllerName = SiteConfiguration.GetPageController(),
+                ControllerAreaName = SiteConfiguration.GetDefaultModuleName(),
+                ActionName = SiteConfiguration.GetPageAction()
+            };
         }
 
         /// <summary>
@@ -1019,30 +1007,38 @@ namespace Sdl.Web.Tridion.Mapping
         /// <returns>MVC data</returns>
         private static MvcData GetMvcData(IComponentPresentation cp)
         {
-            IComponentTemplate template = cp.ComponentTemplate;
-            string viewName = Regex.Replace(template.Title, @"\[.*\]|\s", String.Empty);
+            IComponentTemplate ct = cp.ComponentTemplate;
 
-            if (template.MetadataFields != null)
+            string viewName;
+            IField viewNameField;
+            if (ct.MetadataFields != null && ct.MetadataFields.TryGetValue("view", out viewNameField))
             {
-                if (template.MetadataFields.ContainsKey("view"))
-                {
-                    viewName = template.MetadataFields["view"].Value;
-                }
+                viewName = viewNameField.Value;
+            }
+            else
+            {
+                // Fallback if no View name defined in CT Metadata: extract View name from CT Title.
+                viewName = Regex.Replace(ct.Title, @"\[.*\]|\s", String.Empty);
             }
 
-            MvcData mvcData = CreateViewData(viewName);
-            // defaults
-            mvcData.ControllerName = SiteConfiguration.GetEntityController();
-            mvcData.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
-            mvcData.ActionName = SiteConfiguration.GetEntityAction();
-            mvcData.RouteValues = new Dictionary<string, string>();
+            MvcData regionMvcData = GetRegionMvcData(cp);
 
-            // TODO: remove code duplication of splitting area and controller/region names
-            if (template.MetadataFields != null)
+            MvcData mvcData = new MvcData(viewName)
             {
-                if (template.MetadataFields.ContainsKey("controller"))
+                RegionName = regionMvcData.RegionName ?? regionMvcData.ViewName,
+                RegionAreaName = regionMvcData.AreaName,
+                // Defaults:
+                ControllerName = SiteConfiguration.GetEntityController(),
+                ControllerAreaName = SiteConfiguration.GetDefaultModuleName(),
+                ActionName = SiteConfiguration.GetEntityAction(),
+                RouteValues = new Dictionary<string, string>() // TODO: leave null if not specified?
+            };
+
+            if (ct.MetadataFields != null)
+            {
+                if (ct.MetadataFields.ContainsKey("controller"))
                 {
-                    string[] controllerNameParts = template.MetadataFields["controller"].Value.Split(':');
+                    string[] controllerNameParts = ct.MetadataFields["controller"].Value.Split(':');
                     if (controllerNameParts.Length > 1)
                     {
                         mvcData.ControllerName = controllerNameParts[1];
@@ -1053,27 +1049,13 @@ namespace Sdl.Web.Tridion.Mapping
                         mvcData.ControllerName = controllerNameParts[0];
                     }
                 }
-                if (template.MetadataFields.ContainsKey("regionView"))
+                if (ct.MetadataFields.ContainsKey("action"))
                 {
-                    string[] regionNameParts = template.MetadataFields["regionView"].Value.Split(':');
-                    if (regionNameParts.Length > 1)
-                    {
-                        mvcData.RegionName = regionNameParts[1];
-                        mvcData.RegionAreaName = regionNameParts[0];
-                    }
-                    else
-                    {
-                        mvcData.RegionName = regionNameParts[0];
-                        mvcData.RegionAreaName = SiteConfiguration.GetDefaultModuleName();
-                    }
+                    mvcData.ActionName = ct.MetadataFields["action"].Value;
                 }
-                if (template.MetadataFields.ContainsKey("action"))
+                if (ct.MetadataFields.ContainsKey("routeValues"))
                 {
-                    mvcData.ActionName = template.MetadataFields["action"].Value;
-                }
-                if (template.MetadataFields.ContainsKey("routeValues"))
-                {
-                    string[] routeValues = template.MetadataFields["routeValues"].Value.Split(',');
+                    string[] routeValues = ct.MetadataFields["routeValues"].Value.Split(',');
                     foreach (string routeValue in routeValues)
                     {
                         string[] routeValueParts = routeValue.Trim().Split(':');
@@ -1084,37 +1066,8 @@ namespace Sdl.Web.Tridion.Mapping
                     }
                 }
             }
-            else
-            {
-                // fallback if no meta - use the CT title to determine region view name and area name
-                Match match = Regex.Match(template.Title, @".*?\[(.*?)\]");
-                if (match.Success)
-                {
-                    string module;
-                    string regionName = DetermineRegionViewNameAndModule(match.Groups[1].Value, out module);
-                    mvcData.RegionName = regionName;
-                    mvcData.RegionAreaName = module;
-                }                
-            }
 
             return mvcData;
-        }
-
-        private static MvcData CreateViewData(string viewName)
-        {
-            string[] nameParts = viewName.Split(':');
-            string areaName;
-            if (nameParts.Length > 1)
-            {
-                areaName = nameParts[0].Trim();
-                viewName = nameParts[1].Trim();
-            }
-            else
-            {
-                areaName = SiteConfiguration.GetDefaultModuleName();
-                viewName = nameParts[0].Trim();
-            }
-            return new MvcData { ViewName = viewName, AreaName = areaName };
         }
     }
 }
