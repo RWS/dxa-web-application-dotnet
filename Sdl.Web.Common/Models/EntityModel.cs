@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
@@ -13,10 +14,9 @@ namespace Sdl.Web.Common.Models
     {
         private const string XpmComponentPresentationMarkup = "<!-- Start Component Presentation: {{\"ComponentID\" : \"{0}\", \"ComponentModified\" : \"{1}\", \"ComponentTemplateID\" : \"{2}\", \"ComponentTemplateModified\" : \"{3}\", \"IsRepositoryPublished\" : {4}}} -->";
 
-        private string _id = string.Empty;
-
         #region IEntity members (obsolete)
         [SemanticProperty(IgnoreMapping = true)]
+        [JsonIgnore]
         [Obsolete("Deprecated in DXA 1.1. Use property XpmMetadata instead.")]
         public Dictionary<string, string> EntityData
         {
@@ -31,6 +31,7 @@ namespace Sdl.Web.Common.Models
         }
 
         [SemanticProperty(IgnoreMapping = true)]
+        [JsonIgnore]
         [Obsolete("Deprecated in DXA 1.1. Use property XpmPropertyMetadata instead.")]
         public Dictionary<string, string> PropertyData
         {
@@ -45,6 +46,7 @@ namespace Sdl.Web.Common.Models
         }
 
         [SemanticProperty(IgnoreMapping = true)]
+        [JsonIgnore]
         [Obsolete("Deprecated in DXA 1.1. Use property MvcData instead.")]
         public MvcData AppData
         {
@@ -62,17 +64,15 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Gets or sets the identifier for the Entity.
         /// </summary>
+        /// <remarks>
+        /// Note that class <see cref="EntityModel"/> is also used for complex types which are not really Entities and thus don't have an Identifier.
+        /// Therefore, <see cref="Id"/> can be <c>null</c>.
+        /// </remarks>
         [SemanticProperty(IgnoreMapping = true)]
         public string Id
         {
-            get
-            {
-                return _id;
-            }
-            set
-            {
-                _id = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace Sdl.Web.Common.Models
             {
                 return false;
             }
-            return other.Id == Id;
+            return (Id == null) ? ReferenceEquals(this, other) : (other.Id == Id);
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace Sdl.Web.Common.Models
         /// </returns>
         public override int GetHashCode()
         {
-            return Id.GetHashCode();
+            return (Id == null) ? base.GetHashCode() : Id.GetHashCode();
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace Sdl.Web.Common.Models
         /// </returns>
         public override string ToString()
         {
-            return string.Format("{0}: {1}", GetType().Name, Id);
+            return (Id == null) ? GetType().Name : String.Format("{0}: {1}", GetType().Name, Id);
         }
 
         #endregion

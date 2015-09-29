@@ -95,6 +95,11 @@
     <Compile Include="Context\ContextEngine.cs" />
     <Compile Include="Context\DeviceClaims.cs" />
     <Compile Include="Context\OperatingSystemClaims.cs" />
+    <Compile Include="Controllers\EntityController.cs" />
+    <Compile Include="Controllers\ListController.cs" />
+    <Compile Include="Controllers\NavigationController.cs" />
+    <Compile Include="Controllers\PageController.cs" />
+    <Compile Include="Controllers\RegionController.cs" />
     <Compile Include="Formats\FeedResult.cs" />
     <Compile Include="Formats\FormatDataAttribute.cs" />
     <Compile Include="Controllers\NoCacheAttribute.cs" />
@@ -129,6 +134,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Context\ContextEngine.cd" />
+    <None Include="Controllers\Controllers.cd" />
     <None Include="Html\MvcExtensions.cd" />
     <None Include="packages.config" />
   </ItemGroup>

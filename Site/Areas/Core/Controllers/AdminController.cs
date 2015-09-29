@@ -1,5 +1,4 @@
 ﻿using System.Web.Mvc;
-using Sdl.Web.Common.Configuration;
 using Sdl.Web.Mvc;
 using Sdl.Web.Mvc.Configuration;
 
