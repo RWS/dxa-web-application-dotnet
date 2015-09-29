@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Sdl.Web.Common.Models
 {
@@ -33,6 +34,7 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Items are the raw entities that make up the page (eg Component Presentations, or other regions).
         /// </summary>
+        [JsonIgnore]
         [Obsolete("Deprecated in DXA 1.1. Use property Entities instead.")]
         public List<object> Items
         {
@@ -46,6 +48,7 @@ namespace Sdl.Web.Common.Models
             }
         }
 
+        [JsonIgnore]
         [Obsolete("Deprecated in DXA 1.1. Use property XpmMetadata instead.")]
         public Dictionary<string, string> RegionData
         {
@@ -59,6 +62,7 @@ namespace Sdl.Web.Common.Models
             }
         }
 
+        [JsonIgnore]
         [Obsolete("Deprecated in DXA 1.1. Use property MvcData instead.")]
         public MvcData AppData
         {
@@ -72,6 +76,7 @@ namespace Sdl.Web.Common.Models
             }
         }
 
+        [JsonIgnore]
         [Obsolete("Deprecated in DXA 1.1. Use MvcData.AreaName instead.", true)]
         public string Module
         {

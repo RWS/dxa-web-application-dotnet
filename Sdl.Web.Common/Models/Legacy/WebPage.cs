@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Sdl.Web.Common.Models
 {
@@ -36,6 +37,7 @@ namespace Sdl.Web.Common.Models
         /// Gets or sets the Page Includes. The dictionary keys are the include names.
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
+        [JsonIgnore]
         [Obsolete("Deprecated in DXA 1.1. Page Includes are now modeled as Regions, so use PageModel.Regions instead.")]
         public Dictionary<string, IPage> Includes
         {

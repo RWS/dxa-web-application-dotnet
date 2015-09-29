@@ -7,12 +7,16 @@ using Sdl.Web.Common.Models;
 namespace Sdl.Web.Mvc.Configuration
 {
     /// <summary>
-    /// Base AreaRegistration class which helper methods to register views models for the area with the application
+    /// Abstract base class for DXA-style area registration.
     /// </summary>
     public abstract class BaseAreaRegistration : AreaRegistration
     {
         public override void RegisterArea(AreaRegistrationContext context)
         {
+            // By default, class AreaRegistration assumes that the Controllers are in the same namespace as the concrete AreaRegistration subclass itself (or a sub namespace).
+            // However, the DXA Core controllers are in the Sdl.Web.Mvc.Controllers namespace.
+            context.Namespaces.Add("Sdl.Web.Mvc.Controllers");
+
             //Default Route - required for sub actions (region/entity/navigation etc.)
             context.MapRoute(
                 AreaName + "_Default",
@@ -36,11 +40,27 @@ namespace Sdl.Web.Mvc.Configuration
         /// <summary>
         /// Registers a View Model and associated View.
         /// </summary>
-        /// <param name="viewName">The name of the View.</param>
-        /// <param name="modelType">The view model type</param>
-        /// <param name="controllerName">The controller name (eg Search)</param>
-        protected void RegisterViewModel(string viewName, Type modelType, string controllerName = "Entity")
+        /// <param name="viewName">The name of the View to register.</param>
+        /// <param name="modelType">The View Model Type to associate with the View. Must be a subclass of Type <see cref="ViewModel"/>.</param>
+        /// <param name="controllerName">The Controller name. If not specified (or <c>null</c>), the Controller name is inferred from the <see cref="modelType"/>: either "Entity", "Region" or "Page".</param>
+        protected void RegisterViewModel(string viewName, Type modelType, string controllerName = null)
         {
+            if (String.IsNullOrEmpty(controllerName))
+            {
+                if (typeof(EntityModel).IsAssignableFrom(modelType))
+                {
+                    controllerName = "Entity";
+                }
+                else if (typeof(RegionModel).IsAssignableFrom(modelType))
+                {
+                    controllerName = "Region";
+                }
+                else
+                {
+                    controllerName = "Page";
+                }
+            }
+
             MvcData mvcData = new MvcData { AreaName = AreaName, ControllerName = controllerName, ViewName = viewName };
             ModelTypeRegistry.RegisterViewModel(mvcData, modelType);
         }

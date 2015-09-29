@@ -1,8 +1,7 @@
 ﻿using System.Web.Mvc;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Mvc.Controllers;
 
-namespace Sdl.Web.Site.Areas.Core.Controllers
+namespace Sdl.Web.Mvc.Controllers
 {
     public class EntityController : BaseController
     {
