@@ -860,6 +860,15 @@ namespace Sdl.Web.Tridion.Mapping
             else
             {
                 // Fallback if no CT metadata found: try to extract Region View name from CT title
+                if (ct.Title == null)
+                {
+                    // If a DCP has been published with DDT4 1.31 TBBs, it won't be read properly using the DD4T 2.0 ComponentPresentationFactory
+                    // resulting in almost all CT properties being null.
+                    throw new DxaException(
+                        string.Format("No Component Template data available for DCP '{0}/{1}'. Republish the DCP to ensure it uses the new DD4T 2.0 DCP format.",
+                            cp.Component.Id, cp.ComponentTemplate.Id)
+                        );
+                }
                 Match match = Regex.Match(ct.Title, @".*?\[(.+?)\]");
                 if (match.Success)
                 {
@@ -1018,7 +1027,16 @@ namespace Sdl.Web.Tridion.Mapping
             else
             {
                 // Fallback if no View name defined in CT Metadata: extract View name from CT Title.
-                viewName = Regex.Replace(ct.Title, @"\[.*\]|\s", String.Empty);
+                if (ct.Title == null)
+                {
+                    // If a DCP has been published with DDT4 1.31 TBBs, it won't be read properly using the DD4T 2.0 ComponentPresentationFactory
+                    // resulting in almost all CT properties being null.
+                    throw new DxaException(
+                        string.Format("No Component Template data available for DCP '{0}/{1}'. Republish the DCP to ensure it uses the new DD4T 2.0 DCP format.",
+                            cp.Component.Id, cp.ComponentTemplate.Id)
+                        );
+                }
+                viewName = Regex.Replace(ct.Title, @"\[.*\]|\s", string.Empty);
             }
 
             MvcData regionMvcData = GetRegionMvcData(cp);

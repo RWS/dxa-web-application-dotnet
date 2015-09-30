@@ -124,43 +124,14 @@ namespace Sdl.Web.Tridion.Mapping
                 string componentUri = string.Format("tcm:{0}-{1}", localization.LocalizationId, idParts[0]);
                 string templateUri = string.Format("tcm:{0}-{1}-32", localization.LocalizationId, idParts[1]);
 
-                IComponentFactory componentFactory = DD4TFactoryCache.GetComponentFactory(localization);
-                IComponent component;
-                if (!componentFactory.TryGetComponent(componentUri, out component, templateUri))
+                IComponentPresentationFactory componentPresentationFactory = DD4TFactoryCache.GetComponentPresentationFactory(localization);
+                IComponentPresentation dcp;
+                if (!componentPresentationFactory.TryGetComponentPresentation(out dcp, componentUri, templateUri))
                 {
                     throw new DxaItemNotFoundException(id);
                 }
 
-                TcmUri templateTcmUri = new TcmUri(templateUri);
-                Criteria[] criteria = new Criteria[]
-                {
-                    new PublicationCriteria(templateTcmUri.PublicationId),
-                    new ItemReferenceCriteria(templateTcmUri.ItemId),
-                    new ItemTypeCriteria(32)
-                };
-
-                var query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(CriteriaFactory.And(criteria));
-                IItem[] results = query.ExecuteEntityQuery();
-                ITemplateMeta templateMeta = (ITemplateMeta) results.FirstOrDefault();
-                if (templateMeta == null)
-                {
-                    throw new DxaException(String.Format("Cannot find Component Template metadata for '{0}'", templateUri));
-                }
-
-                IComponentPresentation componentPresentation = new ComponentPresentation
-                {
-                    Component = (Component) component,
-                    ComponentTemplate = new ComponentTemplate
-                    {
-                        Id = templateUri,
-                        Title = templateMeta.Title,
-                        OutputFormat = templateMeta.OutputFormat
-                        // NOTE: we can't obtain CT metadata for DCPs, so ensure that the (qualified) View Name is in the CT title.
-                    },
-                    IsDynamic = true
-                };
-
-                return ModelBuilderPipeline.CreateEntityModel(componentPresentation, localization);
+                return ModelBuilderPipeline.CreateEntityModel(dcp, localization);
             }
         }
 

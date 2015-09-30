@@ -256,8 +256,7 @@
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>copy "$(ProjectDir)\..\_references\dd4t-update\*.dll" "$(TargetDir)" /y
-copy "$(ProjectDir)\..\Sdl.Web.Tridion\bin\$(ConfigurationName)\*.*" "$(TargetDir)" /y
+    <PreBuildEvent>copy "$(ProjectDir)\..\Sdl.Web.Tridion\bin\$(ConfigurationName)\*.*" "$(TargetDir)" /y
 </PreBuildEvent>
   </PropertyGroup>
 </Project>
