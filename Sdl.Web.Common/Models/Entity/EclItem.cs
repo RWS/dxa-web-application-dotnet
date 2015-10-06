@@ -1,22 +1,28 @@
 ﻿using System;
+using System.Xml;
 using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
 {
-    public  abstract class EclItem : MediaItem
+    /// <summary>
+    /// Abstract base class for View Models representing ECL items.
+    /// </summary>
+    public abstract class EclItem : MediaItem
     {
         /// <summary>
-        /// ECL URI for External Content Library Components (null for normal multimedia Components)
+        /// ECL URI.
         /// </summary>
-        public string EclUri
-        {
-            // TODO: read ECL URI from published data (currently only available for ECL items embedded in RTF, so lets use the filename for now)
-            get
-            {
-                // build ECL URI from filename (filename: 8-mm-204-dist-file.ecl ECL URI: ecl:8-mm-204-dist-file)
-                return String.Format("ecl:{0}", FileName.Replace(".ecl", String.Empty));
-            }
-        }
+        public string EclUri { get; set; }
+
+        /// <summary>
+        /// ECL Display Type ID.
+        /// </summary>
+        public string EclDisplayTypeId { get; set; }
+
+        /// <summary>
+        /// ECL Template Fragment.
+        /// </summary>
+        public string EclTemplateFragment { get; set; }
 
         /// <summary>
         /// Gets the rendered XPM markup
@@ -28,17 +34,54 @@ namespace Sdl.Web.Common.Models
         /// <returns>The XPM markup.</returns>
         public override string GetXpmMarkup(Localization localization)
         {
-            // replace TCM URI with ECL URI
-            return base.GetXpmMarkup(localization).Replace(String.Format("tcm:{0}-{1}", localization.LocalizationId, Id), EclUri);
+            if (XpmMetadata != null && !string.IsNullOrEmpty(EclUri))
+            {
+                XpmMetadata["ComponentID"] = EclUri;
+            }
+            return base.GetXpmMarkup(localization);
         }
 
-        // TODO: provide default implementation of ToHtml using the ECL Template Fragment
-        //public override string ToHtml(string widthFactor, double aspect = 0, string cssClass = null, int containerSize = 0)
+        /// <summary>
+        /// Renders an HTML representation of the ECL Item.
+        /// </summary>
+        /// <param name="widthFactor">The factor to apply to the width - can be % (eg "100%") or absolute (eg "120").</param>
+        /// <param name="aspect">The aspect ratio to apply.</param>
+        /// <param name="cssClass">Optional CSS class name(s) to apply.</param>
+        /// <param name="containerSize">The size (in grid column units) of the containing element.</param>
+        /// <returns>The HTML representation.</returns>
+        /// <remarks>
+        /// This method is used by the <see cref="IRichTextFragment.ToHtml()"/> implementation and by the HtmlHelperExtensions.Media implementation.
+        /// Both cases should be avoided, since HTML rendering should be done in View code rather than in Model code.
+        /// </remarks>
+        public override string ToHtml(string widthFactor, double aspect = 0, string cssClass = null, int containerSize = 0)
+        {
+            // NOTE: we're ignoring all parameters here.
+            return EclTemplateFragment;
+        }
 
-        //public override void ReadFromXhtmlElement(XmlElement xhtmlElement)
-        //{
-        //    base.ReadFromXhtmlElement(xhtmlElement);
-        //    EclUri = xhtmlElement.GetAttribute("eclUri");
-        //}
+        /// <summary>
+        /// Read properties from XHTML element.
+        /// </summary>
+        /// <param name="xhtmlElement">XHTML element</param>
+        public override void ReadFromXhtmlElement(XmlElement xhtmlElement)
+        {
+            base.ReadFromXhtmlElement(xhtmlElement);
+            EclUri = xhtmlElement.GetAttribute("data-eclId");
+            EclDisplayTypeId = xhtmlElement.GetAttribute("data-eclDisplayTypeId");
+            EclTemplateFragment = xhtmlElement.GetAttribute("data-eclTemplateFragment");
+
+            // Note that FileName and MimeType are already set in MediaItem.ReadFromXhtmlElement.
+            // We overwrite those with the values provided by ECL (if any).
+            string eclFileName = xhtmlElement.GetAttribute("data-eclFileName");
+            if (!string.IsNullOrEmpty(eclFileName))
+            {
+                FileName = eclFileName;
+            }
+            string eclMimeType = xhtmlElement.GetAttribute("data-eclMimeType");
+            if (!string.IsNullOrEmpty(eclMimeType))
+            {
+                MimeType = eclMimeType;
+            }
+        }
     }
 }

@@ -210,6 +210,26 @@ namespace Sdl.Web.Tridion.Mapping
                     mediaItem.MimeType = component.Multimedia.MimeType;
                 }
 
+                if (entityModel is EclItem)
+                {
+                    EclItem eclItem = (EclItem) entityModel;
+                    eclItem.EclUri = component.EclId;
+
+                    const string eclSectionName = "ECL";
+                    eclItem.EclDisplayTypeId = GetExtensionFieldValue(component, eclSectionName, "DisplayTypeId");
+                    eclItem.EclTemplateFragment = GetExtensionFieldValue(component, eclSectionName, "TemplateFragment");
+                    string eclFileName = GetExtensionFieldValue(component, eclSectionName, "FileName");
+                    if (!string.IsNullOrEmpty(eclFileName))
+                    {
+                        eclItem.FileName = eclFileName;
+                    }
+                    string eclMimeType = GetExtensionFieldValue(component, eclSectionName, "MimeType");
+                    if (!string.IsNullOrEmpty(eclMimeType))
+                    {
+                        eclItem.MimeType = eclMimeType;
+                    }
+                }
+
                 if (entityModel is Link)
                 {
                     Link link = (Link)entityModel;
@@ -221,6 +241,29 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
         #endregion
+
+        // TODO: Move to DD4T 2.0 codebase?
+        private static string GetExtensionFieldValue(IModel model, string sectionName, string propertyName)
+        {
+            if (model.ExtensionData == null)
+            {
+                return null;
+            }
+
+            IFieldSet sectionFieldSet;
+            if (!model.ExtensionData.TryGetValue(sectionName, out sectionFieldSet))
+            {
+                return null;
+            }
+
+            IField propertyField;
+            if (!sectionFieldSet.TryGetValue(propertyName, out propertyField))
+            {
+                return null;
+            }
+
+            return propertyField.Value;
+        }
 
         private PageModel CreatePageModel(IPage page, Localization localization)
         {
