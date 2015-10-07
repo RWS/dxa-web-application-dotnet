@@ -941,12 +941,11 @@ namespace Sdl.Web.Tridion.Mapping
 
         private static RegionModel GetRegionFromIncludePage(IPage page)
         {
-            string regionName = page.Title;
-
-            MvcData regionMvcData = new MvcData(regionName);
+            // Page Title can be a qualified View Name; we use the unqualified View Name as Region Name.
+            MvcData regionMvcData = new MvcData(page.Title);
             InitializeRegionMvcData(regionMvcData);
 
-            return new RegionModel(regionName)
+            return new RegionModel(regionMvcData.ViewName)
             {
                 MvcData = regionMvcData,
                 XpmMetadata = new Dictionary<string, string>
