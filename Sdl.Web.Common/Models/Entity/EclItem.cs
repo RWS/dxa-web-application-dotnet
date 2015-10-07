@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml;
 using Sdl.Web.Common.Configuration;
 
@@ -23,6 +24,14 @@ namespace Sdl.Web.Common.Models
         /// ECL Template Fragment.
         /// </summary>
         public string EclTemplateFragment { get; set; }
+
+        /// <summary>
+        /// ECL External Metadata.
+        /// </summary>
+        /// <value>
+        /// Keys are the field names. Values can be simple types (string, double, DateTime), nested IDictionaries and enumerables of those types. 
+        /// </value>
+        public IDictionary<string, object> EclExternalMetadata { get; set; }
 
         /// <summary>
         /// Gets the rendered XPM markup

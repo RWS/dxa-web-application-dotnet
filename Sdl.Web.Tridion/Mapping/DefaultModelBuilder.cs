@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
 using Sdl.Web.Common;
@@ -212,22 +213,7 @@ namespace Sdl.Web.Tridion.Mapping
 
                 if (entityModel is EclItem)
                 {
-                    EclItem eclItem = (EclItem) entityModel;
-                    eclItem.EclUri = component.EclId;
-
-                    const string eclSectionName = "ECL";
-                    eclItem.EclDisplayTypeId = GetExtensionFieldValue(component, eclSectionName, "DisplayTypeId");
-                    eclItem.EclTemplateFragment = GetExtensionFieldValue(component, eclSectionName, "TemplateFragment");
-                    string eclFileName = GetExtensionFieldValue(component, eclSectionName, "FileName");
-                    if (!string.IsNullOrEmpty(eclFileName))
-                    {
-                        eclItem.FileName = eclFileName;
-                    }
-                    string eclMimeType = GetExtensionFieldValue(component, eclSectionName, "MimeType");
-                    if (!string.IsNullOrEmpty(eclMimeType))
-                    {
-                        eclItem.MimeType = eclMimeType;
-                    }
+                    MapEclItem((EclItem) entityModel, component);
                 }
 
                 if (entityModel is Link)
@@ -242,27 +228,95 @@ namespace Sdl.Web.Tridion.Mapping
         }
         #endregion
 
-        // TODO: Move to DD4T 2.0 codebase?
-        private static string GetExtensionFieldValue(IModel model, string sectionName, string propertyName)
+        private static void MapEclItem(EclItem eclItem, IComponent component)
         {
-            if (model.ExtensionData == null)
+            eclItem.EclUri = component.EclId;
+
+            IFieldSet eclExtensionDataFields;
+            if (component.ExtensionData == null || !component.ExtensionData.TryGetValue("ECL", out eclExtensionDataFields))
+            {
+                Log.Warn("Encountered ECL Stub Component without ECL Extension Data: {0}", component.Id);
+                return;
+            }
+
+            eclItem.EclDisplayTypeId = GetFieldValue("DisplayTypeId", eclExtensionDataFields);
+            eclItem.EclTemplateFragment = GetFieldValue("TemplateFragment", eclExtensionDataFields);
+            string eclFileName = GetFieldValue("FileName", eclExtensionDataFields);
+            if (!string.IsNullOrEmpty(eclFileName))
+            {
+                eclItem.FileName = eclFileName;
+            }
+            string eclMimeType = GetFieldValue("MimeType", eclExtensionDataFields);
+            if (!string.IsNullOrEmpty(eclMimeType))
+            {
+                eclItem.MimeType = eclMimeType;
+            }
+
+            IFieldSet eclExternalMetadataFields;
+            if (component.ExtensionData.TryGetValue("ECL-ExternalMetadata", out eclExternalMetadataFields))
+            {
+                eclItem.EclExternalMetadata = MapEclExternalMetadata(eclExternalMetadataFields);
+            }
+        }
+
+
+        private static IDictionary<string, object> MapEclExternalMetadata(IFieldSet fields)
+        {
+            IDictionary<string, object> result = new Dictionary<string, object>();
+            foreach (IField field in fields.Values)
+            {
+                object mappedValue;
+                switch (field.FieldType)
+                {
+                    case FieldType.Number:
+                        mappedValue = GetFieldValue(field.NumericValues);
+                        break;
+
+                    case FieldType.Date:
+                        mappedValue = GetFieldValue(field.DateTimeValues);
+                        break;
+
+                    case FieldType.Embedded:
+                        if (field.EmbeddedValues.Count == 1)
+                        {
+                            mappedValue = MapEclExternalMetadata(field.EmbeddedValues[0]);
+                        }
+                        else
+                        {
+                            mappedValue = field.EmbeddedValues.Select(MapEclExternalMetadata).ToArray();
+                        }
+                        break;
+
+                    default:
+                        mappedValue = GetFieldValue(field.Values);
+                        break;
+                }
+                result.Add(field.Name, mappedValue);
+            }
+            return result;
+        }
+
+        private static object GetFieldValue<T>(IList<T> fieldValues)
+        {
+            switch (fieldValues.Count)
+            {
+                case 0:
+                    return null;
+                case 1:
+                    return fieldValues[0];
+                default:
+                    return fieldValues;
+            }
+        }
+
+        private static string GetFieldValue(string fieldName, IFieldSet fields)
+        {
+            IField field;
+            if (!fields.TryGetValue(fieldName, out field))
             {
                 return null;
             }
-
-            IFieldSet sectionFieldSet;
-            if (!model.ExtensionData.TryGetValue(sectionName, out sectionFieldSet))
-            {
-                return null;
-            }
-
-            IField propertyField;
-            if (!sectionFieldSet.TryGetValue(propertyName, out propertyField))
-            {
-                return null;
-            }
-
-            return propertyField.Value;
+            return field.Value;
         }
 
         private PageModel CreatePageModel(IPage page, Localization localization)
