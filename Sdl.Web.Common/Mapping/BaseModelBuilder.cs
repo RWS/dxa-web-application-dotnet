@@ -50,12 +50,13 @@ namespace Sdl.Web.Common.Mapping
                     addedDefaults = true;
                 }
             }
-            //Add default vocab if none was specified on entity
-            if (!addedDefaults)
+
+            //Add default mapping if none was specified on entity
+            if (!res.ContainsKey(string.Empty))
             {
-                SemanticDefaultsAttribute semantics = new SemanticDefaultsAttribute();
-                res.Add(semantics.Prefix, new KeyValuePair<string, string>(semantics.Vocab, String.Empty));
+                res.Add(string.Empty, new KeyValuePair<string, string>(ViewModel.CoreVocabulary, string.Empty));
             }
+
             return res;
         }
 
