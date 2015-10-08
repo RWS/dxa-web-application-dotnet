@@ -64,8 +64,12 @@ namespace Sdl.Web.Common.Models
         /// </remarks>
         public override string ToHtml(string widthFactor, double aspect = 0, string cssClass = null, int containerSize = 0)
         {
-            // NOTE: we're ignoring all parameters here.
-            return EclTemplateFragment;
+            // NOTE: we're ignoring all parameters but cssClass here.
+            if (string.IsNullOrEmpty(cssClass))
+            {
+                return EclTemplateFragment ?? string.Empty;
+            }
+            return string.Format("<div class=\"{0}\">{1}</div>", cssClass, EclTemplateFragment);
         }
 
         /// <summary>
