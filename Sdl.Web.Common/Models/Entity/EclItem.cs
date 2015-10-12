@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Xml;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Common.Models
 {
@@ -32,6 +33,52 @@ namespace Sdl.Web.Common.Models
         /// Keys are the field names. Values can be simple types (string, double, DateTime), nested IDictionaries and enumerables of those types. 
         /// </value>
         public IDictionary<string, object> EclExternalMetadata { get; set; }
+
+
+        /// <summary>
+        /// Convenience method to obtain a single value from ECL External Metadata.
+        /// </summary>
+        /// <param name="key">The metadata key. This can contain slashes for nested metadata (e.g. "Program/Asset/Title").</param>
+        /// <returns>The metadata value. Can be <c>null</c> if the key does not resolve to a value.</returns>
+        public object GetEclExternalMetadataValue(string key)
+        {
+            IDictionary<string, object> metadataDictionary = EclExternalMetadata;
+            if (metadataDictionary == null)
+            {
+                return null;
+            }
+
+            string[] keyParts = key.Split('/');
+            int lastPartIndex = keyParts.Length - 1;
+            // Traverse to the right location in the tree of (nested) metadata.
+            for (int i = 0; i < lastPartIndex; i++)
+            {
+                object nestedValue;
+                if (!metadataDictionary.TryGetValue(keyParts[i], out nestedValue))
+                {
+                    return null;
+                }
+                metadataDictionary = nestedValue as IDictionary<string, object>;
+                if (metadataDictionary == null)
+                {
+                    Log.Warn(
+                        "Attempt to access ECL external metadata using key '{0}', but '{1}' is not a structured value, but of type '{2}'. ",
+                        key, keyParts[i], nestedValue.GetType().Name
+                        );
+                    return null;
+                }
+            }
+
+            // Obtain the metadata value (leaf)
+            object value;
+            if (!metadataDictionary.TryGetValue(keyParts[lastPartIndex], out value))
+            {
+                return null;
+            }
+
+            return value;
+        }
+
 
         /// <summary>
         /// Gets the rendered XPM markup
@@ -65,6 +112,12 @@ namespace Sdl.Web.Common.Models
         public override string ToHtml(string widthFactor, double aspect = 0, string cssClass = null, int containerSize = 0)
         {
             // NOTE: we're ignoring all parameters but cssClass here.
+            if (string.IsNullOrEmpty(EclTemplateFragment))
+            {
+                throw new DxaException(
+                    string.Format("Attempt to render an ECL Item for which no Template Fragment is available: '{0}' (DisplayTypeId: '{1}')", EclUri, EclDisplayTypeId)
+                    );
+            }
             if (string.IsNullOrEmpty(cssClass))
             {
                 return EclTemplateFragment ?? string.Empty;
