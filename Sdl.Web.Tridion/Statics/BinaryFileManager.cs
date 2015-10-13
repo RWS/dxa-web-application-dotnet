@@ -10,8 +10,6 @@ using DD4T.ContentModel;
 using DD4T.ContentModel.Contracts.Caching;
 using DD4T.ContentModel.Exceptions;
 using DD4T.ContentModel.Factories;
-using DD4T.Factories;
-using DD4T.Factories.Caching;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
@@ -56,7 +54,7 @@ namespace Sdl.Web.Tridion.Statics
         {
             get
             {
-                return _cacheAgent ?? (_cacheAgent = new DefaultCacheAgent());
+                return _cacheAgent ?? (_cacheAgent = DD4TFactoryCache.CreateCacheAgent() );
             }
             set
             {
