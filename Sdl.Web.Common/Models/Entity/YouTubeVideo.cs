@@ -45,7 +45,7 @@ namespace Sdl.Web.Common.Models
         }
 
         /// <summary>
-        /// Read additional properties from XHTML element, and set view name in MvcData.
+        /// Read additional properties from XHTML element.
         /// </summary>
         /// <param name="xhtmlElement">XHTML element</param>
         public override void ReadFromXhtmlElement(XmlElement xhtmlElement)
@@ -55,7 +55,18 @@ namespace Sdl.Web.Common.Models
 
             YouTubeId = xhtmlElement.GetAttribute("data-youTubeId");
             Headline = xhtmlElement.GetAttribute("data-headline");
-            MvcData = new MvcData("Core:Entity:YouTubeVideo");
+        }
+
+        /// <summary>
+        /// Gets the default View.
+        /// </summary>
+        /// <param name="localization">The context Localization</param>
+        /// <remarks>
+        /// This makes it possible possible to render "embedded" YouTubeVideo Models using the Html.DxaEntity method.
+        /// </remarks>
+        public override MvcData GetDefaultView(Localization localization)
+        {
+            return new MvcData("Core:YouTubeVideo");
         }
     }
 }

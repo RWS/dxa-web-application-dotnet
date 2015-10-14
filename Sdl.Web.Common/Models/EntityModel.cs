@@ -112,6 +112,19 @@ namespace Sdl.Web.Common.Models
 
         #endregion
 
+        #region Overridables
+        /// <summary>
+        /// Gets the default View for this Entity Model (if any).
+        /// </summary>
+        /// <param name="localization">The context Localization.</param>
+        /// <remarks>
+        /// If this method is overridden in a subclass, it will be possible to render "embedded" Entity Models of that type using the Html.DxaEntity method.
+        /// </remarks>
+        public virtual MvcData GetDefaultView(Localization localization)
+        {
+            return null;
+        }
+        #endregion
 
         #region Overrides
 

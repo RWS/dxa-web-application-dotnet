@@ -115,6 +115,12 @@ namespace Sdl.Web.Tridion.Mapping
                 Type modelType = semanticSchema.GetModelTypeFromSemanticMapping(typeof(MediaItem));
                 MediaItem mediaItem = (MediaItem)Activator.CreateInstance(modelType);
                 mediaItem.ReadFromXhtmlElement(imgElement);
+                if (mediaItem.MvcData == null)
+                {
+                    // In DXA 1.1 MediaItem.ReadFromXhtmlElement was expected to set MvcData.
+                    // In DXA 1.2 this should be done in a GetDefaultView override (which is also used for other embedded Entities)
+                    mediaItem.MvcData = mediaItem.GetDefaultView(localization);
+                }
                 embeddedEntities.Add(mediaItem);
 
                 // Replace img element with marker XML processing instruction 

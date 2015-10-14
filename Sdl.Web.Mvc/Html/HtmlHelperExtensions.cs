@@ -276,6 +276,11 @@ namespace Sdl.Web.Mvc.Html
             MvcData mvcData = entity.MvcData;
             using (new Tracer(htmlHelper, entity, containerSize, mvcData))
             {
+                if (mvcData == null)
+                {
+                    throw new DxaException(string.Format("Unable to render Entity Model [{0}], because it has no MVC data.", entity));
+                }
+
                 string actionName = mvcData.ActionName ?? SiteConfiguration.GetEntityAction();
                 string controllerName = mvcData.ControllerName ?? SiteConfiguration.GetEntityController();
                 string controllerAreaName = mvcData.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName();

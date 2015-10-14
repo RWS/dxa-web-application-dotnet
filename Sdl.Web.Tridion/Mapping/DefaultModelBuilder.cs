@@ -152,8 +152,9 @@ namespace Sdl.Web.Tridion.Mapping
                 Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
                 // NOTE: not using ModelBuilderPipeline here, but directly calling our own implementation.
-                BuildEntityModel(ref entityModel, cp.Component, modelType, localization);                    
+                BuildEntityModel(ref entityModel, cp.Component, modelType, localization);
 
+                entityModel.XpmMetadata = GetXpmMetadata(cp.Component);
                 entityModel.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
                 entityModel.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
                 entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "true" : "false");
@@ -200,7 +201,6 @@ namespace Sdl.Web.Tridion.Mapping
 
                 entityModel = (EntityModel)CreateViewModel(mappingData);
                 entityModel.Id = GetDxaIdentifierFromTcmUri(component.Id);
-                entityModel.XpmMetadata = GetXpmMetadata(component);
 
                 if (entityModel is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
                 {
@@ -224,6 +224,9 @@ namespace Sdl.Web.Tridion.Mapping
                         link.Url = SiteConfiguration.LinkResolver.ResolveLink(component.Id);
                     }
                 }
+
+                // Set the Entity Model's default View (if any) after it has been fully initialized.
+                entityModel.MvcData = entityModel.GetDefaultView(localization);
             }
         }
         #endregion
