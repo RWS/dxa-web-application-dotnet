@@ -30,7 +30,6 @@ namespace Sdl.Web.Common.Mapping
 
         protected virtual Dictionary<string, KeyValuePair<string, string>> GetEntityDataFromType(Type type)
         {
-            bool addedDefaults = false;
             Dictionary<string, KeyValuePair<string, string>> res = new Dictionary<string, KeyValuePair<string, string>>();
             foreach (Attribute attr in type.GetCustomAttributes())
             {
@@ -47,7 +46,6 @@ namespace Sdl.Web.Common.Mapping
                 {
                     SemanticDefaultsAttribute semantics = (SemanticDefaultsAttribute)attr;
                     res.Add(semantics.Prefix, new KeyValuePair<string, string>(semantics.Vocab, String.Empty));
-                    addedDefaults = true;
                 }
             }
 
