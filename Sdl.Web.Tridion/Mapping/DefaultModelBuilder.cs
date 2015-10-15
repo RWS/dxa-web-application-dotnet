@@ -406,7 +406,7 @@ namespace Sdl.Web.Tridion.Mapping
                     foreach (SemanticProperty info in propertySemantics[pi.Name])
                     {
                         IField field = GetFieldFromSemantics(mappingData, info);
-                        if (field != null && (field.Values.Count > 0 || field.EmbeddedValues.Count > 0))
+                        if (field != null)
                         {
                             pi.SetValue(model, MapFieldValues(field, propertyType, multival, mappingData));
                             xpmPropertyMetadata.Add(pi.Name, GetFieldXPath(field));
