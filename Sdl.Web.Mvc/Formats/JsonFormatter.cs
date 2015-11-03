@@ -8,7 +8,7 @@ namespace Sdl.Web.Mvc.Formats
         {
             AddMediaType("application/json");
             ProcessModel = true;
-            AddIncludes = false;
+            AddIncludes = true;
         }
 
         public override ActionResult FormatData(ControllerContext controllerContext, object model)
