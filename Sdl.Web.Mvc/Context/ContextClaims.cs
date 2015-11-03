@@ -70,7 +70,12 @@ namespace Sdl.Web.Mvc.Context
 
         private static T CastValue<T>(object value)
         {
-            if (value == null || value is T)
+            if (value == null)
+            {
+                return default(T);
+            }
+                
+            if (value is T)
             {
                 return (T) value;
             }
