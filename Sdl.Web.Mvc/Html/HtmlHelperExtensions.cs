@@ -313,6 +313,23 @@ namespace Sdl.Web.Mvc.Html
         }
 
         /// <summary>
+        /// Renders a given Entity Model.
+        /// </summary>
+        /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
+        /// <param name="entity">The Entity to render.</param>
+        /// <param name="viewName">The (qualified) name of the View used to render the entity. This overrides the View set in <see cref="EntityModel.MvcData"/>.</param>
+        /// <param name="containerSize">The size (in grid column units) of the containing element.</param>
+        /// <returns>The rendered HTML or an empty string if <paramref name="entity"/> is <c>null</c>.</returns>
+        public static MvcHtmlString DxaEntity(this HtmlHelper htmlHelper, EntityModel entity, string viewName, int containerSize = 0)
+        {
+            MvcData mvcDataOverride = new MvcData(viewName);
+            entity.MvcData.AreaName = mvcDataOverride.AreaName;
+            entity.MvcData.ViewName = mvcDataOverride.ViewName;
+
+            return htmlHelper.DxaEntity(entity, containerSize);
+        }
+
+        /// <summary>
         /// Renders all Entities in the current Region Model.
         /// </summary>
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
