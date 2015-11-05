@@ -1,4 +1,5 @@
 ﻿using System.Xml;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
 {
@@ -36,14 +37,15 @@ namespace Sdl.Web.Common.Models
         }
 
         /// <summary>
-        /// Set view name in MvcData.
+        /// Gets the default View.
         /// </summary>
-        /// <param name="xhtmlElement">XHTML element</param>
-        public override void ReadFromXhtmlElement(XmlElement xhtmlElement)
+        /// <param name="localization">The context Localization</param>
+        /// <remarks>
+        /// This makes it possible possible to render "embedded" Download Models using the Html.DxaEntity method.
+        /// </remarks>
+        public override MvcData GetDefaultView(Localization localization)
         {
-            base.ReadFromXhtmlElement(xhtmlElement);
-
-            MvcData = new MvcData("Core:Entity:Download");
+            return new MvcData("Core:Download");
         }
     }
 }

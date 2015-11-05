@@ -56,27 +56,22 @@ namespace Sdl.Web.Tridion.Mapping
 
         private RichText ResolveRichText(XmlDocument doc, Localization localization)
         {
+            const string xlinkNamespaceUri = "http://www.w3.org/1999/xlink";
+
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
             nsmgr.AddNamespace("xhtml", "http://www.w3.org/1999/xhtml");
-            nsmgr.AddNamespace("xlink", "http://www.w3.org/1999/xlink");
+            nsmgr.AddNamespace("xlink", xlinkNamespaceUri);
 
-            // resolve links which haven't been resolved
+            // Process/resolve hyperlinks with XLink attributes
             ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
-            foreach (XmlElement linkElement in doc.SelectNodes("//a[@xlink:href[starts-with(string(.),'tcm:')]][@href='' or not(@href)]", nsmgr))
+            foreach (XmlElement linkElement in doc.SelectNodes("//a[@xlink:href]", nsmgr))
             {
-                // does this link already have a resolved href?
+                // DD4T BinaryPublisher may have resolved a href attribute already (for links to MM Components)
                 string linkUrl = linkElement.GetAttribute("href");
                 if (string.IsNullOrEmpty(linkUrl))
                 {
-                    // DD4T BinaryPublisher resolves these links and adds a src rather than a href, let's try that
-                    linkUrl = linkElement.GetAttribute("src");
-                    // lets remove that invalid attribute directly 
-                    linkElement.RemoveAttribute("src");
-                }
-                if (string.IsNullOrEmpty(linkUrl))
-                {
-                    // assume dynamic component link and try to resolve
-                    string tcmUri = linkElement.GetAttribute("xlink:href");
+                    // No href attribute found. Apparently the XLink refers to a regular Component; we resolve it to a URL here.
+                    string tcmUri = linkElement.GetAttribute("href", xlinkNamespaceUri);
                     if (!string.IsNullOrEmpty(tcmUri))
                     {
                         // Try to resolve directly to Binary content of MM Component.
@@ -85,29 +80,27 @@ namespace Sdl.Web.Tridion.Mapping
                 }                
                 if (!string.IsNullOrEmpty(linkUrl))
                 {
-                    // add href
+                    // The link was resolved; set HTML href attribute
                     linkElement.SetAttribute("href", linkUrl);
-
                     ApplyHashIfApplicable(linkElement, localization);
 
-                    // remove all xlink attributes
-                    foreach (XmlAttribute xlinkAttr in linkElement.SelectNodes("//@xlink:*", nsmgr))
+                    // Remove all XLink and data- attributes
+                    IEnumerable<XmlAttribute> attributesToRemove = linkElement.Attributes.Cast<XmlAttribute>()
+                        .Where(a => a.NamespaceURI == xlinkNamespaceUri || a.LocalName == "xlink" || a.LocalName.StartsWith("data-")).ToArray();
+                    foreach (XmlAttribute attr in attributesToRemove)
                     {
-                        linkElement.Attributes.Remove(xlinkAttr);
+                        linkElement.Attributes.Remove(attr);
                     }
                 }
                 else
                 {
-                    // copy child nodes of link so we keep them
-                    linkElement.ChildNodes.Cast<XmlNode>()
-                        .Select(linkElement.RemoveChild)
-                        .ToList()
-                        .ForEach(child => 
-                        {
-                            linkElement.ParentNode.InsertBefore(child, linkElement);
-                        });
-                    // remove link node
-                    linkElement.ParentNode.RemoveChild(linkElement);
+                    // The link was not resolved; remove the hyperlink.
+                    XmlNode parentNode = linkElement.ParentNode;
+                    foreach (XmlNode childNode in linkElement.ChildNodes)
+                    {
+                        parentNode.InsertBefore(childNode, linkElement);
+                    }
+                    parentNode.RemoveChild(linkElement);
                 }
             }
 
@@ -122,6 +115,12 @@ namespace Sdl.Web.Tridion.Mapping
                 Type modelType = semanticSchema.GetModelTypeFromSemanticMapping(typeof(MediaItem));
                 MediaItem mediaItem = (MediaItem)Activator.CreateInstance(modelType);
                 mediaItem.ReadFromXhtmlElement(imgElement);
+                if (mediaItem.MvcData == null)
+                {
+                    // In DXA 1.1 MediaItem.ReadFromXhtmlElement was expected to set MvcData.
+                    // In DXA 1.2 this should be done in a GetDefaultView override (which is also used for other embedded Entities)
+                    mediaItem.MvcData = mediaItem.GetDefaultView(localization);
+                }
                 embeddedEntities.Add(mediaItem);
 
                 // Replace img element with marker XML processing instruction 
