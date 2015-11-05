@@ -18,7 +18,7 @@
         }
     }
     var redirectId = WebRequestContext.PageId;
-    var defaultItem = Model.Settings.ContainsKey("defaultContentLink") ? Model.Settings["defaultContentLink"].Substring(4) : null;
+    var defaultItem = Model.Settings.ContainsKey("defaultContentLink") ? Model.Settings["defaultContentLink"].Split('-')[1] : null;
 }
 @if (redirectId != null && filteredLocalizations.Count > 1)
 {

@@ -781,7 +781,7 @@ namespace Sdl.Web.Tridion.Mapping
                     //Default is to add the value as plain text
                     else
                     {
-                        string val = component.Fields[fieldname].Value;
+                        string val = GetFieldValuesAsStrings(component.Fields[fieldname]).FirstOrDefault();
                         if (val != null)
                         {
                             values.Add(fieldname, val);
@@ -793,7 +793,7 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 if (!values.ContainsKey(fieldname))
                 {
-                    string val = component.MetadataFields[fieldname].Value;
+                    string val = GetFieldValuesAsStrings(component.MetadataFields[fieldname]).FirstOrDefault();
                     if (val != null)
                     {
                         values.Add(fieldname, val);
@@ -801,6 +801,24 @@ namespace Sdl.Web.Tridion.Mapping
                 }
             }
             return values;
+        }
+
+        private static string[] GetFieldValuesAsStrings(IField field)
+        {
+            switch (field.FieldType)
+            {
+                case FieldType.Number:
+                    return field.NumericValues.Select(v => v.ToString()).ToArray();
+                case FieldType.Date:
+                    return field.DateTimeValues.Select(v => v.ToString()).ToArray();
+                case FieldType.ComponentLink:
+                case FieldType.MultiMediaLink:
+                    return field.LinkedComponentValues.Select(v => v.Id).ToArray();
+                case FieldType.Keyword:
+                    return field.KeywordValues.Select(v => v.Id).ToArray();
+                default:
+                    return field.Values.ToArray();
+            }
         }
 
 
