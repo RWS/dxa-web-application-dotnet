@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
 using Sdl.Web.Common;
@@ -58,8 +59,9 @@ namespace Sdl.Web.Tridion.Mapping
                 foreach (IComponentPresentation cp in page.ComponentPresentations)
                 {
                     MvcData cpRegionMvcData = GetRegionMvcData(cp);
+                    string regionName = cpRegionMvcData.RegionName ?? cpRegionMvcData.ViewName;
                     RegionModel region;
-                    if (regions.TryGetValue(cpRegionMvcData.ViewName, out region))
+                    if (regions.TryGetValue(regionName, out region))
                     {
                         // Region already exists in Page Model; MVC data should match.
                         if (!region.MvcData.Equals(cpRegionMvcData))
@@ -150,8 +152,9 @@ namespace Sdl.Web.Tridion.Mapping
                 Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
                 // NOTE: not using ModelBuilderPipeline here, but directly calling our own implementation.
-                BuildEntityModel(ref entityModel, cp.Component, modelType, localization);                    
+                BuildEntityModel(ref entityModel, cp.Component, modelType, localization);
 
+                entityModel.XpmMetadata = GetXpmMetadata(cp.Component);
                 entityModel.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
                 entityModel.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
                 entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "true" : "false");
@@ -198,7 +201,6 @@ namespace Sdl.Web.Tridion.Mapping
 
                 entityModel = (EntityModel)CreateViewModel(mappingData);
                 entityModel.Id = GetDxaIdentifierFromTcmUri(component.Id);
-                entityModel.XpmMetadata = GetXpmMetadata(component);
 
                 if (entityModel is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
                 {
@@ -209,6 +211,11 @@ namespace Sdl.Web.Tridion.Mapping
                     mediaItem.MimeType = component.Multimedia.MimeType;
                 }
 
+                if (entityModel is EclItem)
+                {
+                    MapEclItem((EclItem) entityModel, component);
+                }
+
                 if (entityModel is Link)
                 {
                     Link link = (Link)entityModel;
@@ -217,9 +224,103 @@ namespace Sdl.Web.Tridion.Mapping
                         link.Url = SiteConfiguration.LinkResolver.ResolveLink(component.Id);
                     }
                 }
+
+                // Set the Entity Model's default View (if any) after it has been fully initialized.
+                entityModel.MvcData = entityModel.GetDefaultView(localization);
             }
         }
         #endregion
+
+        private static void MapEclItem(EclItem eclItem, IComponent component)
+        {
+            eclItem.EclUri = component.EclId;
+
+            IFieldSet eclExtensionDataFields;
+            if (component.ExtensionData == null || !component.ExtensionData.TryGetValue("ECL", out eclExtensionDataFields))
+            {
+                Log.Warn("Encountered ECL Stub Component without ECL Extension Data: {0}", component.Id);
+                return;
+            }
+
+            eclItem.EclDisplayTypeId = GetFieldValue("DisplayTypeId", eclExtensionDataFields);
+            eclItem.EclTemplateFragment = GetFieldValue("TemplateFragment", eclExtensionDataFields);
+            string eclFileName = GetFieldValue("FileName", eclExtensionDataFields);
+            if (!string.IsNullOrEmpty(eclFileName))
+            {
+                eclItem.FileName = eclFileName;
+            }
+            string eclMimeType = GetFieldValue("MimeType", eclExtensionDataFields);
+            if (!string.IsNullOrEmpty(eclMimeType))
+            {
+                eclItem.MimeType = eclMimeType;
+            }
+
+            IFieldSet eclExternalMetadataFields;
+            if (component.ExtensionData.TryGetValue("ECL-ExternalMetadata", out eclExternalMetadataFields))
+            {
+                eclItem.EclExternalMetadata = MapEclExternalMetadata(eclExternalMetadataFields);
+            }
+        }
+
+
+        private static IDictionary<string, object> MapEclExternalMetadata(IFieldSet fields)
+        {
+            IDictionary<string, object> result = new Dictionary<string, object>();
+            foreach (IField field in fields.Values)
+            {
+                object mappedValue;
+                switch (field.FieldType)
+                {
+                    case FieldType.Number:
+                        mappedValue = GetFieldValue(field.NumericValues);
+                        break;
+
+                    case FieldType.Date:
+                        mappedValue = GetFieldValue(field.DateTimeValues);
+                        break;
+
+                    case FieldType.Embedded:
+                        if (field.EmbeddedValues.Count == 1)
+                        {
+                            mappedValue = MapEclExternalMetadata(field.EmbeddedValues[0]);
+                        }
+                        else
+                        {
+                            mappedValue = field.EmbeddedValues.Select(MapEclExternalMetadata).ToArray();
+                        }
+                        break;
+
+                    default:
+                        mappedValue = GetFieldValue(field.Values);
+                        break;
+                }
+                result.Add(field.Name, mappedValue);
+            }
+            return result;
+        }
+
+        private static object GetFieldValue<T>(IList<T> fieldValues)
+        {
+            switch (fieldValues.Count)
+            {
+                case 0:
+                    return null;
+                case 1:
+                    return fieldValues[0];
+                default:
+                    return fieldValues;
+            }
+        }
+
+        private static string GetFieldValue(string fieldName, IFieldSet fields)
+        {
+            IField field;
+            if (!fields.TryGetValue(fieldName, out field))
+            {
+                return null;
+            }
+            return field.Value;
+        }
 
         private PageModel CreatePageModel(IPage page, Localization localization)
         {
@@ -305,7 +406,7 @@ namespace Sdl.Web.Tridion.Mapping
                     foreach (SemanticProperty info in propertySemantics[pi.Name])
                     {
                         IField field = GetFieldFromSemantics(mappingData, info);
-                        if (field != null && (field.Values.Count > 0 || field.EmbeddedValues.Count > 0))
+                        if (field != null)
                         {
                             pi.SetValue(model, MapFieldValues(field, propertyType, multival, mappingData));
                             xpmPropertyMetadata.Add(pi.Name, GetFieldXPath(field));
@@ -680,7 +781,7 @@ namespace Sdl.Web.Tridion.Mapping
                     //Default is to add the value as plain text
                     else
                     {
-                        string val = component.Fields[fieldname].Value;
+                        string val = GetFieldValuesAsStrings(component.Fields[fieldname]).FirstOrDefault();
                         if (val != null)
                         {
                             values.Add(fieldname, val);
@@ -692,7 +793,7 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 if (!values.ContainsKey(fieldname))
                 {
-                    string val = component.MetadataFields[fieldname].Value;
+                    string val = GetFieldValuesAsStrings(component.MetadataFields[fieldname]).FirstOrDefault();
                     if (val != null)
                     {
                         values.Add(fieldname, val);
@@ -700,6 +801,24 @@ namespace Sdl.Web.Tridion.Mapping
                 }
             }
             return values;
+        }
+
+        private static string[] GetFieldValuesAsStrings(IField field)
+        {
+            switch (field.FieldType)
+            {
+                case FieldType.Number:
+                    return field.NumericValues.Select(v => v.ToString()).ToArray();
+                case FieldType.Date:
+                    return field.DateTimeValues.Select(v => v.ToString()).ToArray();
+                case FieldType.ComponentLink:
+                case FieldType.MultiMediaLink:
+                    return field.LinkedComponentValues.Select(v => v.Id).ToArray();
+                case FieldType.Keyword:
+                    return field.KeywordValues.Select(v => v.Id).ToArray();
+                default:
+                    return field.Values.ToArray();
+            }
         }
 
 
@@ -848,68 +967,60 @@ namespace Sdl.Web.Tridion.Mapping
 
         private static MvcData GetRegionMvcData(IComponentPresentation cp)
         {
-            string regionName = null;
-            string module = SiteConfiguration.GetDefaultModuleName(); //Default module
-            if (cp.ComponentTemplate.MetadataFields != null)
-            {
-                if (cp.ComponentTemplate.MetadataFields.ContainsKey("regionView"))
-                {
-                    regionName = DetermineRegionViewNameAndModule(cp.ComponentTemplate.MetadataFields["regionView"].Value, out module);
-                }
-            }
+            IComponentTemplate ct = cp.ComponentTemplate;
 
-            // fallback if no meta - use the CT title
-            if (regionName == null)
+            string regionViewName = null;
+            IField regionViewNameField;
+            if (ct.MetadataFields != null && ct.MetadataFields.TryGetValue("regionView", out regionViewNameField))
             {
-                Match match = Regex.Match(cp.ComponentTemplate.Title, @".*?\[(.*?)\]");
+                regionViewName = regionViewNameField.Value;
+            }
+            else
+            {
+                // Fallback if no CT metadata found: try to extract Region View name from CT title
+                if (ct.Title == null)
+                {
+                    // If a DCP has been published with DDT4 1.31 TBBs, it won't be read properly using the DD4T 2.0 ComponentPresentationFactory
+                    // resulting in almost all CT properties being null.
+                    throw new DxaException(
+                        string.Format("No Component Template data available for DCP '{0}/{1}'. Republish the DCP to ensure it uses the new DD4T 2.0 DCP format.",
+                            cp.Component.Id, cp.ComponentTemplate.Id)
+                        );
+                }
+                Match match = Regex.Match(ct.Title, @".*?\[(.+?)\]");
                 if (match.Success)
                 {
-                    regionName = DetermineRegionViewNameAndModule(match.Groups[1].Value, out module);
+                    regionViewName = match.Groups[1].Value;
                 }
             }
 
-            regionName = regionName ?? "Main"; // default region name
-
-            MvcData regionMvcData = new MvcData { AreaName = module, ViewName = regionName };
-            InitializeRegionMvcData(regionMvcData);
-            return regionMvcData;
-        }
-
-        /// <summary>
-        /// Split out region view and module from region name.
-        /// </summary>
-        /// <param name="regionName">The region name (can contain a module prefixed to it module:region)</param>
-        /// <param name="module">Returns the module name, will use default if no module name is prefixed, <see cref="SiteConfiguration.GetDefaultModuleName()"/></param>
-        /// <returns>Region view name</returns>
-        /// <remarks>TODO: replace this method with something like <see cref="CreateViewData(string)"/></remarks>
-        private static string DetermineRegionViewNameAndModule(string regionName, out string module)
-        {
-            module = SiteConfiguration.GetDefaultModuleName(); // default module
-
-            if (!String.IsNullOrEmpty(regionName))
+            if (String.IsNullOrEmpty(regionViewName))
             {
-                // split region view on colon, use first part as area (module) name
-                string[] regionViewParts = regionName.Split(':');
-                if (regionViewParts.Length > 1)
-                {
-                    module = regionViewParts[0].Trim();
-                    return regionViewParts[1].Trim();
-                }
-                
-                return regionViewParts[0].Trim();
+                regionViewName = "Main";
             }
 
-            return null;
+            MvcData regionMvcData = new MvcData(regionViewName);
+            InitializeRegionMvcData(regionMvcData);
+
+            IField regionNameField;
+            if (ct.MetadataFields != null && ct.MetadataFields.TryGetValue("regionName", out regionNameField))
+            {
+                if (!String.IsNullOrEmpty(regionNameField.Value))
+                {
+                    regionMvcData.RegionName = regionNameField.Value;
+                }
+            }
+
+            return regionMvcData;
         }
 
         private static RegionModel GetRegionFromIncludePage(IPage page)
         {
-            string regionName = page.Title;
-
-            MvcData regionMvcData = new MvcData(regionName);
+            // Page Title can be a qualified View Name; we use the unqualified View Name as Region Name.
+            MvcData regionMvcData = new MvcData(page.Title);
             InitializeRegionMvcData(regionMvcData);
 
-            return new RegionModel(regionName)
+            return new RegionModel(regionMvcData.ViewName)
             {
                 MvcData = regionMvcData,
                 XpmMetadata = new Dictionary<string, string>
@@ -926,9 +1037,15 @@ namespace Sdl.Web.Tridion.Mapping
         /// </summary>
         private static RegionModel CreateRegionModel(MvcData regionMvcData)
         {
+            string regionName = regionMvcData.RegionName ?? regionMvcData.ViewName;
+
             Type regionModelType = ModelTypeRegistry.GetViewModelType(regionMvcData);
-            RegionModel regionModel = (RegionModel) Activator.CreateInstance(regionModelType, regionMvcData.ViewName);
-            regionModel.MvcData = regionMvcData;
+            RegionModel regionModel = (RegionModel) Activator.CreateInstance(regionModelType, regionName);
+            regionModel.MvcData = new MvcData(regionMvcData)
+            {
+                RegionName = null // Suppress RegionName in the final model.
+            };
+
             return regionModel;
         }
 
@@ -956,6 +1073,13 @@ namespace Sdl.Web.Tridion.Mapping
 
                 MvcData regionMvcData = new MvcData(regionViewNameField.Value);
                 InitializeRegionMvcData(regionMvcData);
+
+                IField regionNameField;
+                if (regionMetadataFields.TryGetValue("name", out regionNameField) && !String.IsNullOrEmpty(regionNameField.Value))
+                {
+                    regionMvcData.RegionName = regionNameField.Value;
+                }
+
                 RegionModel regionModel = CreateRegionModel(regionMvcData);
                 regions.Add(regionModel);
             }
@@ -980,24 +1104,26 @@ namespace Sdl.Web.Tridion.Mapping
         /// <returns>MVC data</returns>
         private static MvcData GetMvcData(IPage page)
         {
-            IPageTemplate template = page.PageTemplate;
-            string viewName = template.Title.RemoveSpaces();
+            IPageTemplate pt = page.PageTemplate;
 
-            if (template.MetadataFields != null)
+            string viewName;
+            IField viewNameField;
+            if (pt.MetadataFields != null && pt.MetadataFields.TryGetValue("view", out viewNameField))
             {
-                if (template.MetadataFields.ContainsKey("view"))
-                {
-                    viewName = template.MetadataFields["view"].Value;
-                }
+                viewName = viewNameField.Value;
+            }
+            else
+            {
+                // Fallback if no View name is defined in PT Metadata: get View name from PT Title.
+                viewName = pt.Title.RemoveSpaces();
             }
 
-            MvcData mvcData = CreateViewData(viewName);
-            // defaults
-            mvcData.ControllerName = SiteConfiguration.GetPageController();
-            mvcData.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
-            mvcData.ActionName = SiteConfiguration.GetPageAction();
-
-            return mvcData;
+            return new MvcData(viewName)
+            {
+                ControllerName = SiteConfiguration.GetPageController(),
+                ControllerAreaName = SiteConfiguration.GetDefaultModuleName(),
+                ActionName = SiteConfiguration.GetPageAction()
+            };
         }
 
         /// <summary>
@@ -1007,30 +1133,47 @@ namespace Sdl.Web.Tridion.Mapping
         /// <returns>MVC data</returns>
         private static MvcData GetMvcData(IComponentPresentation cp)
         {
-            IComponentTemplate template = cp.ComponentTemplate;
-            string viewName = Regex.Replace(template.Title, @"\[.*\]|\s", String.Empty);
+            IComponentTemplate ct = cp.ComponentTemplate;
 
-            if (template.MetadataFields != null)
+            string viewName;
+            IField viewNameField;
+            if (ct.MetadataFields != null && ct.MetadataFields.TryGetValue("view", out viewNameField))
             {
-                if (template.MetadataFields.ContainsKey("view"))
+                viewName = viewNameField.Value;
+            }
+            else
+            {
+                // Fallback if no View name defined in CT Metadata: extract View name from CT Title.
+                if (ct.Title == null)
                 {
-                    viewName = template.MetadataFields["view"].Value;
+                    // If a DCP has been published with DDT4 1.31 TBBs, it won't be read properly using the DD4T 2.0 ComponentPresentationFactory
+                    // resulting in almost all CT properties being null.
+                    throw new DxaException(
+                        string.Format("No Component Template data available for DCP '{0}/{1}'. Republish the DCP to ensure it uses the new DD4T 2.0 DCP format.",
+                            cp.Component.Id, cp.ComponentTemplate.Id)
+                        );
                 }
+                viewName = Regex.Replace(ct.Title, @"\[.*\]|\s", string.Empty);
             }
 
-            MvcData mvcData = CreateViewData(viewName);
-            // defaults
-            mvcData.ControllerName = SiteConfiguration.GetEntityController();
-            mvcData.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
-            mvcData.ActionName = SiteConfiguration.GetEntityAction();
-            mvcData.RouteValues = new Dictionary<string, string>();
+            MvcData regionMvcData = GetRegionMvcData(cp);
 
-            // TODO: remove code duplication of splitting area and controller/region names
-            if (template.MetadataFields != null)
+            MvcData mvcData = new MvcData(viewName)
             {
-                if (template.MetadataFields.ContainsKey("controller"))
+                RegionName = regionMvcData.RegionName ?? regionMvcData.ViewName,
+                RegionAreaName = regionMvcData.AreaName,
+                // Defaults:
+                ControllerName = SiteConfiguration.GetEntityController(),
+                ControllerAreaName = SiteConfiguration.GetDefaultModuleName(),
+                ActionName = SiteConfiguration.GetEntityAction(),
+                RouteValues = new Dictionary<string, string>() // TODO: leave null if not specified?
+            };
+
+            if (ct.MetadataFields != null)
+            {
+                if (ct.MetadataFields.ContainsKey("controller"))
                 {
-                    string[] controllerNameParts = template.MetadataFields["controller"].Value.Split(':');
+                    string[] controllerNameParts = ct.MetadataFields["controller"].Value.Split(':');
                     if (controllerNameParts.Length > 1)
                     {
                         mvcData.ControllerName = controllerNameParts[1];
@@ -1041,27 +1184,13 @@ namespace Sdl.Web.Tridion.Mapping
                         mvcData.ControllerName = controllerNameParts[0];
                     }
                 }
-                if (template.MetadataFields.ContainsKey("regionView"))
+                if (ct.MetadataFields.ContainsKey("action"))
                 {
-                    string[] regionNameParts = template.MetadataFields["regionView"].Value.Split(':');
-                    if (regionNameParts.Length > 1)
-                    {
-                        mvcData.RegionName = regionNameParts[1];
-                        mvcData.RegionAreaName = regionNameParts[0];
-                    }
-                    else
-                    {
-                        mvcData.RegionName = regionNameParts[0];
-                        mvcData.RegionAreaName = SiteConfiguration.GetDefaultModuleName();
-                    }
+                    mvcData.ActionName = ct.MetadataFields["action"].Value;
                 }
-                if (template.MetadataFields.ContainsKey("action"))
+                if (ct.MetadataFields.ContainsKey("routeValues"))
                 {
-                    mvcData.ActionName = template.MetadataFields["action"].Value;
-                }
-                if (template.MetadataFields.ContainsKey("routeValues"))
-                {
-                    string[] routeValues = template.MetadataFields["routeValues"].Value.Split(',');
+                    string[] routeValues = ct.MetadataFields["routeValues"].Value.Split(',');
                     foreach (string routeValue in routeValues)
                     {
                         string[] routeValueParts = routeValue.Trim().Split(':');
@@ -1072,37 +1201,8 @@ namespace Sdl.Web.Tridion.Mapping
                     }
                 }
             }
-            else
-            {
-                // fallback if no meta - use the CT title to determine region view name and area name
-                Match match = Regex.Match(template.Title, @".*?\[(.*?)\]");
-                if (match.Success)
-                {
-                    string module;
-                    string regionName = DetermineRegionViewNameAndModule(match.Groups[1].Value, out module);
-                    mvcData.RegionName = regionName;
-                    mvcData.RegionAreaName = module;
-                }                
-            }
 
             return mvcData;
-        }
-
-        private static MvcData CreateViewData(string viewName)
-        {
-            string[] nameParts = viewName.Split(':');
-            string areaName;
-            if (nameParts.Length > 1)
-            {
-                areaName = nameParts[0].Trim();
-                viewName = nameParts[1].Trim();
-            }
-            else
-            {
-                areaName = SiteConfiguration.GetDefaultModuleName();
-                viewName = nameParts[0].Trim();
-            }
-            return new MvcData { ViewName = viewName, AreaName = areaName };
         }
     }
 }

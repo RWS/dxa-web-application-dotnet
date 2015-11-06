@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Sdl.Web.Common.Models
 {
@@ -40,6 +41,7 @@ namespace Sdl.Web.Common.Models
         }
 
         [SemanticProperty(IgnoreMapping = true)]
+        [JsonIgnore]
         [Obsolete("Deprecated in DXA 1.1. Use PageModel.Regions instead.")]
         public Dictionary<string, IRegion> Regions
         {
@@ -57,6 +59,7 @@ namespace Sdl.Web.Common.Models
         /// For storing system data (for example page id and modified date for xpm markup).
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
+        [JsonIgnore]
         [Obsolete("Deprecated in DXA 1.1. Use property XpmMetadata instead.")]
         public Dictionary<string, string> PageData
         {
@@ -71,6 +74,7 @@ namespace Sdl.Web.Common.Models
         }
 
         [SemanticProperty(IgnoreMapping = true)]
+        [JsonIgnore]
         [Obsolete("Deprecated in DXA 1.1. Use property MvcData instead.")]
         public MvcData AppData
         {

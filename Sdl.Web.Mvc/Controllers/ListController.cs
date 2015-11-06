@@ -1,11 +1,9 @@
 ﻿using System.Linq;
-using Sdl.Web.Common.Interfaces;
+using System.Web.Mvc;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
-using Sdl.Web.Mvc.Controllers;
-using System.Web.Mvc;
 
-namespace Sdl.Web.Site.Areas.Core.Controllers
+namespace Sdl.Web.Mvc.Controllers
 {
     public class ListController : EntityController
     {

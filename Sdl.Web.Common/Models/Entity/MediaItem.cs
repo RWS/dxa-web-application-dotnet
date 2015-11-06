@@ -7,7 +7,7 @@ namespace Sdl.Web.Common.Models
     [SemanticEntity(Vocab = SchemaOrgVocabulary, EntityName = "MediaObject", Prefix = "s", Public = true)]
     public abstract class MediaItem : EntityModel
     {
-        private static readonly IDictionary<string, string> FontAwesomeMimeTypeToIconClassMapping = new Dictionary<string, string>
+        protected static readonly IDictionary<string, string> FontAwesomeMimeTypeToIconClassMapping = new Dictionary<string, string>
         {
             {"application/ms-excel", "excel"},
             {"application/pdf", "pdf"},

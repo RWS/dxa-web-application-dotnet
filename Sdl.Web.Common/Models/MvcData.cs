@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
@@ -14,7 +15,7 @@ namespace Sdl.Web.Common.Models
         public string ViewName { get; set; }
         public string AreaName { get; set; }
         public string RegionName { get; set; }
-        public string RegionAreaName { get; set; }
+        public string RegionAreaName { get; set; } // TODO: Do we really need this?
         public Dictionary<string, string> RouteValues { get; set; }
 
         #region Constructors
@@ -54,6 +55,25 @@ namespace Sdl.Web.Common.Models
                             );
             }
         }
+
+        /// <summary>
+        /// Initializes a new <see cref="MvcData"/> instance which is a copy of another.
+        /// </summary>
+        /// <param name="other">The other <see cref="MvcData"/> to copy.</param>
+        public MvcData(MvcData other)
+        {
+            ControllerName = other.ControllerName;
+            ControllerAreaName = other.ControllerAreaName;
+            ActionName = other.ActionName;
+            ViewName = other.ViewName;
+            AreaName = other.AreaName;
+            RegionName = other.RegionName;
+            RegionAreaName = other.RegionAreaName;
+            if (other.RouteValues != null)
+            {
+                RouteValues = new Dictionary<string, string>(other.RouteValues);
+            }
+        }
         #endregion
 
         #region Overrides
@@ -65,16 +85,25 @@ namespace Sdl.Web.Common.Models
         {
             MvcData other = obj as MvcData;
             if (other == null)
+            {
                 return false;
+            }
 
-            // TODO: what about RouteValues?
-            return (ControllerName == other.ControllerName) &&
-                (ControllerAreaName == other.ControllerAreaName) &&
-                (ActionName == other.ActionName) &&
-                (ViewName == other.ViewName) &&
-                (AreaName == other.AreaName) &&
-                (RegionName == other.RegionName) &&
-                (RegionAreaName == other.RegionAreaName);
+            // NOTE: RegionName and RegionAreaName are not included in equality check (these merely carry some additional info).
+            if ((ControllerName != other.ControllerName) ||
+                (ControllerAreaName != other.ControllerAreaName) ||
+                (ActionName != other.ActionName) ||
+                (ViewName != other.ViewName) ||
+                (AreaName != other.AreaName))
+            {
+                return false;
+            }
+
+            if (RouteValues == null)
+            {
+                return other.RouteValues == null;
+            }
+            return RouteValues.SequenceEqual(other.RouteValues);
         }
 
         /// <summary>
@@ -90,9 +119,7 @@ namespace Sdl.Web.Common.Models
                 SafeHashCode(ControllerAreaName) ^
                 SafeHashCode(ActionName) ^
                 SafeHashCode(ViewName) ^
-                SafeHashCode(AreaName) ^
-                SafeHashCode(RegionName) ^
-                SafeHashCode(RegionAreaName)
+                SafeHashCode(AreaName)
                 );
         }
 

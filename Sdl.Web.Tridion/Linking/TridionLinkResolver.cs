@@ -55,7 +55,7 @@ namespace Sdl.Web.Tridion.Linking
         private static string ResolveLink(TcmUri tcmUri, bool resolveToBinary, Localization localization)
         {
             int localizationId = (localization == null) ? 0 : Convert.ToInt32(localization.LocalizationId);
-            switch (tcmUri.ItemType)
+            switch ((ItemType)tcmUri.ItemTypeId)
             {
                 case ItemType.Page:
                     return ResolvePageLink(tcmUri, localizationId);
@@ -86,7 +86,7 @@ namespace Sdl.Web.Tridion.Linking
         {
             int publicationId = localizationId == 0 ? tcmUri.PublicationId : localizationId;
             BinaryLink linker = new BinaryLink(publicationId);
-            Link link = linker.GetLink(tcmUri, null, null, null, false);
+            Link link = linker.GetLink(tcmUri.ToString(), null, null, null, false);
             return link.IsResolved ? link.Url : null;
         }
 

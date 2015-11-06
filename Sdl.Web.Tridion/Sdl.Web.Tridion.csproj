@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Sdl.Web.Tridion</RootNamespace>
     <AssemblyName>Sdl.Web.Tridion</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' Or '$(Configuration)|$(Platform)' == 'Tridion71Debug|AnyCPU'   ">
     <DebugSymbols>true</DebugSymbols>
@@ -49,13 +50,22 @@
   <ItemGroup>
     <Reference Include="DD4T.ContentModel, Version=1.31.0.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\dd4t-update\DD4T.ContentModel.dll</HintPath>
+      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.ContentModel.dll</HintPath>
     </Reference>
     <Reference Include="DD4T.ContentModel.Contracts">
-      <HintPath>..\_references\dd4t-update\DD4T.ContentModel.Contracts.dll</HintPath>
+      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.ContentModel.Contracts.dll</HintPath>
+    </Reference>
+    <Reference Include="DD4T.Core.Contracts">
+      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.Core.Contracts.dll</HintPath>
     </Reference>
     <Reference Include="DD4T.Factories">
-      <HintPath>..\_references\dd4t-update\DD4T.Factories.dll</HintPath>
+      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.Factories.dll</HintPath>
+    </Reference>
+    <Reference Include="DD4T.Providers.SDLTridion2013sp1">
+      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.Providers.SDLTridion2013sp1.dll</HintPath>
+    </Reference>
+    <Reference Include="DD4T.Utils">
+      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.Utils.dll</HintPath>
     </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Drawing" />
@@ -90,7 +100,6 @@
     <Compile Include="Mapping\DefaultModelBuilder.cs" />
     <Compile Include="Mapping\DefaultProvider.cs" />
     <Compile Include="Mapping\DefaultRichTextProcessor.cs" />
-    <Compile Include="Mapping\ExtensionlessLinkFactory.cs" />
     <Compile Include="Mapping\IModelBuilder.cs" />
     <Compile Include="Mapping\MappingData.cs" />
     <Compile Include="Mapping\ModelBuilderPipeline.cs" />
