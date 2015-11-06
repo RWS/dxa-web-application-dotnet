@@ -50,18 +50,17 @@ namespace Sdl.Web.Mvc.Controllers
         /// <summary>
         /// Resolve a item ID into a url and redirect to that URL
         /// </summary>
-        /// <param name="itemId">The item id to resolve</param>
-        /// <param name="localizationId">The site localization in which to resolve the URL</param>
-        /// <param name="defaultItemId"></param>
+        /// <param name="itemId">The ID of the Page to resolve.</param>
+        /// <param name="localizationId">The context Localization in which to resolve.</param>
+        /// <param name="defaultItemId">Optional ID of a Component to resolve in case the Page cannot be resolved.</param>
         /// <param name="defaultPath"></param>
         /// <returns>null - response is redirected if the URL can be resolved</returns>
         public virtual ActionResult Resolve(string itemId, int localizationId, string defaultItemId = null, string defaultPath = null)
         {
-            // TODO TSI-801: Assuming here that itemId/defaultItemId is Item Reference ID (integer) of a Page.
             string url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}-64", localizationId, itemId));
             if (url == null && defaultItemId != null)
             {
-                url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}-64", localizationId, defaultItemId));
+                url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}", localizationId, defaultItemId));
             }
             if (url == null)
             {

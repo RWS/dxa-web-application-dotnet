@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
 using Sdl.Web.Common;
@@ -151,8 +152,9 @@ namespace Sdl.Web.Tridion.Mapping
                 Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
                 // NOTE: not using ModelBuilderPipeline here, but directly calling our own implementation.
-                BuildEntityModel(ref entityModel, cp.Component, modelType, localization);                    
+                BuildEntityModel(ref entityModel, cp.Component, modelType, localization);
 
+                entityModel.XpmMetadata = GetXpmMetadata(cp.Component);
                 entityModel.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
                 entityModel.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
                 entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "true" : "false");
@@ -199,7 +201,6 @@ namespace Sdl.Web.Tridion.Mapping
 
                 entityModel = (EntityModel)CreateViewModel(mappingData);
                 entityModel.Id = GetDxaIdentifierFromTcmUri(component.Id);
-                entityModel.XpmMetadata = GetXpmMetadata(component);
 
                 if (entityModel is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
                 {
@@ -210,6 +211,11 @@ namespace Sdl.Web.Tridion.Mapping
                     mediaItem.MimeType = component.Multimedia.MimeType;
                 }
 
+                if (entityModel is EclItem)
+                {
+                    MapEclItem((EclItem) entityModel, component);
+                }
+
                 if (entityModel is Link)
                 {
                     Link link = (Link)entityModel;
@@ -218,9 +224,103 @@ namespace Sdl.Web.Tridion.Mapping
                         link.Url = SiteConfiguration.LinkResolver.ResolveLink(component.Id);
                     }
                 }
+
+                // Set the Entity Model's default View (if any) after it has been fully initialized.
+                entityModel.MvcData = entityModel.GetDefaultView(localization);
             }
         }
         #endregion
+
+        private static void MapEclItem(EclItem eclItem, IComponent component)
+        {
+            eclItem.EclUri = component.EclId;
+
+            IFieldSet eclExtensionDataFields;
+            if (component.ExtensionData == null || !component.ExtensionData.TryGetValue("ECL", out eclExtensionDataFields))
+            {
+                Log.Warn("Encountered ECL Stub Component without ECL Extension Data: {0}", component.Id);
+                return;
+            }
+
+            eclItem.EclDisplayTypeId = GetFieldValue("DisplayTypeId", eclExtensionDataFields);
+            eclItem.EclTemplateFragment = GetFieldValue("TemplateFragment", eclExtensionDataFields);
+            string eclFileName = GetFieldValue("FileName", eclExtensionDataFields);
+            if (!string.IsNullOrEmpty(eclFileName))
+            {
+                eclItem.FileName = eclFileName;
+            }
+            string eclMimeType = GetFieldValue("MimeType", eclExtensionDataFields);
+            if (!string.IsNullOrEmpty(eclMimeType))
+            {
+                eclItem.MimeType = eclMimeType;
+            }
+
+            IFieldSet eclExternalMetadataFields;
+            if (component.ExtensionData.TryGetValue("ECL-ExternalMetadata", out eclExternalMetadataFields))
+            {
+                eclItem.EclExternalMetadata = MapEclExternalMetadata(eclExternalMetadataFields);
+            }
+        }
+
+
+        private static IDictionary<string, object> MapEclExternalMetadata(IFieldSet fields)
+        {
+            IDictionary<string, object> result = new Dictionary<string, object>();
+            foreach (IField field in fields.Values)
+            {
+                object mappedValue;
+                switch (field.FieldType)
+                {
+                    case FieldType.Number:
+                        mappedValue = GetFieldValue(field.NumericValues);
+                        break;
+
+                    case FieldType.Date:
+                        mappedValue = GetFieldValue(field.DateTimeValues);
+                        break;
+
+                    case FieldType.Embedded:
+                        if (field.EmbeddedValues.Count == 1)
+                        {
+                            mappedValue = MapEclExternalMetadata(field.EmbeddedValues[0]);
+                        }
+                        else
+                        {
+                            mappedValue = field.EmbeddedValues.Select(MapEclExternalMetadata).ToArray();
+                        }
+                        break;
+
+                    default:
+                        mappedValue = GetFieldValue(field.Values);
+                        break;
+                }
+                result.Add(field.Name, mappedValue);
+            }
+            return result;
+        }
+
+        private static object GetFieldValue<T>(IList<T> fieldValues)
+        {
+            switch (fieldValues.Count)
+            {
+                case 0:
+                    return null;
+                case 1:
+                    return fieldValues[0];
+                default:
+                    return fieldValues;
+            }
+        }
+
+        private static string GetFieldValue(string fieldName, IFieldSet fields)
+        {
+            IField field;
+            if (!fields.TryGetValue(fieldName, out field))
+            {
+                return null;
+            }
+            return field.Value;
+        }
 
         private PageModel CreatePageModel(IPage page, Localization localization)
         {
@@ -306,7 +406,7 @@ namespace Sdl.Web.Tridion.Mapping
                     foreach (SemanticProperty info in propertySemantics[pi.Name])
                     {
                         IField field = GetFieldFromSemantics(mappingData, info);
-                        if (field != null && (field.Values.Count > 0 || field.EmbeddedValues.Count > 0))
+                        if (field != null)
                         {
                             pi.SetValue(model, MapFieldValues(field, propertyType, multival, mappingData));
                             xpmPropertyMetadata.Add(pi.Name, GetFieldXPath(field));
@@ -681,7 +781,7 @@ namespace Sdl.Web.Tridion.Mapping
                     //Default is to add the value as plain text
                     else
                     {
-                        string val = component.Fields[fieldname].Value;
+                        string val = GetFieldValuesAsStrings(component.Fields[fieldname]).FirstOrDefault();
                         if (val != null)
                         {
                             values.Add(fieldname, val);
@@ -693,7 +793,7 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 if (!values.ContainsKey(fieldname))
                 {
-                    string val = component.MetadataFields[fieldname].Value;
+                    string val = GetFieldValuesAsStrings(component.MetadataFields[fieldname]).FirstOrDefault();
                     if (val != null)
                     {
                         values.Add(fieldname, val);
@@ -701,6 +801,24 @@ namespace Sdl.Web.Tridion.Mapping
                 }
             }
             return values;
+        }
+
+        private static string[] GetFieldValuesAsStrings(IField field)
+        {
+            switch (field.FieldType)
+            {
+                case FieldType.Number:
+                    return field.NumericValues.Select(v => v.ToString()).ToArray();
+                case FieldType.Date:
+                    return field.DateTimeValues.Select(v => v.ToString()).ToArray();
+                case FieldType.ComponentLink:
+                case FieldType.MultiMediaLink:
+                    return field.LinkedComponentValues.Select(v => v.Id).ToArray();
+                case FieldType.Keyword:
+                    return field.KeywordValues.Select(v => v.Id).ToArray();
+                default:
+                    return field.Values.ToArray();
+            }
         }
 
 
@@ -860,6 +978,15 @@ namespace Sdl.Web.Tridion.Mapping
             else
             {
                 // Fallback if no CT metadata found: try to extract Region View name from CT title
+                if (ct.Title == null)
+                {
+                    // If a DCP has been published with DDT4 1.31 TBBs, it won't be read properly using the DD4T 2.0 ComponentPresentationFactory
+                    // resulting in almost all CT properties being null.
+                    throw new DxaException(
+                        string.Format("No Component Template data available for DCP '{0}/{1}'. Republish the DCP to ensure it uses the new DD4T 2.0 DCP format.",
+                            cp.Component.Id, cp.ComponentTemplate.Id)
+                        );
+                }
                 Match match = Regex.Match(ct.Title, @".*?\[(.+?)\]");
                 if (match.Success)
                 {
@@ -889,12 +1016,11 @@ namespace Sdl.Web.Tridion.Mapping
 
         private static RegionModel GetRegionFromIncludePage(IPage page)
         {
-            string regionName = page.Title;
-
-            MvcData regionMvcData = new MvcData(regionName);
+            // Page Title can be a qualified View Name; we use the unqualified View Name as Region Name.
+            MvcData regionMvcData = new MvcData(page.Title);
             InitializeRegionMvcData(regionMvcData);
 
-            return new RegionModel(regionName)
+            return new RegionModel(regionMvcData.ViewName)
             {
                 MvcData = regionMvcData,
                 XpmMetadata = new Dictionary<string, string>
@@ -1018,7 +1144,16 @@ namespace Sdl.Web.Tridion.Mapping
             else
             {
                 // Fallback if no View name defined in CT Metadata: extract View name from CT Title.
-                viewName = Regex.Replace(ct.Title, @"\[.*\]|\s", String.Empty);
+                if (ct.Title == null)
+                {
+                    // If a DCP has been published with DDT4 1.31 TBBs, it won't be read properly using the DD4T 2.0 ComponentPresentationFactory
+                    // resulting in almost all CT properties being null.
+                    throw new DxaException(
+                        string.Format("No Component Template data available for DCP '{0}/{1}'. Republish the DCP to ensure it uses the new DD4T 2.0 DCP format.",
+                            cp.Component.Id, cp.ComponentTemplate.Id)
+                        );
+                }
+                viewName = Regex.Replace(ct.Title, @"\[.*\]|\s", string.Empty);
             }
 
             MvcData regionMvcData = GetRegionMvcData(cp);
