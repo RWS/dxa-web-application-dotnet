@@ -38,15 +38,6 @@
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Tridion71Debug|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Tridion71Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DD4T.ContentModel, Version=1.31.0.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -71,12 +62,12 @@
     <Reference Include="System.Drawing" />
     <Reference Include="Tridion.ContentDelivery">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.dll</HintPath>
+      <HintPath>..\_references\cd-7.1\Tridion.ContentDelivery.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Tridion.ContentDelivery.AmbientData">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\2013-sp1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
+      <HintPath>..\_references\cd-7.1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
