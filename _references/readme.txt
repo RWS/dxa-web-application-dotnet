@@ -1,1 +1,0 @@
-There is a subfolder here per visual studio build configuration. This allows us to reference different versions of assemblies for different versions of Tridion, plus add switches per build config in things like web.config.
