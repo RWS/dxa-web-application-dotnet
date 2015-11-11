@@ -136,7 +136,16 @@ namespace Sdl.Web.Common.Configuration
             {
                 if (LastRefresh == DateTime.MinValue)
                 {
-                    Load();
+                    try
+                    {
+                        Load();
+                    }
+                    catch (Exception)
+                    {
+                        // If an exception occurs during Loading, the Localization should remain uninitialized.
+                        LastRefresh = DateTime.MinValue;
+                        throw;
+                    }
                 }
             }
         }
