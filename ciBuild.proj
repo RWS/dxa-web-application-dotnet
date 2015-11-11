@@ -42,7 +42,7 @@
       <Message Text="Deploying output to '$(CdTestDeployFolder)'..." />
 
       <ItemGroup>
-        <ConfigFiles Include="$(ProjectDirectory)\Site\*.config" />
+        <ConfigFiles Include="$(ProjectDirectory)\Site\*.config;$(ProjectDirectory)\Site\Global.asax" />
         <ViewFiles Include="$(ProjectDirectory)\Site\Views\**\*" />
         <AreaFiles Include="$(ProjectDirectory)\Site\Areas\**\*" />
         <BinFiles Include="$(ProjectDirectory)\Site\bin\*" />
