@@ -221,8 +221,13 @@ namespace Sdl.Web.Common.Configuration
                     IsHtmlDesignPublished = true;
                     List<string> mediaPatterns = new List<string>();
                     string versionUrl = System.IO.Path.Combine(Path.ToCombinePath(true), @"version.json").Replace("\\", "/");
-                    string versionJson = SiteConfiguration.ContentProvider.GetStaticContentItem(versionUrl, this).GetText();
-                    if (versionJson == null)
+
+                    string versionJson = null;
+                    try
+                    {
+                        versionJson = SiteConfiguration.ContentProvider.GetStaticContentItem(versionUrl, this).GetText();
+                    }
+                    catch (DxaItemNotFoundException)
                     {
                         //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually
                         //in which case we try to load it directly - the HTML Design is thus not published from CMS
@@ -231,6 +236,11 @@ namespace Sdl.Web.Common.Configuration
                         {
                             versionJson = File.ReadAllText(path);
                             IsHtmlDesignPublished = false;
+                            Log.Info("Obtained version.json directly from filesystem.");
+                        }
+                        else
+                        {
+                            throw;
                         }
                     }
                     if (versionJson != null)
