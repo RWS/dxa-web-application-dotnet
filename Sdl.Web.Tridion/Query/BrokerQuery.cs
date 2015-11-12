@@ -80,7 +80,8 @@ namespace Sdl.Web.Tridion.Query
         {
             if (meta.NameValues.Contains(fieldname))
             {
-                return meta.GetValue(fieldname).ToString();
+                object value = meta.GetValue(fieldname);
+                return (value == null) ? null : value.ToString();
             }
             return null;
         }
