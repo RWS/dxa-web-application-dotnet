@@ -98,7 +98,6 @@ namespace Sdl.Web.Tridion
                     throw new DxaUnknownLocalizationException(string.Format("No Localization found with ID '{0}'", localizationId));
                 }
 
-                result.EnsureInitialized();
                 return result;
             }
         }
