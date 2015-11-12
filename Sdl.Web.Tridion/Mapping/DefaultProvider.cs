@@ -91,7 +91,7 @@ namespace Sdl.Web.Tridion.Mapping
                 }
                 if (page == null)
                 {
-                    throw new DxaItemNotFoundException(url);
+                    throw new DxaItemNotFoundException(url, localization.LocalizationId);
                 }
                 FullyLoadDynamicComponentPresentations(page, localization);
 
@@ -128,7 +128,7 @@ namespace Sdl.Web.Tridion.Mapping
                 IComponentPresentation dcp;
                 if (!componentPresentationFactory.TryGetComponentPresentation(out dcp, componentUri, templateUri))
                 {
-                    throw new DxaItemNotFoundException(id);
+                    throw new DxaItemNotFoundException(id, localization.LocalizationId);
                 }
 
                 return ModelBuilderPipeline.CreateEntityModel(dcp, localization);

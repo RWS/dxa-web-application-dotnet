@@ -171,7 +171,7 @@ namespace Sdl.Web.Tridion.Statics
                     {
                         CleanupLocalFile(localFilePath);
                     }
-                    throw new DxaItemNotFoundException(urlPath);
+                    throw new DxaItemNotFoundException(urlPath, localization.LocalizationId);
                 }
 
                 WriteBinaryToFile(binary, localFilePath, dimensions);
