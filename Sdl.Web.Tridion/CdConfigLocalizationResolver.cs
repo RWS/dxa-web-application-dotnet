@@ -5,7 +5,6 @@ using System.Linq;
 using System.Xml.Linq;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Tridion
@@ -13,9 +12,8 @@ namespace Sdl.Web.Tridion
     /// <summary>
     /// Localization Resolver that reads the URL to Publication mapping from cd_dynamic_conf.xml
     /// </summary>
-    public class CdConfigLocalizationResolver : ILocalizationResolver
+    public class CdConfigLocalizationResolver : LocalizationResolver
     {
-        private readonly IDictionary<string, Localization> _knownLocalizations = new Dictionary<string, Localization>();
         private readonly IList<KeyValuePair<Uri, Localization>> _urlToLocalizationMapping = new List<KeyValuePair<Uri, Localization>>();
 
         /// <summary>
@@ -41,14 +39,14 @@ namespace Sdl.Web.Tridion
                     {
                         Uri baseUrl = GetBaseUrl(hostElement);
                         Localization localization;
-                        if (!_knownLocalizations.TryGetValue(publicationId, out localization))
+                        if (!KnownLocalizations.TryGetValue(publicationId, out localization))
                         {
                             localization = new Localization
                             {
                                 LocalizationId = publicationId,
                                 Path = hostElement.Attribute("Path").Value
                             };
-                            _knownLocalizations.Add(publicationId, localization);
+                            KnownLocalizations.Add(publicationId, localization);
                         }
                         _urlToLocalizationMapping.Add(new KeyValuePair<Uri, Localization>(baseUrl, localization));
                     }
@@ -63,7 +61,7 @@ namespace Sdl.Web.Tridion
         /// <param name="url">The URL to resolve.</param>
         /// <returns>A <see cref="Localization"/> instance which base URL matches that of the given URL.</returns>
         /// <exception cref="DxaUnknownLocalizationException">If no matching Localization can be found.</exception>
-        public Localization ResolveLocalization(Uri url)
+        public override Localization ResolveLocalization(Uri url)
         {
             using (new Tracer(url))
             {
@@ -81,39 +79,7 @@ namespace Sdl.Web.Tridion
                 return result;
             }
         }
-
-        /// <summary>
-        /// Gets a <see cref="Localization"/> by its identifier.
-        /// </summary>
-        /// <param name="localizationId">The Localization identifier.</param>
-        /// <returns>A <see cref="Localization"/> instance with the given identifier.</returns>
-        /// <exception cref="DxaUnknownLocalizationException">If no matching Localization can be found.</exception>
-        public Localization GetLocalization(string localizationId)
-        {
-            using (new Tracer(localizationId))
-            {
-                Localization result;
-                if (!_knownLocalizations.TryGetValue(localizationId, out result))
-                {
-                    throw new DxaUnknownLocalizationException(string.Format("No Localization found with ID '{0}'", localizationId));
-                }
-
-                return result;
-            }
-        }
-
         #endregion
-
-
-        private static bool MatchesBaseUrl(Uri url, Uri baseUrl)
-        {
-            return
-                (url.Scheme == baseUrl.Scheme) &&
-                (url.Host == baseUrl.Host) &&
-                (url.Port == baseUrl.Port) &&
-                url.AbsolutePath.StartsWith(baseUrl.AbsolutePath, StringComparison.InvariantCultureIgnoreCase);
-        }
-
 
         private static Uri GetBaseUrl(XElement hostElement)
         {
@@ -127,6 +93,5 @@ namespace Sdl.Web.Tridion
 
             return baseUrlBuilder.Uri;
         }
-
     }
 }

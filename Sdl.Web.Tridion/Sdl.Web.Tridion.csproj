@@ -95,10 +95,14 @@
     <Reference Include="Sdl.Web.Context.OData.Client">
       <HintPath>..\_references\cdaas-8.1\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
+    <Reference Include="Sdl.Web.Delivery.Model">
+      <HintPath>..\_references\cdaas-8.1\Sdl.Web.Delivery.Model.dll</HintPath>
+    </Reference>
     <Reference Include="DD4T.Providers.SDLWeb8">
       <HintPath>..\_references\dd4t-2.0-dxa\DD4T.Providers.SDLWeb8.dll</HintPath>
     </Reference>
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
+    <Compile Include="CdApiLocalizationResolver.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Release_7.1'">
     <Reference Include="Tridion.ContentDelivery">
@@ -125,6 +129,7 @@
     <Compile Include="Context\AdfContextClaimsProvider.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Linking\TridionLinkResolver.cs" />
+    <Compile Include="LocalizationResolver.cs" />
     <Compile Include="Mapping\DD4TFactoryCache.cs" />
     <Compile Include="Mapping\DefaultModelBuilder.cs" />
     <Compile Include="Mapping\DefaultProvider.cs" />
