@@ -44,7 +44,7 @@ namespace Sdl.Web.Tridion.Context
                     EvidenceBuilder evidenceBuilder = new EvidenceBuilder().With("user-agent", httpRequest.UserAgent);
                     if (contextCookie != null && !string.IsNullOrEmpty(contextCookie.Value))
                     {
-                        evidenceBuilder.With("cookie", contextCookie.Value);
+                        evidenceBuilder.With("cookie", string.Format("{0}={1}", contextCookie.Name, contextCookie.Value));
                     }
                     IEvidence evidence = evidenceBuilder.Build();
 
