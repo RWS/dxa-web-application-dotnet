@@ -39,17 +39,18 @@ namespace Sdl.Web.Tridion
         {
             using (new Tracer(url))
             {
-                IPublicationMapping mapping;
+                IPublicationMapping mapping = null;
                 try
                 {
                     // NOTE: we're not using UrlToLocalizationMapping here, because we may match too eagerly on a base URL when there is a matching mapping with a more specific URL.
                     mapping = _mappingsRetriever.GetPublicationMapping(url.ToString());
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw new DxaUnknownLocalizationException(string.Format("No matching Localization found for URL '{0}'", url));
+                    Log.Warn("Exception occurred in DynamicMappingsRetriever.GetPublicationMapping: {0}", ex.ToString());
+                    // Let mapping be null, we'll handle it below.
                 }
-                if (mapping == null)
+                if (mapping == null || mapping.Port != url.Port.ToString()) // See CRQ-1195
                 {
                     throw new DxaUnknownLocalizationException(string.Format("No matching Localization found for URL '{0}'", url));
                 }
