@@ -18,6 +18,8 @@ namespace Sdl.Web.Tridion.Context
     /// </remarks>
     public class ContextServiceClaimsProvider : IContextClaimsProvider
     {
+        private static ODataContextEngine _contextEngineClient = new ODataContextEngine();
+
         #region IContextClaimsProvider Members
 
         /// <summary>
@@ -48,8 +50,7 @@ namespace Sdl.Web.Tridion.Context
                     }
                     IEvidence evidence = evidenceBuilder.Build();
 
-                    ODataContextEngine contextEngineClient = new ODataContextEngine();
-                    contextMap = contextEngineClient.Resolve(evidence);
+                    contextMap = _contextEngineClient.Resolve(evidence);
                 }
                 catch (Exception ex)
                 {
