@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Dynamic;
 using DD4T.ContentModel.Contracts.Caching;
 using DD4T.ContentModel.Contracts.Configuration;
 using DD4T.ContentModel.Contracts.Logging;
@@ -7,11 +6,16 @@ using DD4T.ContentModel.Contracts.Providers;
 using DD4T.ContentModel.Contracts.Resolvers;
 using DD4T.ContentModel.Factories;
 using DD4T.Factories;
-using DD4T.Providers.SDLTridion2013sp1;
 using DD4T.Utils;
 using DD4T.Utils.Caching;
 using DD4T.Utils.Logging;
 using Sdl.Web.Common.Configuration;
+
+#if TRIDION_71
+    using DD4T.Providers.SDLTridion2013sp1;
+#else
+    using DD4T.Providers.SDLWeb8;
+#endif
 
 namespace Sdl.Web.Tridion.Mapping
 {
