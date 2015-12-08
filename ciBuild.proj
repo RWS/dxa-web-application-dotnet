@@ -37,8 +37,9 @@
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
 
-		<!-- Build the Site project for SDL Web 8 (Release/Debug) only; there is only difference in Sdl.Web.Tridion artifacts (see above). -->
+		<!-- Build the Site project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1); there is only difference in Sdl.Web.Tridion artifacts (see above). -->
         <MSBuild Projects="$(ProjectDirectory)\Site\Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
+        <MSBuild Projects="$(ProjectDirectory)\Site\Site.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
     </Target>
 
      <!-- =============================================================================================================================================  -->
