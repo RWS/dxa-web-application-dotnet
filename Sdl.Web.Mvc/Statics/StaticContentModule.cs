@@ -60,6 +60,12 @@ namespace Sdl.Web.Mvc.Statics
                     Log.Error(ex);
                     SendNotFoundResponse(ex.Message, response);
                 }
+                catch (Exception ex)
+                {
+                    // Other exceptions: log and let ASP.NET handle them
+                    Log.Error(ex);
+                    throw;
+                }
 
 
                 // Prevent direct access to BinaryData folder
