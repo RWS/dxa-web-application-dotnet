@@ -54,6 +54,13 @@ namespace Sdl.Web.Mvc.Statics
                 {
                     SendNotFoundResponse(ex.Message, response);
                 }
+                catch (DxaItemNotFoundException  ex)
+                {
+                    // Localization has been resolved, but could not be initialized (e.g. Version.json not found)
+                    Log.Error(ex);
+                    SendNotFoundResponse(ex.Message, response);
+                }
+
 
                 // Prevent direct access to BinaryData folder
                 if (url.StartsWith("/" + SiteConfiguration.StaticsFolder + "/"))
