@@ -609,14 +609,26 @@ namespace Sdl.Web.Mvc.Html
                     );
             }
 
-            Expression<Func<object>> entityExpression = Expression.Lambda<Func<object>>(memberExpression.Expression);
-            Func<object> entityLambda = entityExpression.Compile();
-            object entity = entityLambda.Invoke();
-            EntityModel entityModel = entity as EntityModel;
+            object subject;
+            MemberExpression subjectExpression = memberExpression.Expression as MemberExpression;
+            if (subjectExpression != null && subjectExpression.Member.Name == "Model")
+            {
+                // Often the subject of the property expression is the current Model. For example: () => Model.Headline
+                // This is a shortcut to prevent having to compile the subject expression for that case.
+                subject = htmlHelper.ViewData.Model;
+            }
+            else
+            {
+                Expression<Func<object>> entityExpression = Expression.Lambda<Func<object>>(memberExpression.Expression);
+                Func<object> entityLambda = entityExpression.Compile();
+                subject = entityLambda.Invoke();
+            }
+
+            EntityModel entityModel = subject as EntityModel;
             if (entityModel == null)
             {
                 throw new DxaException(
-                    string.Format("Unexpected type used in DxaPropertyMarkup expression: {0}. Expecting a lambda which evaluates to an Entity Model property.", entity)
+                    string.Format("Unexpected type used in DxaPropertyMarkup expression: {0}. Expecting a lambda which evaluates to an Entity Model property.", subject)
                     );
             }
 
