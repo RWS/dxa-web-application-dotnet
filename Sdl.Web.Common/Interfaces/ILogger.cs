@@ -11,5 +11,7 @@ namespace Sdl.Web.Common.Interfaces
         void Error(string messageFormat, params object[] parameters);
         void Error(Exception ex, string messageFormat, params object[] parameters);
         void Error(Exception ex);
+
+        bool IsTracingEnabled { get; }
     }
 }
