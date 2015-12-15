@@ -132,10 +132,23 @@ namespace Sdl.Web.Mvc.Controllers
                     for (int i = 0; i < region.Entities.Count; i++)
                     {
                         EntityModel entity = region.Entities[i];
-                        if (entity != null && entity.MvcData != null)
+                        if (entity == null || entity.MvcData == null)
                         {
-                            region.Entities[i] = EnrichEntityModel(entity);
+                            continue;
                         }
+
+                        EntityModel enrichedEntityModel;
+                        try
+                        {
+                            enrichedEntityModel = EnrichEntityModel(entity);
+                        }
+                        catch (Exception ex)
+                        {
+                            // If there is a problem enriching an Entity, we replace it with an ExceptionEntity which holds the error details and carry on.
+                            Log.Error(ex);
+                            enrichedEntityModel = new ExceptionEntity(ex);
+                        }
+                        region.Entities[i] = enrichedEntityModel;
                     }
                 }
             }

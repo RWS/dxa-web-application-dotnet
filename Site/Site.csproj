@@ -207,6 +207,7 @@
     <Content Include="Areas\Core\Views\Entity\Image.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Areas\Core\Views\Entity\EntityError.cshtml" />
     <None Include="Web.Release_7.1.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
 using Sdl.Web.Common;
@@ -14,7 +13,6 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Common.Models.Common;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Extensions;
 using IPage = DD4T.ContentModel.IPage;
@@ -83,14 +81,9 @@ namespace Sdl.Web.Tridion.Mapping
                     }
                     catch (Exception ex)
                     {
-                        //if there is a problem mapping the item, we replace it with an exception entity
-                        //and carry on processing - this should not cause a failure in the rendering of
-                        //the page as a whole
+                        // If there is a problem mapping an Entity, we replace it with an ExceptionEntity which holds the error details and carry on.
                         Log.Error(ex);
-                        entity = new ExceptionEntity(ex)
-                        {
-                            MvcData = GetMvcData(cp) // TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
-                        };
+                        entity = new ExceptionEntity(ex);
                     }
 
                     if (conditionalEntityEvaluator == null || conditionalEntityEvaluator.IncludeEntity(entity))
