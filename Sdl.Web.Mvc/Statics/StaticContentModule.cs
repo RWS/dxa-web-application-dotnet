@@ -131,6 +131,12 @@ namespace Sdl.Web.Mvc.Statics
                 {
                     SendNotFoundResponse(ex.Message, response);
                 }
+                catch (Exception ex)
+                {
+                    // Other exceptions: log and let ASP.NET handle them
+                    Log.Error(ex);
+                    throw;
+                }
 
                 // Terminate the HTTP pipeline.
                 application.CompleteRequest();
