@@ -150,7 +150,7 @@ namespace Sdl.Web.Tridion.Mapping
                 string localFilePath = BinaryFileManager.Instance.GetCachedFile(urlPath, localization);
  
                 return new StaticContentItem(
-                    new FileStream(localFilePath, FileMode.Open),
+                    new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan),
                     MimeMapping.GetMimeMapping(localFilePath),
                     File.GetLastWriteTime(localFilePath), 
                     Encoding.UTF8
