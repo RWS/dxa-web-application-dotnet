@@ -114,7 +114,7 @@ namespace Sdl.Web.Mvc.Statics
                     using (StaticContentItem staticContentItem = SiteConfiguration.ContentProvider.GetStaticContentItem(urlPath, localization))
                     {
                         DateTime lastModified = staticContentItem.LastModified;
-                        if (lastModified < ifModifiedSince)
+                        if (lastModified <= ifModifiedSince.AddSeconds(1))
                         {
                             Log.Debug("Static content item last modified at {0} => Sending HTTP 304 (Not Modified).", lastModified);
                             response.StatusCode = (int) HttpStatusCode.NotModified;
@@ -123,6 +123,8 @@ namespace Sdl.Web.Mvc.Statics
                         else
                         {
                             response.ContentType = staticContentItem.ContentType;
+                            response.AppendHeader("Last-Modified", lastModified.ToUniversalTime().ToString("r"));
+                            response.AppendHeader("Cache-Control", "public");
                             staticContentItem.GetContentStream().CopyTo(response.OutputStream);
                         }
                     }
