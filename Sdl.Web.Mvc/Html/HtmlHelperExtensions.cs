@@ -193,7 +193,7 @@ namespace Sdl.Web.Mvc.Html
                 //need to know their width
                 if (containerSize == 0)
                 {
-                    containerSize = helper.ViewBag.ContainerSize;
+                    containerSize = (int) helper.ViewData[DxaViewDataItems.ContainerSize];
                 }
 
                 return new MvcHtmlString(media.ToHtml(widthFactor, aspect, cssClass, containerSize));
@@ -286,7 +286,7 @@ namespace Sdl.Web.Mvc.Html
                 string controllerAreaName = mvcData.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName();
 
                 RouteValueDictionary parameters = new RouteValueDictionary();
-                int parentContainerSize = htmlHelper.ViewBag.ContainerSize;
+                int parentContainerSize = (int) htmlHelper.ViewData[DxaViewDataItems.ContainerSize];
                 if (parentContainerSize == 0)
                 {
                     parentContainerSize = SiteConfiguration.MediaHelper.GridSize;

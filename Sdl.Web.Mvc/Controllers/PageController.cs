@@ -21,7 +21,12 @@ namespace Sdl.Web.Mvc.Controllers
         [FormatData]
         public virtual ActionResult Page(string pageUrl)
         {
-            bool addIncludes = ViewBag.AddIncludes ?? true;
+            bool addIncludes = true;
+            object addIncludesViewData;
+            if (ViewData.TryGetValue(DxaViewDataItems.AddIncludes, out addIncludesViewData))
+            {
+                addIncludes = (bool) addIncludesViewData;
+            }
 
             PageModel pageModel;
             try

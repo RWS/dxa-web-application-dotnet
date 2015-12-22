@@ -120,13 +120,13 @@ namespace Sdl.Web.Mvc.Controllers
         {
 #pragma warning disable 618
             // To support (deprecated) use of ViewBag.Renderer in Views.
-            ViewBag.Renderer = Renderer;
+            ViewData[DxaViewDataItems.Renderer] = Renderer;
 #pragma warning restore 618
 
-            ViewBag.ContainerSize = containerSize;
+            ViewData[DxaViewDataItems.ContainerSize] = containerSize;
             if (viewData != null)
             {
-                ViewBag.RegionName = viewData.RegionName;
+                ViewData[DxaViewDataItems.RegionName] = viewData.RegionName;
                 //This enables us to jump areas when rendering sub-views - for example from rendering a region in Core to an entity in ModuleX
                 ControllerContext.RouteData.DataTokens["area"] = viewData.AreaName;
             }

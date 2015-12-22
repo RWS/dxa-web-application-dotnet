@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
-using System.Web.Helpers;
-using System.Web.Script.Serialization;
+using Newtonsoft.Json;
 using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Models.Data;
 
 namespace Sdl.Web.Common.Configuration
 {
@@ -18,21 +19,16 @@ namespace Sdl.Web.Common.Configuration
     /// </summary>
     public class Localization
     {
-        private string _path;
+        private LocalizationData _data = new LocalizationData();
         private string _culture;
         private Regex _staticContentUrlRegex;
         private Dictionary<string, Dictionary<string, string>> _config;
+        private IDictionary _resources;
         private readonly object _loadLock = new object();
 
         public string Path {
-            get
-            {
-                return _path;
-            }
-            set
-            {
-                _path = value != null && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value;
-            }
+            get { return _data.Path; }
+            set { _data.Path = value != null && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value; }
         }
         
         public string Culture { 
@@ -64,14 +60,14 @@ namespace Sdl.Web.Common.Configuration
 
         public string Language
         {
-            get; 
-            set;
+            get { return _data.Language; } 
+            set { _data.Language = value; }
         }
 
         public string LocalizationId
         {
-            get; 
-            set;
+            get { return _data.Id; }
+            set { _data.Id = value; }
         }
 
         public string StaticContentUrlPattern
@@ -82,8 +78,8 @@ namespace Sdl.Web.Common.Configuration
 
         public bool IsStaging
         {
-            get; 
-            set;
+            get { return _data.IsXpmEnabled; }
+            set { _data.IsXpmEnabled = value; }
         }
 
         public bool IsHtmlDesignPublished
@@ -94,8 +90,8 @@ namespace Sdl.Web.Common.Configuration
 
         public bool IsDefaultLocalization
         {
-            get; 
-            set;
+            get { return _data.IsDefaultLocalization; }
+            set { _data.IsDefaultLocalization = value; }
         }
 
         public string Version
@@ -209,6 +205,41 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
+        /// <summary>
+        /// Gets resources.
+        /// </summary>
+        /// <param name="sectionName">Optional name of the section for which to get resource. If not specified (or <c>null</c>), all resources are obtained.</param>
+        public IDictionary GetResources(string sectionName = null)
+        {
+            // TODO PERF: use sectionName to JIT load resources 
+            if (_resources == null)
+            {
+                lock (_loadLock)
+                {
+                    if (_resources == null)
+                    {
+                        LoadResources();
+                    }
+                }
+            }
+            return _resources;
+        }
+
+
+        private void SetData(LocalizationData data)
+        {
+            LocalizationData oldData = _data;
+            _data = data;
+            if (data.Id == null)
+            {
+                _data.Id = oldData.Id;
+            }
+            if (data.Path == null)
+            {
+                _data.Path = oldData.Path;
+            }
+        }
+
         private void Load() 
         {
             using (new Tracer(this))
@@ -220,9 +251,9 @@ namespace Sdl.Web.Common.Configuration
 
                     IsHtmlDesignPublished = true;
                     List<string> mediaPatterns = new List<string>();
-                    string versionUrl = System.IO.Path.Combine(Path.ToCombinePath(true), @"version.json").Replace("\\", "/");
 
-                    string versionJson = null;
+                    string versionUrl = System.IO.Path.Combine(Path.ToCombinePath(true), @"version.json").Replace("\\", "/");
+                    string versionJson;
                     try
                     {
                         versionJson = SiteConfiguration.ContentProvider.GetStaticContentItem(versionUrl, this).GetText();
@@ -231,78 +262,65 @@ namespace Sdl.Web.Common.Configuration
                     {
                         //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually
                         //in which case we try to load it directly - the HTML Design is thus not published from CMS
-                        string path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SiteConfiguration.SystemFolder, @"assets\version.json");
-                        if (File.Exists(path))
+                        string versionJsonPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SiteConfiguration.SystemFolder, @"assets\version.json");
+                        if (File.Exists(versionJsonPath))
                         {
-                            versionJson = File.ReadAllText(path);
+                            versionJson = File.ReadAllText(versionJsonPath);
                             IsHtmlDesignPublished = false;
-                            Log.Info("Obtained version.json directly from filesystem.");
+                            Log.Info("Obtained '{0}' directly from file system.", versionJsonPath);
                         }
                         else
                         {
                             throw;
                         }
                     }
-                    if (versionJson != null)
+                    Version = JsonConvert.DeserializeObject<VersionData>(versionJson).Version;
+
+                    string bootstrapUrl = System.IO.Path.Combine(Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"config\_all.json").Replace("\\", "/");
+                    string bootstrapJson = SiteConfiguration.ContentProvider.GetStaticContentItem(bootstrapUrl, this).GetText();
+                    SetData(JsonConvert.DeserializeObject<LocalizationData>(bootstrapJson));
+
+                    if (_data.MediaRoot != null)
                     {
-                        Version = Json.Decode(versionJson).version;
+                        string mediaRoot = _data.MediaRoot;
+                        if (!mediaRoot.EndsWith("/"))
+                        {
+                            mediaRoot += "/";
+                        }
+                        mediaPatterns.Add(string.Format("^{0}.*", mediaRoot));
                     }
-                    dynamic bootstrapJson = GetConfigBootstrapJson();
-                    if (bootstrapJson != null)
+
+                    if (_data.SiteLocalizations != null)
                     {
-                        //The _all.json file contains a reference to all other configuration files
-                        if (bootstrapJson.defaultLocalization != null && bootstrapJson.defaultLocalization)
+                        ILocalizationResolver localizationResolver = SiteConfiguration.LocalizationResolver;
+                        SiteLocalizations = new List<Localization>();
+                        foreach (LocalizationData siteLocalizationData in _data.SiteLocalizations)
                         {
-                            IsDefaultLocalization = true;
-                        }
-                        if (bootstrapJson.staging != null && bootstrapJson.staging)
-                        {
-                            IsStaging = true;
-                        }
-                        if (bootstrapJson.mediaRoot != null)
-                        {
-                            string mediaRoot = bootstrapJson.mediaRoot;
-                            if (!mediaRoot.EndsWith("/"))
+                            try
                             {
-                                mediaRoot += "/";
-                            }
-                            mediaPatterns.Add(String.Format("^{0}{1}.*", mediaRoot, mediaRoot.EndsWith("/") ? String.Empty : "/"));
-                        }
-                        if (bootstrapJson.siteLocalizations != null)
-                        {
-                            ILocalizationResolver localizationResolver = SiteConfiguration.LocalizationResolver;
-                            SiteLocalizations = new List<Localization>();
-                            foreach (dynamic item in bootstrapJson.siteLocalizations)
-                            {
-                                string localizationId = item.id ?? item;
-                                try
+                                Localization siteLocalization = localizationResolver.GetLocalization(siteLocalizationData.Id);
+                                if (siteLocalization.LastRefresh == DateTime.MinValue)
                                 {
-                                    Localization siteLocalization = localizationResolver.GetLocalization(localizationId);
-                                    siteLocalization.IsDefaultLocalization = item.isMaster ?? false;
-                                    SiteLocalizations.Add(siteLocalization);
+                                    siteLocalization.SetData(siteLocalizationData);
                                 }
-                                catch (DxaUnknownLocalizationException)
-                                {
-                                    Log.Error("Unknown localization ID '{0}' specified in SiteLocalizations for Localization [{1}].", localizationId, this);
-                                }
+                                SiteLocalizations.Add(siteLocalization);
                             }
-                        }
-                        if (IsHtmlDesignPublished)
-                        {
-                            mediaPatterns.Add("^/favicon.ico");
-                            mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*", Path, SiteConfiguration.SystemFolder));
-                        }
-                        if (bootstrapJson.files != null)
-                        {
-                            List<string> configFiles = new List<string>();
-                            foreach (string file in bootstrapJson.files)
+                            catch (DxaUnknownLocalizationException)
                             {
-                                configFiles.Add(file);
+                                Log.Error("Unknown localization ID '{0}' specified in SiteLocalizations for Localization [{1}].", siteLocalizationData.Id, this);
                             }
-                            LoadConfig(configFiles);
                         }
-                        mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$", Path, SiteConfiguration.SystemFolder));
                     }
+
+                    LoadConfig();
+
+                    if (IsHtmlDesignPublished)
+                    {
+                        mediaPatterns.Add("^/favicon.ico");
+                        mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*", Path, SiteConfiguration.SystemFolder));
+                    }
+                    mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$", Path, SiteConfiguration.SystemFolder));
+
                     StaticContentUrlPattern = String.Join("|", mediaPatterns);
                     _staticContentUrlRegex = new Regex(StaticContentUrlPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -314,25 +332,49 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
-
-        private dynamic GetConfigBootstrapJson()
+        private void LoadConfig()
         {
-            string url = System.IO.Path.Combine(Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"config\_all.json").Replace("\\", "/");
-            string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(url, this).GetText();
-            return Json.Decode(jsonData);
+            using (new Tracer(this))
+            {
+                if (_data.ConfigStaticContentUrls == null)
+                {
+                    Log.Warn("No Config URLs defined for Localization [{0}]", this);
+                    return;
+                }
+
+                _config = new Dictionary<string, Dictionary<string, string>>();
+                foreach (string configItemUrl in _data.ConfigStaticContentUrls)
+                {
+                    string sectionName = configItemUrl.Substring(configItemUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                    sectionName = sectionName.Substring(0, sectionName.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
+                    string configJson = SiteConfiguration.ContentProvider.GetStaticContentItem(configItemUrl, this).GetText();
+                    Dictionary<string, string> settings = JsonConvert.DeserializeObject<Dictionary<string, string>>(configJson);
+                    _config.Add(sectionName, settings);
+                }
+            }
         }
 
-
-        private void LoadConfig(IEnumerable<string> configItemUrls)
+        private void LoadResources()
         {
-            _config = new Dictionary<string, Dictionary<string, string>>();
-            foreach (string configItemUrl in configItemUrls)
+            using (new Tracer(this))
             {
-                string sectionName = configItemUrl.Substring(configItemUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
-                sectionName = sectionName.Substring(0, sectionName.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(configItemUrl, this).GetText();
-                Dictionary<string, string> settings = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(jsonData);
-                _config.Add(sectionName, settings);
+                string resourcesBootstrapUrl = System.IO.Path.Combine(Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"resources\_all.json").Replace("\\", "/");
+                string resourcesBootstrapJson = SiteConfiguration.ContentProvider.GetStaticContentItem(resourcesBootstrapUrl, this).GetText();
+                ResourcesData resourcesData = JsonConvert.DeserializeObject<ResourcesData>(resourcesBootstrapJson);
+
+                _resources = new Hashtable();
+                foreach (string staticContentItemUrl in resourcesData.StaticContentItemUrls)
+                {
+                    string type = staticContentItemUrl.Substring(staticContentItemUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                    type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
+                    string resourcesJson = SiteConfiguration.ContentProvider.GetStaticContentItem(staticContentItemUrl, this).GetText();
+                    IDictionary<string, object> resources = JsonConvert.DeserializeObject<Dictionary<string, object>>(resourcesJson);
+                    foreach (KeyValuePair<string, object> resource in resources)
+                    {
+                        //we ensure resource key uniqueness by adding the type (which comes from the filename)
+                        _resources.Add(String.Format("{0}.{1}", type, resource.Key), resource.Value);
+                    }
+                }
             }
         }
 

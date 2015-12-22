@@ -866,7 +866,8 @@ namespace Sdl.Web.Tridion.Mapping
                     }
                 }
             }
-            string titlePostfix = GetResource("core.pageTitleSeparator") + GetResource("core.pageTitlePostfix");
+            IDictionary coreResources = localization.GetResources("core");
+            string titlePostfix = coreResources["core.pageTitleSeparator"].ToString() + coreResources["core.pageTitlePostfix"].ToString();
             //if we still dont have a title, use the page title
             if (title == null)
             {
@@ -874,7 +875,7 @@ namespace Sdl.Web.Tridion.Mapping
                 // Index and Default are not a proper titles for an HTML page
                 if (title.ToLowerInvariant().Equals("index") || title.ToLowerInvariant().Equals("default"))
                 {
-                    title = GetResource("core.defaultPageTitle");
+                    title = coreResources["core.defaultPageTitle"].ToString();
                 }
             }
             meta.Add("twitter:card", "summary");
@@ -935,15 +936,6 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
                 
-        private string GetResource(string name)
-        {
-            if (_resourceProvider == null)
-            {
-                _resourceProvider = new ResourceProvider();
-            }
-            return _resourceProvider.GetObject(name, CultureInfo.CurrentUICulture).ToString();
-        }
-
         private static void InitializeRegionMvcData(MvcData regionMvcData)
         {
             if (String.IsNullOrEmpty(regionMvcData.ControllerName))
