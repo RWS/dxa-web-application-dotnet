@@ -18,7 +18,26 @@ namespace Sdl.Web.Tridion.Context
     /// </remarks>
     public class ContextServiceClaimsProvider : IContextClaimsProvider
     {
-        private static readonly ODataContextEngine _contextEngineClient = new ODataContextEngine();
+        private static readonly ODataContextEngine _contextEngineClient;
+
+        /// <summary>
+        /// Class constructor
+        /// </summary>
+        static ContextServiceClaimsProvider()
+        {
+            using (new Tracer())
+            {
+                try
+                {
+                    _contextEngineClient = new ODataContextEngine();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex);
+                    throw;
+                }
+            }
+        }
 
         #region IContextClaimsProvider Members
 
