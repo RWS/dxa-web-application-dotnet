@@ -7,6 +7,7 @@ using System.Web;
 using System.Web.Script.Serialization;
 using DD4T.ContentModel;
 using DD4T.ContentModel.Factories;
+using Newtonsoft.Json;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
@@ -211,7 +212,7 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", url);
                     string navigationJsonString = GetPageContent(url, localization);
-                    result = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
+                    result = JsonConvert.DeserializeObject<SitemapItem>(navigationJsonString);
                     HttpContext.Current.Items[cacheKey] = result;
                 }
                 else
@@ -399,7 +400,7 @@ namespace Sdl.Web.Tridion.Mapping
         {
             List<IPage> result = new List<IPage>();
             string[] pageTemplateTcmUriParts = page.PageTemplate.Id.Split('-');
-            IEnumerable<string> includePageUrls = SiteConfiguration.GetIncludePageUrls(pageTemplateTcmUriParts[1], localization);
+            IEnumerable<string> includePageUrls = localization.GetIncludePageUrls(pageTemplateTcmUriParts[1]);
             foreach (string includePageUrl in includePageUrls)
             {
                 IPage includePage = GetPage(SiteConfiguration.LocalizeUrl(includePageUrl, localization), localization);

@@ -38,8 +38,6 @@ namespace Sdl.Web.Tridion.Mapping
         private const string RegionForPageTitleComponent = "Main";
         private const string ComponentXmlFieldNameForPageTitle = "headline";
 
-        private ResourceProvider _resourceProvider;
-
         #region IModelBuilder members
 
         public virtual void BuildPageModel(ref PageModel pageModel, IPage page, IEnumerable<IPage> includes, Localization localization)

@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
 using Newtonsoft.Json;
-using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models.Data;
 
 namespace Sdl.Web.Common.Configuration
@@ -24,6 +24,12 @@ namespace Sdl.Web.Common.Configuration
         private Regex _staticContentUrlRegex;
         private Dictionary<string, Dictionary<string, string>> _config;
         private IDictionary _resources;
+        private IDictionary<string, string[]> _includePageUrls;
+        private XpmRegion[] _xpmRegionConfiguration;
+        private IDictionary<string, XpmRegion> _xpmRegionConfigurationMap;
+        private SemanticSchema[] _semanticSchemas;
+        private IDictionary<string, SemanticSchema> _semanticSchemaMap;
+        private SemanticVocabulary[] _semanticVocabularies;
         private readonly object _loadLock = new object();
 
         public string Path {
@@ -155,15 +161,21 @@ namespace Sdl.Web.Common.Configuration
             {
                 if (allSiteLocalizations)
                 {
-                    // Reload all Site Localizations (variants)
+                    // Refresh all Site Localizations (variants)
                     foreach (Localization localization in SiteLocalizations)
                     {
-                        localization.Load();
+                        localization.Refresh();
                     }
                 }
                 else
                 {
-                    // Reload only this Localization
+                    // Refresh only this Localization
+                    _config = null;
+                    _resources = null;
+                    _includePageUrls = null;
+                    _xpmRegionConfiguration = null;
+                    _semanticSchemas = null;
+                    _semanticVocabularies = null;
                     Load();
                 }
             }
@@ -242,6 +254,124 @@ namespace Sdl.Web.Common.Configuration
             return string.Format("{0}/{1}/{2}/{3}", Path, SiteConfiguration.SystemFolder, Version, relativePath);
         }
 
+        /// <summary>
+        /// Gets the include Page URLs for a given Page Type/Template.
+        /// </summary>
+        /// <param name="pageTypeIdentifier">The Page Type Identifier.</param>
+        /// <param name="localization">The Localization</param>
+        /// <returns>The URLs of Include Pages</returns>
+        /// <remarks>
+        /// The concept of Include Pages will be removed in a future version of DXA.
+        /// As of DXA 1.1 Include Pages are represented as <see cref="Sdl.Web.Common.Models.PageModel.Regions"/>.
+        /// Implementations should avoid using this method directly.
+        /// </remarks>
+        public IEnumerable<string> GetIncludePageUrls(string pageTypeIdentifier)
+        {
+            using (new Tracer(pageTypeIdentifier, this))
+            {
+                if (_includePageUrls == null)
+                {
+                    LoadStaticContentItem("mappings/includes.json", ref _includePageUrls);
+                }
+
+                string[] result;
+                if (!_includePageUrls.TryGetValue(pageTypeIdentifier, out result))
+                {
+                    throw new DxaException(
+                        String.Format("Localization [{0}] does not contain includes for Page Type '{1}'. {2}", this, pageTypeIdentifier, Constants.CheckSettingsUpToDate)
+                        );
+                }
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Gets XPM Region configuration for a given Region name.
+        /// </summary>
+        /// <param name="regionName">The Region name</param>
+        /// <returns>The XPM Region configuration or <c>null</c> if no configuration is found.</returns>
+        public XpmRegion GetXpmRegionConfiguration(string regionName)
+        {
+            // This method is called a lot, so intentionally no Tracer here.
+            if (_xpmRegionConfiguration == null)
+            {
+                LoadStaticContentItem("mappings/regions.json", ref _xpmRegionConfiguration);
+                _xpmRegionConfigurationMap = _xpmRegionConfiguration.ToDictionary(xpmRegion => xpmRegion.Region);
+            }
+
+            XpmRegion result;
+            if (!_xpmRegionConfigurationMap.TryGetValue(regionName, out result))
+            {
+                Log.Warn("XPM Region '{0}' is not defined in Localization [{1}].", regionName, this);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets Semantic Schema for a given schema identifier.
+        /// </summary>
+        /// <param name="schemaId">The schema identifier.</param>
+        /// <returns>The Semantic Schema configuration.</returns>
+        public SemanticSchema GetSemanticSchema(string schemaId)
+        {
+            // This method is called a lot, so intentionally no Tracer here.
+            if (_semanticSchemas == null)
+            {
+                LoadStaticContentItem("mappings/schemas.json", ref _semanticSchemas);
+                _semanticSchemaMap = _semanticSchemas.ToDictionary(ss => ss.Id.ToString(CultureInfo.InvariantCulture));
+                foreach (SemanticSchema semanticSchema in _semanticSchemas)
+                {
+                    semanticSchema.Localization = this;
+                }
+            }
+
+            SemanticSchema result;
+            if (!_semanticSchemaMap.TryGetValue(schemaId, out result))
+            {
+                throw new DxaException(
+                    string.Format("Semantic schema '{0}' not defined in Localization [{1}]. {2}",schemaId, this, Constants.CheckSettingsUpToDate)
+                    );
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the Semantic Vocabularies (indexed by their prefix)
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<SemanticVocabulary> GetSemanticVocabularies()
+        {
+            // This method is called a lot, so intentionally no Tracer here.
+            if (_semanticVocabularies == null)
+            {
+                LoadStaticContentItem("mappings/vocabularies.json", ref _semanticVocabularies);
+            }
+            return _semanticVocabularies;
+        } 
+
+
+        private void LoadStaticContentItem<T>(string relativeUrl, ref T deserializedObject)
+        {
+            using (new Tracer(relativeUrl, deserializedObject, this))
+            {
+                lock (_loadLock)
+                {
+                    // Because of "optimistic locking", the object may already have been loaded at this point.
+                    if (deserializedObject != null)
+                    {
+                        return;
+                    }
+
+                    string urlPath = (relativeUrl.StartsWith("/")) ? Path + relativeUrl : string.Format("{0}/{1}/{2}", Path, SiteConfiguration.SystemFolder, relativeUrl);
+                    string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(urlPath, this).GetText();
+                    deserializedObject = JsonConvert.DeserializeObject<T>(jsonData);
+                }
+            }
+        }
+
         private void SetData(LocalizationData data)
         {
             LocalizationData oldData = _data;
@@ -268,11 +398,10 @@ namespace Sdl.Web.Common.Configuration
                     IsHtmlDesignPublished = true;
                     List<string> mediaPatterns = new List<string>();
 
-                    string versionUrl = System.IO.Path.Combine(Path.ToCombinePath(true), @"version.json").Replace("\\", "/");
-                    string versionJson;
+                    VersionData versionData = null;
                     try
                     {
-                        versionJson = SiteConfiguration.ContentProvider.GetStaticContentItem(versionUrl, this).GetText();
+                        LoadStaticContentItem("/version.json", ref versionData);
                     }
                     catch (DxaItemNotFoundException)
                     {
@@ -281,7 +410,8 @@ namespace Sdl.Web.Common.Configuration
                         string versionJsonPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SiteConfiguration.SystemFolder, @"assets\version.json");
                         if (File.Exists(versionJsonPath))
                         {
-                            versionJson = File.ReadAllText(versionJsonPath);
+                            string versionJson = File.ReadAllText(versionJsonPath);
+                            versionData = JsonConvert.DeserializeObject<VersionData>(versionJson);
                             IsHtmlDesignPublished = false;
                             Log.Info("Obtained '{0}' directly from file system.", versionJsonPath);
                         }
@@ -290,11 +420,11 @@ namespace Sdl.Web.Common.Configuration
                             throw;
                         }
                     }
-                    Version = JsonConvert.DeserializeObject<VersionData>(versionJson).Version;
+                    Version = versionData.Version;
 
-                    string bootstrapUrl = System.IO.Path.Combine(Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"config\_all.json").Replace("\\", "/");
-                    string bootstrapJson = SiteConfiguration.ContentProvider.GetStaticContentItem(bootstrapUrl, this).GetText();
-                    SetData(JsonConvert.DeserializeObject<LocalizationData>(bootstrapJson));
+                    LocalizationData localizationData = null;
+                    LoadStaticContentItem("config/_all.json", ref localizationData);
+                    SetData(localizationData);
 
                     if (_data.MediaRoot != null)
                     {
@@ -350,6 +480,7 @@ namespace Sdl.Web.Common.Configuration
 
         private void LoadConfig()
         {
+            // TODO PERF: load config files individually
             using (new Tracer(this))
             {
                 if (_data.ConfigStaticContentUrls == null)
@@ -374,9 +505,8 @@ namespace Sdl.Web.Common.Configuration
         {
             using (new Tracer(this))
             {
-                string resourcesBootstrapUrl = System.IO.Path.Combine(Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"resources\_all.json").Replace("\\", "/");
-                string resourcesBootstrapJson = SiteConfiguration.ContentProvider.GetStaticContentItem(resourcesBootstrapUrl, this).GetText();
-                ResourcesData resourcesData = JsonConvert.DeserializeObject<ResourcesData>(resourcesBootstrapJson);
+                ResourcesData resourcesData = null;
+                LoadStaticContentItem("resources/_all.json", ref resourcesData);
 
                 _resources = new Hashtable();
                 foreach (string staticContentItemUrl in resourcesData.StaticContentItemUrls)
