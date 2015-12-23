@@ -22,7 +22,7 @@ namespace Sdl.Web.Common.Configuration
         private LocalizationData _data = new LocalizationData();
         private string _culture;
         private Regex _staticContentUrlRegex;
-        private Dictionary<string, Dictionary<string, string>> _config;
+        private IDictionary<string, IDictionary<string, string>> _config;
         private IDictionary _resources;
         private IDictionary<string, string[]> _includePageUrls;
         private XpmRegion[] _xpmRegionConfiguration;
@@ -203,13 +203,13 @@ namespace Sdl.Web.Common.Configuration
                 string sectionName = key.Substring(0, key.LastIndexOf(".", StringComparison.Ordinal));
                 string propertyName = keyParts[keyParts.Length - 1];
 
-                Dictionary<string, string> sectionConfig;
-                if (!_config.TryGetValue(sectionName, out sectionConfig))
+                IDictionary<string, string> configSection;
+                if (_config == null || !_config.TryGetValue(sectionName, out configSection))
                 {
-                    throw new DxaException(string.Format("Configuration section '{0}' does not exist for Localization [{1}].", sectionName, this));
+                    configSection = LoadConfigSection(sectionName);
                 }
                 string configValue;
-                if (!sectionConfig.TryGetValue(propertyName, out configValue))
+                if (!configSection.TryGetValue(propertyName, out configValue))
                 {
                     Log.Warn("Configuration key '{0}' does not exist in section '{1}' for Localization [{2}]. GetConfigValue returns null.", propertyName, sectionName, this);
                 }
@@ -458,8 +458,6 @@ namespace Sdl.Web.Common.Configuration
                         }
                     }
 
-                    LoadConfig();
-
                     if (IsHtmlDesignPublished)
                     {
                         mediaPatterns.Add("^/favicon.ico");
@@ -478,25 +476,22 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
-        private void LoadConfig()
+        private IDictionary<string, string> LoadConfigSection(string sectionName)
         {
-            // TODO PERF: load config files individually
-            using (new Tracer(this))
+            using (new Tracer(sectionName, this))
             {
-                if (_data.ConfigStaticContentUrls == null)
+                lock (_loadLock)
                 {
-                    Log.Warn("No Config URLs defined for Localization [{0}]", this);
-                    return;
-                }
+                    if (_config == null)
+                    {
+                        _config = new Dictionary<string, IDictionary<string, string>>();
+                    }
 
-                _config = new Dictionary<string, Dictionary<string, string>>();
-                foreach (string configItemUrl in _data.ConfigStaticContentUrls)
-                {
-                    string sectionName = configItemUrl.Substring(configItemUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
-                    sectionName = sectionName.Substring(0, sectionName.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
+                    string configItemUrl = string.Format("{0}/{1}/config/{2}.json", Path, SiteConfiguration.SystemFolder, sectionName);
                     string configJson = SiteConfiguration.ContentProvider.GetStaticContentItem(configItemUrl, this).GetText();
-                    Dictionary<string, string> settings = JsonConvert.DeserializeObject<Dictionary<string, string>>(configJson);
-                    _config.Add(sectionName, settings);
+                    IDictionary<string, string> configSection = JsonConvert.DeserializeObject<Dictionary<string, string>>(configJson);
+                    _config[sectionName] = configSection;
+                    return configSection;
                 }
             }
         }
