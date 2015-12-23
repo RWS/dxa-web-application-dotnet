@@ -415,7 +415,7 @@ namespace Sdl.Web.Common.Configuration
         public static bool IsStaging { get; set; }
         
         [Obsolete("There is no longer the concept of a global default localization. The Localization.IsDefaultLocalization property can help you find if a localization is the default for its site.", true)]
-        public static string DefaultLocalization { get; }
+        public static string DefaultLocalization { get; private set; }
 
         [Obsolete("Configuration should not be access directly, but rather via the GetConfig(string, Localization) method.", true)]
         public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LocalConfiguration { get; set; }
