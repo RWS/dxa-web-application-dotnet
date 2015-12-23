@@ -225,6 +225,22 @@ namespace Sdl.Web.Common.Configuration
             return _resources;
         }
 
+        /// <summary>
+        /// Gets a versioned URL (including the version number of the HTML design/assets).
+        /// </summary>
+        /// <param name="relativePath">The (unversioned) URL path relative to the system folder</param>
+        /// <returns>A versioned URL path (server-relative).</returns>
+        /// <remarks>
+        /// Versioned URLs are used to facilitate agressive caching of those assets; see StaticContentModule.
+        /// </remarks>
+        public string GetVersionedUrlPath(string relativePath)
+        {
+            if (relativePath.StartsWith("/"))
+            {
+                relativePath = relativePath.Substring(1);
+            }
+            return string.Format("{0}/{1}/{2}/{3}", Path, SiteConfiguration.SystemFolder, Version, relativePath);
+        }
 
         private void SetData(LocalizationData data)
         {
