@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
-using System.Web.Script.Serialization;
 using DD4T.ContentModel;
 using DD4T.ContentModel.Factories;
 using Newtonsoft.Json;
@@ -16,9 +15,6 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Statics;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Query;
-using Tridion.ContentDelivery.DynamicContent.Query;
-using Tridion.ContentDelivery.Meta;
-using IItem = Tridion.ContentDelivery.Meta.IItem;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.Tridion.Mapping
@@ -132,7 +128,13 @@ namespace Sdl.Web.Tridion.Mapping
                     throw new DxaItemNotFoundException(id, localization.LocalizationId);
                 }
 
-                return ModelBuilderPipeline.CreateEntityModel(dcp, localization);
+                EntityModel result = ModelBuilderPipeline.CreateEntityModel(dcp, localization);
+                if (result.XpmMetadata != null)
+                {
+                    // Entity Models requested through this method are per definition "query based" in XPM terminology.
+                    result.XpmMetadata["IsQueryBased"] = "true";
+                }
+                return result;
             }
         }
 
