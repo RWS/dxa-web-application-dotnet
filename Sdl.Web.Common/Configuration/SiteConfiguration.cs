@@ -8,14 +8,6 @@ using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Configuration
 {
-    public enum ScreenWidth // TODO: move to a separate file (in Sdl.Web.Mvc ?)
-    {
-        ExtraSmall,
-        Small,
-        Medium,
-        Large
-    }
-
     /// <summary>
     /// Represents configuration that applies to the entire web application.
     /// </summary>

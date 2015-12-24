@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\ComponentType.cs" />
+    <Compile Include="Configuration\ScreenWidth.cs" />
     <Compile Include="Configuration\SiteConfiguration.cs" />
     <Compile Include="Configuration\Localization.cs" />
     <Compile Include="Configuration\XpmRegion.cs" />

@@ -258,7 +258,6 @@ namespace Sdl.Web.Common.Configuration
         /// Gets the include Page URLs for a given Page Type/Template.
         /// </summary>
         /// <param name="pageTypeIdentifier">The Page Type Identifier.</param>
-        /// <param name="localization">The Localization</param>
         /// <returns>The URLs of Include Pages</returns>
         /// <remarks>
         /// The concept of Include Pages will be removed in a future version of DXA.

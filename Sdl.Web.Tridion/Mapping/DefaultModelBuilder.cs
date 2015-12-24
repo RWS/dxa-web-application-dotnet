@@ -13,7 +13,6 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Extensions;
 using IPage = DD4T.ContentModel.IPage;
 
@@ -799,9 +798,9 @@ namespace Sdl.Web.Tridion.Mapping
             switch (field.FieldType)
             {
                 case FieldType.Number:
-                    return field.NumericValues.Select(v => v.ToString()).ToArray();
+                    return field.NumericValues.Select(v => v.ToString(CultureInfo.InvariantCulture)).ToArray();
                 case FieldType.Date:
-                    return field.DateTimeValues.Select(v => v.ToString()).ToArray();
+                    return field.DateTimeValues.Select(v => v.ToString("s")).ToArray();
                 case FieldType.ComponentLink:
                 case FieldType.MultiMediaLink:
                     return field.LinkedComponentValues.Select(v => v.Id).ToArray();
@@ -895,7 +894,6 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 meta.Add("description", description ?? title);
             }
-            // TODO: meta.Add("fb:admins", Configuration.GetConfig("core.fbadmins");
             return title + titlePostfix;
         }
 
@@ -1039,7 +1037,7 @@ namespace Sdl.Web.Tridion.Mapping
         {
             IFieldSet ptMetadataFields = pageTemplate.MetadataFields;
             IField regionsField;
-            if (ptMetadataFields == null || !ptMetadataFields.TryGetValue("regions", out regionsField)) // TODO: "region" instead of "regions"
+            if (ptMetadataFields == null || !ptMetadataFields.TryGetValue("regions", out regionsField))
             {
                 Log.Debug("No Region metadata defined for Page Template '{0}'.", pageTemplate.Id);
                 return;
@@ -1148,8 +1146,7 @@ namespace Sdl.Web.Tridion.Mapping
                 // Defaults:
                 ControllerName = SiteConfiguration.GetEntityController(),
                 ControllerAreaName = SiteConfiguration.GetDefaultModuleName(),
-                ActionName = SiteConfiguration.GetEntityAction(),
-                RouteValues = new Dictionary<string, string>() // TODO: leave null if not specified?
+                ActionName = SiteConfiguration.GetEntityAction()
             };
 
             if (ct.MetadataFields != null)
@@ -1174,6 +1171,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (ct.MetadataFields.ContainsKey("routeValues"))
                 {
                     string[] routeValues = ct.MetadataFields["routeValues"].Value.Split(',');
+                    mvcData.RouteValues = new Dictionary<string, string>(routeValues.Length);
                     foreach (string routeValue in routeValues)
                     {
                         string[] routeValueParts = routeValue.Trim().Split(':');
