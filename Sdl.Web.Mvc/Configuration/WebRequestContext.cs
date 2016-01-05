@@ -31,15 +31,16 @@ namespace Sdl.Web.Mvc.Configuration
         /// <summary>
         /// True if the current request is for a resource outside the scope of a particular localization
         /// </summary>
+        [Obsolete("Deprecated in DXA 1.3. All requests will be in scope of a particular Localization; if no Localization can be determined, an exception will occur.")]
         public static bool HasNoLocalization
         {
             get
             {
-                return (bool?)GetFromContextStore("IsDeveloperMode") ?? false;
+                return false;
             }
             set
             {
-                AddToContextStore("IsDeveloperMode", value);
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.3.");
             }
         }
 

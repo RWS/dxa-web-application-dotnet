@@ -6,7 +6,6 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Common.Models.Common;
 using Sdl.Web.Mvc.Html;
 
 namespace Sdl.Web.Mvc.Controllers
@@ -66,37 +65,34 @@ namespace Sdl.Web.Mvc.Controllers
         }
 
         /// <summary>
-        /// This is the method to override if you need to add custom model population logic, 
-        /// first calling the base class and then adding your own logic
+        /// Enriches the View Model as obtained from the Content Provider.
         /// </summary>
-        /// <param name="model">The model which you wish to add data to</param>
-        /// <returns>A fully populated view model combining CMS content with other data</returns>
+        /// <param name="model">The View Model to enrich.</param>
+        /// <returns>The enriched View Model.</returns>
+        /// <remarks>
+        /// This is the method to override if you need to add custom model population logic. 
+        /// For example retrieving additional information from another system.
+        /// </remarks>
         protected virtual ViewModel EnrichModel(ViewModel model)
         {
-            //Check if an exception was generated when creating the model, so now is the time to throw it
-            // TODO: shouldn't we just render the ExceptionEntity using an Exception View?
-            ExceptionEntity exceptionEntity = model as ExceptionEntity;
-            if (exceptionEntity != null)
-            {
-                throw exceptionEntity.Exception;
-            }
 #pragma warning disable 618
             return (ViewModel) ProcessModel(model, model.GetType()); // To support legacy overrides
 #pragma warning restore 618
         }
 
-        
+
         /// <summary>
-        /// This is the method to override if you need to add custom model population logic, first calling the base class and then adding your own logic
+        /// Turns a domain model into a strongly typed View Model.
         /// </summary>
         /// <param name="sourceModel">The model to process</param>
         /// <param name="type">The type of view model required</param>
         /// <returns>A processed view model</returns>
+        /// <remarks>
+        /// This method is intentionally loosely typed for backwards compatibility; this was part of the V1.0 (semi-)public API
+        /// </remarks>
         [Obsolete("Deprecated in DXA 1.1. Override EnrichModel instead.")]
         protected virtual object ProcessModel(object sourceModel, Type type)
         {
-            // NOTE: Intentionally loosely typed for backwards compatibility; this was part of the V1.0 (semi-)public API
-
             return sourceModel;
         }
 
@@ -124,13 +120,13 @@ namespace Sdl.Web.Mvc.Controllers
         {
 #pragma warning disable 618
             // To support (deprecated) use of ViewBag.Renderer in Views.
-            ViewBag.Renderer = Renderer;
+            ViewData[DxaViewDataItems.Renderer] = Renderer;
 #pragma warning restore 618
 
-            ViewBag.ContainerSize = containerSize;
+            ViewData[DxaViewDataItems.ContainerSize] = containerSize;
             if (viewData != null)
             {
-                ViewBag.RegionName = viewData.RegionName;
+                ViewData[DxaViewDataItems.RegionName] = viewData.RegionName;
                 //This enables us to jump areas when rendering sub-views - for example from rendering a region in Core to an entity in ModuleX
                 ControllerContext.RouteData.DataTokens["area"] = viewData.AreaName;
             }
@@ -210,18 +206,10 @@ namespace Sdl.Web.Mvc.Controllers
                 tempRequestContext.RouteData.Values["controller"] = controllerName;
                 tempRequestContext.RouteData.Values["area"] = controllerAreaName;
 
-                try
-                {
-                    // Note: Entity Controllers don't have to inherit from EntityController per se, but they must inherit from BaseController.
-                    BaseController entityController = (BaseController) ControllerBuilder.Current.GetControllerFactory().CreateController(tempRequestContext, controllerName);
-                    entityController.ControllerContext = new ControllerContext(HttpContext, tempRequestContext.RouteData, entityController);
-                    return (EntityModel) entityController.EnrichModel(entity);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex);
-                    return new ExceptionEntity(ex); // TODO: What about MvcData?
-                }
+                // Note: Entity Controllers don't have to inherit from EntityController per se, but they must inherit from BaseController.
+                BaseController entityController = (BaseController) ControllerBuilder.Current.GetControllerFactory().CreateController(tempRequestContext, controllerName);
+                entityController.ControllerContext = new ControllerContext(HttpContext, tempRequestContext.RouteData, entityController);
+                return (EntityModel) entityController.EnrichModel(entity);
             }
         }
 

@@ -6,3 +6,5 @@ bin
 packages/
 web/
 .vs/
+*.vspx
+*.psess

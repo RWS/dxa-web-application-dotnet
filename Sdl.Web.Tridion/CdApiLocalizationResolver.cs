@@ -39,20 +39,29 @@ namespace Sdl.Web.Tridion
         {
             using (new Tracer(url))
             {
+                string urlLeftPart = url.GetLeftPart(UriPartial.Path);
+                // TODO PERF: to optimize caching, we could only take the first part of the URL path (e.g. one or two levels)
+
                 IPublicationMapping mapping = null;
                 try
                 {
                     // NOTE: we're not using UrlToLocalizationMapping here, because we may match too eagerly on a base URL when there is a matching mapping with a more specific URL.
-                    mapping = _mappingsRetriever.GetPublicationMapping(url.ToString());
+                    mapping = _mappingsRetriever.GetPublicationMapping(urlLeftPart);
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn("Exception occurred in DynamicMappingsRetriever.GetPublicationMapping: {0}", ex.ToString());
+                    // CIL throws Sdl.Web.Delivery.Service.InvalidResourceException if the mapping cannot be resolved.
+                    // We don't have a direct reference to Sdl.Web.Delivery.Service, so we just check the type name
+                    if (ex.GetType().FullName != "Sdl.Web.Delivery.Service.InvalidResourceException")
+                    {
+                        throw;
+                    }
+                    Log.Debug("Exception occurred in DynamicMappingsRetriever.GetPublicationMapping('{0}'):\n{1}", urlLeftPart, ex.ToString());
                     // Let mapping be null, we'll handle it below.
                 }
                 if (mapping == null || mapping.Port != url.Port.ToString()) // See CRQ-1195
                 {
-                    throw new DxaUnknownLocalizationException(string.Format("No matching Localization found for URL '{0}'", url));
+                    throw new DxaUnknownLocalizationException(string.Format("No matching Localization found for URL '{0}'", urlLeftPart));
                 }
 
                 Localization result;

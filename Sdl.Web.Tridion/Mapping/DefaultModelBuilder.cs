@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.RegularExpressions;
 using DD4T.ContentModel;
 using Sdl.Web.Common;
@@ -14,8 +13,6 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Common.Models.Common;
-using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Extensions;
 using IPage = DD4T.ContentModel.IPage;
 
@@ -39,8 +36,6 @@ namespace Sdl.Web.Tridion.Mapping
         private const string StandardMetadataDescriptionXmlFieldName = "description";
         private const string RegionForPageTitleComponent = "Main";
         private const string ComponentXmlFieldNameForPageTitle = "headline";
-
-        private ResourceProvider _resourceProvider;
 
         #region IModelBuilder members
 
@@ -83,14 +78,9 @@ namespace Sdl.Web.Tridion.Mapping
                     }
                     catch (Exception ex)
                     {
-                        //if there is a problem mapping the item, we replace it with an exception entity
-                        //and carry on processing - this should not cause a failure in the rendering of
-                        //the page as a whole
+                        // If there is a problem mapping an Entity, we replace it with an ExceptionEntity which holds the error details and carry on.
                         Log.Error(ex);
-                        entity = new ExceptionEntity(ex)
-                        {
-                            MvcData = GetMvcData(cp) // TODO: The regular View won't expect an ExceptionEntity model. Should use an Exception View (?)
-                        };
+                        entity = new ExceptionEntity(ex);
                     }
 
                     if (conditionalEntityEvaluator == null || conditionalEntityEvaluator.IncludeEntity(entity))
@@ -808,9 +798,9 @@ namespace Sdl.Web.Tridion.Mapping
             switch (field.FieldType)
             {
                 case FieldType.Number:
-                    return field.NumericValues.Select(v => v.ToString()).ToArray();
+                    return field.NumericValues.Select(v => v.ToString(CultureInfo.InvariantCulture)).ToArray();
                 case FieldType.Date:
-                    return field.DateTimeValues.Select(v => v.ToString()).ToArray();
+                    return field.DateTimeValues.Select(v => v.ToString("s")).ToArray();
                 case FieldType.ComponentLink:
                 case FieldType.MultiMediaLink:
                     return field.LinkedComponentValues.Select(v => v.Id).ToArray();
@@ -873,7 +863,8 @@ namespace Sdl.Web.Tridion.Mapping
                     }
                 }
             }
-            string titlePostfix = GetResource("core.pageTitleSeparator") + GetResource("core.pageTitlePostfix");
+            IDictionary coreResources = localization.GetResources("core");
+            string titlePostfix = coreResources["core.pageTitleSeparator"].ToString() + coreResources["core.pageTitlePostfix"].ToString();
             //if we still dont have a title, use the page title
             if (title == null)
             {
@@ -881,7 +872,7 @@ namespace Sdl.Web.Tridion.Mapping
                 // Index and Default are not a proper titles for an HTML page
                 if (title.ToLowerInvariant().Equals("index") || title.ToLowerInvariant().Equals("default"))
                 {
-                    title = GetResource("core.defaultPageTitle");
+                    title = coreResources["core.defaultPageTitle"].ToString();
                 }
             }
             meta.Add("twitter:card", "summary");
@@ -903,7 +894,6 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 meta.Add("description", description ?? title);
             }
-            // TODO: meta.Add("fb:admins", Configuration.GetConfig("core.fbadmins");
             return title + titlePostfix;
         }
 
@@ -942,15 +932,6 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
                 
-        private string GetResource(string name)
-        {
-            if (_resourceProvider == null)
-            {
-                _resourceProvider = new ResourceProvider();
-            }
-            return _resourceProvider.GetObject(name, CultureInfo.CurrentUICulture).ToString();
-        }
-
         private static void InitializeRegionMvcData(MvcData regionMvcData)
         {
             if (String.IsNullOrEmpty(regionMvcData.ControllerName))
@@ -1056,7 +1037,7 @@ namespace Sdl.Web.Tridion.Mapping
         {
             IFieldSet ptMetadataFields = pageTemplate.MetadataFields;
             IField regionsField;
-            if (ptMetadataFields == null || !ptMetadataFields.TryGetValue("regions", out regionsField)) // TODO: "region" instead of "regions"
+            if (ptMetadataFields == null || !ptMetadataFields.TryGetValue("regions", out regionsField))
             {
                 Log.Debug("No Region metadata defined for Page Template '{0}'.", pageTemplate.Id);
                 return;
@@ -1165,8 +1146,7 @@ namespace Sdl.Web.Tridion.Mapping
                 // Defaults:
                 ControllerName = SiteConfiguration.GetEntityController(),
                 ControllerAreaName = SiteConfiguration.GetDefaultModuleName(),
-                ActionName = SiteConfiguration.GetEntityAction(),
-                RouteValues = new Dictionary<string, string>() // TODO: leave null if not specified?
+                ActionName = SiteConfiguration.GetEntityAction()
             };
 
             if (ct.MetadataFields != null)
@@ -1191,6 +1171,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (ct.MetadataFields.ContainsKey("routeValues"))
                 {
                     string[] routeValues = ct.MetadataFields["routeValues"].Value.Split(',');
+                    mvcData.RouteValues = new Dictionary<string, string>(routeValues.Length);
                     foreach (string routeValue in routeValues)
                     {
                         string[] routeValueParts = routeValue.Trim().Split(':');

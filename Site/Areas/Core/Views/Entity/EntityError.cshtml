@@ -1,13 +1,11 @@
-﻿@model HandleErrorInfo
+﻿@model ExceptionEntity
 <div class="alert alert-danger">
     <strong>@Html.Resource("core.sectionErrorMessage")</strong>
     @if (WebRequestContext.IsDeveloperMode)
     {
-        Exception ex = Model.Exception;
-        while (ex != null)
+        foreach (string errorMessage in Model.ErrorMessages)
         {
-            <pre>@ex.Message</pre>
-            ex = ex.InnerException;
+            <pre>@errorMessage</pre>
         }
     }
 </div>

@@ -131,17 +131,26 @@ namespace Sdl.Web.Common.Mapping
                 }
             }
 
+            string errorMessage;
             if (foundAmbiguousMappings == null)
             {
-                Log.Warn("No semantic mapping found between Schema {0} ({1}) and model type '{2}'. Sticking with model type.",
-                        Id, String.Join(", ", semanticTypeNames), baseModelType.FullName);
+                errorMessage = string.Format("No semantic mapping found between Schema {0} ({1}) and model type '{2}'",
+                    Id, String.Join(", ", semanticTypeNames), baseModelType.FullName);
             }
             else
             {
-                Log.Warn("Ambiguous semantic mappings found between Schema {0} ({1}) and model type '{2}'. Found types: {3}. Sticking with model type.",
-                        Id, String.Join(", ", semanticTypeNames), String.Join(", ", foundAmbiguousMappings.Select(t => t.FullName)), baseModelType.FullName);
+                errorMessage = string.Format("Ambiguous semantic mappings found between Schema {0} ({1}) and model type '{2}'. Found types: {3}",
+                    Id, String.Join(", ", semanticTypeNames), String.Join(", ", foundAmbiguousMappings.Select(t => t.FullName)), baseModelType.FullName);
             }
 
+            if (baseModelType.IsAbstract)
+            {
+                // Base model type is abstract and we didn't find an (unambigous) concrete subtype to instantiate.
+                throw new DxaException(errorMessage);
+            }
+
+            // Base model type is concrete, so we can fall back to instantiating that type.
+            Log.Warn("{0}. Sticking with model type.", errorMessage);
             return baseModelType;
         }
     }

@@ -47,9 +47,13 @@ namespace Sdl.Web.Common.Models
                         _viewToModelTypeMapping.Add(viewData, modelType);
                     }
 
-                    if (!_modelTypeToSemanticInfoMapping.ContainsKey(modelType))
+                    // Obtain a lock on _modelTypeToSemanticInfoMapping too to prevent a race with GetSemanticInfo
+                    lock (_modelTypeToSemanticInfoMapping)
                     {
-                        RegisterModelType(modelType);
+                        if (!_modelTypeToSemanticInfoMapping.ContainsKey(modelType))
+                        {
+                            RegisterModelType(modelType);
+                        }
                     }
                 }
             }
@@ -193,8 +197,16 @@ namespace Sdl.Web.Common.Models
             SemanticInfo semanticInfo;
             if (!_modelTypeToSemanticInfoMapping.TryGetValue(modelType, out semanticInfo))
             {
-                // Just-In-Time model type registration.
-                semanticInfo = RegisterModelType(modelType);
+                // To prevent excessive locking, we only obtain a lock if no semantic info is found.
+                // In a race condition, it may get set just before we obtain the lock, so therefore we check once more.
+                lock (_modelTypeToSemanticInfoMapping)
+                {
+                    if (!_modelTypeToSemanticInfoMapping.TryGetValue(modelType, out semanticInfo))
+                    {
+                        // Just-In-Time model type registration.
+                        semanticInfo = RegisterModelType(modelType);
+                    }
+                }
             }
             return semanticInfo;
         }

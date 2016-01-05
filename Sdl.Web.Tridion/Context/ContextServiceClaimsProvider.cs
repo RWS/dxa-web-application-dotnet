@@ -18,6 +18,27 @@ namespace Sdl.Web.Tridion.Context
     /// </remarks>
     public class ContextServiceClaimsProvider : IContextClaimsProvider
     {
+        private static readonly ODataContextEngine _contextEngineClient;
+
+        /// <summary>
+        /// Class constructor
+        /// </summary>
+        static ContextServiceClaimsProvider()
+        {
+            using (new Tracer())
+            {
+                try
+                {
+                    _contextEngineClient = new ODataContextEngine();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex);
+                    throw;
+                }
+            }
+        }
+
         #region IContextClaimsProvider Members
 
         /// <summary>
@@ -47,9 +68,7 @@ namespace Sdl.Web.Tridion.Context
                         evidenceBuilder.With("cookie", string.Format("{0}={1}", contextCookie.Name, contextCookie.Value));
                     }
                     IEvidence evidence = evidenceBuilder.Build();
-
-                    ODataContextEngine contextEngineClient = new ODataContextEngine();
-                    contextMap = contextEngineClient.Resolve(evidence);
+                    contextMap = _contextEngineClient.Resolve(evidence);
                 }
                 catch (Exception ex)
                 {

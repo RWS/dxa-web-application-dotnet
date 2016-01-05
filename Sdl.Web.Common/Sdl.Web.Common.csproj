@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\ComponentType.cs" />
+    <Compile Include="Configuration\ScreenWidth.cs" />
     <Compile Include="Configuration\SiteConfiguration.cs" />
     <Compile Include="Configuration\Localization.cs" />
     <Compile Include="Configuration\XpmRegion.cs" />
@@ -159,6 +160,12 @@
     <None Include="Interfaces\ExtensionPoints.cd" />
     <None Include="Models\ViewModels.cd" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sdl.Web.Common.Models\Sdl.Web.Common.Models.csproj">
+      <Project>{9a3ceda6-6fcc-46e7-9e06-4d6ceb5ceabe}</Project>
+      <Name>Sdl.Web.Common.Models</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
