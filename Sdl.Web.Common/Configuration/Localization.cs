@@ -211,7 +211,7 @@ namespace Sdl.Web.Common.Configuration
                 string configValue;
                 if (!configSection.TryGetValue(propertyName, out configValue))
                 {
-                    Log.Warn("Configuration key '{0}' does not exist in section '{1}' for Localization [{2}]. GetConfigValue returns null.", propertyName, sectionName, this);
+                    Log.Debug("Configuration key '{0}' does not exist in section '{1}' for Localization [{2}]. GetConfigValue returns null.", propertyName, sectionName, this);
                 }
                 return configValue;
             }
