@@ -33,18 +33,20 @@ namespace Sdl.Web.Tridion.Tests
             _parentLocalization = new Localization
             {
                 LocalizationId = "1065",
-                Path = "autotest-parent"
+                Path = "/autotest-parent"
             };
 
             _childLocalization = new Localization
             {
                 LocalizationId = "1066",
-                Path = "autotest-child"
+                Path = "/autotest-child"
             };
 
             _testLocalizations = new[] { _parentLocalization, _childLocalization };
 
-            DcpEntityId = "1234-2345"; // TODO
+            ArticleDcpEntityId = "9712-9711";
+
+            TestRegistration.RegisterCoreViewModels();
         }
 
         internal static Localization ParentLocalization
@@ -65,7 +67,7 @@ namespace Sdl.Web.Tridion.Tests
             }
         }
 
-        internal static string DcpEntityId { get; private set; }
+        internal static string ArticleDcpEntityId { get; private set; }
 
         internal static void InitializeProviders()
         {
