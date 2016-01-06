@@ -49,21 +49,29 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DD4T.ContentModel, Version=1.31.0.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.ContentModel.dll</HintPath>
+    <Reference Include="DD4T.ContentModel, Version=2.0.7.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Model.2.0.7\lib\net45\DD4T.ContentModel.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.ContentModel.Contracts">
-      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.ContentModel.Contracts.dll</HintPath>
+    <Reference Include="DD4T.ContentModel.Contracts, Version=2.0.7.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Model.2.0.7\lib\net45\DD4T.ContentModel.Contracts.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.Core.Contracts">
-      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.Core.Contracts.dll</HintPath>
+    <Reference Include="DD4T.Core.Contracts, Version=2.0.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Core.2.0.7\lib\net45\DD4T.Core.Contracts.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.Factories">
-      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.Factories.dll</HintPath>
+    <Reference Include="DD4T.Factories, Version=2.0.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Core.2.0.7\lib\net45\DD4T.Factories.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.Utils">
-      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.Utils.dll</HintPath>
+    <Reference Include="DD4T.Serialization, Version=2.0.7.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Model.2.0.7\lib\net45\DD4T.Serialization.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DD4T.Utils, Version=2.0.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Core.2.0.7\lib\net45\DD4T.Utils.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
