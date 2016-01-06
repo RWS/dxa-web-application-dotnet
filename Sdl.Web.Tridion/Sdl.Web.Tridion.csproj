@@ -123,8 +123,9 @@
       <HintPath>..\_references\cd-7.1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.Providers.SDLTridion2013sp1">
-      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.Providers.SDLTridion2013sp1.dll</HintPath>
+    <Reference Include="DD4T.Providers.SDLTridion2013sp1, Version=2.0.8.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Providers.SDLTridion2013sp1.2.0.8\lib\net45\DD4T.Providers.SDLTridion2013sp1.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
