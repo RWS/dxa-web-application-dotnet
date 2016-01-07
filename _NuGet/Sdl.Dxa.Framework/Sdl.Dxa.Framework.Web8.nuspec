@@ -16,5 +16,26 @@
 			<files include="any/net45/bin/*" buildAction="None" copyToOutput="true" flatten="true" />
 			<files include="any/net45/bin_2013sp1/*" buildAction="None" copyToOutput="false" flatten="true" />
 		</contentFiles>
+		<dependencies>
+			<dependency id="DD4T.Core" version="2.0.7" />
+			<dependency id="DD4T.Model" version="2.0.7" />
+			<!-- TODO: <dependency id="DD4T.Providers.SDLWeb8" version="2.0.8" /> -->
+			<dependency id="HtmlAgilityPack" version="1.4.6"/>
+			<dependency id="log4net" version="2.0.3"/>
+			<dependency id="Microsoft.AspNet.Mvc" version="5.1.2"/>
+			<dependency id="Microsoft.AspNet.Razor" version="3.1.2"/>
+			<dependency id="Microsoft.AspNet.WebPages" version="3.1.2"/>
+			<dependency id="Microsoft.Data.Edm" version="5.6.4" />
+			<dependency id="Microsoft.Data.OData" version="5.6.4" />
+			<dependency id="Microsoft.Data.Services.Client" version="5.6.4" />
+			<dependency id="Microsoft.OData.Client" version="6.13.0" />
+			<dependency id="Microsoft.OData.Core" version="6.13.0" />
+			<dependency id="Microsoft.OData.Edm" version="6.13.0" />
+			<dependency id="Microsoft.Spatial" version="6.13.0" />
+			<dependency id="Microsoft.Web.Infrastructure" version="1.0.0.0"/>
+			<dependency id="Newtonsoft.Json" version="7.0.1"/>
+			<dependency id="Sdl.Web.Delivery" version="8.1.0.1239" />
+			<dependency id="System.Spatial" version="5.6.4" />			
+		</dependencies>
 	</metadata>
 </package>
