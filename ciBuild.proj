@@ -14,12 +14,13 @@
   </PropertyGroup>
 
 
-  <!-- =============================================================================================================================================  -->
-  <Target Name="Build">
-    <Message Text="Start build..." Importance="high" />
+    <!-- =============================================================================================================================================  -->
+    <Target Name="Build">
+        <Message Text="Start build..." Importance="high" />
         
         <CallTarget Targets="PrepareBuild"/>
-        <CallTarget Targets="PackageBuild"/>
+        <CallTarget Targets="RunBuild"/>
+        <CallTarget Targets="Package"/>
     </Target>
 
     <!-- =============================================================================================================================================  -->
@@ -30,16 +31,43 @@
     </Target>
 
     <!-- =============================================================================================================================================  -->
-    <Target Name="PackageBuild">
+    <Target Name="RunBuild">
         <Message Text="Running build commands..." Importance="high" />
 
-		<!-- Build the Sdl.Web.Tridion project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1) -->
+        <!-- Build the Sdl.Web.Tridion project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1) -->
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
 
-		<!-- Build the Site project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1); there is only difference in Sdl.Web.Tridion artifacts (see above). -->
+        <!-- Build the Site project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1); there is only difference in Sdl.Web.Tridion artifacts (see above). -->
         <MSBuild Projects="$(ProjectDirectory)\Site\Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
         <MSBuild Projects="$(ProjectDirectory)\Site\Site.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
+    </Target>
+
+    <!-- =============================================================================================================================================  -->
+    <Target Name="Package">
+        <Message Text="Creating NuGet packages..." Importance="high" />
+
+        <PropertyGroup>
+            <NuGet>&quot;$(ProjectDirectory)\_tools\NuGet.exe&quot;</NuGet>
+            <NuGetPackageDirectory>$(ProjectDirectory)\_NuGet</NuGetPackageDirectory>
+            <DxaFrameworkPackageDirectory>$(NuGetPackageDirectory)\Sdl.Dxa.Framework</DxaFrameworkPackageDirectory>
+            <SiteDirectory>$(ProjectDirectory)\Site</SiteDirectory>
+            <BinDirectory>$(SiteDirectory)\bin</BinDirectory>
+            <Bin2013SP1Directory>$(SiteDirectory)\bin_2013SP1</Bin2013SP1Directory>
+        </PropertyGroup>
+            
+        <ItemGroup>
+            <LibFiles Include="$(BinDirectory)\Sdl.Web.Mvc.dll;$(SiteDirectory)\bin\Sdl.Web.Common.dll;$(SiteDirectory)\bin\Sdl.Web.Common.Models.dll" />
+            <BinFiles Include="$(BinDirectory)\Sdl.Web.Tridion.dll;$(BinDirectory)\DD4T.Providers.SDLWeb8.dll" />
+            <Bin2013SP1Files Include="$(Bin2013SP1Directory)\Sdl.Web.Tridion.dll;$(Bin2013SP1Directory)\DD4T.Providers.SDLTridion2013SP1.dll" />
+        </ItemGroup>
+
+        <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(DxaFrameworkPackageDirectory)\lib\net45" />
+        <Copy SourceFiles="@(BinFiles)" DestinationFolder="$(DxaFrameworkPackageDirectory)\contentFiles\any\net45\bin" />
+        <Copy SourceFiles="@(Bin2013SP1Files)" DestinationFolder="$(DxaFrameworkPackageDirectory)\contentFiles\any\net45\bin_2013SP1" />
+    
+        <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.Web8.nuspec" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
+        <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.2013SP1.nuspec" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
     </Target>
 
      <!-- =============================================================================================================================================  -->
