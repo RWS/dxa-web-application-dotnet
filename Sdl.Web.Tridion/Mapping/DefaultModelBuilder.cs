@@ -909,6 +909,7 @@ namespace Sdl.Web.Tridion.Mapping
 
         protected virtual void ProcessMetadataField(IField field, IDictionary<string, string> meta)
         {
+            
             if (field.FieldType==FieldType.Embedded)
             {
                 if (field.EmbeddedValues!=null && field.EmbeddedValues.Count>0)

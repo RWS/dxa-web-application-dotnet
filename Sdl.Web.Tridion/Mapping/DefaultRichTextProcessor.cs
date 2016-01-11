@@ -75,7 +75,7 @@ namespace Sdl.Web.Tridion.Mapping
                     if (!string.IsNullOrEmpty(tcmUri))
                     {
                         // Try to resolve directly to Binary content of MM Component.
-                        linkUrl = linkResolver.ResolveLink(tcmUri, resolveToBinary: true);
+                        linkUrl = linkResolver.ResolveLink(tcmUri, true, localization);
                     }
                 }                
                 if (!string.IsNullOrEmpty(linkUrl))
