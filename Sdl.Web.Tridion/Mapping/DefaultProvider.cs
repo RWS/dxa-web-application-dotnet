@@ -182,7 +182,7 @@ namespace Sdl.Web.Tridion.Mapping
                 ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
                 foreach (Teaser item in queryResults)
                 {
-                    item.Link.Url = linkResolver.ResolveLink(item.Link.Url);
+                    item.Link.Url = linkResolver.ResolveLink(item.Link.Url, localization: localization);
                 }
 
                 contentList.ItemListElements = queryResults.Cast<T>().ToList();
