@@ -51,23 +51,23 @@
             <NuGet>&quot;$(ProjectDirectory)\_tools\NuGet.exe&quot;</NuGet>
             <NuGetPackageDirectory>$(ProjectDirectory)\_NuGet</NuGetPackageDirectory>
             <DxaFrameworkPackageDirectory>$(NuGetPackageDirectory)\Sdl.Dxa.Framework</DxaFrameworkPackageDirectory>
-            <SiteDirectory>$(ProjectDirectory)\Site</SiteDirectory>
-            <BinDirectory>$(SiteDirectory)\bin</BinDirectory>
-            <Bin2013SP1Directory>$(SiteDirectory)\bin_2013SP1</Bin2013SP1Directory>
+            <PackageVersion>1.3.0-sprint4</PackageVersion> <!--TODO: Determine based on $(Version) or from VERSION.txt -->
         </PropertyGroup>
-            
-        <ItemGroup>
-            <LibFiles Include="$(BinDirectory)\Sdl.Web.Mvc.dll;$(SiteDirectory)\bin\Sdl.Web.Common.dll;$(SiteDirectory)\bin\Sdl.Web.Common.Models.dll" />
-            <BinFiles Include="$(BinDirectory)\Sdl.Web.Tridion.dll;$(BinDirectory)\DD4T.Providers.SDLWeb8.dll" />
-            <Bin2013SP1Files Include="$(Bin2013SP1Directory)\Sdl.Web.Tridion.dll;$(Bin2013SP1Directory)\DD4T.Providers.SDLTridion2013SP1.dll" />
-        </ItemGroup>
 
-        <Copy SourceFiles="@(LibFiles)" DestinationFolder="$(DxaFrameworkPackageDirectory)\lib\net45" />
-        <Copy SourceFiles="@(BinFiles)" DestinationFolder="$(DxaFrameworkPackageDirectory)\contentFiles\any\net45\bin" />
-        <Copy SourceFiles="@(Bin2013SP1Files)" DestinationFolder="$(DxaFrameworkPackageDirectory)\contentFiles\any\net45\bin_2013SP1" />
-    
-        <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.Web8.nuspec" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
-        <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.2013SP1.nuspec" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
+        <!--Versionize the path to DXA Framework libs in the {package_id}.targets files -->
+        <XmlPoke 
+            XmlInputPath="$(DxaFrameworkPackageDirectory)\Sdl.Dxa.Framework.Web8.targets"
+            Namespaces="&lt;Namespace Prefix='msb' Uri='http://schemas.microsoft.com/developer/msbuild/2003' /&gt;"
+            Query="//msb:DxaFrameworkLibs/@Include"
+            Value="..\packages\Sdl.Dxa.Framework.Web8.$(PackageVersion)\lib\net452\*.*" />
+        <XmlPoke
+            XmlInputPath="$(DxaFrameworkPackageDirectory)\Sdl.Dxa.Framework.2013SP1.targets"
+            Namespaces="&lt;Namespace Prefix='msb' Uri='http://schemas.microsoft.com/developer/msbuild/2003' /&gt;"
+            Query="//msb:DxaFrameworkLibs/@Include"
+            Value="..\packages\Sdl.Dxa.Framework.2013SP1.$(PackageVersion)\lib\net452\*.*" />
+
+        <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.Web8.nuspec -Version $(PackageVersion)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
+        <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.2013SP1.nuspec -Version $(PackageVersion)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
     </Target>
 
      <!-- =============================================================================================================================================  -->
