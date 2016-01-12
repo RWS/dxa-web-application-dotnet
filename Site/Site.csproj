@@ -108,13 +108,6 @@
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </Content>
-    <Content Include="Web.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="Log.config" />
     <Content Include="Areas\Core\Views\web.config" />
     <Content Include="Areas\Core\Views\Entity\Accordion.cshtml" />
@@ -208,9 +201,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\Core\Views\Entity\EntityError.cshtml" />
-    <None Include="Web.Release_7.1.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
