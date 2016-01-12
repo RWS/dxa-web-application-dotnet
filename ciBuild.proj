@@ -8,7 +8,13 @@
         <BuildConfiguration>Release</BuildConfiguration>
         <ProjectDirectory>$(MSBuildProjectDirectory)</ProjectDirectory>
         <CdTestDeployFolder>\\saintjohn01.ams.dev\C$\inetpub\wwwroot\GitVersion</CdTestDeployFolder>
-        
+        <NuGetRepositoryUrl></NuGetRepositoryUrl>
+
+        <NuGet>&quot;$(ProjectDirectory)\_tools\NuGet.exe&quot;</NuGet>
+        <NuGetPackageDirectory>$(ProjectDirectory)\_NuGet</NuGetPackageDirectory>
+        <DxaFrameworkPackageDirectory>$(NuGetPackageDirectory)\Sdl.Dxa.Framework</DxaFrameworkPackageDirectory>
+        <PackageVersion>1.3.0-sprint4</PackageVersion> <!--TODO: Determine based on $(Version) or from VERSION.txt -->
+
         <!--Tools-->
         <MsBuildExe>C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe</MsBuildExe>
   </PropertyGroup>
@@ -20,7 +26,8 @@
         
         <CallTarget Targets="PrepareBuild"/>
         <CallTarget Targets="RunBuild"/>
-        <CallTarget Targets="Package"/>
+        <CallTarget Targets="CreatePackages"/>
+        <CallTarget Targets="PublishPackages" Condition="'$(NuGetRepositoryUrl)' != ''"/>
     </Target>
 
     <!-- =============================================================================================================================================  -->
@@ -44,15 +51,8 @@
     </Target>
 
     <!-- =============================================================================================================================================  -->
-    <Target Name="Package">
-        <Message Text="Creating NuGet packages..." Importance="high" />
-
-        <PropertyGroup>
-            <NuGet>&quot;$(ProjectDirectory)\_tools\NuGet.exe&quot;</NuGet>
-            <NuGetPackageDirectory>$(ProjectDirectory)\_NuGet</NuGetPackageDirectory>
-            <DxaFrameworkPackageDirectory>$(NuGetPackageDirectory)\Sdl.Dxa.Framework</DxaFrameworkPackageDirectory>
-            <PackageVersion>1.3.0-sprint4</PackageVersion> <!--TODO: Determine based on $(Version) or from VERSION.txt -->
-        </PropertyGroup>
+    <Target Name="CreatePackages">
+        <Message Text="Creating NuGet packages in '$(NuGetPackageDirectory)' ..." Importance="high" />
 
         <!--Versionize the path to DXA Framework libs in the {package_id}.targets files -->
         <XmlPoke 
@@ -70,7 +70,15 @@
         <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.2013SP1.nuspec -Version $(PackageVersion)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
     </Target>
 
-     <!-- =============================================================================================================================================  -->
+    <!-- =============================================================================================================================================  -->
+    <Target Name="PublishPackages">
+        <Message Text="Publishing NuGet packages to '$(NuGetRepositoryUrl)' ..." Importance="high" />
+
+        <Exec Command="$(NuGet) push Sdl.Dxa.Framework.Web8.$(PackageVersion).nupkg -Source $(NuGetRepositoryUrl)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
+        <Exec Command="$(NuGet) push Sdl.Dxa.Framework.2013SP1.$(PackageVersion).nupkg -Source $(NuGetRepositoryUrl)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
+    </Target>
+    
+    <!-- =============================================================================================================================================  -->
     <Target Name="DeployOutput">
       <Message Text="Deploying output to '$(CdTestDeployFolder)'..." />
 
