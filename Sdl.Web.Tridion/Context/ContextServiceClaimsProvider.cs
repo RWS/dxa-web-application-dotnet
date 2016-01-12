@@ -33,8 +33,10 @@ namespace Sdl.Web.Tridion.Context
                 }
                 catch (Exception ex)
                 {
+                    // ODataContextEngine construction can fail for several reasons, because it immediately tries to communicate with Discovery Service.
+                    // Error handling in ODataContextEngine is currently suboptimal and class ContextServiceClaimsProvider is constructed very early in the DXA initialization.
+                    // Therefore, we just log the error here and continue; GetContextClaims will throw an exception later on (if we even get to that point).
                     Log.Error(ex);
-                    throw;
                 }
             }
         }
@@ -50,6 +52,12 @@ namespace Sdl.Web.Tridion.Context
         {
             using (new Tracer(aspectName))
             {
+                if (_contextEngineClient == null)
+                {
+                    // Apparently an exception occurred in the class constructor; it should have logged the exception already.
+                    throw new DxaException("Context Engine Client was not initialized. Check the log file for errors.");
+                }
+
                 // TODO: Not really nice to use HttpContext at this level.
                 HttpContext httpContext = HttpContext.Current;
                 if (httpContext == null)
