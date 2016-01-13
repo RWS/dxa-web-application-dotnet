@@ -19,7 +19,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             { typeof(IContentProvider), new DefaultProvider() },
             { typeof(INavigationProvider), new DefaultProvider() },
-            { typeof(ILinkResolver), new TridionLinkResolver() },
+            { typeof(ILinkResolver), new DefaultLinkResolver() },
             { typeof(IRichTextProcessor), new DefaultRichTextProcessor() },
             { typeof(IMediaHelper), new TestMediaHelper() },
             { typeof(ILocalizationResolver), new TestFixture() },

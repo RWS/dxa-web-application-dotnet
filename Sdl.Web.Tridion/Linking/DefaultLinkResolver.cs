@@ -8,9 +8,9 @@ using Tridion.ContentDelivery.Web.Linking;
 namespace Sdl.Web.Tridion.Linking
 {
     /// <summary>
-    /// Default/Tridion Link Resolver implementation
+    /// Default Link Resolver implementation
     /// </summary>
-    public class TridionLinkResolver : ILinkResolver
+    public class DefaultLinkResolver : ILinkResolver
     {
         #region ILinkResolver Members
 

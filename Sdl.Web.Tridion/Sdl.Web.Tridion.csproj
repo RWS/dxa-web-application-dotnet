@@ -152,7 +152,7 @@
     <Compile Include="ContentManager\ItemTypes.cs" />
     <Compile Include="Context\AdfContextClaimsProvider.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Linking\TridionLinkResolver.cs" />
+    <Compile Include="Linking\DefaultLinkResolver.cs" />
     <Compile Include="LocalizationResolver.cs" />
     <Compile Include="Mapping\DD4TFactoryCache.cs" />
     <Compile Include="Mapping\DefaultModelBuilder.cs" />
