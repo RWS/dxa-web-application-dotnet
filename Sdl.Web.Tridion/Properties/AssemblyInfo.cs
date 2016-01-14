@@ -16,7 +16,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyCompany("SDL Group")]
 [assembly: AssemblyProduct("SDL Digital Experience Accelerator")]
-[assembly: AssemblyCopyright("Copyright © 2014-2015 SDL Group")]
+[assembly: AssemblyCopyright("Copyright © 2014-2016 SDL Group")]
 
 [assembly: ComVisible(false)]
 
