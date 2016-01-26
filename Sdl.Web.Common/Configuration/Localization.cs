@@ -429,6 +429,11 @@ namespace Sdl.Web.Common.Configuration
                     if (_data.MediaRoot != null)
                     {
                         string mediaRoot = _data.MediaRoot;
+                        if (!mediaRoot.StartsWith("/"))
+                        {
+                            // SDL Web 8 context-relative URL
+                            mediaRoot = string.Format("{0}/{1}", Path, mediaRoot);
+                        }
                         if (!mediaRoot.EndsWith("/"))
                         {
                             mediaRoot += "/";
