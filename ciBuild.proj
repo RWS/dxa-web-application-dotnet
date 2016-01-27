@@ -13,8 +13,7 @@
         <NuGet>&quot;$(ProjectDirectory)\_tools\NuGet.exe&quot;</NuGet>
         <NuGetPackageDirectory>$(ProjectDirectory)\_NuGet</NuGetPackageDirectory>
         <DxaFrameworkPackageDirectory>$(NuGetPackageDirectory)\Sdl.Dxa.Framework</DxaFrameworkPackageDirectory>
-        <PackageVersion>1.3.0-sprint4</PackageVersion> <!--TODO: Determine based on $(Version) or from VERSION.txt -->
-
+ 
         <!--Tools-->
         <MsBuildExe>C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe</MsBuildExe>
   </PropertyGroup>
@@ -54,6 +53,15 @@
     <Target Name="CreatePackages">
         <Message Text="Creating NuGet packages in '$(NuGetPackageDirectory)' ..." Importance="high" />
 
+		<!-- Read Package Version from _Nuget\package-version.txt -->
+		<ItemGroup>
+			<VersionFile Include="$(NuGetPackageDirectory)\package-version.txt" />
+		</ItemGroup>
+		<ReadLinesFromFile File="@(VersionFile)">
+            <Output TaskParameter="Lines" PropertyName="PackageVersion"/>
+        </ReadLinesFromFile>
+		<Message Text="Package Version: $(PackageVersion)" />
+		
         <!--Versionize the path to DXA Framework libs in the {package_id}.targets files -->
         <XmlPoke 
             XmlInputPath="$(DxaFrameworkPackageDirectory)\Sdl.Dxa.Framework.Web8.targets"
