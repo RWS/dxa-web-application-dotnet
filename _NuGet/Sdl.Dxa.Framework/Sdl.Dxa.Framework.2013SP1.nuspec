@@ -2,26 +2,31 @@
 <package >
     <metadata>
         <id>Sdl.Dxa.Framework.2013SP1</id>
-        <version>1.3.0-sprint4</version>
+        <!-- Version is set by ciBuild.proj -->
+		<version>0.0.0</version>
         <!-- NOTE: Visual Studio's NuGet UI only shows 'id' and 'description' -->
         <title>SDL Digital eXperience Accelerator Framework for SDL Tridion 2013 SP1</title>
         <authors>SDL Group</authors>
         <projectUrl>https://github.com/sdl/dxa-web-application-dotnet</projectUrl>
-        <!-- <licenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</licenseUrl> -->
+        <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
         <iconUrl>http://dr0muzwhcp26z.cloudfront.net/static/corporate/SDL-logo-2014.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>SDL Digital eXperience Accelerator Framework for SDL Tridion 2013 SP1</description>
         <copyright>Copyright 2015-2016 SDL Group</copyright>
         <tags>SDL DXA Tridion 2013</tags>
         <references>
-            <!-- These assemblies form the public API -->
+            <!-- These assemblies form the DXA public API -->
             <reference file="Sdl.Web.Mvc.dll" />
             <reference file="Sdl.Web.Common.dll" />
-            <reference file="Sdl.Web.Common.Models.dll" />
         </references>
+		<dependencies>
+			<!-- NOTE: We hardly use package dependencies, because we don't want direct references to transitive dependencies and the explicit reference above don't control those.-->
+			<dependency id="Newtonsoft.Json" version="7.0.0" />
+		</dependencies>
     </metadata>
     <files>
-        <file src="..\..\Sdl.Web.Tridion\bin\Release_7.1\*.dll" target="lib\net452" />
+		<!-- NOTE: we're excluding CD assemblies because these should not be redistributed publicly -->
+        <file src="..\..\Sdl.Web.Tridion\bin\Release_7.1\*.dll" exclude="**\Tridion.ContentDelivery*.dll;**\netrtsn.dll;**\System.Web*.dll;;**\Newtonsoft.Json.dll" target="lib\net452" />
         <file src="Sdl.Dxa.Framework.2013SP1.targets" target="build\net452" />
     </files>
 </package>
