@@ -8,41 +8,85 @@
         <BuildConfiguration>Release</BuildConfiguration>
         <ProjectDirectory>$(MSBuildProjectDirectory)</ProjectDirectory>
         <CdTestDeployFolder>\\saintjohn01.ams.dev\C$\inetpub\wwwroot\GitVersion</CdTestDeployFolder>
-        
+        <NuGetRepositoryUrl></NuGetRepositoryUrl>
+
+        <NuGet>&quot;$(ProjectDirectory)\_tools\NuGet.exe&quot;</NuGet>
+        <NuGetPackageDirectory>$(ProjectDirectory)\_NuGet</NuGetPackageDirectory>
+        <DxaFrameworkPackageDirectory>$(NuGetPackageDirectory)\Sdl.Dxa.Framework</DxaFrameworkPackageDirectory>
+ 
         <!--Tools-->
         <MsBuildExe>C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe</MsBuildExe>
   </PropertyGroup>
 
 
-  <!-- =============================================================================================================================================  -->
-  <Target Name="Build">
-    <Message Text="Start build..." Importance="high" />
+    <!-- =============================================================================================================================================  -->
+    <Target Name="Build">
+        <Message Text="Start build..." Importance="high" />
         
         <CallTarget Targets="PrepareBuild"/>
-        <CallTarget Targets="PackageBuild"/>
+        <CallTarget Targets="RunBuild"/>
+        <CallTarget Targets="CreatePackages"/>
+        <CallTarget Targets="PublishPackages" Condition="'$(NuGetRepositoryUrl)' != ''"/>
     </Target>
 
     <!-- =============================================================================================================================================  -->
     <Target Name="PrepareBuild">
         <Message Text="Preparing build..." Importance="high" />
 
-        <Exec Command="_tools\RestorePackages Site.sln" WorkingDirectory="$(ProjectDirectory)" />
+        <Exec Command="_tools\RestorePackages DxaFramework.sln" WorkingDirectory="$(ProjectDirectory)" />
     </Target>
 
     <!-- =============================================================================================================================================  -->
-    <Target Name="PackageBuild">
+    <Target Name="RunBuild">
         <Message Text="Running build commands..." Importance="high" />
 
-		<!-- Build the Sdl.Web.Tridion project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1) -->
+        <!-- Build the Sdl.Web.Tridion project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1) -->
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
 
-		<!-- Build the Site project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1); there is only difference in Sdl.Web.Tridion artifacts (see above). -->
-        <MSBuild Projects="$(ProjectDirectory)\Site\Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
-        <MSBuild Projects="$(ProjectDirectory)\Site\Site.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
+        <!-- Build the Site project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1); there is only difference in Sdl.Web.Tridion artifacts (see above). -->
+        <MSBuild Projects="$(ProjectDirectory)\Site\Sdl.Web.Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
+        <MSBuild Projects="$(ProjectDirectory)\Site\Sdl.Web.Site.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
     </Target>
 
-     <!-- =============================================================================================================================================  -->
+    <!-- =============================================================================================================================================  -->
+    <Target Name="CreatePackages">
+        <Message Text="Creating NuGet packages in '$(NuGetPackageDirectory)' ..." Importance="high" />
+
+		<!-- Read Package Version from _Nuget\package-version.txt -->
+		<ItemGroup>
+			<VersionFile Include="$(NuGetPackageDirectory)\package-version.txt" />
+		</ItemGroup>
+		<ReadLinesFromFile File="@(VersionFile)">
+            <Output TaskParameter="Lines" PropertyName="PackageVersion"/>
+        </ReadLinesFromFile>
+		<Message Text="Package Version: $(PackageVersion)" />
+		
+        <!--Versionize the path to DXA Framework libs in the {package_id}.targets files -->
+        <XmlPoke 
+            XmlInputPath="$(DxaFrameworkPackageDirectory)\Sdl.Dxa.Framework.Web8.targets"
+            Namespaces="&lt;Namespace Prefix='msb' Uri='http://schemas.microsoft.com/developer/msbuild/2003' /&gt;"
+            Query="//msb:DxaFrameworkLibs/@Include"
+            Value="..\packages\Sdl.Dxa.Framework.Web8.$(PackageVersion)\lib\net452\*.*" />
+        <XmlPoke
+            XmlInputPath="$(DxaFrameworkPackageDirectory)\Sdl.Dxa.Framework.2013SP1.targets"
+            Namespaces="&lt;Namespace Prefix='msb' Uri='http://schemas.microsoft.com/developer/msbuild/2003' /&gt;"
+            Query="//msb:DxaFrameworkLibs/@Include"
+            Value="..\packages\Sdl.Dxa.Framework.2013SP1.$(PackageVersion)\lib\net452\*.*" />
+
+        <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.Web8.nuspec -Version $(PackageVersion)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
+        <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.2013SP1.nuspec -Version $(PackageVersion)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
+    </Target>
+
+    <!-- =============================================================================================================================================  -->
+    <Target Name="PublishPackages">
+        <Message Text="Publishing NuGet packages to '$(NuGetRepositoryUrl)' ..." Importance="high" />
+
+        <Exec Command="$(NuGet) push Sdl.Dxa.Framework.Web8.$(PackageVersion).nupkg -Source $(NuGetRepositoryUrl)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
+        <Exec Command="$(NuGet) push Sdl.Dxa.Framework.2013SP1.$(PackageVersion).nupkg -Source $(NuGetRepositoryUrl)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
+    </Target>
+    
+    <!-- =============================================================================================================================================  -->
     <Target Name="DeployOutput">
       <Message Text="Deploying output to '$(CdTestDeployFolder)'..." />
 

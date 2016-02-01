@@ -118,8 +118,16 @@ namespace Sdl.Web.Common.Configuration
         /// <summary>
         /// Initializes the providers (Content Provider, Link Resolver, Media Helper, etc.) using dependency injection, i.e. obtained from configuration.
         /// </summary>
-        /// <param name="dependencyResolver">The Dependency Resolver used to get implementations for provider interfaces.</param>
-        public static void InitializeProviders(IDependencyResolver dependencyResolver)
+        /// <param name="dependencyResolver">A delegate that provide an implementation instance for a given interface type.</param>
+        /// <remarks>
+        /// This method took a parameter of type <see cref="System.Web.Mvc.IDependencyResolver"/> in DXA 1.1 and 1.2.
+        /// That created an undesirable dependency on System.Web.Mvc and therefore this has been changed to a delegate in DXA 1.3.
+        /// We couldn't keep the old signature (as deprecated) because that would still result in a dependency on System.Web.Mvc.
+        /// This means that the call in Global.asax.cs must be changed from
+        /// <c>SiteConfiguration.InitializeProviders(DependencyResolver.Current);</c> to
+        /// <c>SiteConfiguration.InitializeProviders(DependencyResolver.Current.GetService);</c>
+        /// </remarks>
+        public static void InitializeProviders(Func<Type, object> dependencyResolver)
         {
             using (new Tracer())
             {
@@ -137,11 +145,11 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
-        private static T GetProvider<T>(IDependencyResolver dependencyResolver, bool isOptional = false)
+        private static T GetProvider<T>(Func<Type, object> dependencyResolver, bool isOptional = false)
             where T: class // interface to be more precise.
         {
             Type interfaceType = typeof(T);
-            T provider = (T) dependencyResolver.GetService(interfaceType);
+            T provider = (T) dependencyResolver(interfaceType);
             if (provider == null)
             {
                 if (!isOptional)

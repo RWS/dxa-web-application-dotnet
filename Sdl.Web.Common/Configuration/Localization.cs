@@ -211,7 +211,7 @@ namespace Sdl.Web.Common.Configuration
                 string configValue;
                 if (!configSection.TryGetValue(propertyName, out configValue))
                 {
-                    Log.Warn("Configuration key '{0}' does not exist in section '{1}' for Localization [{2}]. GetConfigValue returns null.", propertyName, sectionName, this);
+                    Log.Debug("Configuration key '{0}' does not exist in section '{1}' for Localization [{2}]. GetConfigValue returns null.", propertyName, sectionName, this);
                 }
                 return configValue;
             }
@@ -394,29 +394,30 @@ namespace Sdl.Web.Common.Configuration
                     // NOTE: intentionally setting LastRefresh first, because while loading other classes (e.g. BinaryFileManager) may be using LastRefresh to detect stale content.
                     LastRefresh = DateTime.Now;
 
-                    IsHtmlDesignPublished = true;
                     List<string> mediaPatterns = new List<string>();
 
                     VersionData versionData = null;
                     try
                     {
                         LoadStaticContentItem("/version.json", ref versionData);
+                        IsHtmlDesignPublished = true;
                     }
                     catch (DxaItemNotFoundException)
                     {
                         //it may be that the version json file is 'unmanaged', ie just placed on the filesystem manually
                         //in which case we try to load it directly - the HTML Design is thus not published from CMS
+                        IsHtmlDesignPublished = false;
                         string versionJsonPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SiteConfiguration.SystemFolder, @"assets\version.json");
                         if (File.Exists(versionJsonPath))
                         {
                             string versionJson = File.ReadAllText(versionJsonPath);
                             versionData = JsonConvert.DeserializeObject<VersionData>(versionJson);
-                            IsHtmlDesignPublished = false;
                             Log.Info("Obtained '{0}' directly from file system.", versionJsonPath);
                         }
                         else
                         {
-                            throw;
+                            Log.Warn("HTML design is not published nor does file '{0}' exist on disk. Setting version to v0.0", versionJsonPath);
+                            versionData = new VersionData { Version = "v0.0" };
                         }
                     }
                     Version = versionData.Version;
@@ -428,6 +429,11 @@ namespace Sdl.Web.Common.Configuration
                     if (_data.MediaRoot != null)
                     {
                         string mediaRoot = _data.MediaRoot;
+                        if (!mediaRoot.StartsWith("/"))
+                        {
+                            // SDL Web 8 context-relative URL
+                            mediaRoot = string.Format("{0}/{1}", Path, mediaRoot);
+                        }
                         if (!mediaRoot.EndsWith("/"))
                         {
                             mediaRoot += "/";
