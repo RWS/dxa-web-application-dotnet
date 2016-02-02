@@ -132,7 +132,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (result.XpmMetadata != null)
                 {
                     // Entity Models requested through this method are per definition "query based" in XPM terminology.
-                    result.XpmMetadata["IsQueryBased"] = "true";
+                    result.XpmMetadata["IsQueryBased"] = true;
                 }
                 return result;
             }

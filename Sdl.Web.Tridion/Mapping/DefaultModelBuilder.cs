@@ -147,7 +147,7 @@ namespace Sdl.Web.Tridion.Mapping
                 entityModel.XpmMetadata = GetXpmMetadata(cp.Component);
                 entityModel.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
                 entityModel.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
-                entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic ? "true" : "false");
+                entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic);
                 entityModel.MvcData = mvcData;
 
                 // add html classes to model from metadata
@@ -660,9 +660,9 @@ namespace Sdl.Web.Tridion.Mapping
             return field.XPath;
         }
 
-        protected virtual IDictionary<string, string> GetXpmMetadata(IComponent comp)
+        protected virtual IDictionary<string, object> GetXpmMetadata(IComponent comp)
         {
-            IDictionary<string, string> result = new Dictionary<string, string>();
+            IDictionary<string, object> result = new Dictionary<string, object>();
             if (comp != null)
             {
                 result.Add("ComponentID", comp.Id);
@@ -671,9 +671,9 @@ namespace Sdl.Web.Tridion.Mapping
             return result;
         }
 
-        protected virtual IDictionary<string, string> GetXpmMetadata(IPage page)
+        protected virtual IDictionary<string, object> GetXpmMetadata(IPage page)
         {
-            IDictionary<string, string> result = new Dictionary<string, string>();
+            IDictionary<string, object> result = new Dictionary<string, object>();
             if (page != null)
             {
                 result.Add("PageID", page.Id);
@@ -1004,7 +1004,7 @@ namespace Sdl.Web.Tridion.Mapping
             return new RegionModel(regionMvcData.ViewName)
             {
                 MvcData = regionMvcData,
-                XpmMetadata = new Dictionary<string, string>
+                XpmMetadata = new Dictionary<string, object>
                 {
                     {RegionModel.IncludedFromPageIdXpmMetadataKey, page.Id},
                     {RegionModel.IncludedFromPageTitleXpmMetadataKey, page.Title},

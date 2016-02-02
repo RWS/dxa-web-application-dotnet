@@ -45,6 +45,7 @@ namespace Sdl.Web.Tridion.Tests
             _testLocalizations = new[] { _parentLocalization, _childLocalization };
 
             ArticleDcpEntityId = "9712-9711";
+            ArticlePageUrl = "/autotest-parent/test_article_page.html";
 
             TestRegistration.RegisterCoreViewModels();
         }
@@ -68,6 +69,8 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         internal static string ArticleDcpEntityId { get; private set; }
+
+        internal static string ArticlePageUrl { get; private set; }
 
         internal static void InitializeProviders()
         {
