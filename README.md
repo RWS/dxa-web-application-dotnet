@@ -1,4 +1,4 @@
-dxa-web-application
+dxa-web-application-dotnet
 ===
 SDL Digital Experience Accelerator ASP.NET MVC web application
 
@@ -7,7 +7,7 @@ About
 -----
 The SDL Digital Experience Accelerator is a reference implementation of SDL Tridion intended to help you create, design and publish an SDL Web-based Web site quickly.
 
-You can find more details and a download of the entire release on https://community.sdl.com/developers/tridion_developer/m/mediagallery/1241
+You can find more details and a download of the entire release on https://community.sdl.com/developers/tridion_developer/m/mediagallery/852
 
 
 Support
