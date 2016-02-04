@@ -38,7 +38,6 @@ namespace Sdl.Web.Common.Logging
 
         private string _indent;
         private string _callingMethodName;
-        private string _callingAssemblyName;
         private int _numberOfCallingMethodParams;
         private Stopwatch _stopwatch = new Stopwatch();
 
@@ -49,15 +48,7 @@ namespace Sdl.Web.Common.Logging
         static Tracer()
         {
             // We store the tracing enabled setting in a static to minimize the performance overhead of tracing when it is disabled.
-            try
-            {
-                //_commonConfigSection = ConfigurationManager.GetSection<CommonSettings>(CommonSettings.SectionName);
-                _isTracingEnabled = true; //TODO: _commonConfigSection.TracingSettings.Enabled;
-            }
-            catch
-            {
-                _isTracingEnabled = false;
-            }
+            _isTracingEnabled = Log.Logger.IsTracingEnabled;
         }
 
         /// <summary>
@@ -76,7 +67,6 @@ namespace Sdl.Web.Common.Logging
             // http://www.smelser.net/blog/2008/11/default.aspx
             _numberOfCallingMethodParams = 0;
             _callingMethodName = "Not available";
-            _callingAssemblyName = "Not available";
 
             StackTrace stackTrace = new StackTrace();
             StackFrame callingMethodFrame = stackTrace.GetFrame(1);
@@ -93,9 +83,6 @@ namespace Sdl.Web.Common.Logging
                     if (declaringType != null)
                     {
                         _callingMethodName = declaringType.Name + "." + methodInfo.Name;
-
-                        Assembly assembly = declaringType.Assembly;
-                        _callingAssemblyName = assembly.GetName().Name;
                     }
                 }
             }
@@ -125,7 +112,6 @@ namespace Sdl.Web.Common.Logging
             // http://www.smelser.net/blog/2008/11/default.aspx
             _numberOfCallingMethodParams = 0;
             _callingMethodName = "Not available";
-            _callingAssemblyName = "Not available";
 
             StackTrace stackTrace = new StackTrace();
             StackFrame callingMethodFrame = stackTrace.GetFrame(1);
@@ -142,9 +128,6 @@ namespace Sdl.Web.Common.Logging
                     if (declaringType != null)
                     {
                         _callingMethodName = declaringType.Name + "." + methodInfo.Name;
-
-                        Assembly assembly = declaringType.Assembly;
-                        _callingAssemblyName = assembly.GetName().Name;
                     }
                 }
             }

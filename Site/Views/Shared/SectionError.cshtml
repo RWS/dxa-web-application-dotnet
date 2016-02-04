@@ -3,6 +3,11 @@
     <strong>@Html.Resource("core.sectionErrorMessage")</strong>
     @if (WebRequestContext.IsDeveloperMode)
     {
-         <small>. Check the log files for more details: @Model.Exception.Message</small>
+        Exception ex = Model.Exception;
+        while (ex != null)
+        {
+            <pre>@ex.Message</pre>
+            ex = ex.InnerException;
+        }
     }
 </div>

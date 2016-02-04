@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
-using System.Web.Script.Serialization;
 using DD4T.ContentModel;
 using DD4T.ContentModel.Factories;
+using Newtonsoft.Json;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
@@ -15,9 +15,6 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Statics;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Query;
-using Tridion.ContentDelivery.DynamicContent.Query;
-using Tridion.ContentDelivery.Meta;
-using IItem = Tridion.ContentDelivery.Meta.IItem;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.Tridion.Mapping
@@ -91,7 +88,7 @@ namespace Sdl.Web.Tridion.Mapping
                 }
                 if (page == null)
                 {
-                    throw new DxaItemNotFoundException(url);
+                    throw new DxaItemNotFoundException(url, localization.LocalizationId);
                 }
                 FullyLoadDynamicComponentPresentations(page, localization);
 
@@ -128,10 +125,16 @@ namespace Sdl.Web.Tridion.Mapping
                 IComponentPresentation dcp;
                 if (!componentPresentationFactory.TryGetComponentPresentation(out dcp, componentUri, templateUri))
                 {
-                    throw new DxaItemNotFoundException(id);
+                    throw new DxaItemNotFoundException(id, localization.LocalizationId);
                 }
 
-                return ModelBuilderPipeline.CreateEntityModel(dcp, localization);
+                EntityModel result = ModelBuilderPipeline.CreateEntityModel(dcp, localization);
+                if (result.XpmMetadata != null)
+                {
+                    // Entity Models requested through this method are per definition "query based" in XPM terminology.
+                    result.XpmMetadata["IsQueryBased"] = true;
+                }
+                return result;
             }
         }
 
@@ -150,7 +153,7 @@ namespace Sdl.Web.Tridion.Mapping
                 string localFilePath = BinaryFileManager.Instance.GetCachedFile(urlPath, localization);
  
                 return new StaticContentItem(
-                    new FileStream(localFilePath, FileMode.Open),
+                    new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan),
                     MimeMapping.GetMimeMapping(localFilePath),
                     File.GetLastWriteTime(localFilePath), 
                     Encoding.UTF8
@@ -211,7 +214,7 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", url);
                     string navigationJsonString = GetPageContent(url, localization);
-                    result = new JavaScriptSerializer().Deserialize<SitemapItem>(navigationJsonString);
+                    result = JsonConvert.DeserializeObject<SitemapItem>(navigationJsonString);
                     HttpContext.Current.Items[cacheKey] = result;
                 }
                 else
@@ -399,7 +402,7 @@ namespace Sdl.Web.Tridion.Mapping
         {
             List<IPage> result = new List<IPage>();
             string[] pageTemplateTcmUriParts = page.PageTemplate.Id.Split('-');
-            IEnumerable<string> includePageUrls = SiteConfiguration.GetIncludePageUrls(pageTemplateTcmUriParts[1], localization);
+            IEnumerable<string> includePageUrls = localization.GetIncludePageUrls(pageTemplateTcmUriParts[1]);
             foreach (string includePageUrl in includePageUrls)
             {
                 IPage includePage = GetPage(SiteConfiguration.LocalizeUrl(includePageUrl, localization), localization);

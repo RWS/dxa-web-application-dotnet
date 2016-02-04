@@ -171,7 +171,7 @@ namespace Sdl.Web.Tridion.Statics
                     {
                         CleanupLocalFile(localFilePath);
                     }
-                    throw new DxaItemNotFoundException(urlPath);
+                    throw new DxaItemNotFoundException(urlPath, localization.LocalizationId);
                 }
 
                 WriteBinaryToFile(binary, localFilePath, dimensions);
@@ -181,7 +181,11 @@ namespace Sdl.Web.Tridion.Statics
 
         private static string GetFilePathFromUrl(string urlPath, Localization loc)
         {
-            return HttpContext.Current.Server.MapPath("~/" + SiteConfiguration.GetLocalStaticsFolder(loc.LocalizationId) + urlPath);
+            // TODO: not nice to use HttpContext at this level
+            HttpContext httpContext = HttpContext.Current;
+            return (httpContext == null) ?
+                string.Format("{0}/{1}", SiteConfiguration.GetLocalStaticsFolder(loc.LocalizationId), Uri.UnescapeDataString(urlPath)) :
+                httpContext.Server.MapPath("~/" + SiteConfiguration.GetLocalStaticsFolder(loc.LocalizationId) + urlPath);
         }
 
         /// <summary>

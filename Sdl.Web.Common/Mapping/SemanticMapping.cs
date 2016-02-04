@@ -1,11 +1,5 @@
-﻿using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Extensions;
-using Sdl.Web.Common.Logging;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Web.Script.Serialization;
+﻿using System.Linq;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Mapping
 {
@@ -23,12 +17,6 @@ namespace Sdl.Web.Common.Mapping
         /// Default semantic vocabulary.
         /// </summary>
         public const string DefaultVocabulary = "http://www.sdl.com/web/schemas/core";
-
-        private const string _mapSettingsType = "map";
-        private const string _vocabSettingsType = "vocab";
-
-        private static readonly Dictionary<string, Dictionary<string, SemanticSchema>> _semanticMap = new Dictionary<string, Dictionary<string, SemanticSchema>>();
-        private static readonly Dictionary<string, List<SemanticVocabulary>> _semanticVocabularies = new Dictionary<string, List<SemanticVocabulary>>();
 
         /// <summary>
         /// Gets a qualified (semantic) type name consisting of vocabulary ID and (local) type name.
@@ -61,18 +49,14 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>Semantic vocabulary for the given prefix</returns>
         public static string GetVocabulary(string prefix, Localization loc)
         {
-            string key = loc.LocalizationId;
-            if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc))
+            SemanticVocabulary semanticVocabulary = loc.GetSemanticVocabularies().FirstOrDefault(sv => sv.Prefix == prefix);
+            if (semanticVocabulary == null)
             {
-                LoadVocabulariesForLocalization(loc);
+                throw new DxaException(
+                    string.Format("No vocabulary defined for prefix '{0}' in Localization [{1}]. {2}", prefix, loc, Constants.CheckSettingsUpToDate)
+                    );
             }
-            if (_semanticVocabularies.ContainsKey(key))
-            {
-                List<SemanticVocabulary> vocabs = _semanticVocabularies[key];
-                return GetVocabulary(vocabs, prefix);
-            }
-            Log.Error("Localization {0} does not contain prefix {1}. Check that the Publish Settings page is published and the application cache is up to date.", loc.LocalizationId, prefix);
-            return null;
+            return semanticVocabulary.Vocab;
         }
 
         /// <summary>
@@ -83,18 +67,14 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>Prefix for this semantic vocabulary</returns>
         public static string GetPrefix(string vocab, Localization loc)
         {
-            string key = loc.LocalizationId;
-            if (!_semanticVocabularies.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_vocabSettingsType, loc))
+            SemanticVocabulary semanticVocabulary = loc.GetSemanticVocabularies().FirstOrDefault(sv => sv.Vocab == vocab);
+            if (semanticVocabulary == null)
             {
-                LoadVocabulariesForLocalization(loc);
+                throw new DxaException(
+                    string.Format("No vocabulary defined for '{0}' in Localization [{1}]. {2}", vocab, loc, Constants.CheckSettingsUpToDate)
+                    );
             }
-            if (_semanticVocabularies.ContainsKey(key))
-            {
-                List<SemanticVocabulary> vocabs = _semanticVocabularies[key];
-                return GetPrefix(vocabs, vocab);
-            }
-            Log.Error("Localization {0} does not contain vocabulary {1}. Check that the Publish Settings page is published and the application cache is up to date.", loc.LocalizationId, vocab);
-            return null;
+            return semanticVocabulary.Prefix;
         }
 
         /// <summary>
@@ -105,89 +85,7 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>The semantic schema matching the id for the given module</returns>
         public static SemanticSchema GetSchema(string id, Localization loc)
         {
-            string key = loc.LocalizationId;
-            if (!_semanticMap.ContainsKey(key) || SiteConfiguration.CheckSettingsNeedRefresh(_mapSettingsType, loc))
-            {
-                LoadSemanticMapForLocalization(loc);
-            }
-
-            try
-            {
-                return _semanticMap[key][id];
-            }
-            catch (Exception)
-            {
-                throw new DxaException(
-                    string.Format("Semantic schema {0} not defined in Localization [{1}]. Check that the Publish Settings page is published and the application cache is up to date.", 
-                    id, loc)
-                    );
-            }
-        }
-
-        private static void LoadVocabulariesForLocalization(Localization loc)
-        {
-            string key = loc.LocalizationId;
-            string url = Path.Combine(loc.Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"mappings\vocabularies.json").Replace("\\", "/");
-            string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(url, loc).GetText();
-            if (jsonData != null)
-            {
-                List<SemanticVocabulary> vocabs = GetVocabulariesFromFile(jsonData);
-                SiteConfiguration.ThreadSafeSettingsUpdate(_vocabSettingsType, _semanticVocabularies, key, vocabs);
-            }
-        }
-
-        private static string GetPrefix(List<SemanticVocabulary> vocabularies, string vocab)
-        {
-            SemanticVocabulary vocabulary = vocabularies.Find(v => v.Vocab.Equals(vocab));
-            if (vocabulary != null)
-            {
-                return vocabulary.Prefix;
-            }
-            Log.Warn("Prefix not found for semantic vocabulary '{0}'", vocab);
-            return null;
-        }
-
-        private static string GetVocabulary(List<SemanticVocabulary> vocabularies, string prefix)
-        {
-            SemanticVocabulary vocabulary = vocabularies.Find(v => v.Prefix.Equals(prefix));
-            if (vocabulary != null)
-            {
-                return vocabulary.Vocab;
-            }
-
-            Exception ex = new Exception(string.Format("Semantic vocabulary not found for prefix '{0}'", prefix));
-            Log.Error(ex);
-            // TODO should we throw the exception here or return the default vocabulary?
-            throw ex;
-        }
-
-        
-        private static void LoadSemanticMapForLocalization(Localization loc)
-        {
-            string key = loc.LocalizationId;
-            string url = Path.Combine(loc.Path.ToCombinePath(true), SiteConfiguration.SystemFolder, @"mappings\schemas.json").Replace("\\", "/");
-            string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(url, loc).GetText();;
-            if (jsonData != null)
-            {
-                IEnumerable<SemanticSchema> schemas = GetSchemasFromFile(jsonData);
-                Dictionary<string, SemanticSchema> map = new Dictionary<string, SemanticSchema>();
-                foreach (SemanticSchema schema in schemas)
-                {
-                    schema.Localization = loc;
-                    map.Add(schema.Id.ToString(CultureInfo.InvariantCulture), schema);
-                }
-                SiteConfiguration.ThreadSafeSettingsUpdate(_mapSettingsType, _semanticMap, key, map);
-            }
-        }
-
-        private static IEnumerable<SemanticSchema> GetSchemasFromFile(string jsonData)
-        {
-            return new JavaScriptSerializer().Deserialize<List<SemanticSchema>>(jsonData);
-        }
-
-        private static List<SemanticVocabulary> GetVocabulariesFromFile(string jsonData)
-        {
-            return new JavaScriptSerializer().Deserialize<List<SemanticVocabulary>>(jsonData);
+            return loc.GetSemanticSchema(id);
         }
     }
 }

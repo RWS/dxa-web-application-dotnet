@@ -1,9 +1,8 @@
 ﻿@using Sdl.Web.Common.Extensions
 @model Teaser
 @{
-    var isHero = ViewBag.RegionName == "Hero" ? true : false;
     double imageAspect = 0.0;
-    if (isHero)
+    if (ViewBag.RegionName == "Hero")
     {
         imageAspect = WebRequestContext.ScreenWidth == ScreenWidth.ExtraSmall ? 2 : (WebRequestContext.ScreenWidth == ScreenWidth.Small ? 2.5 : 3.3);
     }

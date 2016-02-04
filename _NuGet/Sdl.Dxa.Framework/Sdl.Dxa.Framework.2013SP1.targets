@@ -1,0 +1,8 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="CopyDxaFrameworkLibsToOutput">
+    <ItemGroup>
+      <DxaFrameworkLibs Include="..\packages\Sdl.Dxa.Framework.2013SP1.1.3.0-sprint4\lib\net452\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DxaFrameworkLibs)" DestinationFolder="$(OutputPath)" />
+  </Target>
+</Project>

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package >
+    <metadata>
+        <id>Sdl.Dxa.Framework.Web8</id>
+        <!-- Version is set by ciBuild.proj -->
+        <version>0.0.0</version>
+        <!-- NOTE: Visual Studio's NuGet UI only shows 'id' and 'description' -->
+        <title>SDL Digital eXperience Accelerator Framework for SDL Web 8</title>
+        <authors>SDL Group</authors>
+        <projectUrl>https://github.com/sdl/dxa-web-application-dotnet</projectUrl>
+        <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+        <iconUrl>http://dr0muzwhcp26z.cloudfront.net/static/corporate/SDL-logo-2014.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>SDL Digital eXperience Accelerator Framework for SDL Web 8.</description>
+        <copyright>Copyright 2015-2016 SDL Group</copyright>
+        <tags>SDL DXA Web8</tags>
+        <references>
+            <!-- These assemblies form the DXA public API -->
+            <reference file="Sdl.Web.Mvc.dll" />
+            <reference file="Sdl.Web.Common.dll" />
+        </references>
+		<dependencies>
+			<!-- NOTE: We hardly use package dependencies, because we don't want direct references to transitive dependencies and the explicit reference above don't control those.-->
+			<dependency id="Newtonsoft.Json" version="7.0.0" />
+		</dependencies>
+    </metadata>
+    <files>
+		<!-- NOTE: we're excluding CIL assemblies to prevent licensing issues (CIL has a custom license; not Apache 2.0) -->
+        <file src="..\..\Sdl.Web.Tridion\bin\Release\*.dll" exclude="**\Sdl.Web.Delivery*.dll;**\Sdl.Web.Context*.dll;**\Tridion.ContentDelivery*.dll;**\Microsoft.*.dll;**\System.Spatial.dll;**\System.Web*.dll;**\Newtonsoft.Json.dll" target="lib\net452" />
+        <file src="Sdl.Dxa.Framework.Web8.targets" target="build\net452" />
+    </files>
+</package>

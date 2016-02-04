@@ -96,7 +96,7 @@ namespace Sdl.Web.Site
         protected void Application_Start()
         {
             InitializeDependencyInjection();
-            SiteConfiguration.InitializeProviders(DependencyResolver.Current);
+            SiteConfiguration.InitializeProviders(DependencyResolver.Current.GetService);
 
             DataFormatters.Formatters.Add("json", new JsonFormatter());
             DataFormatters.Formatters.Add("rss", new RssFormatter());

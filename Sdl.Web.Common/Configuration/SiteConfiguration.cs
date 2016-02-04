@@ -1,27 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
-using System.Web.Script.Serialization;
-using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Configuration
 {
-    public enum ScreenWidth // TODO: move to a separate file (in Sdl.Web.Mvc ?)
-    {
-        ExtraSmall,
-        Small,
-        Medium,
-        Large
-    }
-
     /// <summary>
-    /// General Configuration Class which reads configuration from json files on disk
+    /// Represents configuration that applies to the entire web application.
     /// </summary>
     public static class SiteConfiguration
     {
@@ -31,19 +19,12 @@ namespace Sdl.Web.Common.Configuration
         public const string StaticsFolder = "BinaryData";
         public const string DefaultVersion = "v1.00";
 
-        private const string IncludeSettingsType = "include";
-        private const string RegionSettingsType = "regions";
-
-        // TODO: move this configuration state to class Localization instead of maintaining loc.ID mappings of everything here.
-        private static readonly Dictionary<string, Dictionary<string, XpmRegion>> XpmRegions = new Dictionary<string, Dictionary<string, XpmRegion>>();
-        private static readonly Dictionary<string, Dictionary<string, List<string>>> Includes = new Dictionary<string, Dictionary<string, List<string>>>();
-
         //A set of refresh states, keyed by localization id and then type (eg "config", "resources" etc.) 
-        private static readonly Dictionary<string, Dictionary<string, DateTime>> RefreshStates = new Dictionary<string, Dictionary<string, DateTime>>();
+        private static readonly Dictionary<string, Dictionary<string, DateTime>> _refreshStates = new Dictionary<string, Dictionary<string, DateTime>>();
         //A set of locks to use, one per localization
-        private static readonly Dictionary<string, object> LocalizationLocks = new Dictionary<string, object>();
+        private static readonly Dictionary<string, object> _localizationLocks = new Dictionary<string, object>();
         //A global lock
-        private static readonly object Lock = new object();
+        private static readonly object _lock = new object();
 
         #region References to "providers"
         /// <summary>
@@ -137,8 +118,16 @@ namespace Sdl.Web.Common.Configuration
         /// <summary>
         /// Initializes the providers (Content Provider, Link Resolver, Media Helper, etc.) using dependency injection, i.e. obtained from configuration.
         /// </summary>
-        /// <param name="dependencyResolver">The Dependency Resolver used to get implementations for provider interfaces.</param>
-        public static void InitializeProviders(IDependencyResolver dependencyResolver)
+        /// <param name="dependencyResolver">A delegate that provide an implementation instance for a given interface type.</param>
+        /// <remarks>
+        /// This method took a parameter of type <see cref="System.Web.Mvc.IDependencyResolver"/> in DXA 1.1 and 1.2.
+        /// That created an undesirable dependency on System.Web.Mvc and therefore this has been changed to a delegate in DXA 1.3.
+        /// We couldn't keep the old signature (as deprecated) because that would still result in a dependency on System.Web.Mvc.
+        /// This means that the call in Global.asax.cs must be changed from
+        /// <c>SiteConfiguration.InitializeProviders(DependencyResolver.Current);</c> to
+        /// <c>SiteConfiguration.InitializeProviders(DependencyResolver.Current.GetService);</c>
+        /// </remarks>
+        public static void InitializeProviders(Func<Type, object> dependencyResolver)
         {
             using (new Tracer())
             {
@@ -156,11 +145,11 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
-        private static T GetProvider<T>(IDependencyResolver dependencyResolver, bool isOptional = false)
+        private static T GetProvider<T>(Func<Type, object> dependencyResolver, bool isOptional = false)
             where T: class // interface to be more precise.
         {
             Type interfaceType = typeof(T);
-            T provider = (T) dependencyResolver.GetService(interfaceType);
+            T provider = (T) dependencyResolver(interfaceType);
             if (provider == null)
             {
                 if (!isOptional)
@@ -176,52 +165,6 @@ namespace Sdl.Web.Common.Configuration
             return provider;
         }
         #endregion
-
-
-        /// <summary>
-        /// Gets the include Page URLs for a given Page Type and Localization.
-        /// </summary>
-        /// <param name="pageTypeIdentifier">The Page Type Identifier.</param>
-        /// <param name="localization">The Localization</param>
-        /// <returns>The URLs of Include Pages</returns>
-        /// <remarks>
-        /// The concept of Include Pages will be removed in a future version of DXA.
-        /// As of DXA 1.1 Include Pages are represented as <see cref="Sdl.Web.Common.Models.PageModel.Regions"/>.
-        /// Implementations should avoid using this method directly.
-        /// </remarks>
-        public static IEnumerable<string> GetIncludePageUrls(string pageTypeIdentifier, Localization localization)
-        {
-            using (new Tracer(pageTypeIdentifier, localization))
-            {
-                string key = localization.LocalizationId;
-                if (!Includes.ContainsKey(key) || CheckSettingsNeedRefresh(IncludeSettingsType, localization))
-                {
-                    LoadIncludesForLocalization(localization);
-                }
-                if (Includes.ContainsKey(key))
-                {
-                    Dictionary<string, List<string>> includes = Includes[key];
-                    if (includes.ContainsKey(pageTypeIdentifier))
-                    {
-                        return includes[pageTypeIdentifier];
-                    }
-                }
-
-                throw new DxaException(
-                    String.Format("Localization [{0}] does not contain includes for Page Type '{1}'. Check that the Publish Settings page is published and the application cache is up to date.",
-                        localization, pageTypeIdentifier)
-                    );
-            }
-        }
-
-        private static void LoadIncludesForLocalization(Localization localization)
-        {
-            string key = localization.LocalizationId;
-            string url = Path.Combine(localization.Path.ToCombinePath(true), SystemFolder, @"mappings\includes.json").Replace("\\", "/");
-            string jsonData = ContentProvider.GetStaticContentItem(url, localization).GetText();
-            Dictionary<string, List<string>> includes = new JavaScriptSerializer().Deserialize<Dictionary<string, List<string>>>(jsonData);
-            ThreadSafeSettingsUpdate(IncludeSettingsType, Includes, key, includes);
-        }
 
 
         public static string GetPageController()
@@ -331,7 +274,7 @@ namespace Sdl.Web.Common.Configuration
         public static bool CheckSettingsNeedRefresh(string type, Localization localization) // TODO: Move to class Localization
         {
             Dictionary<string, DateTime> localizationRefreshStates;
-            if (!RefreshStates.TryGetValue(localization.LocalizationId, out localizationRefreshStates))
+            if (!_refreshStates.TryGetValue(localization.LocalizationId, out localizationRefreshStates))
             {
                 return false;
             }
@@ -355,11 +298,11 @@ namespace Sdl.Web.Common.Configuration
         private static void UpdateRefreshState(string localizationId, string type) // TODO
         {
             //Update is already done under a localization lock, so we don't need to lock again here
-            if (!RefreshStates.ContainsKey(localizationId))
+            if (!_refreshStates.ContainsKey(localizationId))
             {
-                RefreshStates.Add(localizationId, new Dictionary<string, DateTime>());
+                _refreshStates.Add(localizationId, new Dictionary<string, DateTime>());
             }
-            Dictionary<string, DateTime> states = RefreshStates[localizationId];
+            Dictionary<string, DateTime> states = _refreshStates[localizationId];
             if (states.ContainsKey(type))
             {
                 states[type] = DateTime.Now;
@@ -372,20 +315,40 @@ namespace Sdl.Web.Common.Configuration
 
         private static object GetLocalizationLock(string localizationId)
         {
-            if (!LocalizationLocks.ContainsKey(localizationId))
+            if (!_localizationLocks.ContainsKey(localizationId))
             {
-                lock (Lock)
+                lock (_lock)
                 {
-                    LocalizationLocks.Add(localizationId, new object());
+                    _localizationLocks.Add(localizationId, new object());
                 }
             }
-            return LocalizationLocks[localizationId];
+            return _localizationLocks[localizationId];
         }
 
         #endregion
 
 
         #region Obsolete 
+        /// <summary>
+        /// Gets the include Page URLs for a given Page Type and Localization.
+        /// </summary>
+        /// <param name="pageTypeIdentifier">The Page Type Identifier.</param>
+        /// <param name="localization">The Localization</param>
+        /// <returns>The URLs of Include Pages</returns>
+        /// <remarks>
+        /// The concept of Include Pages will be removed in a future version of DXA.
+        /// As of DXA 1.1 Include Pages are represented as <see cref="Sdl.Web.Common.Models.PageModel.Regions"/>.
+        /// Implementations should avoid using this method directly.
+        /// </remarks>
+        [Obsolete("Deprecated in DXA 1.3. Use Localization.GetIncludePageUrls instead (avoid using this method in general).")]
+        public static IEnumerable<string> GetIncludePageUrls(string pageTypeIdentifier, Localization localization)
+        {
+            using (new Tracer(pageTypeIdentifier, localization))
+            {
+                return localization.GetIncludePageUrls(pageTypeIdentifier);
+            }
+        }
+
         /// <summary>
         /// A registry of View Path -> View Model Type mappings to enable the correct View Model to be mapped for a given View
         /// </summary>
@@ -491,9 +454,7 @@ namespace Sdl.Web.Common.Configuration
         }
 
         [Obsolete("Localizations are now loaded on demand in the web application so this is no longer available. Use the SiteConfiguration.LocalizationResolver.GetLocalizationByUri or GetLocalizationById methods", true)]
-        public static Dictionary<string, Localization> Localizations { get; set; }        
-        #endregion
-
+        public static Dictionary<string, Localization> Localizations { get; set; }
 
         /// <summary>
         /// Gets a XPM region by name.
@@ -501,39 +462,15 @@ namespace Sdl.Web.Common.Configuration
         /// <param name="name">The region name</param>
         /// <param name="loc"></param>
         /// <returns>The XPM region matching the name for the given module</returns>
+        [Obsolete("Deprecated in DXA 1.3. Use Localization.GetXpmRegionConfiguration instead.")]
         public static XpmRegion GetXpmRegion(string name, Localization loc)
         {
-            string key = loc.LocalizationId;
-            if (!XpmRegions.ContainsKey(key) || CheckSettingsNeedRefresh(RegionSettingsType,loc))
+            using (new Tracer(name, loc))
             {
-                LoadRegionsForLocalization(loc);
+                return loc.GetXpmRegionConfiguration(name);
             }
-            if (XpmRegions.ContainsKey(key))
-            {
-                Dictionary<string, XpmRegion> regionData = XpmRegions[key];
-                if (regionData.ContainsKey(name))
-                {
-                    return regionData[name];
-                }
-            }
-            Log.Warn("XPM Region '{0}' does not exist in localization {1}.", name, loc.LocalizationId);
-            return null;
         }
+        #endregion
 
-        private static void LoadRegionsForLocalization(Localization loc)
-        {
-            string key = loc.LocalizationId;
-            string url = Path.Combine(loc.Path.ToCombinePath(true), @"system\mappings\regions.json").Replace("\\", "/");
-            string jsonData = ContentProvider.GetStaticContentItem(url, loc).GetText();
-            if (jsonData != null)
-            {
-                Dictionary<string, XpmRegion> regions = new JavaScriptSerializer().Deserialize<List<XpmRegion>>(jsonData).ToDictionary(region => region.Region);
-                ThreadSafeSettingsUpdate(RegionSettingsType, XpmRegions, key, regions);
-            }
-            else
-            {
-                Log.Error("Region file: {0} does not exist for localization {1}. Check that the Publish Settings page has been published in this publication.", url, loc.LocalizationId);
-            }
-        }
     }
 }
