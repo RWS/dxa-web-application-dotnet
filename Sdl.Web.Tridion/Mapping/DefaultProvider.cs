@@ -357,6 +357,10 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 url = "/" + url;
             }
+
+            // Support of non-ASCII characters in IRIs (Internationalized Resource Identifiers)
+            url = Uri.EscapeUriString(url);
+
             return url;
         }
 
