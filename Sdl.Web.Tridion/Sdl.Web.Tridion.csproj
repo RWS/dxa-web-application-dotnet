@@ -137,8 +137,8 @@
     <Reference Include="Sdl.Web.Context.OData.Client">
       <HintPath>..\packages\Sdl.Web.Context.Client.8.1.1-beta-201602082144\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
-    <Reference Include="DD4T.Providers.SDLWeb8">
-      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.Providers.SDLWeb8.dll</HintPath>
+    <Reference Include="DD4T.Providers.SDLWeb8.CIL">
+      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.Providers.SDLWeb8.CIL.dll</HintPath>
     </Reference>
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
     <Compile Include="CdApiLocalizationResolver.cs" />
