@@ -29,11 +29,11 @@ namespace Sdl.Web.Common.Interfaces
         /// <summary>
         /// Gets a Page Model for a given URL.
         /// </summary>
-        /// <param name="url">The URL.</param>
+        /// <param name="urlPath">The URL.</param>
         /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
         /// <returns>The Page Model.</returns>
         [Obsolete("Deprecated in DXA 1.1. Use the overload that has a Localization parameter.")]
-        PageModel GetPageModel(string url, bool addIncludes = true);
+        PageModel GetPageModel(string urlPath, bool addIncludes = true);
 
         /// <summary>
         /// Populates a Content List by executing the query it specifies.
@@ -45,14 +45,14 @@ namespace Sdl.Web.Common.Interfaces
 
 
         /// <summary>
-        /// Gets a Page Model for a given URL.
+        /// Gets a Page Model for a given URL path.
         /// </summary>
-        /// <param name="url">The URL.</param>
+        /// <param name="urlPath">The URL path (unescaped).</param>
         /// <param name="localization">The context Localization.</param>
         /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
         /// <returns>The Page Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given URL.</exception>
-        PageModel GetPageModel(string url, Localization localization, bool addIncludes = true);
+        PageModel GetPageModel(string urlPath, Localization localization, bool addIncludes = true);
 
         /// <summary>
         /// Gets an Entity Model for a given Entity Identifier.
@@ -66,7 +66,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <summary>
         /// Gets a Static Content Item (binary) for a given URL path.
         /// </summary>
-        /// <param name="urlPath">The URL path.</param>
+        /// <param name="urlPath">The URL path (unescaped).</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The Static Content Item.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Static Content Item exists for the given URL.</exception>

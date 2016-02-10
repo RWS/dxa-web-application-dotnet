@@ -40,7 +40,15 @@ namespace Sdl.Web.Tridion
             using (new Tracer(url))
             {
                 string urlLeftPart = url.GetLeftPart(UriPartial.Path);
+
                 // TODO PERF: to optimize caching, we could only take the first part of the URL path (e.g. one or two levels)
+                int espaceIndex = urlLeftPart.IndexOf("%");
+                if (espaceIndex > 0)
+                {
+                    // TODO: This is a work-around for a bug in SDL Web 8 Publication Mapping: URLs with escaped characters don't resolve properly (CRQ-1585).
+                    // Therefore we truncate the URL at the first escaped character for now (assuming that the URL is still specific enough to resolve the right Publication).
+                    urlLeftPart = urlLeftPart.Substring(0, espaceIndex);
+                }
 
                 IPublicationMapping mapping = null;
                 try
