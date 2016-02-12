@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Runtime.InteropServices.ComTypes;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
@@ -16,11 +17,36 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetPageModel_InternationalizedUrl_Success() // See TSI-1278
+        {
+            string testPathUrlPath = TestFixture.Tsi1278PageUrlPath;
+
+            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPathUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Image testImage = pageModel.Regions["Main"].Entities[0] as Image;
+            Assert.IsNotNull(testImage, "testImage");
+            StringAssert.Contains(testImage.Url, "tr%C3%A5dl%C3%B8st", "testImage.Url");
+        }
+
+        [TestMethod, Ignore] // TODO: It seems that DD4T can't deal with internationalized URLs.
+        public void GetStaticContentItem_InternationalizedUrl_Success() 
+        {
+            string testStaticContentItemUrlPath = TestFixture.Tsi1278StaticContentItemUrlPath;
+
+            StaticContentItem staticContentItem = SiteConfiguration.ContentProvider.GetStaticContentItem(testStaticContentItemUrlPath, TestFixture.ParentLocalization);
+
+            Assert.IsNotNull(staticContentItem, "staticContentItem");
+        }
+
+
+
+        [TestMethod]
         public void GetPageModel_XpmMarkup_Success()
         {
-            string testPageUrl = TestFixture.ArticlePageUrl;
+            string testPageUrlPath = TestFixture.ArticlePageUrlPath;
 
-            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrl, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
 
