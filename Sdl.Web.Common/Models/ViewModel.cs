@@ -42,7 +42,7 @@ namespace Sdl.Web.Common.Models
         /// Gets or sets metadata used to render XPM markup
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
-        public IDictionary<string, string> XpmMetadata
+        public IDictionary<string, object> XpmMetadata
         {
             get;
             set;

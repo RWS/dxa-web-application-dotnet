@@ -16,12 +16,17 @@ namespace Sdl.Web.Mvc.Controllers
         /// Given a page URL, load the corresponding Page Model, Map it to the View Model and render it. 
         /// Can return XML or JSON if specifically requested on the URL query string (e.g. ?format=xml). 
         /// </summary>
-        /// <param name="pageUrl">The page URL</param>
+        /// <param name="pageUrl">The page URL path (unescaped).</param>
         /// <returns>Rendered Page View Model</returns>
         [FormatData]
         public virtual ActionResult Page(string pageUrl)
         {
-            bool addIncludes = ViewBag.AddIncludes ?? true;
+            bool addIncludes = true;
+            object addIncludesViewData;
+            if (ViewData.TryGetValue(DxaViewDataItems.AddIncludes, out addIncludesViewData))
+            {
+                addIncludes = (bool) addIncludesViewData;
+            }
 
             PageModel pageModel;
             try
@@ -30,7 +35,7 @@ namespace Sdl.Web.Mvc.Controllers
             }
             catch (DxaItemNotFoundException ex)
             {
-                Log.Error(ex);
+                Log.Warn(ex.Message);
                 return NotFound();
             }
 
@@ -132,10 +137,23 @@ namespace Sdl.Web.Mvc.Controllers
                     for (int i = 0; i < region.Entities.Count; i++)
                     {
                         EntityModel entity = region.Entities[i];
-                        if (entity != null && entity.MvcData != null)
+                        if (entity == null || entity.MvcData == null)
                         {
-                            region.Entities[i] = EnrichEntityModel(entity);
+                            continue;
                         }
+
+                        EntityModel enrichedEntityModel;
+                        try
+                        {
+                            enrichedEntityModel = EnrichEntityModel(entity);
+                        }
+                        catch (Exception ex)
+                        {
+                            // If there is a problem enriching an Entity, we replace it with an ExceptionEntity which holds the error details and carry on.
+                            Log.Error(ex);
+                            enrichedEntityModel = new ExceptionEntity(ex);
+                        }
+                        region.Entities[i] = enrichedEntityModel;
                     }
                 }
             }

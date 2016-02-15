@@ -50,7 +50,12 @@ namespace Sdl.Web.Common.Models
             }
 
             string cmsUrl;
-            if (!XpmMetadata.TryGetValue("CmsUrl", out cmsUrl))
+            object cmsUrlValue;
+            if (XpmMetadata.TryGetValue("CmsUrl", out cmsUrlValue))
+            {
+                cmsUrl = (string) cmsUrlValue;
+            }
+            else
             {
                 cmsUrl = localization.GetConfigValue("core.cmsurl");
             }

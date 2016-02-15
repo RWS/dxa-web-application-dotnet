@@ -13,31 +13,19 @@ namespace Sdl.Web.Mvc.Html
     public static class UrlHelperExtensions
     {
         /// <summary>
-        /// Add a version number to a static asset URL
+        /// Gets a versioned URL (including the version number of the HTML design/assets).
         /// </summary>
-        /// <param name="helper"></param>
-        /// <param name="path">The URL to add the version to</param>
-        /// <param name="localization">The localization to add to the URL</param>
-        /// <returns>A localized, versioned URL</returns>
-        public static string VersionedContent(this UrlHelper helper, string path, string localization = "")
+        /// <param name="helper">The <see cref="UrlHelper"/> instance on which this extension method operates.</param>
+        /// <param name="relativePath">The (unversioned) URL path relative to the system folder.</param>
+        /// <param name="localization">Not used (deprecated).</param>
+        /// <returns>A versioned URL path (server-relative).</returns>
+        /// <remarks>
+        /// Versioned URLs are used to facilitate agressive caching of those assets; see <see cref="Sdl.Web.Mvc.Statics.StaticContentModule"/>.
+        /// </remarks>
+        public static string VersionedContent(this UrlHelper helper, string relativePath, string localization = "")
         {
-            Localization loc = WebRequestContext.Localization;
-            if (!path.StartsWith("/"))
-            {
-                path = "/" + path;
-            }
-            string version = loc.Version;
-            if (String.IsNullOrEmpty(localization) && WebRequestContext.Localization.SiteLocalizations != null && WebRequestContext.Localization.SiteLocalizations.Count > 0)
-            {
-                Localization defaultLoc = WebRequestContext.Localization.SiteLocalizations.FirstOrDefault(l => l.IsDefaultLocalization) ?? WebRequestContext.Localization;
-                localization = defaultLoc.Path;
-            }
-            if (!String.IsNullOrEmpty(version))
-            {
-                version = "/" + version;
-            }
-            path = "~" + localization + "/system" + version + path;
-            return helper.Content(path);
+            string versionedUrlPath = WebRequestContext.Localization.GetVersionedUrlPath(relativePath);
+            return helper.Content(versionedUrlPath);
         }
 
         /// <summary>

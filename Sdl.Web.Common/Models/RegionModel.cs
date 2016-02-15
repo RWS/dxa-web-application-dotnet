@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
@@ -14,8 +12,8 @@ namespace Sdl.Web.Common.Models
     public class RegionModel : Region
 #pragma warning restore 618
     {
-        private const string _xpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], minOccurs: {2}}} -->";
-        private const string _xpmComponentTypeMarkup = "{{schema: \"{0}\", template: \"{1}\"}}";
+        private const string XpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], minOccurs: {2}}} -->";
+        private const string XpmComponentTypeMarkup = "{{schema: \"{0}\", template: \"{1}\"}}";
 
         private readonly RegionModelSet _regions = new RegionModelSet();
 
@@ -91,7 +89,7 @@ namespace Sdl.Web.Common.Models
         /// <returns>The XPM markup.</returns>
         public override string GetXpmMarkup(Localization localization)
         {
-            XpmRegion xpmRegion = SiteConfiguration.GetXpmRegion(Name, localization);
+            XpmRegion xpmRegion =  localization.GetXpmRegionConfiguration(Name);
             if (xpmRegion == null)
             {
                 return string.Empty;
@@ -99,9 +97,9 @@ namespace Sdl.Web.Common.Models
 
             // TODO: obtain MinOccurs & MaxOccurs from regions.json
             return string.Format(
-                _xpmRegionMarkup, 
+                XpmRegionMarkup, 
                 Name, 
-                string.Join(", ", xpmRegion.ComponentTypes.Select(ct => string.Format(_xpmComponentTypeMarkup, ct.Schema, ct.Template))), 
+                string.Join(", ", xpmRegion.ComponentTypes.Select(ct => string.Format(XpmComponentTypeMarkup, ct.Schema, ct.Template))), 
                 0);
 
         }

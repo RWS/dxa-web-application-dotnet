@@ -1,7 +1,9 @@
-﻿using Sdl.Web.Common.Configuration;
-using Sdl.Web.Mvc.Configuration;
-using System;
+﻿using System;
 using System.Globalization;
+using System.Web.Configuration;
+using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Html
 {
@@ -10,12 +12,16 @@ namespace Sdl.Web.Mvc.Html
     /// </summary>
     public class ContextualMediaHelper : BaseMediaHelper
     {
-        public string ImageResizeRoute { get; set; }
-        private const string SingleSiteToken = "source/site";
+        private string _cidBaseUrl;
+
         public ContextualMediaHelper()
         {
-            ImageResizeUrlFormat = "/{0}/scale/{1}x{2}/{3}{4}";
-            ImageResizeRoute = "cid";
+            ImageResizeUrlFormat = "{0}/scale/{1}x{2}/{3}{4}";
+            _cidBaseUrl = WebConfigurationManager.AppSettings["cid-service-uri"] ?? "/cid";
+            if (_cidBaseUrl == string.Empty)
+            {
+                throw new DxaException("cid-service-uri cannot be empty when ContextualMediaHelper is enabled.");
+            }
         }
 
         public override string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0)
@@ -31,21 +37,15 @@ namespace Sdl.Web.Mvc.Html
                     break;
                 }
             }
+
             //Height is calculated from the aspect ratio (0 means preserve aspect ratio)
-            string height = aspect == 0 ? String.Empty : ((int)Math.Ceiling(width / aspect)).ToString(CultureInfo.InvariantCulture);
+            string height = (aspect == 0) ? String.Empty : ((int)Math.Ceiling(width / aspect)).ToString(CultureInfo.InvariantCulture);
+            
             //Build the URL
             url = SiteConfiguration.MakeFullUrl(url, WebRequestContext.Localization);
-            string prefix = SingleSiteToken;
-            if (url.StartsWith("http"))
-            {
-                prefix = "";
-                if (url.StartsWith("https"))
-                {
-                    prefix = "https/";
-                }
-                url = url.Substring(url.IndexOf("://", StringComparison.Ordinal) + 3);
-            }
-            return String.Format(ImageResizeUrlFormat, ImageResizeRoute, width, height, prefix, url);
+            string prefix = url.StartsWith("https") ? "https/" : string.Empty;
+            url = url.Substring(url.IndexOf("://", StringComparison.Ordinal) + 3);
+            return String.Format(ImageResizeUrlFormat, _cidBaseUrl, width, height, prefix, url);
         }
     }
 }

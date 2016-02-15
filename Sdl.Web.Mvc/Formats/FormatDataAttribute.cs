@@ -18,8 +18,8 @@ namespace Sdl.Web.Mvc.Formats
             IDataFormatter formatter = DataFormatters.GetFormatter(filterContext);
             if (formatter != null)
             {
-                filterContext.Controller.ViewBag.DataFormatter = formatter;
-                filterContext.Controller.ViewBag.AddIncludes = formatter.AddIncludes;
+                filterContext.Controller.ViewData[DxaViewDataItems.DataFormatter] = formatter;
+                filterContext.Controller.ViewData[DxaViewDataItems.AddIncludes] = formatter.AddIncludes;
             }
             base.OnActionExecuting(filterContext);
         }
@@ -27,7 +27,7 @@ namespace Sdl.Web.Mvc.Formats
         public override void OnActionExecuted(ActionExecutedContext filterContext)
         {
             ControllerBase controller = filterContext.Controller;
-            IDataFormatter formatter = controller.ViewBag.DataFormatter as IDataFormatter;
+            IDataFormatter formatter = controller.ViewData[DxaViewDataItems.DataFormatter] as IDataFormatter;
 
             // Once we got here, we expect the View Model to be enriched already, but in case of a Page Model,
             // the embedded Region/Entity Models won't be enriched yet.

@@ -14,6 +14,8 @@ namespace Sdl.Web.Mvc.Statics
     /// </summary>
     public class StaticContentModule : IHttpModule
     {
+        private const string IsVersionedUrlContextItem = "IsVersionedUrl";
+
         #region IHttpModule members
         /// <summary>
         /// Initialize this HttpModule.
@@ -54,6 +56,19 @@ namespace Sdl.Web.Mvc.Statics
                 {
                     SendNotFoundResponse(ex.Message, response);
                 }
+                catch (DxaItemNotFoundException  ex)
+                {
+                    // Localization has been resolved, but could not be initialized (e.g. Version.json not found)
+                    Log.Error(ex);
+                    SendNotFoundResponse(ex.Message, response);
+                }
+                catch (Exception ex)
+                {
+                    // Other exceptions: log and let ASP.NET handle them
+                    Log.Error(ex);
+                    throw;
+                }
+
 
                 // Prevent direct access to BinaryData folder
                 if (url.StartsWith("/" + SiteConfiguration.StaticsFolder + "/"))
@@ -67,6 +82,7 @@ namespace Sdl.Web.Mvc.Statics
                 {
                     Log.Debug("Rewriting versioned static content URL '{0}' to '{1}'", url, versionLessUrl);
                     context.RewritePath(versionLessUrl);
+                    context.Items[IsVersionedUrlContextItem] = true;
                 }
             }
         }
@@ -101,7 +117,7 @@ namespace Sdl.Web.Mvc.Statics
                     using (StaticContentItem staticContentItem = SiteConfiguration.ContentProvider.GetStaticContentItem(urlPath, localization))
                     {
                         DateTime lastModified = staticContentItem.LastModified;
-                        if (lastModified < ifModifiedSince)
+                        if (lastModified <= ifModifiedSince.AddSeconds(1))
                         {
                             Log.Debug("Static content item last modified at {0} => Sending HTTP 304 (Not Modified).", lastModified);
                             response.StatusCode = (int) HttpStatusCode.NotModified;
@@ -109,6 +125,13 @@ namespace Sdl.Web.Mvc.Statics
                         }
                         else
                         {
+                            // Items with a versioned URL can be cached long-term, because the URL will change if needed.
+                            bool isVersionedUrl = context.Items.Contains(IsVersionedUrlContextItem);
+                            TimeSpan maxAge = isVersionedUrl ? new TimeSpan(7, 0, 0, 0) : new TimeSpan(0, 1, 0, 0); // 1 Week or 1 Hour
+                            response.Cache.SetLastModified(lastModified); // Allows the browser to do an If-Modified-Since request next time
+                            response.Cache.SetCacheability(HttpCacheability.Public); // Allow caching
+                            response.Cache.SetMaxAge(maxAge);
+                            response.Cache.SetExpires(DateTime.UtcNow.Add(maxAge));
                             response.ContentType = staticContentItem.ContentType;
                             staticContentItem.GetContentStream().CopyTo(response.OutputStream);
                         }
@@ -117,6 +140,12 @@ namespace Sdl.Web.Mvc.Statics
                 catch (DxaItemNotFoundException ex)
                 {
                     SendNotFoundResponse(ex.Message, response);
+                }
+                catch (Exception ex)
+                {
+                    // Other exceptions: log and let ASP.NET handle them
+                    Log.Error(ex);
+                    throw;
                 }
 
                 // Terminate the HTTP pipeline.

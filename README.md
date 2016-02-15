@@ -1,11 +1,11 @@
 dxa-web-application-dotnet
 ===
-SDL Digital Experience Accelerator .NET MVC web application
+SDL Digital Experience Accelerator ASP.NET MVC web application
 
 
 About
 -----
-The SDL Digital Experience Accelerator (formerly known as the SDL Tridion Reference Implementation) is a reference implementation of SDL Tridion intended to help you create, design and publish an SDL Tridion-based Web site quickly.
+The SDL Digital Experience Accelerator is a reference implementation of SDL Tridion intended to help you create, design and publish an SDL Web-based Web site quickly.
 
 You can find more details and a download of the entire release on https://community.sdl.com/developers/tridion_developer/m/mediagallery/852
 
@@ -20,7 +20,9 @@ If you encounter problems, reach out to the community: http://tridion.stackexcha
 Sources
 -------
 
-The official v1.1 release (downloadable on https://community.sdl.com/developers/tridion_developer/m/mediagallery/852) contains only the **Site** project in the web-application Visual Studio solution, since only that part of the source is considered public API (as in, you are expected to change that). This repository contains the full source of all the `Sdl.Web.*` DLLs to give you insight in how the solution is built and what is there available for you to extend. You are free to use these sources under the terms and conditions of the license mentioned below, however we suggest you only change the code of the **Site** project and make use of the compiled `Sdl.Web.Common.dll`, `Sdl.Web.Mvc.dll` and `Sdl.Web.Tridion.dll` from the SDL Community site. 
+The DXA distribution contains only the source code for the DXA example Web Application and the Core module (DxaWebApp.sln); the DXA framework is distributed through NuGet.
+This repository contains the full source of the DXA framework to give you insight in how it is built and what is there available for you to extend.
+You are free to use these sources under the terms and conditions of the license mentioned below, however we suggest you only change the code provided in the distribution media and make use of the compiled DXA framework. 
 
 
 Documentation
@@ -36,9 +38,9 @@ The following repositories with source code are available:
 
  - https://github.com/sdl/dxa-content-management - Core Template Building Blocks
  - https://github.com/sdl/dxa-html-design - Whitelabel HTML Design
- - https://github.com/sdl/dxa-modules - Modules
- - https://github.com/sdl/dxa-web-application-dotnet - .NET MVC web application
- - https://github.com/sdl/dxa-web-application-java - Java Spring MVC web application
+ - https://github.com/sdl/dxa-modules - Modules (.NET and Java)
+ - https://github.com/sdl/dxa-web-application-dotnet - ASP.NET MVC web application (incl. framework)
+ - https://github.com/sdl/dxa-web-application-java - Java Spring MVC web application (incl. framework)
 
 
 Branching model
@@ -55,7 +57,7 @@ Please submit your pull requests on develop. In the near future we intend to pus
 
 License
 -------
-Copyright (c) 2014-2015 SDL Group.
+Copyright (c) 2014-2016 SDL Group.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
