@@ -43,13 +43,13 @@ namespace Sdl.Web.Tridion.Mapping
         /// <summary>
         /// Gets a Page Model for a given URL.
         /// </summary>
-        /// <param name="url">The URL.</param>
+        /// <param name="urlPath">The URL.</param>
         /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
         /// <returns>The Page Model.</returns>
         [Obsolete("Deprecated in DXA 1.1. Use the overload that has a Localization parameter.")]
-        public PageModel GetPageModel(string url, bool addIncludes = true)
+        public PageModel GetPageModel(string urlPath, bool addIncludes = true)
         {
-            return GetPageModel(url, WebRequestContext.Localization, addIncludes);
+            return GetPageModel(urlPath, WebRequestContext.Localization, addIncludes);
         }
 
         /// <summary>
@@ -69,26 +69,26 @@ namespace Sdl.Web.Tridion.Mapping
         /// <summary>
         /// Gets a Page Model for a given URL.
         /// </summary>
-        /// <param name="url">The URL.</param>
+        /// <param name="urlPath">The URL path (unescaped).</param>
         /// <param name="localization">The context Localization.</param>
         /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
         /// <returns>The Page Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given URL.</exception>
-        public virtual PageModel GetPageModel(string url, Localization localization, bool addIncludes)
+        public virtual PageModel GetPageModel(string urlPath, Localization localization, bool addIncludes)
         {
-            using (new Tracer(url, localization, addIncludes))
+            using (new Tracer(urlPath, localization, addIncludes))
             {
                 //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
                 //1. Try adding the default extension, so /news becomes /news.html
-                IPage page = GetPage(url, localization);
-                if (page == null && (url == null || (!url.EndsWith("/") && url.LastIndexOf(".", StringComparison.Ordinal) <= url.LastIndexOf("/", StringComparison.Ordinal))))
+                IPage page = GetPage(urlPath, localization);
+                if (page == null && (urlPath == null || (!urlPath.EndsWith("/") && urlPath.LastIndexOf(".", StringComparison.Ordinal) <= urlPath.LastIndexOf("/", StringComparison.Ordinal))))
                 {
                     //2. Try adding the default page, so /news becomes /news/index.html
-                    page = GetPage(url + "/", localization);
+                    page = GetPage(urlPath + "/", localization);
                 }
                 if (page == null)
                 {
-                    throw new DxaItemNotFoundException(url, localization.LocalizationId);
+                    throw new DxaItemNotFoundException(urlPath, localization.LocalizationId);
                 }
                 FullyLoadDynamicComponentPresentations(page, localization);
 
@@ -143,7 +143,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// <summary>
         /// Gets a Static Content Item for a given URL path.
         /// </summary>
-        /// <param name="urlPath">The URL path.</param>
+        /// <param name="urlPath">The URL path (unescaped).</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The Static Content Item.</returns>
         public StaticContentItem GetStaticContentItem(string urlPath, Localization localization)
@@ -335,53 +335,55 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
         /// <summary>
-        /// Converts a request URL into a CMS URL (for example adding default page name, and file extension)
+        /// Converts a request URL path into a CMS URL (for example adding default page name and file extension)
         /// </summary>
-        /// <param name="url">The request URL</param>
-        /// <returns>A CMS URL</returns>
-        protected virtual string GetCmUrl(string url)
+        /// <param name="urlPath">The request URL path (unescaped)</param>
+        /// <returns>A CMS URL (UTF-8 URL escaped)</returns>
+        protected virtual string GetCmUrl(string urlPath)
         {
-            if (String.IsNullOrEmpty(url))
+            string cmUrl;
+            if (String.IsNullOrEmpty(urlPath))
             {
-                url = Constants.DefaultPageName;
+                cmUrl = Constants.DefaultPageName;
             }
-            if (url.EndsWith("/"))
+            else
             {
-                url = url + Constants.DefaultPageName;
-            }
-            if (!Path.HasExtension(url))
-            {
-                url = url + Constants.DefaultExtension;
-            }
-            if (!url.StartsWith("/"))
-            {
-                url = "/" + url;
+                cmUrl = Uri.EscapeUriString(urlPath);
             }
 
-            // Support of non-ASCII characters in IRIs (Internationalized Resource Identifiers)
-            url = Uri.EscapeUriString(url);
-
-            return url;
+            if (cmUrl.EndsWith("/"))
+            {
+                cmUrl = cmUrl + Constants.DefaultPageName;
+            }
+            if (!Path.HasExtension(cmUrl))
+            {
+                cmUrl = cmUrl + Constants.DefaultExtension;
+            }
+            if (!cmUrl.StartsWith("/"))
+            {
+                cmUrl = "/" + cmUrl;
+            }
+            return cmUrl;
         }
 
-        protected virtual string GetPageContent(string url, Localization localization)
+        protected virtual string GetPageContent(string urlPath, Localization localization)
         {
-            string cmUrl = GetCmUrl(url);
+            string cmUrl = GetCmUrl(urlPath);
 
-            using (new Tracer(url, cmUrl))
+            using (new Tracer(urlPath, cmUrl))
             {
                 IPageFactory pageFactory = DD4TFactoryCache.GetPageFactory(localization);
                 string result;
-                pageFactory.TryFindPageContent(GetCmUrl(url), out result);
+                pageFactory.TryFindPageContent(GetCmUrl(urlPath), out result);
                 return result;
             }
         }
 
-        protected virtual IPage GetPage(string url, Localization localization)
+        protected virtual IPage GetPage(string urlPath, Localization localization)
         {
-            string cmUrl = GetCmUrl(url);
+            string cmUrl = GetCmUrl(urlPath);
 
-            using (new Tracer(url, cmUrl))
+            using (new Tracer(urlPath, cmUrl))
             {
                 IPageFactory pageFactory = DD4TFactoryCache.GetPageFactory(localization);
                 IPage result;

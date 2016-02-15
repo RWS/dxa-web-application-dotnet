@@ -14,7 +14,7 @@ using Sdl.Web.Common.Configuration;
 #if TRIDION_71
     using DD4T.Providers.SDLTridion2013sp1;
 #else
-    using DD4T.Providers.SDLWeb8;
+    using DD4T.Providers.SDLWeb8.CIL;
 #endif
 
 namespace Sdl.Web.Tridion.Mapping

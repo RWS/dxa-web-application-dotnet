@@ -16,7 +16,7 @@ namespace Sdl.Web.Mvc.Controllers
         /// Given a page URL, load the corresponding Page Model, Map it to the View Model and render it. 
         /// Can return XML or JSON if specifically requested on the URL query string (e.g. ?format=xml). 
         /// </summary>
-        /// <param name="pageUrl">The page URL</param>
+        /// <param name="pageUrl">The page URL path (unescaped).</param>
         /// <returns>Rendered Page View Model</returns>
         [FormatData]
         public virtual ActionResult Page(string pageUrl)
