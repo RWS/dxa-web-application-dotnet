@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 // Common assembly info shared by all projects/assemblies
 
-    #if DEBUG
-[assembly: AssemblyConfiguration("Debug")]
+#if DEBUG
+    [assembly: AssemblyConfiguration("Debug")]
 #else
     [assembly: AssemblyConfiguration("Release")]
 #endif
