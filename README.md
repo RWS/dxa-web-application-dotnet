@@ -5,14 +5,14 @@ SDL Digital Experience Accelerator ASP.NET MVC web application
 
 About
 -----
-The SDL Digital Experience Accelerator is a reference implementation of SDL Tridion intended to help you create, design and publish an SDL Web-based Web site quickly.
+The SDL Digital Experience Accelerator is a reference implementation of SDL Web 8 and SDL Tridion 2013 SP1 intended to help you create, design and publish an SDL Web/Tridion-based Website quickly.
 
 You can find more details and a download of the entire release on https://community.sdl.com/developers/tridion_developer/m/mediagallery/852
 
 
 Support
 ---------------
-The SDL Digital Experience Accelerator is intended as a toolkit to help the SDL Tridion community and is not an officially supported SDL Tridion product.
+The SDL Digital Experience Accelerator is intended as a toolkit to help the SDL Tridion community and is not an officially supported SDL product.
 
 If you encounter problems, reach out to the community: http://tridion.stackexchange.com/
 
