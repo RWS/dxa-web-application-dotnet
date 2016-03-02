@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Site", "Site\Sdl.Web.Site.csproj", "{4B9E8878-0810-4CD1-B57A-D06589C49FE2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Site", "Site\Sdl.Web.Site.csproj", "{4B9E8878-0810-4CD1-B57A-D06589C49FE2}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AE4651DF-A42F-4863-A0E1-870EACF3D072} = {AE4651DF-A42F-4863-A0E1-870EACF3D072}
 	EndProjectSection
@@ -17,6 +17,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Common.Models", "Sdl.Web.Common.Models\Sdl.Web.Common.Models.csproj", "{9A3CEDA6-6FCC-46E7-9E06-4D6CEB5CEABE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Tridion.Tests", "Sdl.Web.Tridion.Tests\Sdl.Web.Tridion.Tests.csproj", "{3CB09C75-EECA-4418-AA46-DDFFBD802D46}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{75144B96-6DF7-4A20-AF29-63E8AE45F51E}"
+	ProjectSection(SolutionItems) = preProject
+		CommonAssemblyInfo.cs = CommonAssemblyInfo.cs
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -5,6 +5,7 @@
         <!-- Input parameters -->
         <Version Condition="'$(VERSION)' == ''">0.0.0.0</Version>
         <Version Condition="'$(VERSION)' != ''">$(VERSION)</Version>
+        <IsPreRelease>true</IsPreRelease>
         <BuildConfiguration>Release</BuildConfiguration>
         <ProjectDirectory>$(MSBuildProjectDirectory)</ProjectDirectory>
         <CdTestDeployFolder>\\saintjohn01.ams.dev\C$\inetpub\wwwroot\GitVersion</CdTestDeployFolder>
@@ -13,7 +14,14 @@
         <NuGet>&quot;$(ProjectDirectory)\_tools\NuGet.exe&quot;</NuGet>
         <NuGetPackageDirectory>$(ProjectDirectory)\_NuGet</NuGetPackageDirectory>
         <DxaFrameworkPackageDirectory>$(NuGetPackageDirectory)\Sdl.Dxa.Framework</DxaFrameworkPackageDirectory>
- 
+
+        <VersionMajor>$(Version.Split('.')[0])</VersionMajor>
+        <VersionMinor>$(Version.Split('.')[1])</VersionMinor>
+        <VersionPatch>$(Version.Split('.')[2])</VersionPatch>
+        <VersionBuild>$(Version.Split('.')[3])</VersionBuild>
+        <PreReleaseLabel Condition="'$(IsPreRelease)' == 'true'">-alpha-$([System.DateTime]::Now.ToString("yyyyMMddHHmm"))</PreReleaseLabel>
+        <PackageVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)$(PreReleaseLabel)</PackageVersion>
+
         <!--Tools-->
         <MsBuildExe>C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe</MsBuildExe>
   </PropertyGroup>
@@ -33,7 +41,18 @@
     <Target Name="PrepareBuild">
         <Message Text="Preparing build..." Importance="high" />
 
+        <Message Text="Restoring NuGet packages..."/>
         <Exec Command="_tools\RestorePackages DxaFramework.sln" WorkingDirectory="$(ProjectDirectory)" />
+
+        <ItemGroup>
+            <AssemblyInfo Include="[assembly: AssemblyVersion(&quot;$(VersionMajor).$(VersionMinor).$(VersionPatch).0&quot;)]" />
+            <AssemblyInfo Include="[assembly: AssemblyFileVersion(&quot;$(Version)&quot;)]" />
+            <AssemblyInfo Include="[assembly: AssemblyInformationalVersion(&quot;$(PackageVersion)&quot;)]" />
+            <AssemblyInfo Include="[assembly: AssemblyCopyright(&quot;Copyright © 2014-$([System.DateTime]::Now.ToString(&quot;yyyy&quot;)) SDL Group&quot;)]" />
+        </ItemGroup>
+
+        <Message Text="Updating CommonAssemblyInfo..."/>
+        <WriteLinesToFile File="$(ProjectDirectory)\CommonAssemblyInfo.cs" Overwrite="False" Lines="@(AssemblyInfo)" />
     </Target>
 
     <!-- =============================================================================================================================================  -->
@@ -41,27 +60,20 @@
         <Message Text="Running build commands..." Importance="high" />
 
         <!-- Build the Sdl.Web.Tridion project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1) -->
-        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
-        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
+        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
+        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU" StopOnFirstFailure="true" />
 
         <!-- Build the Site project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1); there is only difference in Sdl.Web.Tridion artifacts (see above). -->
-        <MSBuild Projects="$(ProjectDirectory)\Site\Sdl.Web.Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
-        <MSBuild Projects="$(ProjectDirectory)\Site\Sdl.Web.Site.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU;AsmVersion=$(Version);FileVersion=$(Version)" StopOnFirstFailure="true" />
+        <MSBuild Projects="$(ProjectDirectory)\Site\Sdl.Web.Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
+        <MSBuild Projects="$(ProjectDirectory)\Site\Sdl.Web.Site.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU" StopOnFirstFailure="true" />
     </Target>
 
     <!-- =============================================================================================================================================  -->
     <Target Name="CreatePackages">
         <Message Text="Creating NuGet packages in '$(NuGetPackageDirectory)' ..." Importance="high" />
 
-		<!-- Read Package Version from _Nuget\package-version.txt -->
-		<ItemGroup>
-			<VersionFile Include="$(NuGetPackageDirectory)\package-version.txt" />
-		</ItemGroup>
-		<ReadLinesFromFile File="@(VersionFile)">
-            <Output TaskParameter="Lines" PropertyName="PackageVersion"/>
-        </ReadLinesFromFile>
-		<Message Text="Package Version: $(PackageVersion)" />
-		
+        <Message Text="Package Version: $(PackageVersion)" />
+        
         <!--Versionize the path to DXA Framework libs in the {package_id}.targets files -->
         <XmlPoke 
             XmlInputPath="$(DxaFrameworkPackageDirectory)\Sdl.Dxa.Framework.Web8.targets"
