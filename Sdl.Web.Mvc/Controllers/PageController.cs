@@ -62,10 +62,12 @@ namespace Sdl.Web.Mvc.Controllers
         /// <returns>null - response is redirected if the URL can be resolved</returns>
         public virtual ActionResult Resolve(string itemId, int localizationId, string defaultItemId = null, string defaultPath = null)
         {
-            string url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}-64", localizationId, itemId));
+            var localization = SiteConfiguration.LocalizationResolver.GetLocalization(localizationId.ToString());
+
+            string url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}-64", localizationId, itemId), localization: localization);
             if (url == null && defaultItemId != null)
             {
-                url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}", localizationId, defaultItemId));
+                url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}", localizationId, defaultItemId), localization: localization);
             }
             if (url == null)
             {

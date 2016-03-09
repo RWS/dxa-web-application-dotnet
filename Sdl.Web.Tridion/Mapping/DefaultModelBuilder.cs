@@ -211,7 +211,7 @@ namespace Sdl.Web.Tridion.Mapping
                     Link link = (Link)entityModel;
                     if (String.IsNullOrEmpty(link.Url))
                     {
-                        link.Url = SiteConfiguration.LinkResolver.ResolveLink(component.Id);
+                        link.Url = SiteConfiguration.LinkResolver.ResolveLink(component.Id, localization: localization);
                     }
                 }
 
@@ -716,7 +716,7 @@ namespace Sdl.Web.Tridion.Mapping
         {
             if (modelType == typeof(string))
             {
-                return SiteConfiguration.LinkResolver.ResolveLink(component.Id);
+                return SiteConfiguration.LinkResolver.ResolveLink(component.Id, localization: localization);
             }
 
             if (!modelType.IsSubclassOf(typeof(EntityModel)))
@@ -899,6 +899,7 @@ namespace Sdl.Web.Tridion.Mapping
 
         protected virtual void ProcessMetadataField(IField field, IDictionary<string, string> meta)
         {
+            
             if (field.FieldType==FieldType.Embedded)
             {
                 if (field.EmbeddedValues!=null && field.EmbeddedValues.Count>0)
