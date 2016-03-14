@@ -3,7 +3,6 @@ using System.Linq;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Delivery.Model.Mapping;
 using Tridion.ContentDelivery.DynamicContent;
 
 namespace Sdl.Web.Tridion

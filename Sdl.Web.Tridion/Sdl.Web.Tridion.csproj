@@ -48,6 +48,11 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' != 'Release_7.1'">
+    <SdlWebDelivery>..\packages\Sdl.Web.Delivery.8.1.1-beta-201603090940\lib\net45</SdlWebDelivery>
+    <SdlWebContextImage>..\packages\Sdl.Web.Context.Image.8.1.1-beta-201603100802\lib\net45</SdlWebContextImage>
+    <SdlWebContext>..\packages\Sdl.Web.Context.Client.8.1.1-beta-201603100801\lib\net45</SdlWebContext>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DD4T.ContentModel, Version=2.0.7.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
       <HintPath>..\packages\DD4T.Model.2.0.7\lib\net45\DD4T.ContentModel.dll</HintPath>
@@ -120,22 +125,21 @@
       <HintPath>..\packages\Microsoft.Spatial.6.13.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="Tridion.ContentDelivery">
-      <HintPath>..\_references\cdaas-8.1.0\Tridion.ContentDelivery.dll</HintPath>
+      <HintPath>$(SdlWebDelivery)\Tridion.ContentDelivery.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Tridion.ContentDelivery.AmbientData">
-      <HintPath>..\_references\cdaas-8.1.0\Tridion.ContentDelivery.AmbientData.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Sdl.Web.Delivery.Model">
-      <HintPath>..\_references\cdaas-8.1.0\Sdl.Web.Delivery.Model.dll</HintPath>
+      <HintPath>$(SdlWebDelivery)\Tridion.ContentDelivery.AmbientData.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.Context.Api">
-      <HintPath>..\_references\cdaas-8.1.0\Sdl.Web.Context.Api.dll</HintPath>
+      <HintPath>$(SdlWebContext)\Sdl.Web.Context.Api.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Context.OData.Client">
-      <HintPath>..\_references\cdaas-8.1.0\Sdl.Web.Context.OData.Client.dll</HintPath>
+      <HintPath>$(SdlWebContext)\Sdl.Web.Context.OData.Client.dll</HintPath>
+    </Reference>
+     <Reference Include="Sdl.Web.Context.Image.Proxy">
+      <HintPath>$(SdlWebContextImage)\Sdl.Web.Context.Image.Proxy.dll</HintPath>
     </Reference>
     <Reference Include="DD4T.Providers.SDLWeb8.CIL">
       <HintPath>..\_references\dd4t-2.0-dxa\DD4T.Providers.SDLWeb8.CIL.dll</HintPath>
