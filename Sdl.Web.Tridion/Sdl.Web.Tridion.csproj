@@ -49,9 +49,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' != 'Release_7.1'">
-    <SdlWebDelivery>..\packages\Sdl.Web.Delivery.8.1.1-beta-201603090940\lib\net45</SdlWebDelivery>
-    <SdlWebContextImage>..\packages\Sdl.Web.Context.Image.8.1.1-beta-201603100802\lib\net45</SdlWebContextImage>
-    <SdlWebContext>..\packages\Sdl.Web.Context.Client.8.1.1-beta-201603100801\lib\net45</SdlWebContext>
+    <SdlWebDelivery>..\packages\Sdl.Web.Delivery.8.1.1\lib\net45</SdlWebDelivery>
+    <SdlWebContextImage>..\packages\Sdl.Web.Context.Image.8.1.1\lib\net45</SdlWebContextImage>
+    <SdlWebContext>..\packages\Sdl.Web.Context.Client.8.1.1\lib\net45</SdlWebContext>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DD4T.ContentModel, Version=2.0.7.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
