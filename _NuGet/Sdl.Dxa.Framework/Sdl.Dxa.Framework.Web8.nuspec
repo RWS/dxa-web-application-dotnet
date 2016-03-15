@@ -22,6 +22,7 @@
 		<dependencies>
 			<!-- NOTE: We hardly use package dependencies, because we don't want direct references to transitive dependencies and the explicit reference above don't control those.-->
 			<dependency id="Newtonsoft.Json" version="7.0.0" />
+            <dependency id="Sdl.Web.Cil" version="8.1.1" />
 		</dependencies>
     </metadata>
     <files>
