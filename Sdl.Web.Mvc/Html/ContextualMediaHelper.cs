@@ -18,15 +18,27 @@ namespace Sdl.Web.Mvc.Html
 
         public ContextualMediaHelper()
         {
-            ImageResizeUrlFormat = "{0}/scale/{1}x{2}/{3}{4}";
-            // the exclusion of the app setting does mean the proxy will operate on all requests and we don't want that
-            // so we must force the use of this setting by triggering an exception if its empty
-            string pattern = WebConfigurationManager.AppSettings["cid-service-proxy-pattern"] ?? string.Empty;
-            _cidBaseUrl = pattern.Replace("*", "").Replace("?", "").TrimEnd('/');
-            if (string.IsNullOrEmpty(_cidBaseUrl))
+            ImageResizeUrlFormat = "/{0}/scale/{1}x{2}/{3}{4}";               
+            _cidBaseUrl = GetCidPath;            
+        }
+
+        /// <summary>
+        /// Returns the CID path that the proxy operates on (e.g. cid)
+        /// </summary>
+        public static string GetCidPath
+        {
+            get
             {
-                throw new DxaException("cid-service-proxy-pattern cannot be empty when ContextualMediaHelper is enabled.");
-            }          
+                // the exclusion of the app setting does mean the proxy will operate on all requests and we don't want 
+                // that to happen so we must force the use of this setting by triggering an exception if its empty.
+                string pattern = WebConfigurationManager.AppSettings["cid-service-proxy-pattern"] ?? string.Empty;
+                pattern = pattern.Replace("*", "").Replace("?", "").Trim('/');
+                if (string.IsNullOrEmpty(pattern))
+                {
+                    throw new DxaException("cid-service-proxy-pattern cannot be empty when ContextualMediaHelper is enabled.");
+                }
+                return pattern;
+            }
         }
        
         public override string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0)
