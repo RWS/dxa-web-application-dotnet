@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Web;
 using Newtonsoft.Json;
@@ -31,6 +32,13 @@ namespace Sdl.Web.Common.Configuration
         private IDictionary<string, SemanticSchema> _semanticSchemaMap;
         private SemanticVocabulary[] _semanticVocabularies;
         private readonly object _loadLock = new object();
+        private readonly string _hostname;
+
+        public Localization()
+        {
+            // get hostname so we can perform mapping from localhost if required. 
+            _hostname = Dns.GetHostName();
+        }
 
         public string Path {
             get { return _data.Path; }
@@ -530,7 +538,8 @@ namespace Sdl.Web.Common.Configuration
             if (HttpContext.Current!=null)
             {
                 Uri uri = HttpContext.Current.Request.Url;
-                return uri.GetLeftPart(UriPartial.Authority) + Path;
+                // return base uri with localhost mapped to dns hostname if required
+                return uri.GetLeftPart(UriPartial.Authority).Replace("localhost", _hostname) + Path;
             }
             return null;
         }
