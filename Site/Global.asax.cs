@@ -9,6 +9,7 @@ using Microsoft.Practices.Unity.Configuration;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Mvc.Formats;
+using Sdl.Web.Mvc.Html;
 using Unity.Mvc5;
 
 namespace Sdl.Web.Site
@@ -19,8 +20,8 @@ namespace Sdl.Web.Site
 
         public static void RegisterRoutes(RouteCollection routes)
         {
-            RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-            RouteTable.Routes.IgnoreRoute("cid/{*pathInfo}");
+            RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");          
+            RouteTable.Routes.IgnoreRoute(ContextualMediaHelper.GetCidPath + "/{*pathInfo}");
             RouteTable.Routes.MapMvcAttributeRoutes();
             
             // XPM blank page
