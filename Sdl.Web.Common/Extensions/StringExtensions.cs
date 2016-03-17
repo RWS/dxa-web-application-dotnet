@@ -19,7 +19,7 @@ namespace Sdl.Web.Common.Extensions
         /// </summary>
         /// <param name="str">Original string</param>
         /// <param name="oldValue">Value to replace</param>
-        /// <param name="newValue">Replacemwent</param>
+        /// <param name="newValue">Replacement</param>
         /// <param name="comparisonType">String comparison</param>
         /// <returns></returns>
         public static string Replace(this string str, string oldValue, string newValue, StringComparison comparisonType)
