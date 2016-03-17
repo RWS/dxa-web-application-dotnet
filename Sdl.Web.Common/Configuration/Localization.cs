@@ -524,8 +524,7 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
-
-        public string GetBaseUrl() 
+        public string GetBaseUrl()
         {
             if (HttpContext.Current!=null)
             {

@@ -20,8 +20,12 @@ namespace Sdl.Web.Site
 
         public static void RegisterRoutes(RouteCollection routes)
         {
-            RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");          
-            RouteTable.Routes.IgnoreRoute(ContextualMediaHelper.GetCidPath + "/{*pathInfo}");
+            RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+            string cid = ContextualMediaHelper.GetCidPath;
+            if (!string.IsNullOrEmpty(cid))
+            {   // only ignore if we have cid enabled
+                RouteTable.Routes.IgnoreRoute(ContextualMediaHelper.GetCidPath + "/{*pathInfo}");
+            }
             RouteTable.Routes.MapMvcAttributeRoutes();
             
             // XPM blank page
