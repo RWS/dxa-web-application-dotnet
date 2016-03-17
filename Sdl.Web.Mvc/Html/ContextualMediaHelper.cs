@@ -70,7 +70,9 @@ namespace Sdl.Web.Mvc.Html
             //Build the URL
             url = SiteConfiguration.MakeFullUrl(url, WebRequestContext.Localization);
             //remap localhost to real hostname for CID service
-            url = url.Replace("localhost", _hostname, StringComparison.InvariantCultureIgnoreCase);
+            Uri tmp = new Uri(url);           
+            url = tmp.GetLeftPart(UriPartial.Authority).Replace("localhost", _hostname, StringComparison.InvariantCultureIgnoreCase) + tmp.PathAndQuery;
+            // get prefix
             string prefix = url.StartsWith("https") ? "https/" : string.Empty;
             // should encode the url incase it contains special chars in a query string or something
             url = WebUtility.UrlEncode(url.Substring(url.IndexOf("://", StringComparison.Ordinal) + 3));
