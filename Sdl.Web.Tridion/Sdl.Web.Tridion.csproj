@@ -57,20 +57,20 @@
       <HintPath>..\packages\DD4T.Model.2.0.7\lib\net45\DD4T.ContentModel.Contracts.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.Core.Contracts, Version=2.0.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DD4T.Core.2.0.7\lib\net45\DD4T.Core.Contracts.dll</HintPath>
+    <Reference Include="DD4T.Core.Contracts, Version=2.0.8.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Core.2.0.8\lib\net45\DD4T.Core.Contracts.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.Factories, Version=2.0.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DD4T.Core.2.0.7\lib\net45\DD4T.Factories.dll</HintPath>
+    <Reference Include="DD4T.Factories, Version=2.0.8.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Core.2.0.8\lib\net45\DD4T.Factories.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DD4T.Serialization, Version=2.0.7.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
       <HintPath>..\packages\DD4T.Model.2.0.7\lib\net45\DD4T.Serialization.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.Utils, Version=2.0.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DD4T.Core.2.0.7\lib\net45\DD4T.Utils.dll</HintPath>
+    <Reference Include="DD4T.Utils, Version=2.0.8.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Core.2.0.8\lib\net45\DD4T.Utils.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -119,8 +119,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Spatial.6.13.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
     </Reference>
-    <Reference Include="DD4T.Providers.SDLWeb8.CIL">
-      <HintPath>..\_references\dd4t-2.0-dxa\DD4T.Providers.SDLWeb8.CIL.dll</HintPath>
+    <Reference Include="DD4T.Providers.SDLWeb8.CIL, Version=2.0.0.6, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Providers.SDLWeb8.CIL.2.0.0.6-alpha\lib\net45\DD4T.Providers.SDLWeb8.CIL.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Tridion.ContentDelivery, Version=8.1.0.1239, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
       <HintPath>..\packages\Sdl.Web.Delivery.8.1.1\lib\net45\Tridion.ContentDelivery.dll</HintPath>
