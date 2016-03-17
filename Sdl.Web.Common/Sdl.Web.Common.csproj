@@ -118,6 +118,7 @@
     <Compile Include="Models\Legacy\IEntity.cs" />
     <Compile Include="Interfaces\IMediaHelper.cs" />
     <Compile Include="Models\Legacy\IRegion.cs" />
+    <Compile Include="Models\PageModelWithHttpResponseData.cs" />
     <Compile Include="Models\RichText.cs" />
     <Compile Include="Models\SemanticAttributes.cs" />
     <Compile Include="Models\Entity\Download.cs" />
