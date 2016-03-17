@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text.RegularExpressions;
 using System.Web;
 using Newtonsoft.Json;
@@ -32,7 +31,7 @@ namespace Sdl.Web.Common.Configuration
         private IDictionary<string, SemanticSchema> _semanticSchemaMap;
         private SemanticVocabulary[] _semanticVocabularies;
         private readonly object _loadLock = new object();
-      
+
         public string Path {
             get { return _data.Path; }
             set { _data.Path = value != null && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value; }
@@ -525,11 +524,11 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
-        public string GetBaseUrl() 
+        public string GetBaseUrl()
         {
             if (HttpContext.Current!=null)
             {
-                Uri uri = HttpContext.Current.Request.Url;              
+                Uri uri = HttpContext.Current.Request.Url;
                 return uri.GetLeftPart(UriPartial.Authority) + Path;
             }
             return null;
