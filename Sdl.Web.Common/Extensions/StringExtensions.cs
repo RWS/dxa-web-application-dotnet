@@ -13,6 +13,15 @@ namespace Sdl.Web.Common.Extensions
             return (prefixWithSlash ? "\\" : "") + value.Replace('/', '\\').Trim('\\');
         }
 
+        /// <summary>
+        /// Returns a new string in which all occurances of a specifid string are replaced with a new string
+        /// using the provided string comparison option
+        /// </summary>
+        /// <param name="str">Original string</param>
+        /// <param name="oldValue">Value to replace</param>
+        /// <param name="newValue">Replacemwent</param>
+        /// <param name="comparisonType">String comparison</param>
+        /// <returns></returns>
         public static string Replace(this string str, string oldValue, string newValue, StringComparison comparisonType)
         {
             if (str == null || oldValue == null || newValue == null) return str;
