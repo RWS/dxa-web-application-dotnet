@@ -3,6 +3,7 @@ using System.IO;
 using System.Web.Mvc;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Mvc.Html;
 
 namespace Sdl.Web.Mvc.Configuration
 {
@@ -107,6 +108,15 @@ namespace Sdl.Web.Mvc.Configuration
                 }
             }
             Log.Info("Registered {0} views for area {1} in {2} milliseconds. This startup overhead can be reduced by explicitly registering view using the Sdl.Web.Mvc.Configuration.BaseAreaRegistration.RegisterView() method.", viewCount, this.AreaName, (DateTime.Now - timer).TotalMilliseconds);
+        }
+
+        /// <summary>
+        /// Registers a <see cref="IMarkupDecorator"/> implementation.
+        /// </summary>
+        /// <param name="markupDecoratorType">The type of the markup decorator. The type must have a parameterless constructor and implement <see cref="IMarkupDecorator"/>.</param>
+        protected void RegisterMarkupDecorator(Type markupDecoratorType)
+        {
+            Markup.RegisterMarkupDecorator(markupDecoratorType);
         }
     }
 }

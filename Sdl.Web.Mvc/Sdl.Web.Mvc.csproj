@@ -114,6 +114,7 @@
     <Compile Include="Controllers\HandleSectionErrorAttribute.cs" />
     <Compile Include="Html\BaseMediaHelper.cs" />
     <Compile Include="Html\ContextualMediaHelper.cs" />
+    <Compile Include="Html\IMarkupDecorator.cs" />
     <Compile Include="Html\Markup.cs" />
     <Compile Include="Configuration\ResourceProviderFactory.cs" />
     <Compile Include="Configuration\ResourceProvider.cs" />
