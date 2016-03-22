@@ -121,9 +121,9 @@ namespace Sdl.Web.Mvc.Html
                 return htmlToDecorate;
             }
 
-            using (new Tracer(htmlToDecorate, viewModel))
+            string htmlString = htmlToDecorate.ToString();
+            using (new Tracer(htmlString.Replace("{", string.Empty), viewModel))
             {
-                string htmlString = htmlToDecorate.ToString();
                 foreach (IMarkupDecorator markupDecorator in _markupDecorators)
                 {
                     htmlString = markupDecorator.DecorateMarkup(htmlString, viewModel);

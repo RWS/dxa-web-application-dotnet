@@ -14,17 +14,20 @@ namespace Sdl.Web.Mvc.Configuration
     {
         public override void RegisterArea(AreaRegistrationContext context)
         {
-            // By default, class AreaRegistration assumes that the Controllers are in the same namespace as the concrete AreaRegistration subclass itself (or a sub namespace).
-            // However, the DXA Core controllers are in the Sdl.Web.Mvc.Controllers namespace.
-            context.Namespaces.Add("Sdl.Web.Mvc.Controllers");
+            using (new Tracer(context, this))
+            {
+                // By default, class AreaRegistration assumes that the Controllers are in the same namespace as the concrete AreaRegistration subclass itself (or a sub namespace).
+                // However, the DXA Core controllers are in the Sdl.Web.Mvc.Controllers namespace.
+                context.Namespaces.Add("Sdl.Web.Mvc.Controllers");
 
-            //Default Route - required for sub actions (region/entity/navigation etc.)
-            context.MapRoute(
-                AreaName + "_Default",
-                "{controller}/{action}/{id}",
-                new { controller = "Entity", action = "Entity", id = UrlParameter.Optional }
-            );
-            RegisterAllViewModels();
+                //Default Route - required for sub actions (region/entity/navigation etc.)
+                context.MapRoute(
+                    AreaName + "_Default",
+                    "{controller}/{action}/{id}",
+                    new { controller = "Entity", action = "Entity", id = UrlParameter.Optional }
+                );
+                RegisterAllViewModels();
+            }
         }
 
         /// <summary>
