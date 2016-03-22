@@ -22,17 +22,19 @@ namespace Sdl.Web.Mvc.Html
         {
             ImageResizeUrlFormat = "/{0}/scale/{1}x{2}/{3}{4}";               
             _cidBaseUrl = GetCidPath;
+#if !TRIDION_71          
             if (string.IsNullOrEmpty(_cidBaseUrl))
             {
                 throw new DxaException("cid-service-proxy-pattern cannot be empty when ContextualMediaHelper is enabled.");
             }
+#endif
             // try to see if a user has added a mapping from localhost to some hostname
             _hostname = WebConfigurationManager.AppSettings["cid-localhost"] ?? string.Empty;
             if (string.IsNullOrEmpty(_hostname))
             {
                 // fallback: attempt to auto resolve and this will work for the majority of time so
                 // we can eliminate the need for users to add the setting
-                _hostname = Dns.GetHostName();
+                _hostname = Dns.GetHostEntry("LocalHost").HostName;
             }
         }
 
@@ -43,10 +45,15 @@ namespace Sdl.Web.Mvc.Html
         {
             get
             {
+#if TRIDION_71
+                // we always return cid here to keep everything compatible
+                return "cid";
+#else
                 // the exclusion of the app setting does mean the proxy will operate on all requests and we don't want 
                 // that to happen so we must force the use of this setting by triggering an exception if its empty.
                 string pattern = WebConfigurationManager.AppSettings["cid-service-proxy-pattern"] ?? string.Empty;
-                return pattern.Replace("*", "").Replace("?", "").Trim('/');              
+                return pattern.Replace("*", "").Replace("?", "").Trim('/');
+#endif
             }
         }
        
