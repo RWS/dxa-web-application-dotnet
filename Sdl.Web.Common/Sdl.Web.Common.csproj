@@ -98,6 +98,7 @@
     <Compile Include="Interfaces\ILocalizationResolver.cs" />
     <Compile Include="Interfaces\INavigationProvider.cs" />
     <Compile Include="Interfaces\IRichTextProcessor.cs" />
+    <Compile Include="Interfaces\IUnknownLocalizationHandler.cs" />
     <Compile Include="Interfaces\LegacyContentResolverFacade.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />
     <Compile Include="Logging\Log.cs" />
