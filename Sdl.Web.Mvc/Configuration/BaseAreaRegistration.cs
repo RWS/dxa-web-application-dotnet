@@ -3,6 +3,7 @@ using System.IO;
 using System.Web.Mvc;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Mvc.Html;
 
 namespace Sdl.Web.Mvc.Configuration
 {
@@ -13,17 +14,20 @@ namespace Sdl.Web.Mvc.Configuration
     {
         public override void RegisterArea(AreaRegistrationContext context)
         {
-            // By default, class AreaRegistration assumes that the Controllers are in the same namespace as the concrete AreaRegistration subclass itself (or a sub namespace).
-            // However, the DXA Core controllers are in the Sdl.Web.Mvc.Controllers namespace.
-            context.Namespaces.Add("Sdl.Web.Mvc.Controllers");
+            using (new Tracer(context, this))
+            {
+                // By default, class AreaRegistration assumes that the Controllers are in the same namespace as the concrete AreaRegistration subclass itself (or a sub namespace).
+                // However, the DXA Core controllers are in the Sdl.Web.Mvc.Controllers namespace.
+                context.Namespaces.Add("Sdl.Web.Mvc.Controllers");
 
-            //Default Route - required for sub actions (region/entity/navigation etc.)
-            context.MapRoute(
-                AreaName + "_Default",
-                "{controller}/{action}/{id}",
-                new { controller = "Entity", action = "Entity", id = UrlParameter.Optional }
-            );
-            RegisterAllViewModels();
+                //Default Route - required for sub actions (region/entity/navigation etc.)
+                context.MapRoute(
+                    AreaName + "_Default",
+                    "{controller}/{action}/{id}",
+                    new { controller = "Entity", action = "Entity", id = UrlParameter.Optional }
+                );
+                RegisterAllViewModels();
+            }
         }
 
         /// <summary>
@@ -107,6 +111,15 @@ namespace Sdl.Web.Mvc.Configuration
                 }
             }
             Log.Info("Registered {0} views for area {1} in {2} milliseconds. This startup overhead can be reduced by explicitly registering view using the Sdl.Web.Mvc.Configuration.BaseAreaRegistration.RegisterView() method.", viewCount, this.AreaName, (DateTime.Now - timer).TotalMilliseconds);
+        }
+
+        /// <summary>
+        /// Registers a <see cref="IMarkupDecorator"/> implementation.
+        /// </summary>
+        /// <param name="markupDecoratorType">The type of the markup decorator. The type must have a parameterless constructor and implement <see cref="IMarkupDecorator"/>.</param>
+        protected void RegisterMarkupDecorator(Type markupDecoratorType)
+        {
+            Markup.RegisterMarkupDecorator(markupDecoratorType);
         }
     }
 }

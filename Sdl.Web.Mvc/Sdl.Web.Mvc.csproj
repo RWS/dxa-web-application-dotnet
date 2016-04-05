@@ -41,20 +41,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DocumentationFile>
     </DocumentationFile>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <DocumentationFile>bin\Release\Sdl.Web.Mvc.xml</DocumentationFile>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_7.1|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Release_7.1\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;TRIDION_71</DefineConstants>
     <DocumentationFile>bin\Release\Sdl.Web.Mvc.xml</DocumentationFile>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack">
@@ -114,6 +120,7 @@
     <Compile Include="Controllers\HandleSectionErrorAttribute.cs" />
     <Compile Include="Html\BaseMediaHelper.cs" />
     <Compile Include="Html\ContextualMediaHelper.cs" />
+    <Compile Include="Html\IMarkupDecorator.cs" />
     <Compile Include="Html\Markup.cs" />
     <Compile Include="Configuration\ResourceProviderFactory.cs" />
     <Compile Include="Configuration\ResourceProvider.cs" />

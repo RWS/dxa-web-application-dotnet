@@ -17,6 +17,8 @@ namespace Sdl.Web.Mvc.Html
     /// </summary>
     public static class Markup
     {
+        private static readonly IList<IMarkupDecorator> _markupDecorators = new List<IMarkupDecorator>();
+
         private const string XpmMarkupHtmlAttrName = "data-xpm";
         private const string XpmMarkupXPath = "//*[@" + XpmMarkupHtmlAttrName + "]";
         private const string XpmFieldMarkup = "<!-- Start Component Field: {{\"XPath\":\"{0}\"}} -->";
@@ -86,9 +88,50 @@ namespace Sdl.Web.Mvc.Html
         {
             return RenderPropertyAttributes((EntityModel) entity, propertyName, index);
         }
-        
+
 #pragma warning restore 618
         #endregion
+
+        /// <summary>
+        /// Registers a <see cref="IMarkupDecorator"/> implementation.
+        /// </summary>
+        /// <param name="markupDecoratorType">The type of the markup decorator. The type must have a parameterless constructor and implement <see cref="IMarkupDecorator"/>.</param>
+        /// <seealso cref="BaseAreaRegistration.RegisterMarkupDecorator"/>
+        internal static void RegisterMarkupDecorator(Type markupDecoratorType)
+        {
+            using (new Tracer(markupDecoratorType))
+            {
+                IMarkupDecorator markupDecorator = (IMarkupDecorator) Activator.CreateInstance(markupDecoratorType);
+                _markupDecorators.Add(markupDecorator);
+            }
+        }
+
+        /// <summary>
+        /// Decorates HTML markup if any markup decorators have been registered.
+        /// </summary>
+        /// <param name="htmlToDecorate">The HTML to decorate.</param>
+        /// <param name="viewModel">The <see cref="ViewModel"/> associated with the HTML fragment.</param>
+        /// <returns>The decorated HTML.</returns>
+        /// <seealso cref="RegisterMarkupDecorator"/>
+        internal static MvcHtmlString DecorateMarkup(MvcHtmlString htmlToDecorate, ViewModel viewModel)
+        {
+            if (!_markupDecorators.Any())
+            {
+                // No decorators; nothing to do.
+                return htmlToDecorate;
+            }
+
+            string htmlString = htmlToDecorate.ToString();
+            using (new Tracer(htmlString.Replace("{", string.Empty), viewModel))
+            {
+                foreach (IMarkupDecorator markupDecorator in _markupDecorators)
+                {
+                    htmlString = markupDecorator.DecorateMarkup(htmlString, viewModel);
+                }
+
+                return new MvcHtmlString(htmlString);
+            }
+        }
 
         /// <summary>
         /// Generates semantic markup (HTML/RDFa attributes) for a given Entity Model.

@@ -3,6 +3,7 @@ using System.Net;
 using System.Web;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
@@ -42,19 +43,30 @@ namespace Sdl.Web.Mvc.Statics
             HttpContext context = application.Context;
             HttpRequest request = context.Request;
             HttpResponse response = context.Response;
-            string url = context.Request.Url.AbsolutePath;
+            string url = request.Url.AbsolutePath;
 
             using (new Tracer(sender, e, url))
             {
                 // Attempt to determine Localization
+                Localization localization = null;
                 try
                 {
-                    Localization localization = WebRequestContext.Localization;
-                    Log.Debug("Request URL '{0}' maps to Localization [{1}]", request.Url, localization);
+                    localization = WebRequestContext.Localization;
                 }
                 catch (DxaUnknownLocalizationException ex)
                 {
-                    SendNotFoundResponse(ex.Message, response);
+                    IUnknownLocalizationHandler unknownLocalizationHandler = SiteConfiguration.UnknownLocalizationHandler;
+                    if (unknownLocalizationHandler != null)
+                    {
+                        localization = unknownLocalizationHandler.HandleUnknownLocalization(ex, request, response);
+                    }
+
+                    if (localization == null)
+                    {
+                        // There was no Unknown Localization Handler or it didn't terminate the request processing using response.End()
+                        // and it also didn't resolve a Localization.
+                        SendNotFoundResponse(ex.Message, response);
+                    }
                 }
                 catch (DxaItemNotFoundException  ex)
                 {
@@ -68,7 +80,7 @@ namespace Sdl.Web.Mvc.Statics
                     Log.Error(ex);
                     throw;
                 }
-
+                Log.Debug("Request URL '{0}' maps to Localization [{1}]", request.Url, localization);
 
                 // Prevent direct access to BinaryData folder
                 if (url.StartsWith("/" + SiteConfiguration.StaticsFolder + "/"))

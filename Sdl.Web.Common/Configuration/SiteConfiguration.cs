@@ -30,90 +30,55 @@ namespace Sdl.Web.Common.Configuration
         /// <summary>
         /// Gets the Content Provider used for obtaining the Page and Entity Models and Static Content.
         /// </summary>
-        public static IContentProvider ContentProvider
-        {
-            get;
-            private set;
-        }
+        public static IContentProvider ContentProvider { get; private set; }
 
         /// <summary>
         /// Gets the Content Provider used for obtaining the Navigation Models
         /// </summary>.
-        public static INavigationProvider NavigationProvider
-        {
-            get;
-            private set;
-        }
-
+        public static INavigationProvider NavigationProvider { get; private set; }
 
         /// <summary>
         /// Gets the Context Claims Provider.
         /// </summary>
-        public static IContextClaimsProvider ContextClaimsProvider
-        {
-            get;
-            private set;
-        }
-
+        public static IContextClaimsProvider ContextClaimsProvider { get; private set; }
 
         /// <summary>
         /// Gets the Link Resolver.
         /// </summary>
-        public static ILinkResolver LinkResolver
-        {
-            get;
-            private set;
-        }
+        public static ILinkResolver LinkResolver { get; private set; }
 
         /// <summary>
         /// Gets the Rich Text Processor.
         /// </summary>
-        public static IRichTextProcessor RichTextProcessor
-        {
-            get;
-            private set;
-        }
+        public static IRichTextProcessor RichTextProcessor { get; private set; }
 
         /// <summary>
         /// Gets the Conditional Entity Evaluator.
         /// </summary>
-        public static IConditionalEntityEvaluator ConditionalEntityEvaluator
-        {
-            get;
-            private set;
-        }
-
+        public static IConditionalEntityEvaluator ConditionalEntityEvaluator { get; private set; }
 
         /// <summary>
         /// Gets the Media helper used for generating responsive markup for images, videos etc.
         /// </summary>
-        public static IMediaHelper MediaHelper 
-        { 
-            get; 
-            private set; 
-        }
-
+        public static IMediaHelper MediaHelper  { get; private set; }
 
 #pragma warning disable 618
         /// <summary>
         /// Gets the Static File Manager used for serializing and accessing static files published from the CMS (config/resources/HTML design assets etc.)
         /// </summary>
         [Obsolete("Deprecated in DXA 1.1. Use ContentProvider.GetStaticContentItem to get static content.")]
-        public static IStaticFileManager StaticFileManager
-        {
-            get; 
-            private set;
-        }
+        public static IStaticFileManager StaticFileManager { get;  private set; }
 #pragma warning restore 618
 
         /// <summary>
         /// Gets the Localization Resolver used for mapping URLs to Localizations.
         /// </summary>
-        public static ILocalizationResolver LocalizationResolver
-        {
-            get;
-            private set;
-        }
+        public static ILocalizationResolver LocalizationResolver { get; private set; }
+
+        /// <summary>
+        /// Gets the Handler for Unknown Localizations (failed publication URL lookups).
+        /// </summary>
+        public static IUnknownLocalizationHandler UnknownLocalizationHandler {get; private set; }
 
         /// <summary>
         /// Initializes the providers (Content Provider, Link Resolver, Media Helper, etc.) using dependency injection, i.e. obtained from configuration.
@@ -142,6 +107,7 @@ namespace Sdl.Web.Common.Configuration
 #pragma warning disable 618
                 StaticFileManager = GetProvider<IStaticFileManager>(dependencyResolver, isOptional: true);
 #pragma warning restore 618
+                UnknownLocalizationHandler = GetProvider<IUnknownLocalizationHandler>(dependencyResolver, isOptional: true);
             }
         }
 

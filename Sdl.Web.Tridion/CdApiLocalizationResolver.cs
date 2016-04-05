@@ -3,7 +3,6 @@ using System.Linq;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Delivery.Model.Mapping;
 using Tridion.ContentDelivery.DynamicContent;
 
 namespace Sdl.Web.Tridion
@@ -85,12 +84,38 @@ namespace Sdl.Web.Tridion
                         };
                         KnownLocalizations.Add(localizationId, result);
                     }
+                    else
+                    {
+                        // we fill in the path regardless as it may of been
+                        // a partially created localization.
+                        result.Path = mapping.Path;
+                    }
                 }
 
                 result.EnsureInitialized();
                 return result;
             }
         }
+
+        public override Localization GetLocalization(string localizationId)
+        {
+            using (new Tracer(localizationId))
+            {
+                Localization result;
+                if (!KnownLocalizations.TryGetValue(localizationId, out result))
+                {
+                    // no localization found so lets return a partially constructed one
+                    // and fully resolve it later.
+                    result = new Localization
+                    {
+                        LocalizationId = localizationId                       
+                    };
+                }
+
+                return result;
+            }
+        }
+       
         #endregion
     }
 }

@@ -41,9 +41,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DocumentationFile>
     </DocumentationFile>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <DocumentationFile>bin\Release\Sdl.Web.Common.xml</DocumentationFile>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_7.1|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -55,6 +59,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net">
@@ -98,6 +104,7 @@
     <Compile Include="Interfaces\ILocalizationResolver.cs" />
     <Compile Include="Interfaces\INavigationProvider.cs" />
     <Compile Include="Interfaces\IRichTextProcessor.cs" />
+    <Compile Include="Interfaces\IUnknownLocalizationHandler.cs" />
     <Compile Include="Interfaces\LegacyContentResolverFacade.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />
     <Compile Include="Logging\Log.cs" />
@@ -118,6 +125,7 @@
     <Compile Include="Models\Legacy\IEntity.cs" />
     <Compile Include="Interfaces\IMediaHelper.cs" />
     <Compile Include="Models\Legacy\IRegion.cs" />
+    <Compile Include="Models\PageModelWithHttpResponseData.cs" />
     <Compile Include="Models\RichText.cs" />
     <Compile Include="Models\SemanticAttributes.cs" />
     <Compile Include="Models\Entity\Download.cs" />

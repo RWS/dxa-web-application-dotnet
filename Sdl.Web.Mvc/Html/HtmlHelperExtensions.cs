@@ -308,7 +308,7 @@ namespace Sdl.Web.Mvc.Html
                 {
                     result = new MvcHtmlString(Markup.TransformXpmMarkupAttributes(result.ToString()));
                 }
-                return result;
+                return Markup.DecorateMarkup(result, entity);
             }
         }
 
@@ -383,7 +383,7 @@ namespace Sdl.Web.Mvc.Html
                 {
                     result = new MvcHtmlString(Markup.TransformXpmMarkupAttributes(result.ToString()));
                 }
-                return result;
+                return Markup.DecorateMarkup(result, region);
             }
         }
 

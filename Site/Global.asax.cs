@@ -9,6 +9,7 @@ using Microsoft.Practices.Unity.Configuration;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Mvc.Formats;
+using Sdl.Web.Mvc.Html;
 using Unity.Mvc5;
 
 namespace Sdl.Web.Site
@@ -19,9 +20,25 @@ namespace Sdl.Web.Site
 
         public static void RegisterRoutes(RouteCollection routes)
         {
-            RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-            RouteTable.Routes.IgnoreRoute("cid/{*pathInfo}");
-            RouteTable.Routes.MapMvcAttributeRoutes();
+            // Some URLs should not be handled by any Controller:
+            routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+            string cidUrlPath = ContextualMediaHelper.GetCidPath;
+            if (!string.IsNullOrEmpty(cidUrlPath))
+            {
+                // If cid-service-proxy-pattern is configured:
+                routes.IgnoreRoute(cidUrlPath + "/{*pathInfo}");
+            }
+            string ignoreUrls = WebConfigurationManager.AppSettings["ignore-urls"];
+            if (!string.IsNullOrEmpty(ignoreUrls))
+            {
+                // If additional URLs to be ignored are configured (e.g. XO Experiment Tracking):
+                foreach (string ignoreUrl in ignoreUrls.Split(';'))
+                {
+                    routes.IgnoreRoute(ignoreUrl + "/{*pathInfo}");
+                }
+            }
+
+            routes.MapMvcAttributeRoutes();
             
             // XPM blank page
             routes.MapRoute(

@@ -21,35 +21,44 @@ namespace Sdl.Web.Mvc.Controllers
         [FormatData]
         public virtual ActionResult Page(string pageUrl)
         {
-            bool addIncludes = true;
-            object addIncludesViewData;
-            if (ViewData.TryGetValue(DxaViewDataItems.AddIncludes, out addIncludesViewData))
+            using (new Tracer(pageUrl))
             {
-                addIncludes = (bool) addIncludesViewData;
+                bool addIncludes = true;
+                object addIncludesViewData;
+                if (ViewData.TryGetValue(DxaViewDataItems.AddIncludes, out addIncludesViewData))
+                {
+                    addIncludes = (bool) addIncludesViewData;
+                }
+
+                PageModel pageModel;
+                try
+                {
+                    pageModel = ContentProvider.GetPageModel(pageUrl, WebRequestContext.Localization, addIncludes);
+                }
+                catch (DxaItemNotFoundException ex)
+                {
+                    Log.Warn(ex.Message);
+                    return NotFound();
+                }
+
+                PageModelWithHttpResponseData pageModelWithHttpResponseData = pageModel as PageModelWithHttpResponseData;
+                if (pageModelWithHttpResponseData != null)
+                {
+                    pageModelWithHttpResponseData.SetHttpResponseData(System.Web.HttpContext.Current.Response);
+                }
+
+                SetupViewData(pageModel);
+                PageModel model = (EnrichModel(pageModel) as PageModel) ?? pageModel;
+
+                if (!string.IsNullOrEmpty(model.Id))
+                {
+                    WebRequestContext.PageId = model.Id;
+                }
+
+                Log.Debug("Page Request for URL '{0}' maps to Model [{1}] with View '{2}'", pageUrl, model, model.MvcData.ViewName);
+
+                return View(model.MvcData.ViewName, model);
             }
-
-            PageModel pageModel;
-            try
-            {
-                pageModel = ContentProvider.GetPageModel(pageUrl, WebRequestContext.Localization, addIncludes);
-            }
-            catch (DxaItemNotFoundException ex)
-            {
-                Log.Warn(ex.Message);
-                return NotFound();
-            }
-
-            SetupViewData(pageModel);
-            PageModel model = (EnrichModel(pageModel) as PageModel) ?? pageModel;
-
-            if (!string.IsNullOrEmpty(model.Id))
-            {
-                WebRequestContext.PageId = model.Id;
-            }
-
-            Log.Debug("Page Request for URL '{0}' maps to Model [{1}] with View '{2}'", pageUrl, model, model.MvcData.ViewName);
-
-            return View(model.MvcData.ViewName, model);
         }
 
         /// <summary>
@@ -62,16 +71,19 @@ namespace Sdl.Web.Mvc.Controllers
         /// <returns>null - response is redirected if the URL can be resolved</returns>
         public virtual ActionResult Resolve(string itemId, int localizationId, string defaultItemId = null, string defaultPath = null)
         {
-            string url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}-64", localizationId, itemId));
-            if (url == null && defaultItemId != null)
+            using (new Tracer(itemId, localizationId, defaultItemId, defaultPath))
             {
-                url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}", localizationId, defaultItemId));
+                string url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}-64", localizationId, itemId));
+                if (url == null && defaultItemId != null)
+                {
+                    url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}", localizationId, defaultItemId));
+                }
+                if (url == null)
+                {
+                    url = String.IsNullOrEmpty(defaultPath) ? "/" : defaultPath;
+                }
+                return Redirect(url);
             }
-            if (url == null)
-            {
-                url = String.IsNullOrEmpty(defaultPath) ? "/" : defaultPath;
-            }
-            return Redirect(url);
         }
 
         /// <summary>
@@ -81,40 +93,47 @@ namespace Sdl.Web.Mvc.Controllers
         [FormatData]
         public virtual ActionResult NotFound()
         {
-            string notFoundPageUrl = WebRequestContext.Localization.Path + "/error-404"; // TODO TSI-775: No need to prefix with WebRequestContext.Localization.Path here (?)
-
-            PageModel pageModel;
-            try
+            using (new Tracer())
             {
-                pageModel = ContentProvider.GetPageModel(notFoundPageUrl, WebRequestContext.Localization);
-            }
-            catch (DxaItemNotFoundException ex)
-            {
-                Log.Error(ex);
-                throw new HttpException(404, ex.Message);
-            }
+                string notFoundPageUrl = WebRequestContext.Localization.Path + "/error-404"; // TODO TSI-775: No need to prefix with WebRequestContext.Localization.Path here (?)
 
-            SetupViewData(pageModel);
-            ViewModel model = EnrichModel(pageModel) ?? pageModel;
-            Response.StatusCode = 404;
-            return View(model.MvcData.ViewName, model);
+                PageModel pageModel;
+                try
+                {
+                    pageModel = ContentProvider.GetPageModel(notFoundPageUrl, WebRequestContext.Localization);
+                }
+                catch (DxaItemNotFoundException ex)
+                {
+                    Log.Error(ex);
+                    throw new HttpException(404, ex.Message);
+                }
+
+                SetupViewData(pageModel);
+                ViewModel model = EnrichModel(pageModel) ?? pageModel;
+                Response.StatusCode = 404;
+                return View(model.MvcData.ViewName, model);
+            }
         }
         
 
         public ActionResult ServerError()
         {
-            //For a server error, it may be that there is an issue with connectivity,
-            //so we show a very plain page with no dependency on the Content Provider
-            Response.StatusCode = 500;
-            return View();
+            using (new Tracer())
+            {
+                //For a server error, it may be that there is an issue with connectivity,
+                //so we show a very plain page with no dependency on the Content Provider
+                Response.StatusCode = 500;
+                return View();
+            }
         }
 
         public ActionResult Blank()
         {
-            //For Experience Manager se_blank.html can be completely empty, or a valid HTML page without actual content
-            return Content(string.Empty);
-
-
+            using (new Tracer())
+            {
+                //For Experience Manager se_blank.html can be completely empty, or a valid HTML page without actual content
+                return Content(string.Empty);
+            }
         }
 
         /// <summary>
