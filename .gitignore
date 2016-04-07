@@ -5,6 +5,7 @@ bin_2013SP1/
 packages/
 .vs/
 TestResults/
+CoverageReports/
 *.user
 *.suo
 *.vspx
