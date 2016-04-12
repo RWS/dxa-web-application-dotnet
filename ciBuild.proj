@@ -125,7 +125,7 @@
     <Target Name="Test" Condition="'$(BuildConfiguration)' == 'Release'">
         <Message Text="Running unit tests..." />
     
-        <Exec Command='packages\OpenCover.4.6.519\tools\OpenCover.Console.exe -register:user "-target:$(MsTestExe)" "-targetargs:/testcontainer:Sdl.Web.Tridion.Tests\bin\$(BuildConfiguration)\Sdl.Web.Tridion.Tests.dll" -output:CoverageReports\Coverage.xml"'/>      
+        <Exec Command='packages\OpenCover.4.6.519\tools\OpenCover.Console.exe -register:user "-target:$(MsTestExe)" "-targetargs:/testcontainer:Sdl.Web.Tridion.Tests\bin\$(BuildConfiguration)\Sdl.Web.Tridion.Tests.dll" "-filter:+[Sdl.*]* -[*Test*]*" -output:CoverageReports\Coverage.xml"'/>      
 
         <Exec Command='packages\ReportGenerator.2.4.4.0\tools\ReportGenerator.exe "-reports:CoverageReports\Coverage.xml" "-targetdir:CoverageReports"'/>
     </Target>
