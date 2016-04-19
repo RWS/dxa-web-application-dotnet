@@ -24,6 +24,7 @@
 
         <!--Tools-->
         <MsBuildExe>C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe</MsBuildExe>
+        <MsTestExe>C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\MSTest.exe</MsTestExe>
   </PropertyGroup>
 
 
@@ -32,7 +33,8 @@
         <Message Text="Start build..." Importance="high" />
         
         <CallTarget Targets="PrepareBuild"/>
-        <CallTarget Targets="RunBuild"/>
+        <CallTarget Targets="RunBuild"/>       
+        <CallTarget Targets="Test"/>
         <CallTarget Targets="CreatePackages"/>
         <CallTarget Targets="PublishPackages" Condition="'$(NuGetRepositoryUrl)' != ''"/>
     </Target>
@@ -66,6 +68,10 @@
         <!-- Build the Site project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1); there is only difference in Sdl.Web.Tridion artifacts (see above). -->
         <MSBuild Projects="$(ProjectDirectory)\Site\Sdl.Web.Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
         <MSBuild Projects="$(ProjectDirectory)\Site\Sdl.Web.Site.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU" StopOnFirstFailure="true" />
+
+        <!-- Build the Sdl.Web.Tridion.Tests project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1) -->
+        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion.Tests\Sdl.Web.Tridion.Tests.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
+        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU" StopOnFirstFailure="true" />
     </Target>
 
     <!-- =============================================================================================================================================  -->
@@ -113,6 +119,15 @@
       <Copy SourceFiles="@(ViewFiles)" DestinationFolder="$(CdTestDeployFolder)\Views\%(RecursiveDir)" />
       <Copy SourceFiles="@(AreaFiles)" DestinationFolder="$(CdTestDeployFolder)\Areas\%(RecursiveDir)" />
       <Copy SourceFiles="@(BinFiles)" DestinationFolder="$(CdTestDeployFolder)\bin\%(RecursiveDir)" />
+    </Target>
+ 
+    <!-- =============================================================================================================================================  -->
+    <Target Name="Test" Condition="'$(BuildConfiguration)' == 'Release'">
+        <Message Text="Running unit tests..." />
+    
+        <Exec Command='packages\OpenCover.4.6.519\tools\OpenCover.Console.exe -register:user "-target:$(MsTestExe)" "-targetargs:/testcontainer:Sdl.Web.Tridion.Tests\bin\$(BuildConfiguration)\Sdl.Web.Tridion.Tests.dll /resultsfile:TestResults.trx" "-filter:+[Sdl.*]* -[*Test*]*" -output:CoverageReports\Coverage.xml"'/>      
+
+        <Exec Command='packages\ReportGenerator.2.4.4.0\tools\ReportGenerator.exe "-reports:CoverageReports\Coverage.xml" "-targetdir:CoverageReports"'/>
     </Target>
  
 </Project>

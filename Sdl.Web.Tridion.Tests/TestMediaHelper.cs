@@ -20,12 +20,12 @@ namespace Sdl.Web.Tridion.Tests
             throw new NotImplementedException();
         }
 
-        public bool ShowVideoPlaceholders { get; }
-        public int GridSize { get; }
-        public int LargeScreenBreakpoint { get; }
-        public int MediumScreenBreakpoint { get; }
-        public int SmallScreenBreakpoint { get; }
-        public double DefaultMediaAspect { get; }
-        public string DefaultMediaFill { get; }
+        public bool ShowVideoPlaceholders { get; set; }
+        public int GridSize { get; set; }
+        public int LargeScreenBreakpoint { get; set; }
+        public int MediumScreenBreakpoint { get; set; }
+        public int SmallScreenBreakpoint { get; set; }
+        public double DefaultMediaAspect { get; set; }
+        public string DefaultMediaFill { get; set; }
     }
 }
