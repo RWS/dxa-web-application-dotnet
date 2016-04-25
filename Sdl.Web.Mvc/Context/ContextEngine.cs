@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Xml.Linq;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 
@@ -72,17 +74,62 @@ namespace Sdl.Web.Mvc.Context
                     _deviceFamily = SiteConfiguration.ContextClaimsProvider.GetDeviceFamily();
                     if (_deviceFamily == null)
                     {
-                        // Defaults
-                        DeviceClaims device = GetClaims<DeviceClaims>();
-                        if (!device.IsMobile && !device.IsTablet) _deviceFamily = "desktop";
-                        if (device.IsTablet) _deviceFamily = "tablet";
-                        if (device.IsMobile && !device.IsTablet)
+                        string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin", "device-families.xml");
+                        if (!File.Exists(path))
                         {
-                            _deviceFamily = device.DisplayWidth > 319 ? "smartphone" : "featurephone";
+                            // Defaults
+                            DeviceClaims device = GetClaims<DeviceClaims>();
+                            if (!device.IsMobile && !device.IsTablet) _deviceFamily = "desktop";
+                            if (device.IsTablet) _deviceFamily = "tablet";
+                            if (device.IsMobile && !device.IsTablet)
+                            {
+                                _deviceFamily = device.DisplayWidth > 319 ? "smartphone" : "featurephone";
+                            }
+                        }
+                        else
+                        {
+                            string result = null;
+                            XDocument families = XDocument.Load(path);
+                            foreach (XElement i in families.Descendants("devicefamily"))
+                            {
+                                string family = i.Attribute("name").Value;
+                                bool inFamily = true;
+                                foreach (XElement c in i.Descendants("condition"))
+                                {
+                                    string contextClaim = c.Attribute("context-claim").Value;
+                                    string expectedValue = c.Attribute("value").Value;
+
+                                    if (expectedValue.StartsWith("<"))
+                                    {
+                                        int value = Convert.ToInt32(expectedValue.Replace("<", String.Empty));
+                                        int claimValue = Convert.ToInt32(_claims[contextClaim]);
+                                        if (claimValue >= value)
+                                            inFamily = false;
+                                    }
+                                    else if (expectedValue.StartsWith(">"))
+                                    {
+                                        int value = Convert.ToInt32(expectedValue.Replace(">", String.Empty));
+                                        int claimValue = Convert.ToInt32(_claims[contextClaim]);
+                                        if (claimValue <= value)
+                                            inFamily = false;
+                                    }
+                                    else
+                                    {
+                                        string stringClaimValue = Convert.ToString(_claims[contextClaim]);
+                                        if (!stringClaimValue.Equals(expectedValue, StringComparison.InvariantCultureIgnoreCase))
+                                            inFamily = false; // move on to next family
+                                    }
+                                }
+                                if (inFamily)
+                                {
+                                    result = family;
+                                    break;
+                                }                           
+                            }
                         }
                     }
-                    return _deviceFamily;
                 }
+                return _deviceFamily;
             }
         }
 
