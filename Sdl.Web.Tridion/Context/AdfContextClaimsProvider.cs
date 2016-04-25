@@ -51,57 +51,7 @@ namespace Sdl.Web.Tridion.Context
         /// <returns>A string representing the device family.</returns>
         public string GetDeviceFamily()
         {
-            // TODO TSI-789: this functionality overlaps with "Context Expressions".
-            using (new Tracer())
-            {
-                string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin", "Families.xml");
-                if (!File.Exists(path))
-                {
-                    return null;
-                }
-
-                string result = null;
-                XDocument families = XDocument.Load(path);
-                foreach (XElement i in families.Descendants("devicefamily"))
-                {
-                    string family = i.Attribute("name").Value;
-                    bool inFamily = true;
-                    foreach (XElement c in i.Descendants("condition"))
-                    {
-                        Uri uri = new Uri(c.Attribute("uri").Value);
-                        string expectedValue = c.Attribute("value").Value;
-
-                        if (expectedValue.StartsWith("<"))
-                        {
-                            int value = Convert.ToInt32(expectedValue.Replace("<", String.Empty));
-                            int claimValue = Convert.ToInt32(AmbientDataContext.CurrentClaimStore.Get<string>(uri));
-                            if (claimValue >= value)
-                                inFamily = false;
-                        }
-                        else if (expectedValue.StartsWith(">"))
-                        {
-                            int value = Convert.ToInt32(expectedValue.Replace(">", String.Empty));
-                            int claimValue = Convert.ToInt32(AmbientDataContext.CurrentClaimStore.Get<string>(uri));
-                            if (claimValue <= value)
-                                inFamily = false;
-                        }
-                        else
-                        {
-                            string stringClaimValue = AmbientDataContext.CurrentClaimStore.Get<string>(uri);
-                            if (!stringClaimValue.Equals(expectedValue))
-                                inFamily = false; // move on to next family
-                        }
-                    }
-                    if (inFamily)
-                    {
-                        result = family;
-                        break;
-                    }
-                    // Need to evaluate if all conditions are true.
-                }
-
-                return result;
-            }
+            return null;
         }
 
         #endregion
