@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!--
+  device-families.xml provides a collection of rules for determining which view will
+  be used for the current request.
+  
+  Naming convention: <MvcData.ViewName>.devicefamiliy where devicefamily is matches 
+  a devicefamily name in the XML below. If a view is not found for the requests device 
+  family then the default view will be used (views with no .<displayname> suffix.
+-->
 <configuration>
     <devicefamily name="featurephone">
         <condition context-claim="device.mobile" value="true" />
@@ -14,7 +22,7 @@
         <condition context-claim="device.tablet" value="true" />
     </devicefamily>
     <devicefamily name="desktop">
-        <condition context-claim="device.mobile" value="false"/>
+        <condition context-claim="device.mobile" value="true"/>
         <condition context-claim="device.tablet" value="false" />
     </devicefamily>
 </configuration>
