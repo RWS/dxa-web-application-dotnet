@@ -74,14 +74,19 @@ namespace Sdl.Web.Mvc.Context
                     {
                         XDocument families = XDocument.Load(path);
                         foreach (XElement i in families.Descendants("devicefamily"))
-                        {
+                        {                           
                             modes.Add(i.Attribute("name").Value);
+                            Log.Debug(string.Format("Found device family '{0}'.", i.Attribute("name").Value));
                         }
                     }
                     catch(Exception ex)
                     {
                         Log.Error(string.Format("Failed to parse '{0}'.", path), ex);
                     }
+                }
+                else
+                {
+                    Log.Info(string.Format("The device famiies file at '{0}' could not be found.", path));
                 }
                 return modes;
             }

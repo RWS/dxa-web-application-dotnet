@@ -140,7 +140,20 @@ namespace Sdl.Web.Site
                     {
                         // return true if this family matches our current requests device family.
                         string deviceFamility = WebRequestContext.ContextEngine.DeviceFamily;
-                        return deviceFamility != null && deviceFamility.Equals(family);
+                        if(!string.IsNullOrEmpty(deviceFamility))
+                        {
+                            bool result = deviceFamility.Equals(family);
+                            if (result)
+                            {
+                                Log.Debug(string.Format("Current device family for request is '{0}' and a display mode has been found.", deviceFamility));
+                            }
+                            return result;
+                        }
+                        else
+                        {
+                            Log.Debug("Current device family is unknown.");
+                            return false;
+                        }
                     }
                 });
             }
