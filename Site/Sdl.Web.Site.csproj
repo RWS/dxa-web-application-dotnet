@@ -202,6 +202,18 @@
   <ItemGroup>
     <Content Include="Areas\Core\Views\Entity\EntityError.cshtml" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Areas\Core\Views\Entity\Article.smartphone.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Areas\Core\Views\Entity\Article.tablet.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Areas\Core\Views\Region\Header.smartphone.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Areas\Core\Views\Region\Header.tablet.cshtml" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
