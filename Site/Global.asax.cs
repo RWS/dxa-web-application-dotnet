@@ -145,7 +145,7 @@ namespace Sdl.Web.Site
                             bool result = deviceFamility.Equals(family);
                             if (result)
                             {
-                                Log.Debug(string.Format("Current device family for request is '{0}' and a display mode has been found.", deviceFamility));
+                                Log.Trace(DateTime.Now, "Global", string.Format("Current device family for request is '{0}' and a display mode has been found.", deviceFamility));
                             }
                             return result;
                         }

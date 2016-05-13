@@ -1,8 +1,14 @@
 ﻿@model Article
 
 <article class="rich-text @Model.HtmlClasses" @Html.DxaEntityMarkup()>
-    <!-- featurephone view -->
-    <h1 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
+    <!-- smartphone view -->   
+    <div class="hero" @Html.DxaPropertyMarkup(() => Model.Image)>
+        @Html.Media(Model.Image, 3.3)
+        <div class="overlay overlay-tl ribbon">
+            <h1 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
+        </div>
+    </div>
+ 
     @if (Model.Date != null)
     {
         <div class="meta" @Html.DxaPropertyMarkup(() => Model.Date)>
