@@ -23,9 +23,9 @@ namespace Sdl.Web.Common.Logging
             }
         }
 
-        public static void Trace(DateTime start, string type, string messageFormat, params object[] parameters)
+        public static void Trace(string messageFormat, params object[] parameters)
         {
-            Logger.Trace(start, type, messageFormat, parameters);
+            Logger.Trace(messageFormat, parameters);
         }
 
         public static void Debug(string messageFormat, params object[] parameters)

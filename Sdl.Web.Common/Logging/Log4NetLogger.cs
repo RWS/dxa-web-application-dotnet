@@ -13,30 +13,18 @@ namespace Sdl.Web.Common.Logging
         private const string TraceFormat = "url:{0},type:{1},time:{2},details:{3}";
 
         #region ILogger members
-        /// <summary>
-        /// Used to log performance metrics to a separate log file
-        /// </summary>
-        /// <param name="start">Date and time to execute the action</param>
-        /// <param name="type">Type of action</param>
-        /// <param name="messageFormat">Detailed message format string</param>
-        /// <param name="parameters">Message format string parameters</param>
-        public void Trace(DateTime start, string type, string messageFormat, params object[] parameters)
+
+        public void Trace(string messageFormat, params object[] parameters)
         {
-            // TODO: We currently don't use this method at all (see class Tracer). Remove? Rewire Tracer to use this?
             ILog log = _log;
-            if (log.IsInfoEnabled)
+            if (IsTracingEnabled)
             {
-                string url = "[none]";
-                try
-                {
-                    url = HttpContext.Current.Request.RawUrl;
-                }
-                catch (Exception)
-                {
-                    //ignore - we are in a non request context
-                }
-                string message = String.Format(messageFormat ?? "", parameters);
-                log.InfoFormat(TraceFormat, url, type, (DateTime.Now - start).TotalMilliseconds, message);
+                // no trace output available in log4net so we use debug instead but we should move to
+                // using the same logging as the CIL library (trace listeners) and then we can remove 
+                // the log4net dependency from DXA and instead provide a DXA logging module that will 
+                // allow people to use it if they wish by implementing a trace listener to forward on
+                // log writes to log4net.
+                log.DebugFormat(messageFormat, parameters);   
             }
         }
 
@@ -87,7 +75,7 @@ namespace Sdl.Web.Common.Logging
 
         public void Error(Exception ex)
         {
-            ILog log = _log;
+            ILog log = _log;            
             if (log.IsErrorEnabled)
             {
                 log.Error(ex.Message, ex);

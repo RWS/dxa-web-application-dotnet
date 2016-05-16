@@ -183,9 +183,8 @@ namespace Sdl.Web.Common.Logging
                 parametersString,
                 string.IsNullOrEmpty(extraInfo) ? string.Empty : " : " + extraInfo
                 );
-
-            //Logger.Write(traceMessage, _callingAssemblyName, LoggingCategory.Tracing, TraceEventType.Verbose);
-            Log.Debug(traceMessage); // TODO: use Log.Trace ?
+          
+            Log.Trace(traceMessage);
 
             _stopwatch.Start();
         }
@@ -203,9 +202,8 @@ namespace Sdl.Web.Common.Logging
                 _callingMethodName,
                 _stopwatch.ElapsedMilliseconds
                 );
-
-            //Logger.Write(traceMessage, _callingAssemblyName, LoggingCategory.Tracing, TraceEventType.Verbose);
-            Log.Debug(traceMessage); // TODO: use Log.Trace ?
+            
+            Log.Trace(traceMessage);
 
             _nestingLevel--;
         }
