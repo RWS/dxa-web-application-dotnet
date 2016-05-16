@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.Web;
 using log4net;
 using log4net.Config;
+using log4net.Util;
 using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Logging
@@ -18,13 +21,11 @@ namespace Sdl.Web.Common.Logging
         {
             ILog log = _log;
             if (IsTracingEnabled)
-            {
-                // no trace output available in log4net so we use debug instead but we should move to
-                // using the same logging as the CIL library (trace listeners) and then we can remove 
-                // the log4net dependency from DXA and instead provide a DXA logging module that will 
-                // allow people to use it if they wish by implementing a trace listener to forward on
-                // log writes to log4net.
-                log.DebugFormat(messageFormat, parameters);   
+            {          
+                // the log4net wrapper doesn't actually have a Trace method so instead we implement our own. we are lucky because log4net DOES include
+                // a trace level in its enum :-)
+                System.Reflection.MethodBase mb = new StackFrame(3).GetMethod();
+                log.Logger.Log(mb.DeclaringType, log4net.Core.Level.Trace, new SystemStringFormat(CultureInfo.InvariantCulture, messageFormat, parameters), null);
             }
         }
 
@@ -91,7 +92,7 @@ namespace Sdl.Web.Common.Logging
         {
             get
             {
-                return _log.IsDebugEnabled;
+                return _log.Logger.IsEnabledFor(log4net.Core.Level.Trace);
             }
         }
         #endregion
