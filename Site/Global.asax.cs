@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Web;
 using System.Web.Configuration;
 using System.Web.Mvc;
 using System.Web.Routing;
+using System.Web.WebPages;
 using Microsoft.Practices.ServiceLocation;
 using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.Configuration;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Mvc.Context;
 using Sdl.Web.Mvc.Formats;
 using Sdl.Web.Mvc.Html;
 using Unity.Mvc5;
@@ -121,7 +125,38 @@ namespace Sdl.Web.Site
             
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
+            RegisterDisplayModes();
             _initialized = true;
+        }
+
+        protected void RegisterDisplayModes()
+        {
+            IList<string> families = ContextEngine.DeviceFamilies;
+            foreach (string family in families)
+            {
+                DisplayModeProvider.Instance.Modes.Insert(1, new DefaultDisplayMode(family)
+                {
+                    ContextCondition = ctx =>
+                    {
+                        // return true if this family matches our current requests device family.
+                        string deviceFamility = WebRequestContext.ContextEngine.DeviceFamily;
+                        if(!string.IsNullOrEmpty(deviceFamility))
+                        {
+                            bool result = deviceFamility.Equals(family);
+                            if (result)
+                            {
+                                Log.Trace("Current device family for request is '{0}' and a display mode has been found.", deviceFamility);
+                            }
+                            return result;
+                        }
+                        else
+                        {
+                            Log.Trace("Current device family is unknown.");
+                            return false;
+                        }
+                    }
+                });
+            }
         }
 
         protected IUnityContainer InitializeDependencyInjection()

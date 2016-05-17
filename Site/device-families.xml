@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  device-families.xml provides a collection of rules for determining which view will
+  be used for the current request.
+  
+  Naming convention for view: <MvcData.ViewName>.devicefamily 
+  
+  where devicefamily matches a devicefamily name in the XML below. If a view is not found for the requests device 
+  family then the default view will be used (views with no .<displayname> suffix.
+-->
+<configuration>
+    <!-- Specify a devicefamily name -->
+    <devicefamily name="featurephone">
+        <!-- Provide a list of AND conditions that check values of context-claims against values specified here.
+           
+             Possible values for condition checks are:
+                true, false (i.e. boolean values such as device.mobile)
+                <,> (i.e. <= or >= numeric checks such as device.displayWidth)
+                string values comparison (i.e. device.vendor)
+      
+        An example list of conditions to select the featurephone view would be:
+        check device.mobile is true AND device.tablet is false AND device.displayWidth <= 320 
+        
+        For a list of possible context-claim names please see the relevant documentation.
+        -->
+        <condition context-claim="device.mobile" value="true" />
+        <condition context-claim="device.tablet" value="false" />
+        <condition context-claim="device.displayWidth" value="&lt;320" />
+    </devicefamily>
+    <devicefamily name="smartphone">
+        <condition context-claim="device.mobile" value="true"/>
+        <condition context-claim="device.tablet" value="false" />
+        <condition context-claim="device.displayWidth" value="&gt;319" />
+    </devicefamily>
+    <devicefamily name="tablet">
+        <condition context-claim="device.tablet" value="true" />
+    </devicefamily>
+    <devicefamily name="desktop">
+        <condition context-claim="device.mobile" value="false"/>
+        <condition context-claim="device.tablet" value="false" />
+    </devicefamily>
+</configuration>
