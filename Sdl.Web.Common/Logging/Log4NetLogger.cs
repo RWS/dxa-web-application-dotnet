@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.Web;
 using log4net;
 using log4net.Config;
+using log4net.Util;
 using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Logging
@@ -13,30 +16,16 @@ namespace Sdl.Web.Common.Logging
         private const string TraceFormat = "url:{0},type:{1},time:{2},details:{3}";
 
         #region ILogger members
-        /// <summary>
-        /// Used to log performance metrics to a separate log file
-        /// </summary>
-        /// <param name="start">Date and time to execute the action</param>
-        /// <param name="type">Type of action</param>
-        /// <param name="messageFormat">Detailed message format string</param>
-        /// <param name="parameters">Message format string parameters</param>
-        public void Trace(DateTime start, string type, string messageFormat, params object[] parameters)
+
+        public void Trace(string messageFormat, params object[] parameters)
         {
-            // TODO: We currently don't use this method at all (see class Tracer). Remove? Rewire Tracer to use this?
             ILog log = _log;
-            if (log.IsInfoEnabled)
-            {
-                string url = "[none]";
-                try
-                {
-                    url = HttpContext.Current.Request.RawUrl;
-                }
-                catch (Exception)
-                {
-                    //ignore - we are in a non request context
-                }
-                string message = String.Format(messageFormat ?? "", parameters);
-                log.InfoFormat(TraceFormat, url, type, (DateTime.Now - start).TotalMilliseconds, message);
+            if (IsTracingEnabled)
+            {          
+                // the log4net wrapper doesn't actually have a Trace method so instead we implement our own. we are lucky because log4net DOES include
+                // a trace level in its enum :-)
+                System.Reflection.MethodBase mb = new StackFrame(3).GetMethod();
+                log.Logger.Log(mb.DeclaringType, log4net.Core.Level.Trace, new SystemStringFormat(CultureInfo.InvariantCulture, messageFormat, parameters), null);
             }
         }
 
@@ -87,7 +76,7 @@ namespace Sdl.Web.Common.Logging
 
         public void Error(Exception ex)
         {
-            ILog log = _log;
+            ILog log = _log;            
             if (log.IsErrorEnabled)
             {
                 log.Error(ex.Message, ex);
@@ -103,7 +92,7 @@ namespace Sdl.Web.Common.Logging
         {
             get
             {
-                return _log.IsDebugEnabled;
+                return _log.Logger.IsEnabledFor(log4net.Core.Level.Trace);
             }
         }
         #endregion

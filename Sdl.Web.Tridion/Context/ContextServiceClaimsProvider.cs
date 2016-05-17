@@ -123,6 +123,7 @@ namespace Sdl.Web.Tridion.Context
             {
                 string claimName = string.Format("{0}.{1}", aspectName, propertyName);
                 object claimValue = aspect.Get(propertyName);
+                Log.Trace("Context claim property {0} = {1}", claimName, claimValue != null ? claimValue.ToString() : "<NULL>");            
                 claims.Add(claimName, claimValue);
             }
         }
