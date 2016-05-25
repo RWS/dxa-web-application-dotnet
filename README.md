@@ -10,7 +10,7 @@ The SDL Digital Experience Accelerator (DXA) is a reference implementation of SD
 It is available for .NET and Java Web Applications and has a modular architecture consisting of a Framework and example web application providing core functionality and separate Modules for additional, optional functionality.
 
 This repository contains the source code of the DXA Framework and example web application for .NET. 
-The full DXA distibution (including CM-side items and installation support) is downloadable from the [SDL Community site](https://community.sdl.com/developers/tridion_developer/m/mediagallery/852) (latest version)
+The full DXA distribution (including CM-side items and installation support) is downloadable from the [SDL Community site](https://community.sdl.com/developers/tridion_developer/m/mediagallery/852) (latest version)
 or the [Releases in GitHub](https://github.com/sdl/dxa-web-application-dotnet/releases) (all versions)
 
 Furthermore, the DXA Framework is available on [NuGet.org](https://www.nuget.org/packages?q=dxa). 
