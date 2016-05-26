@@ -15,7 +15,7 @@ namespace Sdl.Web.Mvc.Context
     /// </remarks>
     public class ContextEngine
     {
-        private static readonly string DEVICE_FAMILIES_FILE = "device-families.xml";
+        private const string DeviceFamiliesFileName = "device-families.xml";
 
         private readonly IDictionary<string, object> _claims;
         private readonly IDictionary<Type, ContextClaims> _stronglyTypedClaims = new Dictionary<Type, ContextClaims>();
@@ -96,7 +96,7 @@ namespace Sdl.Web.Mvc.Context
         {
             get
             {
-                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin", DEVICE_FAMILIES_FILE);
+                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin", DeviceFamiliesFileName);
             }
         }
 
