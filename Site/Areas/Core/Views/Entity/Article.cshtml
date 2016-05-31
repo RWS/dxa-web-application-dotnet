@@ -2,12 +2,19 @@
 
 <article class="rich-text @Model.HtmlClasses" @Html.DxaEntityMarkup()>
     <!-- default (desktop) view -->   
-    <div class="hero" @Html.DxaPropertyMarkup(() => Model.Image)>
-        @Html.Media(Model.Image, 3.3)
-        <div class="overlay overlay-tl ribbon">
-            <h1 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
+    @if (Model.Image != null && WebRequestContext.ScreenWidth != ScreenWidth.ExtraSmall)
+    {
+        <div class="hero" @Html.DxaPropertyMarkup(() => Model.Image)>
+            @Html.Media(Model.Image, 3.3)
+            <div class="overlay overlay-tl ribbon">
+                <h1 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
+            </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <h1 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
+    }
  
     @if (Model.Date != null)
     {
