@@ -49,6 +49,36 @@ namespace Sdl.Web.Common.Models
         }
 
         /// <summary>
+        /// Gets or sets extension data (additional properties which can be used by custom Model Builders, Controllers and/or Views)
+        /// </summary>
+        /// <value>
+        /// The value is <c>null</c> if no extension data has been set.
+        /// </value>
+        [SemanticProperty(IgnoreMapping = true)]
+        public IDictionary<string, object> ExtensionData
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///  Sets an extension data key/value pair.
+        /// </summary>
+        /// <remarks>
+        /// This convenience method ensures the <see cref="ExtensionData"/> dictionary is initialized before setting the key/value pair.
+        /// </remarks>
+        /// <param name="key">The key for the extension data.</param>
+        /// <param name="value">The value.</param>
+        public void SetExtensionData(string key, object value)
+        {
+            if (ExtensionData == null)
+            {
+                ExtensionData = new Dictionary<string, object>();
+            }
+            ExtensionData[key] = value;
+        }
+
+        /// <summary>
         /// Gets the rendered XPM markup
         /// </summary>
         /// <param name="localization">The context Localization.</param>
