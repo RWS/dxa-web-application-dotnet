@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Mvc.Context
@@ -20,6 +22,7 @@ namespace Sdl.Web.Mvc.Context
         private readonly IDictionary<string, object> _claims;
         private readonly IDictionary<Type, ContextClaims> _stronglyTypedClaims = new Dictionary<Type, ContextClaims>();
         private string _deviceFamily;
+        private static XDocument _deviceFamiliesDoc;
 
         /// <summary>
         /// Initializes a new <see cref="ContextEngine"/> instance.
@@ -30,9 +33,11 @@ namespace Sdl.Web.Mvc.Context
             using (new Tracer())
             {
                 // For now, we get all context claims (for all aspects) in one go:
-                _claims = SiteConfiguration.ContextClaimsProvider.GetContextClaims(null);
+                IContextClaimsProvider contextClaimsProvider = SiteConfiguration.ContextClaimsProvider;
+                _claims = contextClaimsProvider.GetContextClaims(null);
+                Log.Debug("Obtained {0} claims from {1}.", _claims.Count, contextClaimsProvider.GetType().Name);
             }
-        }       
+        }
 
         /// <summary>
         /// Gets strongly typed claims of a given type (for a specific aspect).
@@ -66,37 +71,35 @@ namespace Sdl.Web.Mvc.Context
         {
             get
             {
-                List<string> modes = new List<string>();
-                string path = DeviceFamiliesPath;
-                if (File.Exists(path))
+                using (new Tracer())
                 {
-                    try
+                    List<string> result = new List<string>();
+                    string deviceFamiliesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin", DeviceFamiliesFileName);
+                    if (File.Exists(deviceFamiliesPath))
                     {
-                        XDocument families = XDocument.Load(path);
-                        foreach (XElement i in families.Descendants("devicefamily"))
-                        {                           
-                            modes.Add(i.Attribute("name").Value);
-                            Log.Debug(string.Format("Found device family '{0}'.", i.Attribute("name").Value));
+                        try
+                        {
+                            _deviceFamiliesDoc = XDocument.Load(deviceFamiliesPath);
+                            foreach (XElement deviceFamilyElement in _deviceFamiliesDoc.Descendants("devicefamily"))
+                            {
+                                string deviceFamilyName = deviceFamilyElement.Attribute("name").Value;
+                                result.Add(deviceFamilyName);
+                                Log.Debug("Found Device Family '{0}'.", deviceFamilyName);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error("Unable to parse Device Families file '{0}'.", deviceFamiliesPath);
+                            Log.Error(ex);
+                            _deviceFamiliesDoc = null;
                         }
                     }
-                    catch(Exception ex)
+                    else
                     {
-                        Log.Error(string.Format("Failed to parse '{0}'.", path), ex);
+                        Log.Error("The Device Families file at '{0}' could not be found.", deviceFamiliesPath);
                     }
+                    return result;
                 }
-                else
-                {
-                    Log.Info(string.Format("The device famiies file at '{0}' could not be found.", path));
-                }
-                return modes;
-            }
-        }
-
-        private static string DeviceFamiliesPath
-        {
-            get
-            {
-                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin", DeviceFamiliesFileName);
             }
         }
 
@@ -108,79 +111,100 @@ namespace Sdl.Web.Mvc.Context
         {
             get
             {
-                using (new Tracer())
+                if (_deviceFamily != null)
                 {
-                    if (_deviceFamily != null)
+                    return _deviceFamily;
+                }
+
+                _deviceFamily = SiteConfiguration.ContextClaimsProvider.GetDeviceFamily();
+                if (_deviceFamily == null)
+                {
+                    if (_deviceFamiliesDoc == null)
                     {
-                        return _deviceFamily;
+                        Log.Warn("Device Families file '{0}' was not loaded properly; using defaults.", DeviceFamiliesFileName);
+
+                        // Defaults
+                        DeviceClaims device = GetClaims<DeviceClaims>();
+                        if (!device.IsMobile && !device.IsTablet) _deviceFamily = "desktop";
+                        if (device.IsTablet) _deviceFamily = "tablet";
+                        if (device.IsMobile && !device.IsTablet)
+                        {
+                            _deviceFamily = device.DisplayWidth > 319 ? "smartphone" : "featurephone";
+                        }
                     }
-
-                    _deviceFamily = SiteConfiguration.ContextClaimsProvider.GetDeviceFamily();
-                    if (_deviceFamily == null)
+                    else
                     {
-                        string path = DeviceFamiliesPath;
-                        if (!File.Exists(path))
-                        {
-                            // Defaults
-                            DeviceClaims device = GetClaims<DeviceClaims>();
-                            if (!device.IsMobile && !device.IsTablet) _deviceFamily = "desktop";
-                            if (device.IsTablet) _deviceFamily = "tablet";
-                            if (device.IsMobile && !device.IsTablet)
-                            {
-                                _deviceFamily = device.DisplayWidth > 319 ? "smartphone" : "featurephone";
-                            }
-                        }
-                        else
-                        {
-                            try
-                            {
-                                XDocument families = XDocument.Load(path);
-                                foreach (XElement i in families.Descendants("devicefamily"))
-                                {
-                                    string family = i.Attribute("name").Value;
-                                    bool inFamily = true;
-                                    foreach (XElement c in i.Descendants("condition"))
-                                    {
-                                        string contextClaim = c.Attribute("context-claim").Value;
-                                        string expectedValue = c.Attribute("value").Value;
-
-                                        if (expectedValue.StartsWith("<"))
-                                        {
-                                            int value = Convert.ToInt32(expectedValue.Replace("<", String.Empty));
-                                            int claimValue = Convert.ToInt32(_claims[contextClaim]);
-                                            if (claimValue >= value)
-                                                inFamily = false;
-                                        }
-                                        else if (expectedValue.StartsWith(">"))
-                                        {
-                                            int value = Convert.ToInt32(expectedValue.Replace(">", String.Empty));
-                                            int claimValue = Convert.ToInt32(_claims[contextClaim]);
-                                            if (claimValue <= value)
-                                                inFamily = false;
-                                        }
-                                        else
-                                        {
-                                            string stringClaimValue = Convert.ToString(_claims[contextClaim]);
-                                            if (!stringClaimValue.Equals(expectedValue, StringComparison.InvariantCultureIgnoreCase))
-                                                inFamily = false; // move on to next family
-                                        }
-                                    }
-                                    if (inFamily)
-                                    {
-                                        _deviceFamily = family;
-                                        break;
-                                    }
-                                }
-                            }
-                            catch(Exception ex)
-                            {
-                                Log.Error(string.Format("Failed to parse '{0}'.", path), ex);
-                            }
-                        }
+                        _deviceFamily = DetermineDeviceFamily();
                     }
                 }
                 return _deviceFamily;
             }
+        }
+
+        private string DetermineDeviceFamily()
+        {
+            using (new Tracer())
+            {
+                foreach (XElement deviceFamilyElement in _deviceFamiliesDoc.Descendants("devicefamily"))
+                {
+                    string deviceFamily = deviceFamilyElement.Attribute("name").Value;
+                    bool inFamily = true;
+                    try
+                    {
+                        foreach (XElement conditionElement in deviceFamilyElement.Descendants("condition"))
+                        {
+                            string contextClaimName = conditionElement.Attribute("context-claim").Value;
+                            string expectedValue = conditionElement.Attribute("value").Value;
+
+                            if (expectedValue.StartsWith("<"))
+                            {
+                                int value = Convert.ToInt32(expectedValue.Substring(1));
+                                int claimValue = GetContextClaim<int>(contextClaimName);
+                                if (claimValue >= value)
+                                    inFamily = false;
+                            }
+                            else if (expectedValue.StartsWith(">"))
+                            {
+                                int value = Convert.ToInt32(expectedValue.Substring(1));
+                                int claimValue = GetContextClaim<int>(contextClaimName);
+                                if (claimValue <= value)
+                                    inFamily = false;
+                            }
+                            else
+                            {
+                                string stringClaimValue = GetContextClaim<string>(contextClaimName);
+                                if (!stringClaimValue.Equals(expectedValue, StringComparison.InvariantCultureIgnoreCase))
+                                    inFamily = false; 
+                            }
+                        }
+                        if (inFamily)
+                        {
+                            Log.Debug("Determined Device Family: '{0}'", deviceFamily);
+                            return deviceFamily;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("Unable to evaluate Device Family '{0}'", deviceFamily);
+                        Log.Error(ex);
+                        return string.Empty;
+                    }
+                }
+
+                Log.Debug("None of the Device Families matched.");
+                return string.Empty;
+            }
+        }
+
+        private T GetContextClaim<T>(string name)
+        {
+            object claimValue;
+            if (!_claims.TryGetValue(name, out claimValue))
+            {
+                throw new DxaException(string.Format("Context Claim '{0}' not found.", name));
+            }
+
+            return ContextClaims.CastValue<T>(claimValue);
         }
 
         #region Obsolete
