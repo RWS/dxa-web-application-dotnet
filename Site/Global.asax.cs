@@ -131,17 +131,13 @@ namespace Sdl.Web.Site
 
         protected void RegisterDisplayModes()
         {
-            IList<string> families = ContextEngine.DeviceFamilies;
-            foreach (string family in families)
+            IList<IDisplayMode> displayModes = DisplayModeProvider.Instance.Modes;
+            foreach (string deviceFamily in ContextEngine.DeviceFamilies)
             {
-                DisplayModeProvider.Instance.Modes.Insert(1, new DefaultDisplayMode(family)
-                {
-                    ContextCondition = ctx =>
-                    {
-                        // return true if this family matches our current requests device family.
-                        return WebRequestContext.ContextEngine.DeviceFamily == family;
-                    }
-                });
+                displayModes.Insert(
+                    1, 
+                    new DefaultDisplayMode(deviceFamily) { ContextCondition = (ctx => WebRequestContext.ContextEngine.DeviceFamily == deviceFamily) }
+                    );
             }
         }
 
