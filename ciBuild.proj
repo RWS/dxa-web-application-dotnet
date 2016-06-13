@@ -55,6 +55,8 @@
 
         <Message Text="Updating CommonAssemblyInfo..."/>
         <WriteLinesToFile File="$(ProjectDirectory)\CommonAssemblyInfo.cs" Overwrite="False" Lines="@(AssemblyInfo)" />
+
+        <Exec Command="$(NuGet) update $(ProjectDirectory)\Site\DxaWebApp.csproj"/>
     </Target>
 
     <!-- =============================================================================================================================================  -->
