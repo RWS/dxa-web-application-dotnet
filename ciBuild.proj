@@ -62,7 +62,7 @@
     <Target Name="UpdatePackageRefs">
         <Message Text="Updating NuGet Package References..." Importance="high" />
 
-        <Exec Command="$(NuGet) update &quot;$(ProjectDirectory)\Site\DxaWebApp.csproj&quot; -Prerelease" />
+        <Exec Command="$(NuGet) update &quot;$(ProjectDirectory)\Site\DxaWebApp.csproj&quot; -Prerelease -Id Sdl.Dxa.Framework.Web8" />
     </Target>
 
     <!-- =============================================================================================================================================  -->
