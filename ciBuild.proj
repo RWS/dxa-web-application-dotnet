@@ -37,6 +37,7 @@
         <CallTarget Targets="Test"/>
         <CallTarget Targets="CreatePackages"/>
         <CallTarget Targets="PublishPackages" Condition="'$(NuGetRepositoryUrl)' != ''"/>
+        <CallTarget Targets="UpdatePackageRefs" Condition="'$(NuGetRepositoryUrl)' != ''"/>
     </Target>
 
     <!-- =============================================================================================================================================  -->
@@ -55,6 +56,13 @@
 
         <Message Text="Updating CommonAssemblyInfo..."/>
         <WriteLinesToFile File="$(ProjectDirectory)\CommonAssemblyInfo.cs" Overwrite="False" Lines="@(AssemblyInfo)" />
+    </Target>
+
+    <!-- =============================================================================================================================================  -->
+    <Target Name="UpdatePackageRefs">
+        <Message Text="Updating NuGet Package References..." Importance="high" />
+
+        <Exec Command="$(NuGet) update &quot;$(ProjectDirectory)\Site\DxaWebApp.csproj&quot; -Prerelease" />
     </Target>
 
     <!-- =============================================================================================================================================  -->

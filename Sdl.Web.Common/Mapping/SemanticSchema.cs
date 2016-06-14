@@ -150,7 +150,15 @@ namespace Sdl.Web.Common.Mapping
             }
 
             // Base model type is concrete, so we can fall back to instantiating that type.
-            Log.Warn("{0}. Sticking with model type.", errorMessage);
+            if (foundAmbiguousMappings == null)
+            {
+                Log.Debug("{0}. Sticking with model type.", errorMessage);
+            }
+            else
+            {
+                Log.Warn("{0}. Sticking with model type.", errorMessage);
+            }
+
             return baseModelType;
         }
     }

@@ -41,13 +41,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DocumentationFile>
     </DocumentationFile>
-    <NoWarn>
-    </NoWarn>
+    <NoWarn>1591,1574,1570,1572,1573</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <DocumentationFile>bin\Release\Sdl.Web.Common.xml</DocumentationFile>
-    <NoWarn>
-    </NoWarn>
+    <NoWarn>1591,1574,1570,1572,1573</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_7.1|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -59,8 +57,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <NoWarn>
-    </NoWarn>
+    <NoWarn>1591,1574,1570,1572,1573</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net">

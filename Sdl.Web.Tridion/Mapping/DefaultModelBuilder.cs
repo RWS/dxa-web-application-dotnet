@@ -71,21 +71,20 @@ namespace Sdl.Web.Tridion.Mapping
                         regions.Add(region);
                     }
 
-                    EntityModel entity;
                     try
                     {
-                        entity = ModelBuilderPipeline.CreateEntityModel(cp, localization);
+                        EntityModel entity = ModelBuilderPipeline.CreateEntityModel(cp, localization);
+
+                        if (conditionalEntityEvaluator == null || conditionalEntityEvaluator.IncludeEntity(entity))
+                        {
+                            region.Entities.Add(entity);
+                        }
                     }
                     catch (Exception ex)
                     {
                         // If there is a problem mapping an Entity, we replace it with an ExceptionEntity which holds the error details and carry on.
                         Log.Error(ex);
-                        entity = new ExceptionEntity(ex);
-                    }
-
-                    if (conditionalEntityEvaluator == null || conditionalEntityEvaluator.IncludeEntity(entity))
-                    {
-                        region.Entities.Add(entity);
+                        region.Entities.Add(new ExceptionEntity(ex));
                     }
                 }
 

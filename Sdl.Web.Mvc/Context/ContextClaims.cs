@@ -68,7 +68,7 @@ namespace Sdl.Web.Mvc.Context
             return (claimValue == null) ? null : (from object item in (IEnumerable) claimValue select CastValue<T>(item)).ToArray();
         }
 
-        private static T CastValue<T>(object value)
+        internal static T CastValue<T>(object value)
         {
             if (value == null)
             {
