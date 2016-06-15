@@ -95,6 +95,14 @@ namespace Sdl.Web.Common.Logging
                 return _log.Logger.IsEnabledFor(log4net.Core.Level.Trace);
             }
         }
+
+        public bool IsDebugEnabled
+        {
+            get
+            {
+                return _log.IsDebugEnabled;
+            }
+        }
         #endregion
     }
 }

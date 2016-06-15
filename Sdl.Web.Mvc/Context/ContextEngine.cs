@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
@@ -35,8 +37,37 @@ namespace Sdl.Web.Mvc.Context
                 // For now, we get all context claims (for all aspects) in one go:
                 IContextClaimsProvider contextClaimsProvider = SiteConfiguration.ContextClaimsProvider;
                 _claims = contextClaimsProvider.GetContextClaims(null);
-                Log.Debug("Obtained {0} claims from {1}.", _claims.Count, contextClaimsProvider.GetType().Name);
+
+                if (Log.Logger.IsDebugEnabled)
+                {
+                    Log.Debug("Obtained {0} Context Claims from {1}:", _claims.Count, contextClaimsProvider.GetType().Name);
+                    foreach (KeyValuePair<string, object> claim in _claims)
+                    {
+                        Log.Debug("\t{0} = {1}", claim.Key, FormatClaimValue(claim.Value));
+                    }
+                }
             }
+        }
+
+        private static string FormatClaimValue(object claimValue)
+        {
+            if (claimValue == null)
+            {
+                return "(null)";
+            }
+
+            if (claimValue is string)
+            {
+                return string.Format("\"{0}\"", claimValue);
+            }
+
+            if (claimValue is IEnumerable)
+            {
+                string[] items = (from object item in (IEnumerable) claimValue select FormatClaimValue(item)).ToArray();
+                return "{" + string.Join(", ", items) + "}";
+            }
+
+            return claimValue.ToString();
         }
 
         /// <summary>
