@@ -8,7 +8,6 @@ using DD4T.ContentModel.Factories;
 using DD4T.Factories;
 using DD4T.Utils;
 using DD4T.Utils.Caching;
-using DD4T.Utils.Logging;
 using Sdl.Web.Common.Configuration;
 
 #if TRIDION_71
@@ -29,7 +28,7 @@ namespace Sdl.Web.Tridion.Mapping
         private static readonly IDictionary<string, IComponentFactory> _componentFactories = new Dictionary<string, IComponentFactory>();
         private static readonly IDictionary<string, IBinaryFactory> _binaryFactories = new Dictionary<string, IBinaryFactory>();
 
-        private static readonly ILogger _logger = new DefaultLogger();
+        private static readonly ILogger _logger = new DD4TLoggerAdapter();
         private static readonly IDD4TConfiguration _config = new DD4TConfiguration();
 
         internal static ICacheAgent CreateCacheAgent()

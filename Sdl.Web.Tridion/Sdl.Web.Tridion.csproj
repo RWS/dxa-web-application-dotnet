@@ -185,6 +185,7 @@
     <Compile Include="Linking\DefaultLinkResolver.cs" />
     <Compile Include="LocalizationResolver.cs" />
     <Compile Include="Mapping\DD4TFactoryCache.cs" />
+    <Compile Include="Mapping\DD4TLoggerAdapter.cs" />
     <Compile Include="Mapping\DefaultModelBuilder.cs" />
     <Compile Include="Mapping\DefaultProvider.cs" />
     <Compile Include="Mapping\DefaultRichTextProcessor.cs" />
