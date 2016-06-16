@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices.ComTypes;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
@@ -66,6 +66,20 @@ namespace Sdl.Web.Tridion.Tests
             StringAssert.Contains(xpmMarkup, "\"IsRepositoryPublished\":false", "XPM markup");
         }
 
+        [TestMethod]
+        public void GetPageModel_RichTextImageWithHtmlClass_Success() // See TSI-1614
+        {
+            string testPageUrlPath = TestFixture.Tsi1614PageUrlPath;
+
+            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Article testArticle = pageModel.Regions["Main"].Entities[0] as Article;
+            Assert.IsNotNull(testArticle, "Test Article not found on Page.");
+            Image testImage = testArticle.ArticleBody[0].Content.Fragments.OfType<Image>().FirstOrDefault();
+            Assert.IsNotNull(testImage, "Test Image not found in Rich Text");
+            Assert.AreEqual("test tsi1614", testImage.HtmlClasses, "Image.HtmlClasses");
+        }
 
         [TestMethod]
         public void GetEntityModel_XpmMarkup_Success()

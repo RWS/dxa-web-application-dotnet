@@ -48,6 +48,7 @@ namespace Sdl.Web.Tridion.Tests
             ArticlePageUrlPath = "/autotest-parent/test_article_page.html";
             Tsi1278PageUrlPath = "/autotest-parent/tsi-1278_trådløst.html";
             Tsi1278StaticContentItemUrlPath = "/autotest-parent/Images/trådløst_tcm1065-9791.jpg";
+            Tsi1614PageUrlPath = "/autotest-parent/tsi-1614.html";
 
             TestRegistration.RegisterCoreViewModels();
         }
@@ -74,6 +75,7 @@ namespace Sdl.Web.Tridion.Tests
         internal static string ArticlePageUrlPath { get; private set; }
         internal static string Tsi1278PageUrlPath { get; private set; }
         internal static string Tsi1278StaticContentItemUrlPath { get; private set; }
+        internal static string Tsi1614PageUrlPath { get; private set; }
 
 
         internal static void InitializeProviders()
