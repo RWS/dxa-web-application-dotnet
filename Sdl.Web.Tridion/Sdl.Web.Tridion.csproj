@@ -79,16 +79,7 @@
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="Sdl.Web.Context.Api">
-      <HintPath>..\packages\Sdl.Web.Context.Client.8.2.0\lib\net45\Sdl.Web.Context.Api.dll</HintPath>
-    </Reference>
-    <Reference Include="Sdl.Web.Context.Image.Proxy">
-      <HintPath>..\packages\Sdl.Web.Context.Image.8.2.0\lib\net45\Sdl.Web.Context.Image.Proxy.dll</HintPath>
-    </Reference>
-    <Reference Include="Sdl.Web.Context.OData.Client">
-      <HintPath>..\packages\Sdl.Web.Context.Client.8.2.0\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
-    </Reference>
+    </Reference>   
     <Reference Include="System.Configuration" />
     <Reference Include="System.Drawing" />
     <Reference Include="System" />
@@ -96,16 +87,7 @@
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Tridion.ContentDelivery">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Tridion.ContentDelivery.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.ContentDelivery.AmbientData">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Tridion.ContentDelivery.AmbientData.dll</HintPath>
-    </Reference>
-    <Reference Include="Tridion.ContentDelivery.UGC">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Tridion.ContentDelivery.UGC.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Xml" />    
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' != 'Release_7.1'">
     <Reference Include="Microsoft.Data.Edm, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -143,6 +125,24 @@
     <Reference Include="DD4T.Providers.SDLWeb8.CIL, Version=2.0.0.6, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DD4T.Providers.SDLWeb8.CIL.2.0.0.6-alpha\lib\net45\DD4T.Providers.SDLWeb8.CIL.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="Tridion.ContentDelivery">
+      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Tridion.ContentDelivery.dll</HintPath>
+    </Reference>
+    <Reference Include="Tridion.ContentDelivery.AmbientData">
+      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Tridion.ContentDelivery.AmbientData.dll</HintPath>
+    </Reference>
+    <Reference Include="Tridion.ContentDelivery.UGC">
+      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Tridion.ContentDelivery.UGC.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.Context.Api">
+      <HintPath>..\packages\Sdl.Web.Context.Client.8.2.0\lib\net45\Sdl.Web.Context.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.Context.Image.Proxy">
+      <HintPath>..\packages\Sdl.Web.Context.Image.8.2.0\lib\net45\Sdl.Web.Context.Image.Proxy.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.Context.OData.Client">
+      <HintPath>..\packages\Sdl.Web.Context.Client.8.2.0\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
     <Compile Include="CdApiLocalizationResolver.cs" />
