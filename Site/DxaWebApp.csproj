@@ -101,17 +101,14 @@
       <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.5.0-alpha-201605161540\lib\net452\Sdl.Web.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Sdl.Web.Context.Api, Version=8.1.0.1232, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.Context.Client.8.1.1\lib\net45\Sdl.Web.Context.Api.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Sdl.Web.Context.Api">
+      <HintPath>..\packages\Sdl.Web.Context.Client.8.2.0\lib\net45\Sdl.Web.Context.Api.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Context.Image.Proxy, Version=8.1.0.1232, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.Context.Image.8.1.1\lib\net45\Sdl.Web.Context.Image.Proxy.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Sdl.Web.Context.Image.Proxy">
+      <HintPath>..\packages\Sdl.Web.Context.Image.8.2.0\lib\net45\Sdl.Web.Context.Image.Proxy.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Context.OData.Client, Version=8.1.0.1232, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.Context.Client.8.1.1\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Sdl.Web.Context.OData.Client">
+      <HintPath>..\packages\Sdl.Web.Context.Client.8.2.0\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Mvc, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.5.0-alpha-201605161540\lib\net452\Sdl.Web.Mvc.dll</HintPath>
@@ -147,21 +144,15 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="Tridion.ContentDelivery, Version=8.1.0.1239, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.1.1\lib\net45\Tridion.ContentDelivery.dll</HintPath>
+    <Reference Include="Tridion.ContentDelivery">
+      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Tridion.ContentDelivery.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Tridion.ContentDelivery.AmbientData, Version=8.1.0.1239, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.1.1\lib\net45\Tridion.ContentDelivery.AmbientData.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Tridion.ContentDelivery.AmbientData">
+      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Tridion.ContentDelivery.AmbientData.dll</HintPath>
     </Reference>
-    <Reference Include="Tridion.ContentDelivery.Preview, Version=8.1.0.1239, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.1.1\lib\net45\Tridion.ContentDelivery.Preview.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Tridion.ContentDelivery.UGC, Version=8.1.0.1239, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.1.1\lib\net45\Tridion.ContentDelivery.UGC.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Tridion.ContentDelivery.UGC">
+      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Tridion.ContentDelivery.UGC.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Mvc5">
       <HintPath>..\packages\Unity.Mvc5.1.1\lib\net45\Unity.Mvc5.dll</HintPath>
