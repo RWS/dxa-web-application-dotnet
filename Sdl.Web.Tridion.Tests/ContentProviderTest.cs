@@ -29,8 +29,8 @@ namespace Sdl.Web.Tridion.Tests
             StringAssert.Contains(testImage.Url, "tr%C3%A5dl%C3%B8st", "testImage.Url");
         }
 
-        [TestMethod, Ignore] // TODO: It seems that DD4T can't deal with internationalized URLs.
-        public void GetStaticContentItem_InternationalizedUrl_Success() 
+        [TestMethod]
+        public void GetStaticContentItem_InternationalizedUrl_Success() // See TSI-1279 and TSI-1495
         {
             string testStaticContentItemUrlPath = TestFixture.Tsi1278StaticContentItemUrlPath;
 
