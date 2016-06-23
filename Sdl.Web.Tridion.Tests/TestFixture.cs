@@ -44,6 +44,7 @@ namespace Sdl.Web.Tridion.Tests
 
             _testLocalizations = new[] { _parentLocalization, _childLocalization };
 
+            HomePageId = "640";
             ArticleDcpEntityId = "9712-9711";
             ArticlePageUrlPath = "/autotest-parent/test_article_page.html";
             Tsi1278PageUrlPath = "/autotest-parent/tsi-1278_trådløst.html";
@@ -72,6 +73,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         internal static string ArticleDcpEntityId { get; private set; }
+        internal static string HomePageId { get; private set; }
         internal static string ArticlePageUrlPath { get; private set; }
         internal static string Tsi1278PageUrlPath { get; private set; }
         internal static string Tsi1278StaticContentItemUrlPath { get; private set; }

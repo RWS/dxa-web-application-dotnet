@@ -17,11 +17,24 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetPageModel_ImplicitIndexPage_Success() 
+        {
+            string testPageUrlPath = TestFixture.ParentLocalization.Path; // Implicitly address the home page (index.html)
+
+            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Assert.AreEqual(TestFixture.HomePageId, pageModel.Id, "Id");
+        }
+
+
+
+        [TestMethod]
         public void GetPageModel_InternationalizedUrl_Success() // See TSI-1278
         {
-            string testPathUrlPath = TestFixture.Tsi1278PageUrlPath;
+            string testPageUrlPath = TestFixture.Tsi1278PageUrlPath;
 
-            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPathUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
             Image testImage = pageModel.Regions["Main"].Entities[0] as Image;
@@ -106,10 +119,25 @@ namespace Sdl.Web.Tridion.Tests
 
         [TestMethod]
         [ExpectedException(typeof(DxaItemNotFoundException))]
+        public void GetPageModel_NonExistent_Exception()
+        {
+            SiteConfiguration.ContentProvider.GetPageModel("/does/not/exist", TestFixture.ParentLocalization);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(DxaItemNotFoundException))]
         public void GetEntityModel_NonExistent_Exception()
         {
             const string testEntityId = "666-666"; // Should not actually exist
             SiteConfiguration.ContentProvider.GetEntityModel(testEntityId, TestFixture.ParentLocalization);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(DxaException))]
+        public void GetEntityModel_InvalidId_Exception()
+        {
+            SiteConfiguration.ContentProvider.GetEntityModel("666", TestFixture.ParentLocalization);
+        }
+
     }
 }

@@ -57,6 +57,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NavigationProviderTest.cs" />
     <Compile Include="TestClass.cs" />
     <Compile Include="TestFixture.cs" />
     <Compile Include="TestRegistration.cs" />
