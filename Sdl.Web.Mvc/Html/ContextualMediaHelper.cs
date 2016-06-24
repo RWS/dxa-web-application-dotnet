@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Web;
 using System.Web.Configuration;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
@@ -82,7 +83,7 @@ namespace Sdl.Web.Mvc.Html
             // get prefix
             string prefix = url.StartsWith("https") ? "https/" : string.Empty;
             // should encode the url incase it contains special chars in a query string or something
-            url = WebUtility.UrlEncode(url.Substring(url.IndexOf("://", StringComparison.Ordinal) + 3));
+            url = HttpUtility.UrlPathEncode(url.Substring(url.IndexOf("://", StringComparison.Ordinal) + 3));
             return String.Format(ImageResizeUrlFormat, _cidBaseUrl, width, height, prefix, url);
         }
     }
