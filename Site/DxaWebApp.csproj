@@ -97,8 +97,8 @@
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Sdl.Web.Common, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.5.0-alpha-201605161540\lib\net452\Sdl.Web.Common.dll</HintPath>
+    <Reference Include="Sdl.Web.Common">
+      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.5.0\lib\net452\Sdl.Web.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.Context.Api">
@@ -110,8 +110,8 @@
     <Reference Include="Sdl.Web.Context.OData.Client">
       <HintPath>..\packages\Sdl.Web.Context.Client.8.2.0\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Mvc, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.5.0-alpha-201605161540\lib\net452\Sdl.Web.Mvc.dll</HintPath>
+    <Reference Include="Sdl.Web.Mvc">
+      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.5.0\lib\net452\Sdl.Web.Mvc.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -299,5 +299,5 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.1.5.0-alpha-201605161540\build\net452\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.1.5.0-alpha-201605161540\build\net452\Sdl.Dxa.Framework.Web8.targets')" />
+  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.1.5.0\build\net452\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.1.5.0\build\net452\Sdl.Dxa.Framework.Web8.targets')" />
 </Project>
