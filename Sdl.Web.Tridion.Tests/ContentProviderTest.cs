@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices.ComTypes;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
@@ -17,11 +17,24 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetPageModel_ImplicitIndexPage_Success() 
+        {
+            string testPageUrlPath = TestFixture.ParentLocalization.Path; // Implicitly address the home page (index.html)
+
+            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Assert.AreEqual(TestFixture.HomePageId, pageModel.Id, "Id");
+        }
+
+
+
+        [TestMethod]
         public void GetPageModel_InternationalizedUrl_Success() // See TSI-1278
         {
-            string testPathUrlPath = TestFixture.Tsi1278PageUrlPath;
+            string testPageUrlPath = TestFixture.Tsi1278PageUrlPath;
 
-            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPathUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
             Image testImage = pageModel.Regions["Main"].Entities[0] as Image;
@@ -29,8 +42,8 @@ namespace Sdl.Web.Tridion.Tests
             StringAssert.Contains(testImage.Url, "tr%C3%A5dl%C3%B8st", "testImage.Url");
         }
 
-        [TestMethod, Ignore] // TODO: It seems that DD4T can't deal with internationalized URLs.
-        public void GetStaticContentItem_InternationalizedUrl_Success() 
+        [TestMethod]
+        public void GetStaticContentItem_InternationalizedUrl_Success() // See TSI-1279 and TSI-1495
         {
             string testStaticContentItemUrlPath = TestFixture.Tsi1278StaticContentItemUrlPath;
 
@@ -66,6 +79,20 @@ namespace Sdl.Web.Tridion.Tests
             StringAssert.Contains(xpmMarkup, "\"IsRepositoryPublished\":false", "XPM markup");
         }
 
+        [TestMethod]
+        public void GetPageModel_RichTextImageWithHtmlClass_Success() // See TSI-1614
+        {
+            string testPageUrlPath = TestFixture.Tsi1614PageUrlPath;
+
+            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Article testArticle = pageModel.Regions["Main"].Entities[0] as Article;
+            Assert.IsNotNull(testArticle, "Test Article not found on Page.");
+            Image testImage = testArticle.ArticleBody[0].Content.Fragments.OfType<Image>().FirstOrDefault();
+            Assert.IsNotNull(testImage, "Test Image not found in Rich Text");
+            Assert.AreEqual("test tsi1614", testImage.HtmlClasses, "Image.HtmlClasses");
+        }
 
         [TestMethod]
         public void GetEntityModel_XpmMarkup_Success()
@@ -92,10 +119,25 @@ namespace Sdl.Web.Tridion.Tests
 
         [TestMethod]
         [ExpectedException(typeof(DxaItemNotFoundException))]
+        public void GetPageModel_NonExistent_Exception()
+        {
+            SiteConfiguration.ContentProvider.GetPageModel("/does/not/exist", TestFixture.ParentLocalization);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(DxaItemNotFoundException))]
         public void GetEntityModel_NonExistent_Exception()
         {
             const string testEntityId = "666-666"; // Should not actually exist
             SiteConfiguration.ContentProvider.GetEntityModel(testEntityId, TestFixture.ParentLocalization);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(DxaException))]
+        public void GetEntityModel_InvalidId_Exception()
+        {
+            SiteConfiguration.ContentProvider.GetEntityModel("666", TestFixture.ParentLocalization);
+        }
+
     }
 }

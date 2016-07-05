@@ -13,5 +13,6 @@ namespace Sdl.Web.Common.Interfaces
         void Error(Exception ex);
 
         bool IsTracingEnabled { get; }
+        bool IsDebugEnabled { get; }
     }
 }

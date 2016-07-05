@@ -101,6 +101,11 @@ namespace Sdl.Web.Common.Models
             // Return the Item (Reference) ID part of the TCM URI.
             Id = xhtmlElement.GetAttribute("xlink:href").Split('-')[1];
             Url = xhtmlElement.GetAttribute("src");
+            string htmlClasses = xhtmlElement.GetAttribute("class").Trim();
+            if (!string.IsNullOrEmpty(htmlClasses))
+            {
+                HtmlClasses = htmlClasses;
+            }
             FileName = xhtmlElement.GetAttribute("data-multimediaFileName");
             string size = xhtmlElement.GetAttribute("data-multimediaFileSize");
             if (!String.IsNullOrEmpty(size))

@@ -209,19 +209,22 @@ namespace Sdl.Web.Tridion.Mapping
                 string url = SiteConfiguration.LocalizeUrl("navigation.json", localization);
                 // TODO TSI-110: This is a temporary measure to cache the Navigation Model per request to not retrieve and serialize 3 times per request. Comprehensive caching strategy pending
                 string cacheKey = "navigation-" + url;
-                SitemapItem result;
-                if (HttpContext.Current.Items[cacheKey] == null)
-                {
-                    Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", url);
-                    string navigationJsonString = GetPageContent(url, localization);
-                    result = JsonConvert.DeserializeObject<SitemapItem>(navigationJsonString);
-                    HttpContext.Current.Items[cacheKey] = result;
-                }
-                else
+                HttpContext httpContext = HttpContext.Current;
+                if (httpContext != null && httpContext.Items[cacheKey] != null)
                 {
                     Log.Debug("Obtained Navigation Model from cache.");
-                    result = (SitemapItem)HttpContext.Current.Items[cacheKey];
+                    return (SitemapItem) HttpContext.Current.Items[cacheKey];
                 }
+
+                Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", url);
+                string navigationJsonString = GetPageContent(url, localization);
+                SitemapItem result = JsonConvert.DeserializeObject<SitemapItem>(navigationJsonString);
+
+                if (httpContext != null)
+                {
+                    httpContext.Items[cacheKey] = result;
+                }
+
                 return result;
             }
         }

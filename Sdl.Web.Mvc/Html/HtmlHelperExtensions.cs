@@ -188,6 +188,12 @@ namespace Sdl.Web.Mvc.Html
                 {
                     return MvcHtmlString.Empty;
                 }
+
+                if (cssClass == null)
+                {
+                    cssClass = media.HtmlClasses;
+                }
+
                 //We read the container size (based on bootstrap grid) from the view bag
                 //This means views can be independent of where they are rendered and do not
                 //need to know their width
