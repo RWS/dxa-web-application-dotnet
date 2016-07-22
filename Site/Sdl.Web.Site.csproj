@@ -111,28 +111,13 @@
     </Content>
     <Content Include="Log.config" />
     <Content Include="Areas\Core\Views\web.config" />
-    <Content Include="Areas\Core\Views\Entity\Accordion.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Article.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Carousel.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\CookieNotificationBar.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Download.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\FooterLinkGroup.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\FooterLinks.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\HeaderLinks.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\HeaderLogo.cshtml" />
     <Content Include="Areas\Core\Views\Entity\LanguageSelector.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\OldBrowserNotificationBar.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Partials\GoogleMap.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Place.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\SocialLinks.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\SocialSharing.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Tab.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Teaser-ImageOverlay.cshtml" />
     <Content Include="Areas\Core\Views\Entity\Teaser.cshtml" />
     <Content Include="Areas\Core\Views\Entity\TeaserColored.cshtml" />
     <Content Include="Areas\Core\Views\Entity\TeaserHero-ImageOverlay.cshtml" />
     <Content Include="Areas\Core\Views\Entity\TeaserMap.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\YouTubeVideo.cshtml" />
     <Content Include="Areas\Core\Views\List\List.cshtml" />
     <Content Include="Areas\Core\Views\List\PagedList.cshtml" />
     <Content Include="Areas\Core\Views\List\Partials\Pager.cshtml" />
@@ -198,25 +183,13 @@
     <Content Include="Views\Shared\Partials\XpmButton.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Areas\Core\Views\Entity\Image.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Areas\Core\Views\Entity\EntityError.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Areas\Core\Views\Entity\Article.featurephone.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Areas\Core\Views\Entity\Article.smartphone.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\Core\Views\Page\GeneralPage.smartphone.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\Core\Views\Page\GeneralPage.tablet.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Areas\Core\Views\Entity\Article.tablet.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\Core\Views\Page\GeneralPage.featurephone.cshtml" />

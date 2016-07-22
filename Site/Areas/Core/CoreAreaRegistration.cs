@@ -16,28 +16,12 @@ namespace Sdl.Web.Site.Areas.Core
         protected override void RegisterAllViewModels()
         {
             // Entity Views
-            RegisterViewModel("Accordion", typeof(ItemList));
-            RegisterViewModel("Article", typeof(Article));
-            RegisterViewModel("Carousel", typeof(ItemList));
-            RegisterViewModel("CookieNotificationBar", typeof(Notification));
-            RegisterViewModel("Download", typeof(Download));
-            RegisterViewModel("FooterLinkGroup", typeof(LinkList<Link>));
-            RegisterViewModel("FooterLinks", typeof(LinkList<Link>));
-            RegisterViewModel("HeaderLinks", typeof(LinkList<Link>));
-            RegisterViewModel("HeaderLogo", typeof(Teaser));
-            RegisterViewModel("Image", typeof(Image));
             RegisterViewModel("LanguageSelector", typeof(Configuration));
-            RegisterViewModel("OldBrowserNotificationBar", typeof(Notification));
-            RegisterViewModel("Place", typeof(Place));
-            RegisterViewModel("SocialLinks", typeof(LinkList<TagLink>));
-            RegisterViewModel("SocialSharing", typeof(LinkList<TagLink>));
-            RegisterViewModel("Tab", typeof(ItemList));
             RegisterViewModel("Teaser-ImageOverlay", typeof(Teaser));
             RegisterViewModel("Teaser", typeof(Teaser));
             RegisterViewModel("TeaserColored", typeof(Teaser));
             RegisterViewModel("TeaserHero-ImageOverlay", typeof(Teaser));
             RegisterViewModel("TeaserMap", typeof(Teaser));
-            RegisterViewModel("YouTubeVideo", typeof(YouTubeVideo));
 
             RegisterViewModel("List", typeof(ContentList<Teaser>), "List");
             RegisterViewModel("PagedList", typeof(ContentList<Teaser>), "List");
