@@ -1,0 +1,24 @@
+﻿@model Notification
+<!--[if lt IE 8]>
+    <div id="incompability" class="container-fluid page-border @Model.HtmlClasses" @Html.DxaEntityMarkup()>
+        <div class="row">
+            <div class="col-sm-9">
+                <div class="h4" @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</div>
+                <p @Html.DxaPropertyMarkup(() => Model.Text)>@Model.Text</p>
+            </div>
+            <div class="col-sm-3">
+                <ul class="nav nav-cookie">
+                    <li @Html.DxaPropertyMarkup(() => Model.Continue)>
+                        <a id="incompability-hide" href="#"><i class="fa fa-check-circle"></i> @Model.Continue</a>
+                    </li>
+                    @if (Model.Link.IsLinkWithText())
+                    {
+                        <li @Html.DxaPropertyMarkup(() => Model.Link)>
+                            <a href="@Model.Link.Url"><i class="fa fa-question-circle"></i> @Model.Link.LinkText</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+<![endif]-->

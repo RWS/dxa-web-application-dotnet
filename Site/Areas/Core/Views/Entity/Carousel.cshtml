@@ -1,0 +1,31 @@
+﻿@model ItemList
+<div id="carousel-@Model.Id" class="carousel slide @Model.HtmlClasses" data-ride="carousel" data-interval="5000" @Html.DxaEntityMarkup()>
+    <ol class="carousel-indicators">
+        @if (Model.ItemListElements!=null)
+        {
+            for (int i = 0; i < Model.ItemListElements.Count; i++)
+            {
+                <li data-target="#carousel-@Model.Id" data-slide-to="@i" class="@(i==0 ? "active" : String.Empty)"></li>
+            }
+        }
+    </ol>
+    <div class="carousel-inner">
+        @if (Model.ItemListElements!=null)
+        {
+            for (int i = 0; i < Model.ItemListElements.Count; i++)
+            {
+                var item = Model.ItemListElements[i];
+                <div class="item @(i==0 ? "active" : String.Empty)" @Html.DxaPropertyMarkup(() => Model.ItemListElements, i)>
+                    @Html.Partial("Partials/Teaser-ImageOverlay", item)
+                </div>
+            }
+        }
+    </div>
+    <!-- Controls -->
+    <a class="left carousel-control" href="#carousel-@Model.Id" data-slide="prev">
+        <i class="fa fa-chevron-left carousel-icon-left"></i>
+    </a>
+    <a class="right carousel-control" href="#carousel-@Model.Id" data-slide="next">
+        <i class="fa fa-chevron-right carousel-icon-right"></i>
+    </a>
+</div>

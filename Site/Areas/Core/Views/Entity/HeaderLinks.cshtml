@@ -1,0 +1,14 @@
+﻿@model LinkList<Link>
+@if (Model.Links != null && Model.Links.Count > 0)
+{
+    <ul class="nav navbar-nav utility-nav @Model.HtmlClasses" @Html.DxaEntityMarkup()>
+        @{ int index = 0; }
+        @foreach (var link in Model.Links)
+        {
+            <li @Html.DxaPropertyMarkup(() => Model.Links, index)>
+                <a href="@link.Url" title="@link.AlternateText">@link.LinkText</a>
+            </li>
+            index++;
+        }
+    </ul>
+}

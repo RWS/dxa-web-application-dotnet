@@ -1,0 +1,60 @@
+﻿@model Place
+@{
+    var width = Model.Location != null ? "6" : "12";
+    var daddr = Model.Location != null ? (Model.Location.Query ?? String.Format("{0},{1}", Model.Location.Latitude, Model.Location.Longitude)): null;
+}
+<div class="@Model.HtmlClasses" @Html.DxaEntityMarkup()>
+    @if (Model.Image != null && WebRequestContext.ScreenWidth != ScreenWidth.ExtraSmall)
+    {
+        <div class="hero" @Html.DxaPropertyMarkup(() => Model.Image)>
+            @Html.Media(Model.Image, 3.3)
+            <div class="overlay overlay-tl ribbon">
+                <h1 @Html.DxaPropertyMarkup(() => Model.Name)>@Model.Name</h1>
+            </div>
+        </div>
+    }
+    else if (Model.Name != null)
+    {
+        <h1 @Html.DxaPropertyMarkup(() => Model.Name)>@Model.Name</h1>
+    }
+    <div class="container-fluid">
+        <div id="location-tile" class="row">
+            @if (Model.Location != null)
+            {
+                <div class="col-sm-6">
+                    @Html.Partial("Partials/GoogleMap", Model.Location, new ViewDataDictionary { { "MarkerName", Model.Name } })
+                </div>
+            }
+            <div class="col-sm-@width">
+                <div class="tile">
+                    <div class="vcard">
+                        @if (Model.Address != null)
+                        {
+                            <h4><i class="fa fa-map-marker"></i> @Html.Resource("core.addressHeadingText")</h4>
+                            <div class="adr" @Html.DxaPropertyMarkup(() => Model.Address)>
+                                @Html.Raw(Model.Address)
+                            </div>
+                            if (daddr != null)
+                            {
+                                <a class="popup-iframe popup-mobile-ignore" href="//maps.google.com/maps?saddr=My+Location&amp;daddr=@daddr">@Html.Resource("core.directionsLinkText")</a><br />
+                                <a class="popup-iframe popup-mobile-ignore" href="//maps.google.com/maps?q=@daddr">@Html.Resource("core.largeMapLinkText")</a>
+                            }
+                        }
+                        @if (Model.Telephone != null || Model.FaxNumber != null || Model.Email != null)
+                        {
+                            <h4><i class="fa fa-envelope"></i> @Html.Resource("core.placeContactHeadingText")</h4>
+                            <div class="h-card">
+                                @if (Model.Telephone != null)
+                                { <p>@Html.Resource("core.teleponeCaptionText") <a class="tel" href="tel:@Model.Telephone" @Html.DxaPropertyMarkup(() => Model.Telephone)>@Model.Telephone</a></p> }
+                                @if (Model.FaxNumber != null)
+                                { <p>@Html.Resource("core.faxCaptionText") <a class="fax" href="fax:@Model.FaxNumber" @Html.DxaPropertyMarkup(() => Model.FaxNumber)>@Model.FaxNumber</a></p> }
+                                @if (Model.Email != null)
+                                { <p>@Html.Resource("core.emailCaptionText") <a class="email" href="mailto:@Model.Email" @Html.DxaPropertyMarkup(() => Model.Email)>@Model.Email</a></p> }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

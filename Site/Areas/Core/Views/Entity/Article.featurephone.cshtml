@@ -1,0 +1,72 @@
+﻿@model Article
+
+<article class="rich-text @Model.HtmlClasses" @Html.DxaEntityMarkup()>
+    <!-- featurephone view -->
+    @if (Model.Image != null && WebRequestContext.ScreenWidth != ScreenWidth.ExtraSmall)
+    {
+        <div class="hero" @Html.DxaPropertyMarkup(() => Model.Image)>
+            @Html.Media(Model.Image, 3.3)
+            <div class="overlay overlay-tl ribbon">
+                <h1 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h1 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
+    }
+    @if (Model.Date != null)
+    {
+        <div class="meta" @Html.DxaPropertyMarkup(() => Model.Date)>
+            @Html.Date(Model.Date)
+        </div>
+    }
+    <div class="content">
+        @if (Model.ArticleBody != null)
+        {
+            int i = 0;
+            foreach (var para in Model.ArticleBody)
+            {
+                <div @Html.DxaPropertyMarkup(() => Model.ArticleBody, i++)>
+                    @if (para.Subheading != null)
+                    {
+                        <h3 @Html.DxaPropertyMarkup(() => para.Subheading)>@para.Subheading</h3>
+                    }
+                    @if (para.Content != null)
+                    {
+                        <div @Html.DxaPropertyMarkup(() => para.Content)>
+                            @Html.DxaRichText(para.Content)
+                        </div>
+                    }
+                    @if (para.Media != null)
+                    {
+                        if (para.Media is Image)
+                        {
+                            <figure @Html.DxaPropertyMarkup(() => para.Media)>
+                                @Html.Media(para.Media, "100%", 0)
+                                @if (para.Caption != null)
+                                {
+                                <figcaption @Html.DxaPropertyMarkup(()=> para.Caption)>
+                                    @para.Caption
+                                </figcaption>
+                                }
+                            </figure>
+                        }
+                        else
+                        {
+                            <div @Html.DxaPropertyMarkup(() => para.Media)>
+                                @Html.DxaEntity(para.Media)
+                                @if (para.Caption != null)
+                                {
+                                    <div @Html.DxaPropertyMarkup(() => para.Caption)>
+                                        @para.Caption
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        }
+    </div>
+</article>

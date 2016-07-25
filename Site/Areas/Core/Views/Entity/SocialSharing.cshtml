@@ -1,0 +1,19 @@
+﻿@model LinkList<TagLink>
+@{
+    int i = 0;
+    var pageUrl = Url.Encode(Request.Url.ToString());
+}
+<div class="share-buttons clearfix @Model.HtmlClasses" @Html.DxaEntityMarkup()>
+    @Html.Resource("core.shareOnSocialCaption")
+    <ul>
+        @foreach (var link in Model.Links)
+        {
+            <li @Html.DxaPropertyMarkup(() => Model.Links, i++)>
+                <!--<a class="popup-iframe popup-mobile-ignore" href="@String.Format(link.Url,pageUrl)" title="@Html.FormatResource("core.shareOnSocialLinkTitle",link.Tag.DisplayText)"> -->
+                <a href="javascript:window.open('@String.Format(link.Url,pageUrl)', '_blank', 'width=400,height=500');void(0);" title="@Html.FormatResource("core.shareOnSocialLinkTitle",link.Tag.DisplayText)">
+                    <i class="fa fa-@link.Tag.Key"></i>
+                </a>
+            </li>
+        }
+    </ul>
+</div>
