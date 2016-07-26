@@ -124,13 +124,21 @@ namespace Sdl.Web.Tridion.Mapping
             string currentRegionName = currentRegion!=null ? currentRegion.NameWithoutPostfix : null;
             string duplicateRegionName = null;
             RegionModel region = null;
-            //If we are still in the same region, reuse it
+            //If we are still in the same region, reuse it, unless the mvc data is different, 
+            //in which case we start a new region of the same name
             if (regionName==currentRegionName)
             {
-                region = currentRegion;
+                if (currentRegion.MvcData.Equals(cpRegionMvcData))
+                {
+                    return currentRegion;
+                }
+                else
+                {
+                    Log.Debug("Region '{0}' is defined with different MVC data: [{1}] and [{2}]. Starting a new region.", regionName, currentRegion.MvcData, cpRegionMvcData);
+                }
             }
             //We already had this region, but there has been something else inbetween, so we need to create a new (postfixed) one
-            else if (regions.ContainsKey(regionName))
+            if (regions.ContainsKey(regionName))
             {
                 int counter = 1;
                 if (duplicateRegionCounter.ContainsKey(regionName))
