@@ -990,7 +990,7 @@ namespace Sdl.Web.Tridion.Mapping
                     regionMvcData.RegionName = regionNameField.Value;
                 }
             }
-
+            regionMvcData.RouteValues = GetRouteValues(ct);
             return regionMvcData;
         }
 
@@ -1167,22 +1167,29 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     mvcData.ActionName = ct.MetadataFields["action"].Value;
                 }
-                if (ct.MetadataFields.ContainsKey("routeValues"))
-                {
-                    string[] routeValues = ct.MetadataFields["routeValues"].Value.Split(',');
-                    mvcData.RouteValues = new Dictionary<string, string>(routeValues.Length);
-                    foreach (string routeValue in routeValues)
-                    {
-                        string[] routeValueParts = routeValue.Trim().Split(':');
-                        if (routeValueParts.Length > 1 && !mvcData.RouteValues.ContainsKey(routeValueParts[0]))
-                        {
-                            mvcData.RouteValues.Add(routeValueParts[0], routeValueParts[1]);
-                        }
-                    }
-                }
+                mvcData.RouteValues = GetRouteValues(ct);
             }
 
             return mvcData;
+        }
+
+        private static Dictionary<string, string> GetRouteValues(IComponentTemplate ct, String metaFieldName = "routeValues")
+        {
+            Dictionary<string, string> routeValues = null;
+            if (ct.MetadataFields.ContainsKey(metaFieldName))
+            {
+                string[] routeValuesString = ct.MetadataFields[metaFieldName].Value.Split(',');
+                routeValues = new Dictionary<string, string>(routeValuesString.Length);
+                foreach (string routeValue in routeValuesString)
+                {
+                    string[] routeValueParts = routeValue.Trim().Split(':');
+                    if (routeValueParts.Length > 1 && !routeValues.ContainsKey(routeValueParts[0]))
+                    {
+                        routeValues.Add(routeValueParts[0], routeValueParts[1]);
+                    }
+                }
+            }
+            return routeValues;
         }
     }
 }
