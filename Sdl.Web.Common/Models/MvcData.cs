@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Sdl.Web.Common.Configuration;
+using System;
 
 namespace Sdl.Web.Common.Models
 {
@@ -132,7 +133,8 @@ namespace Sdl.Web.Common.Models
         public override string ToString()
         {
             // TODO: what about the other properties?
-            return string.Format("{0}:{1}:{2}", AreaName, ControllerName, ViewName);
+            var routeValues = RouteValues != null ? String.Join(",", RouteValues.Select(v => String.Format("{0}:{1}", v.Key, v.Value))) : "";
+            return string.Format("{0}:{1}:{2}:[{3}]", AreaName, ControllerName, ViewName, routeValues);
         }
         #endregion
 
