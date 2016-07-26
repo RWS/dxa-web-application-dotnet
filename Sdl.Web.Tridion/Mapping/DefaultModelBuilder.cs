@@ -122,7 +122,7 @@ namespace Sdl.Web.Tridion.Mapping
             MvcData cpRegionMvcData = GetRegionMvcData(cp);
             string regionName = cpRegionMvcData.RegionName ?? cpRegionMvcData.ViewName;
             string currentRegionName = currentRegion!=null ? currentRegion.NameWithoutPostfix : null;
-            string duplicateRegionName = null;
+            string duplicateRegionPostfix = null;
             RegionModel region = null;
             //If we are still in the same region, reuse it
             if (regionName==currentRegionName)
@@ -142,15 +142,15 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     duplicateRegionCounter.Add(regionName, counter);
                 }
-                duplicateRegionName = regions[regionName].GetNameWithPostfix(counter);
+                duplicateRegionPostfix = regions[regionName].GetNameWithPostfix(counter);
             }
             //New region required
             if (region == null)
             {
                 // Region does not exist in Page Model yet; create Region Model and add it.
-                if (!String.IsNullOrEmpty(duplicateRegionName))
+                if (!String.IsNullOrEmpty(duplicateRegionPostfix))
                 {
-                    cpRegionMvcData.RegionName = duplicateRegionName;
+                    cpRegionMvcData.RegionName = String.Format("{0}{1}", regionName, duplicateRegionPostfix);
                 }
                 region = CreateRegionModel(cpRegionMvcData);
                 regions.Add(region);
