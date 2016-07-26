@@ -51,40 +51,24 @@ namespace Sdl.Web.Tridion.Mapping
 
                 // Create Regions/Entities from Component Presentations
                 IConditionalEntityEvaluator conditionalEntityEvaluator = SiteConfiguration.ConditionalEntityEvaluator;
+                RegionModel currentRegion = null;
+                Dictionary<String, int> duplicateRegionCounter = new Dictionary<string, int>();
                 foreach (IComponentPresentation cp in page.ComponentPresentations)
                 {
-                    MvcData cpRegionMvcData = GetRegionMvcData(cp);
-                    string regionName = cpRegionMvcData.RegionName ?? cpRegionMvcData.ViewName;
-                    RegionModel region;
-                    if (regions.TryGetValue(regionName, out region))
-                    {
-                        // Region already exists in Page Model; MVC data should match.
-                        if (!region.MvcData.Equals(cpRegionMvcData))
-                        {
-                            Log.Warn("Region '{0}' is defined with conflicting MVC data: [{1}] and [{2}]. Using the former.", region.Name, region.MvcData, cpRegionMvcData);
-                        }
-                    }
-                    else
-                    {
-                        // Region does not exist in Page Model yet; create Region Model and add it.
-                        region = CreateRegionModel(cpRegionMvcData);
-                        regions.Add(region);
-                    }
-
+                    currentRegion = GetRegionForEntity(regions, cp, currentRegion, duplicateRegionCounter);
                     try
                     {
                         EntityModel entity = ModelBuilderPipeline.CreateEntityModel(cp, localization);
-
                         if (conditionalEntityEvaluator == null || conditionalEntityEvaluator.IncludeEntity(entity))
                         {
-                            region.Entities.Add(entity);
+                            currentRegion.Entities.Add(entity);
                         }
                     }
                     catch (Exception ex)
                     {
                         // If there is a problem mapping an Entity, we replace it with an ExceptionEntity which holds the error details and carry on.
                         Log.Error(ex);
-                        region.Entities.Add(new ExceptionEntity(ex));
+                        currentRegion.Entities.Add(new ExceptionEntity(ex));
                     }
                 }
 
@@ -131,6 +115,48 @@ namespace Sdl.Web.Tridion.Mapping
                     }
                 }
             }
+        }
+
+        private RegionModel GetRegionForEntity(RegionModelSet regions, IComponentPresentation cp, RegionModel currentRegion, Dictionary<String,int> duplicateRegionCounter)
+        {
+            MvcData cpRegionMvcData = GetRegionMvcData(cp);
+            string regionName = cpRegionMvcData.RegionName ?? cpRegionMvcData.ViewName;
+            string currentRegionName = currentRegion!=null ? currentRegion.NameWithoutPostfix : null;
+            string duplicateRegionPostfix = null;
+            RegionModel region = null;
+            //If we are still in the same region, reuse it
+            if (regionName==currentRegionName)
+            {
+                region = currentRegion;
+            }
+            //We already had this region, but there has been something else inbetween, so we need to create a new (postfixed) one
+            else if (regions.ContainsKey(regionName))
+            {
+                int counter = 1;
+                if (duplicateRegionCounter.ContainsKey(regionName))
+                {
+                    counter = duplicateRegionCounter[regionName] + 1;
+                    duplicateRegionCounter[regionName] = counter;
+                }
+                else
+                {
+                    duplicateRegionCounter.Add(regionName, counter);
+                }
+                duplicateRegionPostfix = regions[regionName].GetNameWithPostfix(counter);
+            }
+            //New region required
+            if (region == null)
+            {
+                // Region does not exist in Page Model yet; create Region Model and add it.
+                if (!String.IsNullOrEmpty(duplicateRegionPostfix))
+                {
+                    cpRegionMvcData.RegionName = String.Format("{0}{1}", regionName, duplicateRegionPostfix);
+                }
+                region = CreateRegionModel(cpRegionMvcData);
+                regions.Add(region);
+                currentRegion = region;
+            }
+            return region;
         }
 
         public virtual void BuildEntityModel(ref EntityModel entityModel, IComponentPresentation cp, Localization localization)
