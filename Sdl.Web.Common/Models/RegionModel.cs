@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Sdl.Web.Common.Configuration;
-using System.Text.RegularExpressions;
-using System;
 
 namespace Sdl.Web.Common.Models
 {
@@ -56,18 +54,7 @@ namespace Sdl.Web.Common.Models
             }
         }
 
-        public String NameWithoutPostfix
-        {
-            get
-            {
-                var match = Regex.Match(Name, @"(.*)___\d+");
-                if (match.Success)
-                {
-                    return match.Groups[1].Value;
-                }
-                return Name;
-            }
-        }
+
         #region Constructors
         /// <summary>
         /// Initializes a new <see cref="RegionModel"/> instance.
@@ -93,11 +80,6 @@ namespace Sdl.Web.Common.Models
         }
         #endregion
 
-        public String GetNameWithPostfix(int counter)
-        {
-            return String.Format("___{0}", counter);
-        }
-
         #region Overrides
 
         /// <summary>
@@ -107,7 +89,7 @@ namespace Sdl.Web.Common.Models
         /// <returns>The XPM markup.</returns>
         public override string GetXpmMarkup(Localization localization)
         {
-            XpmRegion xpmRegion =  localization.GetXpmRegionConfiguration(this.NameWithoutPostfix);
+            XpmRegion xpmRegion =  localization.GetXpmRegionConfiguration(Name);
             if (xpmRegion == null)
             {
                 return string.Empty;
