@@ -95,7 +95,7 @@ namespace Sdl.Web.Common.Models
 
         public String GetNameWithPostfix(int counter)
         {
-            return String.Format("___{0}", counter);
+            return String.Format("{0}___{1}", this.Name, counter);
         }
 
         #region Overrides
