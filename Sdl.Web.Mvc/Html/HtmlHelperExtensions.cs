@@ -383,18 +383,7 @@ namespace Sdl.Web.Mvc.Html
                 string controllerName = mvcData.ControllerName ?? SiteConfiguration.GetRegionController();
                 string controllerAreaName = mvcData.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName();
 
-                RouteValueDictionary parameters = new RouteValueDictionary();
-                parameters["containerSize"] = containerSize;
-                parameters["region"] = region;
-                parameters["area"] = controllerAreaName;
-                if (mvcData.RouteValues != null)
-                {
-                    foreach (string key in mvcData.RouteValues.Keys)
-                    {
-                        parameters[key] = mvcData.RouteValues[key];
-                    }
-                }
-                MvcHtmlString result = htmlHelper.Action(actionName, controllerName, parameters);
+                MvcHtmlString result = htmlHelper.Action(actionName, controllerName, new { Region = region, containerSize = containerSize, area = controllerAreaName });
 
                 if (WebRequestContext.IsPreview)
                 {
