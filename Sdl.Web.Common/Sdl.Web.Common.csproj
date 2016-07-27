@@ -118,6 +118,7 @@
     <Compile Include="Models\Entity\ExceptionEntity.cs" />
     <Compile Include="Models\EntityModel.cs" />
     <Compile Include="Models\Entity\Configuration.cs" />
+    <Compile Include="Models\Entity\FeedItem.cs" />
     <Compile Include="Models\Entity\Location.cs" />
     <Compile Include="Models\Legacy\IPage.cs" />
     <Compile Include="Models\Legacy\IEntity.cs" />

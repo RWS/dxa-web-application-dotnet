@@ -51,70 +51,88 @@ namespace Sdl.Web.Mvc.Formats
         protected virtual List<SyndicationItem> GetFeedItemsFromEntity(EntityModel entity)
         {
             List<SyndicationItem> items = new List<SyndicationItem>();
-            IEnumerable<Teaser> entityItems = GetEntityItems(entity);
-            foreach(Teaser item in entityItems)
+            IEnumerable<FeedItem> entityItems = GetEntityItems(entity);
+            foreach(FeedItem item in entityItems)
             {
-                items.Add(GetSyndicationItemFromTeaser(item));
+                items.Add(GetSyndicationItemFromFeedItem(item));
             }
             return items;
         }
 
-        private IEnumerable<Teaser> GetEntityItems(EntityModel entity)
+        private Link CreateLink(object link)
         {
-            List<Teaser> res = new List<Teaser>();
-            //1. Check if entity is a teaser, if add it
-            if (entity is Teaser)
+            if (link == null)
+                return null;
+            
+            if(link is string)
             {
-                res.Add((Teaser)entity);
+                return new Link { Url = link as string };
+            }
+            else if(link is Link)
+            {
+                return link as Link;
+            }
+            return null;
+        }
+
+        private IEnumerable<FeedItem> GetEntityItems(EntityModel entity)
+        {
+            List<FeedItem> res = new List<FeedItem>();
+            // if the entity is an actual FeedItem we just add it directly.
+            if (entity is FeedItem)
+            {
+                res.Add((FeedItem)entity);
             }
             else
             {
-                //2. Second check if entity type is (semantically) a list, and if so, get its list items
-                List<Teaser> items = GetTeaserListFromSemantics(entity);
+                // if the entity type is (semantically) a list, get its list items
+                List<FeedItem> items = GetFeedItemListFromSemantics(entity);
                 if (items != null)
                 {
                     res = items;
                 }
                 else
                 {
-                    //3. Last resort, try to find some suitable properties using reflection
-                    Teaser teaser = new Teaser();
+                    // the entity we are dealing with is not known so try to find some suitable properties using reflection
+                    FeedItem feedItem = new FeedItem();
                     foreach (PropertyInfo pi in entity.GetType().GetProperties())
                     {
                         switch (pi.Name)
                         {
+                            case "Title":
                             case "Headline":
                             case "Name":
-                                teaser.Headline = pi.GetValue(entity) as String;
+                                feedItem.Title = pi.GetValue(entity) as String;
                                 break;
+                            case "Summary":
+                            case "Description":
+                            case "Snippet":
+                            case "Teaser":
+                                feedItem.Summary = pi.GetValue(entity) as String;
+                                break;                            
+                            case "Updated":
                             case "Date":
                                 DateTime? date = pi.GetValue(entity) as DateTime?;
                                 if (date != null)
-                                    teaser.Date = date;
-                                break;
-                            case "Description":
-                                teaser.Text = pi.GetValue(entity) as String;
-                                break;
+                                    feedItem.Date = date;
+                                break;                           
                             case "Link":
-                                teaser.Link = pi.GetValue(entity) as Link;
-                                break;
                             case "Url":
-                                string url = pi.GetValue(entity) as String;
-                                if (url != null)
-                                    teaser.Link = new Link { Url = url };
+                                feedItem.Link = CreateLink(pi.GetValue(entity));
                                 break;
                         }
                     }
-                    if (teaser.Headline != null || teaser.Text != null || teaser.Link != null)
+                    // only use the feed item if some properties were populated
+                    if (feedItem.Title != null || feedItem.Summary != null || feedItem.Link != null)
                     {
-                        res.Add(teaser);
+                        res.Add(feedItem);
                     }
                 }
             }
             return res;
         }
 
-        private List<Teaser> GetTeaserListFromSemantics(EntityModel entity)
+        private List<FeedItem> GetFeedItemListFromSemantics(EntityModel entity)
         {
             Type type = entity.GetType();
             bool isList = false;
@@ -134,27 +152,27 @@ namespace Sdl.Web.Mvc.Formats
             {
                 foreach(PropertyInfo pi in type.GetProperties())
                 {
-                    if (pi.PropertyType == typeof(List<Teaser>))
+                    if (pi.PropertyType == typeof(List<FeedItem>))
                     {
-                         return pi.GetValue(entity) as List<Teaser>;
+                         return pi.GetValue(entity) as List<FeedItem>;
                     }
                 }
             }
             return null;
         }
 
-        private SyndicationItem GetSyndicationItemFromTeaser(Teaser item)
+        private SyndicationItem GetSyndicationItemFromFeedItem(FeedItem item)
         {
             SyndicationItem si = new SyndicationItem();
-            if (item.Headline != null)
+            if (item.Title != null)
             {
-                si.Title = new TextSyndicationContent(item.Headline);
+                si.Title = new TextSyndicationContent(item.Title);
             }
-            if (item.Text != null)
+            if (item.Summary != null)
             {
-                si.Summary = new TextSyndicationContent(item.Text.ToString());
+                si.Summary = new TextSyndicationContent(item.Summary.ToString());
             }
-            if (item.Link != null && item.Link.Url!=null && item.Link.Url.StartsWith("http"))
+            if (item.Link != null && item.Link.Url != null && item.Link.Url.StartsWith("http"))
             {
                 si.Links.Add(new SyndicationLink(new Uri(item.Link.Url)));
             }
