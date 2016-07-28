@@ -6,6 +6,7 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Mapping;
+using Sdl.Web.Tridion.Navigation;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -17,8 +18,8 @@ namespace Sdl.Web.Tridion.Tests
 
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
-            { typeof(IContentProvider), new DefaultProvider() },
-            { typeof(INavigationProvider), new DefaultProvider() },
+            { typeof(IContentProvider), new DefaultContentProvider() },
+            { typeof(INavigationProvider), new StaticNavigationProvider() },
             { typeof(ILinkResolver), new DefaultLinkResolver() },
             { typeof(IRichTextProcessor), new DefaultRichTextProcessor() },
             { typeof(IMediaHelper), new TestMediaHelper() },
