@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ServiceModel.Syndication;
 using System.Web;
+using System.Collections;
 
 namespace Sdl.Web.Mvc.Formats
 {
@@ -75,64 +76,76 @@ namespace Sdl.Web.Mvc.Formats
             return null;
         }
 
+        private FeedItem CreateFeedItemFromProperties(EntityModel entity)
+        {
+            if (entity == null)
+                return null;
+            FeedItem feedItem = new FeedItem();
+            foreach (PropertyInfo pi in entity.GetType().GetProperties())
+            {
+                switch (pi.Name)
+                {
+                    case "Title":
+                    case "Headline":
+                    case "Name":
+                        feedItem.Title = pi.GetValue(entity) as String;
+                        break;
+                    case "Summary":
+                    case "Description":
+                    case "Snippet":
+                    case "Teaser":
+                        feedItem.Summary = pi.GetValue(entity) as String;
+                        break;
+                    case "Updated":
+                    case "Date":
+                        DateTime? date = pi.GetValue(entity) as DateTime?;
+                        if (date != null)
+                            feedItem.Date = date;
+                        break;
+                    case "Link":
+                    case "Url":
+                        feedItem.Link = CreateLink(pi.GetValue(entity));
+                        break;
+                }
+            }
+            // only use the feed item if some properties were populated
+            if (feedItem.Title != null || feedItem.Summary != null || feedItem.Link != null)
+            {
+                return feedItem;
+            }
+            return null;
+        }
+
         private IEnumerable<FeedItem> GetEntityItems(EntityModel entity)
         {
             List<FeedItem> res = new List<FeedItem>();
-            // if the entity is an actual FeedItem we just add it directly.
-            if (entity is FeedItem)
+
+            // if the entity type is (semantically) a list, get its list items
+            ICollection items = GetFeedItemListFromSemantics(entity);
+            if (items != null)
             {
-                res.Add((FeedItem)entity);
-            }
-            else
-            {
-                // if the entity type is (semantically) a list, get its list items
-                List<FeedItem> items = GetFeedItemListFromSemantics(entity);
-                if (items != null)
+                foreach(object e in items)
                 {
-                    res = items;
-                }
-                else
-                {
-                    // the entity we are dealing with is not known so try to find some suitable properties using reflection
-                    FeedItem feedItem = new FeedItem();
-                    foreach (PropertyInfo pi in entity.GetType().GetProperties())
-                    {
-                        switch (pi.Name)
-                        {
-                            case "Title":
-                            case "Headline":
-                            case "Name":
-                                feedItem.Title = pi.GetValue(entity) as String;
-                                break;
-                            case "Summary":
-                            case "Description":
-                            case "Snippet":
-                            case "Teaser":
-                                feedItem.Summary = pi.GetValue(entity) as String;
-                                break;                            
-                            case "Updated":
-                            case "Date":
-                                DateTime? date = pi.GetValue(entity) as DateTime?;
-                                if (date != null)
-                                    feedItem.Date = date;
-                                break;                           
-                            case "Link":
-                            case "Url":
-                                feedItem.Link = CreateLink(pi.GetValue(entity));
-                                break;
-                        }
-                    }
-                    // only use the feed item if some properties were populated
-                    if (feedItem.Title != null || feedItem.Summary != null || feedItem.Link != null)
+                    FeedItem feedItem = CreateFeedItemFromProperties(e as EntityModel);
+                    if (feedItem != null)
                     {
                         res.Add(feedItem);
                     }
                 }
             }
+            else
+            {
+                // the entity we are dealing with is not known so try to find some suitable properties using reflection
+                FeedItem feedItem = CreateFeedItemFromProperties(entity);
+                if (feedItem != null)
+                {
+                    res.Add(feedItem);
+                }
+            }
             return res;
         }
 
-        private List<FeedItem> GetFeedItemListFromSemantics(EntityModel entity)
+        private ICollection GetFeedItemListFromSemantics(EntityModel entity)
         {
             Type type = entity.GetType();
             bool isList = false;
@@ -150,11 +163,12 @@ namespace Sdl.Web.Mvc.Formats
             }
             if (isList)
             {
-                foreach(PropertyInfo pi in type.GetProperties())
+                foreach (PropertyInfo pi in type.GetProperties())
                 {
-                    if (pi.PropertyType == typeof(List<FeedItem>))
+                    if (pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>) || pi.PropertyType.GetGenericTypeDefinition() == typeof(IList<>)) && 
+                        pi.PropertyType.GenericTypeArguments.Length>0 &&  typeof(EntityModel).IsAssignableFrom(pi.PropertyType.GenericTypeArguments[0]))
                     {
-                         return pi.GetValue(entity) as List<FeedItem>;
+                        return pi.GetValue(entity) as ICollection;
                     }
                 }
             }
