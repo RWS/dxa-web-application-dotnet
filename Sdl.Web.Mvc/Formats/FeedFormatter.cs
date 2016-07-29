@@ -47,16 +47,37 @@ namespace Sdl.Web.Mvc.Formats
                 }
             }
             return items;
-        }
-
-        protected virtual List<SyndicationItem> GetFeedItemsFromEntity(EntityModel entity)
+        }     
+    
+        private IEnumerable<SyndicationItem> GetFeedItemsFromEntity(EntityModel entity)
         {
             List<SyndicationItem> items = new List<SyndicationItem>();
-            IEnumerable<FeedItem> entityItems = GetEntityItems(entity);
-            foreach(FeedItem item in entityItems)
+
+            if (entity != null)
             {
-                items.Add(GetSyndicationItemFromFeedItem(item));
+                Type type = entity.GetType();
+                foreach (PropertyInfo pi in type.GetProperties())
+                {
+                    if (pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>) || pi.PropertyType.GetGenericTypeDefinition() == typeof(IList<>)) &&
+                        pi.PropertyType.GenericTypeArguments.Length > 0 && typeof(EntityModel).IsAssignableFrom(pi.PropertyType.GenericTypeArguments[0]))
+                    {
+                        ICollection subItems = pi.GetValue(entity) as ICollection;
+                        if (subItems != null)
+                        {
+                            foreach (object e in subItems)
+                            {
+                                items.AddRange(GetFeedItemsFromEntity(e as EntityModel));
+                            }
+                        }
+                    }
+                }
+                SyndicationItem item = CreateFeedItemFromProperties(entity);
+                if (item != null)
+                {
+                    items.Add(item);
+                }
             }
+
             return items;
         }
 
@@ -64,23 +85,37 @@ namespace Sdl.Web.Mvc.Formats
         {
             if (link == null)
                 return null;
-            
-            if(link is string)
+
+            if (link is string)
             {
                 return new Link { Url = link as string };
             }
-            else if(link is Link)
+            else if (link is Link)
             {
                 return link as Link;
             }
             return null;
         }
 
-        private FeedItem CreateFeedItemFromProperties(EntityModel entity)
+        private string GetText(object obj)
+        {
+            if (obj is string)
+                return obj as string;
+            if (obj is RichText)
+                return (obj as RichText).ToString();
+            return null;
+        }
+
+        private SyndicationItem CreateFeedItemFromProperties(EntityModel entity)
         {
             if (entity == null)
                 return null;
-            FeedItem feedItem = new FeedItem();
+
+            string title = null;
+            string summary = null;
+            DateTime? date = null;
+            Link link = null;
+
             foreach (PropertyInfo pi in entity.GetType().GetProperties())
             {
                 switch (pi.Name)
@@ -88,113 +123,49 @@ namespace Sdl.Web.Mvc.Formats
                     case "Title":
                     case "Headline":
                     case "Name":
-                        feedItem.Title = pi.GetValue(entity) as String;
+                        title = GetText(pi.GetValue(entity));
                         break;
                     case "Summary":
                     case "Description":
                     case "Snippet":
                     case "Teaser":
-                        feedItem.Summary = pi.GetValue(entity) as String;
+                    case "Text":
+                        summary = GetText(pi.GetValue(entity));
                         break;
                     case "Updated":
                     case "Date":
-                        DateTime? date = pi.GetValue(entity) as DateTime?;
-                        if (date != null)
-                            feedItem.Date = date;
+                        date = pi.GetValue(entity) as DateTime?;
                         break;
                     case "Link":
                     case "Url":
-                        feedItem.Link = CreateLink(pi.GetValue(entity));
+                        link = CreateLink(pi.GetValue(entity));
                         break;
                 }
             }
-            // only use the feed item if some properties were populated
-            if (feedItem.Title != null || feedItem.Summary != null || feedItem.Link != null)
+
+            // only create a syndication if we found a property
+            if (title != null || summary != null || link != null)
             {
-                return feedItem;
+                SyndicationItem si = new SyndicationItem();
+                if (title != null)
+                {
+                    si.Title = new TextSyndicationContent(title);
+                }
+                if (summary != null)
+                {
+                    si.Summary = new TextSyndicationContent(summary.ToString());
+                }
+                if (link != null && link.Url != null && link.Url.StartsWith("http"))
+                {
+                    si.Links.Add(new SyndicationLink(new Uri(link.Url)));
+                }
+                if (date != null)
+                {
+                    si.PublishDate = (DateTime)date;
+                }
+                return si;
             }
             return null;
-        }
-
-        private IEnumerable<FeedItem> GetEntityItems(EntityModel entity)
-        {
-            List<FeedItem> res = new List<FeedItem>();
-
-            // if the entity type is (semantically) a list, get its list items
-            ICollection items = GetFeedItemListFromSemantics(entity);
-            if (items != null)
-            {
-                foreach(object e in items)
-                {
-                    FeedItem feedItem = CreateFeedItemFromProperties(e as EntityModel);
-                    if (feedItem != null)
-                    {
-                        res.Add(feedItem);
-                    }
-                }
-            }
-            else
-            {
-                // the entity we are dealing with is not known so try to find some suitable properties using reflection
-                FeedItem feedItem = CreateFeedItemFromProperties(entity);
-                if (feedItem != null)
-                {
-                    res.Add(feedItem);
-                }
-            }
-            return res;
-        }
-
-        private ICollection GetFeedItemListFromSemantics(EntityModel entity)
-        {
-            Type type = entity.GetType();
-            bool isList = false;
-            foreach (object attr in type.GetCustomAttributes(true))
-            {
-                if (attr is SemanticEntityAttribute)
-                {
-                    SemanticEntityAttribute semantics = (SemanticEntityAttribute)attr;
-                    isList = semantics.Vocab == ViewModel.SchemaOrgVocabulary && semantics.EntityName == "ItemList";
-                    if (isList)
-                    {
-                        break;
-                    }
-                }
-            }
-            if (isList)
-            {
-                foreach (PropertyInfo pi in type.GetProperties())
-                {
-                    if (pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>) || pi.PropertyType.GetGenericTypeDefinition() == typeof(IList<>)) && 
-                        pi.PropertyType.GenericTypeArguments.Length>0 &&  typeof(EntityModel).IsAssignableFrom(pi.PropertyType.GenericTypeArguments[0]))
-                    {
-                        return pi.GetValue(entity) as ICollection;
-                    }
-                }
-            }
-            return null;
-        }
-
-        private SyndicationItem GetSyndicationItemFromFeedItem(FeedItem item)
-        {
-            SyndicationItem si = new SyndicationItem();
-            if (item.Title != null)
-            {
-                si.Title = new TextSyndicationContent(item.Title);
-            }
-            if (item.Summary != null)
-            {
-                si.Summary = new TextSyndicationContent(item.Summary.ToString());
-            }
-            if (item.Link != null && item.Link.Url != null && item.Link.Url.StartsWith("http"))
-            {
-                si.Links.Add(new SyndicationLink(new Uri(item.Link.Url)));
-            }
-            if (item.Date != null)
-            {
-                si.PublishDate = (DateTime)item.Date;
-            }
-            return si;
         }
     }
 }
