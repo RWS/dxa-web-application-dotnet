@@ -2,14 +2,17 @@
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
-using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Tridion.Mapping;
 
 namespace Sdl.Web.Tridion.Tests
 {
     [TestClass]
     public class ContentProviderTest : TestClass
     {
+        private static readonly IContentProvider _testContentProvider = new DefaultContentProvider();
+
         [ClassInitialize]
         public static void Initialize(TestContext testContext)
         {
@@ -21,7 +24,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testPageUrlPath = TestFixture.ParentLocalization.Path; // Implicitly address the home page (index.html)
 
-            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
             Assert.AreEqual(TestFixture.HomePageId, pageModel.Id, "Id");
@@ -34,7 +37,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testPageUrlPath = TestFixture.Tsi1278PageUrlPath;
 
-            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
             Image testImage = pageModel.Regions["Main"].Entities[0] as Image;
@@ -47,7 +50,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testStaticContentItemUrlPath = TestFixture.Tsi1278StaticContentItemUrlPath;
 
-            StaticContentItem staticContentItem = SiteConfiguration.ContentProvider.GetStaticContentItem(testStaticContentItemUrlPath, TestFixture.ParentLocalization);
+            StaticContentItem staticContentItem = _testContentProvider.GetStaticContentItem(testStaticContentItemUrlPath, TestFixture.ParentLocalization);
 
             Assert.IsNotNull(staticContentItem, "staticContentItem");
         }
@@ -59,7 +62,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testPageUrlPath = TestFixture.ArticlePageUrlPath;
 
-            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
 
@@ -84,7 +87,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testPageUrlPath = TestFixture.Tsi1614PageUrlPath;
 
-            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
             Article testArticle = pageModel.Regions["Main"].Entities[0] as Article;
@@ -99,7 +102,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testEntityId = TestFixture.ArticleDcpEntityId;
 
-            EntityModel entityModel = SiteConfiguration.ContentProvider.GetEntityModel(testEntityId, TestFixture.ParentLocalization);
+            EntityModel entityModel = _testContentProvider.GetEntityModel(testEntityId, TestFixture.ParentLocalization);
 
             Assert.IsNotNull(entityModel, "entityModel");
             Assert.AreEqual(testEntityId, entityModel.Id, "entityModel.Id");
@@ -121,7 +124,7 @@ namespace Sdl.Web.Tridion.Tests
         [ExpectedException(typeof(DxaItemNotFoundException))]
         public void GetPageModel_NonExistent_Exception()
         {
-            SiteConfiguration.ContentProvider.GetPageModel("/does/not/exist", TestFixture.ParentLocalization);
+            _testContentProvider.GetPageModel("/does/not/exist", TestFixture.ParentLocalization);
         }
 
         [TestMethod]
@@ -129,14 +132,14 @@ namespace Sdl.Web.Tridion.Tests
         public void GetEntityModel_NonExistent_Exception()
         {
             const string testEntityId = "666-666"; // Should not actually exist
-            SiteConfiguration.ContentProvider.GetEntityModel(testEntityId, TestFixture.ParentLocalization);
+            _testContentProvider.GetEntityModel(testEntityId, TestFixture.ParentLocalization);
         }
 
         [TestMethod]
         [ExpectedException(typeof(DxaException))]
         public void GetEntityModel_InvalidId_Exception()
         {
-            SiteConfiguration.ContentProvider.GetEntityModel("666", TestFixture.ParentLocalization);
+            _testContentProvider.GetEntityModel("666", TestFixture.ParentLocalization);
         }
 
     }
