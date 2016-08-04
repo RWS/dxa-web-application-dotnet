@@ -1,11 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Sdl.Web.Common.Mapping
 {
     /// <summary>
-    /// Class for deserialized json schema field.
-    /// {"Name":"headline","Path":"/Article/headline","IsMultiValue":false,"Semantics":[...],"Fields":[...]}
+    /// Represents a Semantic Schema Field.
     /// </summary>
+    /// <remarks>
+    /// Deserialized from JSON in schemas.json.
+    /// </remarks>
     public class SemanticSchemaField
     {
         /// <summary>
@@ -68,52 +72,51 @@ namespace Sdl.Web.Common.Mapping
         public List<SemanticSchemaField> Fields { get; set; }
 
         /// <summary>
-        /// Initializes a new empty instance of the <see cref="SemanticSchemaField"/> class.
-        /// </summary>
-        public SemanticSchemaField() { }
-
-        /// <summary>
         /// Check if current field contains given semantics.
         /// </summary>
         /// <param name="fieldSemantics">The semantics to check against</param>
         /// <returns>True if this field contains given semantics, false otherwise</returns>
+        [Obsolete("Deprecated in DXA 1.6. Use HasSemantics instead.")]
         public bool ContainsSemantics(FieldSemantics fieldSemantics)
         {
-            foreach (FieldSemantics property in Semantics)
-            {
-                // TODO add proper Equals implementation in FieldSemantics
-                if (property.Property.Equals(fieldSemantics.Property) &&
-                    property.Prefix.Equals(fieldSemantics.Prefix) /*&& -- removed as this is breaking on embedded fields where the property.Entity is something like EmbeddedLink
-                    property.Entity.Equals(fieldSemantics.Entity)*/)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return HasSemantics(fieldSemantics);
         }
+
+        /// <summary>
+        /// Check if current field has given semantics.
+        /// </summary>
+        /// <param name="fieldSemantics">The semantics to check against</param>
+        /// <returns><c>true</c> if this field has given semantics, <c>false</c> otherwise.</returns>
+        public bool HasSemantics(FieldSemantics fieldSemantics)
+        {
+            // TODO: shouldn't we be matching on fieldSemantics.Entity? return Semantics.Any(s => s.Equals(fieldSemantics));
+            return Semantics.Any(s => s.Property.Equals(fieldSemantics.Property) && s.Prefix.Equals(fieldSemantics.Prefix));
+        }
+
 
         /// <summary>
         /// Find <see cref="SemanticSchemaField"/> with given semantics.
         /// </summary>
         /// <param name="fieldSemantics">The semantics to check against</param>
+        /// <param name="includeSelf">If <c>true</c> the field itself will be returned if it matches the given semantics.</param>
         /// <returns>This field or one of its embedded fields that match with the given semantics, null if a match cannot be found</returns>
-        public SemanticSchemaField FindFieldBySemantics(FieldSemantics fieldSemantics)
+        public SemanticSchemaField FindFieldBySemantics(FieldSemantics fieldSemantics, bool includeSelf = true)
         {
-            if (ContainsSemantics(fieldSemantics))
+            if (includeSelf && HasSemantics(fieldSemantics))
             {
                 return this;
             }
 
-            foreach (SemanticSchemaField embeddedField in Fields)
-            {
-                SemanticSchemaField field = embeddedField.FindFieldBySemantics(fieldSemantics);
-                if (field != null)
-                {
-                    return field;
-                }
-            }
-            return null;
+            return Fields.Select(embeddedField => embeddedField.FindFieldBySemantics(fieldSemantics)).FirstOrDefault(field => field != null);
+        }
+
+        /// <summary>
+        /// Provides a string representation of the object.
+        /// </summary>
+        /// <returns>A string representation containing the field Name and Path</returns>
+        public override string ToString()
+        {
+            return string.Format("{0} {1} ({2})", GetType().Name, Name, Path);
         }
     }
 }
