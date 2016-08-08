@@ -315,10 +315,22 @@ namespace Sdl.Web.Mvc.Html
         public static MvcHtmlString DxaEntity(this HtmlHelper htmlHelper, EntityModel entity, string viewName, int containerSize = 0)
         {
             MvcData mvcDataOverride = new MvcData(viewName);
-            entity.MvcData.AreaName = mvcDataOverride.AreaName;
-            entity.MvcData.ViewName = mvcDataOverride.ViewName;
+            MvcData orginalMvcData = entity.MvcData;
+            MvcData tempMvcData = new MvcData(orginalMvcData)
+            {
+                AreaName = mvcDataOverride.AreaName,
+                ViewName = mvcDataOverride.ViewName
+            };
 
-            return htmlHelper.DxaEntity(entity, containerSize);
+            try
+            {
+                entity.MvcData = tempMvcData;
+                return htmlHelper.DxaEntity(entity, containerSize);
+            }
+            finally
+            {
+                entity.MvcData = orginalMvcData;
+            }
         }
 
         /// <summary>
