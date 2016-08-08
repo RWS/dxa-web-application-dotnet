@@ -8,17 +8,17 @@ namespace Sdl.Web.Tridion.Tests
         internal static void RegisterCoreViewModels()
         {
             // Entity Views
-            RegisterViewModel("HeaderLogo", typeof(Teaser));
+            //RegisterViewModel("HeaderLogo", typeof(Teaser));
             RegisterViewModel("LanguageSelector", typeof(Common.Models.Configuration));
-            RegisterViewModel("Teaser-ImageOverlay", typeof(Teaser));
-            RegisterViewModel("Teaser", typeof(Teaser));
-            RegisterViewModel("TeaserColored", typeof(Teaser));
-            RegisterViewModel("TeaserHero-ImageOverlay", typeof(Teaser));
-            RegisterViewModel("TeaserMap", typeof(Teaser));
+            //RegisterViewModel("Teaser-ImageOverlay", typeof(Teaser));
+            //RegisterViewModel("Teaser", typeof(Teaser));
+            //RegisterViewModel("TeaserColored", typeof(Teaser));
+            //RegisterViewModel("TeaserHero-ImageOverlay", typeof(Teaser));
+            //RegisterViewModel("TeaserMap", typeof(Teaser));
 
-            RegisterViewModel("List", typeof(ContentList<Teaser>), "List");
-            RegisterViewModel("PagedList", typeof(ContentList<Teaser>), "List");
-            RegisterViewModel("ThumbnailList", typeof(ContentList<Teaser>), "List");
+            //RegisterViewModel("List", typeof(ContentList<Teaser>), "List");
+            //RegisterViewModel("PagedList", typeof(ContentList<Teaser>), "List");
+            //RegisterViewModel("ThumbnailList", typeof(ContentList<Teaser>), "List");
 
             RegisterViewModel("Breadcrumb", typeof(NavigationLinks), "Navigation");
             RegisterViewModel("LeftNavigation", typeof(NavigationLinks), "Navigation");
