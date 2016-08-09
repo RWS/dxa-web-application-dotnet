@@ -9,6 +9,11 @@ namespace Sdl.Web.Common.Models
 {
     public abstract class DynamicList : EntityModel
     {
+        public DynamicList()
+        {
+            QueryResults = new List<EntityModel>();
+        }
+
         public bool HasMore { get; set; }
 
         public List<EntityModel> QueryResults

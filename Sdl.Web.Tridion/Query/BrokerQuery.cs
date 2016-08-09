@@ -17,7 +17,7 @@ namespace Sdl.Web.Tridion.Query
         public Dictionary<string, List<string>> KeywordFilters { get; set; }
         public bool HasMore { get; set; }
 
-        public IEnumerable<EntityModel> ExecuteQuery(SimpleBrokerQuery qParams)
+        public IEnumerable<EntityModel> ExecuteQuery(Type modelType, SimpleBrokerQuery qParams)
         {
             Criteria criteria = BuildCriteria(qParams);
             global::Tridion.ContentDelivery.DynamicContent.Query.Query query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(criteria);
@@ -44,22 +44,18 @@ namespace Sdl.Web.Tridion.Query
                     for (int i = 0; i < ids.Length && i <= qParams.PageSize; i++)
                     {
                         IList componentPresentations = cpf.FindAllComponentPresentations(ids[i]);
-                        if (componentPresentations != null)
+                        if (componentPresentations != null && componentPresentations.Count > 0)
                         {
-                            foreach (ComponentPresentation cp in componentPresentations)
+                            // get a DD4T representation of the component presentation and construct an entity model from it using our semantic model builder
+                            DD4T.ContentModel.IComponentPresentation dd4tcp = DD4TFactoryCache.GetComponentPresentationFactory(qParams.Localization).GetIComponentPresentationObject(((ComponentPresentation)componentPresentations[0]).Content);
+                            EntityModel model = ModelBuilderPipeline.CreateEntityModel(dd4tcp.Component, modelType, qParams.Localization);
+                            if (model != null)
                             {
-                                // get a DD4T representation of the component presentation and construct an entity model from it using our semantic model builder
-                                DD4T.ContentModel.IComponentPresentation dd4tcp = DD4TFactoryCache.GetComponentPresentationFactory(qParams.Localization).GetIComponentPresentationObject(cp.Content);
-                                EntityModel model = ModelBuilderPipeline.CreateEntityModel(dd4tcp, qParams.Localization);
-                                if (model != null)
-                                {
-                                    models.Add(model);
-                                }
+                                models.Add(model);
                             }
                         }
                     }
                 }
-
                 return models;
             }
             catch (Exception ex)

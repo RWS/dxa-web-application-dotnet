@@ -180,7 +180,7 @@ namespace Sdl.Web.Tridion.Mapping
                 SimpleBrokerQuery queryParams = dynamicList.GetQuery(localization) as SimpleBrokerQuery;
                 queryParams.Start = start;
                 BrokerQuery query = new BrokerQuery();
-                dynamicList.QueryResults = query.ExecuteQuery(queryParams).ToList();
+                dynamicList.QueryResults = query.ExecuteQuery(dynamicList.ResultType, queryParams).ToList();
                 dynamicList.HasMore = query.HasMore;
             }
         }
