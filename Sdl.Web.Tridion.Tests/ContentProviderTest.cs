@@ -41,6 +41,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        [Ignore]
         public void GetEntityModel_XpmMarkup_Success()
         {
             string testEntityId = TestFixture.ArticleDcpEntityId;
