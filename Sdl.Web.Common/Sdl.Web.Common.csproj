@@ -114,6 +114,7 @@
     <Compile Include="Mapping\SemanticSchema.cs" />
     <Compile Include="Mapping\SemanticSchemaField.cs" />
     <Compile Include="Mapping\SemanticVocabulary.cs" />
+    <Compile Include="Models\Entity\DynamicList.cs" />
     <Compile Include="Models\Entity\EclItem.cs" />
     <Compile Include="Models\Entity\ExceptionEntity.cs" />
     <Compile Include="Models\EntityModel.cs" />
@@ -125,25 +126,13 @@
     <Compile Include="Models\PageModelWithHttpResponseData.cs" />
     <Compile Include="Models\RichText.cs" />
     <Compile Include="Models\SemanticAttributes.cs" />
-    <Compile Include="Models\Entity\Download.cs" />
     <Compile Include="Models\Legacy\EntityBase.cs" />
     <Compile Include="Models\Legacy\ModelType.cs" />
-    <Compile Include="Models\Entity\Image.cs" />
     <Compile Include="Models\Entity\Link.cs" />
-    <Compile Include="Models\Entity\Location.cs" />
     <Compile Include="Models\Entity\MediaItem.cs" />
-    <Compile Include="Models\Entity\Paragraph.cs" />
     <Compile Include="Models\Entity\Tag.cs" />
     <Compile Include="Models\Entity\TagLink.cs" />
     <Compile Include="Models\MvcData.cs" />
-    <Compile Include="Models\Entity\YouTubeVideo.cs" />
-    <Compile Include="Models\Entity\Article.cs" />
-    <Compile Include="Models\Entity\ItemList.cs" />
-    <Compile Include="Models\Entity\ContentList.cs" />
-    <Compile Include="Models\Entity\LinkList.cs" />
-    <Compile Include="Models\Entity\Notification.cs" />
-    <Compile Include="Models\Entity\Place.cs" />
-    <Compile Include="Models\Entity\Teaser.cs" />
     <Compile Include="Interfaces\IContentProvider.cs" />
     <Compile Include="Interfaces\ILogger.cs" />
     <Compile Include="Interfaces\IRenderer.cs" />
@@ -161,6 +150,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\CommonAssemblyInfo.cs" />
     <Compile Include="Models\ModelTypeRegistry.cs" />
+    <Compile Include="Query\Query.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Interfaces\ExtensionPoints.cd" />

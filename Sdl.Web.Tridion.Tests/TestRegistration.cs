@@ -8,32 +8,17 @@ namespace Sdl.Web.Tridion.Tests
         internal static void RegisterCoreViewModels()
         {
             // Entity Views
-            RegisterViewModel("Accordion", typeof(ItemList));
-            RegisterViewModel("Article", typeof(Article));
-            RegisterViewModel("Carousel", typeof(ItemList));
-            RegisterViewModel("CookieNotificationBar", typeof(Notification));
-            RegisterViewModel("Download", typeof(Download));
-            RegisterViewModel("FooterLinkGroup", typeof(LinkList<Link>));
-            RegisterViewModel("FooterLinks", typeof(LinkList<Link>));
-            RegisterViewModel("HeaderLinks", typeof(LinkList<Link>));
-            RegisterViewModel("HeaderLogo", typeof(Teaser));
-            RegisterViewModel("Image", typeof(Image));
+            //RegisterViewModel("HeaderLogo", typeof(Teaser));
             RegisterViewModel("LanguageSelector", typeof(Common.Models.Configuration));
-            RegisterViewModel("OldBrowserNotificationBar", typeof(Notification));
-            RegisterViewModel("Place", typeof(Place));
-            RegisterViewModel("SocialLinks", typeof(LinkList<TagLink>));
-            RegisterViewModel("SocialSharing", typeof(LinkList<TagLink>));
-            RegisterViewModel("Tab", typeof(ItemList));
-            RegisterViewModel("Teaser-ImageOverlay", typeof(Teaser));
-            RegisterViewModel("Teaser", typeof(Teaser));
-            RegisterViewModel("TeaserColored", typeof(Teaser));
-            RegisterViewModel("TeaserHero-ImageOverlay", typeof(Teaser));
-            RegisterViewModel("TeaserMap", typeof(Teaser));
-            RegisterViewModel("YouTubeVideo", typeof(YouTubeVideo));
+            //RegisterViewModel("Teaser-ImageOverlay", typeof(Teaser));
+            //RegisterViewModel("Teaser", typeof(Teaser));
+            //RegisterViewModel("TeaserColored", typeof(Teaser));
+            //RegisterViewModel("TeaserHero-ImageOverlay", typeof(Teaser));
+            //RegisterViewModel("TeaserMap", typeof(Teaser));
 
-            RegisterViewModel("List", typeof(ContentList<Teaser>), "List");
-            RegisterViewModel("PagedList", typeof(ContentList<Teaser>), "List");
-            RegisterViewModel("ThumbnailList", typeof(ContentList<Teaser>), "List");
+            //RegisterViewModel("List", typeof(ContentList<Teaser>), "List");
+            //RegisterViewModel("PagedList", typeof(ContentList<Teaser>), "List");
+            //RegisterViewModel("ThumbnailList", typeof(ContentList<Teaser>), "List");
 
             RegisterViewModel("Breadcrumb", typeof(NavigationLinks), "Navigation");
             RegisterViewModel("LeftNavigation", typeof(NavigationLinks), "Navigation");

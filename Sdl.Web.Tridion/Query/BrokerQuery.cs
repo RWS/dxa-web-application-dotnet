@@ -1,7 +1,11 @@
 ﻿using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Tridion.Mapping;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.DynamicContent.Query;
 using Tridion.ContentDelivery.Meta;
 using Tridion.ContentDelivery.Taxonomies;
@@ -10,89 +14,54 @@ namespace Sdl.Web.Tridion.Query
 {
     public class BrokerQuery
     {
-        public int SchemaId { get; set; }
-        public int PublicationId { get; set; }
-        public int MaxResults { get; set; }
-        public string Sort { get; set; }
-        public int Start { get; set; }
-        public int PageSize { get; set; }
         public Dictionary<string, List<string>> KeywordFilters { get; set; }
         public bool HasMore { get; set; }
 
-        public IEnumerable<Teaser> ExecuteQuery()
+        public IEnumerable<EntityModel> ExecuteQuery(Type modelType, SimpleBrokerQuery qParams)
         {
-            Criteria criteria = BuildCriteria();
+            Criteria criteria = BuildCriteria(qParams);
             global::Tridion.ContentDelivery.DynamicContent.Query.Query query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(criteria);
-            if (!String.IsNullOrEmpty(Sort) && Sort.ToLower() != "none")
+            if (!String.IsNullOrEmpty(qParams.Sort) && qParams.Sort.ToLower() != "none")
             {
-                query.AddSorting(GetSortParameter());
+                query.AddSorting(GetSortParameter(qParams));
             }
-            if (MaxResults > 0)
+            if (qParams.MaxResults > 0)
             {
-                query.SetResultFilter(new LimitFilter(MaxResults));
+                query.SetResultFilter(new LimitFilter(qParams.MaxResults));
             }
-            if (PageSize > 0)
+            if (qParams.PageSize > 0)
             {
                 //We set the page size to one more than what we need, to see if there are more pages to come...
-                query.SetResultFilter(new PagingFilter(Start, PageSize + 1));
+                query.SetResultFilter(new PagingFilter(qParams.Start, qParams.PageSize + 1));
             }
             try
             {
-                ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(PublicationId);
-                List<Teaser> results = new List<Teaser>();
+                List<EntityModel> models = new List<EntityModel>();
                 string[] ids = query.ExecuteQuery();
-                HasMore = ids.Length > PageSize;
-                int count = 0;
-                foreach (string compId in ids)
+                if (ids != null && ids.Length > 0)
                 {
-                    if (count >= PageSize)
+                    ComponentPresentationFactory cpf = new ComponentPresentationFactory(qParams.PublicationId);
+                    for (int i = 0; i < ids.Length && i <= qParams.PageSize; i++)
                     {
-                        break;
+                        IList componentPresentations = cpf.FindAllComponentPresentations(ids[i]);
+                        if (componentPresentations != null && componentPresentations.Count > 0)
+                        {
+                            // get a DD4T representation of the component presentation and construct an entity model from it using our semantic model builder
+                            DD4T.ContentModel.IComponentPresentation dd4tcp = DD4TFactoryCache.GetComponentPresentationFactory(qParams.Localization).GetIComponentPresentationObject(((ComponentPresentation)componentPresentations[0]).Content);
+                            EntityModel model = ModelBuilderPipeline.CreateEntityModel(dd4tcp.Component, modelType, qParams.Localization);
+                            if (model != null)
+                            {
+                                models.Add(model);
+                            }
+                        }
                     }
-                    IComponentMeta compMeta = componentMetaFactory.GetMeta(compId);
-                    if (compMeta != null)
-                    {
-                        results.Add(GetTeaserFromMeta(compMeta));
-                    }
-                    count++;
                 }
-                return results;
+                return models;
             }
             catch (Exception ex)
             {
                 throw new DxaException("Error executing Broker Query", ex);
             }
-        }
-
-        private static Teaser GetTeaserFromMeta(IComponentMeta compMeta)
-        {
-            Teaser result = new Teaser
-                {
-                    Link = new Link { Url = String.Format("tcm:{0}-{1}", compMeta.PublicationId, compMeta.Id) },
-                    Date = GetDateFromCustomMeta(compMeta.CustomMeta, "dateCreated") ?? compMeta.LastPublicationDate,
-                    Headline = GetTextFromCustomMeta(compMeta.CustomMeta, "name") ?? compMeta.Title,
-                    Text = GetTextFromCustomMeta(compMeta.CustomMeta, "introText")
-                };
-            return result;
-        }
-
-        private static string GetTextFromCustomMeta(CustomMeta meta, string fieldname)
-        {
-            if (meta.NameValues.Contains(fieldname))
-            {
-                object value = meta.GetValue(fieldname);
-                return (value == null) ? null : value.ToString();
-            }
-            return null;
-        }
-
-        private static DateTime? GetDateFromCustomMeta(CustomMeta meta, string fieldname)
-        {
-            if (meta.NameValues.Contains(fieldname))
-            {
-                return meta.GetValue(fieldname) as DateTime?;
-            }
-            return null;
         }
 
         /// <summary>
@@ -161,16 +130,16 @@ namespace Sdl.Web.Tridion.Query
             return res;
         }
 
-        private Criteria BuildCriteria()
+        private Criteria BuildCriteria(SimpleBrokerQuery qParams)
         {
             List<Criteria> children = new List<Criteria> { new ItemTypeCriteria(16) };
-            if (SchemaId > 0)
+            if (qParams.SchemaId > 0)
             {
-                children.Add(new ItemSchemaCriteria(SchemaId));
+                children.Add(new ItemSchemaCriteria(qParams.SchemaId));
             }
-            if (PublicationId > 0)
+            if (qParams.PublicationId > 0)
             {
-                children.Add(new PublicationCriteria(PublicationId));
+                children.Add(new PublicationCriteria(qParams.PublicationId));
             }
             if (KeywordFilters != null)
             {
@@ -185,17 +154,17 @@ namespace Sdl.Web.Tridion.Query
             return new AndCriteria(children.ToArray());
         }
 
-        private SortParameter GetSortParameter()
+        private SortParameter GetSortParameter(SimpleBrokerQuery qParams)
         {
-            SortDirection dir = Sort.ToLower().EndsWith("asc") ? SortParameter.Ascending : SortParameter.Descending;
-            return new SortParameter(GetSortColumn(), dir);
+            SortDirection dir = qParams.Sort.ToLower().EndsWith("asc") ? SortParameter.Ascending : SortParameter.Descending;
+            return new SortParameter(GetSortColumn(qParams), dir);
         }
 
-        private SortColumn GetSortColumn()
+        private SortColumn GetSortColumn(SimpleBrokerQuery qParams)
         {
             //TODO add more options if required
-            int pos = Sort.Trim().IndexOf(" ", StringComparison.Ordinal);
-            string sort = pos > 0 ? Sort.Trim().Substring(0, pos) : Sort.Trim();
+            int pos = qParams.Sort.Trim().IndexOf(" ", StringComparison.Ordinal);
+            string sort = pos > 0 ? qParams.Sort.Trim().Substring(0, pos) : qParams.Sort.Trim();
             switch (sort.ToLower())
             {
                 case "title":
@@ -204,7 +173,7 @@ namespace Sdl.Web.Tridion.Query
                     return SortParameter.ItemLastPublishedDate;
                 default:
                     //Default is to assume that its a custom metadata date field;
-                    return new CustomMetaKeyColumn(Sort, MetadataType.DATE);
+                    return new CustomMetaKeyColumn(qParams.Sort, MetadataType.DATE);
             }
         }
     }

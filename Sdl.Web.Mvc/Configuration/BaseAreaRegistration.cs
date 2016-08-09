@@ -21,11 +21,18 @@ namespace Sdl.Web.Mvc.Configuration
                 context.Namespaces.Add("Sdl.Web.Mvc.Controllers");
 
                 //Default Route - required for sub actions (region/entity/navigation etc.)
-                context.MapRoute(
-                    AreaName + "_Default",
-                    "{controller}/{action}/{id}",
-                    new { controller = "Entity", action = "Entity", id = UrlParameter.Optional }
-                );
+                try
+                {
+                    context.MapRoute(
+                        AreaName + "_Default",
+                        "{controller}/{action}/{id}",
+                        new { controller = "Entity", action = "Entity", id = UrlParameter.Optional }
+                    );
+                }
+                catch
+                {
+                    // already registered Core from using the Core module
+                }
                 RegisterAllViewModels();
             }
         }
