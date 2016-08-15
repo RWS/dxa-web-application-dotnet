@@ -411,29 +411,21 @@ namespace Sdl.Web.Tridion.Mapping
                         bool processed = false;
                         if (info.PropertyName == "_self")
                         {
-                            if (typeof(DateTime).IsAssignableFrom(propertyType) || (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>) && Nullable.GetUnderlyingType(propertyType) == typeof(DateTime)))
+                            //Map the whole entity to an image property, or a resolved link to the entity to a Url field
+                            if (typeof(MediaItem).IsAssignableFrom(propertyType) || typeof(Link).IsAssignableFrom(propertyType) || propertyType == typeof(String))
                             {
-                                pi.SetValue(model, mappingData.SourceEntity.LastPublishedDate);
-                                processed = true;
-                            }
-                            else
-                            {
-                                //Map the whole entity to an image property, or a resolved link to the entity to a Url field
-                                if (typeof(MediaItem).IsAssignableFrom(propertyType) || typeof(Link).IsAssignableFrom(propertyType) || propertyType == typeof(String))
+                                object mappedSelf = MapComponent(mappingData.SourceEntity, propertyType, mappingData.Localization);
+                                if (multival)
                                 {
-                                    object mappedSelf = MapComponent(mappingData.SourceEntity, propertyType, mappingData.Localization);
-                                    if (multival)
-                                    {
-                                        IList genericList = CreateGenericList(propertyType);
-                                        genericList.Add(mappedSelf);
-                                        pi.SetValue(model, genericList);
-                                    }
-                                    else
-                                    {
-                                        pi.SetValue(model, mappedSelf);
-                                    }
-                                    processed = true;
+                                    IList genericList = CreateGenericList(propertyType);
+                                    genericList.Add(mappedSelf);
+                                    pi.SetValue(model, genericList);
                                 }
+                                else
+                                {
+                                    pi.SetValue(model, mappedSelf);
+                                }
+                                processed = true;
                             }
                         }
                         else if (info.PropertyName == "_all" && pi.PropertyType == typeof(Dictionary<string, string>))
