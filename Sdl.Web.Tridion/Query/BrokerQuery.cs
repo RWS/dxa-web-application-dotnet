@@ -38,6 +38,7 @@ namespace Sdl.Web.Tridion.Query
             {
                 List<EntityModel> models = new List<EntityModel>();
                 string[] ids = query.ExecuteQuery();
+                HasMore = ids.Length > qParams.PageSize;
                 if (ids != null && ids.Length > 0)
                 {
                     ComponentPresentationFactory cpf = new ComponentPresentationFactory(qParams.PublicationId);
