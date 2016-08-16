@@ -38,11 +38,10 @@ namespace Sdl.Web.Tridion.Query
             {
                 List<EntityModel> models = new List<EntityModel>();
                 string[] ids = query.ExecuteQuery();
-                HasMore = ids.Length > qParams.PageSize;
                 if (ids != null && ids.Length > 0)
                 {
                     ComponentPresentationFactory cpf = new ComponentPresentationFactory(qParams.PublicationId);
-                    for (int i = 0; i < ids.Length && i <= qParams.PageSize; i++)
+                    for (int i = 0; i < ids.Length && models.Count < qParams.PageSize; i++)
                     {
                         IList componentPresentations = cpf.FindAllComponentPresentations(ids[i]);
                         if (componentPresentations != null && componentPresentations.Count > 0)
@@ -56,6 +55,7 @@ namespace Sdl.Web.Tridion.Query
                             }
                         }
                     }
+                    HasMore = ids.Length > models.Count;
                 }
                 return models;
             }
