@@ -45,7 +45,11 @@ namespace Sdl.Web.Tridion.Query
                     for (int i = 0; i < ids.Length && models.Count < qParams.PageSize; i++)
                     {
                         IComponentMeta componentMeta = componentMetaFactory.GetMeta(ids[i]);
-                        EntityModel model = ModelBuilderPipeline.CreateEntityModel(componentMeta, modelType, qParams.Localization);
+
+                        EntityModel model = ModelBuilderPipeline.CreateEntityModel(
+                            CreateComponent(componentMeta, modelType, qParams.Localization), 
+                            modelType, qParams.Localization
+                        );
                         if (model != null)
                         {
                             models.Add(model);
@@ -59,6 +63,54 @@ namespace Sdl.Web.Tridion.Query
             {
                 throw new DxaException("Error executing Broker Query", ex);
             }
+        }
+
+        private DD4T.ContentModel.IComponent CreateComponent(IComponentMeta componentMeta, Type modelType, Localization localization)
+        {
+            // we construct a lightweight DD4T component that contains enough information such that
+            // the semantic model builder can cope and build a strongly typed model from it.
+            DD4T.ContentModel.Component component = new DD4T.ContentModel.Component
+            {
+                Id = string.Format("tcm:{0}-{1}", componentMeta.PublicationId, componentMeta.Id),
+                LastPublishedDate = componentMeta.LastPublicationDate,
+                RevisionDate = componentMeta.ModificationDate,
+                Schema = new DD4T.ContentModel.Schema
+                {
+                    PublicationId = componentMeta.PublicationId.ToString(),
+                    Id = string.Format("tcm:{0}-{1}", componentMeta.PublicationId, componentMeta.SchemaId)
+                },
+                MetadataFields = new DD4T.ContentModel.FieldSet()
+            };
+
+            DD4T.ContentModel.FieldSet metadataFields = new DD4T.ContentModel.FieldSet();
+            component.MetadataFields.Add("standardMeta", new DD4T.ContentModel.Field { EmbeddedValues = new List<DD4T.ContentModel.FieldSet> { metadataFields } });
+            foreach (DictionaryEntry de in componentMeta.CustomMeta.NameValues)
+            {
+                object v = ((NameValuePair)de.Value).Value;
+                if (v != null)
+                {
+                    string k = de.Key.ToString();
+                    metadataFields.Add(k, new DD4T.ContentModel.Field
+                    {
+                        Name = k,
+                        Values = new List<string> { v.ToString() }
+                    });
+                }
+            }
+
+            // The semantic mapping requires that some metadata fields exist. This may not be the case so we map some component meta properties onto them
+            // if they don't exist.
+            if (!metadataFields.ContainsKey("dateCreated"))
+            {
+                metadataFields.Add("dateCreated", new DD4T.ContentModel.Field { Name = "dateCreated", Values = new List<string> { componentMeta.LastPublicationDate.ToString() } });
+            }
+
+            if (!metadataFields.ContainsKey("name"))
+            {
+                metadataFields.Add("name", new DD4T.ContentModel.Field { Name = "name", Values = new List<string> { componentMeta.Title } });
+            }
+
+            return component;
         }
 
         /// <summary>
