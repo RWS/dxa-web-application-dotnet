@@ -229,13 +229,13 @@ namespace Sdl.Web.Tridion.Mapping
                 // the semantic model builder can cope and build a strongly typed model from it.
                 DD4T.ContentModel.Component component = new Component
                 {
-                    Id = string.Format("{0}-{1}", componentMeta.PublicationId, componentMeta.Id),
+                    Id = string.Format("tcm:{0}-{1}", componentMeta.PublicationId, componentMeta.Id),
                     LastPublishedDate = componentMeta.LastPublicationDate,
                     RevisionDate = componentMeta.ModificationDate,
                     Schema = new Schema
                     {
                         PublicationId = componentMeta.PublicationId.ToString(),
-                        Id = string.Format("{0}-{1}", componentMeta.PublicationId, componentMeta.SchemaId)
+                        Id = string.Format("tcm:{0}-{1}", componentMeta.PublicationId, componentMeta.SchemaId)
                     },
                     MetadataFields = new FieldSet()
                 };
