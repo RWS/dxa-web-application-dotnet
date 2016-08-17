@@ -4,6 +4,7 @@ using Sdl.Web.Common.Models;
 using System;
 using System.Collections.Generic;
 using IPage = DD4T.ContentModel.IPage;
+using IComponentMeta = Tridion.ContentDelivery.Meta.IComponentMeta;
 
 namespace Sdl.Web.Tridion.Mapping
 {
@@ -21,5 +22,6 @@ namespace Sdl.Web.Tridion.Mapping
         void BuildPageModel(ref PageModel pageModel, IPage page, IEnumerable<IPage> includes, Localization localization);
         void BuildEntityModel(ref EntityModel entityModel, IComponentPresentation cp, Localization localization);
         void BuildEntityModel(ref EntityModel entityModel, IComponent component, Type baseModelType, Localization localization);
+        void BuildEntityModel(ref EntityModel entityModel, IComponentMeta componentMeta, Type baseModelType, Localization localization);
     }
 }

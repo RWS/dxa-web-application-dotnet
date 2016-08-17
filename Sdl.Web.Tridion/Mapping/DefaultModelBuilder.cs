@@ -15,6 +15,8 @@ using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Extensions;
 using IPage = DD4T.ContentModel.IPage;
+using IComponentMeta = Tridion.ContentDelivery.Meta.IComponentMeta;
+using NameValuePair = Tridion.ContentDelivery.Meta.NameValuePair;
 
 namespace Sdl.Web.Tridion.Mapping
 {
@@ -216,6 +218,58 @@ namespace Sdl.Web.Tridion.Mapping
 
                 // Set the Entity Model's default View (if any) after it has been fully initialized.
                 entityModel.MvcData = entityModel.GetDefaultView(localization);
+            }
+        }
+      
+        public virtual void BuildEntityModel(ref EntityModel entityModel, IComponentMeta componentMeta, Type baseModelType, Localization localization)
+        {
+            using (new Tracer(entityModel, componentMeta, baseModelType, localization))
+            {
+                // we construct a lightweight DD4T component that contains enough information such that
+                // the semantic model builder can cope and build a strongly typed model from it.
+                DD4T.ContentModel.Component component = new Component
+                {
+                    Id = string.Format("{0}-{1}", componentMeta.PublicationId, componentMeta.Id),
+                    LastPublishedDate = componentMeta.LastPublicationDate,
+                    RevisionDate = componentMeta.ModificationDate,
+                    Schema = new Schema
+                    {
+                        PublicationId = componentMeta.PublicationId.ToString(),
+                        Id = string.Format("{0}-{1}", componentMeta.PublicationId, componentMeta.SchemaId)
+                    },
+                    MetadataFields = new FieldSet()
+                };
+
+                FieldSet metadataFields = new FieldSet();
+                component.MetadataFields.Add("standardMeta", new Field { EmbeddedValues = new List<FieldSet> { metadataFields } });
+                foreach (DictionaryEntry de in componentMeta.CustomMeta.NameValues)
+                {
+                    object v = ((NameValuePair)de.Value).Value;
+                    if (v != null)
+                    {
+                        string k = de.Key.ToString();
+                        metadataFields.Add(k, new Field
+                        {
+                            Name = k,
+                            Values = new List<string> { v.ToString() }
+                        });
+                    }
+                }
+
+                // The semantic mapping requires that some metadata fields exist. This may not be the case so we map some component meta properties onto them
+                // if they don't exist.
+                if(!metadataFields.ContainsKey("dateCreated"))
+                {
+                    metadataFields.Add("dateCreated", new Field { Name = "dateCreated", Values = new List<string> { componentMeta.LastPublicationDate.ToString() }});
+                }
+
+                if (!metadataFields.ContainsKey("name"))
+                {
+                    metadataFields.Add("name", new Field { Name = "name", Values = new List<string> { componentMeta.Title } });
+                }
+
+                // Build our model
+                BuildEntityModel(ref entityModel, component, baseModelType, localization);
             }
         }
         #endregion

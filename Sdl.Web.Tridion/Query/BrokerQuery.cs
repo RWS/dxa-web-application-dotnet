@@ -40,19 +40,15 @@ namespace Sdl.Web.Tridion.Query
                 string[] ids = query.ExecuteQuery();
                 if (ids != null && ids.Length > 0)
                 {
-                    ComponentPresentationFactory cpf = new ComponentPresentationFactory(qParams.PublicationId);
+                    ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(qParams.PublicationId);
+
                     for (int i = 0; i < ids.Length && models.Count < qParams.PageSize; i++)
                     {
-                        IList componentPresentations = cpf.FindAllComponentPresentations(ids[i]);
-                        if (componentPresentations != null && componentPresentations.Count > 0)
+                        IComponentMeta componentMeta = componentMetaFactory.GetMeta(ids[i]);
+                        EntityModel model = ModelBuilderPipeline.CreateEntityModel(componentMeta, modelType, qParams.Localization);
+                        if (model != null)
                         {
-                            // get a DD4T representation of the component presentation and construct an entity model from it using our semantic model builder
-                            DD4T.ContentModel.IComponentPresentation dd4tcp = DD4TFactoryCache.GetComponentPresentationFactory(qParams.Localization).GetIComponentPresentationObject(((ComponentPresentation)componentPresentations[0]).Content);
-                            EntityModel model = ModelBuilderPipeline.CreateEntityModel(dd4tcp.Component, modelType, qParams.Localization);
-                            if (model != null)
-                            {
-                                models.Add(model);
-                            }
+                            models.Add(model);
                         }
                     }
                     HasMore = ids.Length > models.Count;
