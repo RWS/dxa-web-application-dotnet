@@ -7,6 +7,7 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Configuration;
 using IPage = DD4T.ContentModel.IPage;
+using IComponentMeta = Tridion.ContentDelivery.Meta.IComponentMeta;
 
 namespace Sdl.Web.Tridion.Mapping
 {
@@ -119,6 +120,26 @@ namespace Sdl.Web.Tridion.Mapping
                 foreach (IModelBuilder modelBuilder in ModelBuilders)
                 {
                     modelBuilder.BuildEntityModel(ref entityModel, component, baseModelType, localization);
+                }
+                return entityModel;
+            }
+        }
+
+        /// <summary>
+        /// Creates a Strongly Typed Entity Model for a given Component Meta.
+        /// </summary>
+        /// <param name="componentMeta">The Component Meta.</param>
+        /// <param name="baseModelType">The (base) type for the Entity Model.</param>
+        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <returns>The Strongly Typed Entity Model (an instance of type <paramref name="baseModelType"/> or a subclass).</returns>
+        public static EntityModel CreateEntityModel(IComponentMeta componentMeta, Type baseModelType, Localization localization)
+        {
+            using (new Tracer(componentMeta, baseModelType, localization))
+            {
+                EntityModel entityModel = null;
+                foreach (IModelBuilder modelBuilder in ModelBuilders)
+                {
+                    modelBuilder.BuildEntityModel(ref entityModel, componentMeta, baseModelType, localization);
                 }
                 return entityModel;
             }
