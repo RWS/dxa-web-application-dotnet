@@ -78,13 +78,5 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
         /// <param name="localization">The context Localization.</param>
         void PopulateDynamicList(DynamicList dynamicList, Localization localization);
-
-        /// <summary>
-        /// Populates a Dynamic List by executing the query it specifies.
-        /// </summary>
-        /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
-        /// <param name="localization">The context Localization.</param>
-        /// <param name="start">Index of first result used by paging.</param>
-        void PopulateDynamicList(DynamicList dynamicList, Localization localization, int start);
     }
 }

@@ -164,24 +164,16 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="localization">The context Localization.</param>
         public virtual void PopulateDynamicList(DynamicList dynamicList, Localization localization)
         {
-            PopulateDynamicList(dynamicList, localization, 0);
-        }
-
-        /// <summary>
-        /// Populates a Dynamic List by executing the query it specifies.
-        /// </summary>
-        /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
-        /// <param name="localization">The context Localization.</param>
-        /// <param name="start">Index of first result used by paging.</param>
-        public virtual void PopulateDynamicList(DynamicList dynamicList, Localization localization, int start)
-        {
             using (new Tracer(dynamicList, localization))
             {
-                SimpleBrokerQuery queryParams = dynamicList.GetQuery(localization) as SimpleBrokerQuery;
-                queryParams.Start = start;
-                BrokerQuery query = new BrokerQuery();
-                dynamicList.QueryResults = query.ExecuteQuery(dynamicList.ResultType, queryParams).ToList();
-                dynamicList.HasMore = query.HasMore;
+                Common.Models.Query query = dynamicList.GetQuery(localization);
+                if (query == null || !(query is SimpleBrokerQuery))
+                {
+                    throw new DxaException(string.Format("Unexpected result from {0}.GetQuery: {1}", dynamicList.GetType().Name, query));
+                }
+                BrokerQuery brokerQuery = new BrokerQuery();
+                dynamicList.QueryResults = brokerQuery.ExecuteQuery(dynamicList.ResultType, (SimpleBrokerQuery) query).ToList();
+                dynamicList.HasMore = brokerQuery.HasMore;
             }
         }
 

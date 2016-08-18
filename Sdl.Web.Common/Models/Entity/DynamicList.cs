@@ -12,6 +12,8 @@ namespace Sdl.Web.Common.Models
             QueryResults = new List<EntityModel>();
         }
 
+        public int Start { get; set; }
+
         public bool HasMore { get; set; }
 
         [JsonIgnore]

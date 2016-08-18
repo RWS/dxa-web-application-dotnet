@@ -30,17 +30,13 @@ namespace Sdl.Web.Mvc.Controllers
             }
 
             //we need to run a query to populate the list
-            int start = GetRequestParameter<int>("start");
             if (model.Id == Request.Params["id"])
             {
                 //we only take the start from the query string if there is also an id parameter matching the model entity id
                 //this means that we are sure that the paging is coming from the right entity (if there is more than one paged list on the page)
-                ContentProvider.PopulateDynamicList(model, WebRequestContext.Localization, start);
+                model.Start = GetRequestParameter<int>("start");
             }
-            else
-            {
-                ContentProvider.PopulateDynamicList(model, WebRequestContext.Localization);
-            }
+            ContentProvider.PopulateDynamicList(model, WebRequestContext.Localization);
 
             return model;
         }
