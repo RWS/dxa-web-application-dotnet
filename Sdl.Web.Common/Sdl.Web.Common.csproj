@@ -150,7 +150,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\CommonAssemblyInfo.cs" />
     <Compile Include="Models\ModelTypeRegistry.cs" />
-    <Compile Include="Query\Query.cs" />
+    <Compile Include="Models\Query\Query.cs" />
+    <Compile Include="Models\Query\SimpleBrokerQuery.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Interfaces\ExtensionPoints.cd" />

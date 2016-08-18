@@ -189,7 +189,6 @@
     <Compile Include="Query\BrokerQuery.cs" />
     <Compile Include="..\CommonAssemblyInfo.cs" />
     <Compile Include="ContentManager\TcmUri.cs" />
-    <Compile Include="Query\SimpleBrokerQuery.cs" />
     <Compile Include="Statics\BinaryFileManager.cs" />
     <Compile Include="Statics\NamedLocker.cs" />
   </ItemGroup>
