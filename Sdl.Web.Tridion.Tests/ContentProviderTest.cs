@@ -139,5 +139,28 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(testImage, "testImage");
             StringAssert.Contains(testImage.Url, "tr%C3%A5dl%C3%B8st", "testImage.Url");
         }
+
+        [TestMethod]
+        public void GetPageModel_EmbeddedEntityModels_Success() // See TSI-1758
+        {
+            string testPageUrlPath = TestFixture.Tsi1758PageUrlPath;
+
+            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Tsi1758TestEntity testEntity = pageModel.Regions["Main"].Entities[0] as Tsi1758TestEntity;
+            Assert.IsNotNull(testEntity, "testEntity");
+            Assert.IsNotNull(testEntity.EmbedField1, "testEntity.EmbedField1");
+            Assert.IsNotNull(testEntity.EmbedField2, "testEntity.EmbedField2");
+            Assert.AreEqual(2, testEntity.EmbedField1.Count, "testEntity.EmbedField1.Count");
+            Assert.AreEqual(2, testEntity.EmbedField2.Count, "testEntity.EmbedField2.Count");
+            Assert.AreEqual("This is the textField of the first embedField1", testEntity.EmbedField1[0].TextField, "testEntity.EmbedField1[0].TextField");
+            Assert.AreEqual("This is the textField of the second embedField1", testEntity.EmbedField1[1].TextField, "testEntity.EmbedField1[1].TextField");
+            Assert.AreEqual("This is the textField of the first embedField2", testEntity.EmbedField2[0].TextField, "testEntity.EmbedField2[0].TextField");
+            Assert.AreEqual("This is the textField of the second embedField2", testEntity.EmbedField2[1].TextField, "testEntity.EmbedField2[1].TextField");
+
+            Assert.IsNotNull(testEntity.EmbedField1[0].EmbedField1, "testEntity.EmbedField1[0].EmbedField1");
+            Assert.IsNotNull(testEntity.EmbedField2[0].EmbedField1, "testEntity.EmbedField2[0].EmbedField1");
+        }
     }
 }

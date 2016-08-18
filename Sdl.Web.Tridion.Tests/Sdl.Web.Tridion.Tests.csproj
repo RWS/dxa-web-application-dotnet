@@ -61,6 +61,7 @@
     <Compile Include="Models\Entity\Article.cs" />
     <Compile Include="Models\Entity\Image.cs" />
     <Compile Include="Models\Entity\Paragraph.cs" />
+    <Compile Include="Models\Entity\Tsi1758TestEntity.cs" />
     <Compile Include="StaticNavigationProviderTest.cs" />
     <Compile Include="TestClass.cs" />
     <Compile Include="TestFixture.cs" />

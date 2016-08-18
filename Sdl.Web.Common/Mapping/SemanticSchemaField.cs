@@ -100,14 +100,17 @@ namespace Sdl.Web.Common.Mapping
         /// <param name="fieldSemantics">The semantics to check against</param>
         /// <param name="includeSelf">If <c>true</c> the field itself will be returned if it matches the given semantics.</param>
         /// <returns>This field or one of its embedded fields that match with the given semantics, null if a match cannot be found</returns>
-        public SemanticSchemaField FindFieldBySemantics(FieldSemantics fieldSemantics, bool includeSelf = true)
+        public SemanticSchemaField FindFieldBySemantics(FieldSemantics fieldSemantics)
         {
-            if (includeSelf && HasSemantics(fieldSemantics))
+            // Perform a breadth-first lookup: first see if any of the embedded fields themselves match.
+            SemanticSchemaField matchingEmbeddedField = Fields.FirstOrDefault(ssf => ssf.HasSemantics(fieldSemantics));
+            if (matchingEmbeddedField != null)
             {
-                return this;
+                return matchingEmbeddedField;
             }
 
-            return Fields.Select(embeddedField => embeddedField.FindFieldBySemantics(fieldSemantics)).FirstOrDefault(field => field != null);
+            // If none of the embedded fields match: let each embedded field do a breadth-first lookup of its embedded fields (recursive).
+            return Fields.Select(ssf => ssf.FindFieldBySemantics(fieldSemantics)).FirstOrDefault(matchingField => matchingField != null);
         }
 
         /// <summary>

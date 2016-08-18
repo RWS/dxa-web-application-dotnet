@@ -503,7 +503,7 @@ namespace Sdl.Web.Tridion.Mapping
                         // locate semantic schema field
                         semanticSchemaField = (mapData.EmbeddedSemanticSchemaField == null) ? 
                             mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics) : // Used for top-level fields
-                            mapData.EmbeddedSemanticSchemaField.FindFieldBySemantics(fieldSemantics, includeSelf: false); // Used for embedded fields
+                            mapData.EmbeddedSemanticSchemaField.FindFieldBySemantics(fieldSemantics); // Used for embedded fields
                         if (semanticSchemaField != null)
                         {
                             return ExtractMatchedField(semanticSchemaField, (semanticSchemaField.IsMetadata && mapData.Meta!=null) ? mapData.Meta : mapData.Content, mapData.EmbedLevel);

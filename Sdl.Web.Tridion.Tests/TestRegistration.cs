@@ -6,7 +6,7 @@ namespace Sdl.Web.Tridion.Tests
 {
     internal static class TestRegistration 
     {
-        internal static void RegisterCoreViewModels()
+        internal static void RegisterViewModels()
         {
             // Entity Views
             RegisterViewModel("Article", typeof(Article));
@@ -20,10 +20,14 @@ namespace Sdl.Web.Tridion.Tests
             RegisterViewModel("SiteMapXml", typeof(SitemapItem), "Navigation");
             RegisterViewModel("TopNavigation", typeof(NavigationLinks), "Navigation");
 
+            RegisterViewModel("Test:TSI1758Test", typeof(Tsi1758TestEntity));
+
             // Page Views
             RegisterViewModel("GeneralPage", typeof(PageModel));
             RegisterViewModel("IncludePage", typeof(PageModel));
             RegisterViewModel("RedirectPage", typeof(PageModel));
+
+            RegisterViewModel("Test:SimpleTestPage", typeof(PageModel));
 
             // Region Views
             RegisterViewModel("2-Column", typeof(RegionModel));
@@ -69,7 +73,10 @@ namespace Sdl.Web.Tridion.Tests
                 }
             }
 
-            MvcData mvcData = new MvcData { AreaName = "Core", ControllerName = controllerName, ViewName = viewName };
+            MvcData mvcData = new MvcData(viewName)
+            {
+                ControllerName = controllerName
+            };
             ModelTypeRegistry.RegisterViewModel(mvcData, modelType);
         }
     }

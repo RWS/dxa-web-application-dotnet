@@ -68,7 +68,15 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>Schema field or one of its embedded fields that match with the given semantics, null if a match cannot be found</returns>
         public SemanticSchemaField FindFieldBySemantics(FieldSemantics fieldSemantics)
         {
-            return Fields.Select(field => field.FindFieldBySemantics(fieldSemantics)).FirstOrDefault(matchingField => matchingField != null);
+            // Perform a breadth-first lookup: first see if any of the top-level fields match.
+            SemanticSchemaField matchingTopLevelField = Fields.FirstOrDefault(ssf => ssf.HasSemantics(fieldSemantics));
+            if (matchingTopLevelField != null)
+            {
+                return matchingTopLevelField;
+            }
+
+            // If none of the top-level fields match: let each top-level field do a breadth-first lookup of its embedded fields (recursive).
+            return Fields.Select(ssf => ssf.FindFieldBySemantics(fieldSemantics)).FirstOrDefault(matchingField => matchingField != null);
         }
 
         /// <summary>
