@@ -109,7 +109,6 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Log.config" />
-    <Content Include="Areas\Core\Views\web.config" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Shared\SectionError.cshtml" />
     <Content Include="Unity.config">
@@ -119,10 +118,6 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Views\Shared\ServerError.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Areas\Core\Views\Admin\" />
-    <Folder Include="bin\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config">
