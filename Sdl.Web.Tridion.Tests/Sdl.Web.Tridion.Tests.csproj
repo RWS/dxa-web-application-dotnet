@@ -45,6 +45,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
@@ -59,8 +60,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\Entity\Article.cs" />
+    <Compile Include="Models\Entity\ContentList.cs" />
     <Compile Include="Models\Entity\Image.cs" />
     <Compile Include="Models\Entity\Paragraph.cs" />
+    <Compile Include="Models\Entity\Teaser.cs" />
     <Compile Include="Models\Entity\Tsi1758TestEntity.cs" />
     <Compile Include="StaticNavigationProviderTest.cs" />
     <Compile Include="TestClass.cs" />
