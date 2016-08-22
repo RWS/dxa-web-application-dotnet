@@ -53,7 +53,7 @@ namespace Sdl.Web.Tridion.Query
                     DD4T.ContentModel.IComponent dd4tComponent = CreateComponent(componentMeta, modelType, qParams.Localization);
                     EntityModel model = ModelBuilderPipeline.CreateEntityModel(dd4tComponent,modelType, qParams.Localization);
                     models.Add(model);
-                    if (count++ == pageSize)
+                    if (++count == pageSize)
                     {
                         break;
                     }
