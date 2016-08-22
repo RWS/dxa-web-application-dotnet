@@ -1,38 +1,43 @@
 ﻿using Sdl.Web.Common;
-using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Mapping;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.DynamicContent.Query;
 using Tridion.ContentDelivery.Meta;
 using Tridion.ContentDelivery.Taxonomies;
 
 namespace Sdl.Web.Tridion.Query
 {
-    public class BrokerQuery
+    internal class BrokerQuery
     {
-        public Dictionary<string, List<string>> KeywordFilters { get; set; }
-        public bool HasMore { get; set; }
+        private readonly SimpleBrokerQuery _queryParameters;
 
-        public IEnumerable<EntityModel> ExecuteQuery(Type modelType, SimpleBrokerQuery qParams)
+        internal Dictionary<string, List<string>> KeywordFilters { get; set; }
+        internal bool HasMore { get; set; }
+
+        internal BrokerQuery(SimpleBrokerQuery queryParameters)
         {
-            Criteria criteria = BuildCriteria(qParams);
+            _queryParameters = queryParameters;
+        }
+
+        internal IEnumerable<EntityModel> ExecuteQuery(Type resultType)
+        {
+            Criteria criteria = BuildCriteria();
             global::Tridion.ContentDelivery.DynamicContent.Query.Query query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(criteria);
-            if (!String.IsNullOrEmpty(qParams.Sort) && qParams.Sort.ToLower() != "none")
+            if (!string.IsNullOrEmpty(_queryParameters.Sort) && _queryParameters.Sort.ToLower() != "none")
             {
-                query.AddSorting(GetSortParameter(qParams));
+                query.AddSorting(GetSortParameter());
             }
-            if (qParams.MaxResults > 0)
+            if (_queryParameters.MaxResults > 0)
             {
-                query.SetResultFilter(new LimitFilter(qParams.MaxResults));
+                query.SetResultFilter(new LimitFilter(_queryParameters.MaxResults));
             }
-            if (qParams.PageSize > 0)
+            if (_queryParameters.PageSize > 0)
             {
                 //We set the page size to one more than what we need, to see if there are more pages to come...
-                query.SetResultFilter(new PagingFilter(qParams.Start, qParams.PageSize + 1));
+                query.SetResultFilter(new PagingFilter(_queryParameters.Start, _queryParameters.PageSize + 1));
             }
             try
             {
@@ -44,14 +49,14 @@ namespace Sdl.Web.Tridion.Query
                     return models;
                 }
 
-                ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(qParams.PublicationId);
-                int pageSize = qParams.PageSize;
+                ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(_queryParameters.PublicationId);
+                int pageSize = _queryParameters.PageSize;
                 int count = 0;
                 foreach (string componentId in componentIds)
                 {
                     IComponentMeta componentMeta = componentMetaFactory.GetMeta(componentId);
-                    DD4T.ContentModel.IComponent dd4tComponent = CreateComponent(componentMeta, modelType, qParams.Localization);
-                    EntityModel model = ModelBuilderPipeline.CreateEntityModel(dd4tComponent,modelType, qParams.Localization);
+                    DD4T.ContentModel.IComponent dd4tComponent = CreateComponent(componentMeta);
+                    EntityModel model = ModelBuilderPipeline.CreateEntityModel(dd4tComponent, resultType, _queryParameters.Localization);
                     models.Add(model);
                     if (++count == pageSize)
                     {
@@ -67,10 +72,13 @@ namespace Sdl.Web.Tridion.Query
             }
         }
 
-        private DD4T.ContentModel.IComponent CreateComponent(IComponentMeta componentMeta, Type modelType, Localization localization)
+        /// <summary>
+        /// Creates a lightweight DD4T Component that contains enough information such that the semantic model builder can cope and build a strongly typed model from it.
+        /// </summary>
+        /// <param name="componentMeta">A <see cref="IComponentMeta"/> instance obtained from CD API.</param>
+        /// <returns>A DD4T Component.</returns>
+        private static DD4T.ContentModel.IComponent CreateComponent(IComponentMeta componentMeta)
         {
-            // we construct a lightweight DD4T component that contains enough information such that
-            // the semantic model builder can cope and build a strongly typed model from it.
             DD4T.ContentModel.Component component = new DD4T.ContentModel.Component
             {
                 Id = string.Format("tcm:{0}-{1}", componentMeta.PublicationId, componentMeta.Id),
@@ -181,16 +189,16 @@ namespace Sdl.Web.Tridion.Query
             return res;
         }
 
-        private Criteria BuildCriteria(SimpleBrokerQuery qParams)
+        private Criteria BuildCriteria()
         {
             List<Criteria> children = new List<Criteria> { new ItemTypeCriteria(16) };
-            if (qParams.SchemaId > 0)
+            if (_queryParameters.SchemaId > 0)
             {
-                children.Add(new ItemSchemaCriteria(qParams.SchemaId));
+                children.Add(new ItemSchemaCriteria(_queryParameters.SchemaId));
             }
-            if (qParams.PublicationId > 0)
+            if (_queryParameters.PublicationId > 0)
             {
-                children.Add(new PublicationCriteria(qParams.PublicationId));
+                children.Add(new PublicationCriteria(_queryParameters.PublicationId));
             }
             if (KeywordFilters != null)
             {
@@ -205,17 +213,17 @@ namespace Sdl.Web.Tridion.Query
             return new AndCriteria(children.ToArray());
         }
 
-        private SortParameter GetSortParameter(SimpleBrokerQuery qParams)
+        private SortParameter GetSortParameter()
         {
-            SortDirection dir = qParams.Sort.ToLower().EndsWith("asc") ? SortParameter.Ascending : SortParameter.Descending;
-            return new SortParameter(GetSortColumn(qParams), dir);
+            SortDirection dir = _queryParameters.Sort.ToLower().EndsWith("asc") ? SortParameter.Ascending : SortParameter.Descending;
+            return new SortParameter(GetSortColumn(), dir);
         }
 
-        private SortColumn GetSortColumn(SimpleBrokerQuery qParams)
+        private SortColumn GetSortColumn()
         {
             //TODO add more options if required
-            int pos = qParams.Sort.Trim().IndexOf(" ", StringComparison.Ordinal);
-            string sort = pos > 0 ? qParams.Sort.Trim().Substring(0, pos) : qParams.Sort.Trim();
+            int pos = _queryParameters.Sort.Trim().IndexOf(" ", StringComparison.Ordinal);
+            string sort = pos > 0 ? _queryParameters.Sort.Trim().Substring(0, pos) : _queryParameters.Sort.Trim();
             switch (sort.ToLower())
             {
                 case "title":
@@ -224,7 +232,7 @@ namespace Sdl.Web.Tridion.Query
                     return SortParameter.ItemLastPublishedDate;
                 default:
                     //Default is to assume that its a custom metadata date field;
-                    return new CustomMetaKeyColumn(qParams.Sort, MetadataType.DATE);
+                    return new CustomMetaKeyColumn(_queryParameters.Sort, MetadataType.DATE);
             }
         }
     }
