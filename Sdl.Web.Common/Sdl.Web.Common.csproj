@@ -69,6 +69,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Web.Extensions" />
@@ -119,6 +120,7 @@
     <Compile Include="Models\Entity\ExceptionEntity.cs" />
     <Compile Include="Models\EntityModel.cs" />
     <Compile Include="Models\Entity\Configuration.cs" />
+    <Compile Include="Models\ISyndicationFeedItemProvider.cs" />
     <Compile Include="Models\Legacy\IPage.cs" />
     <Compile Include="Models\Legacy\IEntity.cs" />
     <Compile Include="Interfaces\IMediaHelper.cs" />

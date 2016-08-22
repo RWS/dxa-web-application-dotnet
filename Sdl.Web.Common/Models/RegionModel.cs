@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel.Syndication;
 using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
@@ -9,7 +10,7 @@ namespace Sdl.Web.Common.Models
     /// </summary>
 #pragma warning disable 618
     // TODO DXA 2.0: Ideally this would inherit directly from ViewModel, but for backward compatibility we need the legacy type inbetween.
-    public class RegionModel : Region
+    public class RegionModel : Region, ISyndicationFeedItemProvider
 #pragma warning restore 618
     {
         private const string XpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], minOccurs: {2}}} -->";
@@ -141,6 +142,18 @@ namespace Sdl.Web.Common.Models
         public override string ToString()
         {
             return string.Format("{0} '{1}'", GetType().Name, Name);
+        }
+        #endregion
+
+        #region ISyndicationFeedItemProvider members
+        /// <summary>
+        /// Extracts syndication feed items.
+        /// </summary>
+        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <returns>The extracted syndication feed items; a concatentation of syndication feed items provided by <see cref="Entities"/> (if any).</returns>
+        public virtual IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(Localization localization)
+        {
+            return ConcatenateSyndicationFeedItems(Entities.OfType<ISyndicationFeedItemProvider>(), localization);
         }
         #endregion
     }

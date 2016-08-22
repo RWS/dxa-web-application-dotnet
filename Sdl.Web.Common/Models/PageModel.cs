@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.ServiceModel.Syndication;
 using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
@@ -8,7 +11,7 @@ namespace Sdl.Web.Common.Models
     /// </summary>
 #pragma warning disable 618
     // TODO DXA 2.0: Should inherit directly from ViewModel, but for now we need the legacy classes inbetween for compatibility.
-    public class PageModel : WebPage
+    public class PageModel : WebPage, ISyndicationFeedItemProvider
 #pragma warning restore 618
     {
         private const string _xpmPageSettingsMarkup = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\"}} -->";
@@ -76,6 +79,19 @@ namespace Sdl.Web.Common.Models
         }
 
         #endregion  
+
+        #region ISyndicationFeedItemProvider members
+        /// <summary>
+        /// Extracts syndication feed items.
+        /// </summary>
+        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <returns>The extracted syndication feed items; a concatentation of syndication feed items provided by <see cref="Regions"/> (if any).</returns>
+        public virtual IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(Localization localization)
+        {
+            return ConcatenateSyndicationFeedItems(Regions, localization);
+        }
+        #endregion
+
     }
 
 }
