@@ -37,26 +37,28 @@ namespace Sdl.Web.Tridion.Query
             try
             {
                 List<EntityModel> models = new List<EntityModel>();
-                string[] ids = query.ExecuteQuery();
-                if (ids != null && ids.Length > 0)
+
+                string[] componentIds = query.ExecuteQuery();
+                if (componentIds == null || componentIds.Length == 0)
                 {
-                    ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(qParams.PublicationId);
-
-                    for (int i = 0; i < ids.Length && models.Count < qParams.PageSize; i++)
-                    {
-                        IComponentMeta componentMeta = componentMetaFactory.GetMeta(ids[i]);
-
-                        EntityModel model = ModelBuilderPipeline.CreateEntityModel(
-                            CreateComponent(componentMeta, modelType, qParams.Localization), 
-                            modelType, qParams.Localization
-                        );
-                        if (model != null)
-                        {
-                            models.Add(model);
-                        }
-                    }
-                    HasMore = ids.Length > models.Count;
+                    return models;
                 }
+
+                ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(qParams.PublicationId);
+                int pageSize = qParams.PageSize;
+                int count = 0;
+                foreach (string componentId in componentIds)
+                {
+                    IComponentMeta componentMeta = componentMetaFactory.GetMeta(componentId);
+                    DD4T.ContentModel.IComponent dd4tComponent = CreateComponent(componentMeta, modelType, qParams.Localization);
+                    EntityModel model = ModelBuilderPipeline.CreateEntityModel(dd4tComponent,modelType, qParams.Localization);
+                    models.Add(model);
+                    if (count++ == pageSize)
+                    {
+                        break;
+                    }
+                }
+                HasMore = componentIds.Length > count;
                 return models;
             }
             catch (Exception ex)
