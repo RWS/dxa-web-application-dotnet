@@ -126,10 +126,10 @@ namespace Sdl.Web.Common.Models
         /// <param name="title">The title.</param>
         /// <param name="content">The content. Can be a string or a <see cref="RichText"/> instance.</param>
         /// <param name="link">The link.</param>
-        /// <param name="lastUpdated">The date/time this item was last updated. If <c>null</c>, the current date/time is used.</param>
+        /// <param name="publishDate">The date/time this item was published/created. If <c>null</c>, publish date is not included in the feed.</param>
         /// <param name="localization">The context <see cref="Localization"/>.</param>
         /// <returns>The syndication feed item.</returns>
-        protected SyndicationItem CreateSyndicationItem(string title, object content, Link link, DateTime? lastUpdated, Localization localization)
+        protected SyndicationItem CreateSyndicationItem(string title, object content, Link link, DateTime? publishDate, Localization localization)
         {
             SyndicationItem result = new SyndicationItem
             {
@@ -148,9 +148,9 @@ namespace Sdl.Web.Common.Models
                 result.Links.Add(syndicationLink);
             }
 
-            if (lastUpdated.HasValue)
+            if (publishDate.HasValue)
             {
-                result.LastUpdatedTime = lastUpdated.Value;
+                result.PublishDate = publishDate.Value;
             }
 
             return result;

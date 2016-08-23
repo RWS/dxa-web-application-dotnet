@@ -171,8 +171,8 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     throw new DxaException(string.Format("Unexpected result from {0}.GetQuery: {1}", dynamicList.GetType().Name, query));
                 }
-                BrokerQuery brokerQuery = new BrokerQuery();
-                dynamicList.QueryResults = brokerQuery.ExecuteQuery(dynamicList.ResultType, (SimpleBrokerQuery) query).ToList();
+                BrokerQuery brokerQuery = new BrokerQuery((SimpleBrokerQuery) query);
+                dynamicList.QueryResults = brokerQuery.ExecuteQuery(dynamicList.ResultType).ToList();
                 dynamicList.HasMore = brokerQuery.HasMore;
             }
         }

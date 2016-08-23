@@ -20,6 +20,8 @@ namespace Sdl.Web.Tridion.Tests
             RegisterViewModel("SiteMapXml", typeof(SitemapItem), "Navigation");
             RegisterViewModel("TopNavigation", typeof(NavigationLinks), "Navigation");
 
+            RegisterViewModel("PagedList", typeof(ContentList<Teaser>), "List");
+
             RegisterViewModel("Test:TSI1758Test", typeof(Tsi1758TestEntity));
 
             // Page Views

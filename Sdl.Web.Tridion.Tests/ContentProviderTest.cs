@@ -92,7 +92,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testPageUrlPath = TestFixture.ArticlePageUrlPath;
 
-            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
 
@@ -117,7 +117,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testPageUrlPath = TestFixture.Tsi1614PageUrlPath;
 
-            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
             Article testArticle = pageModel.Regions["Main"].Entities[0] as Article;
@@ -132,7 +132,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testPageUrlPath = TestFixture.Tsi1278PageUrlPath;
 
-            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
             MediaItem testImage = pageModel.Regions["Main"].Entities[0] as MediaItem;
@@ -145,7 +145,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testPageUrlPath = TestFixture.Tsi1758PageUrlPath;
 
-            PageModel pageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
             Tsi1758TestEntity testEntity = pageModel.Regions["Main"].Entities[0] as Tsi1758TestEntity;
@@ -161,6 +161,26 @@ namespace Sdl.Web.Tridion.Tests
 
             Assert.IsNotNull(testEntity.EmbedField1[0].EmbedField1, "testEntity.EmbedField1[0].EmbedField1");
             Assert.IsNotNull(testEntity.EmbedField2[0].EmbedField1, "testEntity.EmbedField2[0].EmbedField1");
+        }
+
+        [TestMethod]
+        public void PopulateDynamicList_TeaserFallbackToDescription_Success() // See TSI-1852
+        {
+            string testPageUrlPath = TestFixture.Tsi1852PageUrlPath;
+
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            ContentList<Teaser> testContentList = pageModel.Regions["Main"].Entities[0] as ContentList<Teaser>;
+            Assert.IsNotNull(testContentList, "testContentList");
+            Assert.IsNotNull(testContentList.ItemListElements, "testContentList.ItemListElements");
+            Assert.AreEqual(0, testContentList.ItemListElements.Count, "testContentList.ItemListElements is not empty before PopulateDynamicList");
+
+            _testContentProvider.PopulateDynamicList(testContentList, TestFixture.ParentLocalization);
+
+            Teaser testTeaser = testContentList.ItemListElements.FirstOrDefault(t => t.Headline == "TSI-1852 Article");
+            Assert.IsNotNull(testTeaser, "Test Teaser not found");
+            StringAssert.StartsWith(testTeaser.Text.ToString(), "This is the standard metadata description", "testTeaser.Text");
         }
     }
 }
