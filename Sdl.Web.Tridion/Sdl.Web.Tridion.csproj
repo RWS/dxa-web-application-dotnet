@@ -184,6 +184,7 @@
     <Compile Include="Mapping\MappingData.cs" />
     <Compile Include="Mapping\ModelBuilderPipeline.cs" />
     <Compile Include="Mapping\PublicationResolver.cs" />
+    <Compile Include="Navigation\DynamicNavigationProvider.cs" />
     <Compile Include="Navigation\StaticNavigationProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query\BrokerQuery.cs" />
