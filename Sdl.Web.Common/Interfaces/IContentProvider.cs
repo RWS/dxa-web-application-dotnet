@@ -36,11 +36,11 @@ namespace Sdl.Web.Common.Interfaces
         PageModel GetPageModel(string urlPath, bool addIncludes = true);
 
         /// <summary>
-        /// Populates a Content List by executing the query it specifies.
+        /// Populates a Dynamic List by executing the query it specifies.
         /// </summary>
-        /// <param name="contentList">The Content List (of Teasers) which specifies the query and is to be populated.</param>
+        /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
         [Obsolete("Deprecated in DXA 1.1. Use the overload that has a Localization parameter.")]
-        ContentList<Teaser> PopulateDynamicList(ContentList<Teaser> contentList); 
+        DynamicList PopulateDynamicList(DynamicList dynamicList);
         #endregion
 
 
@@ -73,10 +73,10 @@ namespace Sdl.Web.Common.Interfaces
         StaticContentItem GetStaticContentItem(string urlPath, Localization localization);
 
         /// <summary>
-        /// Populates a Content List by executing the query it specifies.
+        /// Populates a Dynamic List by executing the query it specifies.
         /// </summary>
-        /// <param name="contentList">The Content List which specifies the query and is to be populated.</param>
+        /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
         /// <param name="localization">The context Localization.</param>
-        void PopulateDynamicList<T>(ContentList<T> contentList, Localization localization) where T : EntityModel; 
+        void PopulateDynamicList(DynamicList dynamicList, Localization localization);
     }
 }

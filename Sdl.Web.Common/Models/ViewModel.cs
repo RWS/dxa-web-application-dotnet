@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ServiceModel.Syndication;
 using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
@@ -84,5 +86,75 @@ namespace Sdl.Web.Common.Models
         /// <param name="localization">The context Localization.</param>
         /// <returns>The XPM markup.</returns>
         public abstract string GetXpmMarkup(Localization localization);
+
+        #region Helper methods for syndication feed providers
+        /// <summary>
+        /// Concatenates all syndication feed items provided by a given set of feed item providers.
+        /// </summary>
+        /// <param name="feedItemProviders">The set of feed item providers.</param>
+        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <returns>The concatenated syndication feed items.</returns>
+        protected IEnumerable<SyndicationItem> ConcatenateSyndicationFeedItems(IEnumerable<ISyndicationFeedItemProvider> feedItemProviders, Localization localization)
+        {
+            List<SyndicationItem> result = new List<SyndicationItem>();
+            foreach (ISyndicationFeedItemProvider feedItemProvider in feedItemProviders)
+            {
+                result.AddRange(feedItemProvider.ExtractSyndicationFeedItems(localization));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a syndication item link from a given <see cref="Link"/> instance.
+        /// </summary>
+        /// <param name="link">The <see cref="Link"/> instance.</param>
+        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <returns>The syndication item link or <c>null</c> if <paramref name="link"/> is <c>null</c> or an empty link.</returns>
+        protected SyndicationLink CreateSyndicationLink(Link link, Localization localization)
+        {
+            if (link == null || string.IsNullOrEmpty(link.Url))
+            {
+                return null;
+            }
+            string absoluteUrl = SiteConfiguration.MakeFullUrl(link.Url, localization);
+            return new SyndicationLink(new Uri(absoluteUrl));
+        }
+
+        /// <summary>
+        /// Creates a syndication feed item based on essential data.
+        /// </summary>
+        /// <param name="title">The title.</param>
+        /// <param name="content">The content. Can be a string or a <see cref="RichText"/> instance.</param>
+        /// <param name="link">The link.</param>
+        /// <param name="publishDate">The date/time this item was published/created. If <c>null</c>, publish date is not included in the feed.</param>
+        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <returns>The syndication feed item.</returns>
+        protected SyndicationItem CreateSyndicationItem(string title, object content, Link link, DateTime? publishDate, Localization localization)
+        {
+            SyndicationItem result = new SyndicationItem
+            {
+                Title = new TextSyndicationContent(title),
+            };
+
+            if (content != null)
+            {
+                TextSyndicationContentKind textKind = (content is RichText) ? TextSyndicationContentKind.Html : TextSyndicationContentKind.Plaintext;
+                result.Content = new TextSyndicationContent(content.ToString(), textKind);
+            }
+
+            SyndicationLink syndicationLink = CreateSyndicationLink(link, localization);
+            if (syndicationLink != null)
+            {
+                result.Links.Add(syndicationLink);
+            }
+
+            if (publishDate.HasValue)
+            {
+                result.PublishDate = publishDate.Value;
+            }
+
+            return result;
+        }
+        #endregion
     }
 }

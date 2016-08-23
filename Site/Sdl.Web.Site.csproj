@@ -93,8 +93,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Areas\Core\Controllers\AdminController.cs" />
-    <Compile Include="Areas\Core\CoreAreaRegistration.cs" />
+    <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -110,62 +109,8 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Log.config" />
-    <Content Include="Areas\Core\Views\web.config" />
-    <Content Include="Areas\Core\Views\Entity\Accordion.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Article.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Carousel.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\CookieNotificationBar.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Download.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\FooterLinkGroup.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\FooterLinks.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\HeaderLinks.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\HeaderLogo.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\LanguageSelector.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\OldBrowserNotificationBar.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Partials\GoogleMap.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Place.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\SocialLinks.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\SocialSharing.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Tab.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Teaser-ImageOverlay.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Teaser.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\TeaserColored.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\TeaserHero-ImageOverlay.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\TeaserMap.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\YouTubeVideo.cshtml" />
-    <Content Include="Areas\Core\Views\List\List.cshtml" />
-    <Content Include="Areas\Core\Views\List\PagedList.cshtml" />
-    <Content Include="Areas\Core\Views\List\Partials\Pager.cshtml" />
-    <Content Include="Areas\Core\Views\List\ThumbnailList.cshtml" />
-    <Content Include="Areas\Core\Views\Navigation\Breadcrumb.cshtml" />
-    <Content Include="Areas\Core\Views\Navigation\SiteMap.cshtml" />
-    <Content Include="Areas\Core\Views\Navigation\LeftNavigation.cshtml" />
-    <Content Include="Areas\Core\Views\Navigation\TopNavigation.cshtml" />
-    <Content Include="Areas\Core\Views\Page\GeneralPage.cshtml" />
-    <Content Include="Areas\Core\Views\Page\IncludePage.cshtml" />
-    <Content Include="Areas\Core\Views\Page\RedirectPage.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Areas\Core\Views\Page\_ViewStart.cshtml" />
-    <Content Include="Areas\Core\Views\Region\2-Column.cshtml" />
-    <Content Include="Areas\Core\Views\Region\3-Column.cshtml" />
-    <Content Include="Areas\Core\Views\Region\4-Column.cshtml" />
-    <Content Include="Areas\Core\Views\Region\Hero.cshtml" />
-    <Content Include="Areas\Core\Views\Region\Info.cshtml" />
-    <Content Include="Areas\Core\Views\Region\Left.cshtml" />
-    <Content Include="Areas\Core\Views\Region\Links.cshtml" />
-    <Content Include="Areas\Core\Views\Region\Logo.cshtml" />
-    <Content Include="Areas\Core\Views\Region\Main.cshtml" />
-    <Content Include="Areas\Core\Views\Region\Nav.cshtml" />
-    <Content Include="Areas\Core\Views\Region\Tools.cshtml" />
-    <Content Include="Areas\Core\Views\Region\Header.cshtml" />
-    <Content Include="Areas\Core\Views\Region\Footer.cshtml" />
-    <Content Include="Areas\Core\Views\Region\Content Tools.cshtml" />
-    <Content Include="Areas\Core\Views\Region\Left Navigation.cshtml" />
     <Content Include="Views\Shared\SectionError.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Partials\GoogleStaticMap.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Partials\Teaser.cshtml" />
-    <Content Include="Areas\Core\Views\Navigation\SiteMapXml.cshtml" />
-    <Content Include="Areas\Core\Views\Entity\Partials\Teaser-ImageOverlay.cshtml" />
     <Content Include="Unity.config">
       <SubType>Designer</SubType>
     </Content>
@@ -173,11 +118,6 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Views\Shared\ServerError.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Areas\Core\Views\Admin\" />
-    <Folder Include="Areas\Core\Views\Shared\" />
-    <Folder Include="bin\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config">
@@ -196,30 +136,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Shared\Partials\XpmButton.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Areas\Core\Views\Entity\Image.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Areas\Core\Views\Entity\EntityError.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Areas\Core\Views\Entity\Article.featurephone.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Areas\Core\Views\Entity\Article.smartphone.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Areas\Core\Views\Page\GeneralPage.smartphone.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Areas\Core\Views\Page\GeneralPage.tablet.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Areas\Core\Views\Entity\Article.tablet.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Areas\Core\Views\Page\GeneralPage.featurephone.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

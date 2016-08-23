@@ -23,7 +23,6 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class DefaultContentProvider : IContentProvider, IRawDataProvider
     {
-
         #region IContentProvider members
 #pragma warning disable 618
         [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.LinkResolver or SiteConfiguration.RichTextProcessor to get the new extension points.")]
@@ -52,14 +51,14 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
         /// <summary>
-        /// Populates a Content List by executing the query it specifies.
+        /// Populates a Dynamic List by executing the query it specifies.
         /// </summary>
-        /// <param name="contentList">The Content List (of Teasers) which specifies the query and is to be populated.</param>
+        /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
         [Obsolete("Deprecated in DXA 1.1. Use the overload that has a Localization parameter.")]
-        public ContentList<Teaser> PopulateDynamicList(ContentList<Teaser> contentList)
+        public DynamicList PopulateDynamicList(DynamicList dynamicList)
         {
-            PopulateDynamicList(contentList, WebRequestContext.Localization);
-            return contentList;
+            PopulateDynamicList(dynamicList, WebRequestContext.Localization);
+            return dynamicList;
         }
 
 #pragma warning restore 618
@@ -74,7 +73,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// <returns>The Page Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given URL.</exception>
         public virtual PageModel GetPageModel(string urlPath, Localization localization, bool addIncludes)
-        {
+        {        
             using (new Tracer(urlPath, localization, addIncludes))
             {
                 //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
@@ -137,8 +136,6 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-
-
         /// <summary>
         /// Gets a Static Content Item for a given URL path.
         /// </summary>
@@ -161,34 +158,22 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
         /// <summary>
-        /// Populates a Content List (of Teasers) by executing the query it specifies.
+        /// Populates a Dynamic List by executing the query it specifies.
         /// </summary>
-        /// <param name="contentList">The Content List which specifies the query and is to be populated.</param>
+        /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
         /// <param name="localization">The context Localization.</param>
-        public virtual void PopulateDynamicList<T>(ContentList<T> contentList, Localization localization) where T : EntityModel
+        public virtual void PopulateDynamicList(DynamicList dynamicList, Localization localization)
         {
-            using (new Tracer(contentList, localization))
+            using (new Tracer(dynamicList, localization))
             {
-                BrokerQuery query = new BrokerQuery
+                Common.Models.Query query = dynamicList.GetQuery(localization);
+                if (query == null || !(query is SimpleBrokerQuery))
                 {
-                    Start = contentList.Start,
-                    PublicationId = Int32.Parse(localization.LocalizationId),
-                    PageSize = contentList.PageSize,
-                    SchemaId = MapSchema(contentList.ContentType.Key, localization),
-                    Sort = contentList.Sort.Key
-                };
-
-                // TODO: For now BrokerQuery always returns Teasers
-                IEnumerable<Teaser> queryResults = query.ExecuteQuery();
-
-                ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
-                foreach (Teaser item in queryResults)
-                {
-                    item.Link.Url = linkResolver.ResolveLink(item.Link.Url);
+                    throw new DxaException(string.Format("Unexpected result from {0}.GetQuery: {1}", dynamicList.GetType().Name, query));
                 }
-
-                contentList.ItemListElements = queryResults.Cast<T>().ToList();
-                contentList.HasMore = query.HasMore;
+                BrokerQuery brokerQuery = new BrokerQuery((SimpleBrokerQuery) query);
+                dynamicList.QueryResults = brokerQuery.ExecuteQuery(dynamicList.ResultType).ToList();
+                dynamicList.HasMore = brokerQuery.HasMore;
             }
         }
 
@@ -252,18 +237,6 @@ namespace Sdl.Web.Tridion.Mapping
                 pageFactory.TryFindPage(cmUrl, out result);
                 return result;
             }
-        }
-        
-        protected virtual int MapSchema(string schemaKey, Localization localization)
-        {
-            string[] schemaKeyParts = schemaKey.Split('.');
-            string moduleName = schemaKeyParts.Length > 1 ? schemaKeyParts[0] : SiteConfiguration.CoreModuleName;
-            schemaKey = schemaKeyParts.Length > 1 ? schemaKeyParts[1] : schemaKeyParts[0];
-            string schemaId = localization.GetConfigValue(string.Format("{0}.schemas.{1}", moduleName, schemaKey));
-
-            int result;
-            Int32.TryParse(schemaId, out result);
-            return result;
         }
 
         protected virtual IEnumerable<IPage> GetIncludesFromModel(IPage page, Localization localization)

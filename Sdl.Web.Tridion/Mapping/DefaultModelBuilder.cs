@@ -218,6 +218,7 @@ namespace Sdl.Web.Tridion.Mapping
                 entityModel.MvcData = entityModel.GetDefaultView(localization);
             }
         }
+            
         #endregion
 
         private static void MapEclItem(EclItem eclItem, IComponent component)
@@ -368,8 +369,7 @@ namespace Sdl.Web.Tridion.Mapping
 
         protected virtual ViewModel CreateViewModel(MappingData mappingData)
         {
-            Type modelType = mappingData.TargetType; // TODO: why is this not a separate parameter?
-
+            Type modelType = mappingData.TargetType;
 
             ViewModel model;
             if (string.IsNullOrEmpty(mappingData.ModelId))
@@ -394,10 +394,11 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     foreach (SemanticProperty info in propertySemantics[pi.Name])
                     {
-                        IField field = GetFieldFromSemantics(mappingData, info);
+                        SemanticSchemaField semanticSchemaField;
+                        IField field = GetFieldFromSemantics(mappingData, info, out semanticSchemaField);
                         if (field != null)
                         {
-                            pi.SetValue(model, MapFieldValues(field, propertyType, multival, mappingData));
+                            pi.SetValue(model, MapFieldValues(field, propertyType, multival, mappingData, semanticSchemaField));
                             xpmPropertyMetadata.Add(pi.Name, GetFieldXPath(field));
                             break;
                         }
@@ -484,7 +485,7 @@ namespace Sdl.Web.Tridion.Mapping
             return filtered;
         }
 
-        private static IField GetFieldFromSemantics(MappingData mapData, SemanticProperty info)
+        private static IField GetFieldFromSemantics(MappingData mapData, SemanticProperty info, out SemanticSchemaField semanticSchemaField)
         {
             KeyValuePair<string, string>? entityData = GetEntityData(info.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
             if (entityData != null)
@@ -500,14 +501,18 @@ namespace Sdl.Web.Tridion.Mapping
                     {
                         FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
                         // locate semantic schema field
-                        SemanticSchemaField matchingField = mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics);
-                        if (matchingField != null)
+                        semanticSchemaField = (mapData.EmbeddedSemanticSchemaField == null) ? 
+                            mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics) : // Used for top-level fields
+                            mapData.EmbeddedSemanticSchemaField.FindFieldBySemantics(fieldSemantics); // Used for embedded fields
+                        if (semanticSchemaField != null)
                         {
-                            return ExtractMatchedField(matchingField, (matchingField.IsMetadata && mapData.Meta!=null) ? mapData.Meta : mapData.Content, mapData.EmbedLevel);
+                            return ExtractMatchedField(semanticSchemaField, (semanticSchemaField.IsMetadata && mapData.Meta!=null) ? mapData.Meta : mapData.Content, mapData.EmbedLevel);
                         }
                     }
                 }
             }
+
+            semanticSchemaField = null;
             return null;
         }
 
@@ -525,30 +530,32 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
 
-        private static IField ExtractMatchedField(SemanticSchemaField matchingField, IFieldSet fields, int embedLevel, string path = null)
+        private static IField ExtractMatchedField(SemanticSchemaField semanticField, IFieldSet fields, int embedLevel)
         {
-            if (path==null)
+            // Split the path in segments. The first segment represents the root element name.
+            string[] pathSegments = semanticField.Path.Split(new [] {'/'}, StringSplitOptions.RemoveEmptyEntries);
+            if (pathSegments.Length < embedLevel + 2)
             {
-                path = matchingField.Path;
-                while (embedLevel >= -1 && path.Contains("/"))
-                {
-                    int pos = path.IndexOf("/", StringComparison.Ordinal);
-                    path = path.Substring(pos+1);
-                    embedLevel--;
-                }
+                throw new DxaException(
+                    string.Format("Semantic field path '{0}' is too short for the current embed level: {1}.", semanticField.Path, embedLevel)
+                    );
             }
-            string[] bits = path.Split('/');
-            if (fields.ContainsKey(bits[0]))
-            {
-                if (bits.Length > 1)
-                {
-                    int pos = path.IndexOf("/", StringComparison.Ordinal);
-                    return ExtractMatchedField(matchingField, fields[bits[0]].EmbeddedValues[0], embedLevel, path.Substring(pos + 1));
-                }
+            string currentPathSegment = pathSegments[embedLevel + 1];
 
-                return fields[bits[0]];
+            IField matchedField;
+            if (!fields.TryGetValue(currentPathSegment, out matchedField))
+            {
+                // No matching field found.
+                return null;
             }
-            return null;
+
+            if (pathSegments.Length > embedLevel + 2)
+            {
+                // The semantic field is within an embedded field; flatten the structure.
+                matchedField = ExtractMatchedField(semanticField, matchedField.EmbeddedValues[0], embedLevel + 1);
+            }
+
+            return matchedField;
         }
 
 
@@ -565,7 +572,7 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
 
-        private object MapFieldValues(IField field, Type modelType, bool multival, MappingData mapData)
+        private object MapFieldValues(IField field, Type modelType, bool multival, MappingData mapData, SemanticSchemaField semanticSchemaField)
         {
             try
             {
@@ -604,7 +611,7 @@ namespace Sdl.Web.Tridion.Mapping
                     case FieldType.Embedded:
                         foreach (IFieldSet value in field.EmbeddedValues)
                         {
-                            mappedValues.Add(MapEmbeddedFields(value, modelType, mapData));
+                            mappedValues.Add(MapEmbeddedFields(value, modelType, mapData, semanticSchemaField));
                         }
                         break;
 
@@ -726,22 +733,20 @@ namespace Sdl.Web.Tridion.Mapping
             return ModelBuilderPipeline.CreateEntityModel(component, modelType, localization);
         }
 
-        private ViewModel MapEmbeddedFields(IFieldSet embeddedFields, Type modelType, MappingData mapData)
+        private ViewModel MapEmbeddedFields(IFieldSet embeddedFields, Type modelType, MappingData mapData, SemanticSchemaField semanticSchemaField)
         {
-            MappingData embeddedMappingData = new MappingData
-                {
-                    TargetType = modelType,
-                    Content = embeddedFields,
-                    Meta = null,
-                    EntityNames = mapData.EntityNames, // TODO: should this not be re-determined for the embedded model type?
-                    ParentDefaultPrefix = mapData.ParentDefaultPrefix,
-                    TargetEntitiesByPrefix = mapData.TargetEntitiesByPrefix, // TODO: should this not be re-determined for the embedded model type?
-                    SemanticSchema = mapData.SemanticSchema, // TODO: should this not be re-determined for the embedded model type?
-                    EmbedLevel = mapData.EmbedLevel + 1,
-                    Localization = mapData.Localization
-                };
+            MappingData embeddedMappingData = new MappingData(mapData)
+            {
+                TargetType = modelType,
+                Content = embeddedFields,
+                Meta = null,
+                EmbeddedSemanticSchemaField = semanticSchemaField,
+                EmbedLevel = mapData.EmbedLevel + 1
+            };
 
-            return CreateViewModel(embeddedMappingData);
+            EntityModel result = (EntityModel) CreateViewModel(embeddedMappingData);
+            result.MvcData = result.GetDefaultView(mapData.Localization);
+            return result;
         }
 
         protected Dictionary<string, string> GetAllFieldsAsDictionary(IComponent component)

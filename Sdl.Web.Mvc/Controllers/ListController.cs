@@ -2,6 +2,7 @@
 using System.Web.Mvc;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Common;
 
 namespace Sdl.Web.Mvc.Controllers
 {
@@ -22,20 +23,18 @@ namespace Sdl.Web.Mvc.Controllers
 
         protected override ViewModel EnrichModel(ViewModel sourceModel)
         {
-            ContentList<Teaser> model = base.EnrichModel(sourceModel) as ContentList<Teaser>;
-            if (model == null || model.ItemListElements.Any())
+            DynamicList model = base.EnrichModel(sourceModel) as DynamicList;
+            if (model == null || model.QueryResults.Any())
             {
                 return model;
             }
 
             //we need to run a query to populate the list
-            int start = GetRequestParameter<int>("start");
             if (model.Id == Request.Params["id"])
             {
                 //we only take the start from the query string if there is also an id parameter matching the model entity id
                 //this means that we are sure that the paging is coming from the right entity (if there is more than one paged list on the page)
-                model.CurrentPage = (start / model.PageSize) + 1;
-                model.Start = start;
+                model.Start = GetRequestParameter<int>("start");
             }
             ContentProvider.PopulateDynamicList(model, WebRequestContext.Localization);
 

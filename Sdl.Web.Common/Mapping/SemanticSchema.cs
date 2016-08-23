@@ -8,9 +8,11 @@ using Sdl.Web.Common.Models;
 namespace Sdl.Web.Common.Mapping
 {
     /// <summary>
-    /// Class for deserialized json schema.
-    /// {"Id":80,"RootElement":"Article","Fields":[...],"Semantics":[...]}
+    /// Represents a Semantic Schema
     /// </summary>
+    /// <remarks>
+    /// Deserialized from JSON in schemas.json.
+    /// </remarks>
     public class SemanticSchema
     {
         private string[] _semanticTypeNames; 
@@ -37,11 +39,6 @@ namespace Sdl.Web.Common.Mapping
 
 
         public Localization Localization { get; set; }
-
-        /// <summary>
-        /// Initializes a new empty instance of the <see cref="SemanticSchema"/> class.
-        /// </summary>
-        public SemanticSchema() { }
 
         /// <summary>
         /// Get a list with schema entity names for its vocabularies. 
@@ -71,16 +68,15 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>Schema field or one of its embedded fields that match with the given semantics, null if a match cannot be found</returns>
         public SemanticSchemaField FindFieldBySemantics(FieldSemantics fieldSemantics)
         {
-            foreach (SemanticSchemaField field in Fields)
+            // Perform a breadth-first lookup: first see if any of the top-level fields match.
+            SemanticSchemaField matchingTopLevelField = Fields.FirstOrDefault(ssf => ssf.HasSemantics(fieldSemantics));
+            if (matchingTopLevelField != null)
             {
-                SemanticSchemaField matchingField = field.FindFieldBySemantics(fieldSemantics);
-                if (matchingField != null)
-                {
-                    return matchingField;
-                }
+                return matchingTopLevelField;
             }
 
-            return null;
+            // If none of the top-level fields match: let each top-level field do a breadth-first lookup of its embedded fields (recursive).
+            return Fields.Select(ssf => ssf.FindFieldBySemantics(fieldSemantics)).FirstOrDefault(matchingField => matchingField != null);
         }
 
         /// <summary>
@@ -160,6 +156,15 @@ namespace Sdl.Web.Common.Mapping
             }
 
             return baseModelType;
+        }
+
+        /// <summary>
+        /// Provides a string representation of the object.
+        /// </summary>
+        /// <returns>A string representation containing the Schema ID and Root Element name</returns>
+        public override string ToString()
+        {
+            return string.Format("{0} {1} ({2})", GetType().Name, Id, RootElement);
         }
     }
 }

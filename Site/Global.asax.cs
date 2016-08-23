@@ -97,12 +97,12 @@ namespace Sdl.Web.Site
                    "Core_Admin",
                    "admin/{action}",
                    new { controller = "Admin", action = "Refresh" }
-                ).DataTokens.Add("area", "Core");
+                );
                 routes.MapRoute(
                    "Core_Admin_Loc",
                    "{localization}/admin/{action}",
                    new { controller = "Admin", action = "Refresh" }
-                ).DataTokens.Add("area", "Core");                
+                );
             }
 
             // Tridion Page Route

@@ -147,7 +147,7 @@ namespace Sdl.Web.Mvc.Html
 
             return string.Format("{0} {1}", Math.Ceiling(len), sizes[order]);
         }
-        
+
         /// <summary>
         /// Write out an img tag with a responsive image url
         /// </summary>
@@ -158,15 +158,44 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="cssClass">Css class to apply to img tag</param>
         /// <param name="containerSize">The size (in grid column units) of the containing element</param>
         /// <returns>Complete img tag with all required attributes</returns>
-        public static MvcHtmlString Image(this HtmlHelper helper, Image image, string widthFactor, double aspect, string cssClass = null, int containerSize = 0)
+        [Obsolete("Deprecated in DXA 1.6. Use @Html.Media instead.")]      
+        public static MvcHtmlString Image(this HtmlHelper helper, MediaItem image, string widthFactor, double aspect, string cssClass = null, int containerSize = 0)
         {
-            using (new Tracer(helper, image, widthFactor, aspect, cssClass, containerSize))
+            return Media(helper, image, widthFactor, aspect, cssClass, containerSize);
+        }
+
+        /// <summary>
+        /// Write out an youtube video item
+        /// </summary>
+        /// <param name="helper"></param>
+        /// <param name="video">The video item to write out</param>
+        /// <param name="widthFactor">The factor to apply to the width - can be % (eg "100%") or absolute (eg "120")</param>
+        /// <param name="aspect">The aspect ratio for the video</param>
+        /// <param name="cssClass">Css class to apply</param>
+        /// <param name="containerSize">The size (in grid column units) of the containing element</param>
+        /// <returns>Complete video markup with all required attributes</returns>
+        [Obsolete("Deprecated in DXA 1.1. This method renders HTML which may have to be customized. Use Html.DxaEntity to render the YouTubeVideo Model with an appropriate View instead.")]
+        public static MvcHtmlString YouTubeVideo(this HtmlHelper helper, MediaItem video, string widthFactor, double aspect, string cssClass, int containerSize)
+        {
+            return Media(helper, video, widthFactor, aspect, cssClass, containerSize);           
+        }
+
+        /// <summary>
+        /// Write out a download link
+        /// </summary>
+        /// <param name="helper"></param>
+        /// <param name="download">The download item to render</param>
+        /// <returns></returns>
+        [Obsolete("Deprecated in DXA 1.1. This method renders HTML which may have to be customized. Use Html.DxaEntity to render the Download Model with an appropriate View instead.")]
+        public static MvcHtmlString Download(this HtmlHelper helper, MediaItem download)
+        {
+            using (new Tracer(helper, download))
             {
-                if (image == null || String.IsNullOrEmpty(image.Url))
+                if (download == null)
                 {
                     return MvcHtmlString.Empty;
                 }
-                return new MvcHtmlString(image.ToHtml(widthFactor, aspect, cssClass, containerSize));
+                return new MvcHtmlString(download.ToHtml(null));
             }
         }
 
@@ -214,49 +243,6 @@ namespace Sdl.Web.Mvc.Html
         public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, double aspect, string cssClass = null)
         {
             return Media(helper, media, null, aspect, cssClass);
-        }
-
-
-        /// <summary>
-        /// Write out an youtube video item
-        /// </summary>
-        /// <param name="helper"></param>
-        /// <param name="video">The video item to write out</param>
-        /// <param name="widthFactor">The factor to apply to the width - can be % (eg "100%") or absolute (eg "120")</param>
-        /// <param name="aspect">The aspect ratio for the video</param>
-        /// <param name="cssClass">Css class to apply</param>
-        /// <param name="containerSize">The size (in grid column units) of the containing element</param>
-        /// <returns>Complete video markup with all required attributes</returns>
-        [Obsolete("Deprecated in DXA 1.1. This method renders HTML which may have to be customized. Use Html.DxaEntity to render the YouTubeVideo Model with an appropriate View instead.")]
-        public static MvcHtmlString YouTubeVideo(this HtmlHelper helper, YouTubeVideo video, string widthFactor, double aspect, string cssClass, int containerSize)
-        {
-            using (new Tracer(helper, video, widthFactor, aspect, cssClass, containerSize))
-            {
-                if (video == null || string.IsNullOrEmpty(video.YouTubeId))
-                {
-                    return MvcHtmlString.Empty;
-                }
-                return new MvcHtmlString(video.ToHtml(widthFactor, aspect, cssClass, containerSize));
-            }
-        }
-
-        /// <summary>
-        /// Write out a download link
-        /// </summary>
-        /// <param name="helper"></param>
-        /// <param name="download">The download item to render</param>
-        /// <returns></returns>
-        [Obsolete("Deprecated in DXA 1.1. This method renders HTML which may have to be customized. Use Html.DxaEntity to render the Download Model with an appropriate View instead.")]
-        public static MvcHtmlString Download(this HtmlHelper helper, Download download)
-        {
-            using (new Tracer(helper, download))
-            {
-                if (download == null || string.IsNullOrEmpty(download.Url))
-                {
-                    return MvcHtmlString.Empty;
-                }
-                return new MvcHtmlString(download.ToHtml(null));
-            }
         }
 
         #region Region/Entity rendering extension methods
@@ -329,10 +315,22 @@ namespace Sdl.Web.Mvc.Html
         public static MvcHtmlString DxaEntity(this HtmlHelper htmlHelper, EntityModel entity, string viewName, int containerSize = 0)
         {
             MvcData mvcDataOverride = new MvcData(viewName);
-            entity.MvcData.AreaName = mvcDataOverride.AreaName;
-            entity.MvcData.ViewName = mvcDataOverride.ViewName;
+            MvcData orginalMvcData = entity.MvcData;
+            MvcData tempMvcData = new MvcData(orginalMvcData)
+            {
+                AreaName = mvcDataOverride.AreaName,
+                ViewName = mvcDataOverride.ViewName
+            };
 
-            return htmlHelper.DxaEntity(entity, containerSize);
+            try
+            {
+                entity.MvcData = tempMvcData;
+                return htmlHelper.DxaEntity(entity, containerSize);
+            }
+            finally
+            {
+                entity.MvcData = orginalMvcData;
+            }
         }
 
         /// <summary>

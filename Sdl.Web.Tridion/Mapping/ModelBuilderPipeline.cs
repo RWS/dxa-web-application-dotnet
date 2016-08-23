@@ -122,6 +122,6 @@ namespace Sdl.Web.Tridion.Mapping
                 }
                 return entityModel;
             }
-        }
+        }       
     }
 }

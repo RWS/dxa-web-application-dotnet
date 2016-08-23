@@ -12,6 +12,15 @@ namespace Sdl.Web.Tridion.Tests
 {
     internal class TestFixture : ILocalizationResolver
     {
+        internal const string HomePageId = "640";
+        internal const string ArticleDcpEntityId = "9712-9711";
+        internal const string ArticlePageUrlPath = "/autotest-parent/test_article_page.html";
+        internal const string Tsi1278PageUrlPath = "/autotest-parent/tsi-1278_trådløst.html";
+        internal const string Tsi1278StaticContentItemUrlPath = "/autotest-parent/Images/trådløst_tcm1065-9791.jpg";
+        internal const string Tsi1614PageUrlPath = "/autotest-parent/tsi-1614.html";
+        internal const string Tsi1758PageUrlPath = "/autotest-parent/regression/tsi-1758.html";
+        internal const string Tsi1852PageUrlPath = "/autotest-parent/regression/tsi-1852.html";
+
         private static readonly IEnumerable<Localization> _testLocalizations;
         private static readonly Localization _parentLocalization;
         private static readonly Localization _childLocalization;
@@ -45,14 +54,7 @@ namespace Sdl.Web.Tridion.Tests
 
             _testLocalizations = new[] { _parentLocalization, _childLocalization };
 
-            HomePageId = "640";
-            ArticleDcpEntityId = "9712-9711";
-            ArticlePageUrlPath = "/autotest-parent/test_article_page.html";
-            Tsi1278PageUrlPath = "/autotest-parent/tsi-1278_trådløst.html";
-            Tsi1278StaticContentItemUrlPath = "/autotest-parent/Images/trådløst_tcm1065-9791.jpg";
-            Tsi1614PageUrlPath = "/autotest-parent/tsi-1614.html";
-
-            TestRegistration.RegisterCoreViewModels();
+            TestRegistration.RegisterViewModels();
         }
 
         internal static Localization ParentLocalization
@@ -72,14 +74,6 @@ namespace Sdl.Web.Tridion.Tests
                 return _childLocalization;
             }
         }
-
-        internal static string ArticleDcpEntityId { get; private set; }
-        internal static string HomePageId { get; private set; }
-        internal static string ArticlePageUrlPath { get; private set; }
-        internal static string Tsi1278PageUrlPath { get; private set; }
-        internal static string Tsi1278StaticContentItemUrlPath { get; private set; }
-        internal static string Tsi1614PageUrlPath { get; private set; }
-
 
         internal static void InitializeProviders()
         {

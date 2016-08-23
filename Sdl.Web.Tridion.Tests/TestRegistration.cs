@@ -1,39 +1,18 @@
 ﻿using System;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Tridion.Tests.Models;
 
 namespace Sdl.Web.Tridion.Tests
 {
     internal static class TestRegistration 
     {
-        internal static void RegisterCoreViewModels()
+        internal static void RegisterViewModels()
         {
             // Entity Views
-            RegisterViewModel("Accordion", typeof(ItemList));
             RegisterViewModel("Article", typeof(Article));
-            RegisterViewModel("Carousel", typeof(ItemList));
-            RegisterViewModel("CookieNotificationBar", typeof(Notification));
-            RegisterViewModel("Download", typeof(Download));
-            RegisterViewModel("FooterLinkGroup", typeof(LinkList<Link>));
-            RegisterViewModel("FooterLinks", typeof(LinkList<Link>));
-            RegisterViewModel("HeaderLinks", typeof(LinkList<Link>));
-            RegisterViewModel("HeaderLogo", typeof(Teaser));
             RegisterViewModel("Image", typeof(Image));
-            RegisterViewModel("LanguageSelector", typeof(Common.Models.Configuration));
-            RegisterViewModel("OldBrowserNotificationBar", typeof(Notification));
-            RegisterViewModel("Place", typeof(Place));
-            RegisterViewModel("SocialLinks", typeof(LinkList<TagLink>));
-            RegisterViewModel("SocialSharing", typeof(LinkList<TagLink>));
-            RegisterViewModel("Tab", typeof(ItemList));
-            RegisterViewModel("Teaser-ImageOverlay", typeof(Teaser));
-            RegisterViewModel("Teaser", typeof(Teaser));
-            RegisterViewModel("TeaserColored", typeof(Teaser));
-            RegisterViewModel("TeaserHero-ImageOverlay", typeof(Teaser));
-            RegisterViewModel("TeaserMap", typeof(Teaser));
-            RegisterViewModel("YouTubeVideo", typeof(YouTubeVideo));
 
-            RegisterViewModel("List", typeof(ContentList<Teaser>), "List");
-            RegisterViewModel("PagedList", typeof(ContentList<Teaser>), "List");
-            RegisterViewModel("ThumbnailList", typeof(ContentList<Teaser>), "List");
+            RegisterViewModel("LanguageSelector", typeof(Common.Models.Configuration));
 
             RegisterViewModel("Breadcrumb", typeof(NavigationLinks), "Navigation");
             RegisterViewModel("LeftNavigation", typeof(NavigationLinks), "Navigation");
@@ -41,10 +20,16 @@ namespace Sdl.Web.Tridion.Tests
             RegisterViewModel("SiteMapXml", typeof(SitemapItem), "Navigation");
             RegisterViewModel("TopNavigation", typeof(NavigationLinks), "Navigation");
 
+            RegisterViewModel("PagedList", typeof(ContentList<Teaser>), "List");
+
+            RegisterViewModel("Test:TSI1758Test", typeof(Tsi1758TestEntity));
+
             // Page Views
             RegisterViewModel("GeneralPage", typeof(PageModel));
             RegisterViewModel("IncludePage", typeof(PageModel));
             RegisterViewModel("RedirectPage", typeof(PageModel));
+
+            RegisterViewModel("Test:SimpleTestPage", typeof(PageModel));
 
             // Region Views
             RegisterViewModel("2-Column", typeof(RegionModel));
@@ -90,7 +75,10 @@ namespace Sdl.Web.Tridion.Tests
                 }
             }
 
-            MvcData mvcData = new MvcData { AreaName = "Core", ControllerName = controllerName, ViewName = viewName };
+            MvcData mvcData = new MvcData(viewName)
+            {
+                ControllerName = controllerName
+            };
             ModelTypeRegistry.RegisterViewModel(mvcData, modelType);
         }
     }
