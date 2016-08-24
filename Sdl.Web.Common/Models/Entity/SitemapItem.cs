@@ -34,7 +34,7 @@ namespace Sdl.Web.Common.Models
         public string Url { get; set; }
         public string Type { get; set; }
         public List<SitemapItem> Items { get; set; }
-        public string PublishedDate { get; set; }
+        public DateTime? PublishedDate { get; set; } // NOTE: the type was changed from type string in DXA 1.6. It (de)serializes the same to/from JSON, though.
         public bool Visible { get; set; }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         /// <param name="localization">The context <see cref="Localization"/></param>
         /// <returns>The <see cref="Link"/> Entity Model or <c>null</c> if the <see cref="Url"/> property is <c>null</c> or empty.</returns>
-        public Link CreateLink(Localization localization)
+        public virtual Link CreateLink(Localization localization)
         {
             string linkUrl = Url;
             if (string.IsNullOrEmpty(linkUrl))

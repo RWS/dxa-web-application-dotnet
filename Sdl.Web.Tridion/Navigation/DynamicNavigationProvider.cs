@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
@@ -19,33 +20,60 @@ namespace Sdl.Web.Tridion.Navigation
     public class DynamicNavigationProvider : INavigationProvider
     {
         private const string TaxonomyNavigationMarker = "[Navigation]";
-        private const string SitemapItemTypeCategory = "Category";
-        private const string SitemapItemTypeKeyword = "Keyword";
-        private const string SitemapItemTypePage = "Page";
+
+        private static readonly Regex _pageTitleRegex = new Regex(@"(?<sequence>\d\d\d)?\s*(?<title>.*)", RegexOptions.Compiled);
 
         #region INavigationProvider members
+        /// <summary>
+        /// Gets the Navigation Model (Sitemap) for a given Localization.
+        /// </summary>
+        /// <param name="localization">The Localization.</param>
+        /// <returns>The Navigation Model (Sitemap root Item).</returns>
         public SitemapItem GetNavigationModel(Localization localization)
         {
             using (new Tracer(localization))
             {
+                // TODO PERF: Constructing the entire Navigation Model dynamically is very expensive; this must be cached properly.
                 string navTaxonomyId = GetNavigationTaxonomyId(localization);
 
                 TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
-                TaxonomyFilter wholeTaxonomyFilter = new DepthFilter(-1, DepthFilter.FilterDown);
-                Keyword taxonomyRoot = taxonomyFactory.GetTaxonomyKeywords(navTaxonomyId, wholeTaxonomyFilter);
+                Keyword taxonomyRoot = taxonomyFactory.GetTaxonomyKeywords(navTaxonomyId, new DepthFilter(DepthFilter.UnlimitedDepth, DepthFilter.FilterDown));
 
                 return CreateTaxonomyNode(taxonomyRoot, localization);
             }
         }
 
+        /// <summary>
+        /// Gets Navigation Links for the top navigation menu for the given request URL path.
+        /// </summary>
+        /// <param name="requestUrlPath">The request URL path.</param>
+        /// <param name="localization">The Localization.</param>
+        /// <returns>The Navigation Links.</returns>
         public NavigationLinks GetTopNavigationLinks(string requestUrlPath, Localization localization)
         {
             using (new Tracer(requestUrlPath, localization))
             {
-                throw new NotImplementedException(); // TODO
+                string navTaxonomyId = GetNavigationTaxonomyId(localization);
+
+                TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
+                Keyword taxonomyRoot = taxonomyFactory.GetTaxonomyKeywords(navTaxonomyId, new DepthFilter(1, DepthFilter.FilterDown));
+
+                TaxonomyNode rootNode = CreateTaxonomyNode(taxonomyRoot, localization);
+                IEnumerable<SitemapItem> topLevelItems = rootNode.Items.Where(i => i.Visible && !string.IsNullOrEmpty(i.Url));
+
+                return new NavigationLinks
+                {
+                    Items = topLevelItems.Select(i => i.CreateLink(localization)).ToList()
+                };
             }
         }
 
+        /// <summary>
+        /// Gets Navigation Links for the context navigation panel for the given request URL path.
+        /// </summary>
+        /// <param name="requestUrlPath">The request URL path.</param>
+        /// <param name="localization">The Localization.</param>
+        /// <returns>The Navigation Links.</returns>
         public NavigationLinks GetContextNavigationLinks(string requestUrlPath, Localization localization)
         {
             using (new Tracer(requestUrlPath, localization))
@@ -54,6 +82,12 @@ namespace Sdl.Web.Tridion.Navigation
             }
         }
 
+        /// <summary>
+        /// Gets Navigation Links for the breadcrumb trail for the given request URL path.
+        /// </summary>
+        /// <param name="requestUrlPath">The request URL path.</param>
+        /// <param name="localization">The Localization.</param>
+        /// <returns>The Navigation Links.</returns>
         public NavigationLinks GetBreadcrumbNavigationLinks(string requestUrlPath, Localization localization)
         {
             using (new Tracer(requestUrlPath, localization))
@@ -89,39 +123,55 @@ namespace Sdl.Web.Tridion.Navigation
         private static TaxonomyNode CreateTaxonomyNode(Keyword keyword, Localization localization)
         {
             string taxonomyId = keyword.TaxonomyUri.Split('-')[1];
-            string keywordId = keyword.KeywordUri.Split('-')[1];
             bool isRoot = (keyword.KeywordUri == keyword.TaxonomyUri);
-
-
             List<SitemapItem> childItems = new List<SitemapItem>();
 
             // Add child SitemapItems for child Taxonomy Nodes
             IEnumerable<TaxonomyNode> childTaxonomyNodes = keyword.KeywordChildren.Cast<Keyword>().Select(kw => CreateTaxonomyNode(kw, localization));
             childItems.AddRange(childTaxonomyNodes);
 
-            if (keyword.ReferencedContentCount > 0)
+            string taxonomyNodeUrl = null;
+            int classifiedItemsCount = keyword.ReferencedContentCount;
+            if (classifiedItemsCount > 0)
             {
-                // Add child SitemapItems for classified Pages
+                // Add child SitemapItems for classified Pages (ordered by title)
                 PageMetaFactory pageMetaFactory = new PageMetaFactory(GetPublicationTcmUri(localization));
                 IPageMeta[] classifiedPageMetas = pageMetaFactory.GetTaxonomyPages(keyword, includeBranchedFacets: false);
-                IEnumerable<SitemapItem> pageSitemapItems = classifiedPageMetas.Select(pageMeta => CreateSitemapItem(pageMeta, taxonomyId));
+                IEnumerable<SitemapItem> pageSitemapItems = classifiedPageMetas.Select(pageMeta => CreateSitemapItem(pageMeta, taxonomyId)).OrderBy(i => i.Title).ToArray();
                 childItems.AddRange(pageSitemapItems);
+
+                // Supress sequence prefixes from titles
+                foreach (SitemapItem pageSitemapItem in pageSitemapItems)
+                {
+                    pageSitemapItem.Title = _pageTitleRegex.Match(pageSitemapItem.Title).Groups["title"].Value;
+                }
+
+                // If the Taxonomy Node contains an Index Page (i.e. with "index.html" in its URL), we put that URL on the Taxonomy Node.
+                SitemapItem indexPageSitemapItem = pageSitemapItems.FirstOrDefault(i => i.Url.EndsWith("/index.html"));
+                if (indexPageSitemapItem != null)
+                {
+                    taxonomyNodeUrl = indexPageSitemapItem.Url;
+                }
             }
+
+            List<string> relatedTaxonomyNodeIds = keyword.GetRelatedKeywordUris().Select(uri => FormatKeywordNodeId(uri, taxonomyId)).ToList();
 
             return new TaxonomyNode
             {
-                Id = isRoot ? string.Format("t{0}", taxonomyId) : string.Format("t{0}-k{1}", taxonomyId, keywordId),
-                Type =  isRoot ? SitemapItemTypeCategory : SitemapItemTypeKeyword,
+                Id = isRoot ? string.Format("t{0}", taxonomyId) : FormatKeywordNodeId(keyword.KeywordUri, taxonomyId),
+                Type =  SitemapItem.Types.TaxonomyNode,
                 Title = keyword.KeywordName,
+                Url = taxonomyNodeUrl,
                 Visible = true,
                 Items = childItems,
                 Key = keyword.KeywordKey,
                 Description = keyword.KeywordDescription,
                 IsAbstract = keyword.IsAbstract,
-                ClassifiedItemsCount = keyword.ReferencedContentCount
+                HasChildNodes = keyword.HasChildren || (classifiedItemsCount > 0),
+                ClassifiedItemsCount = classifiedItemsCount,
+                RelatedTaxonomyNodeIds = relatedTaxonomyNodeIds.Any() ? relatedTaxonomyNodeIds : null
+                // TODO: CustomMetadata (?)
             };
-
-            // TODO: RelatedTaxonomyNodeIds, CustomMetadata
         }
 
         private static SitemapItem CreateSitemapItem(IPageMeta pageMeta, string taxonomyId)
@@ -129,9 +179,10 @@ namespace Sdl.Web.Tridion.Navigation
             return new SitemapItem
             {
                 Id = string.Format("t{0}-p{1}", taxonomyId, pageMeta.Id),
-                Type = SitemapItemTypePage,
+                Type = SitemapItem.Types.Page,
                 Title = pageMeta.Title,
                 Url = pageMeta.UrlPath,
+                PublishedDate = pageMeta.LastPublicationDate,
                 Visible = true
             };
         }
@@ -139,6 +190,12 @@ namespace Sdl.Web.Tridion.Navigation
         private static string GetPublicationTcmUri(Localization localization)
         {
             return string.Format("tcm:0-{0}-1", localization.LocalizationId);
+        }
+
+        private static string FormatKeywordNodeId(string keywordUri, string taxonomyId)
+        {
+            string keywordId = keywordUri.Split('-')[1];
+            return string.Format("t{0}-k{1}", taxonomyId, keywordId);
         }
     }
 }
