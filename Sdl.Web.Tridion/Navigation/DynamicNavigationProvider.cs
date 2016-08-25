@@ -121,7 +121,7 @@ namespace Sdl.Web.Tridion.Navigation
             // TODO: Tridion.ContentDelivery.Taxonomies.TaxonomyRelationManager is missing in CIL 8.2. See CRQ-2380.
 #if TRIDION_71
             global::Tridion.ContentDelivery.Taxonomies.TaxonomyRelationManager taxonomyRelationManager = new global::Tridion.ContentDelivery.Taxonomies.TaxonomyRelationManager();
-            return taxonomyRelationManager.GetTaxonomyKeywords(taxonomyUri, classifiedItemUri, null, new DepthFilter(depth, DepthFilter.FilterUp), (int) ItemType.Page);
+            return taxonomyRelationManager.GetTaxonomyKeywords(taxonomyUri, pageUri, null, new DepthFilter(depth, DepthFilter.FilterUp), (int) ItemType.Page);
 #else
             Sdl.Web.Delivery.Dynamic.Taxonomies.Filters.ITaxonomyFilter ancestorsFilter = new Sdl.Web.Delivery.Dynamic.Taxonomies.Filters.DepthFilter(depth, DepthFilter.FilterUp);
             Sdl.Web.Delivery.Dynamic.Taxonomies.TaxonomyRelationManager taxonomyRelationManager = new Sdl.Web.Delivery.Dynamic.Taxonomies.TaxonomyRelationManager();
