@@ -20,6 +20,8 @@ namespace Sdl.Web.Tridion.Tests
         internal const string Tsi1614PageUrlPath = "/autotest-parent/tsi-1614.html";
         internal const string Tsi1758PageUrlPath = "/autotest-parent/regression/tsi-1758.html";
         internal const string Tsi1852PageUrlPath = "/autotest-parent/regression/tsi-1852.html";
+        internal const string TaxonomyTestPage1UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1.html";
+        internal const string TaxonomyTestPage2UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-2.html";
 
         private static readonly IEnumerable<Localization> _testLocalizations;
         private static readonly Localization _parentLocalization;

@@ -25,14 +25,11 @@ namespace Sdl.Web.Common.Models.Entity
         /// Creates a <see cref="Link"/> out of this <see cref="SitemapItem"/>.
         /// </summary>
         /// <param name="localization">The context <see cref="Localization"/></param>
-        /// <returns>The <see cref="Link"/> Entity Model or <c>null</c> if the <see cref="Url"/> property is <c>null</c> or empty.</returns>
+        /// <returns>The <see cref="Link"/> Entity Model.</returns>
         public override Link CreateLink(Localization localization)
         {
             Link result = base.CreateLink(localization);
-            if (result != null)
-            {
-                result.AlternateText = Description;
-            }
+            result.AlternateText = Description;
             return result;
         }
     }

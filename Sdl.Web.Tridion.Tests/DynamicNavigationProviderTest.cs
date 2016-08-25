@@ -79,7 +79,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetTopNavigationLinks_Success()
+        public void GetTopNavigationLinks_Root_Success()
         {
             Localization testLocalization = TestFixture.ParentLocalization;
 
@@ -88,35 +88,43 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(navLinks, "navLinks");
             OutputJson(navLinks);
 
-            Assert.IsNotNull(navLinks.Items, "navLinks.Items");
             Assert.AreEqual(1, navLinks.Items.Count, "navLinks.Items.Count");
-
-            Link keyword2Link = navLinks.Items.FirstOrDefault(link => link.LinkText == "Top-level Keyword 2");
-            Assert.IsNotNull(keyword2Link, "keyword2Link");
-            Assert.AreEqual("/autotest-parent/regression/taxonomy/index.html", keyword2Link.Url, "keyword2Link.Url");
-            Assert.AreEqual("Top-level Keyword 2 (concrete)", keyword2Link.AlternateText, "keyword2Link.AlternateText");
+            AssertValidLink(navLinks.Items[0], "/autotest-parent/regression/taxonomy/index", "Top-level Keyword 2", "Top-level Keyword 2 (concrete)", "navLinks.Items[0]");
         }
 
-        [TestMethod, Ignore]
-        public void GetContextNavigationLinks_Success()
+        [TestMethod]
+        public void GetContextNavigationLinks_TaxonomyTestPage2_Success()
         {
+            const string testUrlPath = TestFixture.TaxonomyTestPage2UrlPath;
             Localization testLocalization = TestFixture.ParentLocalization;
 
-            NavigationLinks navLinks = _testNavigationProvider.GetContextNavigationLinks(testLocalization.Path, testLocalization);
+            NavigationLinks navLinks = _testNavigationProvider.GetContextNavigationLinks(testUrlPath, testLocalization);
 
             Assert.IsNotNull(navLinks, "navLinks");
-            // TODO
+            OutputJson(navLinks);
+
+            Assert.AreEqual(3, navLinks.Items.Count, "navLinks.Items.Count");
+            AssertValidLink(navLinks.Items[0], "/autotest-parent/regression/taxonomy/index", "Navigation Taxonomy Index Page", null, "navLinks.Items[0]");
+            AssertValidLink(navLinks.Items[1], "/autotest-parent/regression/taxonomy/nav-taxonomy-test-2", "Navigation Taxonomy Test Page 2", null, "navLinks.Items[1]");
+            AssertValidLink(navLinks.Items[2], "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1", "Navigation Taxonomy Test Page 1", null, "navLinks.Items[2]");
         }
 
-        [TestMethod, Ignore]
-        public void GetBreadcrumbNavigationLinks_Success()
+        [TestMethod]
+        public void GetBreadcrumbNavigationLinks_TaxonomyTestPage1_Success()
         {
+            const string testUrlPath = TestFixture.TaxonomyTestPage1UrlPath;
             Localization testLocalization = TestFixture.ParentLocalization;
 
-            NavigationLinks navLinks = _testNavigationProvider.GetBreadcrumbNavigationLinks(testLocalization.Path + "index", testLocalization);
+            NavigationLinks navLinks = _testNavigationProvider.GetBreadcrumbNavigationLinks(testUrlPath, testLocalization);
 
             Assert.IsNotNull(navLinks, "navLinks");
-            // TODO
+            OutputJson(navLinks);
+
+            Assert.AreEqual(4, navLinks.Items.Count, "navLinks.Items.Count");
+            AssertValidLink(navLinks.Items[0], null, "Top-level Keyword 1", "Top-level Keyword 1 (abstract)", "navLinks.Items[0]");
+            AssertValidLink(navLinks.Items[1], null, "Keyword 1.1", "First child Keyword of Top-level Keyword 1", "navLinks.Items[1]");
+            AssertValidLink(navLinks.Items[2], null, "Keyword 1.1.2", "Second child Keyword of Keyword 1.1", "navLinks.Items[2]");
+            AssertValidLink(navLinks.Items[3], "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1", "Navigation Taxonomy Test Page 1", null, "navLinks.Items[3]");
         }
     }
 }

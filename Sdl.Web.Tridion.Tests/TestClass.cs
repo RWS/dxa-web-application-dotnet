@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -40,6 +41,13 @@ namespace Sdl.Web.Tridion.Tests
                 Console.WriteLine("Expected exception was thrown by action {0}:", actionName);
                 Console.WriteLine(ex.ToString());
             }
+        }
+
+        protected static void AssertValidLink(Link link, string urlPath, string linkText, string alternateText, string message)
+        {
+            Assert.AreEqual(urlPath, link.Url, message + ".Url");
+            Assert.AreEqual(linkText, link.LinkText, message + ".LinkText");
+            Assert.AreEqual(alternateText, link.AlternateText, message + ".AlternateText");
         }
     }
 }
