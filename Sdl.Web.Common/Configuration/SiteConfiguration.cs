@@ -28,6 +28,11 @@ namespace Sdl.Web.Common.Configuration
 
         #region References to "providers"
         /// <summary>
+        /// Gets the Cache Provider.
+        /// </summary>
+        public static ICacheProvider CacheProvider { get; private set; }
+
+        /// <summary>
         /// Gets the Content Provider used for obtaining the Page and Entity Models and Static Content.
         /// </summary>
         public static IContentProvider ContentProvider { get; private set; }
@@ -96,6 +101,7 @@ namespace Sdl.Web.Common.Configuration
         {
             using (new Tracer())
             {
+                CacheProvider = GetProvider<ICacheProvider>(dependencyResolver);
                 ContentProvider = GetProvider<IContentProvider>(dependencyResolver);
                 NavigationProvider = GetProvider<INavigationProvider>(dependencyResolver);
                 ContextClaimsProvider = GetProvider<IContextClaimsProvider>(dependencyResolver);

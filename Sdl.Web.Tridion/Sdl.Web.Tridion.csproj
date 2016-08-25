@@ -135,6 +135,12 @@
     <Reference Include="Tridion.ContentDelivery.UGC">
       <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Tridion.ContentDelivery.UGC.dll</HintPath>
     </Reference>
+    <Reference Include="Sdl.Web.Delivery.Dynamic">
+      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Sdl.Web.Delivery.Dynamic.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.Delivery.Model">
+      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Sdl.Web.Delivery.Model.dll</HintPath>
+    </Reference>
     <Reference Include="Sdl.Web.Context.Api">
       <HintPath>..\packages\Sdl.Web.Context.Client.8.2.0\lib\net45\Sdl.Web.Context.Api.dll</HintPath>
     </Reference>
@@ -171,6 +177,7 @@
     <Compile Include="ContentManager\InvalidTcmUriException.cs" />
     <Compile Include="ContentManager\ItemTypes.cs" />
     <Compile Include="Context\AdfContextClaimsProvider.cs" />
+    <Compile Include="DefaultCacheProvider.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Linking\DefaultLinkResolver.cs" />
     <Compile Include="LocalizationResolver.cs" />

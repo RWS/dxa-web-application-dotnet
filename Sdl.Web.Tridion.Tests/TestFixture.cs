@@ -27,6 +27,7 @@ namespace Sdl.Web.Tridion.Tests
 
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
+            { typeof(ICacheProvider), new DefaultCacheProvider() },
             { typeof(IContentProvider), new DefaultContentProvider() },
             { typeof(INavigationProvider), new StaticNavigationProvider() },
             { typeof(ILinkResolver), new DefaultLinkResolver() },

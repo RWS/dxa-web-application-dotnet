@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
@@ -8,6 +9,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Entity;
+using Sdl.Web.Tridion.ContentManager;
 using Tridion.ContentDelivery.Meta;
 using Tridion.ContentDelivery.Taxonomies;
 using TaxonomyFactory = Tridion.ContentDelivery.Taxonomies.TaxonomyFactory;
@@ -20,6 +22,8 @@ namespace Sdl.Web.Tridion.Navigation
     public class DynamicNavigationProvider : INavigationProvider
     {
         private const string TaxonomyNavigationMarker = "[Navigation]";
+        private const string TaxonomyCacheRegionName = "Taxonomy";
+        private const string NavTaxonomyCacheRegionName = "NavTaxonomy";
 
         private static readonly Regex _pageTitleRegex = new Regex(@"(?<sequence>\d\d\d)?\s*(?<title>.*)", RegexOptions.Compiled);
 
@@ -33,13 +37,14 @@ namespace Sdl.Web.Tridion.Navigation
         {
             using (new Tracer(localization))
             {
-                // TODO PERF: Constructing the entire Navigation Model dynamically is very expensive; this must be cached properly.
-                string navTaxonomyId = GetNavigationTaxonomyId(localization);
+                string navTaxonomyUri = GetNavigationTaxonomyUri(localization);
 
-                TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
-                Keyword taxonomyRoot = taxonomyFactory.GetTaxonomyKeywords(navTaxonomyId, new DepthFilter(DepthFilter.UnlimitedDepth, DepthFilter.FilterDown));
-
-                return CreateTaxonomyNode(taxonomyRoot, localization);
+                return SiteConfiguration.CacheProvider.GetOrAdd(
+                    localization.LocalizationId, // key
+                    TaxonomyCacheRegionName, 
+                    () => BuildNavigationModel(navTaxonomyUri, localization), 
+                    new [] { navTaxonomyUri } // dependency on Taxonomy
+                    );
             }
         }
 
@@ -53,10 +58,10 @@ namespace Sdl.Web.Tridion.Navigation
         {
             using (new Tracer(requestUrlPath, localization))
             {
-                string navTaxonomyId = GetNavigationTaxonomyId(localization);
+                string navTaxonomyUri = GetNavigationTaxonomyUri(localization);
 
                 TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
-                Keyword taxonomyRoot = taxonomyFactory.GetTaxonomyKeywords(navTaxonomyId, new DepthFilter(1, DepthFilter.FilterDown));
+                Keyword taxonomyRoot = taxonomyFactory.GetTaxonomyKeywords(navTaxonomyUri, new DepthFilter(1, DepthFilter.FilterDown));
 
                 TaxonomyNode rootNode = CreateTaxonomyNode(taxonomyRoot, localization);
                 IEnumerable<SitemapItem> topLevelItems = rootNode.Items.Where(i => i.Visible && !string.IsNullOrEmpty(i.Url));
@@ -97,11 +102,49 @@ namespace Sdl.Web.Tridion.Navigation
         }
         #endregion
 
-        private string GetNavigationTaxonomyId(Localization localization)
+        private SitemapItem BuildNavigationModel(string navTaxonomyUri, Localization localization)
+        {
+            using (new Tracer(navTaxonomyUri, localization))
+            {
+                TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
+                Keyword taxonomyRoot = taxonomyFactory.GetTaxonomyKeywords(navTaxonomyUri, new DepthFilter(DepthFilter.UnlimitedDepth, DepthFilter.FilterDown));
+
+                return CreateTaxonomyNode(taxonomyRoot, localization);
+            }
+        }
+
+
+
+        private static IEnumerable<Keyword> GetTaxonomyKeywordsForPage(string pageUri, string taxonomyUri, int depth = -1)
+        {
+
+            // TODO: Tridion.ContentDelivery.Taxonomies.TaxonomyRelationManager is missing in CIL 8.2. See CRQ-2380.
+#if TRIDION_71
+            global::Tridion.ContentDelivery.Taxonomies.TaxonomyRelationManager taxonomyRelationManager = new global::Tridion.ContentDelivery.Taxonomies.TaxonomyRelationManager();
+            return taxonomyRelationManager.GetTaxonomyKeywords(taxonomyUri, classifiedItemUri, null, new DepthFilter(depth, DepthFilter.FilterUp), (int) ItemType.Page);
+#else
+            Sdl.Web.Delivery.Dynamic.Taxonomies.Filters.ITaxonomyFilter ancestorsFilter = new Sdl.Web.Delivery.Dynamic.Taxonomies.Filters.DepthFilter(depth, DepthFilter.FilterUp);
+            Sdl.Web.Delivery.Dynamic.Taxonomies.TaxonomyRelationManager taxonomyRelationManager = new Sdl.Web.Delivery.Dynamic.Taxonomies.TaxonomyRelationManager();
+            IEnumerable<Sdl.Web.Delivery.Model.Taxonomies.IKeyword> keywords = taxonomyRelationManager.GetTaxonomyKeywords(taxonomyUri, pageUri, null, ancestorsFilter, (int) ItemType.Page);
+
+            ConstructorInfo wrapConstructor = typeof(Keyword).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(Sdl.Web.Delivery.Model.Taxonomies.IKeyword) }, null);
+            return keywords.Select(k => (Keyword) wrapConstructor.Invoke(new object[] {k})).ToArray();
+#endif
+        }
+
+        private static string GetNavigationTaxonomyUri(Localization localization)
+        {
+            return SiteConfiguration.CacheProvider.GetOrAdd(
+                localization.LocalizationId, // key
+                NavTaxonomyCacheRegionName,
+                () => ResolveNavigationTaxonomyUri(localization)
+                );
+        }
+
+        private static string ResolveNavigationTaxonomyUri(Localization localization)
         {
             using (new Tracer(localization))
             {
-                // TODO PERF: this is rather expensive; cache it somehow.
                 TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
                 string[] taxonomyIds = taxonomyFactory.GetTaxonomies(GetPublicationTcmUri(localization));
 
