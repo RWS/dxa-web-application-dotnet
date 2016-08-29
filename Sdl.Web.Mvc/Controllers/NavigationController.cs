@@ -100,28 +100,18 @@ namespace Sdl.Web.Mvc.Controllers
         {
             using (new Tracer(sitemapItemId))
             {
-                NameValueCollection queryParams = Request.QueryString;
-                string includeAncestorsParam = queryParams["includeAncestors"];
-                string descendantLevels = queryParams["descendantLevels"];
-                string includeRelatedParam = queryParams["includeRelated"];
-                string includeCustomMetadataParam = queryParams["includeCustomMetadata"];
+                NavigationFilter navFilter = new NavigationFilter
+                {
+                    DescendantLevels = GetRequestParameter<int>("descendantLevels"),
+                    IncludeAncestors = GetRequestParameter<bool>("includeAncestors"),
+                    IncludeRelated = GetRequestParameter<bool>("includeRelated"),
+                    IncludeCustomMetadata = GetRequestParameter<bool>("includeCustomMetadata")
+                };
 
-                NavigationFilter navFilter = new NavigationFilter();
-                if (!string.IsNullOrEmpty(includeAncestorsParam))
+                if (navFilter.DescendantLevels == 0)
                 {
-                    navFilter.IncludeAncestors = Convert.ToBoolean(includeAncestorsParam);
-                }
-                if (!string.IsNullOrEmpty(descendantLevels))
-                {
-                    navFilter.DecendantLevels = Convert.ToInt32(descendantLevels);
-                }
-                if (!string.IsNullOrEmpty(includeRelatedParam))
-                {
-                    navFilter.IncludeRelated = Convert.ToBoolean(includeRelatedParam);
-                }
-                if (!string.IsNullOrEmpty(includeCustomMetadataParam))
-                {
-                    navFilter.IncludeCustomMetadata = Convert.ToBoolean(includeCustomMetadataParam);
+                    // GetRequestParameter<int> defaults to 0, but we want to use 1 as default value for NavigationFilter.DescendantLevel (0 doesn't make much sense).
+                    navFilter.DescendantLevels = 1;
                 }
 
                 IOnDemandNavigationProvider onDemandNavigationProvider = SiteConfiguration.NavigationProvider as IOnDemandNavigationProvider;

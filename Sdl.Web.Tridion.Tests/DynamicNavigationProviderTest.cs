@@ -167,7 +167,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetNavigationSubtree_TaxonomyRootsAndChildren_Success()
         {
-            NavigationFilter testNavFilter = new NavigationFilter { DecendantLevels = 2 };
+            NavigationFilter testNavFilter = new NavigationFilter { DescendantLevels = 2 };
 
             SitemapItem[] taxonomyRoots = _testOnDemandNavigationProvider.GetNavigationSubtree(null, testNavFilter, TestFixture.ParentLocalization).ToArray();
 
@@ -183,7 +183,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetNavigationSubtree_FullTaxonomies_Success()
         {
-            NavigationFilter testNavFilter = new NavigationFilter { DecendantLevels = -1 };
+            NavigationFilter testNavFilter = new NavigationFilter { DescendantLevels = -1 };
 
             SitemapItem[] taxonomyRoots = _testOnDemandNavigationProvider.GetNavigationSubtree(null, testNavFilter, TestFixture.ParentLocalization).ToArray();
 
@@ -209,7 +209,7 @@ namespace Sdl.Web.Tridion.Tests
         public void GetNavigationSubtree_TestTaxonomyChildren_Success()
         {
             TaxonomyNode testTaxonomyRoot = GetTestTaxonomy();
-            NavigationFilter testNavFilter = new NavigationFilter();
+            NavigationFilter testNavFilter = new NavigationFilter { IncludeRelated = true };
 
             SitemapItem[] childItems = _testOnDemandNavigationProvider.GetNavigationSubtree(testTaxonomyRoot.Id, testNavFilter, TestFixture.ParentLocalization).ToArray();
             Assert.IsNotNull(childItems, "childItems");
@@ -217,13 +217,18 @@ namespace Sdl.Web.Tridion.Tests
 
             Assert.AreEqual(2, childItems.Length, "childItems.Length");
             AssertNoChildItems(childItems, "childItems");
+
+            TaxonomyNode topLevelKeyword1 = childItems.FirstOrDefault(i => i.Title == TestFixture.TopLevelKeyword1Title) as TaxonomyNode;
+            Assert.IsNotNull(topLevelKeyword1, "topLevelkeyword1");
+            Assert.IsNotNull(topLevelKeyword1.RelatedTaxonomyNodeIds, "topLevelkeyword1.RelatedTaxonomyNodeIds"); // IncludeRelated = true
+            // TODO TSI-1880: Assert.AreEqual(1, topLevelkeyword1.RelatedTaxonomyNodeIds.Count, "topLevelkeyword1.RelatedTaxonomyNodeIds.Count");
         }
 
         [TestMethod]
         public void GetNavigationSubtree_TestTaxonomy2LevelDescendants_Success()
         {
             TaxonomyNode testTaxonomyRoot = GetTestTaxonomy();
-            NavigationFilter testNavFilter = new NavigationFilter { DecendantLevels = 2 };
+            NavigationFilter testNavFilter = new NavigationFilter { DescendantLevels = 2 };
 
             SitemapItem[] childItems = _testOnDemandNavigationProvider.GetNavigationSubtree(testTaxonomyRoot.Id, testNavFilter, TestFixture.ParentLocalization).ToArray();
             Assert.IsNotNull(childItems, "childItems");
@@ -233,6 +238,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(topLevelKeyword1, "topLevelKeyword1");
             Assert.IsNotNull(topLevelKeyword1.Items, "topLevelKeyword1.Items");
             AssertNoChildItems(topLevelKeyword1.Items, "topLevelKeyword1.Items");
+            Assert.IsNull(topLevelKeyword1.RelatedTaxonomyNodeIds, "topLevelkeyword1.RelatedTaxonomyNodeIds"); // IncludeRelated = false
         }
 
         private static TaxonomyNode GetTestTaxonomy(IEnumerable<SitemapItem> taxonomyRoots = null)

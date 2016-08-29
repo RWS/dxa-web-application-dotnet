@@ -3,20 +3,20 @@
     public class NavigationFilter
     {
         public bool IncludeAncestors { get; set; }
-        public int DecendantLevels { get; set; }
+        public int DescendantLevels { get; set; }
         public bool IncludeRelated { get; set; }
         public bool IncludeCustomMetadata { get; set; }
 
         public NavigationFilter()
         {
-            DecendantLevels = 1;
+            DescendantLevels = 1;
         }
 
         public override string ToString()
         {
             return string.Format(
                 "IncludeAncestors={0], DecendantLevels={1}, IncludeRelated={2} IncludeCustomMetadata={3}", 
-                IncludeAncestors, DecendantLevels, IncludeRelated, IncludeCustomMetadata
+                IncludeAncestors, DescendantLevels, IncludeRelated, IncludeCustomMetadata
                 );
         }
     }

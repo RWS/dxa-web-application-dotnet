@@ -191,7 +191,7 @@ namespace Sdl.Web.Tridion.Navigation
                 TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
                 string[] taxonomyIds = taxonomyFactory.GetTaxonomies(GetPublicationTcmUri(localization));
 
-                int depth= filter.DecendantLevels > 0 ? (filter.DecendantLevels - 1) : filter.DecendantLevels;
+                int depth= filter.DescendantLevels > 0 ? (filter.DescendantLevels - 1) : filter.DescendantLevels;
                 TaxonomyFilter taxonomyFilter = new DepthFilter(depth, DepthFilter.FilterDown);
                 IEnumerable<Keyword> taxonomyRoots = taxonomyIds.Select(id => taxonomyFactory.GetTaxonomyKeywords(id, taxonomyFilter));
 
@@ -204,9 +204,9 @@ namespace Sdl.Web.Tridion.Navigation
             using (new Tracer(taxonomyUri, keywordUri, filter, localization))
             {
                 TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
-                TaxonomyFilter taxonomyFilter = new DepthFilter(filter.DecendantLevels, DepthFilter.FilterDown);
+                TaxonomyFilter taxonomyFilter = new DepthFilter(filter.DescendantLevels, DepthFilter.FilterDown);
                 Keyword contextKeyword = taxonomyFactory.GetTaxonomyKeywords(taxonomyUri, taxonomyFilter, keywordUri);
-                TaxonomyNode contextTaxonomyNode = CreateTaxonomyNode(contextKeyword, filter.DecendantLevels, filter, localization);
+                TaxonomyNode contextTaxonomyNode = CreateTaxonomyNode(contextKeyword, filter.DescendantLevels, filter, localization);
                 return contextTaxonomyNode.Items;
             }
         }
