@@ -17,6 +17,7 @@ namespace Sdl.Web.Tridion.Navigation
     /// </summary>
     public class StaticNavigationProvider : INavigationProvider
     {
+        private const string NavigationCacheRegionName = "Navigation_Static";
 
         #region INavigationProvider Members
 
@@ -29,35 +30,12 @@ namespace Sdl.Web.Tridion.Navigation
         {
             using (new Tracer(localization))
             {
-                string url = SiteConfiguration.LocalizeUrl("navigation.json", localization);
-                // TODO TSI-110: This is a temporary measure to cache the Navigation Model per request to not retrieve and serialize 3 times per request. Comprehensive caching strategy pending
-                string cacheKey = "navigation-" + url;
-                HttpContext httpContext = HttpContext.Current;
-                if (httpContext != null && httpContext.Items[cacheKey] != null)
-                {
-                    Log.Debug("Obtained Navigation Model from cache.");
-                    return (SitemapItem) HttpContext.Current.Items[cacheKey];
-                }
-
-                Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", url);
-                IRawDataProvider rawDataProvider = SiteConfiguration.ContentProvider as IRawDataProvider;
-                if (rawDataProvider == null)
-                {
-                    throw new DxaException(
-                        string.Format("The current Content Provider '{0}' does not implement interface '{1}' and hence cannot be used in combination with Navigation Provider '{2}'.",
-                            SiteConfiguration.ContentProvider.GetType().FullName, typeof(IRawDataProvider).FullName, GetType().FullName)
-                        );
-                }
-
-                string navigationJsonString = rawDataProvider.GetPageContent(url, localization);
-                SitemapItem result = JsonConvert.DeserializeObject<SitemapItem>(navigationJsonString);
-
-                if (httpContext != null)
-                {
-                    httpContext.Items[cacheKey] = result;
-                }
-
-                return result;
+                return SiteConfiguration.CacheProvider.GetOrAdd(
+                    localization.LocalizationId,
+                    NavigationCacheRegionName,
+                    () => BuildNavigationModel(localization)
+                    // TODO: dependency on navigation.json Page
+                    );
             }
         }
 
@@ -150,6 +128,26 @@ namespace Sdl.Web.Tridion.Navigation
             }
         }
         #endregion
+
+        private SitemapItem BuildNavigationModel(Localization localization)
+        {
+            using (new Tracer(localization))
+            {
+                string navigationJsonUrlPath = SiteConfiguration.LocalizeUrl("navigation.json", localization);
+
+                Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", navigationJsonUrlPath);
+                IRawDataProvider rawDataProvider = SiteConfiguration.ContentProvider as IRawDataProvider;
+                if (rawDataProvider == null)
+                {
+                    throw new DxaException(
+                        string.Format("The current Content Provider '{0}' does not implement interface '{1}' and hence cannot be used in combination with Navigation Provider '{2}'.",
+                            SiteConfiguration.ContentProvider.GetType().FullName, typeof(IRawDataProvider).FullName, GetType().FullName)
+                        );
+                }
+
+                return JsonConvert.DeserializeObject<SitemapItem>(rawDataProvider.GetPageContent(navigationJsonUrlPath, localization));
+            }
+        }
 
         private static SitemapItem RewriteIndexPage(SitemapItem sitemapItem, SitemapItem parentSitemapItem)
         {
