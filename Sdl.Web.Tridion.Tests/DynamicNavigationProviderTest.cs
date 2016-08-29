@@ -241,11 +241,104 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNull(topLevelKeyword1.RelatedTaxonomyNodeIds, "topLevelkeyword1.RelatedTaxonomyNodeIds"); // IncludeRelated = false
         }
 
-        private static TaxonomyNode GetTestTaxonomy(IEnumerable<SitemapItem> taxonomyRoots = null)
+        [TestMethod]
+        public void GetNavigationSubtree_IncludeAncestorsKeyword_Success()
+        {
+            TaxonomyNode testTaxonomyRoot = GetTestTaxonomy(null, -1);
+            TaxonomyNode testTopLevelKeyword1 = testTaxonomyRoot.Items.FirstOrDefault(i => i.Title == TestFixture.TopLevelKeyword1Title) as TaxonomyNode;
+            Assert.IsNotNull(testTopLevelKeyword1, "testTopLevelKeyword1");
+            TaxonomyNode testKeyword11 = testTopLevelKeyword1.Items.FirstOrDefault(i => i.Title == TestFixture.Keyword1_1Title) as TaxonomyNode;
+            Assert.IsNotNull(testKeyword11, "testKeyword11");
+            NavigationFilter testNavFilter = new NavigationFilter { IncludeAncestors = true, DescendantLevels = 0 };
+
+            SitemapItem[] ancestorItems = _testOnDemandNavigationProvider.GetNavigationSubtree(testKeyword11.Id, testNavFilter, TestFixture.ParentLocalization).ToArray();
+            Assert.IsNotNull(ancestorItems, "ancestorItems");
+            OutputJson(ancestorItems);
+
+            // Result should be the Taxonomy Root only; the ancestor chain is formed using SitemapItem.Items.
+            Assert.AreEqual(1, ancestorItems.Length, "ancestorItems.Length"); 
+            TaxonomyNode taxonomyRoot = ancestorItems[0] as TaxonomyNode;
+            Assert.IsNotNull(taxonomyRoot, "taxonomyRoot");
+            Assert.AreEqual(testTaxonomyRoot.Title, taxonomyRoot.Title, "taxonomyRoot.Title");
+            Assert.IsNotNull(taxonomyRoot.Items, "taxonomyRoot.Items");
+            Assert.AreEqual(1, taxonomyRoot.Items.Count, "taxonomyRoot.Items.Count");
+
+            TaxonomyNode topLevelKeyword1 = taxonomyRoot.Items[0] as TaxonomyNode;
+            Assert.IsNotNull(topLevelKeyword1, "topLevelKeyword1");
+            Assert.AreEqual(testTopLevelKeyword1.Title, topLevelKeyword1.Title, "topLevelKeyword1.Title");
+            Assert.IsNotNull(topLevelKeyword1.Items, "topLevelKeyword1.Items");
+            Assert.AreEqual(1, topLevelKeyword1.Items.Count, "topLevelKeyword1.Items.Count");
+
+            TaxonomyNode keyword11 = topLevelKeyword1.Items[0] as TaxonomyNode;
+            Assert.IsNotNull(keyword11, "keyword11");
+            Assert.AreEqual(testKeyword11.Title, keyword11.Title, "keyword11.Title");
+            Assert.IsNull(keyword11.Items, "keyword11.Items");
+
+        }
+
+        [TestMethod]
+        public void GetNavigationSubtree_IncludeAncestorsClassifiedPage_Success()
+        {
+            Localization testLocalization = TestFixture.ParentLocalization;
+            TaxonomyNode testTaxonomyRoot = GetTestTaxonomy(null, -1);
+            TaxonomyNode testTopLevelKeyword1 = testTaxonomyRoot.Items.FirstOrDefault(i => i.Title == TestFixture.TopLevelKeyword1Title) as TaxonomyNode;
+            Assert.IsNotNull(testTopLevelKeyword1, "testTopLevelKeyword1");
+            TaxonomyNode testKeyword11 = testTopLevelKeyword1.Items.FirstOrDefault(i => i.Title == TestFixture.Keyword1_1Title) as TaxonomyNode;
+            Assert.IsNotNull(testKeyword11, "testKeyword11");
+            PageModel testPageModel = SiteConfiguration.ContentProvider.GetPageModel(TestFixture.TaxonomyTestPage1UrlPath, testLocalization);
+            string testPageSitemapItemId = string.Format("{0}-p{1}", testTaxonomyRoot.Id, testPageModel.Id);
+            NavigationFilter testNavFilter = new NavigationFilter { IncludeAncestors = true, DescendantLevels = 0 };
+
+            SitemapItem[] ancestorItems = _testOnDemandNavigationProvider.GetNavigationSubtree(testPageSitemapItemId, testNavFilter, testLocalization).ToArray();
+            Assert.IsNotNull(ancestorItems, "ancestorItems");
+            OutputJson(ancestorItems);
+
+            // Result should be the Taxonomy Root only; it acts as the subtree root for all ancestors.
+            Assert.AreEqual(1, ancestorItems.Length, "ancestorItems.Length");
+            TaxonomyNode taxonomyRoot = ancestorItems[0] as TaxonomyNode;
+            Assert.IsNotNull(taxonomyRoot, "taxonomyRoot");
+            Assert.AreEqual(testTaxonomyRoot.Title, taxonomyRoot.Title, "taxonomyRoot.Title");
+            Assert.IsNotNull(taxonomyRoot.Items, "taxonomyRoot.Items");
+            Assert.AreEqual(2, taxonomyRoot.Items.Count, "taxonomyRoot.Items.Count");
+
+            TaxonomyNode topLevelKeyword1 = taxonomyRoot.Items.FirstOrDefault(i => i.Title == TestFixture.TopLevelKeyword1Title) as TaxonomyNode;
+            Assert.IsNotNull(topLevelKeyword1, "topLevelKeyword1");
+            Assert.IsNotNull(topLevelKeyword1.Items, "topLevelKeyword1.Items");
+            Assert.AreEqual(2, topLevelKeyword1.Items.Count, "topLevelKeyword1.Items.Count");
+
+            TaxonomyNode keyword11 = topLevelKeyword1.Items.FirstOrDefault(i => i.Title == TestFixture.Keyword1_1Title) as TaxonomyNode;
+            Assert.IsNotNull(keyword11, "keyword11");
+            Assert.IsNotNull(keyword11.Items, "keyword11.Items");
+            Assert.AreEqual(1, keyword11.Items.Count, "keyword11.Items.Count");
+
+            TaxonomyNode topLevelKeyword2 = taxonomyRoot.Items.FirstOrDefault(i => i.Title == TestFixture.TopLevelKeyword2Title) as TaxonomyNode;
+            Assert.IsNotNull(topLevelKeyword2, "topLevelKeyword2");
+            Assert.IsNull(topLevelKeyword2.Items, "topLevelKeyword2.Items");
+        }
+
+
+        [TestMethod]
+        public void GetNavigationSubtree_IncludeAncestorsUnclassifiedPage_Success()
+        {
+            Localization testLocalization = TestFixture.ParentLocalization;
+            TaxonomyNode testTaxonomyRoot = GetTestTaxonomy();
+            PageModel testPageModel = SiteConfiguration.ContentProvider.GetPageModel(TestFixture.ArticlePageUrlPath, testLocalization);
+            string testPageSitemapItemId = string.Format("{0}-p{1}", testTaxonomyRoot.Id, testPageModel.Id);
+            NavigationFilter testNavFilter = new NavigationFilter { IncludeAncestors = true, DescendantLevels = 0 };
+
+            SitemapItem[] ancestorItems = _testOnDemandNavigationProvider.GetNavigationSubtree(testPageSitemapItemId, testNavFilter, testLocalization).ToArray();
+            Assert.IsNotNull(ancestorItems, "ancestorItems");
+            OutputJson(ancestorItems);
+
+            Assert.AreEqual(0, ancestorItems.Length, "ancestorItems.Length");
+        }
+
+        private static TaxonomyNode GetTestTaxonomy(IEnumerable<SitemapItem> taxonomyRoots = null, int descendantLevels = 1)
         {
             if (taxonomyRoots == null)
             {
-                taxonomyRoots = _testOnDemandNavigationProvider.GetNavigationSubtree(null, new NavigationFilter(), TestFixture.ParentLocalization);
+                NavigationFilter navFilter = new NavigationFilter { DescendantLevels = descendantLevels };
+                taxonomyRoots = _testOnDemandNavigationProvider.GetNavigationSubtree(null, navFilter, TestFixture.ParentLocalization);
             }
 
             TaxonomyNode result = taxonomyRoots.FirstOrDefault(tn => tn.Title == TestFixture.NavigationTaxonomyTitle) as TaxonomyNode;

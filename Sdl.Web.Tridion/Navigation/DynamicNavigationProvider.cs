@@ -27,7 +27,7 @@ namespace Sdl.Web.Tridion.Navigation
         private const string IndexPageUrlSuffix = "/index";
 
         private static readonly Regex _pageTitleRegex = new Regex(@"(?<sequence>\d\d\d)?\s*(?<title>.*)", RegexOptions.Compiled);
-        private static readonly Regex _sitemapItemIdRegex = new Regex(@"^t(?<taxonomyId>\d+)(-(k(?<keywordId>\d+)))?$", RegexOptions.Compiled);
+        private static readonly Regex _sitemapItemIdRegex = new Regex(@"^t(?<taxonomyId>\d+)((-k(?<keywordId>\d+))|(-p(?<pageId>\d+)))?$", RegexOptions.Compiled);
         private static readonly INavigationProvider _fallbackNavigationProvider = new StaticNavigationProvider();
 
         #region INavigationProvider members
@@ -166,7 +166,7 @@ namespace Sdl.Web.Tridion.Navigation
                     return ExpandTaxonomyRoots(filter, localization);
                 }
 
-                // Extract Taxonomy TCM UI and Keyword TCM URI from the Sitemap Item ID
+                // Extract Taxonomy TCM UI, Keyword TCM URI and/or Page TCM URI from the Sitemap Item ID
                 Match sitemapItemIdMatch = _sitemapItemIdRegex.Match(sitemapItemId);
                 if (!sitemapItemIdMatch.Success)
                 {
@@ -176,13 +176,63 @@ namespace Sdl.Web.Tridion.Navigation
                 string taxonomyUri = string.Format("tcm:{0}-{1}-512", publicationId, sitemapItemIdMatch.Groups["taxonomyId"].Value);
                 string keywordId = sitemapItemIdMatch.Groups["keywordId"].Value;
                 string keywordUri = string.IsNullOrEmpty(keywordId) ?  taxonomyUri : string.Format("tcm:{0}-{1}-1024", publicationId, keywordId);
+                string pageId = sitemapItemIdMatch.Groups["pageId"].Value;
+                string pageUri = string.Format("tcm:{0}-{1}-64", publicationId, pageId);
 
-                // TODO: ExpandAncestors
+                IEnumerable<SitemapItem> result = new SitemapItem[0];
+                if (filter.IncludeAncestors)
+                {
+                    TaxonomyNode taxonomyRoot = null;
+                    if (!string.IsNullOrEmpty(keywordId))
+                    {
+                        taxonomyRoot = ExpandAncestorsForKeyword(taxonomyUri, keywordUri, filter, localization);
+                    }
+                    else if (!string.IsNullOrEmpty(pageId))
+                    {
+                        taxonomyRoot = ExpandAncestorsForPage(taxonomyUri, pageUri, filter, localization);
+                    }
 
-                return ExpandDescendants(taxonomyUri, keywordUri, filter, localization);
+                    if (taxonomyRoot != null)
+                    {
+                        if (filter.DescendantLevels == 0)
+                        {
+                            // No descendants have been requested; ensure Items properties are null on the leafs.
+                            PruneLeafs(taxonomyRoot);
+                        }
+                        // TODO: combine with DescendantLevels != 0
+
+                        result = new[] { taxonomyRoot };
+                    }
+                }
+                else if (filter.DescendantLevels != 0)
+                {
+                    result = ExpandDescendants(taxonomyUri, keywordUri, filter, localization);
+                }
+
+                return result;
             }
         }
         #endregion
+
+        private static void PruneLeafs(SitemapItem subtreeRoot)
+        {
+            if (subtreeRoot.Items == null)
+            {
+                return;
+            }
+
+            if (subtreeRoot.Items.Count == 0)
+            {
+                subtreeRoot.Items = null;
+            }
+            else
+            {
+                foreach (SitemapItem childItem in subtreeRoot.Items)
+                {
+                    PruneLeafs(childItem);
+                }
+            }
+        }
 
         private static IEnumerable<SitemapItem> ExpandTaxonomyRoots(NavigationFilter filter, Localization localization)
         {
@@ -211,7 +261,59 @@ namespace Sdl.Web.Tridion.Navigation
             }
         }
 
-        private static IEnumerable<Keyword> GetTaxonomyKeywordsForPage(string pageUri, string taxonomyUri, int depth = -1)
+        private static TaxonomyNode ExpandAncestorsForKeyword(string taxonomyUri, string keywordUri, NavigationFilter filter, Localization localization)
+        {
+            using (new Tracer(taxonomyUri, keywordUri, filter, localization))
+            {
+                TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
+                TaxonomyFilter taxonomyFilter = new DepthFilter(DepthFilter.UnlimitedDepth, DepthFilter.FilterUp);
+                Keyword taxonomyRoot = taxonomyFactory.GetTaxonomyKeywords(taxonomyUri, taxonomyFilter, keywordUri);
+                return CreateTaxonomyNode(taxonomyRoot, -1, filter, localization);
+            }
+        }
+
+        private static TaxonomyNode ExpandAncestorsForPage(string taxonomyUri, string pageUri, NavigationFilter filter, Localization localization)
+        {
+            using (new Tracer(taxonomyUri, pageUri, filter, localization))
+            {
+                // Get TaxonomyKeywordsForPage may return multiple paths towards the (same) Taxonomy root.
+                Keyword[] taxonomyRoots = GetTaxonomyKeywordsForPage(pageUri, taxonomyUri);
+                if (taxonomyRoots == null || taxonomyRoots.Length == 0)
+                {
+                    Log.Debug("No Keywords found for Page '{0}' in Taxonomy '{1}'.", pageUri, taxonomyUri);
+                    return null;
+                }
+
+                TaxonomyNode[] taxonomyRootNodes = taxonomyRoots.Select(kw => CreateTaxonomyNode(kw, -1, filter, localization)).ToArray();
+
+                // Merge all returned paths into a single subtree
+                TaxonomyNode mergedSubtreeRootNode = taxonomyRootNodes[0];
+                foreach (TaxonomyNode taxonomyRootNode in taxonomyRootNodes.Skip(1))
+                {
+                    MergeSubtrees(taxonomyRootNode, mergedSubtreeRootNode);
+                }
+
+                return mergedSubtreeRootNode;
+            }
+        }
+
+        private static void MergeSubtrees(SitemapItem subtreeRoot, SitemapItem subtreeToMergeInto)
+        {
+            foreach (SitemapItem childNode in subtreeRoot.Items)
+            {
+                SitemapItem childKeywordToMergeInto = subtreeToMergeInto.Items.FirstOrDefault(i => i.Id == childNode.Id);
+                if (childKeywordToMergeInto == null)
+                {
+                    subtreeToMergeInto.Items.Add(childNode);
+                }
+                else
+                {
+                    MergeSubtrees(childNode, childKeywordToMergeInto);
+                }
+            }
+        }
+
+        private static Keyword[] GetTaxonomyKeywordsForPage(string pageUri, string taxonomyUri, int depth = -1)
         {
 
             // TODO: Tridion.ContentDelivery.Taxonomies.TaxonomyRelationManager is missing in CIL 8.2. See CRQ-2380.
@@ -285,7 +387,7 @@ namespace Sdl.Web.Tridion.Navigation
                 IEnumerable<TaxonomyNode> childTaxonomyNodes = keyword.KeywordChildren.Cast<Keyword>().Select(kw => CreateTaxonomyNode(kw, expandLevels - 1, filter, localization));
                 childItems.AddRange(childTaxonomyNodes);
 
-                if (classifiedItemsCount > 0)
+                if (classifiedItemsCount > 0 && filter.DescendantLevels != 0)
                 {
                     // Add child SitemapItems for classified Pages (ordered by title)
                     PageMetaFactory pageMetaFactory = new PageMetaFactory(GetPublicationTcmUri(localization));
