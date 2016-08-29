@@ -181,6 +181,31 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetNavigationSubtree_FullTaxonomies_Success()
+        {
+            NavigationFilter testNavFilter = new NavigationFilter { DecendantLevels = -1 };
+
+            SitemapItem[] taxonomyRoots = _testOnDemandNavigationProvider.GetNavigationSubtree(null, testNavFilter, TestFixture.ParentLocalization).ToArray();
+
+            Assert.IsNotNull(taxonomyRoots, "taxonomyRoots");
+            OutputJson(taxonomyRoots);
+
+            TaxonomyNode testTaxonomyRoot = GetTestTaxonomy(taxonomyRoots);
+            Assert.IsNotNull(testTaxonomyRoot.Items, "testTaxonomyRoot.Items");
+            Assert.AreEqual(2, testTaxonomyRoot.Items.Count, "testTaxonomyRoot.Items.Count");
+
+            SitemapItem topLevelKeyword1 = testTaxonomyRoot.Items.FirstOrDefault(i => i.Title == TestFixture.TopLevelKeyword1Title);
+            Assert.IsNotNull(topLevelKeyword1, "topLevelKeyword1");
+            SitemapItem keyword11 = topLevelKeyword1.Items.FirstOrDefault(i => i.Title == TestFixture.Keyword1_1Title);
+            Assert.IsNotNull(keyword11, "keyword11");
+            SitemapItem keyword112 = keyword11.Items.FirstOrDefault(i => i.Title == "Keyword 1.1.2");
+            Assert.IsNotNull(keyword112, "keyword112");
+            Assert.IsNotNull(keyword112.Items, "keyword112.Items");
+            Assert.AreEqual(1, keyword112.Items.Count, "keyword112.Items.Count");
+        }
+
+
+        [TestMethod]
         public void GetNavigationSubtree_TestTaxonomyChildren_Success()
         {
             TaxonomyNode testTaxonomyRoot = GetTestTaxonomy();

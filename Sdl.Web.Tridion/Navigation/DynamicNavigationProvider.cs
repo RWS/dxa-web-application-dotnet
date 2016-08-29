@@ -191,7 +191,7 @@ namespace Sdl.Web.Tridion.Navigation
                 TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
                 string[] taxonomyIds = taxonomyFactory.GetTaxonomies(GetPublicationTcmUri(localization));
 
-                int depth= filter.DecendantLevels > 0 ? (filter.DecendantLevels - 1) : 0;
+                int depth= filter.DecendantLevels > 0 ? (filter.DecendantLevels - 1) : filter.DecendantLevels;
                 TaxonomyFilter taxonomyFilter = new DepthFilter(depth, DepthFilter.FilterDown);
                 IEnumerable<Keyword> taxonomyRoots = taxonomyIds.Select(id => taxonomyFactory.GetTaxonomyKeywords(id, taxonomyFilter));
 
