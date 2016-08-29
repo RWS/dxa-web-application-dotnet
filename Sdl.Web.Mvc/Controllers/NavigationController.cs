@@ -102,16 +102,15 @@ namespace Sdl.Web.Mvc.Controllers
             {
                 NavigationFilter navFilter = new NavigationFilter
                 {
-                    DescendantLevels = GetRequestParameter<int>("descendantLevels"),
                     IncludeAncestors = GetRequestParameter<bool>("includeAncestors"),
                     IncludeRelated = GetRequestParameter<bool>("includeRelated"),
                     IncludeCustomMetadata = GetRequestParameter<bool>("includeCustomMetadata")
                 };
 
-                if (navFilter.DescendantLevels == 0)
+                int descendantLevels;
+                if (TryGetRequestParameter("descendantLevels", out descendantLevels))
                 {
-                    // GetRequestParameter<int> defaults to 0, but we want to use 1 as default value for NavigationFilter.DescendantLevel (0 doesn't make much sense).
-                    navFilter.DescendantLevels = 1;
+                    navFilter.DescendantLevels = descendantLevels;
                 }
 
                 IOnDemandNavigationProvider onDemandNavigationProvider = SiteConfiguration.NavigationProvider as IOnDemandNavigationProvider;

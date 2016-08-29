@@ -162,28 +162,45 @@ namespace Sdl.Web.Mvc.Controllers
         }
 
         /// <summary>
-        /// Gets the (typed) value a a request parameter (from the URL query string) with a given name.
+        /// Gets the typed value of a request parameter (from the URL query string) with a given name.
         /// </summary>
         /// <typeparam name="T">The type of the value.</typeparam>
         /// <param name="name">The name of the parameter.</param>
         /// <returns>The typed value of the request parameter or the default value for the given type if the parameter is not specified or cannot be converted to the type.</returns>
         protected virtual T GetRequestParameter<T>(string name)
         {
+            T value;
+            TryGetRequestParameter(name, out value);
+            return value;
+        }
+
+        /// <summary>
+        /// Tries to get the typed value of a request parameter (from the URL query string) with a given name.
+        /// </summary>
+        /// <typeparam name="T">The type of the value.</typeparam>
+        /// <param name="name">The name of the parameter.</param>
+        /// <param name="value">The typed value of the parameter (output).</param>
+        /// <returns><c>true</c> if the parameter is specified and its value can be converted to the given type; <c>false</c> otherwise.</returns>
+        protected bool TryGetRequestParameter<T>(string name, out T value)
+        {
             string paramValue = Request.Params[name];
             if (string.IsNullOrEmpty(paramValue))
             {
                 Log.Debug("Request parameter '{0}' is not specified.", name);
-                return default(T);
+                value = default(T);
+                return false;
             }
 
             try
             {
-                return (T)Convert.ChangeType(paramValue,typeof(T));
+                value = (T) Convert.ChangeType(paramValue, typeof(T));
+                return true;
             }
             catch (Exception)
             {
                 Log.Warn("Could not convert value for request parameter '{0}' into type {1}. Value: '{2}'.", name, typeof(T).Name, paramValue);
-                return default(T);
+                value = default(T);
+                return false;
             }
         }
 
