@@ -28,18 +28,20 @@ namespace Sdl.Web.Tridion.Tests
             Console.WriteLine(json);
         }
 
-        protected void AssertThrowsException<TException>(Action action, string actionName = null)
+        protected TException AssertThrowsException<TException>(Action action, string actionName = null)
             where TException : Exception
         {
             try
             {
                 action();
                 Assert.Fail("Action {0} did not throw an exception. Expected exception {1}.", actionName, typeof(TException).Name);
+                return null; // Should never get here
             }
             catch (TException ex)
             {
                 Console.WriteLine("Expected exception was thrown by action {0}:", actionName);
                 Console.WriteLine(ex.ToString());
+                return ex;
             }
         }
 

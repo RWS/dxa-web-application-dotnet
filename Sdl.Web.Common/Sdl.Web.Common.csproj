@@ -102,6 +102,7 @@
     <Compile Include="Interfaces\ILinkResolver.cs" />
     <Compile Include="Interfaces\ILocalizationResolver.cs" />
     <Compile Include="Interfaces\INavigationProvider.cs" />
+    <Compile Include="Interfaces\IOnDemandNavigationProvider.cs" />
     <Compile Include="Interfaces\IRichTextProcessor.cs" />
     <Compile Include="Interfaces\IUnknownLocalizationHandler.cs" />
     <Compile Include="Interfaces\LegacyContentResolverFacade.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="Models\Legacy\IEntity.cs" />
     <Compile Include="Interfaces\IMediaHelper.cs" />
     <Compile Include="Models\Legacy\IRegion.cs" />
+    <Compile Include="Models\Navigation\NavigationFilter.cs" />
     <Compile Include="Models\PageModelWithHttpResponseData.cs" />
     <Compile Include="Models\RichText.cs" />
     <Compile Include="Models\SemanticAttributes.cs" />
@@ -141,8 +143,8 @@
     <Compile Include="Interfaces\ILogger.cs" />
     <Compile Include="Interfaces\IRenderer.cs" />
     <Compile Include="Interfaces\IStaticFileManager.cs" />
-    <Compile Include="Models\Entity\NavigationLinks.cs" />
-    <Compile Include="Models\Entity\SitemapItem.cs" />
+    <Compile Include="Models\Navigation\NavigationLinks.cs" />
+    <Compile Include="Models\Navigation\SitemapItem.cs" />
     <Compile Include="Models\PageModel.cs" />
     <Compile Include="Models\Legacy\PageBase.cs" />
     <Compile Include="Models\Legacy\Region.cs" />
