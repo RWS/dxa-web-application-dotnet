@@ -182,11 +182,11 @@ namespace Sdl.Web.Tridion.Navigation
                     TaxonomyNode taxonomyRoot = null;
                     if (!string.IsNullOrEmpty(keywordId))
                     {
-                        taxonomyRoot = ExpandAncestorsForKeyword(taxonomyUri, keywordUri, filter, localization);
+                        taxonomyRoot = ExpandAncestorsForKeyword(keywordUri, taxonomyUri, filter, localization);
                     }
                     else if (!string.IsNullOrEmpty(pageId))
                     {
-                        taxonomyRoot = ExpandAncestorsForPage(taxonomyUri, pageUri, filter, localization);
+                        taxonomyRoot = ExpandAncestorsForPage(pageUri, taxonomyUri, filter, localization);
                     }
 
                     if (taxonomyRoot != null)
@@ -206,7 +206,7 @@ namespace Sdl.Web.Tridion.Navigation
                 }
                 else if (filter.DescendantLevels != 0 && string.IsNullOrEmpty(pageId))
                 {
-                    result = ExpandDescendants(taxonomyUri, keywordUri, filter, localization);
+                    result = ExpandDescendants(keywordUri, taxonomyUri, filter, localization);
                 }
 
                 return result;
@@ -251,32 +251,35 @@ namespace Sdl.Web.Tridion.Navigation
 
         private static void AddDescendants(TaxonomyNode taxonomyNode, NavigationFilter filter, Localization localization)
         {
-            // First recurse (depth-first)
-            IList<SitemapItem> children = taxonomyNode.Items;
-            foreach (TaxonomyNode childNode in children.OfType<TaxonomyNode>())
+            using (new Tracer(taxonomyNode, filter, localization))
             {
-                AddDescendants(childNode, filter, localization);
-            }
+                // First recurse (depth-first)
+                IList<SitemapItem> children = taxonomyNode.Items;
+                foreach (TaxonomyNode childNode in children.OfType<TaxonomyNode>())
+                {
+                    AddDescendants(childNode, filter, localization);
+                }
 
-            // Add descendants (on the way back)
-            string taxonomyId;
-            string keywordId;
-            string pageId;
-            ParseSitemapItemId(taxonomyNode.Id, out taxonomyId, out keywordId, out pageId);
-            string publicationId = localization.LocalizationId;
-            string taxonomyUri = string.Format("tcm:{0}-{1}-512", publicationId, taxonomyId);
-            string keywordUri = string.IsNullOrEmpty(keywordId) ? taxonomyUri : string.Format("tcm:{0}-{1}-1024", publicationId, keywordId);
+                // Add descendants (on the way back)
+                string taxonomyId;
+                string keywordId;
+                string pageId;
+                ParseSitemapItemId(taxonomyNode.Id, out taxonomyId, out keywordId, out pageId);
+                string publicationId = localization.LocalizationId;
+                string taxonomyUri = string.Format("tcm:{0}-{1}-512", publicationId, taxonomyId);
+                string keywordUri = string.IsNullOrEmpty(keywordId) ? taxonomyUri : string.Format("tcm:{0}-{1}-1024", publicationId, keywordId);
 
-            IEnumerable<SitemapItem> additionalChildren = ExpandDescendants(taxonomyUri, keywordUri, filter, localization);
-            foreach (SitemapItem additionalChildItem in additionalChildren.Where(childItem => children.All(i => i.Id != childItem.Id)))
-            {
-                children.Add(additionalChildItem);
+                IEnumerable<SitemapItem> additionalChildren = ExpandDescendants(keywordUri, taxonomyUri, filter, localization);
+                foreach (SitemapItem additionalChildItem in additionalChildren.Where(childItem => children.All(i => i.Id != childItem.Id)))
+                {
+                    children.Add(additionalChildItem);
+                }
             }
         }
 
         private static IEnumerable<SitemapItem> ExpandTaxonomyRoots(NavigationFilter filter, Localization localization)
         {
-            using (new Tracer(localization))
+            using (new Tracer(filter, localization))
             {
                 TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
                 string[] taxonomyIds = taxonomyFactory.GetTaxonomies(GetPublicationTcmUri(localization));
@@ -289,9 +292,9 @@ namespace Sdl.Web.Tridion.Navigation
             }
         }
 
-        private static IEnumerable<SitemapItem> ExpandDescendants(string taxonomyUri, string keywordUri, NavigationFilter filter, Localization localization)
+        private static IEnumerable<SitemapItem> ExpandDescendants(string keywordUri, string taxonomyUri, NavigationFilter filter, Localization localization)
         {
-            using (new Tracer(taxonomyUri, keywordUri, filter, localization))
+            using (new Tracer(keywordUri, taxonomyUri, filter, localization))
             {
                 TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
                 TaxonomyFilter taxonomyFilter = new DepthFilter(filter.DescendantLevels, DepthFilter.FilterDown);
@@ -301,9 +304,9 @@ namespace Sdl.Web.Tridion.Navigation
             }
         }
 
-        private static TaxonomyNode ExpandAncestorsForKeyword(string taxonomyUri, string keywordUri, NavigationFilter filter, Localization localization)
+        private static TaxonomyNode ExpandAncestorsForKeyword(string keywordUri, string taxonomyUri, NavigationFilter filter, Localization localization)
         {
-            using (new Tracer(taxonomyUri, keywordUri, filter, localization))
+            using (new Tracer(keywordUri, taxonomyUri, filter, localization))
             {
                 TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
                 TaxonomyFilter taxonomyFilter = new DepthFilter(DepthFilter.UnlimitedDepth, DepthFilter.FilterUp);
@@ -312,9 +315,9 @@ namespace Sdl.Web.Tridion.Navigation
             }
         }
 
-        private static TaxonomyNode ExpandAncestorsForPage(string taxonomyUri, string pageUri, NavigationFilter filter, Localization localization)
+        private static TaxonomyNode ExpandAncestorsForPage(string pageUri, string taxonomyUri, NavigationFilter filter, Localization localization)
         {
-            using (new Tracer(taxonomyUri, pageUri, filter, localization))
+            using (new Tracer(pageUri, taxonomyUri, filter, localization))
             {
                 // Get TaxonomyKeywordsForPage may return multiple paths towards the (same) Taxonomy root.
                 Keyword[] taxonomyRoots = GetTaxonomyKeywordsForPage(pageUri, taxonomyUri);
@@ -430,16 +433,8 @@ namespace Sdl.Web.Tridion.Navigation
                 if (classifiedItemsCount > 0 && filter.DescendantLevels != 0)
                 {
                     // Add child SitemapItems for classified Pages (ordered by title)
-                    PageMetaFactory pageMetaFactory = new PageMetaFactory(GetPublicationTcmUri(localization));
-                    IPageMeta[] classifiedPageMetas = pageMetaFactory.GetTaxonomyPages(keyword, includeBranchedFacets: false);
-                    IEnumerable<SitemapItem> pageSitemapItems = classifiedPageMetas.Select(pageMeta => CreateSitemapItem(pageMeta, taxonomyId)).OrderBy(i => i.Title).ToArray();
+                    SitemapItem[] pageSitemapItems = ExpandClassifiedPages(keyword, taxonomyId, localization);
                     childItems.AddRange(pageSitemapItems);
-
-                    // Supress sequence prefixes from titles
-                    foreach (SitemapItem pageSitemapItem in pageSitemapItems)
-                    {
-                        pageSitemapItem.Title = _pageTitleRegex.Match(pageSitemapItem.Title).Groups["title"].Value;
-                    }
 
                     // If the Taxonomy Node contains an Index Page (i.e. URL ending with "/index"), we put that URL on the Taxonomy Node.
                     SitemapItem indexPageSitemapItem = pageSitemapItems.FirstOrDefault(i => i.Url.EndsWith(IndexPageUrlSuffix));
@@ -481,7 +476,26 @@ namespace Sdl.Web.Tridion.Navigation
         private static IDictionary<string, object> GetCustomMetadata(Keyword keyword)
         {
             throw new System.NotImplementedException(); // TODO
-        } 
+        }
+
+        private static SitemapItem[] ExpandClassifiedPages(Keyword keyword, string taxonomyId, Localization localization)
+        {
+            using (new Tracer(keyword.KeywordUri, taxonomyId, localization))
+            {
+                // Return SitemapItems for all classified Pages (ordered by Page Title, including sequence prefix if any)
+                PageMetaFactory pageMetaFactory = new PageMetaFactory(GetPublicationTcmUri(localization));
+                IPageMeta[] classifiedPageMetas = pageMetaFactory.GetTaxonomyPages(keyword, includeBranchedFacets: false);
+                SitemapItem[] result = classifiedPageMetas.Select(pageMeta => CreateSitemapItem(pageMeta, taxonomyId)).OrderBy(i => i.Title).ToArray();
+
+                // Supress sequence prefixes from titles
+                foreach (SitemapItem sitemapItem in result)
+                {
+                    sitemapItem.Title = _pageTitleRegex.Match(sitemapItem.Title).Groups["title"].Value;
+                }
+
+                return result;
+            }
+        }
 
         private static SitemapItem CreateSitemapItem(IPageMeta pageMeta, string taxonomyId)
         {
