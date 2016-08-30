@@ -15,7 +15,7 @@
         public override string ToString()
         {
             return string.Format(
-                "IncludeAncestors={0], DecendantLevels={1}, IncludeRelated={2} IncludeCustomMetadata={3}", 
+                "IncludeAncestors={0}, DescendantLevels={1}, IncludeRelated={2} IncludeCustomMetadata={3}", 
                 IncludeAncestors, DescendantLevels, IncludeRelated, IncludeCustomMetadata
                 );
         }
