@@ -167,16 +167,13 @@ namespace Sdl.Web.Tridion.Navigation
                 }
 
                 // Extract Taxonomy TCM UI, Keyword TCM URI and/or Page TCM URI from the Sitemap Item ID
-                Match sitemapItemIdMatch = _sitemapItemIdRegex.Match(sitemapItemId);
-                if (!sitemapItemIdMatch.Success)
-                {
-                    throw new DxaException(string.Format("Invalid Sitemap Item identifier: '{0}'", sitemapItemId));
-                }
+                string taxonomyId;
+                string keywordId;
+                string pageId;
+                ParseSitemapItemId(sitemapItemId, out taxonomyId, out keywordId, out pageId);
                 string publicationId = localization.LocalizationId;
-                string taxonomyUri = string.Format("tcm:{0}-{1}-512", publicationId, sitemapItemIdMatch.Groups["taxonomyId"].Value);
-                string keywordId = sitemapItemIdMatch.Groups["keywordId"].Value;
+                string taxonomyUri = string.Format("tcm:{0}-{1}-512", publicationId, taxonomyId);
                 string keywordUri = string.IsNullOrEmpty(keywordId) ?  taxonomyUri : string.Format("tcm:{0}-{1}-1024", publicationId, keywordId);
-                string pageId = sitemapItemIdMatch.Groups["pageId"].Value;
                 string pageUri = string.Format("tcm:{0}-{1}-64", publicationId, pageId);
 
                 IEnumerable<SitemapItem> result = new SitemapItem[0];
@@ -196,15 +193,18 @@ namespace Sdl.Web.Tridion.Navigation
                     {
                         if (filter.DescendantLevels == 0)
                         {
-                            // No descendants have been requested; ensure Items properties are null on the leafs.
-                            PruneLeafs(taxonomyRoot);
+                            // No descendants have been requested; ensure Items properties are null on the leaf Taxonomy Nodes.
+                            PruneLeafTaxonomyNodes(taxonomyRoot);
                         }
-                        // TODO: combine with DescendantLevels != 0
+                        else
+                        {
+                            AddDescendants(taxonomyRoot, filter, localization);
+                        }
 
                         result = new[] { taxonomyRoot };
                     }
                 }
-                else if (filter.DescendantLevels != 0)
+                else if (filter.DescendantLevels != 0 && string.IsNullOrEmpty(pageId))
                 {
                     result = ExpandDescendants(taxonomyUri, keywordUri, filter, localization);
                 }
@@ -214,23 +214,63 @@ namespace Sdl.Web.Tridion.Navigation
         }
         #endregion
 
-        private static void PruneLeafs(SitemapItem subtreeRoot)
+        private static void ParseSitemapItemId(string sitemapItemId, out string taxonomyId, out string keywordId, out string pageId)
         {
-            if (subtreeRoot.Items == null)
+            Match sitemapItemIdMatch = _sitemapItemIdRegex.Match(sitemapItemId);
+            if (!sitemapItemIdMatch.Success)
             {
+                throw new DxaException(string.Format("Invalid Sitemap Item identifier: '{0}'", sitemapItemId));
+            }
+            taxonomyId = sitemapItemIdMatch.Groups["taxonomyId"].Value;
+            keywordId = sitemapItemIdMatch.Groups["keywordId"].Value;
+            pageId = sitemapItemIdMatch.Groups["pageId"].Value;
+        }
+
+        private static void PruneLeafTaxonomyNodes(TaxonomyNode taxonomyNode)
+        {
+            if (taxonomyNode.Items == null)
+            {
+                // This leaf TaxonomyNode is already pruned; nothing to do.
                 return;
             }
 
-            if (subtreeRoot.Items.Count == 0)
+            if (taxonomyNode.Items.Count == 0)
             {
-                subtreeRoot.Items = null;
+                // Prune this leaf Taxonomy node.
+                taxonomyNode.Items = null;
             }
             else
             {
-                foreach (SitemapItem childItem in subtreeRoot.Items)
+                // Not a leaf; prune its child Taxonomy Nodes (recursively).
+                foreach (TaxonomyNode childNode in taxonomyNode.Items.OfType<TaxonomyNode>())
                 {
-                    PruneLeafs(childItem);
+                    PruneLeafTaxonomyNodes(childNode);
                 }
+            }
+        }
+
+        private static void AddDescendants(TaxonomyNode taxonomyNode, NavigationFilter filter, Localization localization)
+        {
+            // First recurse (depth-first)
+            IList<SitemapItem> children = taxonomyNode.Items;
+            foreach (TaxonomyNode childNode in children.OfType<TaxonomyNode>())
+            {
+                AddDescendants(childNode, filter, localization);
+            }
+
+            // Add descendants (on the way back)
+            string taxonomyId;
+            string keywordId;
+            string pageId;
+            ParseSitemapItemId(taxonomyNode.Id, out taxonomyId, out keywordId, out pageId);
+            string publicationId = localization.LocalizationId;
+            string taxonomyUri = string.Format("tcm:{0}-{1}-512", publicationId, taxonomyId);
+            string keywordUri = string.IsNullOrEmpty(keywordId) ? taxonomyUri : string.Format("tcm:{0}-{1}-1024", publicationId, keywordId);
+
+            IEnumerable<SitemapItem> additionalChildren = ExpandDescendants(taxonomyUri, keywordUri, filter, localization);
+            foreach (SitemapItem additionalChildItem in additionalChildren.Where(childItem => children.All(i => i.Id != childItem.Id)))
+            {
+                children.Add(additionalChildItem);
             }
         }
 
