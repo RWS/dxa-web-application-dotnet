@@ -26,7 +26,7 @@ namespace Sdl.Web.Tridion.Navigation
         private const string NavTaxonomyCacheRegionName = "NavTaxonomy";
         private const string IndexPageUrlSuffix = "/index";
 
-        private static readonly Regex _pageTitleRegex = new Regex(@"(?<sequence>\d\d\d)?\s*(?<title>.*)", RegexOptions.Compiled);
+        private static readonly Regex _cmTitleRegex = new Regex(@"(?<sequence>\d\d\d)?\s*(?<title>.*)", RegexOptions.Compiled);
         private static readonly Regex _sitemapItemIdRegex = new Regex(@"^t(?<taxonomyId>\d+)((-k(?<keywordId>\d+))|(-p(?<pageId>\d+)))?$", RegexOptions.Compiled);
         private static readonly INavigationProvider _fallbackNavigationProvider = new StaticNavigationProvider();
 
@@ -426,8 +426,12 @@ namespace Sdl.Web.Tridion.Navigation
             {
                 childItems = new List<SitemapItem>();
 
-                // Add child SitemapItems for child Taxonomy Nodes
-                IEnumerable<TaxonomyNode> childTaxonomyNodes = keyword.KeywordChildren.Cast<Keyword>().Select(kw => CreateTaxonomyNode(kw, expandLevels - 1, filter, localization));
+                // Add child SitemapItems for child Taxonomy Nodes (ordered by title, including sequence prefix if any)
+                TaxonomyNode[] childTaxonomyNodes = keyword.KeywordChildren.Cast<Keyword>()
+                    .Select(kw => CreateTaxonomyNode(kw, expandLevels - 1, filter, localization))
+                    .OrderBy(tn => tn.Title)
+                    .ToArray();
+                StripTitleSequencePrefixes(childTaxonomyNodes);
                 childItems.AddRange(childTaxonomyNodes);
 
                 if (classifiedItemsCount > 0 && filter.DescendantLevels != 0)
@@ -487,11 +491,7 @@ namespace Sdl.Web.Tridion.Navigation
                 IPageMeta[] classifiedPageMetas = pageMetaFactory.GetTaxonomyPages(keyword, includeBranchedFacets: false);
                 SitemapItem[] result = classifiedPageMetas.Select(pageMeta => CreateSitemapItem(pageMeta, taxonomyId)).OrderBy(i => i.Title).ToArray();
 
-                // Supress sequence prefixes from titles
-                foreach (SitemapItem sitemapItem in result)
-                {
-                    sitemapItem.Title = _pageTitleRegex.Match(sitemapItem.Title).Groups["title"].Value;
-                }
+                StripTitleSequencePrefixes(result);
 
                 return result;
             }
@@ -508,6 +508,14 @@ namespace Sdl.Web.Tridion.Navigation
                 PublishedDate = pageMeta.LastPublicationDate,
                 Visible = true
             };
+        }
+
+        private static void StripTitleSequencePrefixes(IEnumerable<SitemapItem> sitemapItems)
+        {
+            foreach (SitemapItem sitemapItem in sitemapItems)
+            {
+                sitemapItem.Title = _cmTitleRegex.Match(sitemapItem.Title).Groups["title"].Value;
+            }
         }
 
         private static string StripFileExtension(string urlPath)
