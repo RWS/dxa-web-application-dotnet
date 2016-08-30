@@ -440,11 +440,11 @@ namespace Sdl.Web.Tridion.Navigation
                     SitemapItem[] pageSitemapItems = ExpandClassifiedPages(keyword, taxonomyId, localization);
                     childItems.AddRange(pageSitemapItems);
 
-                    // If the Taxonomy Node contains an Index Page (i.e. URL ending with "/index"), we put that URL on the Taxonomy Node.
+                    // If the Taxonomy Node contains an Index Page (i.e. URL ending with "/index"), we put the Page's SG URL on the Taxonomy Node.
                     SitemapItem indexPageSitemapItem = pageSitemapItems.FirstOrDefault(i => i.Url.EndsWith(IndexPageUrlSuffix));
                     if (indexPageSitemapItem != null)
                     {
-                        taxonomyNodeUrl = indexPageSitemapItem.Url;
+                        taxonomyNodeUrl = indexPageSitemapItem.Url.Substring(0, indexPageSitemapItem.Url.Length - IndexPageUrlSuffix.Length);
                     }
                 }
             }

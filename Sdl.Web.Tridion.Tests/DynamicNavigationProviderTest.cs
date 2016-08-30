@@ -69,7 +69,8 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual("Navigation Taxonomy Test Page 1", keyword12.Items[2].Title, "keyword12.Items[2].Title");
 
             // TaxonomyNode should get the URL from its Index Page
-            Assert.AreEqual(keyword12.Items[0].Url, keyword12.Url, "keyword12.Url");
+            string indexPageUrl = keyword12.Items[0].Url;
+            Assert.AreEqual(indexPageUrl.Substring(0, indexPageUrl.Length - "/index".Length), keyword12.Url, "keyword12.Url");
         }
 
         private static void AssertProperSitemapItemForPage(SitemapItem pageSitemapItem, string subject)
@@ -92,7 +93,7 @@ namespace Sdl.Web.Tridion.Tests
             OutputJson(navLinks);
 
             Assert.AreEqual(1, navLinks.Items.Count, "navLinks.Items.Count");
-            AssertValidLink(navLinks.Items[0], "/autotest-parent/regression/taxonomy/index", TestFixture.TopLevelKeyword2Title, "Top-level Keyword 2 (concrete)", "navLinks.Items[0]");
+            AssertValidLink(navLinks.Items[0], "/autotest-parent/regression/taxonomy", TestFixture.TopLevelKeyword2Title, "Top-level Keyword 2 (concrete)", "navLinks.Items[0]");
         }
 
         [TestMethod]
