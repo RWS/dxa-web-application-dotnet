@@ -346,8 +346,9 @@ namespace Sdl.Web.Tridion.Navigation
         {
             using (new Tracer(pageUri, taxonomyUri, filter, localization))
             {
-                // Get TaxonomyKeywordsForPage may return multiple paths towards the (same) Taxonomy root.
-                Keyword[] taxonomyRoots = GetTaxonomyKeywordsForPage(pageUri, taxonomyUri);
+                // Get TaxonomyRelationManager.GetTaxonomyKeywords may return multiple paths towards the (same) Taxonomy root.
+                TaxonomyRelationManager taxonomyRelationManager = new TaxonomyRelationManager();
+                Keyword[] taxonomyRoots = taxonomyRelationManager.GetTaxonomyKeywords(taxonomyUri, pageUri, null, new DepthFilter(-1, DepthFilter.FilterUp), (int) ItemType.Page);
                 if (taxonomyRoots == null || taxonomyRoots.Length == 0)
                 {
                     Log.Debug("No Keywords found for Page '{0}' in Taxonomy '{1}'.", pageUri, taxonomyUri);
@@ -381,23 +382,6 @@ namespace Sdl.Web.Tridion.Navigation
                     MergeSubtrees(childNode, childKeywordToMergeInto);
                 }
             }
-        }
-
-        private static Keyword[] GetTaxonomyKeywordsForPage(string pageUri, string taxonomyUri, int depth = -1)
-        {
-
-            // TODO: Tridion.ContentDelivery.Taxonomies.TaxonomyRelationManager is missing in CIL 8.2. See CRQ-2380.
-#if TRIDION_71
-            global::Tridion.ContentDelivery.Taxonomies.TaxonomyRelationManager taxonomyRelationManager = new global::Tridion.ContentDelivery.Taxonomies.TaxonomyRelationManager();
-            return taxonomyRelationManager.GetTaxonomyKeywords(taxonomyUri, pageUri, null, new DepthFilter(depth, DepthFilter.FilterUp), (int) ItemType.Page);
-#else
-            Sdl.Web.Delivery.Dynamic.Taxonomies.Filters.ITaxonomyFilter ancestorsFilter = new Sdl.Web.Delivery.Dynamic.Taxonomies.Filters.DepthFilter(depth, DepthFilter.FilterUp);
-            Sdl.Web.Delivery.Dynamic.Taxonomies.TaxonomyRelationManager taxonomyRelationManager = new Sdl.Web.Delivery.Dynamic.Taxonomies.TaxonomyRelationManager();
-            IEnumerable<Sdl.Web.Delivery.Model.Taxonomies.IKeyword> keywords = taxonomyRelationManager.GetTaxonomyKeywords(taxonomyUri, pageUri, null, ancestorsFilter, (int) ItemType.Page);
-
-            ConstructorInfo wrapConstructor = typeof(Keyword).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(Sdl.Web.Delivery.Model.Taxonomies.IKeyword) }, null);
-            return keywords.Select(k => (Keyword) wrapConstructor.Invoke(new object[] {k})).ToArray();
-#endif
         }
 
         private static string GetNavigationTaxonomyUri(Localization localization)
