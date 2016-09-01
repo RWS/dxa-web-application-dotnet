@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -75,7 +76,7 @@ namespace Sdl.Web.Tridion.Navigation
 
                 return new NavigationLinks
                 {
-                    Items = rootSitemapItem.Items.Where(i => i.Visible && !string.IsNullOrEmpty(i.Url)).Select(i => i.CreateLink(localization)).ToList()
+                    Items = rootSitemapItem.Items.Where(i => i.Visible).Select(i => i.CreateLink(localization)).ToList()
                 };
             }
         }
@@ -97,12 +98,17 @@ namespace Sdl.Web.Tridion.Navigation
                     _fallbackNavigationProvider.GetContextNavigationLinks(requestUrlPath, localization);
                 }
 
-                SitemapItem pageSitemapItem = navModel.FindSitemapItem(StripFileExtension(requestUrlPath));
+                string normalizedUrlPath = ExpandIndexPageUrl(StripFileExtension(requestUrlPath));
+                SitemapItem contextNode = navModel.FindSitemapItem(normalizedUrlPath);
+                if (!(contextNode is TaxonomyNode))
+                {
+                    contextNode = contextNode.Parent;
+                }
 
                 List<Link> links = new List<Link>();
-                if (pageSitemapItem != null && pageSitemapItem.Parent != null)
+                if (contextNode != null)
                 {
-                    links.AddRange(pageSitemapItem.Parent.Items.Where(i => i.Visible && !string.IsNullOrEmpty(i.Url)).Select(i => i.CreateLink(localization)));
+                    links.AddRange(contextNode.Items.Where(i => i.Visible).Select(i => i.CreateLink(localization)));
                 }
 
                 return new NavigationLinks
@@ -129,16 +135,31 @@ namespace Sdl.Web.Tridion.Navigation
                     _fallbackNavigationProvider.GetBreadcrumbNavigationLinks(requestUrlPath, localization);
                 }
 
-                SitemapItem sitemapItem = navModel.FindSitemapItem(StripFileExtension(requestUrlPath));
+                string normalizedUrlPath = ExpandIndexPageUrl(StripFileExtension(requestUrlPath));
+                SitemapItem sitemapItem = navModel.FindSitemapItem(normalizedUrlPath);
 
                 List<Link> breadcrumb = new List<Link>();
-                while (sitemapItem != null)
+
+                if (sitemapItem != null)
                 {
-                    if (sitemapItem.Visible)
+                    // Build a breadcrumb of ancestors, excluding the Taxonomy Root.
+                    bool hasHome = false;
+                    while (sitemapItem.Parent != null)
                     {
                         breadcrumb.Insert(0, sitemapItem.CreateLink(localization));
+                        hasHome = IsHome(sitemapItem, localization);
+                        sitemapItem = sitemapItem.Parent;
                     }
-                    sitemapItem = sitemapItem.Parent;
+
+                    // The Home TaxonomyNode/Keyword may be a top-level sibling instead of an ancestor
+                    if (!hasHome)
+                    {
+                        SitemapItem home = sitemapItem.Items.FirstOrDefault(i => IsHome(i, localization));
+                        if (home != null)
+                        {
+                            breadcrumb.Insert(0, home.CreateLink(localization));
+                        }
+                    }
                 }
 
                 return new NavigationLinks
@@ -213,6 +234,12 @@ namespace Sdl.Web.Tridion.Navigation
             }
         }
         #endregion
+
+        private static bool IsHome(SitemapItem sitemapItem, Localization localization)
+        {
+            string homePath = string.IsNullOrEmpty(localization.Path) ? "/" : localization.Path;
+            return sitemapItem != null && sitemapItem.Url != null && sitemapItem.Url.Equals(homePath, StringComparison.InvariantCultureIgnoreCase);
+        }
 
         private static void ParseSitemapItemId(string sitemapItemId, out string taxonomyId, out string keywordId, out string pageId)
         {
@@ -451,13 +478,15 @@ namespace Sdl.Web.Tridion.Navigation
                 }
             }
 
+            string sequencePrefix = _cmTitleRegex.Match(keyword.KeywordName).Groups["sequence"].Value; 
+
             TaxonomyNode result = new TaxonomyNode
             {
                 Id = isRoot ? string.Format("t{0}", taxonomyId) : FormatKeywordNodeId(keyword.KeywordUri, taxonomyId),
                 Type =  SitemapItem.Types.TaxonomyNode,
                 Title = keyword.KeywordName,
                 Url = taxonomyNodeUrl,
-                Visible = !isRoot,
+                Visible = !string.IsNullOrEmpty(sequencePrefix) && !string.IsNullOrEmpty(taxonomyNodeUrl),
                 Items = childItems,
                 Key = keyword.KeywordKey,
                 Description = keyword.KeywordDescription,
@@ -525,6 +554,15 @@ namespace Sdl.Web.Tridion.Navigation
             if (urlPath.EndsWith(Constants.DefaultExtension))
             {
                 urlPath = urlPath.Substring(0, urlPath.Length - Constants.DefaultExtension.Length);
+            }
+            return urlPath;
+        }
+
+        private static string ExpandIndexPageUrl(string urlPath)
+        {
+            if (urlPath.EndsWith("/"))
+            {
+                urlPath += "index";
             }
             return urlPath;
         }

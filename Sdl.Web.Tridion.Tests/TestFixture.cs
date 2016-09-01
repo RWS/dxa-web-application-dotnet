@@ -22,6 +22,7 @@ namespace Sdl.Web.Tridion.Tests
         internal const string Tsi1852PageUrlPath = "/autotest-parent/regression/tsi-1852.html";
         internal const string TaxonomyTestPage1UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1.html";
         internal const string TaxonomyTestPage2UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-2.html";
+        internal const string TaxonomyIndexPageUrlPath = "/autotest-parent/regression/taxonomy";
         internal const string NavigationTaxonomyTitle = "Test Taxonomy [Navigation]";
         internal const string TopLevelKeyword1Title = "Top-level Keyword 1";
         internal const string TopLevelKeyword2Title = "Top-level Keyword 2";

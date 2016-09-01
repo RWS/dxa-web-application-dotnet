@@ -41,6 +41,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual("Test Taxonomy [Navigation]", rootNode.Title, "rootNode.Title");
             Assert.AreEqual("Test Taxonomy to be used for Navigation purposes", rootNode.Description, "rootNode.Description");
             Assert.IsNull(rootNode.Url, "rootNode.Url");
+            Assert.IsFalse(rootNode.Visible, "rootNode.Visible");
             Assert.IsTrue(rootNode.IsAbstract, "rootNode.IsAbstract");
             Assert.IsTrue(rootNode.HasChildNodes, "rootNode.HasChildNodes");
             Assert.AreEqual(3, rootNode.ClassifiedItemsCount, "rootNode.ClassifiedItemsCount");
@@ -52,6 +53,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(topLevelKeyword1, "topLevelKeyword1");
             Assert.IsNotNull(topLevelKeyword1.Items, "topLevelKeyword1.Items");
             Assert.IsNull(topLevelKeyword1.Url, "topLevelKeyword1.Url");
+            Assert.IsFalse(topLevelKeyword1.Visible, "topLevelKeyword1.Visible");
 
             TaxonomyNode keyword12 = topLevelKeyword1.Items.OfType<TaxonomyNode>().FirstOrDefault(i => i.Title == "Keyword 1.2");
             Assert.IsNotNull(keyword12, "keyword12");
@@ -71,6 +73,7 @@ namespace Sdl.Web.Tridion.Tests
             // TaxonomyNode should get the URL from its Index Page
             string indexPageUrl = keyword12.Items[0].Url;
             Assert.AreEqual(indexPageUrl.Substring(0, indexPageUrl.Length - "/index".Length), keyword12.Url, "keyword12.Url");
+            Assert.IsFalse(keyword12.Visible, "keyword12.Visible"); // It has a URL, but no sequence prefix in CM.
         }
 
         private static void AssertProperSitemapItemForPage(SitemapItem pageSitemapItem, string subject)
@@ -96,6 +99,15 @@ namespace Sdl.Web.Tridion.Tests
             AssertValidLink(navLinks.Items[0], "/autotest-parent/regression/taxonomy", TestFixture.TopLevelKeyword2Title, "Top-level Keyword 2 (concrete)", "navLinks.Items[0]");
         }
 
+        private static void AssertExpectedLinks(IList<Link> links)
+        {
+            Assert.IsNotNull(links, "links");
+            Assert.AreEqual(3, links.Count, "links.Count");
+            AssertValidLink(links[0], "/autotest-parent/regression/taxonomy/index", "Navigation Taxonomy Index Page", null, "links[0]");
+            AssertValidLink(links[1], "/autotest-parent/regression/taxonomy/nav-taxonomy-test-2", "Navigation Taxonomy Test Page 2", null, "links[1]");
+            AssertValidLink(links[2], "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1", "Navigation Taxonomy Test Page 1", null, "links[2]");
+        }
+
         [TestMethod]
         public void GetContextNavigationLinks_TaxonomyTestPage2_Success()
         {
@@ -107,10 +119,26 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(navLinks, "navLinks");
             OutputJson(navLinks);
 
-            Assert.AreEqual(3, navLinks.Items.Count, "navLinks.Items.Count");
-            AssertValidLink(navLinks.Items[0], "/autotest-parent/regression/taxonomy/index", "Navigation Taxonomy Index Page", null, "navLinks.Items[0]");
-            AssertValidLink(navLinks.Items[1], "/autotest-parent/regression/taxonomy/nav-taxonomy-test-2", "Navigation Taxonomy Test Page 2", null, "navLinks.Items[1]");
-            AssertValidLink(navLinks.Items[2], "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1", "Navigation Taxonomy Test Page 1", null, "navLinks.Items[2]");
+            AssertExpectedLinks(navLinks.Items);
+        }
+
+        [TestMethod]
+        public void GetContextNavigationLinks_TaxonomyIndexPage_Success()
+        {
+            const string testUrlPathWithoutIndexSuffix = TestFixture.TaxonomyIndexPageUrlPath;
+            const string testUrlPathWithIndexSuffix = testUrlPathWithoutIndexSuffix + "/index";
+            Localization testLocalization = TestFixture.ParentLocalization;
+
+            NavigationLinks navLinks = _testNavigationProvider.GetContextNavigationLinks(testUrlPathWithoutIndexSuffix, testLocalization);
+            NavigationLinks navLinks2 = _testNavigationProvider.GetContextNavigationLinks(testUrlPathWithIndexSuffix, testLocalization);
+
+            Assert.IsNotNull(navLinks, "navLinks");
+            Assert.IsNotNull(navLinks, "navLinks2");
+            OutputJson(navLinks);
+            OutputJson(navLinks2);
+
+            AssertExpectedLinks(navLinks.Items);
+            AssertExpectedLinks(navLinks2.Items);
         }
 
         [TestMethod]
