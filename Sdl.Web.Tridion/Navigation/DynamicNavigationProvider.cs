@@ -18,7 +18,7 @@ using TaxonomyFactory = Tridion.ContentDelivery.Taxonomies.TaxonomyFactory;
 namespace Sdl.Web.Tridion.Navigation
 {
     /// <summary>
-    /// Navigation Provider implementation based on Taxonomies (Categories & Keywords)
+    /// Navigation Provider implementation based on Taxonomies (Categories and Keywords)
     /// </summary>
     public class DynamicNavigationProvider : INavigationProvider, IOnDemandNavigationProvider
     {
