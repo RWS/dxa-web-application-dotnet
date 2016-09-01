@@ -71,7 +71,7 @@ namespace Sdl.Web.Tridion.Navigation
                 if (!(rootSitemapItem is TaxonomyNode))
                 {
                     // No Navigation Taxonomy found in this Localization; fallback to the StaticNavigationProvider.
-                    _fallbackNavigationProvider.GetTopNavigationLinks(requestUrlPath, localization);
+                    return _fallbackNavigationProvider.GetTopNavigationLinks(requestUrlPath, localization);
                 }
 
                 return new NavigationLinks
@@ -95,7 +95,7 @@ namespace Sdl.Web.Tridion.Navigation
                 if (!(navModel is TaxonomyNode))
                 {
                     // No Navigation Taxonomy found in this Localization; fallback to the StaticNavigationProvider.
-                    _fallbackNavigationProvider.GetContextNavigationLinks(requestUrlPath, localization);
+                    return _fallbackNavigationProvider.GetContextNavigationLinks(requestUrlPath, localization);
                 }
 
                 string normalizedUrlPath = ExpandIndexPageUrl(StripFileExtension(requestUrlPath));
@@ -132,7 +132,7 @@ namespace Sdl.Web.Tridion.Navigation
                 if (!(navModel is TaxonomyNode))
                 {
                     // No Navigation Taxonomy found in this Localization; fallback to the StaticNavigationProvider.
-                    _fallbackNavigationProvider.GetBreadcrumbNavigationLinks(requestUrlPath, localization);
+                    return _fallbackNavigationProvider.GetBreadcrumbNavigationLinks(requestUrlPath, localization);
                 }
 
                 string normalizedUrlPath = ExpandIndexPageUrl(StripFileExtension(requestUrlPath));
