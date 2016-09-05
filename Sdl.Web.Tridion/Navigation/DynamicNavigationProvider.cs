@@ -524,6 +524,8 @@ namespace Sdl.Web.Tridion.Navigation
 
         private static SitemapItem CreateSitemapItem(IPageMeta pageMeta, string taxonomyId)
         {
+            string sequencePrefix = _cmTitleRegex.Match(pageMeta.Title).Groups["sequence"].Value;
+
             return new SitemapItem
             {
                 Id = string.Format("t{0}-p{1}", taxonomyId, pageMeta.Id),
@@ -531,7 +533,7 @@ namespace Sdl.Web.Tridion.Navigation
                 Title = pageMeta.Title,
                 Url = StripFileExtension(pageMeta.UrlPath) ,
                 PublishedDate = pageMeta.LastPublicationDate,
-                Visible = true
+                Visible = !string.IsNullOrEmpty(sequencePrefix)
             };
         }
 

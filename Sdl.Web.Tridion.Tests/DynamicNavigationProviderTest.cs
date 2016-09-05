@@ -44,7 +44,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsFalse(rootNode.Visible, "rootNode.Visible");
             Assert.IsTrue(rootNode.IsAbstract, "rootNode.IsAbstract");
             Assert.IsTrue(rootNode.HasChildNodes, "rootNode.HasChildNodes");
-            Assert.AreEqual(3, rootNode.ClassifiedItemsCount, "rootNode.ClassifiedItemsCount");
+            Assert.AreEqual(4, rootNode.ClassifiedItemsCount, "rootNode.ClassifiedItemsCount");
             Assert.IsNotNull(rootNode.Items, "rootNode.Items");
             Assert.AreEqual(2, rootNode.Items.OfType<TaxonomyNode>().Count(), "rootNode.Items.OfType<TaxonomyNode>().Count()");
             Assert.IsNull(rootNode.RelatedTaxonomyNodeIds, "rootNode.RelatedTaxonomyNodeIds");
@@ -70,10 +70,21 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual("Navigation Taxonomy Test Page 2", keyword12.Items[1].Title, "keyword12.Items[1].Title");
             Assert.AreEqual("Navigation Taxonomy Test Page 1", keyword12.Items[2].Title, "keyword12.Items[2].Title");
 
-            // TaxonomyNode should get the URL from its Index Page
+            TaxonomyNode topLevelKeyword2 = rootNode.Items.OfType<TaxonomyNode>().FirstOrDefault(i => i.Title == TestFixture.TopLevelKeyword2Title);
+            Assert.IsNotNull(topLevelKeyword2, "topLevelKeyword2");
+            Assert.IsNotNull(topLevelKeyword2.Items, "topLevelKeyword2.Items");
+            Assert.AreEqual(3, topLevelKeyword2.Items.Count, "topLevelKeyword2.Items.Count");
+
+            SitemapItem navTestPage3 = topLevelKeyword2.Items[2];
+            Assert.AreEqual("Navigation Taxonomy Test Page 3", navTestPage3.Title, "navTestPage3.Title");
+            Assert.IsFalse(navTestPage3.Visible, "navTestPage3.Visible"); // It does not have a sequence prefix
+
+            // TaxonomyNode should get the URL from its Index Page:
             string indexPageUrl = keyword12.Items[0].Url;
             Assert.AreEqual(indexPageUrl.Substring(0, indexPageUrl.Length - "/index".Length), keyword12.Url, "keyword12.Url");
             Assert.IsFalse(keyword12.Visible, "keyword12.Visible"); // It has a URL, but no sequence prefix in CM.
+            Assert.AreEqual(indexPageUrl.Substring(0, indexPageUrl.Length - "/index".Length), topLevelKeyword2.Url, "topLevelKeyword2.Url");
+            Assert.IsTrue(topLevelKeyword2.Visible, "topLevelKeyword2.Visible"); // It has a URL and a sequence prefix in CM
         }
 
         private static void AssertProperSitemapItemForPage(SitemapItem pageSitemapItem, string subject)
@@ -83,6 +94,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(pageSitemapItem.Title, subject + ".Title");
             Assert.IsNotNull(pageSitemapItem.Url, subject + ".Url");
             Assert.IsNotNull(pageSitemapItem.PublishedDate, subject + ".PublishedDate");
+            Assert.IsTrue(pageSitemapItem.Visible, subject + ".Visible");
         }
 
         [TestMethod]
@@ -238,7 +250,7 @@ namespace Sdl.Web.Tridion.Tests
 
             TaxonomyNode testTaxonomyRoot = GetTestTaxonomy(taxonomyRoots);
             Assert.AreEqual(true, testTaxonomyRoot.HasChildNodes, "testTaxonomyRoot.HasChildNodes");
-            Assert.AreEqual(3, testTaxonomyRoot.ClassifiedItemsCount, "testTaxonomyRoot.ClassifiedItemsCount");
+            Assert.AreEqual(4, testTaxonomyRoot.ClassifiedItemsCount, "testTaxonomyRoot.ClassifiedItemsCount");
         }
 
         [TestMethod]
@@ -473,7 +485,7 @@ namespace Sdl.Web.Tridion.Tests
             TaxonomyNode keyword12 = topLevelKeyword1.Items[1] as TaxonomyNode;
             AssertExpectedTaxonomyNode(keyword12, "Keyword 1.2", 3, "keyword12");
             TaxonomyNode topLevelKeyword2 = taxonomyRoot.Items[1] as TaxonomyNode;
-            AssertExpectedTaxonomyNode(topLevelKeyword2, TestFixture.TopLevelKeyword2Title, 2, "topLevelKeyword2");
+            AssertExpectedTaxonomyNode(topLevelKeyword2, TestFixture.TopLevelKeyword2Title, 3, "topLevelKeyword2");
 
             // Assert that child nodes are added because of DescendantLevels = 1:
             TaxonomyNode keyword111 = keyword11.Items[1] as TaxonomyNode;
