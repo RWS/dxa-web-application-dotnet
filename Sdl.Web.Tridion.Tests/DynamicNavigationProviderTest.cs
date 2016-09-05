@@ -177,6 +177,26 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetNavigationSubtree_NonExistingItem_Success()
+        {
+            NavigationFilter descendantsFilter = new NavigationFilter();
+            NavigationFilter ancestorsFilter = new NavigationFilter { IncludeAncestors = true, DescendantLevels = 0 };
+            Localization testLocalization = TestFixture.ParentLocalization;
+
+            IEnumerable<SitemapItem> sitemapItems = _testOnDemandNavigationProvider.GetNavigationSubtree("t666-k666", ancestorsFilter, testLocalization);
+            Assert.IsNotNull(sitemapItems, "sitemapItems");
+            Assert.IsFalse(sitemapItems.Any(), "sitemapItems.Any()");
+
+            IEnumerable<SitemapItem> sitemapItems2 = _testOnDemandNavigationProvider.GetNavigationSubtree("t666-p666", ancestorsFilter, testLocalization);
+            Assert.IsNotNull(sitemapItems2, "sitemapItems2");
+            Assert.IsFalse(sitemapItems2.Any(), "sitemapItems2.Any()");
+
+            IEnumerable<SitemapItem> sitemapItems3 = _testOnDemandNavigationProvider.GetNavigationSubtree("t666", descendantsFilter, testLocalization);
+            Assert.IsNotNull(sitemapItems3, "sitemapItems3");
+            Assert.IsFalse(sitemapItems3.Any(), "sitemapItems3.Any()");
+        }
+
+        [TestMethod]
         public void GetNavigationSubtree_TaxonomyRootsOnly_Success()
         {
             NavigationFilter testNavFilter = new NavigationFilter();

@@ -326,6 +326,12 @@ namespace Sdl.Web.Tridion.Navigation
                 TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
                 TaxonomyFilter taxonomyFilter = new DepthFilter(filter.DescendantLevels, DepthFilter.FilterDown);
                 Keyword contextKeyword = taxonomyFactory.GetTaxonomyKeywords(taxonomyUri, taxonomyFilter, keywordUri);
+                if (contextKeyword == null)
+                {
+                    Log.Warn("Keyword '{0}' in Taxonomy '{1}' not found.", keywordUri, taxonomyUri);
+                    return new SitemapItem[0];
+                }
+
                 TaxonomyNode contextTaxonomyNode = CreateTaxonomyNode(contextKeyword, filter.DescendantLevels, filter, localization);
                 return contextTaxonomyNode.Items;
             }
@@ -338,6 +344,12 @@ namespace Sdl.Web.Tridion.Navigation
                 TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
                 TaxonomyFilter taxonomyFilter = new DepthFilter(DepthFilter.UnlimitedDepth, DepthFilter.FilterUp);
                 Keyword taxonomyRoot = taxonomyFactory.GetTaxonomyKeywords(taxonomyUri, taxonomyFilter, keywordUri);
+                if (taxonomyRoot == null)
+                {
+                    Log.Warn("Keyword '{0}' in Taxonomy '{1}' not found.", keywordUri, taxonomyUri);
+                    return null;
+                }
+
                 return CreateTaxonomyNode(taxonomyRoot, -1, filter, localization);
             }
         }
@@ -351,7 +363,7 @@ namespace Sdl.Web.Tridion.Navigation
                 Keyword[] taxonomyRoots = taxonomyRelationManager.GetTaxonomyKeywords(taxonomyUri, pageUri, null, new DepthFilter(-1, DepthFilter.FilterUp), (int) ItemType.Page);
                 if (taxonomyRoots == null || taxonomyRoots.Length == 0)
                 {
-                    Log.Debug("No Keywords found for Page '{0}' in Taxonomy '{1}'.", pageUri, taxonomyUri);
+                    Log.Debug("Page '{0}' is not classified in Taxonomy '{1}.", pageUri, taxonomyUri);
                     return null;
                 }
 
