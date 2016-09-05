@@ -38,5 +38,34 @@ namespace Sdl.Web.Common.Extensions
             }
             return lhs + rhs;
         }
+
+        /// <summary>
+        /// Normalizes a URL path for a Page.
+        /// </summary>
+        /// <remarks>
+        /// The following normalization actions are taken:
+        /// <list type="bullet">
+        ///     <item>Ensure the URL path is extensionless.</item>
+        ///     <item>Ensure the URL path for an index page ends with "/index".</item>
+        /// </list>
+        /// </remarks>
+        /// <param name="urlPath">The input URL path (the subject for this extension method).</param>
+        /// <returns>The normalized URL path.</returns>
+        public static string NormalizePageUrlPath(this string urlPath)
+        {
+            if (urlPath == null)
+            {
+                return null;
+            }
+            if (urlPath.EndsWith(Constants.DefaultExtension))
+            {
+                urlPath = urlPath.Substring(0, urlPath.Length - Constants.DefaultExtension.Length);
+            }
+            if (urlPath.EndsWith("/"))
+            {
+                urlPath += Constants.DefaultExtensionLessPageName;
+            }
+            return urlPath;
+        }
     }
 }

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -25,7 +26,6 @@ namespace Sdl.Web.Tridion.Navigation
         private const string TaxonomyNavigationMarker = "[Navigation]";
         private const string NavigationCacheRegionName = "Navigation_Dynamic";
         private const string NavTaxonomyCacheRegionName = "NavTaxonomy";
-        private const string IndexPageUrlSuffix = "/index";
 
         private static readonly Regex _cmTitleRegex = new Regex(@"(?<sequence>\d\d\d)?\s*(?<title>.*)", RegexOptions.Compiled);
         private static readonly Regex _sitemapItemIdRegex = new Regex(@"^t(?<taxonomyId>\d+)((-k(?<keywordId>\d+))|(-p(?<pageId>\d+)))?$", RegexOptions.Compiled);
@@ -98,8 +98,7 @@ namespace Sdl.Web.Tridion.Navigation
                     return _fallbackNavigationProvider.GetContextNavigationLinks(requestUrlPath, localization);
                 }
 
-                string normalizedUrlPath = ExpandIndexPageUrl(StripFileExtension(requestUrlPath));
-                SitemapItem contextNode = navModel.FindSitemapItem(normalizedUrlPath);
+                SitemapItem contextNode = navModel.FindSitemapItem(requestUrlPath.NormalizePageUrlPath());
                 if (!(contextNode is TaxonomyNode))
                 {
                     contextNode = contextNode.Parent;
@@ -135,8 +134,7 @@ namespace Sdl.Web.Tridion.Navigation
                     return _fallbackNavigationProvider.GetBreadcrumbNavigationLinks(requestUrlPath, localization);
                 }
 
-                string normalizedUrlPath = ExpandIndexPageUrl(StripFileExtension(requestUrlPath));
-                SitemapItem sitemapItem = navModel.FindSitemapItem(normalizedUrlPath);
+                SitemapItem sitemapItem = navModel.FindSitemapItem(requestUrlPath.NormalizePageUrlPath());
 
                 List<Link> breadcrumb = new List<Link>();
 
@@ -464,12 +462,12 @@ namespace Sdl.Web.Tridion.Navigation
                     childItems.AddRange(pageSitemapItems);
 
                     // If the Taxonomy Node contains an Index Page (i.e. URL path ending with "/index"), we put the Page's SG URL on the Taxonomy Node.
-                    string indexPageUrlPath = pageSitemapItems.Select(i => i.Url).FirstOrDefault(url => url.EndsWith(IndexPageUrlSuffix));
+                    string indexPageUrlPath = pageSitemapItems.Select(i => i.Url).FirstOrDefault(url => url.EndsWith(Constants.IndexPageUrlSuffix, StringComparison.InvariantCultureIgnoreCase));
                     if (indexPageUrlPath != null)
                     {
                         // Strip off "/index" URL suffix so we get the Page's SG URL (except for the Site Home Page, where we use "/")
-                        taxonomyNodeUrl = (indexPageUrlPath == IndexPageUrlSuffix) ? "/" :
-                            indexPageUrlPath.Substring(0, indexPageUrlPath.Length - IndexPageUrlSuffix.Length);
+                        taxonomyNodeUrl = (indexPageUrlPath.Equals(Constants.IndexPageUrlSuffix, StringComparison.InvariantCultureIgnoreCase)) ? "/" :
+                            indexPageUrlPath.Substring(0, indexPageUrlPath.Length - Constants.IndexPageUrlSuffix.Length);
                     }
                 }
             }
@@ -550,15 +548,6 @@ namespace Sdl.Web.Tridion.Navigation
             if (urlPath.EndsWith(Constants.DefaultExtension))
             {
                 urlPath = urlPath.Substring(0, urlPath.Length - Constants.DefaultExtension.Length);
-            }
-            return urlPath;
-        }
-
-        private static string ExpandIndexPageUrl(string urlPath)
-        {
-            if (urlPath.EndsWith("/"))
-            {
-                urlPath += "index";
             }
             return urlPath;
         }

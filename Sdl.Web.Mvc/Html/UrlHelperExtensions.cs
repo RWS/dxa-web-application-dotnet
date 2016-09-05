@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Web.Mvc;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Mvc.Configuration;
 
@@ -43,5 +45,21 @@ namespace Sdl.Web.Mvc.Html
             return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(sourceImageUrl, aspect, widthFactor, containerSize);
         }
 
+        /// <summary>
+        /// Normalizes a URL path for a Page.
+        /// </summary>
+        /// <remarks>
+        /// The following normalization actions are taken:
+        /// <list type="bullet">
+        ///     <item>Ensure the URL path is extensionless.</item>
+        ///     <item>Ensure the URL path for an index page ends with "/index".</item>
+        /// </list>
+        /// </remarks>
+        /// <param name="urlPath">The input URL path.</param>
+        /// <returns>The normalized URL path.</returns>
+        public static string NormalizePageUrlPath(this UrlHelper urlHelper, string urlPath)
+        {
+            return urlPath.NormalizePageUrlPath();
+        }
     }
 }
