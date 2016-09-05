@@ -142,6 +142,34 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetContextNavigationLinks_UnclassifiedPage_Success() // See TSI-1916
+        {
+            Localization testLocalization = TestFixture.ParentLocalization;
+
+            NavigationLinks navLinks = _testNavigationProvider.GetContextNavigationLinks(TestFixture.ArticlePageUrlPath, testLocalization);
+
+            Assert.IsNotNull(navLinks, "navLinks");
+            OutputJson(navLinks);
+
+            Assert.IsNotNull(navLinks.Items, "navLinks.Items");
+            Assert.AreEqual(0, navLinks.Items.Count, "navLinks.Items.Count");
+        }
+
+        [TestMethod]
+        public void GetBreadcrumbNavigationLinks_UnclassifiedPage_Success() // See TSI-1916
+        {
+            Localization testLocalization = TestFixture.ParentLocalization;
+
+            NavigationLinks navLinks = _testNavigationProvider.GetBreadcrumbNavigationLinks(TestFixture.ArticlePageUrlPath, testLocalization);
+
+            Assert.IsNotNull(navLinks, "navLinks");
+            OutputJson(navLinks);
+
+            Assert.IsNotNull(navLinks.Items, "navLinks.Items");
+            Assert.AreEqual(0, navLinks.Items.Count, "navLinks.Items.Count");
+        }
+
+        [TestMethod]
         public void GetBreadcrumbNavigationLinks_TaxonomyTestPage1_Success()
         {
             const string testUrlPath = TestFixture.TaxonomyTestPage1UrlPath;

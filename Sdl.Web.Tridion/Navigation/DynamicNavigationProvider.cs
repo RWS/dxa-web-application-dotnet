@@ -99,7 +99,7 @@ namespace Sdl.Web.Tridion.Navigation
                 }
 
                 SitemapItem contextNode = navModel.FindSitemapItem(requestUrlPath.NormalizePageUrlPath());
-                if (!(contextNode is TaxonomyNode))
+                if (contextNode != null && !(contextNode is TaxonomyNode))
                 {
                     contextNode = contextNode.Parent;
                 }
