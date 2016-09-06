@@ -6,7 +6,6 @@ using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Common.Models.Entity;
 using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.Tridion.Navigation;
 

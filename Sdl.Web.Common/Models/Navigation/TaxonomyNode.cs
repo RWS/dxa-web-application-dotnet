@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Sdl.Web.Common.Configuration;
 
-namespace Sdl.Web.Common.Models.Entity
+namespace Sdl.Web.Common.Models.Navigation
 {
     /// <summary>
     /// Represents a special kind of <see cref="SitemapItem"/> which is used for Taxonomy Nodes.
