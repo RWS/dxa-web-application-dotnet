@@ -47,7 +47,6 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(4, rootNode.ClassifiedItemsCount, "rootNode.ClassifiedItemsCount");
             Assert.IsNotNull(rootNode.Items, "rootNode.Items");
             Assert.AreEqual(2, rootNode.Items.OfType<TaxonomyNode>().Count(), "rootNode.Items.OfType<TaxonomyNode>().Count()");
-            Assert.IsNull(rootNode.RelatedTaxonomyNodeIds, "rootNode.RelatedTaxonomyNodeIds");
 
             TaxonomyNode topLevelKeyword1 = rootNode.Items.OfType<TaxonomyNode>().FirstOrDefault(i => i.Title == TestFixture.TopLevelKeyword1Title);
             Assert.IsNotNull(topLevelKeyword1, "topLevelKeyword1");
@@ -298,7 +297,7 @@ namespace Sdl.Web.Tridion.Tests
         public void GetNavigationSubtree_TestTaxonomyChildren_Success()
         {
             TaxonomyNode testTaxonomyRoot = GetTestTaxonomy();
-            NavigationFilter testNavFilter = new NavigationFilter { IncludeRelated = true };
+            NavigationFilter testNavFilter = new NavigationFilter();
 
             SitemapItem[] childItems = _testOnDemandNavigationProvider.GetNavigationSubtree(testTaxonomyRoot.Id, testNavFilter, TestFixture.ParentLocalization).ToArray();
             Assert.IsNotNull(childItems, "childItems");
@@ -309,8 +308,6 @@ namespace Sdl.Web.Tridion.Tests
 
             TaxonomyNode topLevelKeyword1 = childItems.FirstOrDefault(i => i.Title == TestFixture.TopLevelKeyword1Title) as TaxonomyNode;
             Assert.IsNotNull(topLevelKeyword1, "topLevelkeyword1");
-            Assert.IsNotNull(topLevelKeyword1.RelatedTaxonomyNodeIds, "topLevelkeyword1.RelatedTaxonomyNodeIds"); // IncludeRelated = true
-            // TODO TSI-1880: Assert.AreEqual(1, topLevelkeyword1.RelatedTaxonomyNodeIds.Count, "topLevelkeyword1.RelatedTaxonomyNodeIds.Count");
         }
 
         [TestMethod]
@@ -327,7 +324,6 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(topLevelKeyword1, "topLevelKeyword1");
             Assert.IsNotNull(topLevelKeyword1.Items, "topLevelKeyword1.Items");
             AssertNoChildItems(topLevelKeyword1.Items, "topLevelKeyword1.Items");
-            Assert.IsNull(topLevelKeyword1.RelatedTaxonomyNodeIds, "topLevelkeyword1.RelatedTaxonomyNodeIds"); // IncludeRelated = false
         }
 
         [TestMethod]
