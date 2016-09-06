@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Newtonsoft.Json;
@@ -16,6 +17,7 @@ namespace Sdl.Web.Tridion.Navigation
     /// </summary>
     public class StaticNavigationProvider : INavigationProvider
     {
+        private const string NavigationCacheRegionName = "Navigation_Static";
 
         #region INavigationProvider Members
 
@@ -28,35 +30,12 @@ namespace Sdl.Web.Tridion.Navigation
         {
             using (new Tracer(localization))
             {
-                string url = SiteConfiguration.LocalizeUrl("navigation.json", localization);
-                // TODO TSI-110: This is a temporary measure to cache the Navigation Model per request to not retrieve and serialize 3 times per request. Comprehensive caching strategy pending
-                string cacheKey = "navigation-" + url;
-                HttpContext httpContext = HttpContext.Current;
-                if (httpContext != null && httpContext.Items[cacheKey] != null)
-                {
-                    Log.Debug("Obtained Navigation Model from cache.");
-                    return (SitemapItem) HttpContext.Current.Items[cacheKey];
-                }
-
-                Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", url);
-                IRawDataProvider rawDataProvider = SiteConfiguration.ContentProvider as IRawDataProvider;
-                if (rawDataProvider == null)
-                {
-                    throw new DxaException(
-                        string.Format("The current Content Provider '{0}' does not implement interface '{1}' and hence cannot be used in combination with Navigation Provider '{2}'.",
-                            SiteConfiguration.ContentProvider.GetType().FullName, typeof(IRawDataProvider).FullName, GetType().FullName)
-                        );
-                }
-
-                string navigationJsonString = rawDataProvider.GetPageContent(url, localization);
-                SitemapItem result = JsonConvert.DeserializeObject<SitemapItem>(navigationJsonString);
-
-                if (httpContext != null)
-                {
-                    httpContext.Items[cacheKey] = result;
-                }
-
-                return result;
+                return SiteConfiguration.CacheProvider.GetOrAdd(
+                    localization.LocalizationId,
+                    NavigationCacheRegionName,
+                    () => BuildNavigationModel(localization)
+                    // TODO: dependency on navigation.json Page
+                    );
             }
         }
 
@@ -70,13 +49,11 @@ namespace Sdl.Web.Tridion.Navigation
         {
             using (new Tracer(requestUrlPath, localization))
             {
-                NavigationLinks navigationLinks = new NavigationLinks();
                 SitemapItem sitemapRoot = GetNavigationModel(localization);
-                foreach (SitemapItem item in sitemapRoot.Items.Where(i => i.Visible))
+                return new NavigationLinks
                 {
-                    navigationLinks.Items.Add(CreateLink((item.Title == "Index") ? sitemapRoot : item));
-                }
-                return navigationLinks;
+                    Items = sitemapRoot.Items.Where(i => i.Visible).Select(i => RewriteIndexPage(i, sitemapRoot).CreateLink(localization)).ToList()
+                };
             }
         }
 
@@ -90,28 +67,31 @@ namespace Sdl.Web.Tridion.Navigation
         {
             using (new Tracer(requestUrlPath, localization))
             {
-                NavigationLinks navigationLinks = new NavigationLinks();
-                SitemapItem sitemapItem = GetNavigationModel(localization); // Start with Sitemap root Item.
-                int levels = requestUrlPath.Split('/').Length;
-                while (levels > 1 && sitemapItem.Items != null)
+                // Find the context Sitemap Item; start with Sitemap root.
+                SitemapItem contextSitemapItem = GetNavigationModel(localization);
+                if (requestUrlPath.Contains("/"))
                 {
-                    SitemapItem newParent = sitemapItem.Items.FirstOrDefault(i => i.Type == "StructureGroup" && requestUrlPath.StartsWith(i.Url, StringComparison.InvariantCultureIgnoreCase));
-                    if (newParent == null)
+                    while (contextSitemapItem.Items != null)
                     {
-                        break;
-                    }
-                    sitemapItem = newParent;
-                }
-
-                if (sitemapItem != null && sitemapItem.Items != null)
-                {
-                    foreach (SitemapItem item in sitemapItem.Items.Where(i => i.Visible))
-                    {
-                        navigationLinks.Items.Add(CreateLink(item));
+                        SitemapItem matchingChildSg = contextSitemapItem.Items.FirstOrDefault(i => i.Type == SitemapItem.Types.StructureGroup && requestUrlPath.StartsWith(i.Url, StringComparison.InvariantCultureIgnoreCase));
+                        if (matchingChildSg == null)
+                        {
+                            // No matching child SG found => current contextSitemapItem reflects the context SG.
+                            break;
+                        }
+                        contextSitemapItem = matchingChildSg;
                     }
                 }
 
-                return navigationLinks;
+                if (contextSitemapItem.Items == null)
+                {
+                    throw new DxaException(string.Format("Context SitemapItem has no child items: {0}", contextSitemapItem));
+                }
+
+                return new NavigationLinks
+                {
+                    Items = contextSitemapItem.Items.Where(i => i.Visible).Select(i => i.CreateLink(localization)).ToList()
+                };
             }
         }
 
@@ -126,46 +106,54 @@ namespace Sdl.Web.Tridion.Navigation
             using (new Tracer(requestUrlPath, localization))
             {
 
-                NavigationLinks navigationLinks = new NavigationLinks();
                 int levels = requestUrlPath.Split('/').Length;
-                SitemapItem sitemapItem = GetNavigationModel(localization); // Start with Sitemap root Item.
-                navigationLinks.Items.Add(CreateLink(sitemapItem));
-                while (levels > 1 && sitemapItem.Items != null)
+
+                SitemapItem currentItem = GetNavigationModel(localization); // Start with Sitemap root.
+                List<Link> links = new List<Link> { currentItem.CreateLink(localization) };
+                while (levels > 1 && currentItem.Items != null)
                 {
-                    sitemapItem = sitemapItem.Items.FirstOrDefault(i => requestUrlPath.StartsWith(i.Url, StringComparison.InvariantCultureIgnoreCase));
-                    if (sitemapItem != null)
-                    {
-                        navigationLinks.Items.Add(CreateLink(sitemapItem));
-                        levels--;
-                    }
-                    else
+                    currentItem = currentItem.Items.FirstOrDefault(i => requestUrlPath.StartsWith(i.Url, StringComparison.InvariantCultureIgnoreCase));
+                    if (currentItem == null)
                     {
                         break;
                     }
+                    links.Add(currentItem.CreateLink(localization));
+                    levels--;
                 }
-                return navigationLinks;
+
+                return new NavigationLinks
+                {
+                    Items = links
+                };
             }
         }
-
         #endregion
 
-        /// <summary>
-        /// Creates a Link Entity Model out of a SitemapItem Entity Model.
-        /// </summary>
-        /// <param name="sitemapItem">The SitemapItem Entity Model.</param>
-        /// <returns>The Link Entity Model.</returns>
-        protected static Link CreateLink(SitemapItem sitemapItem)
+        private SitemapItem BuildNavigationModel(Localization localization)
         {
-            string url = sitemapItem.Url;
-            if (url.StartsWith("tcm:"))
+            using (new Tracer(localization))
             {
-                url = SiteConfiguration.LinkResolver.ResolveLink(url);
+                string navigationJsonUrlPath = SiteConfiguration.LocalizeUrl("navigation.json", localization);
+
+                Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", navigationJsonUrlPath);
+                IRawDataProvider rawDataProvider = SiteConfiguration.ContentProvider as IRawDataProvider;
+                if (rawDataProvider == null)
+                {
+                    throw new DxaException(
+                        string.Format("The current Content Provider '{0}' does not implement interface '{1}' and hence cannot be used in combination with Navigation Provider '{2}'.",
+                            SiteConfiguration.ContentProvider.GetType().FullName, typeof(IRawDataProvider).FullName, GetType().FullName)
+                        );
+                }
+
+                return JsonConvert.DeserializeObject<SitemapItem>(rawDataProvider.GetPageContent(navigationJsonUrlPath, localization));
             }
-            return new Link
-            {
-                Url = url,
-                LinkText = sitemapItem.Title
-            };
         }
+
+        private static SitemapItem RewriteIndexPage(SitemapItem sitemapItem, SitemapItem parentSitemapItem)
+        {
+            // TODO: test on Url instead?
+            return (sitemapItem.Title == "Index") ? parentSitemapItem : sitemapItem;
+        }
+
     }
 }

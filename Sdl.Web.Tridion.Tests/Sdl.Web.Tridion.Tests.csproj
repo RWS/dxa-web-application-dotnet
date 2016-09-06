@@ -59,6 +59,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CacheProviderTest.cs" />
+    <Compile Include="DynamicNavigationProviderTest.cs" />
     <Compile Include="Models\Entity\Article.cs" />
     <Compile Include="Models\Entity\ContentList.cs" />
     <Compile Include="Models\Entity\Image.cs" />

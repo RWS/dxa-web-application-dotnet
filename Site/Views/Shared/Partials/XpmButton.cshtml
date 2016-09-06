@@ -11,7 +11,8 @@
 else
 {
     <div class="xpm-button">
-        <a href="/system/include/@Model.XpmMetadata[RegionModel.IncludedFromPageFileNameXpmMetadataKey]" title="Edit @Model.XpmMetadata[RegionModel.IncludedFromPageTitleXpmMetadataKey]" class="fa-stack fa-lg">
+        @{ string includePageUrlPath = string.Format("{0}/system/include/{1}", WebRequestContext.Localization.Path, Model.XpmMetadata[RegionModel.IncludedFromPageFileNameXpmMetadataKey]); }
+        <a href="@includePageUrlPath" title="Edit @Model.XpmMetadata[RegionModel.IncludedFromPageTitleXpmMetadataKey]" class="fa-stack fa-lg">
             <i class="fa fa-square fa-stack-2x"></i>
             <i class="fa fa-pencil fa-inverse fa-stack-1x"></i>
         </a>

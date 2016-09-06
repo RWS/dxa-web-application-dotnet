@@ -37,7 +37,7 @@ namespace Sdl.Web.Mvc.Controllers
                 }
                 catch (DxaItemNotFoundException ex)
                 {
-                    Log.Warn(ex.Message);
+                    Log.Info(ex.Message);
                     return NotFound();
                 }
 

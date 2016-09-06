@@ -53,30 +53,69 @@ namespace Sdl.Web.Tridion.Tests
 
 
         [TestMethod]
-        public void GetContextNavigationLinks_Success()
+        public void GetContextNavigationLinks_Root_Success()
         {
             Localization testLocalization = TestFixture.ParentLocalization;
 
-            NavigationLinks testNavLinks = _testNavigationProvider.GetContextNavigationLinks(testLocalization.Path, testLocalization);
+            NavigationLinks navLinks = _testNavigationProvider.GetContextNavigationLinks(testLocalization.Path, testLocalization);
 
-            Assert.IsNotNull(testNavLinks, "NavigationLinks");
-            AssertValidHomePageLink(testNavLinks, testLocalization);
+            Assert.IsNotNull(navLinks, "navLinks");
+            OutputJson(navLinks);
+
+            Assert.AreEqual(1, navLinks.Items.Count, "navLinks.Items.Count");
+            AssertValidLink(navLinks.Items[0], testLocalization.Path + "/index", "Home", null, "navLinks.Items[0]");
         }
 
         [TestMethod]
-        public void GetBreadcrumbNavigationLinks_Success()
+        public void GetContextNavigationLinks_TaxonomyTestPage1_Success()
+        {
+            const string testUrlPath = TestFixture.TaxonomyTestPage1UrlPath;
+            Localization testLocalization = TestFixture.ParentLocalization;
+
+            NavigationLinks navLinks = _testNavigationProvider.GetContextNavigationLinks(testUrlPath, testLocalization);
+
+            Assert.IsNotNull(navLinks, "navLinks");
+            OutputJson(navLinks);
+
+            Assert.AreEqual(3, navLinks.Items.Count, "navLinks.Items.Count");
+            AssertValidLink(navLinks.Items[0], testLocalization.Path + "/regression/taxonomy/index", "Navigation Taxonomy Index Page", null, "navLinks.Items[0]");
+            AssertValidLink(navLinks.Items[1], testLocalization.Path + "/regression/taxonomy/nav-taxonomy-test-2", "Navigation Taxonomy Test Page 2", null, "navLinks.Items[1]");
+            AssertValidLink(navLinks.Items[2], testLocalization.Path + "/regression/taxonomy/nav-taxonomy-test-1", "Navigation Taxonomy Test Page 1", null, "navLinks.Items[2]");
+        }
+
+
+        [TestMethod]
+        public void GetBreadcrumbNavigationLinks_Root_Success()
         {
             Localization testLocalization = TestFixture.ParentLocalization;
 
-            NavigationLinks testNavLinks = _testNavigationProvider.GetBreadcrumbNavigationLinks(testLocalization.Path + "index", testLocalization);
+            NavigationLinks navLinks = _testNavigationProvider.GetBreadcrumbNavigationLinks(testLocalization.Path, testLocalization);
 
-            Assert.IsNotNull(testNavLinks, "NavigationLinks");
-            Assert.AreEqual(1, testNavLinks.Items.Count, "NavigationLinks.Items (count)");
+            Assert.IsNotNull(navLinks, "navLinks");
+            OutputJson(navLinks);
 
-            Link rootStructureGroupLink = testNavLinks.Items[0];
-            Assert.AreEqual("Home", rootStructureGroupLink.LinkText, "Root SG Link.LinkText");
-            Assert.AreEqual(testLocalization.Path + "/", rootStructureGroupLink.Url, "Root SG Link.Url");
+            Assert.AreEqual(1, navLinks.Items.Count, "navLinks.Items.Count");
+            AssertValidLink(navLinks.Items[0], testLocalization.Path + "/", "Home", null, "navLinks.Items[0]");
         }
+
+        [TestMethod]
+        public void GetBreadcrumbNavigationLinks_TaxonomyTestPage1_Success()
+        {
+            const string testUrlPath = TestFixture.TaxonomyTestPage1UrlPath;
+            Localization testLocalization = TestFixture.ParentLocalization;
+
+            NavigationLinks navLinks = _testNavigationProvider.GetBreadcrumbNavigationLinks(testUrlPath, testLocalization);
+
+            Assert.IsNotNull(navLinks, "navLinks");
+            OutputJson(navLinks);
+
+            Assert.AreEqual(4, navLinks.Items.Count, "navLinks.Items.Count");
+            AssertValidLink(navLinks.Items[0], testLocalization.Path + "/", "Home", null, "navLinks.Items[0]");
+            AssertValidLink(navLinks.Items[1], testLocalization.Path + "/regression", "Regression", null, "navLinks.Items[1]");
+            AssertValidLink(navLinks.Items[2], testLocalization.Path + "/regression/taxonomy", "Taxonomy", null, "navLinks.Items[2]");
+            AssertValidLink(navLinks.Items[3], testLocalization.Path + "/regression/taxonomy/nav-taxonomy-test-1", "Navigation Taxonomy Test Page 1", null, "navLinks.Items[3]");
+        }
+
 
         private void AssertValidHomePageLink(NavigationLinks navLinks, Localization testLocalization)
         {

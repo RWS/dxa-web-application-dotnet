@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using Sdl.Web.Common.Interfaces;
@@ -27,6 +28,11 @@ namespace Sdl.Web.Common.Configuration
         private static readonly object _lock = new object();
 
         #region References to "providers"
+        /// <summary>
+        /// Gets the Cache Provider.
+        /// </summary>
+        public static ICacheProvider CacheProvider { get; private set; }
+
         /// <summary>
         /// Gets the Content Provider used for obtaining the Page and Entity Models and Static Content.
         /// </summary>
@@ -96,6 +102,10 @@ namespace Sdl.Web.Common.Configuration
         {
             using (new Tracer())
             {
+                Version assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
+                Log.Info("-------- Initializing DXA Framework v{0} --------", assemblyVersion);
+
+                CacheProvider = GetProvider<ICacheProvider>(dependencyResolver);
                 ContentProvider = GetProvider<IContentProvider>(dependencyResolver);
                 NavigationProvider = GetProvider<INavigationProvider>(dependencyResolver);
                 ContextClaimsProvider = GetProvider<IContextClaimsProvider>(dependencyResolver);

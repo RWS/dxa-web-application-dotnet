@@ -20,6 +20,13 @@ namespace Sdl.Web.Tridion.Tests
         internal const string Tsi1614PageUrlPath = "/autotest-parent/tsi-1614.html";
         internal const string Tsi1758PageUrlPath = "/autotest-parent/regression/tsi-1758.html";
         internal const string Tsi1852PageUrlPath = "/autotest-parent/regression/tsi-1852.html";
+        internal const string TaxonomyTestPage1UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1.html";
+        internal const string TaxonomyTestPage2UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-2.html";
+        internal const string TaxonomyIndexPageUrlPath = "/autotest-parent/regression/taxonomy";
+        internal const string NavigationTaxonomyTitle = "Test Taxonomy [Navigation]";
+        internal const string TopLevelKeyword1Title = "Top-level Keyword 1";
+        internal const string TopLevelKeyword2Title = "Top-level Keyword 2";
+        internal const string Keyword1_1Title = "Keyword 1.1";
 
         private static readonly IEnumerable<Localization> _testLocalizations;
         private static readonly Localization _parentLocalization;
@@ -27,6 +34,7 @@ namespace Sdl.Web.Tridion.Tests
 
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
+            { typeof(ICacheProvider), new DefaultCacheProvider() },
             { typeof(IContentProvider), new DefaultContentProvider() },
             { typeof(INavigationProvider), new StaticNavigationProvider() },
             { typeof(ILinkResolver), new DefaultLinkResolver() },

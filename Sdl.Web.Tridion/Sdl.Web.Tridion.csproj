@@ -12,6 +12,9 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <SdlWebDeliveryPackageVersion>8.3.0-beta-201608311048</SdlWebDeliveryPackageVersion>
+    <SdlWebContextClientPackageVersion>8.3.0-beta-201608161347</SdlWebContextClientPackageVersion>
+    <SdlWebContextImagePackageVersion>8.3.0-beta-201608161349</SdlWebContextImagePackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -127,22 +130,22 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Tridion.ContentDelivery">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Tridion.ContentDelivery.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net45\Tridion.ContentDelivery.dll</HintPath>
     </Reference>
     <Reference Include="Tridion.ContentDelivery.AmbientData">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Tridion.ContentDelivery.AmbientData.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net45\Tridion.ContentDelivery.AmbientData.dll</HintPath>
     </Reference>
     <Reference Include="Tridion.ContentDelivery.UGC">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.2.0\lib\net45\Tridion.ContentDelivery.UGC.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net45\Tridion.ContentDelivery.UGC.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Context.Api">
-      <HintPath>..\packages\Sdl.Web.Context.Client.8.2.0\lib\net45\Sdl.Web.Context.Api.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.Api.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Context.Image.Proxy">
-      <HintPath>..\packages\Sdl.Web.Context.Image.8.2.0\lib\net45\Sdl.Web.Context.Image.Proxy.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Context.Image.$(SdlWebContextImagePackageVersion)\lib\net45\Sdl.Web.Context.Image.Proxy.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Context.OData.Client">
-      <HintPath>..\packages\Sdl.Web.Context.Client.8.2.0\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
     <Compile Include="CdApiLocalizationResolver.cs" />
@@ -171,6 +174,7 @@
     <Compile Include="ContentManager\InvalidTcmUriException.cs" />
     <Compile Include="ContentManager\ItemTypes.cs" />
     <Compile Include="Context\AdfContextClaimsProvider.cs" />
+    <Compile Include="DefaultCacheProvider.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Linking\DefaultLinkResolver.cs" />
     <Compile Include="LocalizationResolver.cs" />
@@ -184,6 +188,7 @@
     <Compile Include="Mapping\MappingData.cs" />
     <Compile Include="Mapping\ModelBuilderPipeline.cs" />
     <Compile Include="Mapping\PublicationResolver.cs" />
+    <Compile Include="Navigation\DynamicNavigationProvider.cs" />
     <Compile Include="Navigation\StaticNavigationProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query\BrokerQuery.cs" />

@@ -124,22 +124,22 @@ namespace Sdl.Web.Common.Models
         /// Creates a syndication feed item based on essential data.
         /// </summary>
         /// <param name="title">The title.</param>
-        /// <param name="content">The content. Can be a string or a <see cref="RichText"/> instance.</param>
+        /// <param name="summary">The summary. Can be a string or a <see cref="RichText"/> instance.</param>
         /// <param name="link">The link.</param>
         /// <param name="publishDate">The date/time this item was published/created. If <c>null</c>, publish date is not included in the feed.</param>
         /// <param name="localization">The context <see cref="Localization"/>.</param>
         /// <returns>The syndication feed item.</returns>
-        protected SyndicationItem CreateSyndicationItem(string title, object content, Link link, DateTime? publishDate, Localization localization)
+        protected SyndicationItem CreateSyndicationItem(string title, object summary, Link link, DateTime? publishDate, Localization localization)
         {
             SyndicationItem result = new SyndicationItem
             {
                 Title = new TextSyndicationContent(title),
             };
 
-            if (content != null)
+            if (summary != null)
             {
-                TextSyndicationContentKind textKind = (content is RichText) ? TextSyndicationContentKind.Html : TextSyndicationContentKind.Plaintext;
-                result.Content = new TextSyndicationContent(content.ToString(), textKind);
+                TextSyndicationContentKind textKind = (summary is RichText) ? TextSyndicationContentKind.Html : TextSyndicationContentKind.Plaintext;
+                result.Summary = new TextSyndicationContent(summary.ToString(), textKind);
             }
 
             SyndicationLink syndicationLink = CreateSyndicationLink(link, localization);
