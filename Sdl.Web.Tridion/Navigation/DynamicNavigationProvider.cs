@@ -484,9 +484,7 @@ namespace Sdl.Web.Tridion.Navigation
                 Description = keyword.KeywordDescription,
                 IsAbstract = keyword.IsAbstract,
                 HasChildNodes = keyword.HasChildren || (classifiedItemsCount > 0),
-                ClassifiedItemsCount = classifiedItemsCount,
-                RelatedTaxonomyNodeIds = filter.IncludeRelated ? keyword.GetRelatedKeywordUris().Select(uri => FormatKeywordNodeId(uri, taxonomyId)).ToList() : null,
-                CustomMetadata = filter.IncludeCustomMetadata ? GetCustomMetadata(keyword) : null
+                ClassifiedItemsCount = classifiedItemsCount
             };
 
             if (childItems != null)
@@ -498,11 +496,6 @@ namespace Sdl.Web.Tridion.Navigation
             }
 
             return result;
-        }
-
-        private static IDictionary<string, object> GetCustomMetadata(Keyword keyword)
-        {
-            throw new System.NotImplementedException(); // TODO
         }
 
         private static SitemapItem[] ExpandClassifiedPages(Keyword keyword, string taxonomyId, Localization localization)

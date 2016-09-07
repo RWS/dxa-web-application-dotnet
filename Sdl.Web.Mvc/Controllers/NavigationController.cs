@@ -102,9 +102,7 @@ namespace Sdl.Web.Mvc.Controllers
             {
                 NavigationFilter navFilter = new NavigationFilter
                 {
-                    IncludeAncestors = GetRequestParameter<bool>("includeAncestors"),
-                    IncludeRelated = GetRequestParameter<bool>("includeRelated"),
-                    IncludeCustomMetadata = GetRequestParameter<bool>("includeCustomMetadata")
+                    IncludeAncestors = GetRequestParameter<bool>("includeAncestors")
                 };
 
                 int descendantLevels;

@@ -10,11 +10,9 @@ namespace Sdl.Web.Common.Models.Navigation
     {
         public string Key { get; set; }
         public string Description { get; set; }
-        public List<string> RelatedTaxonomyNodeIds { get; set; }
         public bool IsAbstract { get; set; }
         public bool HasChildNodes { get; set; }
         public int ClassifiedItemsCount { get; set; }
-        public IDictionary<string, object> CustomMetadata { get; set; }
 
         /// <summary>
         /// Creates a <see cref="Link"/> out of this <see cref="SitemapItem"/>.
