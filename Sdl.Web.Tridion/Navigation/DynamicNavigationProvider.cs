@@ -447,10 +447,9 @@ namespace Sdl.Web.Tridion.Navigation
 
                 // Add child SitemapItems for child Taxonomy Nodes (ordered by title, including sequence prefix if any)
                 TaxonomyNode[] childTaxonomyNodes = keyword.KeywordChildren.Cast<Keyword>()
+                    .OrderBy(kw => kw.KeywordName)
                     .Select(kw => CreateTaxonomyNode(kw, expandLevels - 1, filter, localization))
-                    .OrderBy(tn => tn.Title)
                     .ToArray();
-                StripTitleSequencePrefixes(childTaxonomyNodes);
                 childItems.AddRange(childTaxonomyNodes);
 
                 if (classifiedItemsCount > 0 && filter.DescendantLevels != 0)
@@ -470,13 +469,12 @@ namespace Sdl.Web.Tridion.Navigation
                 }
             }
 
-            string sequencePrefix = _cmTitleRegex.Match(keyword.KeywordName).Groups["sequence"].Value; 
-
+            string sequencePrefix; 
             TaxonomyNode result = new TaxonomyNode
             {
                 Id = isRoot ? string.Format("t{0}", taxonomyId) : FormatKeywordNodeId(keyword.KeywordUri, taxonomyId),
                 Type =  SitemapItem.Types.TaxonomyNode,
-                Title = keyword.KeywordName,
+                Title = StripSequencePrefix(keyword.KeywordName, out sequencePrefix) ,
                 Url = taxonomyNodeUrl,
                 Visible = !string.IsNullOrEmpty(sequencePrefix) && !string.IsNullOrEmpty(taxonomyNodeUrl),
                 Items = childItems,
@@ -505,35 +503,31 @@ namespace Sdl.Web.Tridion.Navigation
                 // Return SitemapItems for all classified Pages (ordered by Page Title, including sequence prefix if any)
                 PageMetaFactory pageMetaFactory = new PageMetaFactory(GetPublicationTcmUri(localization));
                 IPageMeta[] classifiedPageMetas = pageMetaFactory.GetTaxonomyPages(keyword, includeBranchedFacets: false);
-                SitemapItem[] result = classifiedPageMetas.Select(pageMeta => CreateSitemapItem(pageMeta, taxonomyId)).OrderBy(i => i.Title).ToArray();
-
-                StripTitleSequencePrefixes(result);
-
+                SitemapItem[] result = classifiedPageMetas.OrderBy(pageMeta => pageMeta.Title).Select(pageMeta => CreateSitemapItem(pageMeta, taxonomyId)).ToArray();
                 return result;
             }
         }
 
         private static SitemapItem CreateSitemapItem(IPageMeta pageMeta, string taxonomyId)
         {
-            string sequencePrefix = _cmTitleRegex.Match(pageMeta.Title).Groups["sequence"].Value;
+            string sequencePrefix;
 
             return new SitemapItem
             {
                 Id = string.Format("t{0}-p{1}", taxonomyId, pageMeta.Id),
                 Type = SitemapItem.Types.Page,
-                Title = pageMeta.Title,
+                Title = StripSequencePrefix(pageMeta.Title, out sequencePrefix),
                 Url = StripFileExtension(pageMeta.UrlPath) ,
                 PublishedDate = pageMeta.LastPublicationDate,
                 Visible = !string.IsNullOrEmpty(sequencePrefix)
             };
         }
 
-        private static void StripTitleSequencePrefixes(IEnumerable<SitemapItem> sitemapItems)
+        private static string StripSequencePrefix(string title, out string sequencePrefix)
         {
-            foreach (SitemapItem sitemapItem in sitemapItems)
-            {
-                sitemapItem.Title = _cmTitleRegex.Match(sitemapItem.Title).Groups["title"].Value;
-            }
+            Match titleMatch = _cmTitleRegex.Match(title);
+            sequencePrefix = titleMatch.Groups["sequence"].Value;
+            return titleMatch.Groups["title"].Value;
         }
 
         private static string StripFileExtension(string urlPath)
