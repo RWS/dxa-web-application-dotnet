@@ -76,8 +76,16 @@ namespace Sdl.Web.Site
             ).DataTokens.Add("area", "Core");
 
             // Navigation subtree
-            routes.MapRoute("NavSubtree", "navigation/{sitemapItemId}", new { controller = "Navigation", action = "GetNavigationSubtree", sitemapItemId = UrlParameter.Optional });
-            routes.MapRoute("NavSubtree_Loc", "{localization}/navigation/{sitemapItemId}", new { controller = "Navigation", action = "GetNavigationSubtree", sitemapItemId = UrlParameter.Optional });
+            routes.MapRoute(
+                "NavSubtree",
+                "api/navigation/subtree/{sitemapItemId}",
+                new { controller = "Navigation", action = "GetNavigationSubtree", sitemapItemId = UrlParameter.Optional }
+                );
+            routes.MapRoute(
+                "NavSubtree_Loc", 
+                "{localization}/api/navigation/subtree/{sitemapItemId}", 
+                new { controller = "Navigation", action = "GetNavigationSubtree", sitemapItemId = UrlParameter.Optional }
+                );
 
             // For resolving ids to urls
             routes.MapRoute(
