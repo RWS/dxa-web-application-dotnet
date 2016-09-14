@@ -55,31 +55,31 @@
     <NoWarn>1591,1574,1570,1572,1573</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DD4T.ContentModel, Version=2.0.7.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
+    <Reference Include="DD4T.ContentModel">
       <HintPath>..\packages\DD4T.Model.2.0.7\lib\net45\DD4T.ContentModel.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.ContentModel.Contracts, Version=2.0.7.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
+    <Reference Include="DD4T.ContentModel.Contracts">
       <HintPath>..\packages\DD4T.Model.2.0.7\lib\net45\DD4T.ContentModel.Contracts.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.Core.Contracts, Version=2.0.8.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="DD4T.Core.Contracts">
       <HintPath>..\packages\DD4T.Core.2.0.8\lib\net45\DD4T.Core.Contracts.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.Factories, Version=2.0.8.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="DD4T.Factories">
       <HintPath>..\packages\DD4T.Core.2.0.8\lib\net45\DD4T.Factories.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.Serialization, Version=2.0.7.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
+    <Reference Include="DD4T.Serialization">
       <HintPath>..\packages\DD4T.Model.2.0.7\lib\net45\DD4T.Serialization.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.Utils, Version=2.0.8.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="DD4T.Utils">
       <HintPath>..\packages\DD4T.Core.2.0.8\lib\net45\DD4T.Utils.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
@@ -93,39 +93,39 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' != 'Release_7.1'">
-    <Reference Include="Microsoft.Data.Edm, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.Data.Edm">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Data.Edm.5.6.4\lib\net40\Microsoft.Data.Edm.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Data.OData, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.Data.OData">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Data.OData.5.6.4\lib\net40\Microsoft.Data.OData.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Data.Services.Client, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.Data.Services.Client">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Data.Services.Client.5.6.4\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
     </Reference>
-    <Reference Include="System.Spatial, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="System.Spatial">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\System.Spatial.5.6.4\lib\net40\System.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.OData.Client">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.OData.Client.6.13.0\lib\net40\Microsoft.OData.Client.dll</HintPath>
+      <HintPath>..\packages\Microsoft.OData.Client.6.15.0\lib\net40\Microsoft.OData.Client.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.OData.Core">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.OData.Core.6.13.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.OData.Core.dll</HintPath>
+      <HintPath>..\packages\Microsoft.OData.Core.6.15.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.OData.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.OData.Edm">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.OData.Edm.6.13.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.OData.Edm.dll</HintPath>
+      <HintPath>..\packages\Microsoft.OData.Edm.6.15.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.OData.Edm.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Spatial">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Spatial.6.13.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Spatial.6.15.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
     </Reference>
-    <Reference Include="DD4T.Providers.SDLWeb8.CIL, Version=2.0.0.6, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="DD4T.Providers.SDLWeb8.CIL">
       <HintPath>..\packages\DD4T.Providers.SDLWeb8.CIL.2.0.0.6-alpha\lib\net45\DD4T.Providers.SDLWeb8.CIL.dll</HintPath>
       <Private>True</Private>
     </Reference>
@@ -161,7 +161,7 @@
       <HintPath>..\_references\cd-7.1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DD4T.Providers.SDLTridion2013sp1, Version=2.0.8.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="DD4T.Providers.SDLTridion2013sp1">
       <HintPath>..\packages\DD4T.Providers.SDLTridion2013sp1.2.0.8\lib\net45\DD4T.Providers.SDLTridion2013sp1.dll</HintPath>
       <Private>True</Private>
     </Reference>
