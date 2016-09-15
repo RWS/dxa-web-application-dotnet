@@ -130,6 +130,7 @@
     <Compile Include="Models\Legacy\IRegion.cs" />
     <Compile Include="Models\Navigation\NavigationFilter.cs" />
     <Compile Include="Models\PageModelWithHttpResponseData.cs" />
+    <Compile Include="Models\RedirectModel.cs" />
     <Compile Include="Models\RichText.cs" />
     <Compile Include="Models\SemanticAttributes.cs" />
     <Compile Include="Models\Legacy\EntityBase.cs" />
