@@ -48,6 +48,12 @@ namespace Sdl.Web.Mvc.Controllers
             Type modelType = model.GetType();
             foreach (string formField in Request.Form)
             {
+                if (formField == "__RequestVerificationToken")
+                {
+                    // This is not a form field, but the Anti Request Forgery Token
+                    continue;
+                }
+
                 PropertyInfo modelProperty = modelType.GetProperty(formField);
                 if (modelProperty == null)
                 {
@@ -68,6 +74,11 @@ namespace Sdl.Web.Mvc.Controllers
 
                 try
                 {
+                    if (modelProperty.PropertyType == typeof (bool))
+                    {
+                        // The @Html.CheckBoxFor method includes a hidden field with the original checkbox state, resulting in two boolean values (comma separated)
+                        formFieldValue = formFieldValue.Split(',')[0];
+                    }
                     modelProperty.SetValue(model, Convert.ChangeType(formFieldValue, modelProperty.PropertyType));
                 }
                 catch (Exception ex)
