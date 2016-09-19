@@ -28,6 +28,7 @@ namespace Sdl.Web.Mvc.Controllers
                 Response.StatusCode = (int) HttpStatusCode.Redirect;
                 Response.RedirectLocation = ((RedirectModel) model).RedirectUrl;
                 Response.End();
+                return null;
             }
 
             return View(model.MvcData.ViewName, model);
