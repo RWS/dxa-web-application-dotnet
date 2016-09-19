@@ -63,13 +63,20 @@ namespace Sdl.Web.Mvc.Controllers
 
                 string formFieldValue = Request.Form[formField];
 
-                RequiredAttribute requiredAttr = modelProperty.GetCustomAttribute<RequiredAttribute>();
-                if (requiredAttr != null && string.IsNullOrEmpty(formFieldValue))
+                ValidationAttribute validationAttr = modelProperty.GetCustomAttribute<ValidationAttribute>();
+                if (validationAttr != null)
                 {
-                    Log.Debug("Required property '{0}' has no value in form data.");
-                    string errorMessage = requiredAttr.ErrorMessage ?? string.Format("Field '{0}' must be specified.", formField);
-                    ModelState.AddModelError(formField, errorMessage);
-                    continue;
+                    try
+                    {
+                        validationAttr.Validate(formFieldValue, formField);
+                    }
+                    catch (ValidationException ex)
+                    {
+                        string validationMessage = ResolveValidationMessage(ex.Message, model);
+                        Log.Debug("Validation of property '{0}' failed: {1}", formField, validationMessage);
+                        ModelState.AddModelError(formField, validationMessage);
+                        continue;
+                    }
                 }
 
                 try
@@ -91,6 +98,35 @@ namespace Sdl.Web.Mvc.Controllers
             return true;
         }
 
+        /// <summary>
+        /// Resolves CM-managed validation messages. 
+        /// </summary>
+        /// <param name="inputMessage">The input validation message which may have the special syntax <c>@Model.{$ModelPropertyName}</c>.</param>
+        /// <param name="model">The View Model used to resolve the value of such Model property expression.</param>
+        /// <returns>The resolved validation message or the input message in case resolving fails.</returns>
+        private static string ResolveValidationMessage(string inputMessage, ViewModel model)
+        {
+            const string modelPrefix = "@Model.";
+            if (!inputMessage.StartsWith(modelPrefix))
+            {
+                return inputMessage;
+            }
 
+            string modelPropertyName = inputMessage.Substring(modelPrefix.Length);
+            PropertyInfo validationMessageProperty = model.GetType().GetProperty(modelPropertyName);
+            string validationMessagePropertyValue = null;
+            if (validationMessageProperty != null)
+            {
+                validationMessagePropertyValue = validationMessageProperty.GetValue(model) as string;
+            }
+
+            if (string.IsNullOrEmpty(validationMessagePropertyValue))
+            {
+                Log.Warn("No validation message could be resolved for expression '{0}'", inputMessage);
+                return inputMessage;
+            }
+
+            return validationMessagePropertyValue;
+        }
     }
 }
