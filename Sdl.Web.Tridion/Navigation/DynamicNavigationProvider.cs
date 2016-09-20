@@ -208,12 +208,7 @@ namespace Sdl.Web.Tridion.Navigation
 
                     if (taxonomyRoot != null)
                     {
-                        if (filter.DescendantLevels == 0)
-                        {
-                            // No descendants have been requested; ensure Items properties are null on the leaf Taxonomy Nodes.
-                            PruneLeafTaxonomyNodes(taxonomyRoot);
-                        }
-                        else
+                        if (filter.DescendantLevels != 0)
                         {
                             AddDescendants(taxonomyRoot, filter, localization);
                         }
@@ -247,29 +242,6 @@ namespace Sdl.Web.Tridion.Navigation
             taxonomyId = sitemapItemIdMatch.Groups["taxonomyId"].Value;
             keywordId = sitemapItemIdMatch.Groups["keywordId"].Value;
             pageId = sitemapItemIdMatch.Groups["pageId"].Value;
-        }
-
-        private static void PruneLeafTaxonomyNodes(TaxonomyNode taxonomyNode)
-        {
-            if (taxonomyNode.Items == null)
-            {
-                // This leaf TaxonomyNode is already pruned; nothing to do.
-                return;
-            }
-
-            if (taxonomyNode.Items.Count == 0)
-            {
-                // Prune this leaf Taxonomy node.
-                taxonomyNode.Items = null;
-            }
-            else
-            {
-                // Not a leaf; prune its child Taxonomy Nodes (recursively).
-                foreach (TaxonomyNode childNode in taxonomyNode.Items.OfType<TaxonomyNode>())
-                {
-                    PruneLeafTaxonomyNodes(childNode);
-                }
-            }
         }
 
         private static void AddDescendants(TaxonomyNode taxonomyNode, NavigationFilter filter, Localization localization)
@@ -447,11 +419,9 @@ namespace Sdl.Web.Tridion.Navigation
             int classifiedItemsCount = keyword.ReferencedContentCount;
             string taxonomyNodeUrl = null;
 
-            List<SitemapItem> childItems = null;
+            List<SitemapItem> childItems = new List<SitemapItem>();
             if (expandLevels != 0)
             {
-                childItems = new List<SitemapItem>();
-
                 // Add child SitemapItems for child Taxonomy Nodes (ordered by title, including sequence prefix if any)
                 IEnumerable<TaxonomyNode> childTaxonomyNodes = keyword.KeywordChildren.Cast<Keyword>()
                     .Select(kw => CreateTaxonomyNode(kw, expandLevels - 1, filter, localization));

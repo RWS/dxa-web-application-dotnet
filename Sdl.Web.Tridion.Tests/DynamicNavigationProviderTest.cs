@@ -345,16 +345,8 @@ namespace Sdl.Web.Tridion.Tests
         {
             Assert.IsNotNull(taxonomyNode, subjectName);
             Assert.AreEqual(expectedTitle, taxonomyNode.Title, subjectName + ".Title");
-
-            if (expectedNumberOfChildItems >= 0)
-            {
-                Assert.IsNotNull(taxonomyNode.Items, subjectName + ".Items");
-                Assert.AreEqual(expectedNumberOfChildItems, taxonomyNode.Items.Count, subjectName + ".Items.Count");
-            }
-            else
-            {
-                Assert.IsNull(taxonomyNode.Items, subjectName + ".Items");
-            }
+            Assert.IsNotNull(taxonomyNode.Items, subjectName + ".Items");
+            Assert.AreEqual(expectedNumberOfChildItems, taxonomyNode.Items.Count, subjectName + ".Items.Count");
         }
 
         [TestMethod]
@@ -380,7 +372,7 @@ namespace Sdl.Web.Tridion.Tests
 
             // This is the context node
             TaxonomyNode keyword11 = topLevelKeyword1.Items[0] as TaxonomyNode;
-            AssertExpectedTaxonomyNode(keyword11, testKeyword11.Title, -1, "keyword11");
+            AssertExpectedTaxonomyNode(keyword11, testKeyword11.Title, 0, "keyword11");
         }
 
         [TestMethod]
@@ -410,11 +402,11 @@ namespace Sdl.Web.Tridion.Tests
 
             // Assert that child nodes are added because of DescendantLevels = 1:
             TaxonomyNode keyword111 = keyword11.Items[0] as TaxonomyNode;
-            AssertExpectedTaxonomyNode(keyword111, "Keyword 1.1.1", -1, "keyword111");
+            AssertExpectedTaxonomyNode(keyword111, "Keyword 1.1.1", 0, "keyword111");
             TaxonomyNode keyword12 = topLevelKeyword1.Items[1] as TaxonomyNode;
-            AssertExpectedTaxonomyNode(keyword12, "Keyword 1.2", -1, "keyword12");
+            AssertExpectedTaxonomyNode(keyword12, "Keyword 1.2", 0, "keyword12");
             TaxonomyNode topLevelKeyword2 = taxonomyRoot.Items[1] as TaxonomyNode;
-            AssertExpectedTaxonomyNode(topLevelKeyword2, "Top-level Keyword 2", -1, "topLevelKeyword2");
+            AssertExpectedTaxonomyNode(topLevelKeyword2, "Top-level Keyword 2", 0, "topLevelKeyword2");
         }
 
         [TestMethod]
@@ -439,7 +431,7 @@ namespace Sdl.Web.Tridion.Tests
             AssertExpectedTaxonomyNode(topLevelKeyword1, testTopLevelKeyword1.Title, 2, "topLevelKeyword1");
 
             // Check that the context Keyword and its siblings are ordered correctly (context Keyword should be second because of its title)
-            AssertExpectedTaxonomyNode(topLevelKeyword1.Items[0] as TaxonomyNode, TestFixture.Keyword1_1Title, -1, "topLevelKeyword1.Items[0]");
+            AssertExpectedTaxonomyNode(topLevelKeyword1.Items[0] as TaxonomyNode, TestFixture.Keyword1_1Title, 0, "topLevelKeyword1.Items[0]");
             AssertExpectedTaxonomyNode(topLevelKeyword1.Items[1] as TaxonomyNode, TestFixture.Keyword1_2Title, 3, "topLevelKeyword1.Items[1]");
         }
 
@@ -470,11 +462,11 @@ namespace Sdl.Web.Tridion.Tests
             TaxonomyNode keyword11 = topLevelKeyword1.Items[0] as TaxonomyNode;
             AssertExpectedTaxonomyNode(keyword11, testKeyword11.Title, 1, "keyword11");
             TaxonomyNode keyword112 = keyword11.Items[0] as TaxonomyNode;
-            AssertExpectedTaxonomyNode(keyword112, "Keyword 1.1.2", -1, "keyword112");
+            AssertExpectedTaxonomyNode(keyword112, "Keyword 1.1.2", 0, "keyword112");
             TaxonomyNode keyword12 = topLevelKeyword1.Items[1] as TaxonomyNode;
-            AssertExpectedTaxonomyNode(keyword12, "Keyword 1.2", -1, "keyword12");
+            AssertExpectedTaxonomyNode(keyword12, "Keyword 1.2", 0, "keyword12");
             TaxonomyNode topLevelKeyword2 = taxonomyRoot.Items[1] as TaxonomyNode;
-            AssertExpectedTaxonomyNode(topLevelKeyword2, TestFixture.TopLevelKeyword2Title, -1, "topLevelKeyword2");
+            AssertExpectedTaxonomyNode(topLevelKeyword2, TestFixture.TopLevelKeyword2Title, 0, "topLevelKeyword2");
         }
 
         [TestMethod]
@@ -511,7 +503,7 @@ namespace Sdl.Web.Tridion.Tests
 
             // Assert that child nodes are added because of DescendantLevels = 1:
             TaxonomyNode keyword111 = keyword11.Items[0] as TaxonomyNode;
-            AssertExpectedTaxonomyNode(keyword111, "Keyword 1.1.1", -1, "keyword111");
+            AssertExpectedTaxonomyNode(keyword111, "Keyword 1.1.1", 0, "keyword111");
         }
 
 
@@ -546,7 +538,7 @@ namespace Sdl.Web.Tridion.Tests
 
         private static void AssertNoChildItems(IEnumerable<SitemapItem> sitemapItems, string subjectName)
         {
-            Assert.IsFalse(sitemapItems.Any(tn => tn.Items != null), subjectName + " has child items");
+            Assert.IsFalse(sitemapItems.Any(tn => tn.Items.Count > 0), subjectName + " has child items");
         }
 
     }
