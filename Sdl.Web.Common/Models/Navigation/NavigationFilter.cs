@@ -4,8 +4,6 @@
     {
         public bool IncludeAncestors { get; set; }
         public int DescendantLevels { get; set; }
-        public bool IncludeRelated { get; set; }
-        public bool IncludeCustomMetadata { get; set; }
 
         public NavigationFilter()
         {
@@ -15,8 +13,8 @@
         public override string ToString()
         {
             return string.Format(
-                "IncludeAncestors={0}, DescendantLevels={1}, IncludeRelated={2} IncludeCustomMetadata={3}", 
-                IncludeAncestors, DescendantLevels, IncludeRelated, IncludeCustomMetadata
+                "IncludeAncestors={0}, DescendantLevels={1}", 
+                IncludeAncestors, DescendantLevels
                 );
         }
     }
