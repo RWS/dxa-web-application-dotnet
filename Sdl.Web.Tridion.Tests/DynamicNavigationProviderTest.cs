@@ -418,6 +418,33 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetNavigationSubtree_IncludeAncestorsAndChildrenKeywordOrdered_Success() // See TSI-1964
+        {
+            TaxonomyNode testTaxonomyRoot = GetTestTaxonomy(null, -1);
+            TaxonomyNode testTopLevelKeyword1 = testTaxonomyRoot.Items.FirstOrDefault(i => i.Title == TestFixture.TopLevelKeyword1Title) as TaxonomyNode;
+            Assert.IsNotNull(testTopLevelKeyword1, "testTopLevelKeyword1");
+            TaxonomyNode testKeyword12 = testTopLevelKeyword1.Items.FirstOrDefault(i => i.Title == TestFixture.Keyword1_2Title) as TaxonomyNode;
+            Assert.IsNotNull(testKeyword12, "testKeyword12");
+            NavigationFilter testNavFilter = new NavigationFilter { IncludeAncestors = true, DescendantLevels = 1 };
+
+            SitemapItem[] ancestorItems = _testOnDemandNavigationProvider.GetNavigationSubtree(testKeyword12.Id, testNavFilter, TestFixture.ParentLocalization).ToArray();
+            Assert.IsNotNull(ancestorItems, "ancestorItems");
+            OutputJson(ancestorItems);
+
+            // Result should be the Taxonomy Root only; the ancestor chain is formed using SitemapItem.Items.
+            Assert.AreEqual(1, ancestorItems.Length, "ancestorItems.Length");
+            TaxonomyNode taxonomyRoot = ancestorItems[0] as TaxonomyNode;
+            AssertExpectedTaxonomyNode(taxonomyRoot, testTaxonomyRoot.Title, 2, "taxonomyRoot");
+            TaxonomyNode topLevelKeyword1 = taxonomyRoot.Items[0] as TaxonomyNode;
+            AssertExpectedTaxonomyNode(topLevelKeyword1, testTopLevelKeyword1.Title, 2, "topLevelKeyword1");
+
+            // Check that the context Keyword and its siblings are ordered correctly (context Keyword should be second because of its title)
+            AssertExpectedTaxonomyNode(topLevelKeyword1.Items[0] as TaxonomyNode, TestFixture.Keyword1_1Title, -1, "topLevelKeyword1.Items[0]");
+            AssertExpectedTaxonomyNode(topLevelKeyword1.Items[1] as TaxonomyNode, TestFixture.Keyword1_2Title, 3, "topLevelKeyword1.Items[1]");
+        }
+
+
+        [TestMethod]
         public void GetNavigationSubtree_IncludeAncestorsClassifiedPage_Success()
         {
             Localization testLocalization = TestFixture.ParentLocalization;
@@ -475,7 +502,7 @@ namespace Sdl.Web.Tridion.Tests
             AssertExpectedTaxonomyNode(topLevelKeyword1, testTopLevelKeyword1.Title, 2, "topLevelKeyword1");
             TaxonomyNode keyword11 = topLevelKeyword1.Items[0] as TaxonomyNode;
             AssertExpectedTaxonomyNode(keyword11, testKeyword11.Title, 2, "keyword11");
-            TaxonomyNode keyword112 = keyword11.Items[0] as TaxonomyNode;
+            TaxonomyNode keyword112 = keyword11.Items[1] as TaxonomyNode;
             AssertExpectedTaxonomyNode(keyword112, "Keyword 1.1.2", 1, "keyword112");
             TaxonomyNode keyword12 = topLevelKeyword1.Items[1] as TaxonomyNode;
             AssertExpectedTaxonomyNode(keyword12, "Keyword 1.2", 3, "keyword12");
@@ -483,7 +510,7 @@ namespace Sdl.Web.Tridion.Tests
             AssertExpectedTaxonomyNode(topLevelKeyword2, TestFixture.TopLevelKeyword2Title, 3, "topLevelKeyword2");
 
             // Assert that child nodes are added because of DescendantLevels = 1:
-            TaxonomyNode keyword111 = keyword11.Items[1] as TaxonomyNode;
+            TaxonomyNode keyword111 = keyword11.Items[0] as TaxonomyNode;
             AssertExpectedTaxonomyNode(keyword111, "Keyword 1.1.1", -1, "keyword111");
         }
 

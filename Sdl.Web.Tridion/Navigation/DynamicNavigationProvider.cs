@@ -297,6 +297,9 @@ namespace Sdl.Web.Tridion.Navigation
                 {
                     children.Add(additionalChildItem);
                 }
+
+                // Ensure that children are ordered correctly
+                taxonomyNode.Items = children.OrderBy(i => i.OriginalTitle).ToList();
             }
         }
 
@@ -378,18 +381,22 @@ namespace Sdl.Web.Tridion.Navigation
 
         private static void MergeSubtrees(SitemapItem subtreeRoot, SitemapItem subtreeToMergeInto)
         {
+            List<SitemapItem> mergedChildItems = subtreeToMergeInto.Items;
             foreach (SitemapItem childNode in subtreeRoot.Items)
             {
                 SitemapItem childKeywordToMergeInto = subtreeToMergeInto.Items.FirstOrDefault(i => i.Id == childNode.Id);
                 if (childKeywordToMergeInto == null)
                 {
-                    subtreeToMergeInto.Items.Add(childNode);
+                    mergedChildItems.Add(childNode);
                 }
                 else
                 {
                     MergeSubtrees(childNode, childKeywordToMergeInto);
                 }
             }
+
+            // Ensure that merged child items are ordered correctly
+            subtreeToMergeInto.Items = mergedChildItems.OrderBy(i => i.OriginalTitle).ToList();
         }
 
         private static string GetNavigationTaxonomyUri(Localization localization)
@@ -446,10 +453,8 @@ namespace Sdl.Web.Tridion.Navigation
                 childItems = new List<SitemapItem>();
 
                 // Add child SitemapItems for child Taxonomy Nodes (ordered by title, including sequence prefix if any)
-                TaxonomyNode[] childTaxonomyNodes = keyword.KeywordChildren.Cast<Keyword>()
-                    .OrderBy(kw => kw.KeywordName)
-                    .Select(kw => CreateTaxonomyNode(kw, expandLevels - 1, filter, localization))
-                    .ToArray();
+                IEnumerable<TaxonomyNode> childTaxonomyNodes = keyword.KeywordChildren.Cast<Keyword>()
+                    .Select(kw => CreateTaxonomyNode(kw, expandLevels - 1, filter, localization));
                 childItems.AddRange(childTaxonomyNodes);
 
                 if (classifiedItemsCount > 0 && filter.DescendantLevels != 0)
@@ -467,6 +472,8 @@ namespace Sdl.Web.Tridion.Navigation
                             indexPageUrlPath.Substring(0, indexPageUrlPath.Length - Constants.IndexPageUrlSuffix.Length);
                     }
                 }
+
+                childItems = childItems.OrderBy(i => i.OriginalTitle).ToList();
             }
 
             string sequencePrefix; 
@@ -474,7 +481,8 @@ namespace Sdl.Web.Tridion.Navigation
             {
                 Id = isRoot ? string.Format("t{0}", taxonomyId) : FormatKeywordNodeId(keyword.KeywordUri, taxonomyId),
                 Type =  SitemapItem.Types.TaxonomyNode,
-                Title = StripSequencePrefix(keyword.KeywordName, out sequencePrefix) ,
+                OriginalTitle = keyword.KeywordName,
+                Title = StripSequencePrefix(keyword.KeywordName, out sequencePrefix),
                 Url = taxonomyNodeUrl,
                 Visible = !string.IsNullOrEmpty(sequencePrefix) && !string.IsNullOrEmpty(taxonomyNodeUrl),
                 Items = childItems,
@@ -503,7 +511,7 @@ namespace Sdl.Web.Tridion.Navigation
                 // Return SitemapItems for all classified Pages (ordered by Page Title, including sequence prefix if any)
                 PageMetaFactory pageMetaFactory = new PageMetaFactory(GetPublicationTcmUri(localization));
                 IPageMeta[] classifiedPageMetas = pageMetaFactory.GetTaxonomyPages(keyword, includeBranchedFacets: false);
-                SitemapItem[] result = classifiedPageMetas.OrderBy(pageMeta => pageMeta.Title).Select(pageMeta => CreateSitemapItem(pageMeta, taxonomyId)).ToArray();
+                SitemapItem[] result = classifiedPageMetas.Select(pageMeta => CreateSitemapItem(pageMeta, taxonomyId)).ToArray();
                 return result;
             }
         }
@@ -516,6 +524,7 @@ namespace Sdl.Web.Tridion.Navigation
             {
                 Id = string.Format("t{0}-p{1}", taxonomyId, pageMeta.Id),
                 Type = SitemapItem.Types.Page,
+                OriginalTitle = pageMeta.Title,
                 Title = StripSequencePrefix(pageMeta.Title, out sequencePrefix),
                 Url = StripFileExtension(pageMeta.UrlPath) ,
                 PublishedDate = pageMeta.LastPublicationDate,

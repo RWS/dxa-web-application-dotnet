@@ -27,6 +27,7 @@ namespace Sdl.Web.Tridion.Tests
         internal const string TopLevelKeyword1Title = "Top-level Keyword 1";
         internal const string TopLevelKeyword2Title = "Top-level Keyword 2";
         internal const string Keyword1_1Title = "Keyword 1.1";
+        internal const string Keyword1_2Title = "Keyword 1.2";
 
         private static readonly IEnumerable<Localization> _testLocalizations;
         private static readonly Localization _parentLocalization;
