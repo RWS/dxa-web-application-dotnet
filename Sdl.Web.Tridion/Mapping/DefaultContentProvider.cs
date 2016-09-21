@@ -76,23 +76,39 @@ namespace Sdl.Web.Tridion.Mapping
         {        
             using (new Tracer(urlPath, localization, addIncludes))
             {
-                //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
-                //1. Try adding the default extension, so /news becomes /news.html
-                IPage page = GetPage(urlPath, localization);
-                if (page == null && (urlPath == null || (!urlPath.EndsWith("/") && urlPath.LastIndexOf(".", StringComparison.Ordinal) <= urlPath.LastIndexOf("/", StringComparison.Ordinal))))
+                if (urlPath == null)
                 {
-                    //2. Try adding the default page, so /news becomes /news/index.html
-                    page = GetPage(urlPath + "/", localization);
+                    urlPath = "/";
                 }
+                else if (!urlPath.StartsWith("/"))
+                {
+                    urlPath = "/" + urlPath;
+                }
+
+                IPage page = GetPage(urlPath, localization);
+                if (page == null && !urlPath.EndsWith("/"))
+                {
+                    // This may be a SG URL path; try if the index page exists.
+                    urlPath += Constants.IndexPageUrlSuffix;
+                    page = GetPage(urlPath, localization);
+                }
+                else if (urlPath.EndsWith("/"))
+                {
+                    urlPath += Constants.DefaultExtensionLessPageName;
+                }
+
                 if (page == null)
                 {
                     throw new DxaItemNotFoundException(urlPath, localization.LocalizationId);
                 }
+
                 FullyLoadDynamicComponentPresentations(page, localization);
 
                 IPage[] includes = addIncludes ? GetIncludesFromModel(page, localization).ToArray() : new IPage[0];
 
-                return ModelBuilderPipeline.CreatePageModel(page, includes, localization);
+                PageModel result = ModelBuilderPipeline.CreatePageModel(page, includes, localization);
+                result.Url = urlPath;
+                return result;
             }
         }
 

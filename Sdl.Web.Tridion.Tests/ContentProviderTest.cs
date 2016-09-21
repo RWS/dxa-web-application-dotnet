@@ -22,14 +22,16 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_ImplicitIndexPage_Success() 
+        public void GetPageModel_ImplicitIndexPage_Success()
         {
-            string testPageUrlPath = TestFixture.ParentLocalization.Path; // Implicitly address the home page (index.html)
+            Localization testLocalization = TestFixture.ParentLocalization;
+            string testPageUrlPath = testLocalization.Path; // Implicitly address the home page (index.html)
 
-            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
             Assert.AreEqual(TestFixture.HomePageId, pageModel.Id, "Id");
+            Assert.AreEqual(testLocalization.Path + Constants.IndexPageUrlSuffix, pageModel.Url, "Url");
         }
 
         [TestMethod]
@@ -95,6 +97,7 @@ namespace Sdl.Web.Tridion.Tests
             PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
+            Assert.AreEqual(testPageUrlPath, pageModel.Url, "pageModel.Url");
 
             Article testArticle = pageModel.Regions["Main"].Entities[0] as Article;
             Assert.IsNotNull(testArticle, "Test Article not found on Page.");
@@ -161,6 +164,19 @@ namespace Sdl.Web.Tridion.Tests
 
             Assert.IsNotNull(testEntity.EmbedField1[0].EmbedField1, "testEntity.EmbedField1[0].EmbedField1");
             Assert.IsNotNull(testEntity.EmbedField2[0].EmbedField1, "testEntity.EmbedField2[0].EmbedField1");
+        }
+
+        [TestMethod]
+        public void GetPageModel_OptionalFieldsXpmMetadata_Success() // See TSI-1946
+        {
+            PageModel pageModel = _testContentProvider.GetPageModel(TestFixture.Tsi1946PageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Article testEntity = pageModel.Regions["Main"].Entities[0] as Article;
+            Assert.IsNotNull(testEntity, "testEntity");
+            OutputJson(testEntity);
+
+            // TODO
         }
 
         [TestMethod]

@@ -14,10 +14,10 @@ namespace Sdl.Web.Common.Models
         private readonly Dictionary<string, IPage> _includes = new Dictionary<string, IPage>(); 
 
         /// <summary>
-        /// Gets or sets the URL of the Page.
+        /// Gets or sets the URL path of the Page.
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
-        public string Url // TODO: remove?
+        public string Url
         {
             get; 
             set;

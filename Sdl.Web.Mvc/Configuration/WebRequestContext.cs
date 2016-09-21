@@ -3,6 +3,8 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Mvc.Context;
 using System;
 using System.Web;
+using Sdl.Web.Common;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Mvc.Configuration
 {
@@ -106,15 +108,31 @@ namespace Sdl.Web.Mvc.Configuration
         /// <summary>
         /// Identifier for the current page
         /// </summary>
+        [Obsolete("Deprecated in DXA 1.6. Use WebRequestContext.PageModel instead.")]
         public static string PageId
         {
             get
             {
-                return (string)GetFromContextStore("PageId");
+                return (PageModel == null) ? null : PageModel.Id;
             }
             set
             {
-                AddToContextStore("PageId", value);
+                throw new DxaException("Setting this property is not supported in DXA 1.6");
+            }
+        }
+
+        /// <summary>
+        /// Current Page Model
+        /// </summary>
+        public static PageModel PageModel
+        {
+            get
+            {
+                return (PageModel) GetFromContextStore("PageModel");
+            }
+            set
+            {
+                AddToContextStore("PageModel", value);
             }
         }
 

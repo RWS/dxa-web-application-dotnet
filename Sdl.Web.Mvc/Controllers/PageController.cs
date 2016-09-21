@@ -50,10 +50,7 @@ namespace Sdl.Web.Mvc.Controllers
                 SetupViewData(pageModel);
                 PageModel model = (EnrichModel(pageModel) as PageModel) ?? pageModel;
 
-                if (!string.IsNullOrEmpty(model.Id))
-                {
-                    WebRequestContext.PageId = model.Id;
-                }
+                WebRequestContext.PageModel = model;
 
                 Log.Debug("Page Request for URL '{0}' maps to Model [{1}] with View '{2}'", pageUrl, model, model.MvcData.ViewName);
 
@@ -109,7 +106,10 @@ namespace Sdl.Web.Mvc.Controllers
                 }
 
                 SetupViewData(pageModel);
-                ViewModel model = EnrichModel(pageModel) ?? pageModel;
+                PageModel model = EnrichModel(pageModel) as PageModel ?? pageModel;
+
+                WebRequestContext.PageModel = model;
+
                 Response.StatusCode = 404;
                 return View(model.MvcData.ViewName, model);
             }
