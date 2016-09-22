@@ -164,7 +164,15 @@ namespace Sdl.Web.Common.Configuration
                     // Refresh all Site Localizations (variants)
                     foreach (Localization localization in SiteLocalizations)
                     {
-                        localization.Refresh();
+                        try
+                        {
+                            localization.Refresh();
+                        }
+                        catch (Exception ex)
+                        {
+                            // Localization may not be published (yet). Log the exception and continue.
+                            Log.Error(ex);
+                        }
                     }
                 }
                 else
