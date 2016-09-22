@@ -90,6 +90,37 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetPageModel_RichTextProcessing_Success()
+        {
+            string testPageUrlPath = TestFixture.ArticlePageUrlPath;
+
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Assert.AreEqual(testPageUrlPath, pageModel.Url, "pageModel.Url");
+
+            Article testArticle = pageModel.Regions["Main"].Entities[0] as Article;
+            Assert.IsNotNull(testArticle, "testArticle");
+            OutputJson(testArticle);
+
+            RichText content = testArticle.ArticleBody[0].Content;
+            Assert.IsNotNull(content, "content");
+            Assert.AreEqual(3, content.Fragments.Count(), "content.Fragments.Count");
+
+            Image image = content.Fragments.OfType<Image>().FirstOrDefault();
+            Assert.IsNotNull(image, "image");
+            Assert.IsTrue(image.IsEmbedded, "image.IsEmbedded");
+            Assert.IsNotNull(image.MvcData, "image.MvcData");
+            Assert.AreEqual("Image", image.MvcData.ViewName, "image.MvcData.ViewName");
+
+            string firstHtmlFragment = content.Fragments.First().ToHtml();
+            Assert.IsNotNull(firstHtmlFragment, "firstHtmlFragment");
+            StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(not published\): Test Component"));
+            StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(published\): <a title=""TSI-1758 Test Component"" href=""/autotest-parent/regression/tsi-1758"">TSI-1758 Test Component</a>"));
+            StringAssert.Matches(firstHtmlFragment, new Regex(@"MMC link: <a title=""bulls-eye"" href=""/autotest-parent/Images/bulls-eye.*"">bulls-eye</a>"));
+        }
+
+        [TestMethod]
         public void GetPageModel_XpmMarkup_Success()
         {
             string testPageUrlPath = TestFixture.ArticlePageUrlPath;
