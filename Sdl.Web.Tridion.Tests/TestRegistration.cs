@@ -23,6 +23,7 @@ namespace Sdl.Web.Tridion.Tests
             RegisterViewModel("PagedList", typeof(ContentList<Teaser>), "List");
 
             RegisterViewModel("Test:TSI1758Test", typeof(Tsi1758TestEntity));
+            RegisterViewModel("Test:TSI1946Test", typeof(Tsi1946TestEntity));
 
             // Page Views
             RegisterViewModel("GeneralPage", typeof(PageModel));

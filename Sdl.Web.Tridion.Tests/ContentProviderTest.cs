@@ -172,11 +172,17 @@ namespace Sdl.Web.Tridion.Tests
             PageModel pageModel = _testContentProvider.GetPageModel(TestFixture.Tsi1946PageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
-            Article testEntity = pageModel.Regions["Main"].Entities[0] as Article;
+            Article testArticle = pageModel.Regions["Main"].Entities.OfType<Article>().FirstOrDefault();
+            Assert.IsNotNull(testArticle, "testArticle");
+            Tsi1946TestEntity testEntity = pageModel.Regions["Main"].Entities.OfType<Tsi1946TestEntity>().FirstOrDefault();
             Assert.IsNotNull(testEntity, "testEntity");
+
+            OutputJson(testArticle);
             OutputJson(testEntity);
 
-            // TODO
+            // TODO TSI-1946: there are more fields, but only the ones which have a value are represented in XpmPropertyMetadata.
+            Assert.AreEqual(2, testArticle.XpmPropertyMetadata.Count, "testArticle.XpmPropertyMetadata.Count");
+            Assert.AreEqual(0, testEntity.XpmPropertyMetadata.Count, "testEntity.XpmPropertyMetadata.Count");
         }
 
         [TestMethod]
