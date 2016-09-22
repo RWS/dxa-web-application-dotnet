@@ -386,60 +386,69 @@ namespace Sdl.Web.Tridion.Mapping
             Dictionary<string, string> xpmPropertyMetadata = new Dictionary<string, string>();
             Dictionary<string, List<SemanticProperty>> propertySemantics = LoadPropertySemantics(modelType);
             propertySemantics = FilterPropertySemanticsByEntity(propertySemantics, mappingData);
-            foreach (PropertyInfo pi in modelType.GetProperties())
+
+            foreach (PropertyInfo modelProperty in modelType.GetProperties())
             {
-                bool multival = pi.PropertyType.IsGenericType && (pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
-                Type propertyType = multival ? pi.PropertyType.GetGenericArguments()[0] : pi.PropertyType;
-                if (propertySemantics.ContainsKey(pi.Name))
+                if (!propertySemantics.ContainsKey(modelProperty.Name))
                 {
-                    foreach (SemanticProperty info in propertySemantics[pi.Name])
+                    continue;
+                }
+
+                Type modelPropertyType = modelProperty.PropertyType;
+                bool isCollection = modelPropertyType.IsGenericType && (modelPropertyType.GetGenericTypeDefinition() == typeof(List<>));
+                Type valueType = isCollection ? modelPropertyType.GetGenericArguments()[0] : modelPropertyType;
+
+                foreach (SemanticProperty semanticProperty in propertySemantics[modelProperty.Name])
+                {
+                    SemanticSchemaField semanticSchemaField;
+                    IField dd4tField = GetFieldFromSemantics(mappingData, semanticProperty, out semanticSchemaField);
+                    if (dd4tField != null)
                     {
-                        SemanticSchemaField semanticSchemaField;
-                        IField field = GetFieldFromSemantics(mappingData, info, out semanticSchemaField);
-                        if (field != null)
+                        object propertyValue = MapFieldValues(dd4tField, valueType, isCollection, mappingData, semanticSchemaField);
+                        if (propertyValue != null)
                         {
-                            pi.SetValue(model, MapFieldValues(field, propertyType, multival, mappingData, semanticSchemaField));
-                            xpmPropertyMetadata.Add(pi.Name, GetFieldXPath(field));
-                            break;
+                            modelProperty.SetValue(model, propertyValue);
                         }
+                        xpmPropertyMetadata.Add(modelProperty.Name, dd4tField.XPath);
+                        break;
+                    }
 
-                        // Special mapping cases require SourceEntity to be set
-                        if (mappingData.SourceEntity == null)
-                        {
-                            continue;
-                        }
+                    // Special mapping cases require SourceEntity to be set
+                    if (mappingData.SourceEntity == null)
+                    {
+                        continue;
+                    }
 
-                        bool processed = false;
-                        if (info.PropertyName == "_self")
+                    bool processed = false;
+                    if (semanticProperty.PropertyName == "_self")
+                    {
+                        //Map the whole entity to an image property, or a resolved link to the entity to a Url field
+                        if (typeof(MediaItem).IsAssignableFrom(valueType) || typeof(Link).IsAssignableFrom(valueType) || valueType == typeof(string))
                         {
-                            //Map the whole entity to an image property, or a resolved link to the entity to a Url field
-                            if (typeof(MediaItem).IsAssignableFrom(propertyType) || typeof(Link).IsAssignableFrom(propertyType) || propertyType == typeof(String))
+                            object mappedSelf = MapComponent(mappingData.SourceEntity, valueType, mappingData.Localization);
+                            if (isCollection)
                             {
-                                object mappedSelf = MapComponent(mappingData.SourceEntity, propertyType, mappingData.Localization);
-                                if (multival)
-                                {
-                                    IList genericList = CreateGenericList(propertyType);
-                                    genericList.Add(mappedSelf);
-                                    pi.SetValue(model, genericList);
-                                }
-                                else
-                                {
-                                    pi.SetValue(model, mappedSelf);
-                                }
-                                processed = true;
+                                IList genericList = CreateGenericList(valueType);
+                                genericList.Add(mappedSelf);
+                                modelProperty.SetValue(model, genericList);
                             }
-                        }
-                        else if (info.PropertyName == "_all" && pi.PropertyType == typeof(Dictionary<string, string>))
-                        {
-                            //Map all fields into a single (Dictionary) property
-                            pi.SetValue(model, GetAllFieldsAsDictionary(mappingData.SourceEntity));
+                            else
+                            {
+                                modelProperty.SetValue(model, mappedSelf);
+                            }
                             processed = true;
                         }
+                    }
+                    else if (semanticProperty.PropertyName == "_all" && modelProperty.PropertyType == typeof(Dictionary<string, string>))
+                    {
+                        //Map all fields into a single (Dictionary) property
+                        modelProperty.SetValue(model, GetAllFieldsAsDictionary(mappingData.SourceEntity));
+                        processed = true;
+                    }
 
-                        if (processed)
-                        {
-                            break;
-                        }
+                    if (processed)
+                    {
+                        break;
                     }
                 }
             }
@@ -659,11 +668,6 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 throw new DxaException(String.Format("Unable to map field '{0}' to property of type '{1}'.", field.Name, modelType.FullName), ex);
             }
-        }
-
-        private static string GetFieldXPath(IField field)
-        {
-            return field.XPath;
         }
 
         protected virtual IDictionary<string, object> GetXpmMetadata(IComponent comp)
