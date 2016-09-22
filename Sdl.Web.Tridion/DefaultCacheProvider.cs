@@ -31,7 +31,10 @@ namespace Sdl.Web.Tridion
             List<string> dependsOnTcmUris = (dependencies == null) ? null : dependencies.ToList();
             string cacheAgentKey = GetCacheAgentKey(key, region);
             _cacheAgent.Remove(cacheAgentKey); // DD4T doesn't overwrite existing values (?)
-            _cacheAgent.Store(cacheAgentKey, region, value, dependsOnTcmUris);
+            if (value != null) // DD4T doesn't support storing null values
+            {
+                _cacheAgent.Store(cacheAgentKey, region, value, dependsOnTcmUris);
+            }
         }
 
         /// <summary>

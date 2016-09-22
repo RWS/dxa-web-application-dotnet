@@ -48,6 +48,21 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void Store_Null_Success()
+        {
+            const string testRegion = "Store_Null_Success";
+
+            _testCacheProvider.Store(TestKey1, testRegion, this);
+
+            object cachedValue;
+            Assert.IsTrue(_testCacheProvider.TryGet(TestKey1, testRegion, out cachedValue));
+            Assert.AreEqual(this, cachedValue, "cachedValue");
+
+            _testCacheProvider.Store(TestKey1, testRegion, (CacheProviderTest) null);
+            Assert.IsFalse(_testCacheProvider.TryGet(TestKey1, testRegion, out cachedValue));
+        }
+
+        [TestMethod]
         public void GetOrAdd_IntValue_Success()
         {
             const int testValue = 666;
