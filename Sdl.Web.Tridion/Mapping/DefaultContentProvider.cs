@@ -111,7 +111,7 @@ namespace Sdl.Web.Tridion.Mapping
                 dependencies.AddRange(includes.Select(p => p.Id));
 
                 PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                    page.Id,
+                    string.Format("{0}:{1}", page.Id, addIncludes), // Cache Page Models with and without includes separately
                     PageModelCacheRegionName,
                     () => {
                         PageModel pageModel = ModelBuilderPipeline.CreatePageModel(page, includes, localization);
