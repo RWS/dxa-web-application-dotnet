@@ -72,6 +72,29 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetPageModel_EclItem_Success()
+        {
+            Localization testLocalization = TestFixture.ParentLocalization;
+            string testPageUrlPath = TestFixture.MediaManagerTestPageUrlPath;
+
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            MediaManagerDistribution mmDistribution = pageModel.Regions["Main"].Entities[0] as MediaManagerDistribution;
+            Assert.IsNotNull(mmDistribution, "mmDistribution");
+            Assert.IsNotNull(mmDistribution.EclUri, "mmDistribution.EclUri");
+            StringAssert.Matches(mmDistribution.EclUri, new Regex(@"ecl:\d+-mm-.*"), "mmDistribution.EclUri");
+            Assert.AreEqual("imagedist", mmDistribution.EclDisplayTypeId, "mmDistribution.EclDisplayTypeId");
+            Assert.IsNotNull(mmDistribution.EclTemplateFragment, "mmDistribution.EclTemplateFragment");
+            Assert.IsNotNull(mmDistribution.EclExternalMetadata, "mmDistribution.EclExternalMetadata");
+            Assert.AreEqual(11, mmDistribution.EclExternalMetadata.Keys.Count, "mmDistribution.EclExternalMetadata.Keys.Count");
+            Assert.AreEqual("Image", mmDistribution.EclExternalMetadata["OutletType"], "mmDistribution.EclExternalMetadata['OutletType']");
+        }
+
+
+        [TestMethod]
         public void GetStaticContentItem_InternationalizedUrl_Success() // See TSI-1279 and TSI-1495
         {
             string testStaticContentItemUrlPath = TestFixture.Tsi1278StaticContentItemUrlPath;

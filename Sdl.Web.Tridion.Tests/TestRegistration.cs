@@ -24,6 +24,7 @@ namespace Sdl.Web.Tridion.Tests
 
             RegisterViewModel("Test:TSI1758Test", typeof(Tsi1758TestEntity));
             RegisterViewModel("Test:TSI1946Test", typeof(Tsi1946TestEntity));
+            RegisterViewModel("MediaManager:imagedist", typeof(MediaManagerDistribution));
 
             // Page Views
             RegisterViewModel("GeneralPage", typeof(PageModel));
