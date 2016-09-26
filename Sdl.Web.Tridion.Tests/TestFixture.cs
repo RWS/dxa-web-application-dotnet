@@ -15,6 +15,7 @@ namespace Sdl.Web.Tridion.Tests
         internal const string HomePageId = "640";
         internal const string ArticleDcpEntityId = "9712-9711";
         internal const string ArticlePageUrlPath = "/autotest-parent/test_article_page.html";
+        internal const string ArticleDynamicPageUrlPath = "/autotest-parent/test_article_dynamic.html";
         internal const string Tsi1278PageUrlPath = "/autotest-parent/tsi-1278_trådløst.html";
         internal const string Tsi1278StaticContentItemUrlPath = "/autotest-parent/Images/trådløst_tcm1065-9791.jpg";
         internal const string Tsi1614PageUrlPath = "/autotest-parent/tsi-1614.html";
@@ -43,7 +44,8 @@ namespace Sdl.Web.Tridion.Tests
             { typeof(IRichTextProcessor), new DefaultRichTextProcessor() },
             { typeof(IMediaHelper), new TestMediaHelper() },
             { typeof(ILocalizationResolver), new TestFixture() },
-            { typeof(IContextClaimsProvider), new TestContextClaimsProvider() }
+            { typeof(IContextClaimsProvider), new TestContextClaimsProvider() },
+            { typeof(IConditionalEntityEvaluator), new MockConditionalEntityEvaluator() }
         };
 
         static TestFixture()

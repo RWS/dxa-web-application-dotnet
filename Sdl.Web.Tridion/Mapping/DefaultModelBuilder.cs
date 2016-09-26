@@ -31,6 +31,7 @@ namespace Sdl.Web.Tridion.Mapping
         // TODO: while it works perfectly well, this class is in need of some refactoring to make its behaviour a bit more understandable and maintainable,
         // as its currently very easy to get lost in the semantic mapping logic
 
+        private const string IncludePageCacheRegionName = "PageModel";
         private const string StandardMetadataXmlFieldName = "standardMeta";
         private const string StandardMetadataTitleXmlFieldName = "name";
         private const string StandardMetadataDescriptionXmlFieldName = "description";
@@ -50,7 +51,6 @@ namespace Sdl.Web.Tridion.Mapping
                 CreatePredefinedRegions(regions, page.PageTemplate);
 
                 // Create Regions/Entities from Component Presentations
-                IConditionalEntityEvaluator conditionalEntityEvaluator = SiteConfiguration.ConditionalEntityEvaluator;
                 foreach (IComponentPresentation cp in page.ComponentPresentations)
                 {
                     MvcData cpRegionMvcData = GetRegionMvcData(cp);
@@ -74,11 +74,7 @@ namespace Sdl.Web.Tridion.Mapping
                     try
                     {
                         EntityModel entity = ModelBuilderPipeline.CreateEntityModel(cp, localization);
-
-                        if (conditionalEntityEvaluator == null || conditionalEntityEvaluator.IncludeEntity(entity))
-                        {
                             region.Entities.Add(entity);
-                        }
                     }
                     catch (Exception ex)
                     {
@@ -93,7 +89,12 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     foreach (IPage includePage in includes)
                     {
-                        PageModel includePageModel = ModelBuilderPipeline.CreatePageModel(includePage, null, localization);
+                        PageModel includePageModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                            includePage.Id,
+                            IncludePageCacheRegionName,
+                            () => ModelBuilderPipeline.CreatePageModel(includePage, null, localization),
+                            dependencies: new [] { includePage.Id }
+                            );
 
                         // Model Include Page as Region:
                         RegionModel includePageRegion = GetRegionFromIncludePage(includePage);

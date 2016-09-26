@@ -23,6 +23,9 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class DefaultContentProvider : IContentProvider, IRawDataProvider
     {
+        private const string PageModelCacheRegionName = "PageModel";
+        private const string EntityModelCacheRegionName = "EntityModel";
+
         #region IContentProvider members
 #pragma warning disable 618
         [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.LinkResolver or SiteConfiguration.RichTextProcessor to get the new extension points.")]
@@ -102,12 +105,30 @@ namespace Sdl.Web.Tridion.Mapping
                     throw new DxaItemNotFoundException(urlPath, localization.LocalizationId);
                 }
 
-                FullyLoadDynamicComponentPresentations(page, localization);
-
                 IPage[] includes = addIncludes ? GetIncludesFromModel(page, localization).ToArray() : new IPage[0];
 
-                PageModel result = ModelBuilderPipeline.CreatePageModel(page, includes, localization);
-                result.Url = urlPath;
+                List<string> dependencies = new List<string>() { page.Id };
+                dependencies.AddRange(includes.Select(p => p.Id));
+
+                PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                    page.Id,
+                    PageModelCacheRegionName,
+                    () => {
+                        PageModel pageModel = ModelBuilderPipeline.CreatePageModel(page, includes, localization);
+                        pageModel.Url = urlPath;
+                        return pageModel;
+                        },
+                    dependencies
+                    );
+
+                if (SiteConfiguration.ConditionalEntityEvaluator == null)
+                {
+                    return cachedPageModel;
+                }
+
+                PageModel result = (PageModel) cachedPageModel.Clone();
+                result.FilterConditionalEntities();
+
                 return result;
             }
         }
@@ -135,20 +156,27 @@ namespace Sdl.Web.Tridion.Mapping
                 string componentUri = string.Format("tcm:{0}-{1}", localization.LocalizationId, idParts[0]);
                 string templateUri = string.Format("tcm:{0}-{1}-32", localization.LocalizationId, idParts[1]);
 
-                IComponentPresentationFactory componentPresentationFactory = DD4TFactoryCache.GetComponentPresentationFactory(localization);
-                IComponentPresentation dcp;
-                if (!componentPresentationFactory.TryGetComponentPresentation(out dcp, componentUri, templateUri))
-                {
-                    throw new DxaItemNotFoundException(id, localization.LocalizationId);
-                }
+                return SiteConfiguration.CacheProvider.GetOrAdd(
+                    string.Format("{0}-{1}", id, localization.LocalizationId), // key
+                    EntityModelCacheRegionName,
+                    () => {
+                        IComponentPresentationFactory componentPresentationFactory = DD4TFactoryCache.GetComponentPresentationFactory(localization);
+                        IComponentPresentation dcp;
+                        if (!componentPresentationFactory.TryGetComponentPresentation(out dcp, componentUri, templateUri))
+                        {
+                            throw new DxaItemNotFoundException(id, localization.LocalizationId);
+                        }
 
-                EntityModel result = ModelBuilderPipeline.CreateEntityModel(dcp, localization);
-                if (result.XpmMetadata != null)
-                {
-                    // Entity Models requested through this method are per definition "query based" in XPM terminology.
-                    result.XpmMetadata["IsQueryBased"] = true;
-                }
-                return result;
+                        EntityModel result = ModelBuilderPipeline.CreateEntityModel(dcp, localization);
+                        if (result.XpmMetadata != null)
+                        {
+                            // Entity Models requested through this method are per definition "query based" in XPM terminology.
+                            result.XpmMetadata["IsQueryBased"] = true;
+                        }
+                        return result;
+                    },
+                    dependencies: new [] { componentUri }
+                    );
             }
         }
 
@@ -246,7 +274,7 @@ namespace Sdl.Web.Tridion.Mapping
         {
             string cmUrl = GetCmUrl(urlPath);
 
-            using (new Tracer(urlPath, cmUrl))
+            using (new Tracer(urlPath, localization, cmUrl))
             {
                 IPageFactory pageFactory = DD4TFactoryCache.GetPageFactory(localization);
                 IPage result;
@@ -257,35 +285,22 @@ namespace Sdl.Web.Tridion.Mapping
 
         protected virtual IEnumerable<IPage> GetIncludesFromModel(IPage page, Localization localization)
         {
-            List<IPage> result = new List<IPage>();
-            string[] pageTemplateTcmUriParts = page.PageTemplate.Id.Split('-');
-            IEnumerable<string> includePageUrls = localization.GetIncludePageUrls(pageTemplateTcmUriParts[1]);
-            foreach (string includePageUrl in includePageUrls)
+            using (new Tracer(page.Id, localization))
             {
-                IPage includePage = GetPage(SiteConfiguration.LocalizeUrl(includePageUrl, localization), localization);
-                if (includePage == null)
+                List<IPage> result = new List<IPage>();
+                string[] pageTemplateTcmUriParts = page.PageTemplate.Id.Split('-');
+                IEnumerable<string> includePageUrls = localization.GetIncludePageUrls(pageTemplateTcmUriParts[1]);
+                foreach (string includePageUrl in includePageUrls)
                 {
-                    Log.Error("Include Page '{0}' not found.", includePageUrl);
-                    continue;
+                    IPage includePage = GetPage(SiteConfiguration.LocalizeUrl(includePageUrl, localization), localization);
+                    if (includePage == null)
+                    {
+                        Log.Error("Include Page '{0}' not found.", includePageUrl);
+                        continue;
+                    }
+                    result.Add(includePage);
                 }
-                FullyLoadDynamicComponentPresentations(includePage, localization);
-                result.Add(includePage);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Ensures that the Component Fields of DCPs on the Page are populated.
-        /// </summary>
-        private static void FullyLoadDynamicComponentPresentations(IPage page, Localization localization)
-        {
-            using (new Tracer(page, localization))
-            {
-                foreach (ComponentPresentation dcp in page.ComponentPresentations.Where(cp => cp.IsDynamic).OfType<ComponentPresentation>())
-                {
-                    IComponentFactory componentFactory = DD4TFactoryCache.GetComponentFactory(localization);
-                    dcp.Component = (Component)componentFactory.GetComponent(dcp.Component.Id, dcp.ComponentTemplate.Id);
-                }
+                return result;
             }
         }
     }

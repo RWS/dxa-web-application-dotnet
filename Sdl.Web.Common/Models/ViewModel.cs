@@ -8,7 +8,7 @@ namespace Sdl.Web.Common.Models
     /// <summary>
     /// Abstract base class for all (strongly typed) View Models
     /// </summary>
-    public abstract class ViewModel
+    public abstract class ViewModel : ICloneable
     {
         /// <summary>
         /// The internal/built-in Vocabulary ID used for semantic/CM mapping.
@@ -154,6 +154,33 @@ namespace Sdl.Web.Common.Models
             }
 
             return result;
+        }
+        #endregion
+
+        #region IClonable members
+        /// <summary>
+        /// Creates a deep copy of this View Model.
+        /// </summary>
+        /// <returns>The copied View Model.</returns>
+        public virtual object Clone()
+        {
+            // Start with a shallow copy
+            ViewModel clone = (ViewModel) MemberwiseClone();
+
+            if (MvcData != null)
+            {
+                clone.MvcData = new MvcData(MvcData);
+            }
+            if (XpmMetadata != null)
+            {
+                clone.XpmMetadata = new Dictionary<string, object>(XpmMetadata);
+            }
+            if (ExtensionData != null)
+            {
+                clone.ExtensionData = new Dictionary<string, object>(ExtensionData);
+            }
+
+            return clone;
         }
         #endregion
     }

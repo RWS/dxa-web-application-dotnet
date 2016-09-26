@@ -61,6 +61,7 @@
   <ItemGroup>
     <Compile Include="CacheProviderTest.cs" />
     <Compile Include="DynamicNavigationProviderTest.cs" />
+    <Compile Include="MockConditionalEntityEvaluator.cs" />
     <Compile Include="Models\Entity\Article.cs" />
     <Compile Include="Models\Entity\ContentList.cs" />
     <Compile Include="Models\Entity\Image.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestContextClaimsProvider.cs" />
     <Compile Include="TestMediaHelper.cs" />
+    <Compile Include="ViewModelTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

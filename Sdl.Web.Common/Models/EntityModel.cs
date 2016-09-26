@@ -176,5 +176,23 @@ namespace Sdl.Web.Common.Models
         }
 
         #endregion
+
+        #region IClonable members
+        /// <summary>
+        /// Creates a deep copy of this View Model.
+        /// </summary>
+        /// <returns>The copied View Model.</returns>
+        public override object Clone()
+        {
+            EntityModel clone = (EntityModel) base.Clone();
+
+            if (XpmPropertyMetadata != null)
+            {
+                clone.XpmPropertyMetadata = new Dictionary<string, string>(XpmPropertyMetadata);
+            }
+
+            return clone;
+        }
+        #endregion
     }
 }

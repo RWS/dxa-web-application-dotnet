@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.ServiceModel.Syndication;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Common.Models
 {
@@ -92,6 +91,19 @@ namespace Sdl.Web.Common.Models
         }
         #endregion
 
+        /// <summary>
+        /// Filters (i.e. removes) conditional Entities which don't meet the conditions.
+        /// </summary>
+        public void FilterConditionalEntities()
+        {
+            using (new Tracer(this))
+            {
+                foreach (RegionModel region in Regions)
+                {
+                    region.FilterConditionalEntities();
+                }
+            }
+        }
     }
 
 }

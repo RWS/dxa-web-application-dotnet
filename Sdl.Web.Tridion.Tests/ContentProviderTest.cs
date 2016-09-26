@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
@@ -118,6 +119,64 @@ namespace Sdl.Web.Tridion.Tests
             StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(not published\): Test Component"));
             StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(published\): <a title=""TSI-1758 Test Component"" href=""/autotest-parent/regression/tsi-1758"">TSI-1758 Test Component</a>"));
             StringAssert.Matches(firstHtmlFragment, new Regex(@"MMC link: <a title=""bulls-eye"" href=""/autotest-parent/Images/bulls-eye.*"">bulls-eye</a>"));
+        }
+
+        [TestMethod]
+        public void GetPageModel_ConditionalEntities_Success()
+        {
+            string testPageUrlPath = TestFixture.ArticlePageUrlPath;
+            Localization testLocalization = TestFixture.ParentLocalization;
+
+            // Verify pre-test state: Test Page should contain 1 Article
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);
+            Assert.IsNotNull(pageModel, "pageModel");
+            Assert.AreEqual(1, pageModel.Regions["Main"].Entities.Count, "pageModel.Regions[Main].Entities.Count");
+            Article testArticle = (Article) pageModel.Regions["Main"].Entities[0];
+
+            try
+            {
+                MockConditionalEntityEvaluator.EvaluatedEntities.Clear();
+                MockConditionalEntityEvaluator.ExcludeEntityIds.Add(testArticle.Id);
+
+                // Test Page's Article should now be suppressed by MockConditionalEntityEvaluator
+                PageModel pageModel2 = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);
+                Assert.IsNotNull(pageModel2, "pageModel2");
+                Assert.AreEqual(0, pageModel2.Regions["Main"].Entities.Count, "pageModel2.Regions[Main].Entities.Count");
+                Assert.AreEqual(1, MockConditionalEntityEvaluator.EvaluatedEntities.Count, "MockConditionalEntityEvaluator.EvaluatedEntities.Count");
+            }
+            finally
+            {
+                MockConditionalEntityEvaluator.ExcludeEntityIds.Clear();
+            }
+
+            // Verify post-test state: Test Page should still contain 1 Article
+            PageModel pageModel3 = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);
+            Assert.IsNotNull(pageModel3, "pageModel3");
+            Assert.AreEqual(1, pageModel3.Regions["Main"].Entities.Count, "pageModel3.Regions[Main].Entities.Count");
+        }
+
+        [TestMethod]
+        public void GetPageModel_DynamicComponentPresentation_Success()
+        {
+            Localization testLocalization = TestFixture.ParentLocalization;
+
+            PageModel referencePageModel = _testContentProvider.GetPageModel(TestFixture.ArticlePageUrlPath, testLocalization, addIncludes: false);
+            Assert.IsNotNull(referencePageModel, "referencePageModel");
+            Article referenceArticle = referencePageModel.Regions["Main"].Entities[0] as Article;
+            Assert.IsNotNull(referenceArticle, "testArticle");
+
+            PageModel pageModel = _testContentProvider.GetPageModel(TestFixture.ArticleDynamicPageUrlPath, testLocalization, addIncludes: false);
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Article dcpArticle = pageModel.Regions["Main"].Entities[0] as Article;
+            Assert.IsNotNull(dcpArticle, "dcpArticle");
+            Assert.AreEqual(TestFixture.ArticleDcpEntityId, dcpArticle.Id, "dcpArticle.Id"); // EntityModel.Id for DCP is different
+            Assert.AreEqual(referenceArticle.Headline, dcpArticle.Headline, "dcpArticle.Headline");
+            AssertEqualCollections(referenceArticle.ArticleBody, dcpArticle.ArticleBody, "dcpArticle.ArticleBody");
+            AssertEqualCollections(referenceArticle.XpmPropertyMetadata, dcpArticle.XpmPropertyMetadata, "dcpArticle.XpmPropertyMetadata");
+            Assert.IsNotNull(dcpArticle.XpmMetadata, "dcpArticle.XpmMetadata");
+            Assert.AreEqual(true, dcpArticle.XpmMetadata["IsRepositoryPublished"], "dcpArticle.XpmMetadata['IsRepositoryPublished']");
         }
 
         [TestMethod]

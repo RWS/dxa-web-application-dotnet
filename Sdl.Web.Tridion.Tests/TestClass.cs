@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Sdl.Web.Common.Logging;
@@ -50,6 +52,20 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(urlPath, link.Url, message + ".Url");
             Assert.AreEqual(linkText, link.LinkText, message + ".LinkText");
             Assert.AreEqual(alternateText, link.AlternateText, message + ".AlternateText");
+        }
+
+        protected static void AssertEqualCollections<T>(IEnumerable<T> expected, IEnumerable<T> actual, string subjectName)
+        {
+            if (expected == null)
+            {
+                Assert.IsNull(actual, subjectName);
+            }
+            else
+            {
+                Assert.IsNotNull(actual, subjectName);
+                Assert.AreNotSame(expected, actual, subjectName);
+                Assert.AreEqual(expected.Count(), actual.Count(), subjectName + ".Count()");
+            }
         }
     }
 }
