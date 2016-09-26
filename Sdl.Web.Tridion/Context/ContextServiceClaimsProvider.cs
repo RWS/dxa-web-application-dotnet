@@ -41,6 +41,11 @@ namespace Sdl.Web.Tridion.Context
             }
         }
 
+        /// <summary>
+        /// Default User Agent used in case no User-Agent HTTP header is found (mainly used for testing purposes).
+        /// </summary>
+        public string DefaultUserAgent { get; set; }
+
         #region IContextClaimsProvider Members
 
         /// <summary>
@@ -58,22 +63,30 @@ namespace Sdl.Web.Tridion.Context
                     throw new DxaException("Context Engine Client was not initialized. Check the log file for errors.");
                 }
 
-                // TODO: Not really nice to use HttpContext at this level.
-                HttpContext httpContext = HttpContext.Current;
-                if (httpContext == null)
+                string userAgent = null;
+                string contextCookieValue = null;
+                HttpContext httpContext = HttpContext.Current; // TODO: Not really nice to use HttpContext at this level.
+                if (httpContext != null)
                 {
-                    throw new DxaException("Cannot obtain HttpContext.");
+                    userAgent = httpContext.Request.UserAgent;
+                    HttpCookie contextCookie = httpContext.Request.Cookies["context"];
+                    if (contextCookie != null)
+                    {
+                        contextCookieValue = contextCookie.Value;
+                    }
                 }
-                HttpRequest httpRequest = httpContext.Request;
-                HttpCookie contextCookie = httpRequest.Cookies["context"];
+                if (string.IsNullOrEmpty(userAgent))
+                {
+                    userAgent = DefaultUserAgent;
+                }
 
                 IContextMap contextMap;
                 try
                 {
-                    EvidenceBuilder evidenceBuilder = new EvidenceBuilder().With("user-agent", httpRequest.UserAgent);
-                    if (contextCookie != null && !string.IsNullOrEmpty(contextCookie.Value))
+                    EvidenceBuilder evidenceBuilder = new EvidenceBuilder().With("user-agent", userAgent);
+                    if (!string.IsNullOrEmpty(contextCookieValue))
                     {
-                        evidenceBuilder.With("cookie", string.Format("{0}={1}", contextCookie.Name, contextCookie.Value));
+                        evidenceBuilder.With("cookie", string.Format("context={0}", contextCookieValue));
                     }
                     IEvidence evidence = evidenceBuilder.Build();
                     contextMap = _contextEngineClient.Resolve(evidence);
