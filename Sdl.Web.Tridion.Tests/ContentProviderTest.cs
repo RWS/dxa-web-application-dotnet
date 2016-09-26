@@ -27,12 +27,48 @@ namespace Sdl.Web.Tridion.Tests
         {
             Localization testLocalization = TestFixture.ParentLocalization;
             string testPageUrlPath = testLocalization.Path; // Implicitly address the home page (index.html)
+            string testPageUrlPath2 = testLocalization.Path.Substring(1); // URL path not starting with slash
+            string testPageUrlPath3 = testLocalization.Path + "/"; // URL path ending with slash
 
             PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);
+            PageModel pageModel2 = _testContentProvider.GetPageModel(testPageUrlPath2, testLocalization, addIncludes: false);
+            PageModel pageModel3 = _testContentProvider.GetPageModel(testPageUrlPath3, testLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
-            Assert.AreEqual(TestFixture.HomePageId, pageModel.Id, "Id");
+            Assert.IsNotNull(pageModel, "pageModel2");
+            Assert.IsNotNull(pageModel, "pageModel3");
+            Assert.AreEqual(TestFixture.HomePageId, pageModel.Id, "pageModel.Id");
+            Assert.AreEqual(TestFixture.HomePageId, pageModel2.Id, "pageModel2.Id");
+            Assert.AreEqual(TestFixture.HomePageId, pageModel3.Id, "pageModel3.Id");
             Assert.AreEqual(testLocalization.Path + Constants.IndexPageUrlSuffix, pageModel.Url, "Url");
+            Assert.AreEqual(testLocalization.Path + Constants.IndexPageUrlSuffix, pageModel2.Url, "pageModel2.Url");
+            Assert.AreEqual(testLocalization.Path + Constants.IndexPageUrlSuffix, pageModel3.Url, "pageModel3.Url");
+        }
+
+        [TestMethod]
+        public void GetPageModel_NullUrlPath_Exception()
+        {
+            // null URL path is allowed, but it resolves to "/index" which does not exist in TestFixture.ParentLocalization.
+            AssertThrowsException<DxaItemNotFoundException>(() => _testContentProvider.GetPageModel(null, TestFixture.ParentLocalization, addIncludes: false));
+        }
+
+        [TestMethod]
+        public void GetPageModel_WithIncludes_Success()
+        {
+            Localization testLocalization = TestFixture.ParentLocalization;
+            string testPageUrlPath = TestFixture.ArticlePageUrlPath;
+
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: true);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Assert.AreEqual(4, pageModel.Regions.Count, "pageModel.Regions.Count");
+            RegionModel headerRegion = pageModel.Regions["Header"];
+            Assert.IsNotNull(headerRegion, "headerRegion");
+            Assert.IsNotNull(headerRegion.XpmMetadata, "headerRegion.XpmMetadata");
+            Assert.AreEqual("Header", headerRegion.XpmMetadata[RegionModel.IncludedFromPageTitleXpmMetadataKey], "headerRegion.XpmMetadata[RegionModel.IncludedFromPageTitleXpmMetadataKey]");
+            Assert.AreEqual("header", headerRegion.XpmMetadata[RegionModel.IncludedFromPageFileNameXpmMetadataKey], "headerRegion.XpmMetadata[RegionModel.IncludedFromPageFileNameXpmMetadataKey]");
         }
 
         [TestMethod]
