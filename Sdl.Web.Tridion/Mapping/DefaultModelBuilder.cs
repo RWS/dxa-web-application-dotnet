@@ -31,7 +31,6 @@ namespace Sdl.Web.Tridion.Mapping
         // TODO: while it works perfectly well, this class is in need of some refactoring to make its behaviour a bit more understandable and maintainable,
         // as its currently very easy to get lost in the semantic mapping logic
 
-        private const string IncludePageCacheRegionName = "IncludePageModel";
         private const string StandardMetadataXmlFieldName = "standardMeta";
         private const string StandardMetadataTitleXmlFieldName = "name";
         private const string StandardMetadataDescriptionXmlFieldName = "description";
@@ -90,8 +89,8 @@ namespace Sdl.Web.Tridion.Mapping
                     foreach (IPage includePage in includes)
                     {
                         PageModel includePageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                            includePage.Id,
-                            IncludePageCacheRegionName,
+                            includePage.Id, 
+                            CacheRegions.IncludePageModel,
                             () => ModelBuilderPipeline.CreatePageModel(includePage, null, localization),
                             dependencies: new [] { includePage.Id }
                             );

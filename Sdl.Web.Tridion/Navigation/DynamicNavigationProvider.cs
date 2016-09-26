@@ -22,8 +22,6 @@ namespace Sdl.Web.Tridion.Navigation
     public class DynamicNavigationProvider : INavigationProvider, IOnDemandNavigationProvider
     {
         private const string TaxonomyNavigationMarker = "[Navigation]";
-        private const string NavigationCacheRegionName = "Navigation_Dynamic";
-        private const string NavTaxonomyCacheRegionName = "NavTaxonomy";
 
         private static readonly Regex _cmTitleRegex = new Regex(@"(?<sequence>\d\d\d)?\s*(?<title>.*)", RegexOptions.Compiled);
         private static readonly Regex _sitemapItemIdRegex = new Regex(@"^t(?<taxonomyId>\d+)((-k(?<keywordId>\d+))|(-p(?<pageId>\d+)))?$", RegexOptions.Compiled);
@@ -48,7 +46,7 @@ namespace Sdl.Web.Tridion.Navigation
 
                 return SiteConfiguration.CacheProvider.GetOrAdd(
                     localization.LocalizationId, // key
-                    NavigationCacheRegionName, 
+                    CacheRegions.DynamicNavigation, 
                     () => BuildNavigationModel(navTaxonomyUri, localization), 
                     new [] { navTaxonomyUri } // dependency on Taxonomy
                     );
@@ -375,7 +373,7 @@ namespace Sdl.Web.Tridion.Navigation
         {
             return SiteConfiguration.CacheProvider.GetOrAdd(
                 localization.LocalizationId, // key
-                NavTaxonomyCacheRegionName,
+                CacheRegions.NavigationTaxonomy,
                 () => ResolveNavigationTaxonomyUri(localization)
                 );
         }

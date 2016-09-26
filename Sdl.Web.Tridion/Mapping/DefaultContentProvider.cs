@@ -23,9 +23,6 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class DefaultContentProvider : IContentProvider, IRawDataProvider
     {
-        private const string PageModelCacheRegionName = "PageModel";
-        private const string EntityModelCacheRegionName = "EntityModel";
-
         #region IContentProvider members
 #pragma warning disable 618
         [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.LinkResolver or SiteConfiguration.RichTextProcessor to get the new extension points.")]
@@ -112,7 +109,7 @@ namespace Sdl.Web.Tridion.Mapping
 
                 PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
                     string.Format("{0}:{1}", page.Id, addIncludes), // Cache Page Models with and without includes separately
-                    PageModelCacheRegionName,
+                    CacheRegions.PageModel,
                     () => {
                         PageModel pageModel = ModelBuilderPipeline.CreatePageModel(page, includes, localization);
                         pageModel.Url = urlPath;
@@ -158,7 +155,7 @@ namespace Sdl.Web.Tridion.Mapping
 
                 return SiteConfiguration.CacheProvider.GetOrAdd(
                     string.Format("{0}-{1}", id, localization.LocalizationId), // key
-                    EntityModelCacheRegionName,
+                    CacheRegions.EntityModel,
                     () => {
                         IComponentPresentationFactory componentPresentationFactory = DD4TFactoryCache.GetComponentPresentationFactory(localization);
                         IComponentPresentation dcp;
