@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CacheProviderTest.cs" />
+    <Compile Include="ContextServiceClaimsProviderTest.cs" />
     <Compile Include="DynamicNavigationProviderTest.cs" />
     <Compile Include="MockConditionalEntityEvaluator.cs" />
     <Compile Include="Models\Entity\Article.cs" />
