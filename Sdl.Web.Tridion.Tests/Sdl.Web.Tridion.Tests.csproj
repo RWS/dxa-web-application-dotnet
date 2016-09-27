@@ -79,7 +79,7 @@
     <Compile Include="ContentProviderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestContextClaimsProvider.cs" />
-    <Compile Include="TestMediaHelper.cs" />
+    <Compile Include="MockMediaHelper.cs" />
     <Compile Include="ViewModelTest.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -43,7 +43,7 @@ namespace Sdl.Web.Tridion.Tests
             { typeof(INavigationProvider), new StaticNavigationProvider() },
             { typeof(ILinkResolver), new DefaultLinkResolver() },
             { typeof(IRichTextProcessor), new DefaultRichTextProcessor() },
-            { typeof(IMediaHelper), new TestMediaHelper() },
+            { typeof(IMediaHelper), new MockMediaHelper() },
             { typeof(ILocalizationResolver), new TestFixture() },
             { typeof(IContextClaimsProvider), new TestContextClaimsProvider() },
             { typeof(IConditionalEntityEvaluator), new MockConditionalEntityEvaluator() }
