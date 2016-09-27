@@ -108,7 +108,7 @@ namespace Sdl.Web.Tridion.Mapping
                 List<string> dependencies = new List<string>() { page.Id };
                 dependencies.AddRange(includes.Select(p => p.Id));
 
-                PageModel result;
+                PageModel result = null;
                 if (CacheRegions.IsViewModelCachingEnabled)
                 {
                     PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
@@ -118,13 +118,21 @@ namespace Sdl.Web.Tridion.Mapping
                         {
                             PageModel pageModel = ModelBuilderPipeline.CreatePageModel(page, includes, localization);
                             pageModel.Url = urlPath;
+                            if (pageModel.NoCache)
+                            {
+                                result = pageModel;
+                                return null;
+                            }
                             return pageModel;
                         },
                         dependencies
                         );
 
-                    // Don't return the cached Page Model itself, because we don't want dynamic logic to modify the cached state.
-                    result = (PageModel) cachedPageModel.DeepCopy();
+                    if (cachedPageModel != null)
+                    {
+                        // Don't return the cached Page Model itself, because we don't want dynamic logic to modify the cached state.
+                        result = (PageModel) cachedPageModel.DeepCopy();
+                    }
                 }
                 else
                 {

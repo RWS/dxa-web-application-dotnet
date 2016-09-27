@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ServiceModel.Syndication;
+using Newtonsoft.Json;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 
@@ -27,6 +28,13 @@ namespace Sdl.Web.Common.Models
                 return _regions;
             }
         }
+
+        /// <summary>
+        /// Specifies whether the Page Model can be cached or not.
+        /// </summary>
+        [JsonIgnore]
+        [SemanticProperty(IgnoreMapping = true)]
+        public bool NoCache { get; set; }
 
         /// <summary>
         /// Initializes a new instance of PageModel.
