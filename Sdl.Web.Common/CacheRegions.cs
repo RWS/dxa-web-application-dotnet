@@ -19,12 +19,12 @@ namespace Sdl.Web.Common
         public const string DynamicNavigation = "Navigation_Dynamic";
         public const string NavigationTaxonomy = "NavTaxonomy";
 
-        public static bool IsPageModelCachingEnabled { get; private set; }
+        public static bool IsViewModelCachingEnabled { get; private set; }
 
         static CacheRegions()
         {
-            string cachingSetting = WebConfigurationManager.AppSettings["pageModel-caching"];
-            IsPageModelCachingEnabled = !string.IsNullOrEmpty(cachingSetting) && cachingSetting.Equals("true", StringComparison.InvariantCultureIgnoreCase);
+            string cachingSetting = WebConfigurationManager.AppSettings["viewModel-caching"];
+            IsViewModelCachingEnabled = !string.IsNullOrEmpty(cachingSetting) && cachingSetting.Equals("true", StringComparison.InvariantCultureIgnoreCase);
         }
     }
 }

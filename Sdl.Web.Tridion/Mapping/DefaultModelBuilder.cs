@@ -89,7 +89,7 @@ namespace Sdl.Web.Tridion.Mapping
                     foreach (IPage includePage in includes)
                     {
                         PageModel includePageModel;
-                        if (CacheRegions.IsPageModelCachingEnabled)
+                        if (CacheRegions.IsViewModelCachingEnabled)
                         {
                             includePageModel = SiteConfiguration.CacheProvider.GetOrAdd(
                                 includePage.Id,

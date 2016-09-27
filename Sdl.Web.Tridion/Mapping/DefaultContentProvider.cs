@@ -109,7 +109,7 @@ namespace Sdl.Web.Tridion.Mapping
                 dependencies.AddRange(includes.Select(p => p.Id));
 
                 PageModel result;
-                if (CacheRegions.IsPageModelCachingEnabled)
+                if (CacheRegions.IsViewModelCachingEnabled)
                 {
                     PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
                         string.Format("{0}:{1}", page.Id, addIncludes), // Cache Page Models with and without includes separately
@@ -164,27 +164,37 @@ namespace Sdl.Web.Tridion.Mapping
                 string componentUri = string.Format("tcm:{0}-{1}", localization.LocalizationId, idParts[0]);
                 string templateUri = string.Format("tcm:{0}-{1}-32", localization.LocalizationId, idParts[1]);
 
-                return SiteConfiguration.CacheProvider.GetOrAdd(
-                    string.Format("{0}-{1}", id, localization.LocalizationId), // key
-                    CacheRegions.EntityModel,
-                    () => {
-                        IComponentPresentationFactory componentPresentationFactory = DD4TFactoryCache.GetComponentPresentationFactory(localization);
-                        IComponentPresentation dcp;
-                        if (!componentPresentationFactory.TryGetComponentPresentation(out dcp, componentUri, templateUri))
-                        {
-                            throw new DxaItemNotFoundException(id, localization.LocalizationId);
-                        }
+                IComponentPresentationFactory componentPresentationFactory = DD4TFactoryCache.GetComponentPresentationFactory(localization);
+                IComponentPresentation dcp;
+                if (!componentPresentationFactory.TryGetComponentPresentation(out dcp, componentUri, templateUri))
+                {
+                    throw new DxaItemNotFoundException(id, localization.LocalizationId);
+                }
 
-                        EntityModel result = ModelBuilderPipeline.CreateEntityModel(dcp, localization);
-                        if (result.XpmMetadata != null)
-                        {
-                            // Entity Models requested through this method are per definition "query based" in XPM terminology.
-                            result.XpmMetadata["IsQueryBased"] = true;
-                        }
-                        return result;
-                    },
-                    dependencies: new [] { componentUri }
-                    );
+                EntityModel result;
+                if (CacheRegions.IsViewModelCachingEnabled)
+                {
+                    EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                        string.Format("{0}-{1}", id, localization.LocalizationId), // key
+                        CacheRegions.EntityModel,
+                        () => ModelBuilderPipeline.CreateEntityModel(dcp, localization),
+                        dependencies: new[] {componentUri}
+                        );
+
+                    // Don't return the cached Entity Model itself, because we don't want dynamic logic to modify the cached state.
+                    result = (EntityModel) cachedEntityModel.DeepCopy();
+                }
+                else
+                {
+                    result = ModelBuilderPipeline.CreateEntityModel(dcp, localization);
+                }
+
+                if (result.XpmMetadata != null)
+                {
+                    // Entity Models requested through this method are per definition "query based" in XPM terminology.
+                    result.XpmMetadata["IsQueryBased"] = true;
+                }
+                return result;
             }
         }
 
