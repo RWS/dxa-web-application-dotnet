@@ -63,7 +63,7 @@ namespace Sdl.Web.Tridion
                 {
                     throw new DxaException(string.Format("Timeout waiting for adding of value for key '{0}' in cache region '{1}' ...", key, region));
                 }
-                Log.Debug("Done.");
+                Log.Debug("Done awaiting.");
 
                 // After the event has been signal, the actual value is cached. So, retry.
                 return TryGet(key, region, out value);
@@ -96,16 +96,22 @@ namespace Sdl.Web.Tridion
         {
             T result;
 
-            AutoResetEvent addingEvent;
+            if (TryGet(key, region, out result))
+            {
+                return result;
+            }
+
+            EventWaitHandle addingEvent;
             lock (_cacheAgent)
             {
+                // Another thread may have stored a value just before we aquired the lock, so try again:
                 if (TryGet(key, region, out result))
                 {
                     return result;
                 }
 
-                // Temporarily store an AutoResetEvent value to signal that adding is in progess without locking the entire cache.
-                addingEvent = new AutoResetEvent(false);
+                // Temporarily store an ManualResetEvent value to signal that adding is in progess without locking the entire cache.
+                addingEvent = new ManualResetEvent(false);
                 Store(key, region, addingEvent);
             }
 

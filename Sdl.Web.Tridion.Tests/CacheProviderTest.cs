@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
@@ -74,6 +76,39 @@ namespace Sdl.Web.Tridion.Tests
             cachedValue = _testCacheProvider.GetOrAdd(TestKey1, testRegion, () => { Assert.Fail("Add function called second time."); return 0; });
             Assert.AreEqual(testValue, cachedValue);
         }
+
+        [TestMethod]
+        public void GetOrAdd_RaceCondition_Success()
+        {
+            const string testRegion = "GetOrAdd_RaceCondition_Success";
+            int addFunctionCaller = 0;
+
+            Parallel.For(
+                1,
+                10,
+                i =>
+                {
+                    Console.WriteLine("Iteration {0}. Thread {1}.", i, Thread.CurrentThread.ManagedThreadId);
+                    int cachedValue = _testCacheProvider.GetOrAdd(
+                        TestKey1, 
+                        testRegion,
+                        () =>
+                        {
+                            // This should only be called once.
+                            Console.WriteLine("Add function called by iteration {0}. Thread {1}", i, Thread.CurrentThread.ManagedThreadId);
+                            Assert.AreEqual(0, addFunctionCaller, "addFunctionCaller");
+                            addFunctionCaller = i;
+                            Thread.Sleep(100);
+                            return i;
+                        }
+                        );
+                    // By this time the add function should have been called
+                    Assert.AreNotEqual(0, addFunctionCaller, "addFunctionCaller");
+                    Assert.AreEqual(addFunctionCaller, cachedValue, "cachedValue");
+                }
+                );
+        }
+
 
         [TestMethod]
         public void TryGet_WrongType_Exception()
