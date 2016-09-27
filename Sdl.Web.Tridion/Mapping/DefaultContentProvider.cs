@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
+using System.Web.Configuration;
 using DD4T.ContentModel;
 using DD4T.ContentModel.Factories;
 using Sdl.Web.Common;
@@ -107,24 +108,34 @@ namespace Sdl.Web.Tridion.Mapping
                 List<string> dependencies = new List<string>() { page.Id };
                 dependencies.AddRange(includes.Select(p => p.Id));
 
-                PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                    string.Format("{0}:{1}", page.Id, addIncludes), // Cache Page Models with and without includes separately
-                    CacheRegions.PageModel,
-                    () => {
-                        PageModel pageModel = ModelBuilderPipeline.CreatePageModel(page, includes, localization);
-                        pageModel.Url = urlPath;
-                        return pageModel;
-                        },
-                    dependencies
-                    );
-
-                if (SiteConfiguration.ConditionalEntityEvaluator == null)
+                PageModel result;
+                if (CacheRegions.IsPageModelCachingEnabled)
                 {
-                    return cachedPageModel;
+                    PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                        string.Format("{0}:{1}", page.Id, addIncludes), // Cache Page Models with and without includes separately
+                        CacheRegions.PageModel,
+                        () =>
+                        {
+                            PageModel pageModel = ModelBuilderPipeline.CreatePageModel(page, includes, localization);
+                            pageModel.Url = urlPath;
+                            return pageModel;
+                        },
+                        dependencies
+                        );
+
+                    // Don't return the cached Page Model itself, because we don't want dynamic logic to modify the cached state.
+                    result = (PageModel) cachedPageModel.DeepCopy();
+                }
+                else
+                {
+                    result = ModelBuilderPipeline.CreatePageModel(page, includes, localization);
+                    result.Url = urlPath;
                 }
 
-                PageModel result = (PageModel) cachedPageModel.Clone();
-                result.FilterConditionalEntities();
+                if (SiteConfiguration.ConditionalEntityEvaluator != null)
+                {
+                    result.FilterConditionalEntities();
+                }
 
                 return result;
             }

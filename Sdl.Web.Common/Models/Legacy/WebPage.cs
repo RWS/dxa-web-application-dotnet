@@ -57,14 +57,15 @@ namespace Sdl.Web.Common.Models
             Meta = new Dictionary<string, string>();
         }
 
-        #region IClonable members
+        #region Overrides
+
         /// <summary>
         /// Creates a deep copy of this View Model.
         /// </summary>
         /// <returns>The copied View Model.</returns>
-        public override object Clone()
+        public override ViewModel DeepCopy()
         {
-            WebPage clone = (WebPage) base.Clone();
+            WebPage clone = (WebPage) base.DeepCopy();
             clone.Meta = new Dictionary<string, string>(Meta);
             return clone;
         }

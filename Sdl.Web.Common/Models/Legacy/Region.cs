@@ -114,15 +114,16 @@ namespace Sdl.Web.Common.Models
 
         #endregion
 
-        #region IClonable members
+        #region Overrides
+
         /// <summary>
         /// Creates a deep copy of this View Model.
         /// </summary>
         /// <returns>The copied View Model.</returns>
-        public override object Clone()
+        public override ViewModel DeepCopy()
         {
-            Region clone = (Region) base.Clone();
-            clone._entities = _entities.Select(e => (EntityModel) e.Clone()).ToList();
+            Region clone = (Region) base.DeepCopy();
+            clone._entities = _entities.Select(e => (EntityModel) e.DeepCopy()).ToList();
             return clone;
         }
         #endregion

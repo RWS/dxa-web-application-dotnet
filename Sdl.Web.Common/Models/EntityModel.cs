@@ -175,16 +175,13 @@ namespace Sdl.Web.Common.Models
             return (Id == null) ? GetType().Name : String.Format("{0}: {1}", GetType().Name, Id);
         }
 
-        #endregion
-
-        #region IClonable members
         /// <summary>
         /// Creates a deep copy of this View Model.
         /// </summary>
         /// <returns>The copied View Model.</returns>
-        public override object Clone()
+        public override ViewModel DeepCopy()
         {
-            EntityModel clone = (EntityModel) base.Clone();
+            EntityModel clone = (EntityModel) base.DeepCopy();
 
             if (XpmPropertyMetadata != null)
             {
@@ -193,6 +190,7 @@ namespace Sdl.Web.Common.Models
 
             return clone;
         }
+
         #endregion
     }
 }

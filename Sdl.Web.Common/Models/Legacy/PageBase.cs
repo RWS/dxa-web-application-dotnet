@@ -143,20 +143,16 @@ namespace Sdl.Web.Common.Models
             return string.Format("{0}: {1} ('{2}')", GetType().Name, Id, Title);
         }
 
-        #endregion
-
-        #region IClonable members
         /// <summary>
         /// Creates a deep copy of this View Model.
         /// </summary>
         /// <returns>The copied View Model.</returns>
-        public override object Clone()
+        public override ViewModel DeepCopy()
         {
-            PageBase clone = (PageBase) base.Clone();
-            clone._regions = new RegionModelSet(_regions.Select(r => (RegionModel) r.Clone()));
+            PageBase clone = (PageBase) base.DeepCopy();
+            clone._regions = new RegionModelSet(_regions.Select(r => (RegionModel) r.DeepCopy()));
             return clone;
         }
         #endregion
-
     }
 }

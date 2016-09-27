@@ -15,7 +15,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void Clone_Success()
+        public void DeepCopy_Success()
         {
             Article testArticle = new Article() { Id = "666-666" };
             testArticle.XpmPropertyMetadata = new Dictionary<string, string> { { "xxx", "yyy" } };
@@ -28,7 +28,7 @@ namespace Sdl.Web.Tridion.Tests
             testPageModel.ExtensionData = new Dictionary<string, object> { { "fff", "ggg" }, { "hhh", 6666 } };
             OutputJson(testPageModel);
 
-            PageModel clonedPageModel = testPageModel.Clone() as PageModel;
+            PageModel clonedPageModel = testPageModel.DeepCopy() as PageModel;
             Assert.IsNotNull(clonedPageModel, "clonedPageModel");
             OutputJson(clonedPageModel);
 

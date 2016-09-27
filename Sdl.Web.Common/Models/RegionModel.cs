@@ -145,6 +145,17 @@ namespace Sdl.Web.Common.Models
         {
             return string.Format("{0} '{1}'", GetType().Name, Name);
         }
+
+        /// <summary>
+        /// Creates a deep copy of this View Model.
+        /// </summary>
+        /// <returns>The copied View Model.</returns>
+        public override ViewModel DeepCopy()
+        {
+            RegionModel clone = (RegionModel) base.DeepCopy();
+            clone._regions = new RegionModelSet(_regions.Select(r => (RegionModel) r.DeepCopy()));
+            return clone;
+        }
         #endregion
 
         #region ISyndicationFeedItemProvider members
@@ -156,19 +167,6 @@ namespace Sdl.Web.Common.Models
         public virtual IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(Localization localization)
         {
             return ConcatenateSyndicationFeedItems(Entities.OfType<ISyndicationFeedItemProvider>(), localization);
-        }
-        #endregion
-
-        #region IClonable members
-        /// <summary>
-        /// Creates a deep copy of this View Model.
-        /// </summary>
-        /// <returns>The copied View Model.</returns>
-        public override object Clone()
-        {
-            RegionModel clone = (RegionModel) base.Clone();
-            clone._regions = new RegionModelSet(_regions.Select(r => (RegionModel) r.Clone()));
-            return clone;
         }
         #endregion
 

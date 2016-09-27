@@ -24,7 +24,7 @@ namespace Sdl.Web.Tridion.Tests
             string json = JsonConvert.SerializeObject(
                 objectToSerialize, 
                 Formatting.Indented,
-                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }
+                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, ReferenceLoopHandling = ReferenceLoopHandling.Ignore }
                 );
             Console.WriteLine("---- JSON Representation of {0} ----", objectToSerialize.GetType().FullName);
             Console.WriteLine(json);

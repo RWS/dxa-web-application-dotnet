@@ -45,5 +45,21 @@ namespace Sdl.Web.Common.Models
             return ConcatenateSyndicationFeedItems(QueryResults.OfType<ISyndicationFeedItemProvider>(), localization);
         }
         #endregion
+
+        #region Overrides
+        /// <summary>
+        /// Creates a deep copy of this View Model.
+        /// </summary>
+        /// <returns>The copied View Model.</returns>
+        public override ViewModel DeepCopy()
+        {
+            DynamicList clone = (DynamicList) base.DeepCopy();
+            if (QueryResults != null)
+            {
+                clone.QueryResults = new List<EntityModel>(QueryResults);
+            }
+            return clone;
+        }
+        #endregion
     }
 }

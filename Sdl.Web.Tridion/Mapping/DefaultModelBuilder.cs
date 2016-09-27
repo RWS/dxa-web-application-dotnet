@@ -88,12 +88,20 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     foreach (IPage includePage in includes)
                     {
-                        PageModel includePageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                            includePage.Id, 
-                            CacheRegions.IncludePageModel,
-                            () => ModelBuilderPipeline.CreatePageModel(includePage, null, localization),
-                            dependencies: new [] { includePage.Id }
-                            );
+                        PageModel includePageModel;
+                        if (CacheRegions.IsPageModelCachingEnabled)
+                        {
+                            includePageModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                                includePage.Id,
+                                CacheRegions.IncludePageModel,
+                                () => ModelBuilderPipeline.CreatePageModel(includePage, null, localization),
+                                dependencies: new[] { includePage.Id }
+                                );
+                        }
+                        else
+                        {
+                            includePageModel = ModelBuilderPipeline.CreatePageModel(includePage, null, localization);
+                        }
 
                         // Model Include Page as Region:
                         RegionModel includePageRegion = GetRegionFromIncludePage(includePage);
