@@ -242,10 +242,4 @@
     </PreBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\Sdl.Dxa.Framework.Web8.1.6.0-alpha-201610031135\build\net452\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.1.6.0-alpha-201610031135\build\net452\Sdl.Dxa.Framework.Web8.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Sdl.Dxa.Framework.Web8.1.6.0-alpha-201610031135\build\net452\Sdl.Dxa.Framework.Web8.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Sdl.Dxa.Framework.Web8.1.6.0-alpha-201610031135\build\net452\Sdl.Dxa.Framework.Web8.targets'))" />
-  </Target>
 </Project>
