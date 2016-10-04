@@ -24,7 +24,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <!-- NOTE: We let NuGet update the DXA Framework Package Version in deploy.proj -->
+    <!-- NOTE: We let NuGet update the DXA Framework Package Version in ciBuild.proj -->
     <SdlWebDeliveryPackageVersion>8.3.0</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>8.3.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>8.3.0</SdlWebContextImagePackageVersion>
