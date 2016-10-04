@@ -17,8 +17,6 @@ namespace Sdl.Web.Tridion.Navigation
     /// </summary>
     public class StaticNavigationProvider : INavigationProvider
     {
-        private const string NavigationCacheRegionName = "Navigation_Static";
-
         #region INavigationProvider Members
 
         /// <summary>
@@ -31,8 +29,8 @@ namespace Sdl.Web.Tridion.Navigation
             using (new Tracer(localization))
             {
                 return SiteConfiguration.CacheProvider.GetOrAdd(
-                    localization.LocalizationId,
-                    NavigationCacheRegionName,
+                    localization.LocalizationId, 
+                    CacheRegions.StaticNavigation,
                     () => BuildNavigationModel(localization)
                     // TODO: dependency on navigation.json Page
                     );

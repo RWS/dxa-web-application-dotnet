@@ -14,7 +14,7 @@ namespace Sdl.Web.Common.Models
 #pragma warning restore 618
     {
         private readonly string _name;
-        protected readonly IList<EntityModel> _entities = new List<EntityModel>();
+        protected IList<EntityModel> _entities = new List<EntityModel>();
 
         /// <summary>
         /// Gets or sets the name of the Region.
@@ -112,6 +112,20 @@ namespace Sdl.Web.Common.Models
             _name = name;
         }
 
+        #endregion
+
+        #region Overrides
+
+        /// <summary>
+        /// Creates a deep copy of this View Model.
+        /// </summary>
+        /// <returns>The copied View Model.</returns>
+        public override ViewModel DeepCopy()
+        {
+            Region clone = (Region) base.DeepCopy();
+            clone._entities = _entities.Select(e => (EntityModel) e.DeepCopy()).ToList();
+            return clone;
+        }
         #endregion
     }
 }

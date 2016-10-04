@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
+using System.Web.Configuration;
 using DD4T.ContentModel;
 using DD4T.ContentModel.Factories;
 using Sdl.Web.Common;
@@ -76,23 +77,75 @@ namespace Sdl.Web.Tridion.Mapping
         {        
             using (new Tracer(urlPath, localization, addIncludes))
             {
-                //We can have a couple of tries to get the page model if there is no file extension on the url request, but it does not end in a slash:
-                //1. Try adding the default extension, so /news becomes /news.html
-                IPage page = GetPage(urlPath, localization);
-                if (page == null && (urlPath == null || (!urlPath.EndsWith("/") && urlPath.LastIndexOf(".", StringComparison.Ordinal) <= urlPath.LastIndexOf("/", StringComparison.Ordinal))))
+                if (urlPath == null)
                 {
-                    //2. Try adding the default page, so /news becomes /news/index.html
-                    page = GetPage(urlPath + "/", localization);
+                    urlPath = "/";
                 }
+                else if (!urlPath.StartsWith("/"))
+                {
+                    urlPath = "/" + urlPath;
+                }
+
+                IPage page = GetPage(urlPath, localization);
+                if (page == null && !urlPath.EndsWith("/"))
+                {
+                    // This may be a SG URL path; try if the index page exists.
+                    urlPath += Constants.IndexPageUrlSuffix;
+                    page = GetPage(urlPath, localization);
+                }
+                else if (urlPath.EndsWith("/"))
+                {
+                    urlPath += Constants.DefaultExtensionLessPageName;
+                }
+
                 if (page == null)
                 {
                     throw new DxaItemNotFoundException(urlPath, localization.LocalizationId);
                 }
-                FullyLoadDynamicComponentPresentations(page, localization);
 
                 IPage[] includes = addIncludes ? GetIncludesFromModel(page, localization).ToArray() : new IPage[0];
 
-                return ModelBuilderPipeline.CreatePageModel(page, includes, localization);
+                List<string> dependencies = new List<string>() { page.Id };
+                dependencies.AddRange(includes.Select(p => p.Id));
+
+                PageModel result = null;
+                if (CacheRegions.IsViewModelCachingEnabled)
+                {
+                    PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                        string.Format("{0}:{1}", page.Id, addIncludes), // Cache Page Models with and without includes separately
+                        CacheRegions.PageModel,
+                        () =>
+                        {
+                            PageModel pageModel = ModelBuilderPipeline.CreatePageModel(page, includes, localization);
+                            pageModel.Url = urlPath;
+                            if (pageModel.NoCache)
+                            {
+                                result = pageModel;
+                                return null;
+                            }
+                            return pageModel;
+                        },
+                        dependencies
+                        );
+
+                    if (cachedPageModel != null)
+                    {
+                        // Don't return the cached Page Model itself, because we don't want dynamic logic to modify the cached state.
+                        result = (PageModel) cachedPageModel.DeepCopy();
+                    }
+                }
+                else
+                {
+                    result = ModelBuilderPipeline.CreatePageModel(page, includes, localization);
+                    result.Url = urlPath;
+                }
+
+                if (SiteConfiguration.ConditionalEntityEvaluator != null)
+                {
+                    result.FilterConditionalEntities();
+                }
+
+                return result;
             }
         }
 
@@ -126,7 +179,24 @@ namespace Sdl.Web.Tridion.Mapping
                     throw new DxaItemNotFoundException(id, localization.LocalizationId);
                 }
 
-                EntityModel result = ModelBuilderPipeline.CreateEntityModel(dcp, localization);
+                EntityModel result;
+                if (CacheRegions.IsViewModelCachingEnabled)
+                {
+                    EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                        string.Format("{0}-{1}", id, localization.LocalizationId), // key
+                        CacheRegions.EntityModel,
+                        () => ModelBuilderPipeline.CreateEntityModel(dcp, localization),
+                        dependencies: new[] {componentUri}
+                        );
+
+                    // Don't return the cached Entity Model itself, because we don't want dynamic logic to modify the cached state.
+                    result = (EntityModel) cachedEntityModel.DeepCopy();
+                }
+                else
+                {
+                    result = ModelBuilderPipeline.CreateEntityModel(dcp, localization);
+                }
+
                 if (result.XpmMetadata != null)
                 {
                     // Entity Models requested through this method are per definition "query based" in XPM terminology.
@@ -230,7 +300,7 @@ namespace Sdl.Web.Tridion.Mapping
         {
             string cmUrl = GetCmUrl(urlPath);
 
-            using (new Tracer(urlPath, cmUrl))
+            using (new Tracer(urlPath, localization, cmUrl))
             {
                 IPageFactory pageFactory = DD4TFactoryCache.GetPageFactory(localization);
                 IPage result;
@@ -241,35 +311,22 @@ namespace Sdl.Web.Tridion.Mapping
 
         protected virtual IEnumerable<IPage> GetIncludesFromModel(IPage page, Localization localization)
         {
-            List<IPage> result = new List<IPage>();
-            string[] pageTemplateTcmUriParts = page.PageTemplate.Id.Split('-');
-            IEnumerable<string> includePageUrls = localization.GetIncludePageUrls(pageTemplateTcmUriParts[1]);
-            foreach (string includePageUrl in includePageUrls)
+            using (new Tracer(page.Id, localization))
             {
-                IPage includePage = GetPage(SiteConfiguration.LocalizeUrl(includePageUrl, localization), localization);
-                if (includePage == null)
+                List<IPage> result = new List<IPage>();
+                string[] pageTemplateTcmUriParts = page.PageTemplate.Id.Split('-');
+                IEnumerable<string> includePageUrls = localization.GetIncludePageUrls(pageTemplateTcmUriParts[1]);
+                foreach (string includePageUrl in includePageUrls)
                 {
-                    Log.Error("Include Page '{0}' not found.", includePageUrl);
-                    continue;
+                    IPage includePage = GetPage(SiteConfiguration.LocalizeUrl(includePageUrl, localization), localization);
+                    if (includePage == null)
+                    {
+                        Log.Error("Include Page '{0}' not found.", includePageUrl);
+                        continue;
+                    }
+                    result.Add(includePage);
                 }
-                FullyLoadDynamicComponentPresentations(includePage, localization);
-                result.Add(includePage);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Ensures that the Component Fields of DCPs on the Page are populated.
-        /// </summary>
-        private static void FullyLoadDynamicComponentPresentations(IPage page, Localization localization)
-        {
-            using (new Tracer(page, localization))
-            {
-                foreach (ComponentPresentation dcp in page.ComponentPresentations.Where(cp => cp.IsDynamic).OfType<ComponentPresentation>())
-                {
-                    IComponentFactory componentFactory = DD4TFactoryCache.GetComponentFactory(localization);
-                    dcp.Component = (Component)componentFactory.GetComponent(dcp.Component.Id, dcp.ComponentTemplate.Id);
-                }
+                return result;
             }
         }
     }

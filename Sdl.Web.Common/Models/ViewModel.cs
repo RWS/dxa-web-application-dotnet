@@ -156,5 +156,30 @@ namespace Sdl.Web.Common.Models
             return result;
         }
         #endregion
+
+        /// <summary>
+        /// Creates a deep copy of this View Model.
+        /// </summary>
+        /// <returns>The copied View Model.</returns>
+        public virtual ViewModel DeepCopy()
+        {
+            // Start with a shallow copy
+            ViewModel clone = (ViewModel) MemberwiseClone();
+
+            if (MvcData != null)
+            {
+                clone.MvcData = new MvcData(MvcData);
+            }
+            if (XpmMetadata != null)
+            {
+                clone.XpmMetadata = new Dictionary<string, object>(XpmMetadata);
+            }
+            if (ExtensionData != null)
+            {
+                clone.ExtensionData = new Dictionary<string, object>(ExtensionData);
+            }
+
+            return clone;
+        }
     }
 }

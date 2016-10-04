@@ -2,6 +2,8 @@
 using System.Linq;
 using System.ServiceModel.Syndication;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Common.Models
 {
@@ -16,7 +18,7 @@ namespace Sdl.Web.Common.Models
         private const string XpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], minOccurs: {2}}} -->";
         private const string XpmComponentTypeMarkup = "{{schema: \"{0}\", template: \"{1}\"}}";
 
-        private readonly RegionModelSet _regions = new RegionModelSet();
+        private RegionModelSet _regions = new RegionModelSet();
 
         /// <summary>
         /// The XPM metadata key used for the ID of the (Include) Page from which the Region originates. Avoid using this in implementation code because it may change in a future release.
@@ -143,6 +145,17 @@ namespace Sdl.Web.Common.Models
         {
             return string.Format("{0} '{1}'", GetType().Name, Name);
         }
+
+        /// <summary>
+        /// Creates a deep copy of this View Model.
+        /// </summary>
+        /// <returns>The copied View Model.</returns>
+        public override ViewModel DeepCopy()
+        {
+            RegionModel clone = (RegionModel) base.DeepCopy();
+            clone._regions = new RegionModelSet(_regions.Select(r => (RegionModel) r.DeepCopy()));
+            return clone;
+        }
         #endregion
 
         #region ISyndicationFeedItemProvider members
@@ -156,5 +169,38 @@ namespace Sdl.Web.Common.Models
             return ConcatenateSyndicationFeedItems(Entities.OfType<ISyndicationFeedItemProvider>(), localization);
         }
         #endregion
+
+        /// <summary>
+        /// Filters (i.e. removes) conditional Entities which don't meet the conditions.
+        /// </summary>
+        /// <remarks>
+        /// Applies to this Region and all its nested Regions.
+        /// </remarks>
+        public void FilterConditionalEntities()
+        {
+            using (new Tracer(this))
+            {
+                IConditionalEntityEvaluator conditionalEntityEvaluator = SiteConfiguration.ConditionalEntityEvaluator;
+                if (conditionalEntityEvaluator == null)
+                {
+                    return;
+                }
+
+                EntityModel[] excludeEntities = Entities.Where(entity => !conditionalEntityEvaluator.IncludeEntity(entity)).ToArray();
+                if (excludeEntities.Length > 0)
+                {
+                    Log.Debug("Excluding {0} Entities from Region '{1}'.", excludeEntities.Length, Name);
+                    foreach (EntityModel entity in excludeEntities)
+                    {
+                        Entities.Remove(entity);
+                    }
+                }
+
+                foreach (RegionModel nestedRegion in Regions)
+                {
+                    nestedRegion.FilterConditionalEntities();
+                }
+            }
+        }
     }
 }

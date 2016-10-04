@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.ServiceModel.Syndication;
+using Newtonsoft.Json;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Common.Models
 {
@@ -28,6 +28,13 @@ namespace Sdl.Web.Common.Models
                 return _regions;
             }
         }
+
+        /// <summary>
+        /// Specifies whether the Page Model can be cached or not.
+        /// </summary>
+        [JsonIgnore]
+        [SemanticProperty(IgnoreMapping = true)]
+        public bool NoCache { get; set; }
 
         /// <summary>
         /// Initializes a new instance of PageModel.
@@ -92,6 +99,19 @@ namespace Sdl.Web.Common.Models
         }
         #endregion
 
+        /// <summary>
+        /// Filters (i.e. removes) conditional Entities which don't meet the conditions.
+        /// </summary>
+        public void FilterConditionalEntities()
+        {
+            using (new Tracer(this))
+            {
+                foreach (RegionModel region in Regions)
+                {
+                    region.FilterConditionalEntities();
+                }
+            }
+        }
     }
 
 }

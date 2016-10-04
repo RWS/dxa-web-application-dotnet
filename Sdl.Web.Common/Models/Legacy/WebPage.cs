@@ -14,10 +14,10 @@ namespace Sdl.Web.Common.Models
         private readonly Dictionary<string, IPage> _includes = new Dictionary<string, IPage>(); 
 
         /// <summary>
-        /// Gets or sets the URL of the Page.
+        /// Gets or sets the URL path of the Page.
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
-        public string Url // TODO: remove?
+        public string Url
         {
             get; 
             set;
@@ -56,6 +56,20 @@ namespace Sdl.Web.Common.Models
         {
             Meta = new Dictionary<string, string>();
         }
+
+        #region Overrides
+
+        /// <summary>
+        /// Creates a deep copy of this View Model.
+        /// </summary>
+        /// <returns>The copied View Model.</returns>
+        public override ViewModel DeepCopy()
+        {
+            WebPage clone = (WebPage) base.DeepCopy();
+            clone.Meta = new Dictionary<string, string>(Meta);
+            return clone;
+        }
+        #endregion
     }
 #pragma warning restore 618
 }

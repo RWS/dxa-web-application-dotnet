@@ -43,6 +43,9 @@ namespace Sdl.Web.Common.Models
         [JsonIgnore]
         public SitemapItem Parent { get; set; }
 
+        [JsonIgnore]
+        public string OriginalTitle { get; set; }
+
         /// <summary>
         /// Creates a <see cref="Link"/> out of this <see cref="SitemapItem"/>.
         /// </summary>

@@ -175,6 +175,22 @@ namespace Sdl.Web.Common.Models
             return (Id == null) ? GetType().Name : String.Format("{0}: {1}", GetType().Name, Id);
         }
 
+        /// <summary>
+        /// Creates a deep copy of this View Model.
+        /// </summary>
+        /// <returns>The copied View Model.</returns>
+        public override ViewModel DeepCopy()
+        {
+            EntityModel clone = (EntityModel) base.DeepCopy();
+
+            if (XpmPropertyMetadata != null)
+            {
+                clone.XpmPropertyMetadata = new Dictionary<string, string>(XpmPropertyMetadata);
+            }
+
+            return clone;
+        }
+
         #endregion
     }
 }

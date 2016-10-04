@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
@@ -22,15 +23,76 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_ImplicitIndexPage_Success() 
+        public void GetPageModel_ImplicitIndexPage_Success()
         {
-            string testPageUrlPath = TestFixture.ParentLocalization.Path; // Implicitly address the home page (index.html)
+            Localization testLocalization = TestFixture.ParentLocalization;
+            string testPageUrlPath = testLocalization.Path; // Implicitly address the home page (index.html)
+            string testPageUrlPath2 = testLocalization.Path.Substring(1); // URL path not starting with slash
+            string testPageUrlPath3 = testLocalization.Path + "/"; // URL path ending with slash
 
-            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);
+            PageModel pageModel2 = _testContentProvider.GetPageModel(testPageUrlPath2, testLocalization, addIncludes: false);
+            PageModel pageModel3 = _testContentProvider.GetPageModel(testPageUrlPath3, testLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
-            Assert.AreEqual(TestFixture.HomePageId, pageModel.Id, "Id");
+            Assert.IsNotNull(pageModel, "pageModel2");
+            Assert.IsNotNull(pageModel, "pageModel3");
+            Assert.AreEqual(TestFixture.HomePageId, pageModel.Id, "pageModel.Id");
+            Assert.AreEqual(TestFixture.HomePageId, pageModel2.Id, "pageModel2.Id");
+            Assert.AreEqual(TestFixture.HomePageId, pageModel3.Id, "pageModel3.Id");
+            Assert.AreEqual(testLocalization.Path + Constants.IndexPageUrlSuffix, pageModel.Url, "Url");
+            Assert.AreEqual(testLocalization.Path + Constants.IndexPageUrlSuffix, pageModel2.Url, "pageModel2.Url");
+            Assert.AreEqual(testLocalization.Path + Constants.IndexPageUrlSuffix, pageModel3.Url, "pageModel3.Url");
         }
+
+        [TestMethod]
+        public void GetPageModel_NullUrlPath_Exception()
+        {
+            // null URL path is allowed, but it resolves to "/index" which does not exist in TestFixture.ParentLocalization.
+            AssertThrowsException<DxaItemNotFoundException>(() => _testContentProvider.GetPageModel(null, TestFixture.ParentLocalization, addIncludes: false));
+        }
+
+        [TestMethod]
+        public void GetPageModel_WithIncludes_Success()
+        {
+            Localization testLocalization = TestFixture.ParentLocalization;
+            string testPageUrlPath = TestFixture.ArticlePageUrlPath;
+
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: true);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Assert.AreEqual(4, pageModel.Regions.Count, "pageModel.Regions.Count");
+            RegionModel headerRegion = pageModel.Regions["Header"];
+            Assert.IsNotNull(headerRegion, "headerRegion");
+            Assert.IsNotNull(headerRegion.XpmMetadata, "headerRegion.XpmMetadata");
+            Assert.AreEqual("Header", headerRegion.XpmMetadata[RegionModel.IncludedFromPageTitleXpmMetadataKey], "headerRegion.XpmMetadata[RegionModel.IncludedFromPageTitleXpmMetadataKey]");
+            Assert.AreEqual("header", headerRegion.XpmMetadata[RegionModel.IncludedFromPageFileNameXpmMetadataKey], "headerRegion.XpmMetadata[RegionModel.IncludedFromPageFileNameXpmMetadataKey]");
+        }
+
+        [TestMethod]
+        public void GetPageModel_EclItem_Success()
+        {
+            Localization testLocalization = TestFixture.ParentLocalization;
+            string testPageUrlPath = TestFixture.MediaManagerTestPageUrlPath;
+
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            MediaManagerDistribution mmDistribution = pageModel.Regions["Main"].Entities[0] as MediaManagerDistribution;
+            Assert.IsNotNull(mmDistribution, "mmDistribution");
+            Assert.IsNotNull(mmDistribution.EclUri, "mmDistribution.EclUri");
+            StringAssert.Matches(mmDistribution.EclUri, new Regex(@"ecl:\d+-mm-.*"), "mmDistribution.EclUri");
+            Assert.AreEqual("imagedist", mmDistribution.EclDisplayTypeId, "mmDistribution.EclDisplayTypeId");
+            Assert.IsNotNull(mmDistribution.EclTemplateFragment, "mmDistribution.EclTemplateFragment");
+            Assert.IsNotNull(mmDistribution.EclExternalMetadata, "mmDistribution.EclExternalMetadata");
+            Assert.AreEqual(11, mmDistribution.EclExternalMetadata.Keys.Count, "mmDistribution.EclExternalMetadata.Keys.Count");
+            Assert.AreEqual("Image", mmDistribution.EclExternalMetadata["OutletType"], "mmDistribution.EclExternalMetadata['OutletType']");
+        }
+
 
         [TestMethod]
         public void GetStaticContentItem_InternationalizedUrl_Success() // See TSI-1279 and TSI-1495
@@ -88,6 +150,95 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetPageModel_RichTextProcessing_Success()
+        {
+            string testPageUrlPath = TestFixture.ArticlePageUrlPath;
+
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Assert.AreEqual(testPageUrlPath, pageModel.Url, "pageModel.Url");
+
+            Article testArticle = pageModel.Regions["Main"].Entities[0] as Article;
+            Assert.IsNotNull(testArticle, "testArticle");
+            OutputJson(testArticle);
+
+            RichText content = testArticle.ArticleBody[0].Content;
+            Assert.IsNotNull(content, "content");
+            Assert.AreEqual(3, content.Fragments.Count(), "content.Fragments.Count");
+
+            Image image = content.Fragments.OfType<Image>().FirstOrDefault();
+            Assert.IsNotNull(image, "image");
+            Assert.IsTrue(image.IsEmbedded, "image.IsEmbedded");
+            Assert.IsNotNull(image.MvcData, "image.MvcData");
+            Assert.AreEqual("Image", image.MvcData.ViewName, "image.MvcData.ViewName");
+
+            string firstHtmlFragment = content.Fragments.First().ToHtml();
+            Assert.IsNotNull(firstHtmlFragment, "firstHtmlFragment");
+            StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(not published\): Test Component"));
+            StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(published\): <a title=""TSI-1758 Test Component"" href=""/autotest-parent/regression/tsi-1758"">TSI-1758 Test Component</a>"));
+            StringAssert.Matches(firstHtmlFragment, new Regex(@"MMC link: <a title=""bulls-eye"" href=""/autotest-parent/Images/bulls-eye.*"">bulls-eye</a>"));
+        }
+
+        [TestMethod]
+        public void GetPageModel_ConditionalEntities_Success()
+        {
+            string testPageUrlPath = TestFixture.ArticlePageUrlPath;
+            Localization testLocalization = TestFixture.ParentLocalization;
+
+            // Verify pre-test state: Test Page should contain 1 Article
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);
+            Assert.IsNotNull(pageModel, "pageModel");
+            Assert.AreEqual(1, pageModel.Regions["Main"].Entities.Count, "pageModel.Regions[Main].Entities.Count");
+            Article testArticle = (Article) pageModel.Regions["Main"].Entities[0];
+
+            try
+            {
+                MockConditionalEntityEvaluator.EvaluatedEntities.Clear();
+                MockConditionalEntityEvaluator.ExcludeEntityIds.Add(testArticle.Id);
+
+                // Test Page's Article should now be suppressed by MockConditionalEntityEvaluator
+                PageModel pageModel2 = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);
+                Assert.IsNotNull(pageModel2, "pageModel2");
+                Assert.AreEqual(0, pageModel2.Regions["Main"].Entities.Count, "pageModel2.Regions[Main].Entities.Count");
+                Assert.AreEqual(1, MockConditionalEntityEvaluator.EvaluatedEntities.Count, "MockConditionalEntityEvaluator.EvaluatedEntities.Count");
+            }
+            finally
+            {
+                MockConditionalEntityEvaluator.ExcludeEntityIds.Clear();
+            }
+
+            // Verify post-test state: Test Page should still contain 1 Article
+            PageModel pageModel3 = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);
+            Assert.IsNotNull(pageModel3, "pageModel3");
+            Assert.AreEqual(1, pageModel3.Regions["Main"].Entities.Count, "pageModel3.Regions[Main].Entities.Count");
+        }
+
+        [TestMethod]
+        public void GetPageModel_DynamicComponentPresentation_Success()
+        {
+            Localization testLocalization = TestFixture.ParentLocalization;
+
+            PageModel referencePageModel = _testContentProvider.GetPageModel(TestFixture.ArticlePageUrlPath, testLocalization, addIncludes: false);
+            Assert.IsNotNull(referencePageModel, "referencePageModel");
+            Article referenceArticle = referencePageModel.Regions["Main"].Entities[0] as Article;
+            Assert.IsNotNull(referenceArticle, "testArticle");
+
+            PageModel pageModel = _testContentProvider.GetPageModel(TestFixture.ArticleDynamicPageUrlPath, testLocalization, addIncludes: false);
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Article dcpArticle = pageModel.Regions["Main"].Entities[0] as Article;
+            Assert.IsNotNull(dcpArticle, "dcpArticle");
+            Assert.AreEqual(TestFixture.ArticleDcpEntityId, dcpArticle.Id, "dcpArticle.Id"); // EntityModel.Id for DCP is different
+            Assert.AreEqual(referenceArticle.Headline, dcpArticle.Headline, "dcpArticle.Headline");
+            AssertEqualCollections(referenceArticle.ArticleBody, dcpArticle.ArticleBody, "dcpArticle.ArticleBody");
+            AssertEqualCollections(referenceArticle.XpmPropertyMetadata, dcpArticle.XpmPropertyMetadata, "dcpArticle.XpmPropertyMetadata");
+            Assert.IsNotNull(dcpArticle.XpmMetadata, "dcpArticle.XpmMetadata");
+            Assert.AreEqual(true, dcpArticle.XpmMetadata["IsRepositoryPublished"], "dcpArticle.XpmMetadata['IsRepositoryPublished']");
+        }
+
+        [TestMethod]
         public void GetPageModel_XpmMarkup_Success()
         {
             string testPageUrlPath = TestFixture.ArticlePageUrlPath;
@@ -95,6 +246,7 @@ namespace Sdl.Web.Tridion.Tests
             PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
+            Assert.AreEqual(testPageUrlPath, pageModel.Url, "pageModel.Url");
 
             Article testArticle = pageModel.Regions["Main"].Entities[0] as Article;
             Assert.IsNotNull(testArticle, "Test Article not found on Page.");
@@ -161,6 +313,25 @@ namespace Sdl.Web.Tridion.Tests
 
             Assert.IsNotNull(testEntity.EmbedField1[0].EmbedField1, "testEntity.EmbedField1[0].EmbedField1");
             Assert.IsNotNull(testEntity.EmbedField2[0].EmbedField1, "testEntity.EmbedField2[0].EmbedField1");
+        }
+
+        [TestMethod]
+        public void GetPageModel_OptionalFieldsXpmMetadata_Success() // See TSI-1946
+        {
+            PageModel pageModel = _testContentProvider.GetPageModel(TestFixture.Tsi1946PageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Article testArticle = pageModel.Regions["Main"].Entities.OfType<Article>().FirstOrDefault();
+            Assert.IsNotNull(testArticle, "testArticle");
+            Tsi1946TestEntity testEntity = pageModel.Regions["Main"].Entities.OfType<Tsi1946TestEntity>().FirstOrDefault();
+            Assert.IsNotNull(testEntity, "testEntity");
+
+            OutputJson(testArticle);
+            OutputJson(testEntity);
+
+            // TODO TSI-1946: there are more fields, but only the ones which have a value are represented in XpmPropertyMetadata.
+            Assert.AreEqual(2, testArticle.XpmPropertyMetadata.Count, "testArticle.XpmPropertyMetadata.Count");
+            Assert.AreEqual(0, testEntity.XpmPropertyMetadata.Count, "testEntity.XpmPropertyMetadata.Count");
         }
 
         [TestMethod]

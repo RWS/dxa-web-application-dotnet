@@ -8,6 +8,24 @@ namespace Sdl.Web.Common.Models
     /// </summary>
     public class RegionModelSet : HashSet<RegionModel>
     {
+        #region Constructors
+        /// <summary>
+        /// Initializes a new <see cref="RegionModelSet"/> instance for an empty set.
+        /// </summary>
+        public RegionModelSet()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="RegionModelSet"/> instance from a given set of Region Models.
+        /// </summary>
+        /// <param name="regionModels">The set of Region Models</param>
+        public RegionModelSet(IEnumerable<RegionModel> regionModels)
+            : base(regionModels)
+        {
+        }
+        #endregion
+
         /// <summary>
         /// Gets a Region by its name (indexer).
         /// </summary>

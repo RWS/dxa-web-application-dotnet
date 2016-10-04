@@ -15,11 +15,14 @@ namespace Sdl.Web.Tridion.Tests
         internal const string HomePageId = "640";
         internal const string ArticleDcpEntityId = "9712-9711";
         internal const string ArticlePageUrlPath = "/autotest-parent/test_article_page.html";
+        internal const string ArticleDynamicPageUrlPath = "/autotest-parent/test_article_dynamic.html";
+        internal const string MediaManagerTestPageUrlPath = "/autotest-parent/mm_test.html";
         internal const string Tsi1278PageUrlPath = "/autotest-parent/tsi-1278_trådløst.html";
         internal const string Tsi1278StaticContentItemUrlPath = "/autotest-parent/Images/trådløst_tcm1065-9791.jpg";
         internal const string Tsi1614PageUrlPath = "/autotest-parent/tsi-1614.html";
         internal const string Tsi1758PageUrlPath = "/autotest-parent/regression/tsi-1758.html";
         internal const string Tsi1852PageUrlPath = "/autotest-parent/regression/tsi-1852.html";
+        internal const string Tsi1946PageUrlPath = "/autotest-parent/regression/tsi-1946.html";
         internal const string TaxonomyTestPage1UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1.html";
         internal const string TaxonomyTestPage2UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-2.html";
         internal const string TaxonomyIndexPageUrlPath = "/autotest-parent/regression/taxonomy";
@@ -27,6 +30,7 @@ namespace Sdl.Web.Tridion.Tests
         internal const string TopLevelKeyword1Title = "Top-level Keyword 1";
         internal const string TopLevelKeyword2Title = "Top-level Keyword 2";
         internal const string Keyword1_1Title = "Keyword 1.1";
+        internal const string Keyword1_2Title = "Keyword 1.2";
 
         private static readonly IEnumerable<Localization> _testLocalizations;
         private static readonly Localization _parentLocalization;
@@ -39,9 +43,10 @@ namespace Sdl.Web.Tridion.Tests
             { typeof(INavigationProvider), new StaticNavigationProvider() },
             { typeof(ILinkResolver), new DefaultLinkResolver() },
             { typeof(IRichTextProcessor), new DefaultRichTextProcessor() },
-            { typeof(IMediaHelper), new TestMediaHelper() },
+            { typeof(IMediaHelper), new MockMediaHelper() },
             { typeof(ILocalizationResolver), new TestFixture() },
-            { typeof(IContextClaimsProvider), new TestContextClaimsProvider() }
+            { typeof(IContextClaimsProvider), new TestContextClaimsProvider() },
+            { typeof(IConditionalEntityEvaluator), new MockConditionalEntityEvaluator() }
         };
 
         static TestFixture()
