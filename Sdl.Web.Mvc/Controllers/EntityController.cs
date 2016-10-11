@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Web.Mvc;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
+using System.Web.Helpers;
 
 namespace Sdl.Web.Mvc.Controllers
 {
@@ -51,9 +52,10 @@ namespace Sdl.Web.Mvc.Controllers
             {
                 if (formField == "__RequestVerificationToken")
                 {
-                    // This is not a form field, but the Anti Request Forgery Token
+                    // This is not a form field, but the Anti Request Forgery Token so perform a validation
+                    AntiForgery.Validate();
                     continue;
-                }
+                }                
 
                 PropertyInfo modelProperty = modelType.GetProperty(formField);
                 if (modelProperty == null)
