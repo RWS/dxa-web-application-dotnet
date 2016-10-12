@@ -15,6 +15,8 @@ namespace Sdl.Web.Tridion
     /// </summary>
     public class DefaultCacheProvider : ICacheProvider
     {
+        private const int WaitForAddingTimeout = 15000; // ms
+
         private static readonly ICacheAgent _cacheAgent = DD4TFactoryCache.CreateCacheAgent();
 
         #region ICacheProvider members
@@ -59,9 +61,14 @@ namespace Sdl.Web.Tridion
             if (addingEvent != null)
             {
                 Log.Debug("Awaiting adding of value for key '{0}' in region '{1}' ...", key, region);
-                if (!addingEvent.WaitOne(30000)) // TODO: configurable timeout (?)
+                if (!addingEvent.WaitOne(WaitForAddingTimeout)) 
                 {
-                    throw new DxaException(string.Format("Timeout waiting for adding of value for key '{0}' in cache region '{1}' ...", key, region));
+                    // To facilitate diagnosis of deadlock conditions, first log a warning and then wait another timeout period.
+                    Log.Warn("Waiting for adding of value for key '{0}' in cache region '{1}' for {2} seconds.", key, region, WaitForAddingTimeout/1000) ;
+                    if (!addingEvent.WaitOne(WaitForAddingTimeout))
+                    {
+                        throw new DxaException(string.Format("Timeout waiting for adding of value for key '{0}' in cache region '{1}'.", key, region));
+                    }
                 }
                 Log.Debug("Done awaiting.");
 
