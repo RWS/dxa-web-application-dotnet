@@ -102,7 +102,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.Common">
-      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.6.0-alpha-201610031135\lib\net452\Sdl.Web.Common.dll</HintPath>
+      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.6.0\lib\net452\Sdl.Web.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.Context.Api">
@@ -115,7 +115,7 @@
       <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Mvc">
-      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.6.0-alpha-201610031135\lib\net452\Sdl.Web.Mvc.dll</HintPath>
+      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.6.0\lib\net452\Sdl.Web.Mvc.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -241,5 +241,5 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.1.6.0-alpha-201610031135\build\net452\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.1.6.0-alpha-201610031135\build\net452\Sdl.Dxa.Framework.Web8.targets')" />
+  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.1.6.0\build\net452\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.1.6.0\build\net452\Sdl.Dxa.Framework.Web8.targets')" />
 </Project>
