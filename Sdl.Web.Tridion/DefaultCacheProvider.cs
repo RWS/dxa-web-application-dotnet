@@ -78,8 +78,13 @@ namespace Sdl.Web.Tridion
                 }
                 Log.Debug("Done awaiting.");
 
-                // After the event has been signalled, the actual value is cached. So, retry.
-                return TryGet(key, region, out value);
+                // After the event has been signalled, the value is cached. So, retry.
+                cachedValue = _cacheAgent.Load(cacheAgentKey);
+                if (cachedValue == null)
+                {
+                    value = default(T);
+                    return false;
+                }
             }
 
             if (!(cachedValue is T))
