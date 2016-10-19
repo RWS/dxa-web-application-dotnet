@@ -47,15 +47,21 @@ namespace Sdl.Web.Mvc.Controllers
                 return false;
             }
 
+            // CSRF protection: If the anti CSRF cookie is present, a matching token must be in the form data too.
+            const string antiCsrfToken = "__RequestVerificationToken";
+            if (Request.Cookies[antiCsrfToken] != null)
+            {
+                AntiForgery.Validate();
+            }
+
             Type modelType = model.GetType();
             foreach (string formField in Request.Form)
             {
-                if (formField == "__RequestVerificationToken")
+                if (formField == antiCsrfToken)
                 {
-                    // This is not a form field, but the Anti Request Forgery Token so perform a validation
-                    AntiForgery.Validate();
+                    // This is not a form field, but the anti CSRF token (already validated above).
                     continue;
-                }                
+                }
 
                 PropertyInfo modelProperty = modelType.GetProperty(formField);
                 if (modelProperty == null)
