@@ -329,7 +329,8 @@ namespace Sdl.Web.Tridion.Navigation
             {
                 // Get TaxonomyRelationManager.GetTaxonomyKeywords may return multiple paths towards the (same) Taxonomy root.
                 TaxonomyRelationManager taxonomyRelationManager = new TaxonomyRelationManager();
-                Keyword[] taxonomyRoots = taxonomyRelationManager.GetTaxonomyKeywords(taxonomyUri, pageUri, null, new DepthFilter(-1, DepthFilter.FilterUp), (int) ItemType.Page);
+                Keyword[] contextKeywords = new Keyword[0];
+                Keyword[] taxonomyRoots = taxonomyRelationManager.GetTaxonomyKeywords(taxonomyUri, pageUri, contextKeywords, new DepthFilter(-1, DepthFilter.FilterUp), (int) ItemType.Page);
                 if (taxonomyRoots == null || taxonomyRoots.Length == 0)
                 {
                     Log.Debug("Page '{0}' is not classified in Taxonomy '{1}.", pageUri, taxonomyUri);
