@@ -737,9 +737,9 @@ namespace Sdl.Web.Tridion.Mapping
                 return SiteConfiguration.LinkResolver.ResolveLink(component.Id);
             }
 
-            if (!modelType.IsSubclassOf(typeof(EntityModel)))
+            if (!typeof(EntityModel).IsAssignableFrom(modelType))
             {
-                throw new DxaException(String.Format("Cannot map a Component to type '{0}'. The type must be String or a subclass of EntityModel.", modelType));
+                throw new DxaException(String.Format("Cannot map a Component to type '{0}'. The type must be String or (a subclass of) EntityModel.", modelType));
             }
 
             return ModelBuilderPipeline.CreateEntityModel(component, modelType, localization);
