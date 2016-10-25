@@ -43,17 +43,6 @@
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_7.1|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Release_7.1\</OutputPath>
-    <DefineConstants>TRACE;TRIDION_71</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <NoWarn>1591,1574,1570,1572,1573</NoWarn>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DD4T.ContentModel">
       <HintPath>..\packages\DD4T.Model.2.0.7\lib\net45\DD4T.ContentModel.dll</HintPath>
@@ -91,8 +80,6 @@
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)' != 'Release_7.1'">
     <Reference Include="Microsoft.Data.Edm">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Data.Edm.5.6.4\lib\net40\Microsoft.Data.Edm.dll</HintPath>
@@ -149,22 +136,6 @@
     </Reference>
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
     <Compile Include="CdApiLocalizationResolver.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)' == 'Release_7.1'">
-    <Reference Include="Tridion.ContentDelivery">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\cd-7.1\Tridion.ContentDelivery.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Tridion.ContentDelivery.AmbientData">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\_references\cd-7.1\Tridion.ContentDelivery.AmbientData.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="DD4T.Providers.SDLTridion2013sp1">
-      <HintPath>..\packages\DD4T.Providers.SDLTridion2013sp1.2.0.8\lib\net45\DD4T.Providers.SDLTridion2013sp1.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CdConfigLocalizationResolver.cs" />
