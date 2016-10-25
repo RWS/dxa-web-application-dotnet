@@ -5,7 +5,7 @@ SDL Digital Experience Accelerator ASP.NET MVC web application
 
 About
 -----
-The SDL Digital Experience Accelerator (DXA) is a reference implementation of SDL Web 8 and SDL Tridion 2013 SP1 intended to help you create, design and publish an SDL Web/Tridion-based website quickly.
+The SDL Digital Experience Accelerator (DXA) is a reference implementation of SDL Web 8 and SDL Tridion 2013 SP1(*) intended to help you create, design and publish an SDL Web/Tridion-based website quickly.
 
 It is available for .NET and Java Web Applications and has a modular architecture consisting of a Framework and example web application providing core functionality and separate Modules for additional, optional functionality.
 
@@ -17,6 +17,7 @@ Furthermore, the DXA Framework is available on [NuGet.org](https://www.nuget.org
 To facilitate upgrades, it is highly recommended to use an official, compiled DXA Framework from NuGet.org instead of a custom build.
 If you really have to modify the DXA Framework, we kindly request you to submit your changes as a Contribution; see below. 
 
+(*) SDL Tridion 2013 SP1 is only supported up to DXA version 1.6.
 
 Support
 ---------------
