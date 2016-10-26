@@ -104,7 +104,7 @@ namespace Sdl.Web.Tridion.Mapping
                         }
 
                         // Model Include Page as Region:
-                        RegionModel includePageRegion = GetRegionFromIncludePage(includePage);
+                        RegionModel includePageRegion = GetRegionFromIncludePage(includePage, localization);
                         RegionModel existingRegion;
                         if (regions.TryGetValue(includePageRegion.Name, out existingRegion))
                         {
@@ -151,10 +151,10 @@ namespace Sdl.Web.Tridion.Mapping
                 // NOTE: not using ModelBuilderPipeline here, but directly calling our own implementation.
                 BuildEntityModel(ref entityModel, cp.Component, modelType, localization);
 
-                entityModel.XpmMetadata = GetXpmMetadata(cp.Component);
-                entityModel.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
-                entityModel.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
-                entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic);
+                if (localization.IsStaging)
+                {
+                    entityModel.XpmMetadata = GetXpmMetadata(cp);
+                }
                 entityModel.MvcData = mvcData;
 
                 // add html classes to model from metadata
@@ -359,7 +359,10 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             pageModel.MvcData = pageMvcData;
-            pageModel.XpmMetadata = GetXpmMetadata(page);
+            if (localization.IsStaging)
+            {
+                pageModel.XpmMetadata = GetXpmMetadata(page);
+            }
             pageModel.Title = page.Title;
 
             // add html classes to model from metadata
@@ -462,7 +465,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             EntityModel entityModel = model as EntityModel;
-            if (entityModel != null)
+            if (entityModel != null && mappingData.Localization.IsStaging)
             {
                 entityModel.XpmPropertyMetadata = xpmPropertyMetadata;
             }
@@ -678,14 +681,14 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        protected virtual IDictionary<string, object> GetXpmMetadata(IComponent comp)
+        protected virtual IDictionary<string, object> GetXpmMetadata(IComponentPresentation cp)
         {
             IDictionary<string, object> result = new Dictionary<string, object>();
-            if (comp != null)
-            {
-                result.Add("ComponentID", comp.Id);
-                result.Add("ComponentModified", comp.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
-            }
+            result.Add("ComponentID", cp.Component.Id);
+            result.Add("ComponentModified", cp.Component.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
+            result.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
+            result.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
+            result.Add("IsRepositoryPublished", cp.IsDynamic);
             return result;
         }
 
@@ -1011,22 +1014,28 @@ namespace Sdl.Web.Tridion.Mapping
             return regionMvcData;
         }
 
-        private static RegionModel GetRegionFromIncludePage(IPage page)
+        private static RegionModel GetRegionFromIncludePage(IPage page, Localization localization)
         {
             // Page Title can be a qualified View Name; we use the unqualified View Name as Region Name.
             MvcData regionMvcData = new MvcData(page.Title);
             InitializeRegionMvcData(regionMvcData);
 
-            return new RegionModel(regionMvcData.ViewName)
+            RegionModel result = new RegionModel(regionMvcData.ViewName)
             {
-                MvcData = regionMvcData,
-                XpmMetadata = new Dictionary<string, object>
+                MvcData = regionMvcData
+            };
+
+            if (localization.IsStaging)
+            {
+                result.XpmMetadata = new Dictionary<string, object>
                 {
                     {RegionModel.IncludedFromPageIdXpmMetadataKey, page.Id},
                     {RegionModel.IncludedFromPageTitleXpmMetadataKey, page.Title},
                     {RegionModel.IncludedFromPageFileNameXpmMetadataKey, page.Filename}
-                }
-            };
+                };
+            }
+
+            return result;
         }
 
         /// <summary>

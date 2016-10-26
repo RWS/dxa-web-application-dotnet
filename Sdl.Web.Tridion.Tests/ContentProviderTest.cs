@@ -104,16 +104,20 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(staticContentItem, "staticContentItem");
         }
 
-        [TestMethod]       
-        public void GetEntityModel_XpmMarkup_Success()
+        [TestMethod]
+        public void GetEntityModel_XpmMetadataOnStaging_Success()
         {
-            string testEntityId = TestFixture.ArticleDcpEntityId;
+            const string testEntityId = TestFixture.ArticleDcpEntityId;
 
             EntityModel entityModel = _testContentProvider.GetEntityModel(testEntityId, TestFixture.ParentLocalization);
 
             Assert.IsNotNull(entityModel, "entityModel");
             Assert.AreEqual(testEntityId, entityModel.Id, "entityModel.Id");
             Assert.IsNotNull(entityModel.XpmMetadata, "entityModel.XpmMetadata");
+            Assert.IsNotNull(entityModel.XpmPropertyMetadata, "entityModel.XpmPropertyMetadata");
+            OutputJson(entityModel.XpmMetadata);
+            OutputJson(entityModel.XpmPropertyMetadata);
+
             object isQueryBased;
             Assert.IsTrue(entityModel.XpmMetadata.TryGetValue("IsQueryBased", out isQueryBased), "XpmMetadata contains 'IsQueryBased'");
             Assert.AreEqual(true, isQueryBased, "IsQueryBased value");
@@ -125,6 +129,21 @@ namespace Sdl.Web.Tridion.Tests
             string xpmMarkup = entityModel.GetXpmMarkup(TestFixture.ParentLocalization);
             StringAssert.Contains(xpmMarkup, "\"IsQueryBased\":true", "XPM markup");
             StringAssert.Contains(xpmMarkup, "\"IsRepositoryPublished\":true", "XPM markup");
+        }
+
+        [TestMethod]
+        public void GetEntityModel_NoXpmMetadataOnLive_Success() // See TSI-1942
+        {
+            const string testEntityId = TestFixture.ArticleDcpEntityId;
+            Localization testLocalization = TestFixture.ChildLocalization;
+
+            EntityModel entityModel = _testContentProvider.GetEntityModel(testEntityId, testLocalization);
+
+            Assert.IsNotNull(entityModel, "entityModel");
+            Assert.AreEqual(testEntityId, entityModel.Id, "entityModel.Id");
+            Assert.IsNull(entityModel.XpmMetadata, "entityModel.XpmMetadata");
+            Assert.IsNull(entityModel.XpmPropertyMetadata, "entityModel.XpmPropertyMetadata");
+            Assert.AreEqual(string.Empty, entityModel.GetXpmMarkup(testLocalization), "entityModel.GetXpmMarkup(testLocalization)");
         }
 
         [TestMethod]
@@ -239,19 +258,36 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_XpmMarkup_Success()
+        public void GetPageModel_XpmMetadataOnStaging_Success()
         {
             string testPageUrlPath = TestFixture.ArticlePageUrlPath;
+            Localization testLocalization = TestFixture.ParentLocalization;
 
-            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: true);
 
             Assert.IsNotNull(pageModel, "pageModel");
+            Assert.IsNotNull(pageModel.XpmMetadata, "pageModel.XpmMetadata");
             Assert.AreEqual(testPageUrlPath, pageModel.Url, "pageModel.Url");
 
-            Article testArticle = pageModel.Regions["Main"].Entities[0] as Article;
+            RegionModel headerRegion = pageModel.Regions["Header"];
+            Assert.IsNotNull(headerRegion, "headerRegion");
+            Assert.IsNotNull(headerRegion.XpmMetadata, "headerRegion.XpmMetadata");
+            OutputJson(headerRegion.XpmMetadata);
+            Assert.AreEqual("Header", headerRegion.XpmMetadata[RegionModel.IncludedFromPageTitleXpmMetadataKey], "headerRegion.XpmMetadata[RegionModel.IncludedFromPageTitleXpmMetadataKey]");
+            Assert.AreEqual("header", headerRegion.XpmMetadata[RegionModel.IncludedFromPageFileNameXpmMetadataKey], "headerRegion.XpmMetadata[RegionModel.IncludedFromPageFileNameXpmMetadataKey]");
+
+            RegionModel mainRegion = pageModel.Regions["Main"];
+            Assert.IsNotNull(mainRegion, "mainRegion");
+            Assert.IsNull(mainRegion.XpmMetadata, "mainRegion.XpmMetadata");
+
+            Article testArticle = mainRegion.Entities[0] as Article;
             Assert.IsNotNull(testArticle, "Test Article not found on Page.");
 
-            Assert.IsNotNull(testArticle.XpmMetadata, "entityModel.XpmMetadata");
+            Assert.IsNotNull(testArticle.XpmMetadata, "testArticle.XpmMetadata");
+            Assert.IsNotNull(testArticle.XpmPropertyMetadata, "testArticle.XpmPropertyMetadata");
+            OutputJson(testArticle.XpmMetadata);
+            OutputJson(testArticle.XpmPropertyMetadata);
+
             object isQueryBased;
             Assert.IsFalse(testArticle.XpmMetadata.TryGetValue("IsQueryBased", out isQueryBased), "XpmMetadata contains 'IsQueryBased'");
             object isRepositoryPublished;
@@ -259,10 +295,38 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(false, isRepositoryPublished, "IsRepositoryPublished value");
 
             // NOTE: boolean value must not have quotes in XPM markup (TSI-1251)
-            string xpmMarkup = testArticle.GetXpmMarkup(TestFixture.ParentLocalization);
+            string xpmMarkup = testArticle.GetXpmMarkup(testLocalization);
             StringAssert.DoesNotMatch(xpmMarkup, new Regex("IsQueryBased"), "XPM markup");
             StringAssert.Contains(xpmMarkup, "\"IsRepositoryPublished\":false", "XPM markup");
         }
+
+        [TestMethod]
+        public void GetPageModel_NoXpmMetadataOnLive_Success() // See TSI-1942
+        {
+            string testPageUrlPath = TestFixture.ArticleChildPageUrlPath;
+            Localization testLocalization = TestFixture.ChildLocalization;
+
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: true);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Assert.IsNull(pageModel.XpmMetadata, "pageModel.XpmMetadata");
+            Assert.AreEqual(string.Empty, pageModel.GetXpmMarkup(testLocalization), "pageModel.GetXpmMarkup(testLocalization)");
+
+            RegionModel headerRegion = pageModel.Regions["Header"];
+            Assert.IsNotNull(headerRegion, "headerRegion");
+            Assert.IsNull(headerRegion.XpmMetadata, "headerRegion.XpmMetadata");
+
+            RegionModel mainRegion = pageModel.Regions["Main"];
+            Assert.IsNotNull(mainRegion, "mainRegion");
+            Assert.IsNull(mainRegion.XpmMetadata, "mainRegion.XpmMetadata");
+
+            Article testArticle = mainRegion.Entities[0] as Article;
+            Assert.IsNotNull(testArticle, "Test Article not found on Page.");
+            Assert.IsNull(testArticle.XpmMetadata, "testArticle.XpmMetadata");
+            Assert.IsNull(testArticle.XpmPropertyMetadata, "testArticle.XpmPropertyMetadata");
+            Assert.AreEqual(string.Empty, testArticle.GetXpmMarkup(testLocalization), "testArticle.GetXpmMarkup(testLocalization)");
+        }
+
 
         [TestMethod]
         public void GetPageModel_RichTextImageWithHtmlClass_Success() // See TSI-1614

@@ -15,6 +15,7 @@ namespace Sdl.Web.Tridion.Tests
         internal const string HomePageId = "640";
         internal const string ArticleDcpEntityId = "9712-9711";
         internal const string ArticlePageUrlPath = "/autotest-parent/test_article_page.html";
+        internal const string ArticleChildPageUrlPath = "/autotest-child/test_article_page.html";
         internal const string ArticleDynamicPageUrlPath = "/autotest-parent/test_article_dynamic.html";
         internal const string MediaManagerTestPageUrlPath = "/autotest-parent/mm_test.html";
         internal const string Tsi1278PageUrlPath = "/autotest-parent/tsi-1278_trådløst.html";
@@ -61,7 +62,7 @@ namespace Sdl.Web.Tridion.Tests
 
             _childLocalization = new Localization
             {
-                LocalizationId = "1066",
+                LocalizationId = "1078",
                 Path = "/autotest-child"
             };
 
@@ -84,6 +85,9 @@ namespace Sdl.Web.Tridion.Tests
             get
             {
                 _childLocalization.EnsureInitialized();
+
+                // Trick to allow us to test on a "Live" (not XPM-enabled) configuration even though we're actually on a Staging CD Environment:
+                _childLocalization.IsStaging = false;
                 return _childLocalization;
             }
         }
