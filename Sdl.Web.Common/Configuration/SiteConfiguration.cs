@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Web.Mvc;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -102,8 +102,8 @@ namespace Sdl.Web.Common.Configuration
         {
             using (new Tracer())
             {
-                Version assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
-                Log.Info("-------- Initializing DXA Framework v{0} --------", assemblyVersion);
+                string assemblyFileVersion = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+                Log.Info("-------- Initializing DXA Framework v{0} --------", assemblyFileVersion);
 
                 CacheProvider = GetProvider<ICacheProvider>(dependencyResolver);
                 ContentProvider = GetProvider<IContentProvider>(dependencyResolver);

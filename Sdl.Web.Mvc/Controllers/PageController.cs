@@ -23,38 +23,46 @@ namespace Sdl.Web.Mvc.Controllers
         {
             using (new Tracer(pageUrl))
             {
-                bool addIncludes = true;
-                object addIncludesViewData;
-                if (ViewData.TryGetValue(DxaViewDataItems.AddIncludes, out addIncludesViewData))
-                {
-                    addIncludes = (bool) addIncludesViewData;
-                }
-
-                PageModel pageModel;
                 try
                 {
-                    pageModel = ContentProvider.GetPageModel(pageUrl, WebRequestContext.Localization, addIncludes);
+                    bool addIncludes = true;
+                    object addIncludesViewData;
+                    if (ViewData.TryGetValue(DxaViewDataItems.AddIncludes, out addIncludesViewData))
+                    {
+                        addIncludes = (bool) addIncludesViewData;
+                    }
+
+                    PageModel pageModel;
+                    try
+                    {
+                        pageModel = ContentProvider.GetPageModel(pageUrl, WebRequestContext.Localization, addIncludes);
+                    }
+                    catch (DxaItemNotFoundException ex)
+                    {
+                        Log.Info(ex.Message);
+                        return NotFound();
+                    }
+
+                    PageModelWithHttpResponseData pageModelWithHttpResponseData = pageModel as PageModelWithHttpResponseData;
+                    if (pageModelWithHttpResponseData != null)
+                    {
+                        pageModelWithHttpResponseData.SetHttpResponseData(System.Web.HttpContext.Current.Response);
+                    }
+
+                    SetupViewData(pageModel);
+                    PageModel model = (EnrichModel(pageModel) as PageModel) ?? pageModel;
+
+                    WebRequestContext.PageModel = model;
+
+                    Log.Debug("Page Request for URL '{0}' maps to Model [{1}] with View '{2}'", pageUrl, model, model.MvcData.ViewName);
+
+                    return View(model.MvcData.ViewName, model);
                 }
-                catch (DxaItemNotFoundException ex)
+                catch (Exception ex)
                 {
-                    Log.Info(ex.Message);
-                    return NotFound();
+                    Log.Error(ex);
+                    return ServerError();
                 }
-
-                PageModelWithHttpResponseData pageModelWithHttpResponseData = pageModel as PageModelWithHttpResponseData;
-                if (pageModelWithHttpResponseData != null)
-                {
-                    pageModelWithHttpResponseData.SetHttpResponseData(System.Web.HttpContext.Current.Response);
-                }
-
-                SetupViewData(pageModel);
-                PageModel model = (EnrichModel(pageModel) as PageModel) ?? pageModel;
-
-                WebRequestContext.PageModel = model;
-
-                Log.Debug("Page Request for URL '{0}' maps to Model [{1}] with View '{2}'", pageUrl, model, model.MvcData.ViewName);
-
-                return View(model.MvcData.ViewName, model);
             }
         }
 
@@ -123,7 +131,7 @@ namespace Sdl.Web.Mvc.Controllers
                 //For a server error, it may be that there is an issue with connectivity,
                 //so we show a very plain page with no dependency on the Content Provider
                 Response.StatusCode = 500;
-                return View();
+                return View("ServerError");
             }
         }
 

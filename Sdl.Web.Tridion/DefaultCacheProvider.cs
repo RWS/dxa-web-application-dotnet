@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -15,7 +16,10 @@ namespace Sdl.Web.Tridion
     /// </summary>
     public class DefaultCacheProvider : ICacheProvider
     {
+        private const int WaitForAddingTimeout = 15000; // ms
+
         private static readonly ICacheAgent _cacheAgent = DD4TFactoryCache.CreateCacheAgent();
+        private static readonly IDictionary<string, EventWaitHandle> _addingEvents = new ConcurrentDictionary<string, EventWaitHandle>(); 
 
         #region ICacheProvider members
         /// <summary>
@@ -30,10 +34,13 @@ namespace Sdl.Web.Tridion
         {
             List<string> dependsOnTcmUris = (dependencies == null) ? null : dependencies.ToList();
             string cacheAgentKey = GetCacheAgentKey(key, region);
-            _cacheAgent.Remove(cacheAgentKey); // DD4T doesn't overwrite existing values (?)
-            if (value != null) // DD4T doesn't support storing null values
+            lock (_cacheAgent)
             {
-                _cacheAgent.Store(cacheAgentKey, region, value, dependsOnTcmUris);
+                _cacheAgent.Remove(cacheAgentKey); // DD4T doesn't overwrite existing values (?)
+                if (value != null) // DD4T doesn't support storing null values
+                {
+                    _cacheAgent.Store(cacheAgentKey, region, value, dependsOnTcmUris);
+                }
             }
         }
 
@@ -47,26 +54,37 @@ namespace Sdl.Web.Tridion
         /// <returns><c>true</c> if a cached value was found for the given key and cache region.</returns>
         public bool TryGet<T>(string key, string region, out T value)
         {
-            object cachedValue = _cacheAgent.Load(GetCacheAgentKey(key, region));
+            string cacheAgentKey = GetCacheAgentKey(key, region);
+            object cachedValue = _cacheAgent.Load(cacheAgentKey);
             if (cachedValue == null)
             {
-                value = default(T);
-                return false;
-            }
-
-            // The GetOrAdd method may have stored a special value to indicate that adding is pending:
-            WaitHandle addingEvent = cachedValue as WaitHandle;
-            if (addingEvent != null)
-            {
-                Log.Debug("Awaiting adding of value for key '{0}' in region '{1}' ...", key, region);
-                if (!addingEvent.WaitOne(30000)) // TODO: configurable timeout (?)
+                // Check if another thread is adding a value for the key/region:
+                EventWaitHandle addingEvent;
+                if (!_addingEvents.TryGetValue(cacheAgentKey, out addingEvent))
                 {
-                    throw new DxaException(string.Format("Timeout waiting for adding of value for key '{0}' in cache region '{1}' ...", key, region));
+                    value = default(T);
+                    return false;
+                }
+
+                Log.Debug("Awaiting adding of value for key '{0}' in region '{1}' ...", key, region);
+                if (!addingEvent.WaitOne(WaitForAddingTimeout))
+                {
+                    // To facilitate diagnosis of deadlock conditions, first log a warning and then wait another timeout period.
+                    Log.Warn("Waiting for adding of value for key '{0}' in cache region '{1}' for {2} seconds.", key, region, WaitForAddingTimeout / 1000);
+                    if (!addingEvent.WaitOne(WaitForAddingTimeout))
+                    {
+                        throw new DxaException(string.Format("Timeout waiting for adding of value for key '{0}' in cache region '{1}'.", key, region));
+                    }
                 }
                 Log.Debug("Done awaiting.");
 
-                // After the event has been signal, the actual value is cached. So, retry.
-                return TryGet(key, region, out value);
+                // After the event has been signalled, the value is cached. So, retry.
+                cachedValue = _cacheAgent.Load(cacheAgentKey);
+                if (cachedValue == null)
+                {
+                    value = default(T);
+                    return false;
+                }
             }
 
             if (!(cachedValue is T))
@@ -101,26 +119,29 @@ namespace Sdl.Web.Tridion
                 return result;
             }
 
-            EventWaitHandle addingEvent;
-            lock (_cacheAgent)
+            // Indicate to other threads that we're adding a value
+            EventWaitHandle addingEvent = new ManualResetEvent(false);
+            string cacheAgentKey = GetCacheAgentKey(key, region);
+            try
             {
-                // Another thread may have stored a value just before we aquired the lock, so try again:
+                _addingEvents.Add(cacheAgentKey, addingEvent);
+            }
+            catch (ArgumentException)
+            {
+                // Another thread is already adding a value (race condition); retry getting the value.
                 if (TryGet(key, region, out result))
                 {
                     return result;
                 }
-
-                // Temporarily store an ManualResetEvent value to signal that adding is in progess without locking the entire cache.
-                addingEvent = new ManualResetEvent(false);
-                Store(key, region, addingEvent);
             }
 
             // Obtain the actual value. This may be time-consuming (otherwise there would be no reason to cache).
             result = addFunction();
 
-            // Cache the actual value and signal the event.
+            // Cache the value and unblock other threads which are awaiting it.
             Store(key, region, result, dependencies);
             addingEvent.Set();
+            _addingEvents.Remove(cacheAgentKey);
 
             return result;
         }
