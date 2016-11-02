@@ -638,7 +638,7 @@ namespace Sdl.Web.Tridion.Mapping
                     case FieldType.Keyword:
                         foreach (IKeyword value in field.Keywords)
                         {
-                            mappedValues.Add(MapKeyword(value, modelType));
+                            mappedValues.Add(MapKeyword(value, modelType, mapData.Localization));
                         }
                         break;
 
@@ -705,24 +705,23 @@ namespace Sdl.Web.Tridion.Mapping
             return result;
         }
 
-        protected virtual object MapKeyword(IKeyword keyword, Type modelType)
+        protected virtual object MapKeyword(IKeyword keyword, Type modelType, Localization localization)
         {
-            // TODO TSI-811: Keyword mapping should also be generic rather than hard-coded like below
-            string displayText = String.IsNullOrEmpty(keyword.Description) ? keyword.Title : keyword.Description;
+            string displayText = string.IsNullOrEmpty(keyword.Description) ? keyword.Title : keyword.Description;
             if (modelType == typeof(Tag))
             {
                 return new Tag
                 {
                     DisplayText = displayText,
-                    Key = String.IsNullOrEmpty(keyword.Key) ? keyword.Id : keyword.Key,
+                    Key = string.IsNullOrEmpty(keyword.Key) ? keyword.Id : keyword.Key,
                     TagCategory = keyword.TaxonomyId
                 };
             } 
             
             if (modelType == typeof(bool))
             {
-                //For booleans we assume the keyword key or value can be converted to bool
-                return Boolean.Parse(String.IsNullOrEmpty(keyword.Key) ? keyword.Title : keyword.Key);
+                //For booleans we assume the Keyword's Key/Title can be converted to bool
+                return Convert.ToBoolean(string.IsNullOrEmpty(keyword.Key) ? keyword.Title : keyword.Key);
             }
             
             if (modelType == typeof(string))
@@ -730,7 +729,32 @@ namespace Sdl.Web.Tridion.Mapping
                 return displayText;
             }
 
-            throw new DxaException(String.Format("Cannot map Keyword to type '{0}'. The type must be Tag, bool or string.", modelType));
+            if (!typeof(KeywordModel).IsAssignableFrom(modelType))
+            {
+                throw new DxaException(string.Format("Cannot map Keyword to type '{0}'. The type must be string, bool, Tag or (a subclass of) KeywordModel.", modelType));
+            }
+
+            // TODO TSI-811: We need to get the Keyword's Metadata Schema in the DD4T data model
+            SemanticSchema semanticSchema = SemanticMapping.GetSchema("10119", localization);
+
+            MappingData keywordMappingData = new MappingData
+            {
+                TargetType = modelType,
+                SemanticSchema = semanticSchema,
+                EntityNames = semanticSchema.GetEntityNames(),
+                TargetEntitiesByPrefix = GetEntityDataFromType(modelType),
+                Meta = keyword.MetadataFields,
+                Localization = localization
+            };
+
+            KeywordModel result = (KeywordModel) CreateViewModel(keywordMappingData);
+            result.Id = GetDxaIdentifierFromTcmUri(keyword.Id);
+            result.Title = keyword.Title;
+            result.Description = keyword.Description;
+            result.Key = keyword.Key;
+            result.TaxonomyId = GetDxaIdentifierFromTcmUri(keyword.TaxonomyId);
+
+            return result;
         }
 
         protected virtual object MapComponent(IComponent component, Type modelType, Localization localization)

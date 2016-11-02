@@ -399,6 +399,38 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetPageModel_KeywordMapping_Success() // See TSI-811
+        {
+            Localization testLocalization = TestFixture.ParentLocalization;
+
+            PageModel pageModel = _testContentProvider.GetPageModel(TestFixture.Tsi811PageUrlPath, testLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Tsi811TestEntity testEntity = pageModel.Regions["Main"].Entities[0] as Tsi811TestEntity;
+            Assert.IsNotNull(testEntity, "testEntity");
+            OutputJson(testEntity);
+
+            Assert.IsNotNull(testEntity.Keyword1, "testEntity.Keyword1");
+            Assert.IsNotNull(testEntity.Keyword2, "testEntity.Keyword2");
+            Assert.IsTrue(testEntity.BooleanProperty, "testEntity.BooleanProperty");
+
+            Assert.AreEqual(2, testEntity.Keyword1.Count, "testEntity.Keyword1.Count");
+            AssertValidKeywordModel(testEntity.Keyword1[0], "Test Keyword 1", "TSI-811 Test Keyword 1", "Key 1", "testEntity.Keyword1[0]");
+            AssertValidKeywordModel(testEntity.Keyword1[1], "Test Keyword 2", "TSI-811 Test Keyword 2", "Key 2", "testEntity.Keyword1[1]");
+            AssertValidKeywordModel(testEntity.Keyword2, "News Article", string.Empty, "core.newsArticle", "testEntity.Keyword2");
+        }
+
+        private static void AssertValidKeywordModel(KeywordModel keywordModel, string expectedTitle, string expectedDescription, string expectedKey, string subjectName)
+        {
+            Assert.IsNotNull(keywordModel, subjectName);
+            Assert.AreEqual(expectedTitle, keywordModel.Title, subjectName + ".Title");
+            Assert.AreEqual(expectedDescription, keywordModel.Description, subjectName + ".Description");
+            Assert.AreEqual(expectedKey, keywordModel.Key, subjectName + ".Key");
+            StringAssert.Matches(keywordModel.Id, new Regex(@"\d+"), subjectName + ".Id");
+            StringAssert.Matches(keywordModel.TaxonomyId, new Regex(@"\d+"), subjectName + ".TaxonomyId");
+        }
+
+        [TestMethod]
         public void PopulateDynamicList_TeaserFallbackToDescription_Success() // See TSI-1852
         {
             string testPageUrlPath = TestFixture.Tsi1852PageUrlPath;
