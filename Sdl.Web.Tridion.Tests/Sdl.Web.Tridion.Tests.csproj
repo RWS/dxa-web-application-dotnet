@@ -73,6 +73,7 @@
     <Compile Include="Models\Entity\Tsi1946TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi1758TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi811TestEntity.cs" />
+    <Compile Include="Models\Page\Tsi811PageModel.cs" />
     <Compile Include="StaticNavigationProviderTest.cs" />
     <Compile Include="TestClass.cs" />
     <Compile Include="TestFixture.cs" />

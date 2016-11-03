@@ -734,20 +734,31 @@ namespace Sdl.Web.Tridion.Mapping
                 throw new DxaException(string.Format("Cannot map Keyword to type '{0}'. The type must be string, bool, Tag or (a subclass of) KeywordModel.", modelType));
             }
 
-            // TODO TSI-811: We need to get the Keyword's Metadata Schema in the DD4T data model
-            SemanticSchema semanticSchema = SemanticMapping.GetSchema("10119", localization);
-
-            MappingData keywordMappingData = new MappingData
+            KeywordModel result;
+            string metadataSchemaId = GetMetadataSchemaId(keyword);
+            if (string.IsNullOrEmpty(metadataSchemaId))
             {
-                TargetType = modelType,
-                SemanticSchema = semanticSchema,
-                EntityNames = semanticSchema.GetEntityNames(),
-                TargetEntitiesByPrefix = GetEntityDataFromType(modelType),
-                Meta = keyword.MetadataFields,
-                Localization = localization
-            };
+                // Keyword has no Metadata (Schema) : create a KeywordModel instance.
+                result = new KeywordModel();
+            }
+            else
+            {
+                // Keyword has Metadata: do full-blown model mapping.
+                SemanticSchema semanticSchema = SemanticMapping.GetSchema(GetDxaIdentifierFromTcmUri(metadataSchemaId), localization);
 
-            KeywordModel result = (KeywordModel) CreateViewModel(keywordMappingData);
+                MappingData keywordMappingData = new MappingData
+                {
+                    TargetType = modelType,
+                    SemanticSchema = semanticSchema,
+                    EntityNames = semanticSchema.GetEntityNames(),
+                    TargetEntitiesByPrefix = GetEntityDataFromType(modelType),
+                    Meta = keyword.MetadataFields,
+                    Localization = localization
+                };
+
+                result = (KeywordModel) CreateViewModel(keywordMappingData);
+            }
+
             result.Id = GetDxaIdentifierFromTcmUri(keyword.Id);
             result.Title = keyword.Title;
             result.Description = keyword.Description;
@@ -755,6 +766,28 @@ namespace Sdl.Web.Tridion.Mapping
             result.TaxonomyId = GetDxaIdentifierFromTcmUri(keyword.TaxonomyId);
 
             return result;
+        }
+
+        private static string GetMetadataSchemaId(IKeyword keyword)
+        {
+            if (keyword.ExtensionData == null)
+            {
+                return null;
+            }
+
+            IFieldSet dxaExtensionData;
+            if (!keyword.ExtensionData.TryGetValue("DXA", out dxaExtensionData))
+            {
+                return null;
+            }
+
+            IField metadataSchemaIdField;
+            if (!dxaExtensionData.TryGetValue("MetadataSchemaId", out metadataSchemaIdField))
+            {
+                return null;
+            }
+
+            return metadataSchemaIdField.Value;
         }
 
         protected virtual object MapComponent(IComponent component, Type modelType, Localization localization)

@@ -403,13 +403,13 @@ namespace Sdl.Web.Tridion.Tests
         {
             Localization testLocalization = TestFixture.ParentLocalization;
 
-            PageModel pageModel = _testContentProvider.GetPageModel(TestFixture.Tsi811PageUrlPath, testLocalization, addIncludes: false);
+            Tsi811PageModel pageModel = _testContentProvider.GetPageModel(TestFixture.Tsi811PageUrlPath, testLocalization, addIncludes: false) as Tsi811PageModel;
 
             Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
             Tsi811TestEntity testEntity = pageModel.Regions["Main"].Entities[0] as Tsi811TestEntity;
             Assert.IsNotNull(testEntity, "testEntity");
-            OutputJson(testEntity);
-
             Assert.IsNotNull(testEntity.Keyword1, "testEntity.Keyword1");
             Assert.IsNotNull(testEntity.Keyword2, "testEntity.Keyword2");
             Assert.IsTrue(testEntity.BooleanProperty, "testEntity.BooleanProperty");
@@ -418,6 +418,15 @@ namespace Sdl.Web.Tridion.Tests
             AssertValidKeywordModel(testEntity.Keyword1[0], "Test Keyword 1", "TSI-811 Test Keyword 1", "Key 1", "testEntity.Keyword1[0]");
             AssertValidKeywordModel(testEntity.Keyword1[1], "Test Keyword 2", "TSI-811 Test Keyword 2", "Key 2", "testEntity.Keyword1[1]");
             AssertValidKeywordModel(testEntity.Keyword2, "News Article", string.Empty, "core.newsArticle", "testEntity.Keyword2");
+
+            Tsi811TestKeyword testKeyword1 = testEntity.Keyword1[0];
+            Assert.AreEqual("This is Test Keyword 1's textField", testKeyword1.TextField, "testKeyword1.TextField");
+            Assert.AreEqual(666, testKeyword1.NumberProperty, "testKeyword1.NumberProperty");
+
+            Tsi811TestKeyword pageKeyword = pageModel.PageKeyword;
+            AssertValidKeywordModel(pageKeyword, "Test Keyword 2", "TSI-811 Test Keyword 2", "Key 2", "pageKeyword");
+            Assert.AreEqual("This is textField of Test Keyword 2", pageKeyword.TextField, "pageKeyword.TextField");
+            Assert.AreEqual(999, pageKeyword.NumberProperty, "pageKeyword.NumberProperty");
         }
 
         private static void AssertValidKeywordModel(KeywordModel keywordModel, string expectedTitle, string expectedDescription, string expectedKey, string subjectName)
