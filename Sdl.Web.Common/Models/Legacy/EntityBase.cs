@@ -6,6 +6,7 @@ namespace Sdl.Web.Common.Models
     /// Legacy base class for View Models for Entities.
     /// </summary>
     [Obsolete("Deprecated in DXA 1.1. Use class EntityModel instead.")]
+    [Serializable]
     public class EntityBase : EntityModel
     {
     }

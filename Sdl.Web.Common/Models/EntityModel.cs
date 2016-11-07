@@ -8,6 +8,7 @@ namespace Sdl.Web.Common.Models
     /// <summary>
     /// Abstract base class for View Models for Entities.
     /// </summary>
+    [Serializable]
 #pragma warning disable 618
     public abstract class EntityModel : ViewModel, IRichTextFragment, IEntity
 #pragma warning restore 618

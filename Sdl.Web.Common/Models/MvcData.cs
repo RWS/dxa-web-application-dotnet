@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Sdl.Web.Common.Configuration;
+using System;
 
 namespace Sdl.Web.Common.Models
 {
     /// <summary>
     /// Represents data about the Model, View and Controller
     /// </summary>
+    [Serializable]
     public class MvcData
     {
         public string ControllerName { get; set; }

@@ -4,6 +4,7 @@ using System.ServiceModel.Syndication;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
+using System;
 
 namespace Sdl.Web.Common.Models
 {
@@ -12,6 +13,7 @@ namespace Sdl.Web.Common.Models
     /// </summary>
 #pragma warning disable 618
     // TODO DXA 2.0: Ideally this would inherit directly from ViewModel, but for backward compatibility we need the legacy type inbetween.
+    [Serializable]
     public class RegionModel : Region, ISyndicationFeedItemProvider
 #pragma warning restore 618
     {

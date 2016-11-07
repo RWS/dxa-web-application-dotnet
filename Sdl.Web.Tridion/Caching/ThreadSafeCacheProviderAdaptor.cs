@@ -1,16 +1,12 @@
-﻿using DD4T.ContentModel.Contracts.Caching;
-using DD4T.Utils.Caching;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading;
+using System.Linq;
+using DD4T.ContentModel.Contracts.Caching;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Tridion.Mapping;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Sdl.Web.Tridion.Caching
 {
@@ -37,7 +33,7 @@ namespace Sdl.Web.Tridion.Caching
         /// <param name="dependencies">An optional set of dependent item IDs. Can be used to invalidate the cached item.</param>
         /// <typeparam name="T">The type of the value to add.</typeparam>
         public void Store<T>(string key, string region, T value, IEnumerable<string> dependencies = null)
-        {
+        {            
             List<string> dependsOnTcmUris = (dependencies == null) ? null : dependencies.ToList();
             string cacheAgentKey = GetCacheAgentKey(key, region);
             lock (_cacheAgent)

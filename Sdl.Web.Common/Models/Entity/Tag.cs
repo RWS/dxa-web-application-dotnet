@@ -1,4 +1,5 @@
-﻿namespace Sdl.Web.Common.Models
+﻿using System;
+namespace Sdl.Web.Common.Models
 {
     /// <summary>
     /// Represents a Keyword in CM.
@@ -9,6 +10,7 @@
     /// Since there is no use in subclassing this class (unlike <see cref="KeywordModel"/>), it has been declared as <c>sealed</c> in DXA 1.7.
     /// </remarks>
     /// <seealso cref="KeywordModel"/>
+    [Serializable]
     public sealed class Tag
     {
         /// <summary>
