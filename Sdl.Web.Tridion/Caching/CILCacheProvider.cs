@@ -1,17 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using DD4T.ContentModel.Contracts.Caching;
-using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common.Logging;
-using Sdl.Web.Tridion.Mapping;
-using DD4T.Utils.Caching;
-using Sdl.Web.Delivery.Caching;
-using Newtonsoft.Json;
-using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Tridion.Caching
 {    

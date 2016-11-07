@@ -1,10 +1,6 @@
-﻿using DD4T.ContentModel.Contracts.Caching;
+﻿using System.Collections.Generic;
+using DD4T.ContentModel.Contracts.Caching;
 using Sdl.Web.Delivery.Caching;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sdl.Web.Tridion.Caching
 {
