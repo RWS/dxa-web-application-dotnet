@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Tridion.Caching;
 
 namespace Sdl.Web.Tridion.Tests
 {

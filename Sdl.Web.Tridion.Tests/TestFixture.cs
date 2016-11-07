@@ -7,6 +7,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.Navigation;
+using Sdl.Web.Tridion.Caching;
 
 namespace Sdl.Web.Tridion.Tests
 {
