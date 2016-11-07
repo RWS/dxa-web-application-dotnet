@@ -5,6 +5,7 @@ using System.Xml;
 namespace Sdl.Web.Common.Models
 {
     [SemanticEntity(Vocab = SchemaOrgVocabulary, EntityName = "MediaObject", Prefix = "s", Public = true)]
+    [Serializable]
     public abstract class MediaItem : EntityModel
     {
         protected static readonly IDictionary<string, string> FontAwesomeMimeTypeToIconClassMapping = new Dictionary<string, string>

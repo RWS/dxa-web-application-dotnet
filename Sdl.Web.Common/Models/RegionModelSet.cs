@@ -1,18 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace Sdl.Web.Common.Models
 {
     /// <summary>
     /// Represents a set of Region Models which can be indexed by name.
     /// </summary>
+    [Serializable]
     public class RegionModelSet : HashSet<RegionModel>
     {
         #region Constructors
         /// <summary>
         /// Initializes a new <see cref="RegionModelSet"/> instance for an empty set.
         /// </summary>
-        public RegionModelSet()
+        public RegionModelSet()           
         {
         }
 
@@ -24,6 +27,11 @@ namespace Sdl.Web.Common.Models
             : base(regionModels)
         {
         }
+
+        protected RegionModelSet(SerializationInfo info, StreamingContext context)
+        {
+        }
+
         #endregion
 
         /// <summary>

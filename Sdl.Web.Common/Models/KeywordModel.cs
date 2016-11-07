@@ -1,4 +1,5 @@
 ﻿using Sdl.Web.Common.Configuration;
+using System;
 
 namespace Sdl.Web.Common.Models
 {
@@ -10,6 +11,7 @@ namespace Sdl.Web.Common.Models
     /// You can also create a subclass with additional properties in case your Keyword has custom metadata which you want to use in your View.
     /// Regular semantic mapping can be used to map the Keyword's metadata fields to properties of your subclass.
     /// </remarks>
+    [Serializable]
     public class KeywordModel : ViewModel
     {
         /// <summary>

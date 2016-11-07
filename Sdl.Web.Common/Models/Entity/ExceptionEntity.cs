@@ -7,6 +7,7 @@ using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
 {
+    [Serializable]
     public class ExceptionEntity : EntityModel
     {
         public string[] ErrorMessages { get; private set;}

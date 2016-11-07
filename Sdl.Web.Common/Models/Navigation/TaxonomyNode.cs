@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using Sdl.Web.Common.Configuration;
+using System;
 
 namespace Sdl.Web.Common.Models.Navigation
 {
     /// <summary>
     /// Represents a special kind of <see cref="SitemapItem"/> which is used for Taxonomy Nodes.
     /// </summary>
+    [Serializable]
     public class TaxonomyNode : SitemapItem
     {
         public string Key { get; set; }

@@ -1,4 +1,5 @@
 ﻿using Sdl.Web.Common.Configuration;
+using System;
 
 namespace Sdl.Web.Common.Models
 {
@@ -8,6 +9,7 @@ namespace Sdl.Web.Common.Models
     /// <remarks>
     /// A Controller's EnrichModel implementation can return this pseudo View Model in order to trigger an HTTP Redirect.
     /// </remarks>
+    [Serializable]
     public class RedirectModel : ViewModel
     {
         public string RedirectUrl { get; private set; }

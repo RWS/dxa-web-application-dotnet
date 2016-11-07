@@ -10,6 +10,7 @@ using DD4T.Providers.SDLWeb8.CIL;
 using DD4T.Utils;
 using DD4T.Utils.Caching;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Tridion.Caching;
 
 namespace Sdl.Web.Tridion.Mapping
 {
@@ -26,10 +27,15 @@ namespace Sdl.Web.Tridion.Mapping
         private static readonly ILogger _logger = new DD4TLoggerAdapter();
         private static readonly IDD4TConfiguration _config = new DD4TConfiguration();
 
-        internal static ICacheAgent CreateCacheAgent()
+        internal static ICacheAgent CreateDefaultCacheAgent()
         {
             return new DefaultCacheAgent(_config, _logger);
         }
+
+        internal static ICacheAgent CreateCacheAgent()
+        {
+            return ((ICacheAgentProvider)SiteConfiguration.CacheProvider).CacheAgent;
+        }    
 
         internal static IPageFactory GetPageFactory(Localization localization)
         {
@@ -112,6 +118,5 @@ namespace Sdl.Web.Tridion.Mapping
                 return binaryFactory;
             }
         }
-
     }
 }

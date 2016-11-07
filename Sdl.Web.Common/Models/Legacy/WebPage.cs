@@ -9,6 +9,7 @@ namespace Sdl.Web.Common.Models
     /// Legacy Model for the data that is used to render a web page.
     /// </summary>
     [Obsolete("Deprecated in DXA 1.1. Use class PageModel instead.")]
+    [Serializable]
     public abstract class WebPage : PageBase
     {
         private readonly Dictionary<string, IPage> _includes = new Dictionary<string, IPage>(); 

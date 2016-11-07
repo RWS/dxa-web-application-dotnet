@@ -6,6 +6,8 @@ packages/
 .vs/
 TestResults/
 CoverageReports/
+Site/Areas/Core/
+Site/Areas/AudienceManager/
 *.user
 *.suo
 *.vspx
