@@ -2,26 +2,26 @@
 using System.Collections.Generic;
 using DD4T.ContentModel.Contracts.Caching;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Tridion.Mapping;
 
 namespace Sdl.Web.Tridion.Caching
-{
+{    
     /// <summary>
-    /// Default Cache Provider implementation based on the DD4T Cache Agent interface.
+    /// Default Cache Provider implementation making use of the CIL distributed caching.
     /// </summary>
     public class DefaultCacheProvider : ICacheProvider, ICacheAgentProvider
     {
         private readonly ICacheProvider _cacheProvider;
-        private readonly ICacheAgent _cacheAgent = DD4TFactoryCache.CreateDefaultCacheAgent();
+        private readonly ICacheAgent _cacheAgent;
 
         public DefaultCacheProvider()
         {
+            _cacheAgent = new CILCacheAgent();
             _cacheProvider = new ThreadSafeCacheProviderAdaptor(_cacheAgent);
         }
 
         public ICacheAgent CacheAgent
         {
-            get
+            get 
             {
                 return _cacheAgent;
             }
@@ -39,7 +39,7 @@ namespace Sdl.Web.Tridion.Caching
 
         public T GetOrAdd<T>(string key, string region, Func<T> addFunction, IEnumerable<string> dependencies = null)
         {
-            return _cacheProvider.GetOrAdd<T>(key, region, addFunction, dependencies);                
-        }
+            return _cacheProvider.GetOrAdd<T>(key, region, addFunction, dependencies);
+        }     
     }
 }

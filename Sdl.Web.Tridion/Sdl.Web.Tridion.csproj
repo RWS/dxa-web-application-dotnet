@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlWebDeliveryPackageVersion>8.3.0</SdlWebDeliveryPackageVersion>
+    <SdlWebDeliveryPackageVersion>8.5.0-beta-201611071506</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>8.3.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>8.3.0</SdlWebContextImagePackageVersion>
   </PropertyGroup>
@@ -72,9 +72,9 @@
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Sdl.Web.Delivery.Caching, Version=8.3.0.1002, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Sdl.Web.Delivery.Caching">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Sdl.Web.Delivery.8.3.0\lib\net45\Sdl.Web.Delivery.Caching.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.Caching.dll</HintPath>
     </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Drawing" />
@@ -121,13 +121,13 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Tridion.ContentDelivery">
-      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net45\Tridion.ContentDelivery.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Tridion.ContentDelivery.dll</HintPath>
     </Reference>
     <Reference Include="Tridion.ContentDelivery.AmbientData">
-      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net45\Tridion.ContentDelivery.AmbientData.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Tridion.ContentDelivery.AmbientData.dll</HintPath>
     </Reference>
     <Reference Include="Tridion.ContentDelivery.UGC">
-      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net45\Tridion.ContentDelivery.UGC.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Tridion.ContentDelivery.UGC.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Context.Api">
       <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.Api.dll</HintPath>
@@ -139,7 +139,7 @@
       <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
     <Compile Include="Caching\CILCacheAgent.cs" />
-    <Compile Include="Caching\CILCacheProvider.cs" />
+    <Compile Include="Caching\DefaultCacheProvider.cs" />
     <Compile Include="Caching\ICacheAgentProvider.cs" />
     <Compile Include="Caching\ThreadSafeCacheProviderAdaptor.cs" />
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
@@ -153,7 +153,7 @@
     <Compile Include="ContentManager\InvalidTcmUriException.cs" />
     <Compile Include="ContentManager\ItemTypes.cs" />
     <Compile Include="Context\AdfContextClaimsProvider.cs" />
-    <Compile Include="Caching\DefaultCacheProvider.cs" />
+    <Compile Include="Caching\DD4TCacheProvider.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Linking\DefaultLinkResolver.cs" />
     <Compile Include="LocalizationResolver.cs" />
