@@ -5,6 +5,7 @@ namespace Sdl.Web.Common
     /// <summary>
     /// Exception thrown by DXA Content Providers if an item is not found.
     /// </summary>
+    [Serializable]
     public class DxaUnknownLocalizationException : DxaException
     {
         /// <summary>
