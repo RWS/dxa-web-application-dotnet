@@ -8,6 +8,8 @@ TestResults/
 CoverageReports/
 Site/Areas/Core/
 Site/Areas/AudienceManager/
+Site/Areas/GoogleAnalytics/
+Site/Areas/Search/
 *.user
 *.suo
 *.vspx
