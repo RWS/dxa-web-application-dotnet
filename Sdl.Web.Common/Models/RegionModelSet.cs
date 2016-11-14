@@ -30,7 +30,12 @@ namespace Sdl.Web.Common.Models
 
         protected RegionModelSet(SerializationInfo info, StreamingContext context)
         {
-        }
+            var list = (List<RegionModel>)info.GetValue("hashset", typeof(List<RegionModel>));
+            foreach (RegionModel regionModel in list)
+            {
+                Add(regionModel);
+            }
+        }       
 
         #endregion
 
@@ -75,6 +80,11 @@ namespace Sdl.Web.Common.Models
         public bool ContainsKey(string name)
         {
             return this.Any(r => r.Name == name);
+        }
+
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("hashset", this.ToList<RegionModel>());
         }
     }
 }
