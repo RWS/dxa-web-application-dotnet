@@ -9,6 +9,7 @@ namespace Sdl.Web.Tridion.Caching
     /// </summary>
     public class CILCacheAgent : ICacheAgent
     {
+        private readonly static string DXA_REGION = "DXA";
         private readonly ICacheProvider<object> _cache;
 
         internal CILCacheAgent()
@@ -18,32 +19,32 @@ namespace Sdl.Web.Tridion.Caching
 
         public object Load(string key)
         {
-            return _cache.Get(key);
+            return _cache.Get(key, DXA_REGION);
         }
 
         public void Remove(string key)
         {
-            _cache.Remove(key);
+            _cache.Remove(key, DXA_REGION);
         }
 
         public void Store(string key, string region, object item, List<string> dependOnTcmUris)
-        {           
-            _cache.Set(key, item, region);
+        {
+            _cache.Set(key, item, DXA_REGION, _cache.GetCacheItemPolicy(region));
         }
 
         public void Store(string key, string region, object item)
         {
-            _cache.Set(key, item, region);
+            _cache.Set(key, item, DXA_REGION, _cache.GetCacheItemPolicy(region));
         }
 
         public void Store(string key, object item, List<string> dependOnTcmUris)
         {
-            _cache.Set(key, item);
+            _cache.Set(key, item, DXA_REGION, null);
         }
 
         public void Store(string key, object item)
         {
-            _cache.Set(key, item);
+            _cache.Set(key, item, DXA_REGION, null);
         }
     }
 }

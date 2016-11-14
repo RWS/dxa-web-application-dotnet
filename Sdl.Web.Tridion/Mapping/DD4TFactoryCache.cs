@@ -46,7 +46,7 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     IPublicationResolver publicationResolver = new PublicationResolver(localization);
                     IProvidersCommonServices providersCommonServices = new ProvidersCommonServices(publicationResolver, _logger, _config);
-                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateCacheAgent());
+                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateDefaultCacheAgent());
                     pageFactory = new PageFactory(
                         new TridionPageProvider(providersCommonServices), 
                         GetComponentPresentationFactory(localization), 
@@ -68,7 +68,7 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     IPublicationResolver publicationResolver = new PublicationResolver(localization);
                     IProvidersCommonServices providersCommonServices = new ProvidersCommonServices(publicationResolver, _logger, _config);
-                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateCacheAgent());
+                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateDefaultCacheAgent());
                     componentPresentationFactory = new ComponentPresentationFactory(
                         new TridionComponentPresentationProvider(providersCommonServices), 
                         factoryCommonServices);
@@ -88,7 +88,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (!_componentFactories.TryGetValue(localization.LocalizationId, out componentFactory))
                 {
                     IPublicationResolver publicationResolver = new PublicationResolver(localization);
-                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateCacheAgent());
+                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateDefaultCacheAgent());
                     componentFactory = new ComponentFactory(
                         GetComponentPresentationFactory(localization),
                         factoryCommonServices );
@@ -108,7 +108,7 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     IPublicationResolver publicationResolver = new PublicationResolver(localization);
                     IProvidersCommonServices providersCommonServices = new ProvidersCommonServices(publicationResolver, _logger, _config);
-                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateCacheAgent());
+                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateDefaultCacheAgent());
                     binaryFactory = new BinaryFactory(
                         new TridionBinaryProvider(providersCommonServices),
                         factoryCommonServices);
