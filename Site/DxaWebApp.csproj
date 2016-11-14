@@ -25,7 +25,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <!-- NOTE: We let NuGet update the DXA Framework Package Version in ciBuild.proj -->
-    <SdlWebDeliveryPackageVersion>8.5.0-beta-201611111743</SdlWebDeliveryPackageVersion>
+    <SdlWebDeliveryPackageVersion>8.5.0-beta-201611141416</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>8.3.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>8.3.0</SdlWebContextImagePackageVersion>
   </PropertyGroup>
