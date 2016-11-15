@@ -11,7 +11,7 @@ namespace Sdl.Web.Tridion.Caching
     {
         private const string CilCacheRegionName = "DXA";
 
-        private readonly ICacheProvider<object> _cache = CacheFactory<object>.CreateFromConfiguration("CIL.Caching");
+        private readonly ICacheProvider<object> _cache = CacheFactory<object>.CreateFromConfiguration();
 
         public object Load(string key)
         {
