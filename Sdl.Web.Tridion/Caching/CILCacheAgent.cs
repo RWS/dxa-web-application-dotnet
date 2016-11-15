@@ -7,44 +7,40 @@ namespace Sdl.Web.Tridion.Caching
     /// <summary>
     /// DD4T Cache Agent implementation to use CIL caching
     /// </summary>
-    public class CILCacheAgent : ICacheAgent
+    public class CilCacheAgent : ICacheAgent
     {
-        private readonly static string DXA_REGION = "DXA";
-        private readonly ICacheProvider<object> _cache;
+        private const string CilCacheRegionName = "DXA";
 
-        internal CILCacheAgent()
-        {
-            _cache = CacheFactory<object>.CreateFromConfiguration("CIL.Caching");
-        }
+        private readonly ICacheProvider<object> _cache = CacheFactory<object>.CreateFromConfiguration("CIL.Caching");
 
         public object Load(string key)
         {
-            return _cache.Get(key, DXA_REGION);
+            return _cache.Get(key, CilCacheRegionName);
         }
 
         public void Remove(string key)
         {
-            _cache.Remove(key, DXA_REGION);
+            _cache.Remove(key, CilCacheRegionName);
         }
 
         public void Store(string key, string region, object item, List<string> dependOnTcmUris)
         {
-            _cache.Set(key, item, DXA_REGION, _cache.GetCacheItemPolicy(region));
+            _cache.Set(key, item, CilCacheRegionName, _cache.GetCacheItemPolicy(region));
         }
 
         public void Store(string key, string region, object item)
         {
-            _cache.Set(key, item, DXA_REGION, _cache.GetCacheItemPolicy(region));
+            _cache.Set(key, item, CilCacheRegionName, _cache.GetCacheItemPolicy(region));
         }
 
         public void Store(string key, object item, List<string> dependOnTcmUris)
         {
-            _cache.Set(key, item, DXA_REGION, null);
+            _cache.Set(key, item, CilCacheRegionName, null);
         }
 
         public void Store(string key, object item)
         {
-            _cache.Set(key, item, DXA_REGION, null);
+            _cache.Set(key, item, CilCacheRegionName, null);
         }
     }
 }

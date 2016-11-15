@@ -15,7 +15,7 @@ namespace Sdl.Web.Tridion.Caching
 
         public DefaultCacheProvider()
         {
-            _cacheAgent = new CILCacheAgent();
+            _cacheAgent = new CilCacheAgent();
             _cacheProvider = new ThreadSafeCacheProviderAdaptor(_cacheAgent);
         }
 
