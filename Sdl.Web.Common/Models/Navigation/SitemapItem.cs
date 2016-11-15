@@ -9,6 +9,7 @@ namespace Sdl.Web.Common.Models
     /// <summary>
     /// Represents a node in the Navigation Model (site map).
     /// </summary>
+    [Serializable]
     public class SitemapItem : EntityModel
     {
 

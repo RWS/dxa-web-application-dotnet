@@ -8,6 +8,7 @@ namespace Sdl.Web.Common.Models
     /// <summary>
     /// Represents the View Model for a Page Region.
     /// </summary>
+    [Serializable]
     [Obsolete("Deprecated in DXA 1.1. Use class RegionModel instead.")]
 #pragma warning disable 618
     public abstract class Region : ViewModel, IRegion

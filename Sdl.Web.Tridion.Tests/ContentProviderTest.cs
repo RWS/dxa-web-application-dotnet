@@ -104,16 +104,20 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(staticContentItem, "staticContentItem");
         }
 
-        [TestMethod]       
-        public void GetEntityModel_XpmMarkup_Success()
+        [TestMethod]
+        public void GetEntityModel_XpmMetadataOnStaging_Success()
         {
-            string testEntityId = TestFixture.ArticleDcpEntityId;
+            const string testEntityId = TestFixture.ArticleDcpEntityId;
 
             EntityModel entityModel = _testContentProvider.GetEntityModel(testEntityId, TestFixture.ParentLocalization);
 
             Assert.IsNotNull(entityModel, "entityModel");
             Assert.AreEqual(testEntityId, entityModel.Id, "entityModel.Id");
             Assert.IsNotNull(entityModel.XpmMetadata, "entityModel.XpmMetadata");
+            Assert.IsNotNull(entityModel.XpmPropertyMetadata, "entityModel.XpmPropertyMetadata");
+            OutputJson(entityModel.XpmMetadata);
+            OutputJson(entityModel.XpmPropertyMetadata);
+
             object isQueryBased;
             Assert.IsTrue(entityModel.XpmMetadata.TryGetValue("IsQueryBased", out isQueryBased), "XpmMetadata contains 'IsQueryBased'");
             Assert.AreEqual(true, isQueryBased, "IsQueryBased value");
@@ -125,6 +129,21 @@ namespace Sdl.Web.Tridion.Tests
             string xpmMarkup = entityModel.GetXpmMarkup(TestFixture.ParentLocalization);
             StringAssert.Contains(xpmMarkup, "\"IsQueryBased\":true", "XPM markup");
             StringAssert.Contains(xpmMarkup, "\"IsRepositoryPublished\":true", "XPM markup");
+        }
+
+        [TestMethod]
+        public void GetEntityModel_NoXpmMetadataOnLive_Success() // See TSI-1942
+        {
+            const string testEntityId = TestFixture.ArticleDcpEntityId;
+            Localization testLocalization = TestFixture.ChildLocalization;
+
+            EntityModel entityModel = _testContentProvider.GetEntityModel(testEntityId, testLocalization);
+
+            Assert.IsNotNull(entityModel, "entityModel");
+            Assert.AreEqual(testEntityId, entityModel.Id, "entityModel.Id");
+            Assert.IsNull(entityModel.XpmMetadata, "entityModel.XpmMetadata");
+            Assert.IsNull(entityModel.XpmPropertyMetadata, "entityModel.XpmPropertyMetadata");
+            Assert.AreEqual(string.Empty, entityModel.GetXpmMarkup(testLocalization), "entityModel.GetXpmMarkup(testLocalization)");
         }
 
         [TestMethod]
@@ -239,19 +258,36 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_XpmMarkup_Success()
+        public void GetPageModel_XpmMetadataOnStaging_Success()
         {
             string testPageUrlPath = TestFixture.ArticlePageUrlPath;
+            Localization testLocalization = TestFixture.ParentLocalization;
 
-            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: true);
 
             Assert.IsNotNull(pageModel, "pageModel");
+            Assert.IsNotNull(pageModel.XpmMetadata, "pageModel.XpmMetadata");
             Assert.AreEqual(testPageUrlPath, pageModel.Url, "pageModel.Url");
 
-            Article testArticle = pageModel.Regions["Main"].Entities[0] as Article;
+            RegionModel headerRegion = pageModel.Regions["Header"];
+            Assert.IsNotNull(headerRegion, "headerRegion");
+            Assert.IsNotNull(headerRegion.XpmMetadata, "headerRegion.XpmMetadata");
+            OutputJson(headerRegion.XpmMetadata);
+            Assert.AreEqual("Header", headerRegion.XpmMetadata[RegionModel.IncludedFromPageTitleXpmMetadataKey], "headerRegion.XpmMetadata[RegionModel.IncludedFromPageTitleXpmMetadataKey]");
+            Assert.AreEqual("header", headerRegion.XpmMetadata[RegionModel.IncludedFromPageFileNameXpmMetadataKey], "headerRegion.XpmMetadata[RegionModel.IncludedFromPageFileNameXpmMetadataKey]");
+
+            RegionModel mainRegion = pageModel.Regions["Main"];
+            Assert.IsNotNull(mainRegion, "mainRegion");
+            Assert.IsNull(mainRegion.XpmMetadata, "mainRegion.XpmMetadata");
+
+            Article testArticle = mainRegion.Entities[0] as Article;
             Assert.IsNotNull(testArticle, "Test Article not found on Page.");
 
-            Assert.IsNotNull(testArticle.XpmMetadata, "entityModel.XpmMetadata");
+            Assert.IsNotNull(testArticle.XpmMetadata, "testArticle.XpmMetadata");
+            Assert.IsNotNull(testArticle.XpmPropertyMetadata, "testArticle.XpmPropertyMetadata");
+            OutputJson(testArticle.XpmMetadata);
+            OutputJson(testArticle.XpmPropertyMetadata);
+
             object isQueryBased;
             Assert.IsFalse(testArticle.XpmMetadata.TryGetValue("IsQueryBased", out isQueryBased), "XpmMetadata contains 'IsQueryBased'");
             object isRepositoryPublished;
@@ -259,10 +295,38 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(false, isRepositoryPublished, "IsRepositoryPublished value");
 
             // NOTE: boolean value must not have quotes in XPM markup (TSI-1251)
-            string xpmMarkup = testArticle.GetXpmMarkup(TestFixture.ParentLocalization);
+            string xpmMarkup = testArticle.GetXpmMarkup(testLocalization);
             StringAssert.DoesNotMatch(xpmMarkup, new Regex("IsQueryBased"), "XPM markup");
             StringAssert.Contains(xpmMarkup, "\"IsRepositoryPublished\":false", "XPM markup");
         }
+
+        [TestMethod]
+        public void GetPageModel_NoXpmMetadataOnLive_Success() // See TSI-1942
+        {
+            string testPageUrlPath = TestFixture.ArticleChildPageUrlPath;
+            Localization testLocalization = TestFixture.ChildLocalization;
+
+            PageModel pageModel = _testContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: true);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Assert.IsNull(pageModel.XpmMetadata, "pageModel.XpmMetadata");
+            Assert.AreEqual(string.Empty, pageModel.GetXpmMarkup(testLocalization), "pageModel.GetXpmMarkup(testLocalization)");
+
+            RegionModel headerRegion = pageModel.Regions["Header"];
+            Assert.IsNotNull(headerRegion, "headerRegion");
+            Assert.IsNull(headerRegion.XpmMetadata, "headerRegion.XpmMetadata");
+
+            RegionModel mainRegion = pageModel.Regions["Main"];
+            Assert.IsNotNull(mainRegion, "mainRegion");
+            Assert.IsNull(mainRegion.XpmMetadata, "mainRegion.XpmMetadata");
+
+            Article testArticle = mainRegion.Entities[0] as Article;
+            Assert.IsNotNull(testArticle, "Test Article not found on Page.");
+            Assert.IsNull(testArticle.XpmMetadata, "testArticle.XpmMetadata");
+            Assert.IsNull(testArticle.XpmPropertyMetadata, "testArticle.XpmPropertyMetadata");
+            Assert.AreEqual(string.Empty, testArticle.GetXpmMarkup(testLocalization), "testArticle.GetXpmMarkup(testLocalization)");
+        }
+
 
         [TestMethod]
         public void GetPageModel_RichTextImageWithHtmlClass_Success() // See TSI-1614
@@ -332,6 +396,47 @@ namespace Sdl.Web.Tridion.Tests
             // TODO TSI-1946: there are more fields, but only the ones which have a value are represented in XpmPropertyMetadata.
             Assert.AreEqual(2, testArticle.XpmPropertyMetadata.Count, "testArticle.XpmPropertyMetadata.Count");
             Assert.AreEqual(0, testEntity.XpmPropertyMetadata.Count, "testEntity.XpmPropertyMetadata.Count");
+        }
+
+        [TestMethod]
+        public void GetPageModel_KeywordMapping_Success() // See TSI-811
+        {
+            Localization testLocalization = TestFixture.ParentLocalization;
+
+            Tsi811PageModel pageModel = _testContentProvider.GetPageModel(TestFixture.Tsi811PageUrlPath, testLocalization, addIncludes: false) as Tsi811PageModel;
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Tsi811TestEntity testEntity = pageModel.Regions["Main"].Entities[0] as Tsi811TestEntity;
+            Assert.IsNotNull(testEntity, "testEntity");
+            Assert.IsNotNull(testEntity.Keyword1, "testEntity.Keyword1");
+            Assert.IsNotNull(testEntity.Keyword2, "testEntity.Keyword2");
+            Assert.IsTrue(testEntity.BooleanProperty, "testEntity.BooleanProperty");
+
+            Assert.AreEqual(2, testEntity.Keyword1.Count, "testEntity.Keyword1.Count");
+            AssertValidKeywordModel(testEntity.Keyword1[0], "Test Keyword 1", "TSI-811 Test Keyword 1", "Key 1", "testEntity.Keyword1[0]");
+            AssertValidKeywordModel(testEntity.Keyword1[1], "Test Keyword 2", "TSI-811 Test Keyword 2", "Key 2", "testEntity.Keyword1[1]");
+            AssertValidKeywordModel(testEntity.Keyword2, "News Article", string.Empty, "core.newsArticle", "testEntity.Keyword2");
+
+            Tsi811TestKeyword testKeyword1 = testEntity.Keyword1[0];
+            Assert.AreEqual("This is Test Keyword 1's textField", testKeyword1.TextField, "testKeyword1.TextField");
+            Assert.AreEqual(666, testKeyword1.NumberProperty, "testKeyword1.NumberProperty");
+
+            Tsi811TestKeyword pageKeyword = pageModel.PageKeyword;
+            AssertValidKeywordModel(pageKeyword, "Test Keyword 2", "TSI-811 Test Keyword 2", "Key 2", "pageKeyword");
+            Assert.AreEqual("This is textField of Test Keyword 2", pageKeyword.TextField, "pageKeyword.TextField");
+            Assert.AreEqual(999, pageKeyword.NumberProperty, "pageKeyword.NumberProperty");
+        }
+
+        private static void AssertValidKeywordModel(KeywordModel keywordModel, string expectedTitle, string expectedDescription, string expectedKey, string subjectName)
+        {
+            Assert.IsNotNull(keywordModel, subjectName);
+            Assert.AreEqual(expectedTitle, keywordModel.Title, subjectName + ".Title");
+            Assert.AreEqual(expectedDescription, keywordModel.Description, subjectName + ".Description");
+            Assert.AreEqual(expectedKey, keywordModel.Key, subjectName + ".Key");
+            StringAssert.Matches(keywordModel.Id, new Regex(@"\d+"), subjectName + ".Id");
+            StringAssert.Matches(keywordModel.TaxonomyId, new Regex(@"\d+"), subjectName + ".TaxonomyId");
         }
 
         [TestMethod]

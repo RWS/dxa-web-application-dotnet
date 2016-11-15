@@ -47,18 +47,6 @@
     <DocumentationFile>bin\Release\Sdl.Web.Mvc.xml</DocumentationFile>
     <NoWarn>1591,1574,1570,1572,1573</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_7.1|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Release_7.1\</OutputPath>
-    <DefineConstants>TRACE;TRIDION_71</DefineConstants>
-    <DocumentationFile>bin\Release\Sdl.Web.Mvc.xml</DocumentationFile>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <NoWarn>1591,1574,1570,1572,1573</NoWarn>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack">
       <HintPath>..\packages\HtmlAgilityPack.1.4.6\lib\Net45\HtmlAgilityPack.dll</HintPath>

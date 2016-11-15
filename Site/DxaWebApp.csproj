@@ -25,7 +25,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <!-- NOTE: We let NuGet update the DXA Framework Package Version in ciBuild.proj -->
-    <SdlWebDeliveryPackageVersion>8.3.0</SdlWebDeliveryPackageVersion>
+    <SdlWebDeliveryPackageVersion>8.5.0-beta-201611141640</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>8.3.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>8.3.0</SdlWebContextImagePackageVersion>
   </PropertyGroup>
@@ -102,7 +102,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.Common">
-      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.6.0\lib\net452\Sdl.Web.Common.dll</HintPath>
+      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.7.0-alpha-201611081551\lib\net452\Sdl.Web.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.Context.Api">
@@ -115,7 +115,7 @@
       <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Mvc">
-      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.6.0\lib\net452\Sdl.Web.Mvc.dll</HintPath>
+      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.7.0-alpha-201611081551\lib\net452\Sdl.Web.Mvc.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -149,14 +149,14 @@
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Tridion.ContentDelivery">
-      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net45\Tridion.ContentDelivery.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Tridion.ContentDelivery.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Tridion.ContentDelivery.AmbientData">
-      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net45\Tridion.ContentDelivery.AmbientData.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Tridion.ContentDelivery.AmbientData.dll</HintPath>
     </Reference>
     <Reference Include="Tridion.ContentDelivery.UGC">
-      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net45\Tridion.ContentDelivery.UGC.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Tridion.ContentDelivery.UGC.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Mvc5">
       <HintPath>..\packages\Unity.Mvc5.1.1\lib\net45\Unity.Mvc5.dll</HintPath>
@@ -241,5 +241,5 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.1.6.0\build\net452\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.1.6.0\build\net452\Sdl.Dxa.Framework.Web8.targets')" />
+  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.1.7.0-alpha-201611081551\build\net452\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.1.7.0-alpha-201611081551\build\net452\Sdl.Dxa.Framework.Web8.targets')" />
 </Project>

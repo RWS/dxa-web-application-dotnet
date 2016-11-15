@@ -1,5 +1,7 @@
-﻿namespace Sdl.Web.Common.Models.Navigation
+﻿using System;
+namespace Sdl.Web.Common.Models.Navigation
 {
+    [Serializable]
     public class NavigationFilter
     {
         public bool IncludeAncestors { get; set; }

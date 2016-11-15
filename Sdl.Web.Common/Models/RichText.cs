@@ -15,6 +15,7 @@ namespace Sdl.Web.Common.Models
     /// Preferably, the View Model property is of type <see cref="RichText"/> and the View uses @Html.DxaRichText to render the HTML.
     /// In the latter case, if the <see cref="RichText"/> contains any Entity Models, these will be rendered using an appropriate View.
     /// </remarks>
+    [Serializable]
     public class RichText
     {
         /// <summary>
@@ -123,6 +124,7 @@ namespace Sdl.Web.Common.Models
     /// <summary>
     /// Represents a rich text HTML fragment.
     /// </summary>
+    [Serializable]
     public class RichTextFragment : IRichTextFragment
     {
         /// <summary>

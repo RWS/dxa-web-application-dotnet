@@ -6,6 +6,12 @@ packages/
 .vs/
 TestResults/
 CoverageReports/
+Site/Areas/Core/
+Site/Areas/AudienceManager/
+Site/Areas/GoogleAnalytics/
+Site/Areas/Search/
+Site/Areas/SmartTarget/
+Site/Areas/MediaManager/
 *.user
 *.suo
 *.vspx

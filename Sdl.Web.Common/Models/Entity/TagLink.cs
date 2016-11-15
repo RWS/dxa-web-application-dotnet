@@ -1,5 +1,7 @@
-﻿namespace Sdl.Web.Common.Models
+﻿using System;
+namespace Sdl.Web.Common.Models
 {
+    [Serializable]
     public class TagLink : EntityModel
     {
         [SemanticProperty(PropertyName = "internalLink")]

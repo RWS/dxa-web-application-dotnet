@@ -8,6 +8,7 @@ namespace Sdl.Web.Common.Models
     /// <summary>
     /// Abstract base class for all (strongly typed) View Models
     /// </summary>
+    [Serializable]
     public abstract class ViewModel
     {
         /// <summary>

@@ -24,7 +24,6 @@
 
         <!--Tools-->
         <MsTestExe Condition="'$(MsTestExe)'=='' And Exists('$(MSBuildProgramFiles32)\Microsoft Visual Studio 14.0\Common7\IDE\MSTest.exe')">$(MSBuildProgramFiles32)\Microsoft Visual Studio 14.0\Common7\IDE\MSTest.exe</MsTestExe>
-
         <MsTestExe Condition="'$(MsTestExe)'=='' And Exists('$(MSBuildProgramFiles32)\Microsoft Visual Studio 12.0\Common7\IDE\MSTest.exe')">$(MSBuildProgramFiles32)\Microsoft Visual Studio 12.0\Common7\IDE\MSTest.exe</MsTestExe>
   </PropertyGroup>
 
@@ -34,7 +33,7 @@
         <Message Text="Start build..." Importance="high" />
         
         <CallTarget Targets="PrepareBuild"/>
-        <CallTarget Targets="RunBuild"/>       
+        <CallTarget Targets="RunBuild"/>
         <CallTarget Targets="Test"/>
         <CallTarget Targets="CreatePackages"/>
         <CallTarget Targets="PublishPackages" Condition="'$(NuGetRepositoryUrl)' != ''"/>
@@ -73,17 +72,9 @@
     <Target Name="RunBuild">
         <Message Text="Running build commands..." Importance="high" />
 
-        <!-- Build the Sdl.Web.Tridion project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1) -->
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
-        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU" StopOnFirstFailure="true" />
-
-        <!-- Build the Site project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1); there is only difference in Sdl.Web.Tridion artifacts (see above). -->
         <MSBuild Projects="$(ProjectDirectory)\Site\Sdl.Web.Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
-        <MSBuild Projects="$(ProjectDirectory)\Site\Sdl.Web.Site.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU" StopOnFirstFailure="true" />
-
-        <!-- Build the Sdl.Web.Tridion.Tests project for SDL Web 8 (Release/Debug) and 2013 SP1 (Release_7.1) -->
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion.Tests\Sdl.Web.Tridion.Tests.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
-        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=Release_7.1;Platform=AnyCPU" StopOnFirstFailure="true" />
     </Target>
 
     <!-- =============================================================================================================================================  -->
@@ -98,14 +89,8 @@
             Namespaces="&lt;Namespace Prefix='msb' Uri='http://schemas.microsoft.com/developer/msbuild/2003' /&gt;"
             Query="//msb:DxaFrameworkLibs/@Include"
             Value="..\packages\Sdl.Dxa.Framework.Web8.$(PackageVersion)\lib\net452\*.*" />
-        <XmlPoke
-            XmlInputPath="$(DxaFrameworkPackageDirectory)\Sdl.Dxa.Framework.2013SP1.targets"
-            Namespaces="&lt;Namespace Prefix='msb' Uri='http://schemas.microsoft.com/developer/msbuild/2003' /&gt;"
-            Query="//msb:DxaFrameworkLibs/@Include"
-            Value="..\packages\Sdl.Dxa.Framework.2013SP1.$(PackageVersion)\lib\net452\*.*" />
 
         <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.Web8.nuspec -Version $(PackageVersion)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
-        <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.2013SP1.nuspec -Version $(PackageVersion)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
     </Target>
 
     <!-- =============================================================================================================================================  -->
@@ -113,7 +98,6 @@
         <Message Text="Publishing NuGet packages to '$(NuGetRepositoryUrl)' ..." Importance="high" />
 
         <Exec Command="$(NuGet) push Sdl.Dxa.Framework.Web8.$(PackageVersion).nupkg -Source $(NuGetRepositoryUrl)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
-        <Exec Command="$(NuGet) push Sdl.Dxa.Framework.2013SP1.$(PackageVersion).nupkg -Source $(NuGetRepositoryUrl)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
     </Target>
     
     <!-- =============================================================================================================================================  -->

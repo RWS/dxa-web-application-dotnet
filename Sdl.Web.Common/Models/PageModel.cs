@@ -3,6 +3,7 @@ using System.ServiceModel.Syndication;
 using Newtonsoft.Json;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
+using System;
 
 namespace Sdl.Web.Common.Models
 {
@@ -11,6 +12,7 @@ namespace Sdl.Web.Common.Models
     /// </summary>
 #pragma warning disable 618
     // TODO DXA 2.0: Should inherit directly from ViewModel, but for now we need the legacy classes inbetween for compatibility.
+    [Serializable]
     public class PageModel : WebPage, ISyndicationFeedItemProvider
 #pragma warning restore 618
     {

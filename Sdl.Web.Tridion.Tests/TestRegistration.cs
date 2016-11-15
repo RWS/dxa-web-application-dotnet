@@ -24,6 +24,7 @@ namespace Sdl.Web.Tridion.Tests
 
             RegisterViewModel("Test:TSI1758Test", typeof(Tsi1758TestEntity));
             RegisterViewModel("Test:TSI1946Test", typeof(Tsi1946TestEntity));
+            RegisterViewModel("Test:TSI811Test", typeof(Tsi811TestEntity));
             RegisterViewModel("MediaManager:imagedist", typeof(MediaManagerDistribution));
 
             // Page Views
@@ -32,6 +33,7 @@ namespace Sdl.Web.Tridion.Tests
             RegisterViewModel("RedirectPage", typeof(PageModel));
 
             RegisterViewModel("Test:SimpleTestPage", typeof(PageModel));
+            RegisterViewModel("Test:TSI811TestPage", typeof(Tsi811PageModel));
 
             // Region Views
             RegisterViewModel("2-Column", typeof(RegionModel));

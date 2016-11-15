@@ -1,18 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace Sdl.Web.Common.Models
 {
     /// <summary>
     /// Represents a set of Region Models which can be indexed by name.
     /// </summary>
+    [Serializable]
     public class RegionModelSet : HashSet<RegionModel>
     {
         #region Constructors
         /// <summary>
         /// Initializes a new <see cref="RegionModelSet"/> instance for an empty set.
         /// </summary>
-        public RegionModelSet()
+        public RegionModelSet()           
         {
         }
 
@@ -24,6 +27,16 @@ namespace Sdl.Web.Common.Models
             : base(regionModels)
         {
         }
+
+        protected RegionModelSet(SerializationInfo info, StreamingContext context)
+        {
+            var list = (List<RegionModel>)info.GetValue("hashset", typeof(List<RegionModel>));
+            foreach (RegionModel regionModel in list)
+            {
+                Add(regionModel);
+            }
+        }       
+
         #endregion
 
         /// <summary>
@@ -67,6 +80,11 @@ namespace Sdl.Web.Common.Models
         public bool ContainsKey(string name)
         {
             return this.Any(r => r.Name == name);
+        }
+
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("hashset", this.ToList<RegionModel>());
         }
     }
 }

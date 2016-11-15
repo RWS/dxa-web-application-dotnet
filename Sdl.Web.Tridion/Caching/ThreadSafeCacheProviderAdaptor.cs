@@ -1,27 +1,29 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
+using System.Linq;
 using DD4T.ContentModel.Contracts.Caching;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Tridion.Mapping;
 
-namespace Sdl.Web.Tridion
+namespace Sdl.Web.Tridion.Caching
 {
     /// <summary>
-    /// Default Cache Provider implementation based on the DD4T Cache Agent interface.
+    /// ICacheProvider Adapator implementation to provide thread safe caching on top of the DD4T cache agent
     /// </summary>
-    public class DefaultCacheProvider : ICacheProvider
+    internal class ThreadSafeCacheProviderAdaptor : ICacheProvider
     {
         private const int WaitForAddingTimeout = 15000; // ms
+        private readonly ICacheAgent _cacheAgent = null;
+        private static readonly IDictionary<string, EventWaitHandle> _addingEvents = new ConcurrentDictionary<string, EventWaitHandle>();
 
-        private static readonly ICacheAgent _cacheAgent = DD4TFactoryCache.CreateCacheAgent();
-        private static readonly IDictionary<string, EventWaitHandle> _addingEvents = new ConcurrentDictionary<string, EventWaitHandle>(); 
+        public ThreadSafeCacheProviderAdaptor(ICacheAgent cacheAgent)
+        {
+            _cacheAgent = cacheAgent;
+        }
 
-        #region ICacheProvider members
         /// <summary>
         /// Stores a given key/value pair to a given cache Region.
         /// </summary>
@@ -31,7 +33,7 @@ namespace Sdl.Web.Tridion
         /// <param name="dependencies">An optional set of dependent item IDs. Can be used to invalidate the cached item.</param>
         /// <typeparam name="T">The type of the value to add.</typeparam>
         public void Store<T>(string key, string region, T value, IEnumerable<string> dependencies = null)
-        {
+        {            
             List<string> dependsOnTcmUris = (dependencies == null) ? null : dependencies.ToList();
             string cacheAgentKey = GetCacheAgentKey(key, region);
             lock (_cacheAgent)
@@ -145,7 +147,6 @@ namespace Sdl.Web.Tridion
 
             return result;
         }
-        #endregion
 
         private static string GetCacheAgentKey(string key, string region)
         {

@@ -104,7 +104,7 @@ namespace Sdl.Web.Tridion.Mapping
                         }
 
                         // Model Include Page as Region:
-                        RegionModel includePageRegion = GetRegionFromIncludePage(includePage);
+                        RegionModel includePageRegion = GetRegionFromIncludePage(includePage, localization);
                         RegionModel existingRegion;
                         if (regions.TryGetValue(includePageRegion.Name, out existingRegion))
                         {
@@ -151,10 +151,10 @@ namespace Sdl.Web.Tridion.Mapping
                 // NOTE: not using ModelBuilderPipeline here, but directly calling our own implementation.
                 BuildEntityModel(ref entityModel, cp.Component, modelType, localization);
 
-                entityModel.XpmMetadata = GetXpmMetadata(cp.Component);
-                entityModel.XpmMetadata.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
-                entityModel.XpmMetadata.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
-                entityModel.XpmMetadata.Add("IsRepositoryPublished", cp.IsDynamic);
+                if (localization.IsStaging)
+                {
+                    entityModel.XpmMetadata = GetXpmMetadata(cp);
+                }
                 entityModel.MvcData = mvcData;
 
                 // add html classes to model from metadata
@@ -359,7 +359,10 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             pageModel.MvcData = pageMvcData;
-            pageModel.XpmMetadata = GetXpmMetadata(page);
+            if (localization.IsStaging)
+            {
+                pageModel.XpmMetadata = GetXpmMetadata(page);
+            }
             pageModel.Title = page.Title;
 
             // add html classes to model from metadata
@@ -462,7 +465,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             EntityModel entityModel = model as EntityModel;
-            if (entityModel != null)
+            if (entityModel != null && mappingData.Localization.IsStaging)
             {
                 entityModel.XpmPropertyMetadata = xpmPropertyMetadata;
             }
@@ -635,7 +638,7 @@ namespace Sdl.Web.Tridion.Mapping
                     case FieldType.Keyword:
                         foreach (IKeyword value in field.Keywords)
                         {
-                            mappedValues.Add(MapKeyword(value, modelType));
+                            mappedValues.Add(MapKeyword(value, modelType, mapData.Localization));
                         }
                         break;
 
@@ -678,14 +681,14 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        protected virtual IDictionary<string, object> GetXpmMetadata(IComponent comp)
+        protected virtual IDictionary<string, object> GetXpmMetadata(IComponentPresentation cp)
         {
             IDictionary<string, object> result = new Dictionary<string, object>();
-            if (comp != null)
-            {
-                result.Add("ComponentID", comp.Id);
-                result.Add("ComponentModified", comp.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
-            }
+            result.Add("ComponentID", cp.Component.Id);
+            result.Add("ComponentModified", cp.Component.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
+            result.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
+            result.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
+            result.Add("IsRepositoryPublished", cp.IsDynamic);
             return result;
         }
 
@@ -702,24 +705,23 @@ namespace Sdl.Web.Tridion.Mapping
             return result;
         }
 
-        protected virtual object MapKeyword(IKeyword keyword, Type modelType)
+        protected virtual object MapKeyword(IKeyword keyword, Type modelType, Localization localization)
         {
-            // TODO TSI-811: Keyword mapping should also be generic rather than hard-coded like below
-            string displayText = String.IsNullOrEmpty(keyword.Description) ? keyword.Title : keyword.Description;
+            string displayText = string.IsNullOrEmpty(keyword.Description) ? keyword.Title : keyword.Description;
             if (modelType == typeof(Tag))
             {
                 return new Tag
                 {
                     DisplayText = displayText,
-                    Key = String.IsNullOrEmpty(keyword.Key) ? keyword.Id : keyword.Key,
+                    Key = string.IsNullOrEmpty(keyword.Key) ? keyword.Id : keyword.Key,
                     TagCategory = keyword.TaxonomyId
                 };
             } 
             
             if (modelType == typeof(bool))
             {
-                //For booleans we assume the keyword key or value can be converted to bool
-                return Boolean.Parse(String.IsNullOrEmpty(keyword.Key) ? keyword.Title : keyword.Key);
+                //For booleans we assume the Keyword's Key/Title can be converted to bool
+                return Convert.ToBoolean(string.IsNullOrEmpty(keyword.Key) ? keyword.Title : keyword.Key);
             }
             
             if (modelType == typeof(string))
@@ -727,7 +729,65 @@ namespace Sdl.Web.Tridion.Mapping
                 return displayText;
             }
 
-            throw new DxaException(String.Format("Cannot map Keyword to type '{0}'. The type must be Tag, bool or string.", modelType));
+            if (!typeof(KeywordModel).IsAssignableFrom(modelType))
+            {
+                throw new DxaException(string.Format("Cannot map Keyword to type '{0}'. The type must be string, bool, Tag or (a subclass of) KeywordModel.", modelType));
+            }
+
+            KeywordModel result;
+            string metadataSchemaId = GetMetadataSchemaId(keyword);
+            if (string.IsNullOrEmpty(metadataSchemaId))
+            {
+                // Keyword has no Metadata (Schema) : create a KeywordModel instance.
+                result = new KeywordModel();
+            }
+            else
+            {
+                // Keyword has Metadata: do full-blown model mapping.
+                SemanticSchema semanticSchema = SemanticMapping.GetSchema(GetDxaIdentifierFromTcmUri(metadataSchemaId), localization);
+
+                MappingData keywordMappingData = new MappingData
+                {
+                    TargetType = modelType,
+                    SemanticSchema = semanticSchema,
+                    EntityNames = semanticSchema.GetEntityNames(),
+                    TargetEntitiesByPrefix = GetEntityDataFromType(modelType),
+                    Meta = keyword.MetadataFields,
+                    Localization = localization
+                };
+
+                result = (KeywordModel) CreateViewModel(keywordMappingData);
+            }
+
+            result.Id = GetDxaIdentifierFromTcmUri(keyword.Id);
+            result.Title = keyword.Title;
+            result.Description = keyword.Description;
+            result.Key = keyword.Key;
+            result.TaxonomyId = GetDxaIdentifierFromTcmUri(keyword.TaxonomyId);
+
+            return result;
+        }
+
+        private static string GetMetadataSchemaId(IKeyword keyword)
+        {
+            if (keyword.ExtensionData == null)
+            {
+                return null;
+            }
+
+            IFieldSet dxaExtensionData;
+            if (!keyword.ExtensionData.TryGetValue("DXA", out dxaExtensionData))
+            {
+                return null;
+            }
+
+            IField metadataSchemaIdField;
+            if (!dxaExtensionData.TryGetValue("MetadataSchemaId", out metadataSchemaIdField))
+            {
+                return null;
+            }
+
+            return metadataSchemaIdField.Value;
         }
 
         protected virtual object MapComponent(IComponent component, Type modelType, Localization localization)
@@ -1011,22 +1071,28 @@ namespace Sdl.Web.Tridion.Mapping
             return regionMvcData;
         }
 
-        private static RegionModel GetRegionFromIncludePage(IPage page)
+        private static RegionModel GetRegionFromIncludePage(IPage page, Localization localization)
         {
             // Page Title can be a qualified View Name; we use the unqualified View Name as Region Name.
             MvcData regionMvcData = new MvcData(page.Title);
             InitializeRegionMvcData(regionMvcData);
 
-            return new RegionModel(regionMvcData.ViewName)
+            RegionModel result = new RegionModel(regionMvcData.ViewName)
             {
-                MvcData = regionMvcData,
-                XpmMetadata = new Dictionary<string, object>
+                MvcData = regionMvcData
+            };
+
+            if (localization.IsStaging)
+            {
+                result.XpmMetadata = new Dictionary<string, object>
                 {
                     {RegionModel.IncludedFromPageIdXpmMetadataKey, page.Id},
                     {RegionModel.IncludedFromPageTitleXpmMetadataKey, page.Title},
                     {RegionModel.IncludedFromPageFileNameXpmMetadataKey, page.Filename}
-                }
-            };
+                };
+            }
+
+            return result;
         }
 
         /// <summary>

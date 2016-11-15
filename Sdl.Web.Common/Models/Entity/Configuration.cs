@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 namespace Sdl.Web.Common.Models
 {
+    [Serializable]
     public class Configuration : EntityModel
     {
         [SemanticProperty("_all")]

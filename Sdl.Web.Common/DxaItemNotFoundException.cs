@@ -1,8 +1,10 @@
-﻿namespace Sdl.Web.Common
+﻿using System;
+namespace Sdl.Web.Common
 {
     /// <summary>
     /// Exception thrown by DXA Content Providers if an item is not found.
     /// </summary>
+    [Serializable]
     public class DxaItemNotFoundException : DxaException
     {
         /// <summary>

@@ -9,6 +9,7 @@ namespace Sdl.Web.Common.Models
     /// <summary>
     /// Abstract base class for View Models representing ECL items.
     /// </summary>
+    [Serializable]
     public abstract class EclItem : MediaItem
     {
         /// <summary>

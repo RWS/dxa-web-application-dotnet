@@ -7,6 +7,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.Navigation;
+using Sdl.Web.Tridion.Caching;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -15,6 +16,7 @@ namespace Sdl.Web.Tridion.Tests
         internal const string HomePageId = "640";
         internal const string ArticleDcpEntityId = "9712-9711";
         internal const string ArticlePageUrlPath = "/autotest-parent/test_article_page.html";
+        internal const string ArticleChildPageUrlPath = "/autotest-child/test_article_page.html";
         internal const string ArticleDynamicPageUrlPath = "/autotest-parent/test_article_dynamic.html";
         internal const string MediaManagerTestPageUrlPath = "/autotest-parent/mm_test.html";
         internal const string Tsi1278PageUrlPath = "/autotest-parent/tsi-1278_trådløst.html";
@@ -23,6 +25,7 @@ namespace Sdl.Web.Tridion.Tests
         internal const string Tsi1758PageUrlPath = "/autotest-parent/regression/tsi-1758.html";
         internal const string Tsi1852PageUrlPath = "/autotest-parent/regression/tsi-1852.html";
         internal const string Tsi1946PageUrlPath = "/autotest-parent/regression/tsi-1946.html";
+        internal const string Tsi811PageUrlPath = "/autotest-parent/regression/tsi-811";
         internal const string TaxonomyTestPage1UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1.html";
         internal const string TaxonomyTestPage2UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-2.html";
         internal const string TaxonomyIndexPageUrlPath = "/autotest-parent/regression/taxonomy";
@@ -61,7 +64,7 @@ namespace Sdl.Web.Tridion.Tests
 
             _childLocalization = new Localization
             {
-                LocalizationId = "1066",
+                LocalizationId = "1078",
                 Path = "/autotest-child"
             };
 
@@ -84,6 +87,9 @@ namespace Sdl.Web.Tridion.Tests
             get
             {
                 _childLocalization.EnsureInitialized();
+
+                // Trick to allow us to test on a "Live" (not XPM-enabled) configuration even though we're actually on a Staging CD Environment:
+                _childLocalization.IsStaging = false;
                 return _childLocalization;
             }
         }
