@@ -24,7 +24,6 @@ namespace Sdl.Web.Tridion.Statics
     public class BinaryFileManager
     {
         private static readonly BinaryFileManager _instance = new BinaryFileManager();
-        private ICacheAgent _cacheAgent;
 
         #region Inner classes
         internal class Dimensions
@@ -43,27 +42,6 @@ namespace Sdl.Web.Tridion.Statics
             {
                 return string.Format("(W={0}, H={1}, NoStretch={2})", Width, Height, NoStretch);
             }
-        }
-        #endregion
-
-        #region caching
-        /// <summary>
-        /// Gets or sets the CacheAgent
-        /// </summary>  
-        protected ICacheAgent CacheAgent 
-        {
-            get
-            {
-                return _cacheAgent ?? (_cacheAgent = DD4TFactoryCache.CreateCacheAgent() );
-            }
-            set
-            {
-                _cacheAgent = value;
-            }
-        }
-        private static string GetCacheKey(string url)
-        {
-            return string.Format("Binary_{0}", url);
         }
         #endregion
 
@@ -92,37 +70,26 @@ namespace Sdl.Web.Tridion.Statics
                 Dimensions dimensions;
                 urlPath = StripDimensions(urlPath, out dimensions);
                 
-                string cacheKey = GetCacheKey(urlPath);
-                DateTime? lastPublishedDate = CacheAgent.Load(cacheKey) as DateTime?;
-                if (lastPublishedDate == null)
-                {
-                    IBinaryFactory binaryFactory = DD4TFactoryCache.GetBinaryFactory(localization);
-                    try
+                DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
+                    urlPath,
+                    CacheRegions.BinaryPublishDate,
+                    () => 
                     {
-                        DateTime lpb = binaryFactory.FindLastPublishedDate(urlPath);
-                        if (lpb != DateTime.MinValue.AddSeconds(1)) // this is the secret code for 'does not exist'
+                        IBinaryFactory binaryFactory = DD4TFactoryCache.GetBinaryFactory(localization);
+                        try
                         {
-                            lastPublishedDate = lpb;
-                            CacheAgent.Store(cacheKey, "Binary", lastPublishedDate);
+                            DateTime result = binaryFactory.FindLastPublishedDate(urlPath);
+                            return (result == DateTime.MinValue.AddSeconds(1)) ? DateTime.MinValue : result;
+                        }
+                        catch (NullReferenceException)
+                        {
+                            // DD4T throws a NullReferenceException if the Binary does not exist.
+                            return DateTime.MinValue;
                         }
                     }
-                    catch (NullReferenceException)
-                    {
-                        //Binary not found, this should return a min date, but theres a bug in DD4T where it throws a NRE
-                        //DO NOTHING - binary removed later
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex);
-                        if (File.Exists(localFilePath))
-                        {
-                            //if theres an error connecting, but we still have a version on disk, serve this
-                            return localFilePath;
-                        }
-                    }
-                }
+                    );
 
-                if (lastPublishedDate != null)
+                if (lastPublishedDate != DateTime.MinValue)
                 {
                     if (File.Exists(localFilePath))
                     {

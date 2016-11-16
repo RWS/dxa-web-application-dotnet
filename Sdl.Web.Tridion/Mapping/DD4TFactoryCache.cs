@@ -34,7 +34,7 @@ namespace Sdl.Web.Tridion.Mapping
 
         internal static ICacheAgent CreateCacheAgent()
         {
-            return ((ICacheAgentProvider)SiteConfiguration.CacheProvider).CacheAgent;
+            return new DD4TCacheAgentAdapter();
         }    
 
         internal static IPageFactory GetPageFactory(Localization localization)

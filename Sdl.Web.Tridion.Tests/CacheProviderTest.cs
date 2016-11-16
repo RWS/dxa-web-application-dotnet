@@ -8,18 +8,16 @@ using Sdl.Web.Tridion.Caching;
 
 namespace Sdl.Web.Tridion.Tests
 {
-    [TestClass]
-    public class CacheProviderTest : TestClass
+    public abstract class CacheProviderTest : TestClass
     {
         private const string TestKey1 = "TestKey1";
         private const string TestKey2 = "TestKey2";
 
-        private static readonly ICacheProvider _testCacheProvider = new DefaultCacheProvider();
+        private readonly ICacheProvider _testCacheProvider;
 
-        [ClassInitialize]
-        public static void Initialize(TestContext testContext)
+        protected CacheProviderTest(ICacheProvider cacheProvider)
         {
-            DefaultInitialize(testContext);
+            _testCacheProvider = cacheProvider;
         }
 
         [TestMethod]
