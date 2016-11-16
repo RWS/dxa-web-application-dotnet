@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Tridion.Caching;
 
 namespace Sdl.Web.Tridion.Tests
 {
+    [TestClass]
     public abstract class CacheProviderTest : TestClass
     {
         private const string TestKey1 = "TestKey1";
