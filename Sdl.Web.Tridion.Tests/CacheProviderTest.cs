@@ -108,7 +108,6 @@ namespace Sdl.Web.Tridion.Tests
                 );
         }
 
-
         [TestMethod]
         public void TryGet_WrongType_Exception()
         {
@@ -118,6 +117,23 @@ namespace Sdl.Web.Tridion.Tests
 
             string cachedValue;
             AssertThrowsException<DxaException>(() => { _testCacheProvider.TryGet(TestKey1, testRegion, out cachedValue); }, "TryGet");
+        }
+
+        [TestMethod]
+        public void Store_Expiration_Success()
+        {
+            const string testRegion = "Store_Expiration_Success";
+            const int expiration = 11;
+
+            _testCacheProvider.Store(TestKey1, testRegion, 666);
+
+            int cachedValue;
+            Assert.IsTrue(_testCacheProvider.TryGet(TestKey1, testRegion, out cachedValue), "Value is not cached.");
+
+            Thread.Sleep(expiration * 1000);
+
+            string message = string.Format("Value is still cached after {0} seconds.", expiration);
+            Assert.IsFalse(_testCacheProvider.TryGet(TestKey1, testRegion, out cachedValue), message);
         }
     }
 }
