@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Logging;
 using Sdl.Web.Delivery.Caching;
 
 namespace Sdl.Web.Tridion.Caching
@@ -52,7 +53,7 @@ namespace Sdl.Web.Tridion.Caching
 
                 if (cachedValue == null)
                 {
-                    // There is no value cached for the key/region.
+                    Log.Debug("No value cached for key '{0}' in region '{1}'.", key, region);
                     value = default(T);
                     return false;
                 }

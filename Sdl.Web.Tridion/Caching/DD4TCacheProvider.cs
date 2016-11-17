@@ -2,6 +2,7 @@
 using System.Linq;
 using DD4T.ContentModel.Contracts.Caching;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Logging;
 using Sdl.Web.Tridion.Mapping;
 
 namespace Sdl.Web.Tridion.Caching
@@ -60,7 +61,7 @@ namespace Sdl.Web.Tridion.Caching
 
                 if (cachedValue == null)
                 {
-                    // There is no value cached for the key/region.
+                    Log.Debug("No value cached for key '{0}' in region '{1}'.", key, region);
                     value = default(T);
                     return false;
                 }
