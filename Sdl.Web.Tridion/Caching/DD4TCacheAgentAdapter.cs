@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using DD4T.ContentModel.Contracts.Caching;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
@@ -12,6 +13,7 @@ namespace Sdl.Web.Tridion.Caching
     internal class DD4TCacheAgentAdapter : ICacheAgent
     {
         private readonly ICacheProvider _cacheProvider = SiteConfiguration.CacheProvider;
+        private static readonly Regex _cacheAgentKeyRegex = new Regex(@"(?<region>\w+)_.+", RegexOptions.Compiled);
 
         #region ICacheAgent members
         public object Load(string key)
@@ -52,15 +54,14 @@ namespace Sdl.Web.Tridion.Caching
 
         private static string DetermineCacheRegion(string key)
         {
-            if (key.StartsWith("Page_"))
+            Match match = _cacheAgentKeyRegex.Match(key);
+            if (!match.Success)
             {
-                return CacheRegions.Page;
+                return CacheRegions.Other;
             }
-            if (key.StartsWith("ComponentPresentation_"))
-            {
-                return CacheRegions.ComponentPresentation;
-            }
-            return CacheRegions.Other;
+
+            string region = match.Groups["region"].Value;
+            return region.StartsWith("Page") ? CacheRegions.Page : region;
         }
     }
 }
