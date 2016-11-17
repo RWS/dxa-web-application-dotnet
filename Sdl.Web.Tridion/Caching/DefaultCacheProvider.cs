@@ -46,12 +46,13 @@ namespace Sdl.Web.Tridion.Caching
                 bool valueAdded = AwaitAddingValue(key, region);
                 if (valueAdded)
                 {
-                    // Another thread has just added a value for the key/region.
+                    // Another thread has just added a value for the key/region. Retry.
                     cachedValue = _cilCacheProvider.Get(key, region);
                 }
-                else
+
+                if (cachedValue == null)
                 {
-                    // Nope. There is no value cached for the key/region.
+                    // There is no value cached for the key/region.
                     value = default(T);
                     return false;
                 }
