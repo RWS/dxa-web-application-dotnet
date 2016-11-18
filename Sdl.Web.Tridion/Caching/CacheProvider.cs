@@ -59,13 +59,19 @@ namespace Sdl.Web.Tridion.Caching
                 }
             }
 
-            // Obtain the actual value. This may be time-consuming (otherwise there would be no reason to cache).
-            result = addFunction();
+            try
+            {
+                // Obtain the actual value. This may be time-consuming (otherwise there would be no reason to cache).
+                result = addFunction();
 
-            // Cache the value and unblock other threads which are awaiting it.
-            Store(key, region, result, dependencies);
-            addingEvent.Set();
-            _addingEvents.Remove(qualifiedKey);
+                Store(key, region, result, dependencies);
+            }
+            finally
+            {
+                // Unblock other threads which are awaiting it.
+                addingEvent.Set();
+                _addingEvents.Remove(qualifiedKey);
+            }
 
             return result;
         }
