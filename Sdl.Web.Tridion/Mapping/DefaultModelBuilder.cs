@@ -453,7 +453,7 @@ namespace Sdl.Web.Tridion.Mapping
                     else if (semanticProperty.PropertyName == "_all" && modelProperty.PropertyType == typeof(Dictionary<string, string>))
                     {
                         //Map all fields into a single (Dictionary) property
-                        modelProperty.SetValue(model, GetAllFieldsAsDictionary(mappingData.SourceEntity));
+                        modelProperty.SetValue(model, GetAllFieldsAsDictionary(mappingData.SourceEntity, mappingData.Localization));
                         processed = true;
                     }
 
@@ -705,14 +705,18 @@ namespace Sdl.Web.Tridion.Mapping
             return result;
         }
 
+        private static string GetDisplayText(IKeyword keyword)
+        {
+            return string.IsNullOrEmpty(keyword.Description) ? keyword.Title : keyword.Description;
+        }
+
         protected virtual object MapKeyword(IKeyword keyword, Type modelType, Localization localization)
         {
-            string displayText = string.IsNullOrEmpty(keyword.Description) ? keyword.Title : keyword.Description;
             if (modelType == typeof(Tag))
             {
                 return new Tag
                 {
-                    DisplayText = displayText,
+                    DisplayText = GetDisplayText(keyword),
                     Key = string.IsNullOrEmpty(keyword.Key) ? keyword.Id : keyword.Key,
                     TagCategory = keyword.TaxonomyId
                 };
@@ -726,7 +730,7 @@ namespace Sdl.Web.Tridion.Mapping
             
             if (modelType == typeof(string))
             {
-                return displayText;
+                return GetDisplayText(keyword);
             }
 
             if (!typeof(KeywordModel).IsAssignableFrom(modelType))
@@ -821,7 +825,7 @@ namespace Sdl.Web.Tridion.Mapping
             return result;
         }
 
-        protected Dictionary<string, string> GetAllFieldsAsDictionary(IComponent component)
+        protected Dictionary<string, string> GetAllFieldsAsDictionary(IComponent component, Localization localization)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             foreach (string fieldname in component.Fields.Keys)
@@ -847,7 +851,7 @@ namespace Sdl.Web.Tridion.Mapping
                     //Default is to add the value as plain text
                     else
                     {
-                        string val = GetFieldValuesAsStrings(component.Fields[fieldname]).FirstOrDefault();
+                        string val = GetFieldValuesAsStrings(component.Fields[fieldname], localization).FirstOrDefault();
                         if (val != null)
                         {
                             values.Add(fieldname, val);
@@ -859,7 +863,7 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 if (!values.ContainsKey(fieldname))
                 {
-                    string val = GetFieldValuesAsStrings(component.MetadataFields[fieldname]).FirstOrDefault();
+                    string val = GetFieldValuesAsStrings(component.MetadataFields[fieldname], localization).FirstOrDefault();
                     if (val != null)
                     {
                         values.Add(fieldname, val);
@@ -869,21 +873,24 @@ namespace Sdl.Web.Tridion.Mapping
             return values;
         }
 
-        private static string[] GetFieldValuesAsStrings(IField field)
+        private static IEnumerable<string> GetFieldValuesAsStrings(IField field, Localization localization)
         {
             switch (field.FieldType)
             {
                 case FieldType.Number:
-                    return field.NumericValues.Select(v => v.ToString(CultureInfo.InvariantCulture)).ToArray();
+                    return field.NumericValues.Select(v => v.ToString(CultureInfo.InvariantCulture));
                 case FieldType.Date:
-                    return field.DateTimeValues.Select(v => v.ToString("s")).ToArray();
+                    return field.DateTimeValues.Select(v => v.ToString("s"));
                 case FieldType.ComponentLink:
+                    return field.LinkedComponentValues.Select(v => SiteConfiguration.LinkResolver.ResolveLink(v.Id));
                 case FieldType.MultiMediaLink:
-                    return field.LinkedComponentValues.Select(v => v.Id).ToArray();
+                    return field.LinkedComponentValues.Select(v => v.Multimedia.Url);
                 case FieldType.Keyword:
-                    return field.KeywordValues.Select(v => v.Id).ToArray();
+                    return field.KeywordValues.Select(v => GetDisplayText(v));
+                case FieldType.Xhtml:
+                    return field.Values.Select(v => SiteConfiguration.RichTextProcessor.ProcessRichText(v, localization).ToString());
                 default:
-                    return field.Values.ToArray();
+                    return field.Values;
             }
         }
 
@@ -895,7 +902,7 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 foreach (IField field in page.MetadataFields.Values)
                 {
-                    ProcessMetadataField(field, meta);
+                    ProcessMetadataField(field, meta, localization);
                 }
             }
             string description = meta.ContainsKey("description") ? meta["description"] : null;
@@ -973,38 +980,23 @@ namespace Sdl.Web.Tridion.Mapping
             return title + titlePostfix;
         }
 
-        protected virtual void ProcessMetadataField(IField field, IDictionary<string, string> meta)
+        protected virtual void ProcessMetadataField(IField field, IDictionary<string, string> meta, Localization localization)
         {
-            if (field.FieldType==FieldType.Embedded)
+            if (field.FieldType == FieldType.Embedded)
             {
-                if (field.EmbeddedValues!=null && field.EmbeddedValues.Count>0)
+                // Flatten embedded fields
+                if (field.EmbeddedValues!=null && field.EmbeddedValues.Count > 0)
                 {
                     IFieldSet subfields = field.EmbeddedValues[0];
                     foreach (IField subfield in subfields.Values)
                     {
-                        ProcessMetadataField(subfield, meta);
+                        ProcessMetadataField(subfield, meta, localization);
                     }
                 }
             }
             else
             {
-                string value;
-                switch (field.Name)
-                {
-                    case "internalLink":
-                        value = SiteConfiguration.LinkResolver.ResolveLink(field.Value);
-                        break;
-                    case "image":
-                        value = field.LinkedComponentValues[0].Multimedia.Url;
-                        break;
-                    default:
-                        value = String.Join(",", field.Values);
-                        break;
-                }
-                if (value != null && !meta.ContainsKey(field.Name))
-                {
-                    meta.Add(field.Name, value);
-                }
+                meta[field.Name] = string.Join(", ", GetFieldValuesAsStrings(field, localization));
             }
         }
                 
