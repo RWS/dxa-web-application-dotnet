@@ -123,17 +123,26 @@ namespace Sdl.Web.Tridion.Tests
         public void Store_Expiration_Success()
         {
             const string testRegion = "Store_Expiration_Success";
-            const int expiration = 11;
+            const int timeout = 15;
 
             _testCacheProvider.Store(TestKey1, testRegion, 666);
 
             int cachedValue;
             Assert.IsTrue(_testCacheProvider.TryGet(TestKey1, testRegion, out cachedValue), "Value is not cached.");
 
-            Thread.Sleep(expiration * 1000);
+            // Test that it's absolute expiration rather than sliding expiration by regularly accessing the cache key.
+            for (int i = 1; i <= timeout; i++)
+            {
+                Thread.Sleep(1000);
+                if (_testCacheProvider.TryGet(TestKey1, testRegion, out cachedValue))
+                {
+                    continue;
+                }
+                Console.WriteLine("Cache expired after {0} seconds.", i);
+                return;
+            }
 
-            string message = string.Format("Value is still cached after {0} seconds.", expiration);
-            Assert.IsFalse(_testCacheProvider.TryGet(TestKey1, testRegion, out cachedValue), message);
+            Assert.Fail("Value is still cached after {0} seconds.", timeout);
         }
     }
 }
