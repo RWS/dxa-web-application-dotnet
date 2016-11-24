@@ -8,6 +8,7 @@ using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Context
 {
@@ -36,7 +37,7 @@ namespace Sdl.Web.Mvc.Context
             {
                 // For now, we get all context claims (for all aspects) in one go:
                 IContextClaimsProvider contextClaimsProvider = SiteConfiguration.ContextClaimsProvider;
-                _claims = contextClaimsProvider.GetContextClaims(null);
+                _claims = contextClaimsProvider.GetContextClaims(null, WebRequestContext.Localization);
 
                 if (Log.Logger.IsDebugEnabled)
                 {

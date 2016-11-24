@@ -175,10 +175,11 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Filters (i.e. removes) conditional Entities which don't meet the conditions.
         /// </summary>
+        /// <param name="localization">The context Localization.</param>
         /// <remarks>
         /// Applies to this Region and all its nested Regions.
         /// </remarks>
-        public void FilterConditionalEntities()
+        public void FilterConditionalEntities(Localization localization)
         {
             using (new Tracer(this))
             {
@@ -188,7 +189,7 @@ namespace Sdl.Web.Common.Models
                     return;
                 }
 
-                EntityModel[] excludeEntities = Entities.Where(entity => !conditionalEntityEvaluator.IncludeEntity(entity)).ToArray();
+                EntityModel[] excludeEntities = Entities.Where(entity => !conditionalEntityEvaluator.IncludeEntity(entity, localization)).ToArray();
                 if (excludeEntities.Length > 0)
                 {
                     Log.Debug("Excluding {0} Entities from Region '{1}'.", excludeEntities.Length, Name);
@@ -200,7 +201,7 @@ namespace Sdl.Web.Common.Models
 
                 foreach (RegionModel nestedRegion in Regions)
                 {
-                    nestedRegion.FilterConditionalEntities();
+                    nestedRegion.FilterConditionalEntities(localization);
                 }
             }
         }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Web;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Context.Api;
@@ -52,8 +53,9 @@ namespace Sdl.Web.Tridion.Context
         /// Gets the context claims. Either all context claims or for a given aspect name.
         /// </summary>
         /// <param name="aspectName">The aspect name. If <c>null</c> all context claims are returned.</param>
+        /// <param name="localization">The context Localization.</param>
         /// <returns>A dictionary with the claim names in format aspectName.propertyName as keys.</returns>
-        public IDictionary<string, object> GetContextClaims(string aspectName)
+        public IDictionary<string, object> GetContextClaims(string aspectName, Localization localization)
         {
             using (new Tracer(aspectName))
             {
@@ -83,7 +85,9 @@ namespace Sdl.Web.Tridion.Context
                 IContextMap contextMap;
                 try
                 {
-                    EvidenceBuilder evidenceBuilder = new EvidenceBuilder().With("user-agent", userAgent);
+                    EvidenceBuilder evidenceBuilder = new EvidenceBuilder()
+                        .With("user-agent", userAgent)
+                        .WithPublicationId(Convert.ToInt32(localization.LocalizationId));
                     if (!string.IsNullOrEmpty(contextCookieValue))
                     {
                         evidenceBuilder.With("cookie", string.Format("context={0}", contextCookieValue));
