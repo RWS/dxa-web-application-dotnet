@@ -12,9 +12,9 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlWebDeliveryPackageVersion>8.5.0-beta-201611231812</SdlWebDeliveryPackageVersion>
-    <SdlWebContextClientPackageVersion>8.5.0-beta-201611230900</SdlWebContextClientPackageVersion>
-    <SdlWebContextImagePackageVersion>8.5.0-beta-201611230903</SdlWebContextImagePackageVersion>
+    <SdlWebDeliveryPackageVersion>8.5.0</SdlWebDeliveryPackageVersion>
+    <SdlWebContextClientPackageVersion>8.5.0</SdlWebContextClientPackageVersion>
+    <SdlWebContextImagePackageVersion>8.5.0</SdlWebContextImagePackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
