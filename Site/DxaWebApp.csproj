@@ -64,6 +64,24 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Data.Services.Client.5.6.4\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Extensions.Caching.Abstractions">
+      <HintPath>..\packages\Microsoft.Extensions.Caching.Abstractions.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Caching.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Caching.Memory">
+      <HintPath>..\packages\Microsoft.Extensions.Caching.Memory.1.1.0\lib\net451\Microsoft.Extensions.Caching.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Caching.Redis">
+      <HintPath>..\packages\Microsoft.Extensions.Caching.Redis.1.1.0\lib\net451\Microsoft.Extensions.Caching.Redis.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.1.1.0\lib\netstandard1.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Options">
+      <HintPath>..\packages\Microsoft.Extensions.Options.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Options.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Primitives">
+      <HintPath>..\packages\Microsoft.Extensions.Primitives.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Primitives.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.OData.Client">
       <HintPath>..\packages\Microsoft.OData.Client.6.15.0\lib\net40\Microsoft.OData.Client.dll</HintPath>
       <Private>True</Private>
@@ -102,7 +120,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.Common">
-      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.7.0-alpha-201611081551\lib\net452\Sdl.Web.Common.dll</HintPath>
+      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.7.0-alpha-201611231940\lib\net452\Sdl.Web.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.Context.Api">
@@ -115,8 +133,11 @@
       <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Mvc">
-      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.7.0-alpha-201611081551\lib\net452\Sdl.Web.Mvc.dll</HintPath>
+      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.1.7.0-alpha-201611231940\lib\net452\Sdl.Web.Mvc.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="StackExchange.Redis.StrongName">
+      <HintPath>..\packages\StackExchange.Redis.StrongName.1.1.605\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Spatial">
@@ -241,5 +262,5 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.1.7.0-alpha-201611081551\build\net452\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.1.7.0-alpha-201611081551\build\net452\Sdl.Dxa.Framework.Web8.targets')" />
+  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.1.7.0-alpha-201611231940\build\net452\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.1.7.0-alpha-201611231940\build\net452\Sdl.Dxa.Framework.Web8.targets')" />
 </Project>
