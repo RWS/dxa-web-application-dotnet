@@ -107,7 +107,7 @@ namespace Sdl.Web.Common.Models
         /// <param name="localization">The context Localization.</param>
         public void FilterConditionalEntities(Localization localization)
         {
-            using (new Tracer(this))
+            using (new Tracer(localization, this))
             {
                 foreach (RegionModel region in Regions)
                 {

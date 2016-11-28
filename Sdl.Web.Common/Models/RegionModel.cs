@@ -181,7 +181,7 @@ namespace Sdl.Web.Common.Models
         /// </remarks>
         public void FilterConditionalEntities(Localization localization)
         {
-            using (new Tracer(this))
+            using (new Tracer(localization, this))
             {
                 IConditionalEntityEvaluator conditionalEntityEvaluator = SiteConfiguration.ConditionalEntityEvaluator;
                 if (conditionalEntityEvaluator == null)
