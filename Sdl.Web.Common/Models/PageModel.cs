@@ -104,13 +104,14 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Filters (i.e. removes) conditional Entities which don't meet the conditions.
         /// </summary>
-        public void FilterConditionalEntities()
+        /// <param name="localization">The context Localization.</param>
+        public void FilterConditionalEntities(Localization localization)
         {
-            using (new Tracer(this))
+            using (new Tracer(localization, this))
             {
                 foreach (RegionModel region in Regions)
                 {
-                    region.FilterConditionalEntities();
+                    region.FilterConditionalEntities(localization);
                 }
             }
         }

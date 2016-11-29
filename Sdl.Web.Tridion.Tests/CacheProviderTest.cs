@@ -4,22 +4,20 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Tridion.Caching;
 
 namespace Sdl.Web.Tridion.Tests
 {
     [TestClass]
-    public class CacheProviderTest : TestClass
+    public abstract class CacheProviderTest : TestClass
     {
         private const string TestKey1 = "TestKey1";
         private const string TestKey2 = "TestKey2";
 
-        private static readonly ICacheProvider _testCacheProvider = new DefaultCacheProvider();
+        private readonly ICacheProvider _testCacheProvider;
 
-        [ClassInitialize]
-        public static void Initialize(TestContext testContext)
+        protected CacheProviderTest(ICacheProvider cacheProvider)
         {
-            DefaultInitialize(testContext);
+            _testCacheProvider = cacheProvider;
         }
 
         [TestMethod]
@@ -110,7 +108,6 @@ namespace Sdl.Web.Tridion.Tests
                 );
         }
 
-
         [TestMethod]
         public void TryGet_WrongType_Exception()
         {
@@ -120,6 +117,32 @@ namespace Sdl.Web.Tridion.Tests
 
             string cachedValue;
             AssertThrowsException<DxaException>(() => { _testCacheProvider.TryGet(TestKey1, testRegion, out cachedValue); }, "TryGet");
+        }
+
+        [TestMethod]
+        public void Store_Expiration_Success()
+        {
+            const string testRegion = "Store_Expiration_Success";
+            const int timeout = 15;
+
+            _testCacheProvider.Store(TestKey1, testRegion, 666);
+
+            int cachedValue;
+            Assert.IsTrue(_testCacheProvider.TryGet(TestKey1, testRegion, out cachedValue), "Value is not cached.");
+
+            // Test that it's absolute expiration rather than sliding expiration by regularly accessing the cache key.
+            for (int i = 1; i <= timeout; i++)
+            {
+                Thread.Sleep(1000);
+                if (_testCacheProvider.TryGet(TestKey1, testRegion, out cachedValue))
+                {
+                    continue;
+                }
+                Console.WriteLine("Cache expired after {0} seconds.", i);
+                return;
+            }
+
+            Assert.Fail("Value is still cached after {0} seconds.", timeout);
         }
     }
 }

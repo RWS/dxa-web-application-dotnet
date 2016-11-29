@@ -18,6 +18,10 @@ namespace Sdl.Web.Common
         public const string StaticNavigation = "Navigation_Static";
         public const string DynamicNavigation = "Navigation_Dynamic";
         public const string NavigationTaxonomy = "NavTaxonomy";
+        public const string Page = "Page"; // DD4T Page
+        public const string ComponentPresentation = "ComponentPresentation"; // DD4T ComponentPresentation
+        public const string Other = "Other"; // Other DD4T object
+        public const string BinaryPublishDate = "BinaryPublishDate";
 
         public static bool IsViewModelCachingEnabled { get; private set; }
 

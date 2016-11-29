@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Tridion.ContentDelivery.AmbientData;
@@ -18,8 +19,9 @@ namespace Sdl.Web.Tridion.Context
         /// Gets the context claims. Either all context claims or for a given aspect name.
         /// </summary>
         /// <param name="aspectName">The aspect name. If <c>null</c> all context claims are returned.</param>
+        /// <param name="localization">The context Localization.</param>
         /// <returns>A dictionary with the claim names in format aspectName.propertyName as keys.</returns>
-        public IDictionary<string, object> GetContextClaims(string aspectName)
+        public IDictionary<string, object> GetContextClaims(string aspectName, Localization localization)
         {
             using (new Tracer(aspectName))
             {

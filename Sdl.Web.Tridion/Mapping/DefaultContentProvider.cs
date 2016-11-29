@@ -142,7 +142,7 @@ namespace Sdl.Web.Tridion.Mapping
 
                 if (SiteConfiguration.ConditionalEntityEvaluator != null)
                 {
-                    result.FilterConditionalEntities();
+                    result.FilterConditionalEntities(localization);
                 }
 
                 return result;

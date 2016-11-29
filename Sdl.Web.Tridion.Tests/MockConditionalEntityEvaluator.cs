@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 
@@ -19,7 +20,7 @@ namespace Sdl.Web.Tridion.Tests
             get { return _excludeEntityIds; }
         }
 
-        public bool IncludeEntity(EntityModel entity)
+        public bool IncludeEntity(EntityModel entity, Localization localization)
         {
             _evaluatedEntities.Add(entity);
             return !ExcludeEntityIds.Contains(entity.Id);

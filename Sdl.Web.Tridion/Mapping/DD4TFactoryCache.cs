@@ -34,7 +34,7 @@ namespace Sdl.Web.Tridion.Mapping
 
         internal static ICacheAgent CreateCacheAgent()
         {
-            return ((ICacheAgentProvider)SiteConfiguration.CacheProvider).CacheAgent;
+            return new DD4TCacheAgentAdapter();
         }    
 
         internal static IPageFactory GetPageFactory(Localization localization)
@@ -46,7 +46,7 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     IPublicationResolver publicationResolver = new PublicationResolver(localization);
                     IProvidersCommonServices providersCommonServices = new ProvidersCommonServices(publicationResolver, _logger, _config);
-                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateDefaultCacheAgent());
+                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateCacheAgent());
                     pageFactory = new PageFactory(
                         new TridionPageProvider(providersCommonServices), 
                         GetComponentPresentationFactory(localization), 
@@ -68,7 +68,7 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     IPublicationResolver publicationResolver = new PublicationResolver(localization);
                     IProvidersCommonServices providersCommonServices = new ProvidersCommonServices(publicationResolver, _logger, _config);
-                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateDefaultCacheAgent());
+                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateCacheAgent());
                     componentPresentationFactory = new ComponentPresentationFactory(
                         new TridionComponentPresentationProvider(providersCommonServices), 
                         factoryCommonServices);
@@ -88,7 +88,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (!_componentFactories.TryGetValue(localization.LocalizationId, out componentFactory))
                 {
                     IPublicationResolver publicationResolver = new PublicationResolver(localization);
-                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateDefaultCacheAgent());
+                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateCacheAgent());
                     componentFactory = new ComponentFactory(
                         GetComponentPresentationFactory(localization),
                         factoryCommonServices );
@@ -108,7 +108,7 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     IPublicationResolver publicationResolver = new PublicationResolver(localization);
                     IProvidersCommonServices providersCommonServices = new ProvidersCommonServices(publicationResolver, _logger, _config);
-                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateDefaultCacheAgent());
+                    IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateCacheAgent());
                     binaryFactory = new BinaryFactory(
                         new TridionBinaryProvider(providersCommonServices),
                         factoryCommonServices);

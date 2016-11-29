@@ -421,12 +421,12 @@ namespace Sdl.Web.Tridion.Tests
 
             Tsi811TestKeyword testKeyword1 = testEntity.Keyword1[0];
             Assert.AreEqual("This is Test Keyword 1's textField", testKeyword1.TextField, "testKeyword1.TextField");
-            Assert.AreEqual(666, testKeyword1.NumberProperty, "testKeyword1.NumberProperty");
+            Assert.AreEqual(666.66, testKeyword1.NumberProperty, "testKeyword1.NumberProperty");
 
             Tsi811TestKeyword pageKeyword = pageModel.PageKeyword;
             AssertValidKeywordModel(pageKeyword, "Test Keyword 2", "TSI-811 Test Keyword 2", "Key 2", "pageKeyword");
             Assert.AreEqual("This is textField of Test Keyword 2", pageKeyword.TextField, "pageKeyword.TextField");
-            Assert.AreEqual(999, pageKeyword.NumberProperty, "pageKeyword.NumberProperty");
+            Assert.AreEqual(999.99, pageKeyword.NumberProperty, "pageKeyword.NumberProperty");
         }
 
         private static void AssertValidKeywordModel(KeywordModel keywordModel, string expectedTitle, string expectedDescription, string expectedKey, string subjectName)
