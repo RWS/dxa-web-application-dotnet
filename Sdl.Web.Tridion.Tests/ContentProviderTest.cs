@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -437,6 +437,31 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(expectedKey, keywordModel.Key, subjectName + ".Key");
             StringAssert.Matches(keywordModel.Id, new Regex(@"\d+"), subjectName + ".Id");
             StringAssert.Matches(keywordModel.TaxonomyId, new Regex(@"\d+"), subjectName + ".TaxonomyId");
+        }
+
+        [TestMethod]
+        public void GetPageModel_Meta_Success() // See TSI-1308
+        {
+            PageModel pageModel = _testContentProvider.GetPageModel(TestFixture.Tsi1308PageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            IDictionary<string, string> pageMeta = pageModel.Meta;
+            Assert.IsNotNull(pageMeta, "pageMeta");
+            Assert.AreEqual(15, pageMeta.Count, "pageMeta.Count");
+            Assert.AreEqual("This is single line text", pageMeta["singleLineText"], "pageMeta[singleLineText]");
+            Assert.AreEqual("This is multi line text line 1\nAnd line 2\n", pageMeta["multiLineText"], "pageMeta[multiLineText]");
+            StringAssert.StartsWith(pageMeta["richText"], "This is <strong xmlns=\"http://www.w3.org/1999/xhtml\">rich</strong> text", "pageMeta[richText]");
+            // TODO TSI-1308: Component link in rich text should be resolved, but this requires pre-processing on the CM-side.
+            Assert.AreEqual("News Article", pageMeta["keyword"], "pageMeta[keyword]");
+            Assert.AreEqual("/autotest-parent/test_article_dynamic", pageMeta["componentLink"], "pageMeta[componentLink]");
+            Assert.AreEqual("/autotest-parent/Images/company-news-placeholder_tcm1065-4480.png", pageMeta["mmComponentLink"], "pageMeta[mmComponentLink]");
+            Assert.AreEqual("1970-12-16T12:34:56", pageMeta["date"], "pageMeta[date]");
+            Assert.AreEqual("666.666", pageMeta["number"], "pageMeta[number]");
+            Assert.AreEqual("Rick Pannekoek", pageMeta["author"], "pageMeta[author]");
+            Assert.AreEqual("TSI-1308 Test Page", pageMeta["og:title"], "pageMeta[og: title]");
+            Assert.AreEqual("TSI-1308 Test Page", pageMeta["description"], "pageMeta[description]");
         }
 
         [TestMethod]
