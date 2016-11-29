@@ -452,8 +452,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(15, pageMeta.Count, "pageMeta.Count");
             Assert.AreEqual("This is single line text", pageMeta["singleLineText"], "pageMeta[singleLineText]");
             Assert.AreEqual("This is multi line text line 1\nAnd line 2\n", pageMeta["multiLineText"], "pageMeta[multiLineText]");
-            StringAssert.StartsWith(pageMeta["richText"], "This is <strong xmlns=\"http://www.w3.org/1999/xhtml\">rich</strong> text", "pageMeta[richText]");
-            // TODO TSI-1308: Component link in rich text should be resolved, but this requires pre-processing on the CM-side.
+            Assert.AreEqual("This is <strong>rich</strong> text with a <a title=\"Test Article\" href=\"/autotest-parent/test_article_dynamic\">Component Link</a>", pageMeta["richText"], "pageMeta[richText]");
             Assert.AreEqual("News Article", pageMeta["keyword"], "pageMeta[keyword]");
             Assert.AreEqual("/autotest-parent/test_article_dynamic", pageMeta["componentLink"], "pageMeta[componentLink]");
             Assert.AreEqual("/autotest-parent/Images/company-news-placeholder_tcm1065-4480.png", pageMeta["mmComponentLink"], "pageMeta[mmComponentLink]");
