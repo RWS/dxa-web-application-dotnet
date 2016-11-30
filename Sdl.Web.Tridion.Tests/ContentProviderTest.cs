@@ -393,9 +393,15 @@ namespace Sdl.Web.Tridion.Tests
             OutputJson(testArticle);
             OutputJson(testEntity);
 
-            // TODO TSI-1946: there are more fields, but only the ones which have a value are represented in XpmPropertyMetadata.
-            Assert.AreEqual(2, testArticle.XpmPropertyMetadata.Count, "testArticle.XpmPropertyMetadata.Count");
-            Assert.AreEqual(0, testEntity.XpmPropertyMetadata.Count, "testEntity.XpmPropertyMetadata.Count");
+            Assert.AreEqual(5, testArticle.XpmPropertyMetadata.Count, "testArticle.XpmPropertyMetadata.Count");
+            Assert.AreEqual("tcm:Content/custom:Article/custom:image", testArticle.XpmPropertyMetadata["Image"], "testArticle.XpmPropertyMetadata[Image]");
+            Assert.AreEqual("tcm:Metadata/custom:Metadata/custom:standardMeta/custom:description", testArticle.XpmPropertyMetadata["Description"], "testArticle.XpmPropertyMetadata[Description]");
+
+            Paragraph testParagraph = testArticle.ArticleBody[0];
+            Assert.AreEqual(4, testParagraph.XpmPropertyMetadata.Count, "testParagraph.XpmPropertyMetadata.Count");
+            Assert.AreEqual("tcm:Content/custom:Article/custom:articleBody[1]/custom:caption", testParagraph.XpmPropertyMetadata["Caption"], "testParagraph.XpmPropertyMetadata[Caption]");
+
+            Assert.AreEqual(7, testEntity.XpmPropertyMetadata.Count, "testEntity.XpmPropertyMetadata.Count");
         }
 
         [TestMethod]

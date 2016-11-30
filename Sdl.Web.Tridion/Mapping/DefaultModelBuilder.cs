@@ -408,6 +408,7 @@ namespace Sdl.Web.Tridion.Mapping
                 Type modelPropertyType = modelProperty.PropertyType;
                 bool isCollection = modelPropertyType.IsGenericType && (modelPropertyType.GetGenericTypeDefinition() == typeof(List<>));
                 Type valueType = isCollection ? modelPropertyType.GetGenericArguments()[0] : modelPropertyType;
+                string fieldXPath = null;
 
                 foreach (SemanticProperty semanticProperty in propertySemantics[modelProperty.Name])
                 {
@@ -420,22 +421,22 @@ namespace Sdl.Web.Tridion.Mapping
                         {
                             modelProperty.SetValue(model, propertyValue);
                         }
-                        xpmPropertyMetadata.Add(modelProperty.Name, dd4tField.XPath);
+                        fieldXPath = dd4tField.XPath;
                         break;
                     }
 
                     // Special mapping cases require SourceEntity to be set
-                    if (mappingData.SourceEntity == null)
+                    if (mappingData.SourceEntity != null)
                     {
-                        continue;
-                    }
-
-                    bool processed = false;
-                    if (semanticProperty.PropertyName == "_self")
-                    {
-                        //Map the whole entity to an image property, or a resolved link to the entity to a Url field
-                        if (typeof(MediaItem).IsAssignableFrom(valueType) || typeof(Link).IsAssignableFrom(valueType) || valueType == typeof(string))
+                        if (semanticProperty.PropertyName == "_self")
                         {
+                            // Map the current Component to a MediaItem, Link or String (resolved URL) property.
+                            if (!typeof(MediaItem).IsAssignableFrom(valueType) && !typeof(Link).IsAssignableFrom(valueType) && valueType != typeof(string))
+                            {
+                                throw new DxaException(
+                                    string.Format("Invalid semantics for property {0}.{1}. Properties with [SemanticProperty(\"_self\")] annotation must be of type MediaItem, Link or String.",
+                                        modelType.Name, modelProperty.Name));
+                            }
                             object mappedSelf = MapComponent(mappingData.SourceEntity, valueType, mappingData.Localization);
                             if (isCollection)
                             {
@@ -447,20 +448,33 @@ namespace Sdl.Web.Tridion.Mapping
                             {
                                 modelProperty.SetValue(model, mappedSelf);
                             }
-                            processed = true;
+                            break;
+                        }
+
+                        if (semanticProperty.PropertyName == "_all")
+                        {
+                            // Map all fields into a Dictionary property
+                            if (!typeof(IDictionary<string, string>).IsAssignableFrom(modelPropertyType))
+                            {
+                                throw new DxaException(
+                                    string.Format("Invalid semantics for property {0}.{1}. Properties with [SemanticProperty(\"_all\")] annotation must be of type Dictionary<string, string>.",
+                                        modelType.Name, modelProperty.Name));
+                            }
+                            modelProperty.SetValue(model, GetAllFieldsAsDictionary(mappingData.SourceEntity, mappingData.Localization));
+                            break;
                         }
                     }
-                    else if (semanticProperty.PropertyName == "_all" && modelProperty.PropertyType == typeof(Dictionary<string, string>))
-                    {
-                        //Map all fields into a single (Dictionary) property
-                        modelProperty.SetValue(model, GetAllFieldsAsDictionary(mappingData.SourceEntity, mappingData.Localization));
-                        processed = true;
-                    }
 
-                    if (processed)
+                    if (semanticSchemaField != null && fieldXPath == null)
                     {
-                        break;
+                        // Property can be mapped to a CM field, but the field is not present in the DD4T data model (i.e. empty field in CM).
+                        fieldXPath = semanticSchemaField.GetXPath(mappingData.ContextXPath);
                     }
+                }
+
+                if (fieldXPath != null)
+                {
+                    xpmPropertyMetadata.Add(modelProperty.Name, fieldXPath);
                 }
             }
 
@@ -629,9 +643,11 @@ namespace Sdl.Web.Tridion.Mapping
                         break;
 
                     case FieldType.Embedded:
+                        int index = 1;
                         foreach (IFieldSet value in field.EmbeddedValues)
                         {
-                            mappedValues.Add(MapEmbeddedFields(value, modelType, mapData, semanticSchemaField));
+                            string contextXPath = string.Format("{0}[{1}]", field.XPath, index++);
+                            mappedValues.Add(MapEmbeddedFields(value, modelType, mapData, semanticSchemaField, contextXPath));
                         }
                         break;
 
@@ -809,7 +825,7 @@ namespace Sdl.Web.Tridion.Mapping
             return ModelBuilderPipeline.CreateEntityModel(component, modelType, localization);
         }
 
-        private ViewModel MapEmbeddedFields(IFieldSet embeddedFields, Type modelType, MappingData mapData, SemanticSchemaField semanticSchemaField)
+        private ViewModel MapEmbeddedFields(IFieldSet embeddedFields, Type modelType, MappingData mapData, SemanticSchemaField semanticSchemaField, string contextXPath)
         {
             MappingData embeddedMappingData = new MappingData(mapData)
             {
@@ -817,7 +833,8 @@ namespace Sdl.Web.Tridion.Mapping
                 Content = embeddedFields,
                 Meta = null,
                 EmbeddedSemanticSchemaField = semanticSchemaField,
-                EmbedLevel = mapData.EmbedLevel + 1
+                EmbedLevel = mapData.EmbedLevel + 1,
+                ContextXPath = contextXPath
             };
 
             EntityModel result = (EntityModel) CreateViewModel(embeddedMappingData);

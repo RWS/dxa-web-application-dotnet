@@ -22,18 +22,9 @@ namespace Sdl.Web.Tridion.Mapping
         public string ParentDefaultPrefix { get; set; }
         public int EmbedLevel { get; set; }
         public IComponent SourceEntity { get; set; }
-
-        public string ModelId
-        {
-            get;
-            set;
-        }
-
-        public Localization Localization
-        {
-            get;
-            set;
-        }
+        public string ModelId { get; set;}
+        public Localization Localization { get; set; }
+        public string ContextXPath { get; set; }
 
         #region Constructors
         /// <summary>
@@ -61,6 +52,7 @@ namespace Sdl.Web.Tridion.Mapping
             SourceEntity = other.SourceEntity;
             ModelId = other.ModelId;
             Localization = other.Localization;
+            ContextXPath = other.ContextXPath;
         }
         #endregion
     }
