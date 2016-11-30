@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Common.Mapping
@@ -102,6 +103,22 @@ namespace Sdl.Web.Common.Mapping
         public List<SemanticSchemaField> Fields { get; set; }
 
         /// <summary>
+        /// Initializes an existing instance.
+        /// </summary>
+        /// <param name="localization"></param>
+        public void Initialize(Localization localization)
+        {
+            foreach (FieldSemantics fieldSemantics in Semantics)
+            {
+                fieldSemantics.Initialize(localization);
+            }
+            foreach (SemanticSchemaField field in Fields)
+            {
+                field.Initialize(localization);
+            }
+        }
+
+        /// <summary>
         /// Check if current field contains given semantics.
         /// </summary>
         /// <param name="fieldSemantics">The semantics to check against</param>
@@ -119,8 +136,10 @@ namespace Sdl.Web.Common.Mapping
         /// <returns><c>true</c> if this field has given semantics, <c>false</c> otherwise.</returns>
         public bool HasSemantics(FieldSemantics fieldSemantics)
         {
-            // TODO: shouldn't we be matching on fieldSemantics.Entity? return Semantics.Any(s => s.Equals(fieldSemantics));
-            return Semantics.Any(s => s.Property.Equals(fieldSemantics.Property) && s.Prefix.Equals(fieldSemantics.Prefix));
+            // TODO: this doesn't work for embedded fields, because schemas.json uses the embedded schema's root element/name as semantic entity name.
+            return Semantics.Any(s => s.Equals(fieldSemantics));
+
+            // return Semantics.Any(s => s.Property.Equals(fieldSemantics.Property) && s.Prefix.Equals(fieldSemantics.Prefix));
         }
 
 

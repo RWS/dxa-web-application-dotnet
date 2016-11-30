@@ -533,7 +533,7 @@ namespace Sdl.Web.Tridion.Mapping
                     string entity = mapData.EntityNames[vocab].FirstOrDefault();
                     if (entity != null && mapData.SemanticSchema!=null)
                     {
-                        FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
+                        FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property, mapData.Localization);
                         // locate semantic schema field
                         semanticSchemaField = (mapData.EmbeddedSemanticSchemaField == null) ? 
                             mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics) : // Used for top-level fields

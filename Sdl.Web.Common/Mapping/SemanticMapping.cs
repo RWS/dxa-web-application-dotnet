@@ -49,14 +49,7 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>Semantic vocabulary for the given prefix</returns>
         public static string GetVocabulary(string prefix, Localization loc)
         {
-            SemanticVocabulary semanticVocabulary = loc.GetSemanticVocabularies().FirstOrDefault(sv => sv.Prefix == prefix);
-            if (semanticVocabulary == null)
-            {
-                throw new DxaException(
-                    string.Format("No vocabulary defined for prefix '{0}' in Localization [{1}]. {2}", prefix, loc, Constants.CheckSettingsUpToDate)
-                    );
-            }
-            return semanticVocabulary.Vocab;
+            return loc.GetSemanticVocabulary(prefix).Vocab;
         }
 
         /// <summary>

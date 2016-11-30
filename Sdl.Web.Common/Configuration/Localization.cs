@@ -30,6 +30,7 @@ namespace Sdl.Web.Common.Configuration
         private SemanticSchema[] _semanticSchemas;
         private IDictionary<string, SemanticSchema> _semanticSchemaMap;
         private SemanticVocabulary[] _semanticVocabularies;
+        private IDictionary<string, SemanticVocabulary> _semanticVocabularyMap; 
         private readonly object _loadLock = new object();
 
         public string Path {
@@ -330,7 +331,7 @@ namespace Sdl.Web.Common.Configuration
                 _semanticSchemaMap = _semanticSchemas.ToDictionary(ss => ss.Id.ToString(CultureInfo.InvariantCulture));
                 foreach (SemanticSchema semanticSchema in _semanticSchemas)
                 {
-                    semanticSchema.Localization = this;
+                    semanticSchema.Initialize(this);
                 }
             }
 
@@ -346,7 +347,7 @@ namespace Sdl.Web.Common.Configuration
         }
 
         /// <summary>
-        /// Gets the Semantic Vocabularies (indexed by their prefix)
+        /// Gets the Semantic Vocabularies
         /// </summary>
         /// <returns></returns>
         public IEnumerable<SemanticVocabulary> GetSemanticVocabularies()
@@ -357,8 +358,30 @@ namespace Sdl.Web.Common.Configuration
                 LoadStaticContentItem("mappings/vocabularies.json", ref _semanticVocabularies);
             }
             return _semanticVocabularies;
-        } 
+        }
 
+        /// <summary>
+        /// Gets a Semantic Vocabulary by a given prefix.
+        /// </summary>
+        /// <param name="prefix">The vocabulary prefix.</param>
+        /// <returns>The Semantic Vocabulary.</returns>
+        public SemanticVocabulary GetSemanticVocabulary(string prefix)
+        {
+            if (_semanticVocabularies == null)
+            {
+                _semanticVocabularyMap = GetSemanticVocabularies().ToDictionary(sv => sv.Prefix);
+            }
+
+            SemanticVocabulary result;
+            if (!_semanticVocabularyMap.TryGetValue(prefix, out result))
+            {
+                throw new DxaException(
+                    string.Format("No vocabulary defined for prefix '{0}' in Localization [{1}]. {2}", prefix, this, Constants.CheckSettingsUpToDate)
+                    );
+            }
+
+            return result;
+        }
 
         private void LoadStaticContentItem<T>(string relativeUrl, ref T deserializedObject)
         {
