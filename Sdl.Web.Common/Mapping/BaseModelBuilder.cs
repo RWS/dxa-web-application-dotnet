@@ -9,22 +9,19 @@ namespace Sdl.Web.Common.Mapping
 {
     public abstract class BaseModelBuilder
     {
-        private static readonly object SemanticsLock = new object();
+        private static readonly Dictionary<Type, Dictionary<string, List<SemanticProperty>>> _semanticPropertiesCache = 
+            new Dictionary<Type, Dictionary<string, List<SemanticProperty>>>();
 
-        private static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> _entityPropertySemantics;
+        [Obsolete("Deprecated in DXA 1.7.")]
         public static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> EntityPropertySemantics 
         {
             get
             {
-                if (_entityPropertySemantics == null)
-                {
-                    _entityPropertySemantics = new Dictionary<Type, Dictionary<string, List<SemanticProperty>>>();
-                }
-                return _entityPropertySemantics;
+                return _semanticPropertiesCache;
             }
             set
             {
-                _entityPropertySemantics = value;
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.7.");
             }
         }        
 
@@ -74,20 +71,25 @@ namespace Sdl.Web.Common.Mapping
 
         protected virtual Dictionary<string, List<SemanticProperty>> LoadPropertySemantics(Type type)
         {
-            lock (SemanticsLock)
+            lock (_semanticPropertiesCache)
             {
                 // Try to get cached semantics
                 Dictionary<string, List<SemanticProperty>> result;
-                if (EntityPropertySemantics.TryGetValue(type, out result))
+                if (_semanticPropertiesCache.TryGetValue(type, out result))
                 {
                     return result;
                 }
 
                 //The default prefix is empty - this implies that the prefix should be inherited from the parent object default prefix
-                string defaultPrefix = String.Empty;
-                bool mapAllProperties = true;
+                string defaultPrefix;
+                bool mapAllProperties;
                 SemanticDefaultsAttribute semanticDefaultsAttr = type.GetCustomAttribute<SemanticDefaultsAttribute>();
-                if (semanticDefaultsAttr != null)
+                if (semanticDefaultsAttr == null)
+                {
+                    defaultPrefix = string.Empty;
+                    mapAllProperties = true;
+                }
+                else
                 {
                     defaultPrefix = semanticDefaultsAttr.Prefix;
                     mapAllProperties = semanticDefaultsAttr.MapAllProperties;
@@ -98,7 +100,7 @@ namespace Sdl.Web.Common.Mapping
                 {
                     string propertyName = property.Name;
                     bool ignoreMapping = false;
-                    bool addDefaultSemantics = true;
+                    bool addDefaultSemantics = mapAllProperties;
                     List<SemanticProperty> semanticProperties = new List<SemanticProperty>();
                     foreach (SemanticPropertyAttribute semanticPropertyAttr in property.GetCustomAttributes<SemanticPropertyAttribute>(true))
                     {
@@ -126,16 +128,15 @@ namespace Sdl.Web.Common.Mapping
                         continue;
                     }
 
-                    if (addDefaultSemantics && mapAllProperties)
+                    if (addDefaultSemantics)
                     {
-                        //Add default semantics 
                         semanticProperties.Add(GetDefaultPropertySemantics(property, defaultPrefix));
                     }
 
                     result.Add(propertyName, semanticProperties);
                 }
 
-                EntityPropertySemantics.Add(type, result);
+                _semanticPropertiesCache.Add(type, result);
 
                 return result;
             }

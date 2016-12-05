@@ -15,8 +15,6 @@ namespace Sdl.Web.Common.Mapping
     /// </remarks>
     public class SemanticSchema
     {
-        private string[] _semanticTypeNames; 
-
         /// <summary>
         /// Schema (item) ID.
         /// </summary>
@@ -59,25 +57,15 @@ namespace Sdl.Web.Common.Mapping
         }
 
         /// <summary>
-        /// Get a list with schema entity names for its vocabularies. 
-        /// Using vocabulary name rather than prefix from json, as the prefixes can be different in the view. 
+        /// Get the Schema's semantic entity/types names grouped per semantic vocabulary. 
         /// </summary>
         /// <remarks>
         /// Using <see cref="ILookup{TKey,TElement}"/> rather than a <see cref="Dictionary{TKey,TValue}"/> because it will allow for duplicate keys.
-        /// Duplicate keys make no sense, but we might have them, so this prevents runtime exceptions.
         /// </remarks>
-        /// <returns>List with entity names indexed by vocabulary</returns>
+        /// <returns>The Schema's semantic entity/types names grouped per semantic vocabulary</returns>
         public ILookup<string, string> GetEntityNames()
         {
-            // TODO: refactor using SchemaSemantics.Vocab
-            List<KeyValuePair<string, string>> entityNames = new List<KeyValuePair<string, string>>();
-            foreach (SchemaSemantics schemaSemantics in Semantics)
-            {
-                string vocab = SemanticMapping.GetVocabulary(schemaSemantics.Prefix, Localization);
-                entityNames.Add(new KeyValuePair<string, string>(vocab, schemaSemantics.Entity));
-            }
-
-            return entityNames.ToLookup(x => x.Key, x => x.Value);
+            return Semantics.ToLookup(ss => ss.Vocab, ss => ss.Entity);
         }
 
         /// <summary>
@@ -104,12 +92,7 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>The semantic type names.</returns>
         public string[] GetSemanticTypeNames()
         {
-            // TODO: refactor using SchemaSemantics.Vocab
-            if (_semanticTypeNames == null)
-            {
-                _semanticTypeNames = Semantics.Select(s => SemanticMapping.GetQualifiedTypeName(s.Entity, s.Prefix, Localization)).ToArray();
-            }
-            return _semanticTypeNames;
+            return Semantics.Select(ss => ss.ToString()).ToArray();
         }
 
         /// <summary>
