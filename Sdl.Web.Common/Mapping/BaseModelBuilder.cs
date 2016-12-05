@@ -76,64 +76,69 @@ namespace Sdl.Web.Common.Mapping
         {
             lock (SemanticsLock)
             {
-                if (!EntityPropertySemantics.ContainsKey(type))
+                // Try to get cached semantics
+                Dictionary<string, List<SemanticProperty>> result;
+                if (EntityPropertySemantics.TryGetValue(type, out result))
                 {
-                    //The default prefix is empty - this implies that the prefix should be inherited from the parent object default prefix
-                    string defaultPrefix = String.Empty;
-                    bool mapAllProperties = true;
-                    SemanticDefaultsAttribute semanticDefaultsAttr = type.GetCustomAttributes().OfType<SemanticDefaultsAttribute>().FirstOrDefault();
-                    if (semanticDefaultsAttr != null)
-                    {
-                        defaultPrefix = semanticDefaultsAttr.Prefix;
-                        mapAllProperties = semanticDefaultsAttr.MapAllProperties;
-                    }
-
-                    Dictionary<string, List<SemanticProperty>> result = new Dictionary<string, List<SemanticProperty>>();
-                    foreach (PropertyInfo pi in type.GetProperties())
-                    {
-                        string name = pi.Name;
-                        //flag to indicate we have processed a default mapping, or we explicitly should ignore this property when mapping
-                        bool ignore = false;
-                        foreach (SemanticPropertyAttribute semanticPropertyAttr in pi.GetCustomAttributes(true).OfType<SemanticPropertyAttribute>())
-                        {
-                            if (!semanticPropertyAttr.IgnoreMapping)
-                            {
-                                if (!result.ContainsKey(name))
-                                {
-                                    result.Add(name, new List<SemanticProperty>());
-                                }
-                                string[] propertyNameParts = semanticPropertyAttr.PropertyName.Split(':');
-                                if (propertyNameParts.Length > 1)
-                                {
-                                    result[name].Add(new SemanticProperty(propertyNameParts[0], propertyNameParts[1]));
-                                }
-                                else
-                                {
-                                    //Add the default prefix and set the ignore flag - so no need to apply default mapping using property name
-                                    result[name].Add(new SemanticProperty(defaultPrefix, propertyNameParts[0]));
-                                    ignore = true;
-                                }
-                            }
-                            else
-                            {
-                                ignore = true;
-                            }
-                        }
-                        if (!ignore && mapAllProperties)
-                        {
-                            if (!result.ContainsKey(name))
-                            {
-                                result.Add(name, new List<SemanticProperty>());
-                            }
-                            //Add default semantics 
-                            result[name].Add(GetDefaultPropertySemantics(pi, defaultPrefix));
-                        }
-
-                    }
-                    EntityPropertySemantics.Add(type, result);
+                    return result;
                 }
+
+                //The default prefix is empty - this implies that the prefix should be inherited from the parent object default prefix
+                string defaultPrefix = String.Empty;
+                bool mapAllProperties = true;
+                SemanticDefaultsAttribute semanticDefaultsAttr = type.GetCustomAttribute<SemanticDefaultsAttribute>();
+                if (semanticDefaultsAttr != null)
+                {
+                    defaultPrefix = semanticDefaultsAttr.Prefix;
+                    mapAllProperties = semanticDefaultsAttr.MapAllProperties;
+                }
+
+                result = new Dictionary<string, List<SemanticProperty>>();
+                foreach (PropertyInfo property in type.GetProperties())
+                {
+                    string propertyName = property.Name;
+                    bool ignoreMapping = false;
+                    bool addDefaultSemantics = true;
+                    List<SemanticProperty> semanticProperties = new List<SemanticProperty>();
+                    foreach (SemanticPropertyAttribute semanticPropertyAttr in property.GetCustomAttributes<SemanticPropertyAttribute>(true))
+                    {
+                        if (semanticPropertyAttr.IgnoreMapping)
+                        {
+                            ignoreMapping = true;
+                            break;
+                        }
+
+                        string[] semanticPropertyNameParts = semanticPropertyAttr.PropertyName.Split(':');
+                        if (semanticPropertyNameParts.Length > 1)
+                        {
+                            semanticProperties.Add(new SemanticProperty(semanticPropertyNameParts[0], semanticPropertyNameParts[1]));
+                        }
+                        else
+                        {
+                            //Add the default prefix and set the ignore flag - so no need to apply default mapping using property name
+                            semanticProperties.Add(new SemanticProperty(defaultPrefix, semanticPropertyNameParts[0]));
+                            addDefaultSemantics = false;
+                        }
+                    }
+
+                    if (ignoreMapping)
+                    {
+                        continue;
+                    }
+
+                    if (addDefaultSemantics && mapAllProperties)
+                    {
+                        //Add default semantics 
+                        semanticProperties.Add(GetDefaultPropertySemantics(property, defaultPrefix));
+                    }
+
+                    result.Add(propertyName, semanticProperties);
+                }
+
+                EntityPropertySemantics.Add(type, result);
+
+                return result;
             }
-            return EntityPropertySemantics[type];
         }
 
         protected virtual SemanticProperty GetDefaultPropertySemantics(PropertyInfo pi, string defaultPrefix)

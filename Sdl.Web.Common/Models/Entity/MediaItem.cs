@@ -31,11 +31,20 @@ namespace Sdl.Web.Common.Models
         };
 
         [SemanticProperty("s:contentUrl")]
+        [SemanticProperty(IgnoreMapping = true)]
         public string Url { get; set; }
+
+        [SemanticProperty(IgnoreMapping = true)]
         public string FileName { get; set; }
+
         [SemanticProperty("s:contentSize")]
+        [SemanticProperty(IgnoreMapping = true)]
         public long FileSize { get; set; }
+
+        [SemanticProperty(IgnoreMapping = true)]
         public string MimeType { get; set; }
+
+        [SemanticProperty(IgnoreMapping = true)]
         public bool IsEmbedded { get; set; }
 
         /// <summary>

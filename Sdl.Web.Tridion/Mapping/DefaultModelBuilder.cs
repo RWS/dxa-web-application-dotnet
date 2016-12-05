@@ -410,7 +410,8 @@ namespace Sdl.Web.Tridion.Mapping
                 Type valueType = isCollection ? modelPropertyType.GetGenericArguments()[0] : modelPropertyType;
                 string fieldXPath = null;
 
-                foreach (SemanticProperty semanticProperty in propertySemantics[modelProperty.Name])
+                List<SemanticProperty> semanticProperties = propertySemantics[modelProperty.Name];
+                foreach (SemanticProperty semanticProperty in semanticProperties)
                 {
                     SemanticSchemaField semanticSchemaField;
                     IField dd4tField = GetFieldFromSemantics(mappingData, semanticProperty, out semanticSchemaField);
@@ -465,7 +466,12 @@ namespace Sdl.Web.Tridion.Mapping
                         }
                     }
 
-                    if (semanticSchemaField != null && fieldXPath == null)
+                    if (semanticSchemaField == null)
+                    {
+                        Log.Debug("Property {0}.{1} cannot be mapped to a CM field of {2}. Semantic properties: {3}.", 
+                            modelType.Name, modelProperty.Name, mappingData.SemanticSchema, string.Join(", ", semanticProperties.Select(sp => sp.ToString())));
+                    }
+                    else if (fieldXPath == null)
                     {
                         // Property can be mapped to a CM field, but the field is not present in the DD4T data model (i.e. empty field in CM).
                         fieldXPath = semanticSchemaField.GetXPath(mappingData.ContextXPath);
