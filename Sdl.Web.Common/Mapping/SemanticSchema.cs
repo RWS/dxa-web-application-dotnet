@@ -40,6 +40,24 @@ namespace Sdl.Web.Common.Mapping
 
         public Localization Localization { get; set; }
 
+
+        /// <summary>
+        /// Initializes an existing instance.
+        /// </summary>
+        /// <param name="localization">The context Localization.</param>
+        public void Initialize(Localization localization)
+        {
+            Localization = localization;
+            foreach (SchemaSemantics semantics in Semantics)
+            {
+                semantics.Initialize(localization);
+            }
+            foreach (SemanticSchemaField field in Fields)
+            {
+                field.Initialize(localization);
+            }
+        }
+
         /// <summary>
         /// Get a list with schema entity names for its vocabularies. 
         /// Using vocabulary name rather than prefix from json, as the prefixes can be different in the view. 
@@ -51,6 +69,7 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>List with entity names indexed by vocabulary</returns>
         public ILookup<string, string> GetEntityNames()
         {
+            // TODO: refactor using SchemaSemantics.Vocab
             List<KeyValuePair<string, string>> entityNames = new List<KeyValuePair<string, string>>();
             foreach (SchemaSemantics schemaSemantics in Semantics)
             {
@@ -85,6 +104,7 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>The semantic type names.</returns>
         public string[] GetSemanticTypeNames()
         {
+            // TODO: refactor using SchemaSemantics.Vocab
             if (_semanticTypeNames == null)
             {
                 _semanticTypeNames = Semantics.Select(s => SemanticMapping.GetQualifiedTypeName(s.Entity, s.Prefix, Localization)).ToArray();

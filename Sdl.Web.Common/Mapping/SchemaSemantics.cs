@@ -1,4 +1,7 @@
 ﻿
+using System;
+using Sdl.Web.Common.Configuration;
+
 namespace Sdl.Web.Common.Mapping
 {
     /// <summary>
@@ -10,20 +13,28 @@ namespace Sdl.Web.Common.Mapping
     public class SchemaSemantics
     {
         /// <summary>
-        /// Vocabulary prefix.
+        /// Gets or set the semantic Vocabulary prefix.
         /// </summary>
         public string Prefix { get; set; }
 
         /// <summary>
-        /// Entity name.
+        /// Gets or sets the semantic Entity name.
         /// </summary>
         public string Entity { get; set; }
+
+        /// <summary>
+        /// Gets or set the semantic Vocabulary URI.
+        /// </summary>
+        public string Vocab { get; set; }
 
         #region Constructors
 
         /// <summary>
         /// Initializes a new empty instance of the <see cref="SchemaSemantics"/> class.
         /// </summary>
+        /// <remarks>
+        /// Used by JSON deserialer.
+        /// </remarks>
         public SchemaSemantics()
         {
         }
@@ -32,8 +43,9 @@ namespace Sdl.Web.Common.Mapping
         /// Initializes a new instance of the <see cref="SchemaSemantics"/> class, using default semantic vocabulary prefix.
         /// </summary>
         /// <param name="entity">Entity name.</param>
+        [Obsolete("Deprecated in DXA 1.7. Use the overload with three parameters.")]
         public SchemaSemantics(string entity)
-            : this(SemanticMapping.DefaultPrefix, entity)
+            : this(SemanticMapping.DefaultPrefix, entity, null)
         {
         }
 
@@ -42,20 +54,47 @@ namespace Sdl.Web.Common.Mapping
         /// </summary>
         /// <param name="prefix">Vocabulary prefix</param>
         /// <param name="entity">Entity name</param>
+        [Obsolete("Deprecated in DXA 1.7. Use the overload with three parameters.")]
         public SchemaSemantics(string prefix, string entity)
+            : this(prefix, entity, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SchemaSemantics"/> class.
+        /// </summary>
+        /// <param name="prefix">Vocabulary prefix</param>
+        /// <param name="entity">Entity name</param>
+        /// <param name="localization">The context Localization (used to determine <see cref="Vocab"/>).</param>
+        public SchemaSemantics(string prefix, string entity, Localization localization)
         {
             Prefix = prefix;
             Entity = entity;
+
+            if (localization != null)
+            {
+                Initialize(localization);
+            }
         }
+
         #endregion
+
+        /// <summary>
+        /// Initializes an existing instance: determines the <see cref="Vocab"/> property.
+        /// </summary>
+        /// <param name="localization">The context Localization.</param>
+        public void Initialize(Localization localization)
+        {
+            Vocab = localization.GetSemanticVocabulary(Prefix).Vocab;
+        }
 
         /// <summary>
         /// Provides a string representation of the object.
         /// </summary>
-        /// <returns>A string representation in format <c>Prefix:Entity</c>.</returns>
+        /// <returns>A string representation in format <c>Vocab/Prefix:Entity</c>.</returns>
         public override string ToString()
         {
-            return string.Format("{0}:{1}", Prefix, Entity);
+            return string.Format("{0}:{1}", Vocab ?? Prefix, Entity);
         }
 
         /// <summary>
@@ -68,7 +107,17 @@ namespace Sdl.Web.Common.Mapping
         public override bool Equals(object obj)
         {
             FieldSemantics other = obj as FieldSemantics;
-            return other != null && Prefix == other.Prefix && Entity == other.Entity;
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (Vocab == null)
+            {
+                return Prefix == other.Prefix && Entity == other.Entity;
+            }
+
+            return Vocab == other.Vocab && Entity == other.Entity;
         }
 
         /// <summary>
@@ -79,7 +128,12 @@ namespace Sdl.Web.Common.Mapping
         /// </returns>
         public override int GetHashCode()
         {
-            return Prefix.GetHashCode() ^ Entity.GetHashCode();
+            int result = Prefix.GetHashCode() ^ Entity.GetHashCode();
+            if (Vocab != null)
+            {
+                result ^= Vocab.GetHashCode();
+            }
+            return result;
         }
     }
 }

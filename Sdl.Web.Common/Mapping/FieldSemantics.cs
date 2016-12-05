@@ -1,4 +1,7 @@
 ﻿
+using System;
+using Sdl.Web.Common.Configuration;
+
 namespace Sdl.Web.Common.Mapping
 {
     /// <summary>
@@ -9,8 +12,6 @@ namespace Sdl.Web.Common.Mapping
     /// </remarks>
     public class FieldSemantics : SchemaSemantics
     {
-        // TODO implement proper override of Equals() and Operator ==
-
         /// <summary>
         /// Semantic property name.
         /// </summary>
@@ -21,6 +22,9 @@ namespace Sdl.Web.Common.Mapping
         /// <summary>
         /// Initializes a new empty instance of the <see cref="FieldSemantics"/> class.
         /// </summary>
+        /// <remarks>
+        /// Used by JSON deserializer.
+        /// </remarks>
         public FieldSemantics()
         {
         }
@@ -30,8 +34,9 @@ namespace Sdl.Web.Common.Mapping
         /// </summary>
         /// <param name="entity">Entity name</param>
         /// <param name="property">Semantic property name</param>
+        [Obsolete("Deprecated in DXA 1.7. Use the overload with four parameters.")]
         public FieldSemantics(string entity, string property)
-            : this(SemanticMapping.DefaultPrefix, entity, property)
+            : this(SemanticMapping.DefaultPrefix, entity, property, null)
         {
         }
 
@@ -41,8 +46,21 @@ namespace Sdl.Web.Common.Mapping
         /// <param name="prefix">Vocabulary prefix</param>
         /// <param name="entity">Entity name</param>
         /// <param name="property">Semantic property name</param>
+        [Obsolete("Deprecated in DXA 1.7. Use the overload with four parameters.")]
         public FieldSemantics(string prefix, string entity, string property) 
-            : base(prefix, entity)
+            : this(prefix, entity, property, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FieldSemantics"/> class.
+        /// </summary>
+        /// <param name="prefix">Vocabulary prefix</param>
+        /// <param name="entity">Entity name</param>
+        /// <param name="property">Semantic property name</param>
+        /// <param name="localization">The context Localization (used to determine the semantic Vocabulary URI).</param>
+        public FieldSemantics(string prefix, string entity, string property, Localization localization)
+            : base(prefix, entity, localization)
         {
             Property = property;
         }
@@ -51,10 +69,10 @@ namespace Sdl.Web.Common.Mapping
         /// <summary>
         /// Provides a string representation of the object.
         /// </summary>
-        /// <returns>A string representation in format <c>Prefix:Entity:Property</c>.</returns>
+        /// <returns>A string representation in format <c>Vocab/Prefix:Entity:Property</c>.</returns>
         public override string ToString()
         {
-            return string.Format("{0}:{1}:{2}", Prefix, Entity, Property);
+            return string.Format("{0}:{1}:{2}", Vocab ?? Prefix, Entity, Property);
         }
 
         /// <summary>
