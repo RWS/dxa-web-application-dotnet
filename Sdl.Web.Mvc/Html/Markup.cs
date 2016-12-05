@@ -219,8 +219,6 @@ namespace Sdl.Web.Mvc.Html
                 }
             }
 
-            Log.Debug("Rendered markup for Entity [{0}] Property '{1}': {2}", entityModel, propertyName, markup);
-
             return new MvcHtmlString(markup);
         }
 

@@ -409,6 +409,7 @@ namespace Sdl.Web.Tridion.Mapping
                 bool isCollection = modelPropertyType.IsGenericType && (modelPropertyType.GetGenericTypeDefinition() == typeof(List<>));
                 Type valueType = isCollection ? modelPropertyType.GetGenericArguments()[0] : modelPropertyType;
                 string fieldXPath = null;
+                bool isFieldMapped = false;
 
                 List<SemanticProperty> semanticProperties = propertySemantics[modelProperty.Name];
                 foreach (SemanticProperty semanticProperty in semanticProperties)
@@ -423,6 +424,7 @@ namespace Sdl.Web.Tridion.Mapping
                             modelProperty.SetValue(model, propertyValue);
                         }
                         fieldXPath = dd4tField.XPath;
+                        isFieldMapped = true;
                         break;
                     }
 
@@ -449,6 +451,7 @@ namespace Sdl.Web.Tridion.Mapping
                             {
                                 modelProperty.SetValue(model, mappedSelf);
                             }
+                            isFieldMapped = true;
                             break;
                         }
 
@@ -462,20 +465,26 @@ namespace Sdl.Web.Tridion.Mapping
                                         modelType.Name, modelProperty.Name));
                             }
                             modelProperty.SetValue(model, GetAllFieldsAsDictionary(mappingData.SourceEntity, mappingData.Localization));
+                            isFieldMapped = true;
                             break;
                         }
                     }
 
-                    if (semanticSchemaField == null)
+                    if (semanticSchemaField != null)
                     {
-                        Log.Debug("Property {0}.{1} cannot be mapped to a CM field of {2}. Semantic properties: {3}.", 
-                            modelType.Name, modelProperty.Name, mappingData.SemanticSchema, string.Join(", ", semanticProperties.Select(sp => sp.ToString())));
+                        isFieldMapped = true;
+                        if (fieldXPath == null)
+                        {
+                            // Property can be mapped to a CM field, but the field is not present in the DD4T data model (i.e. empty field in CM).
+                            fieldXPath = semanticSchemaField.GetXPath(mappingData.ContextXPath);
+                        }
                     }
-                    else if (fieldXPath == null)
-                    {
-                        // Property can be mapped to a CM field, but the field is not present in the DD4T data model (i.e. empty field in CM).
-                        fieldXPath = semanticSchemaField.GetXPath(mappingData.ContextXPath);
-                    }
+                }
+
+                if (!isFieldMapped)
+                {
+                    Log.Debug("Property {0}.{1} cannot be mapped to a CM field of {2}. Semantic properties: {3}.",
+                        modelType.Name, modelProperty.Name, mappingData.SemanticSchema, string.Join(", ", semanticProperties.Select(sp => sp.ToString())));
                 }
 
                 if (fieldXPath != null)
