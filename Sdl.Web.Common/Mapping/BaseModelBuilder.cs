@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -80,7 +79,6 @@ namespace Sdl.Web.Common.Mapping
                     return result;
                 }
 
-                //The default prefix is empty - this implies that the prefix should be inherited from the parent object default prefix
                 string defaultPrefix;
                 bool mapAllProperties;
                 SemanticDefaultsAttribute semanticDefaultsAttr = type.GetCustomAttribute<SemanticDefaultsAttribute>();
@@ -99,8 +97,9 @@ namespace Sdl.Web.Common.Mapping
                 foreach (PropertyInfo property in type.GetProperties())
                 {
                     string propertyName = property.Name;
+
                     bool ignoreMapping = false;
-                    bool addDefaultSemantics = mapAllProperties;
+                    bool useImplicitMapping = mapAllProperties;
                     List<SemanticProperty> semanticProperties = new List<SemanticProperty>();
                     foreach (SemanticPropertyAttribute semanticPropertyAttr in property.GetCustomAttributes<SemanticPropertyAttribute>(true))
                     {
@@ -117,20 +116,26 @@ namespace Sdl.Web.Common.Mapping
                         }
                         else
                         {
-                            //Add the default prefix and set the ignore flag - so no need to apply default mapping using property name
                             semanticProperties.Add(new SemanticProperty(defaultPrefix, semanticPropertyNameParts[0]));
-                            addDefaultSemantics = false;
+                            useImplicitMapping = false;
                         }
                     }
 
-                    if (ignoreMapping)
+                    if (useImplicitMapping)
+                    {
+                        semanticProperties.Add(GetDefaultPropertySemantics(property, defaultPrefix));
+                    }
+
+                    if (ignoreMapping || semanticProperties.Count == 0)
                     {
                         continue;
                     }
 
-                    if (addDefaultSemantics)
+                    if (result.ContainsKey(propertyName))
                     {
-                        semanticProperties.Add(GetDefaultPropertySemantics(property, defaultPrefix));
+                        // Properties with same name can exist is a property is reintroduced with a different signature in a subclass.
+                        Log.Debug("Property with name '{0}' is declared multiple times in type {1}.", propertyName, type.FullName);
+                        continue;
                     }
 
                     result.Add(propertyName, semanticProperties);
@@ -142,16 +147,16 @@ namespace Sdl.Web.Common.Mapping
             }
         }
 
-        protected virtual SemanticProperty GetDefaultPropertySemantics(PropertyInfo pi, string defaultPrefix)
+        protected virtual SemanticProperty GetDefaultPropertySemantics(PropertyInfo property, string defaultPrefix)
         {
-            //This is where we map model class property names to Tridion schema xml field names
-            //Which is: the property name with the first character lower case and the last character removed if its an 's' and a List<> type (so Paragraphs becomes paragraph etc.)
-            string name = pi.Name.Substring(0, 1).ToLower() + pi.Name.Substring(1);
-            if (pi.PropertyType.IsGenericType && pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>) && name.EndsWith("s"))
+            // Transform Pascal case into camel case.
+            string semanticPropertyName = property.Name.Substring(0, 1).ToLower() + property.Name.Substring(1);
+            if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>) && semanticPropertyName.EndsWith("s"))
             {
-                name = name.Substring(0,name.Length-1);
+                // Remove trailing 's' of List property name
+                semanticPropertyName = semanticPropertyName.Substring(0, semanticPropertyName.Length-1);
             }
-            return new SemanticProperty(defaultPrefix, name);
+            return new SemanticProperty(defaultPrefix, semanticPropertyName);
         }
     }
 }

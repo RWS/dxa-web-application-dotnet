@@ -136,10 +136,7 @@ namespace Sdl.Web.Common.Mapping
         /// <returns><c>true</c> if this field has given semantics, <c>false</c> otherwise.</returns>
         public bool HasSemantics(FieldSemantics fieldSemantics)
         {
-            // TODO: this doesn't work for embedded fields, because schemas.json uses the embedded schema's root element/name as semantic entity name.
             return Semantics.Any(s => s.Equals(fieldSemantics));
-
-            // return Semantics.Any(s => s.Property.Equals(fieldSemantics.Property) && s.Prefix.Equals(fieldSemantics.Prefix));
         }
 
 
