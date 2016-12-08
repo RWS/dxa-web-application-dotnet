@@ -1,4 +1,5 @@
 ﻿using System;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Logging
@@ -6,14 +7,21 @@ namespace Sdl.Web.Common.Logging
     public static class Log
     {
         private static ILogger _logger;
+
         public static ILogger Logger
         {
             get
             {
+                ILogger configuredLogger = SiteConfiguration.Logger;
+                if (configuredLogger != null)
+                {
+                    return configuredLogger;
+                }
+
+                // No Logger configured/initialized yet
                 if (_logger == null)
                 {
                     _logger = new Log4NetLogger();
-                    Log4NetLogger.Configure();
                 }
                 return _logger;
             }

@@ -29,6 +29,15 @@ namespace Sdl.Web.Common.Configuration
 
         #region References to "providers"
         /// <summary>
+        /// Gets the Logger (Logging Provider)
+        /// </summary>
+        /// <remarks>
+        /// This is only set if a Logger is configured explicitly.
+        /// Avoid using this property directly.  For logging, use class <see cref="Log"/>.
+        /// </remarks>
+        public static ILogger Logger { get; private set; }
+
+        /// <summary>
         /// Gets the Cache Provider.
         /// </summary>
         public static ICacheProvider CacheProvider { get; private set; }
@@ -100,10 +109,18 @@ namespace Sdl.Web.Common.Configuration
         /// </remarks>
         public static void InitializeProviders(Func<Type, object> dependencyResolver)
         {
+            // Initialize the Logger before logging anything:
+            Logger = (ILogger) dependencyResolver(typeof(ILogger));
+
             using (new Tracer())
             {
                 string assemblyFileVersion = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
                 Log.Info("-------- Initializing DXA Framework v{0} --------", assemblyFileVersion);
+
+                if (Logger != null)
+                {
+                    Log.Info("Using implementation type '{0}' for interface ILogger.", Logger.GetType().FullName);
+                }
 
                 CacheProvider = GetProvider<ICacheProvider>(dependencyResolver);
                 ContentProvider = GetProvider<IContentProvider>(dependencyResolver);
