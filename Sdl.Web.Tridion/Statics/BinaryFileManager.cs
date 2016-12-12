@@ -6,14 +6,11 @@ using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Web;
-using DD4T.ContentModel;
-using DD4T.ContentModel.Contracts.Caching;
-using DD4T.ContentModel.Exceptions;
-using DD4T.ContentModel.Factories;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Tridion.Mapping;
+using Tridion.ContentDelivery.DynamicContent;
+using Tridion.ContentDelivery.Meta;
 using Image = System.Drawing.Image; // TODO: Shouldn't use System.Drawing namespace in a web application.
 
 namespace Sdl.Web.Tridion.Statics
@@ -56,6 +53,24 @@ namespace Sdl.Web.Tridion.Statics
             }
         }
 
+        private static BinaryMeta GetBinaryMeta(string urlPath, int publicationId)
+        {
+            BinaryMetaFactory binaryMetaFactory = new BinaryMetaFactory();
+            return binaryMetaFactory.GetMetaByUrl(publicationId, urlPath);
+        }
+
+        private static DateTime GetBinaryLastPublishDate(string urlPath, int publicationId)
+        {
+            BinaryMeta binaryMeta = GetBinaryMeta(urlPath, publicationId);
+            if (binaryMeta == null || !binaryMeta.IsComponent)
+            {
+                return DateTime.MinValue;
+            }
+            ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(publicationId);
+            IComponentMeta componentMeta = componentMetaFactory.GetMeta(binaryMeta.Id);
+            return componentMeta.LastPublicationDate;
+        }
+
         /// <summary>
         /// Gets the cached local file for a given URL path.
         /// </summary>
@@ -69,24 +84,12 @@ namespace Sdl.Web.Tridion.Statics
             {
                 Dimensions dimensions;
                 urlPath = StripDimensions(urlPath, out dimensions);
-                
+                int publicationId = Convert.ToInt32(localization.LocalizationId);
+
                 DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
                     urlPath,
                     CacheRegions.BinaryPublishDate,
-                    () => 
-                    {
-                        IBinaryFactory binaryFactory = DD4TFactoryCache.GetBinaryFactory(localization);
-                        try
-                        {
-                            DateTime result = binaryFactory.FindLastPublishedDate(urlPath);
-                            return (result == DateTime.MinValue.AddSeconds(1)) ? DateTime.MinValue : result;
-                        }
-                        catch (NullReferenceException)
-                        {
-                            // DD4T throws a NullReferenceException if the Binary does not exist.
-                            return DateTime.MinValue;
-                        }
-                    }
+                    () => GetBinaryLastPublishDate(urlPath, publicationId)
                     );
 
                 if (lastPublishedDate != DateTime.MinValue)
@@ -112,26 +115,9 @@ namespace Sdl.Web.Tridion.Statics
                     }
                 }
 
-                // the normal situation (where a binary is still in Tridion and it is present on the file system already and it is up to date) is now covered
-                // Let's handle the exception situations. 
-                IBinary binary;
-                try
-                {
-                    IBinaryFactory binaryFactory = DD4TFactoryCache.GetBinaryFactory(localization);
-                    binaryFactory.TryFindBinary(urlPath, out binary);
-                }
-                catch (BinaryNotFoundException)
-                {
-                    // TryFindBinary throws an Exception if not found ?!
-                    binary = null;
-                }
-                catch (Exception ex)
-                {
-                    throw new DxaException(string.Format("Error loading binary for URL '{0}'", urlPath), ex);
-                }
-
-                //For some reason DD4T sometimes returns a non-null binary with null binary data if it doesnt exist
-                if (binary == null || binary.BinaryData == null)
+                // Binary does not exist or cached binary is out-of-date
+                BinaryMeta binaryMeta = GetBinaryMeta(urlPath, publicationId);
+                if (binaryMeta == null)
                 {
                     // Binary does not exist in Tridion, it should be removed from the local file system too
                     if (File.Exists(localFilePath))
@@ -140,8 +126,10 @@ namespace Sdl.Web.Tridion.Statics
                     }
                     throw new DxaItemNotFoundException(urlPath, localization.LocalizationId);
                 }
+                BinaryFactory binaryFactory = new BinaryFactory();
+                BinaryData binaryData = binaryFactory.GetBinary(publicationId, binaryMeta.Id, binaryMeta.VariantId);
 
-                WriteBinaryToFile(binary, localFilePath, dimensions);
+                WriteBinaryToFile(binaryData.Bytes, localFilePath, dimensions);
                 return localFilePath;
             }
         }
@@ -162,7 +150,7 @@ namespace Sdl.Web.Tridion.Statics
         /// <param name="physicalPath">String the file path to write to</param>
         /// <param name="dimensions">Dimensions of file</param>
         /// <returns>True is binary was written to disk, false otherwise</returns>
-        private static bool WriteBinaryToFile(IBinary binary, String physicalPath, Dimensions dimensions)
+        private static bool WriteBinaryToFile(byte[] binary, String physicalPath, Dimensions dimensions)
         {
             using (new Tracer(binary, physicalPath, dimensions))
             {
@@ -178,7 +166,7 @@ namespace Sdl.Web.Tridion.Statics
                         }
                     }
 
-                    byte[] buffer = binary.BinaryData;
+                    byte[] buffer = binary;
                     if (dimensions != null && (dimensions.Width > 0 || dimensions.Height > 0))
                     {
                         buffer = ResizeImage(buffer, dimensions, GetImageFormat(physicalPath));

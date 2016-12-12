@@ -105,6 +105,13 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetStaticContentItem_NonExistent_Exception()
+        {
+            const string testStaticContentItemUrlPath = "/does/not/exist";
+            AssertThrowsException<DxaItemNotFoundException>(() => _testContentProvider.GetStaticContentItem(testStaticContentItemUrlPath, TestFixture.ParentLocalization));
+        }
+
+        [TestMethod]
         public void GetEntityModel_XpmMetadataOnStaging_Success()
         {
             const string testEntityId = TestFixture.ArticleDcpEntityId;
