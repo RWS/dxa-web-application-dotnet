@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Web;
+using System.Web.Configuration;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
@@ -20,6 +21,7 @@ namespace Sdl.Web.Tridion.Context
     public class ContextServiceClaimsProvider : IContextClaimsProvider
     {
         private static readonly ODataContextEngine _contextEngineClient;
+        private static readonly bool _usePublicationEvidence;
 
         /// <summary>
         /// Class constructor
@@ -31,6 +33,17 @@ namespace Sdl.Web.Tridion.Context
                 try
                 {
                     _contextEngineClient = new ODataContextEngine();
+
+                    // The 8.5 Context Service can not handle Publication ID "evidence" if it has not been configured with a reference to CD Data Store (see CRQ-3440).
+                    // To avoid issues with a 8.5 Context Service without this configuration, we only include the Publication ID evidence if explicitly configured.
+                    // The Context Expression Module installer will configure this.
+                    string contextServicePublicationEvidenceSetting = WebConfigurationManager.AppSettings["context-service-publication-evidence"];
+                    Log.Debug("context-service-publication-evidence setting: '{0}'", contextServicePublicationEvidenceSetting);
+
+                    if (!string.IsNullOrEmpty(contextServicePublicationEvidenceSetting))
+                    {
+                        _usePublicationEvidence = Convert.ToBoolean(contextServicePublicationEvidenceSetting);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -85,9 +98,11 @@ namespace Sdl.Web.Tridion.Context
                 IContextMap contextMap;
                 try
                 {
-                    EvidenceBuilder evidenceBuilder = new EvidenceBuilder()
-                        .With("user-agent", userAgent)
-                        .WithPublicationId(Convert.ToInt32(localization.LocalizationId));
+                    EvidenceBuilder evidenceBuilder = new EvidenceBuilder().With("user-agent", userAgent);
+                    if (_usePublicationEvidence)
+                    {
+                        evidenceBuilder.WithPublicationId(Convert.ToInt32(localization.LocalizationId));
+                    }
                     if (!string.IsNullOrEmpty(contextCookieValue))
                     {
                         evidenceBuilder.With("cookie", string.Format("context={0}", contextCookieValue));
