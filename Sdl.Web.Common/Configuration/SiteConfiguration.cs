@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Web.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -26,6 +27,7 @@ namespace Sdl.Web.Common.Configuration
         private static readonly Dictionary<string, object> _localizationLocks = new Dictionary<string, object>();
         //A global lock
         private static readonly object _lock = new object();
+        private static string _defaultModuleName;
 
         #region References to "providers"
         /// <summary>
@@ -192,7 +194,15 @@ namespace Sdl.Web.Common.Configuration
 
         public static string GetDefaultModuleName()
         {
-            return "Core";
+            if (_defaultModuleName == null)
+            {
+                // Might come here multiple times in case of a race condition, but that doesn't matter.
+                string defaultModuleSetting = WebConfigurationManager.AppSettings["default-module"];
+                _defaultModuleName = string.IsNullOrEmpty(defaultModuleSetting) ? "Core" : defaultModuleSetting;
+                Log.Debug("Default Module Name: '{0}'", _defaultModuleName);
+            }
+
+            return _defaultModuleName;
         }
 
         /// <summary>
