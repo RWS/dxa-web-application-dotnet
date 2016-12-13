@@ -138,7 +138,7 @@
       <HintPath>..\packages\Microsoft.Spatial.6.15.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="DD4T.Providers.SDLWeb8.CIL">
-      <HintPath>..\packages\DD4T.Providers.SDLWeb8.CIL.2.0.0.6-alpha\lib\net45\DD4T.Providers.SDLWeb8.CIL.dll</HintPath>
+      <HintPath>..\packages\DD4T.Providers.SDLWeb8.CIL.2.1.0\lib\net45\DD4T.Providers.SDLWeb8.CIL.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Tridion.ContentDelivery">
