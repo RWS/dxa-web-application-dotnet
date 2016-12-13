@@ -21,7 +21,10 @@ namespace Sdl.Web.Mvc.Controllers
         [FormatData]
         public virtual ActionResult Page(string pageUrl)
         {
-            using (new Tracer(pageUrl))
+            // The pageUrl parameter provided by ASP.NET MVC is relative to the Web App, but we need a server-relative (i.e. absolute) URL path.
+            string absoluteUrlPath = Request.Url.AbsolutePath;
+
+            using (new Tracer(pageUrl, absoluteUrlPath))
             {
                 try
                 {
@@ -35,7 +38,7 @@ namespace Sdl.Web.Mvc.Controllers
                     PageModel pageModel;
                     try
                     {
-                        pageModel = ContentProvider.GetPageModel(pageUrl, WebRequestContext.Localization, addIncludes);
+                        pageModel = ContentProvider.GetPageModel(absoluteUrlPath, WebRequestContext.Localization, addIncludes);
                     }
                     catch (DxaItemNotFoundException ex)
                     {
@@ -54,7 +57,7 @@ namespace Sdl.Web.Mvc.Controllers
 
                     WebRequestContext.PageModel = model;
 
-                    Log.Debug("Page Request for URL '{0}' maps to Model [{1}] with View '{2}'", pageUrl, model, model.MvcData.ViewName);
+                    Log.Debug("Page Request for URL path '{0}' maps to Model [{1}] with View '{2}'", absoluteUrlPath, model, model.MvcData.ViewName);
 
                     return View(model.MvcData.ViewName, model);
                 }

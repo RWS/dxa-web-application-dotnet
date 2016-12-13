@@ -11,5 +11,10 @@ namespace Sdl.Web.Common.Mapping
         }
         public string PropertyName { get; set; }
         public string Prefix { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0}:{1}", Prefix, PropertyName);
+        }
     }
 }

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Common.Mapping
 {
@@ -21,6 +24,34 @@ namespace Sdl.Web.Common.Mapping
         /// XML field path.
         /// </summary>
         public string Path { get; set; }
+
+        /// <summary>
+        /// Gets the XPath used in XPM property metadata
+        /// </summary>
+        /// <param name="contextXPath">The context XPath (incl. index predicate) for multi-valued embedded fields.</param>
+        public string GetXPath(string contextXPath)
+        {
+            StringBuilder xpathBuilder = new StringBuilder(IsMetadata ? "tcm:Metadata" : "tcm:Content");
+            foreach (string pathSegment in Path.Split('/').Skip(1))
+            {
+                xpathBuilder.Append("/custom:");
+                xpathBuilder.Append(pathSegment);
+            }
+            string xpath = xpathBuilder.ToString();
+
+            if (string.IsNullOrEmpty(contextXPath))
+            {
+                return xpath;
+            }
+
+            string contextXPathWithoutPredicate = contextXPath.Split('[')[0];
+            if (!xpath.StartsWith(contextXPathWithoutPredicate))
+            {
+                // This should not happen, but if it happens, we just stick with the original XPath.
+                Log.Warn("Semantic field's XPath ('{0}') does not match context XPath '{1}'.", xpath, contextXPath);
+            }
+            return xpath.Replace(contextXPathWithoutPredicate, contextXPath);
+        }
 
         /// <summary>
         /// Is field a metadata field?
@@ -72,6 +103,22 @@ namespace Sdl.Web.Common.Mapping
         public List<SemanticSchemaField> Fields { get; set; }
 
         /// <summary>
+        /// Initializes an existing instance.
+        /// </summary>
+        /// <param name="localization"></param>
+        public void Initialize(Localization localization)
+        {
+            foreach (FieldSemantics fieldSemantics in Semantics)
+            {
+                fieldSemantics.Initialize(localization);
+            }
+            foreach (SemanticSchemaField field in Fields)
+            {
+                field.Initialize(localization);
+            }
+        }
+
+        /// <summary>
         /// Check if current field contains given semantics.
         /// </summary>
         /// <param name="fieldSemantics">The semantics to check against</param>
@@ -89,8 +136,7 @@ namespace Sdl.Web.Common.Mapping
         /// <returns><c>true</c> if this field has given semantics, <c>false</c> otherwise.</returns>
         public bool HasSemantics(FieldSemantics fieldSemantics)
         {
-            // TODO: shouldn't we be matching on fieldSemantics.Entity? return Semantics.Any(s => s.Equals(fieldSemantics));
-            return Semantics.Any(s => s.Property.Equals(fieldSemantics.Property) && s.Prefix.Equals(fieldSemantics.Prefix));
+            return Semantics.Any(s => s.Equals(fieldSemantics));
         }
 
 

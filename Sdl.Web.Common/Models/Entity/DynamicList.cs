@@ -18,21 +18,20 @@ namespace Sdl.Web.Common.Models
             QueryResults = new List<EntityModel>();
         }
 
+        [SemanticProperty(IgnoreMapping = true)]
         public int Start { get; set; }
 
+        [SemanticProperty(IgnoreMapping = true)]
         public bool HasMore { get; set; }
 
         [JsonIgnore]
-        [SemanticProperty(ignoreMapping: true)]
-        public List<EntityModel> QueryResults
-        {
-            get;
-            set;
-        }
-    
+        [SemanticProperty(IgnoreMapping = true)]
+        public List<EntityModel> QueryResults { get; set; }
+
         public abstract Query GetQuery(Localization localization);
 
         [JsonIgnore]
+        [SemanticProperty(IgnoreMapping = true)]
         public abstract Type ResultType { get; }
 
         #region ISyndicationFeedItemProvider members

@@ -408,8 +408,11 @@ namespace Sdl.Web.Tridion.Mapping
                 Type modelPropertyType = modelProperty.PropertyType;
                 bool isCollection = modelPropertyType.IsGenericType && (modelPropertyType.GetGenericTypeDefinition() == typeof(List<>));
                 Type valueType = isCollection ? modelPropertyType.GetGenericArguments()[0] : modelPropertyType;
+                string fieldXPath = null;
+                bool isFieldMapped = false;
 
-                foreach (SemanticProperty semanticProperty in propertySemantics[modelProperty.Name])
+                List<SemanticProperty> semanticProperties = propertySemantics[modelProperty.Name];
+                foreach (SemanticProperty semanticProperty in semanticProperties)
                 {
                     SemanticSchemaField semanticSchemaField;
                     IField dd4tField = GetFieldFromSemantics(mappingData, semanticProperty, out semanticSchemaField);
@@ -420,22 +423,23 @@ namespace Sdl.Web.Tridion.Mapping
                         {
                             modelProperty.SetValue(model, propertyValue);
                         }
-                        xpmPropertyMetadata.Add(modelProperty.Name, dd4tField.XPath);
+                        fieldXPath = dd4tField.XPath;
+                        isFieldMapped = true;
                         break;
                     }
 
                     // Special mapping cases require SourceEntity to be set
-                    if (mappingData.SourceEntity == null)
+                    if (mappingData.SourceEntity != null)
                     {
-                        continue;
-                    }
-
-                    bool processed = false;
-                    if (semanticProperty.PropertyName == "_self")
-                    {
-                        //Map the whole entity to an image property, or a resolved link to the entity to a Url field
-                        if (typeof(MediaItem).IsAssignableFrom(valueType) || typeof(Link).IsAssignableFrom(valueType) || valueType == typeof(string))
+                        if (semanticProperty.PropertyName == "_self")
                         {
+                            // Map the current Component to a MediaItem, Link or String (resolved URL) property.
+                            if (!typeof(MediaItem).IsAssignableFrom(valueType) && !typeof(Link).IsAssignableFrom(valueType) && valueType != typeof(string))
+                            {
+                                throw new DxaException(
+                                    string.Format("Invalid semantics for property {0}.{1}. Properties with [SemanticProperty(\"_self\")] annotation must be of type MediaItem, Link or String.",
+                                        modelType.Name, modelProperty.Name));
+                            }
                             object mappedSelf = MapComponent(mappingData.SourceEntity, valueType, mappingData.Localization);
                             if (isCollection)
                             {
@@ -447,20 +451,45 @@ namespace Sdl.Web.Tridion.Mapping
                             {
                                 modelProperty.SetValue(model, mappedSelf);
                             }
-                            processed = true;
+                            isFieldMapped = true;
+                            break;
+                        }
+
+                        if (semanticProperty.PropertyName == "_all")
+                        {
+                            // Map all fields into a Dictionary property
+                            if (!typeof(IDictionary<string, string>).IsAssignableFrom(modelPropertyType))
+                            {
+                                throw new DxaException(
+                                    string.Format("Invalid semantics for property {0}.{1}. Properties with [SemanticProperty(\"_all\")] annotation must be of type Dictionary<string, string>.",
+                                        modelType.Name, modelProperty.Name));
+                            }
+                            modelProperty.SetValue(model, GetAllFieldsAsDictionary(mappingData.SourceEntity, mappingData.Localization));
+                            isFieldMapped = true;
+                            break;
                         }
                     }
-                    else if (semanticProperty.PropertyName == "_all" && modelProperty.PropertyType == typeof(Dictionary<string, string>))
-                    {
-                        //Map all fields into a single (Dictionary) property
-                        modelProperty.SetValue(model, GetAllFieldsAsDictionary(mappingData.SourceEntity));
-                        processed = true;
-                    }
 
-                    if (processed)
+                    if (semanticSchemaField != null)
                     {
-                        break;
+                        isFieldMapped = true;
+                        if (fieldXPath == null)
+                        {
+                            // Property can be mapped to a CM field, but the field is not present in the DD4T data model (i.e. empty field in CM).
+                            fieldXPath = semanticSchemaField.GetXPath(mappingData.ContextXPath);
+                        }
                     }
+                }
+
+                if (!isFieldMapped)
+                {
+                    Log.Debug("Property {0}.{1} cannot be mapped to a CM field of {2}. Semantic properties: {3}.",
+                        modelType.Name, modelProperty.Name, mappingData.SemanticSchema, string.Join(", ", semanticProperties.Select(sp => sp.ToString())));
+                }
+
+                if (fieldXPath != null)
+                {
+                    xpmPropertyMetadata.Add(modelProperty.Name, fieldXPath);
                 }
             }
 
@@ -519,7 +548,7 @@ namespace Sdl.Web.Tridion.Mapping
                     string entity = mapData.EntityNames[vocab].FirstOrDefault();
                     if (entity != null && mapData.SemanticSchema!=null)
                     {
-                        FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property);
+                        FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property, mapData.Localization);
                         // locate semantic schema field
                         semanticSchemaField = (mapData.EmbeddedSemanticSchemaField == null) ? 
                             mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics) : // Used for top-level fields
@@ -629,9 +658,11 @@ namespace Sdl.Web.Tridion.Mapping
                         break;
 
                     case FieldType.Embedded:
+                        int index = 1;
                         foreach (IFieldSet value in field.EmbeddedValues)
                         {
-                            mappedValues.Add(MapEmbeddedFields(value, modelType, mapData, semanticSchemaField));
+                            string contextXPath = string.Format("{0}[{1}]", field.XPath, index++);
+                            mappedValues.Add(MapEmbeddedFields(value, modelType, mapData, semanticSchemaField, contextXPath));
                         }
                         break;
 
@@ -705,14 +736,18 @@ namespace Sdl.Web.Tridion.Mapping
             return result;
         }
 
+        private static string GetDisplayText(IKeyword keyword)
+        {
+            return string.IsNullOrEmpty(keyword.Description) ? keyword.Title : keyword.Description;
+        }
+
         protected virtual object MapKeyword(IKeyword keyword, Type modelType, Localization localization)
         {
-            string displayText = string.IsNullOrEmpty(keyword.Description) ? keyword.Title : keyword.Description;
             if (modelType == typeof(Tag))
             {
                 return new Tag
                 {
-                    DisplayText = displayText,
+                    DisplayText = GetDisplayText(keyword),
                     Key = string.IsNullOrEmpty(keyword.Key) ? keyword.Id : keyword.Key,
                     TagCategory = keyword.TaxonomyId
                 };
@@ -726,7 +761,7 @@ namespace Sdl.Web.Tridion.Mapping
             
             if (modelType == typeof(string))
             {
-                return displayText;
+                return GetDisplayText(keyword);
             }
 
             if (!typeof(KeywordModel).IsAssignableFrom(modelType))
@@ -805,7 +840,7 @@ namespace Sdl.Web.Tridion.Mapping
             return ModelBuilderPipeline.CreateEntityModel(component, modelType, localization);
         }
 
-        private ViewModel MapEmbeddedFields(IFieldSet embeddedFields, Type modelType, MappingData mapData, SemanticSchemaField semanticSchemaField)
+        private ViewModel MapEmbeddedFields(IFieldSet embeddedFields, Type modelType, MappingData mapData, SemanticSchemaField semanticSchemaField, string contextXPath)
         {
             MappingData embeddedMappingData = new MappingData(mapData)
             {
@@ -813,7 +848,8 @@ namespace Sdl.Web.Tridion.Mapping
                 Content = embeddedFields,
                 Meta = null,
                 EmbeddedSemanticSchemaField = semanticSchemaField,
-                EmbedLevel = mapData.EmbedLevel + 1
+                EmbedLevel = mapData.EmbedLevel + 1,
+                ContextXPath = contextXPath
             };
 
             EntityModel result = (EntityModel) CreateViewModel(embeddedMappingData);
@@ -821,7 +857,7 @@ namespace Sdl.Web.Tridion.Mapping
             return result;
         }
 
-        protected Dictionary<string, string> GetAllFieldsAsDictionary(IComponent component)
+        protected Dictionary<string, string> GetAllFieldsAsDictionary(IComponent component, Localization localization)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             foreach (string fieldname in component.Fields.Keys)
@@ -847,7 +883,7 @@ namespace Sdl.Web.Tridion.Mapping
                     //Default is to add the value as plain text
                     else
                     {
-                        string val = GetFieldValuesAsStrings(component.Fields[fieldname]).FirstOrDefault();
+                        string val = GetFieldValuesAsStrings(component.Fields[fieldname], localization).FirstOrDefault();
                         if (val != null)
                         {
                             values.Add(fieldname, val);
@@ -859,7 +895,7 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 if (!values.ContainsKey(fieldname))
                 {
-                    string val = GetFieldValuesAsStrings(component.MetadataFields[fieldname]).FirstOrDefault();
+                    string val = GetFieldValuesAsStrings(component.MetadataFields[fieldname], localization).FirstOrDefault();
                     if (val != null)
                     {
                         values.Add(fieldname, val);
@@ -869,21 +905,24 @@ namespace Sdl.Web.Tridion.Mapping
             return values;
         }
 
-        private static string[] GetFieldValuesAsStrings(IField field)
+        private static IEnumerable<string> GetFieldValuesAsStrings(IField field, Localization localization)
         {
             switch (field.FieldType)
             {
                 case FieldType.Number:
-                    return field.NumericValues.Select(v => v.ToString(CultureInfo.InvariantCulture)).ToArray();
+                    return field.NumericValues.Select(v => v.ToString(CultureInfo.InvariantCulture));
                 case FieldType.Date:
-                    return field.DateTimeValues.Select(v => v.ToString("s")).ToArray();
+                    return field.DateTimeValues.Select(v => v.ToString("s"));
                 case FieldType.ComponentLink:
+                    return field.LinkedComponentValues.Select(v => SiteConfiguration.LinkResolver.ResolveLink(v.Id));
                 case FieldType.MultiMediaLink:
-                    return field.LinkedComponentValues.Select(v => v.Id).ToArray();
+                    return field.LinkedComponentValues.Select(v => v.Multimedia.Url);
                 case FieldType.Keyword:
-                    return field.KeywordValues.Select(v => v.Id).ToArray();
+                    return field.KeywordValues.Select(v => GetDisplayText(v));
+                case FieldType.Xhtml:
+                    return field.Values.Select(v => SiteConfiguration.RichTextProcessor.ProcessRichText(v, localization).ToString());
                 default:
-                    return field.Values.ToArray();
+                    return field.Values;
             }
         }
 
@@ -895,7 +934,7 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 foreach (IField field in page.MetadataFields.Values)
                 {
-                    ProcessMetadataField(field, meta);
+                    ProcessMetadataField(field, meta, localization);
                 }
             }
             string description = meta.ContainsKey("description") ? meta["description"] : null;
@@ -973,38 +1012,23 @@ namespace Sdl.Web.Tridion.Mapping
             return title + titlePostfix;
         }
 
-        protected virtual void ProcessMetadataField(IField field, IDictionary<string, string> meta)
+        protected virtual void ProcessMetadataField(IField field, IDictionary<string, string> meta, Localization localization)
         {
-            if (field.FieldType==FieldType.Embedded)
+            if (field.FieldType == FieldType.Embedded)
             {
-                if (field.EmbeddedValues!=null && field.EmbeddedValues.Count>0)
+                // Flatten embedded fields
+                if (field.EmbeddedValues!=null && field.EmbeddedValues.Count > 0)
                 {
                     IFieldSet subfields = field.EmbeddedValues[0];
                     foreach (IField subfield in subfields.Values)
                     {
-                        ProcessMetadataField(subfield, meta);
+                        ProcessMetadataField(subfield, meta, localization);
                     }
                 }
             }
             else
             {
-                string value;
-                switch (field.Name)
-                {
-                    case "internalLink":
-                        value = SiteConfiguration.LinkResolver.ResolveLink(field.Value);
-                        break;
-                    case "image":
-                        value = field.LinkedComponentValues[0].Multimedia.Url;
-                        break;
-                    default:
-                        value = String.Join(",", field.Values);
-                        break;
-                }
-                if (value != null && !meta.ContainsKey(field.Name))
-                {
-                    meta.Add(field.Name, value);
-                }
+                meta[field.Name] = string.Join(", ", GetFieldValuesAsStrings(field, localization));
             }
         }
                 

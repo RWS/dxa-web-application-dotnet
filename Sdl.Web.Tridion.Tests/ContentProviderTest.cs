@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -102,6 +102,13 @@ namespace Sdl.Web.Tridion.Tests
             StaticContentItem staticContentItem = _testContentProvider.GetStaticContentItem(testStaticContentItemUrlPath, TestFixture.ParentLocalization);
 
             Assert.IsNotNull(staticContentItem, "staticContentItem");
+        }
+
+        [TestMethod]
+        public void GetStaticContentItem_NonExistent_Exception()
+        {
+            const string testStaticContentItemUrlPath = "/does/not/exist";
+            AssertThrowsException<DxaItemNotFoundException>(() => _testContentProvider.GetStaticContentItem(testStaticContentItemUrlPath, TestFixture.ParentLocalization));
         }
 
         [TestMethod]
@@ -393,9 +400,15 @@ namespace Sdl.Web.Tridion.Tests
             OutputJson(testArticle);
             OutputJson(testEntity);
 
-            // TODO TSI-1946: there are more fields, but only the ones which have a value are represented in XpmPropertyMetadata.
-            Assert.AreEqual(2, testArticle.XpmPropertyMetadata.Count, "testArticle.XpmPropertyMetadata.Count");
-            Assert.AreEqual(0, testEntity.XpmPropertyMetadata.Count, "testEntity.XpmPropertyMetadata.Count");
+            Assert.AreEqual(5, testArticle.XpmPropertyMetadata.Count, "testArticle.XpmPropertyMetadata.Count");
+            Assert.AreEqual("tcm:Content/custom:Article/custom:image", testArticle.XpmPropertyMetadata["Image"], "testArticle.XpmPropertyMetadata[Image]");
+            Assert.AreEqual("tcm:Metadata/custom:Metadata/custom:standardMeta/custom:description", testArticle.XpmPropertyMetadata["Description"], "testArticle.XpmPropertyMetadata[Description]");
+
+            Paragraph testParagraph = testArticle.ArticleBody[0];
+            Assert.AreEqual(4, testParagraph.XpmPropertyMetadata.Count, "testParagraph.XpmPropertyMetadata.Count");
+            Assert.AreEqual("tcm:Content/custom:Article/custom:articleBody[1]/custom:caption", testParagraph.XpmPropertyMetadata["Caption"], "testParagraph.XpmPropertyMetadata[Caption]");
+
+            Assert.AreEqual(7, testEntity.XpmPropertyMetadata.Count, "testEntity.XpmPropertyMetadata.Count");
         }
 
         [TestMethod]
@@ -437,6 +450,55 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(expectedKey, keywordModel.Key, subjectName + ".Key");
             StringAssert.Matches(keywordModel.Id, new Regex(@"\d+"), subjectName + ".Id");
             StringAssert.Matches(keywordModel.TaxonomyId, new Regex(@"\d+"), subjectName + ".TaxonomyId");
+        }
+
+        [TestMethod]
+        public void GetPageModel_Meta_Success() // See TSI-1308
+        {
+            PageModel pageModel = _testContentProvider.GetPageModel(TestFixture.Tsi1308PageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            IDictionary<string, string> pageMeta = pageModel.Meta;
+            Assert.IsNotNull(pageMeta, "pageMeta");
+            Assert.AreEqual(15, pageMeta.Count, "pageMeta.Count");
+            Assert.AreEqual("This is single line text", pageMeta["singleLineText"], "pageMeta[singleLineText]");
+            Assert.AreEqual("This is multi line text line 1\nAnd line 2\n", pageMeta["multiLineText"], "pageMeta[multiLineText]");
+            Assert.AreEqual("This is <strong>rich</strong> text with a <a title=\"Test Article\" href=\"/autotest-parent/test_article_dynamic\">Component Link</a>", pageMeta["richText"], "pageMeta[richText]");
+            Assert.AreEqual("News Article", pageMeta["keyword"], "pageMeta[keyword]");
+            Assert.AreEqual("/autotest-parent/test_article_dynamic", pageMeta["componentLink"], "pageMeta[componentLink]");
+            Assert.AreEqual("/autotest-parent/Images/company-news-placeholder_tcm1065-4480.png", pageMeta["mmComponentLink"], "pageMeta[mmComponentLink]");
+            Assert.AreEqual("1970-12-16T12:34:56", pageMeta["date"], "pageMeta[date]");
+            Assert.AreEqual("666.666", pageMeta["number"], "pageMeta[number]");
+            Assert.AreEqual("Rick Pannekoek", pageMeta["author"], "pageMeta[author]");
+            Assert.AreEqual("TSI-1308 Test Page", pageMeta["og:title"], "pageMeta[og: title]");
+            Assert.AreEqual("TSI-1308 Test Page", pageMeta["description"], "pageMeta[description]");
+        }
+
+        [TestMethod]
+        public void GetPageModel_RetrofitMapping_Success() // See TSI-1757
+        {
+            PageModel pageModel = _testContentProvider.GetPageModel(TestFixture.Tsi1757PageUrlPath, TestFixture.ChildLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Tsi1757TestEntity3 testEntity3 = pageModel.Regions["Main"].Entities[0] as Tsi1757TestEntity3;
+            Assert.IsNotNull(testEntity3, "testEntity3");
+
+            Assert.AreEqual("This is the textField of TSI-1757 Test Component 3", testEntity3.TextField, "testEntity3.TextField");
+            Assert.IsNotNull(testEntity3.CompLinkField, "testEntity3.CompLinkField");
+            Assert.AreEqual(2, testEntity3.CompLinkField.Count, "testEntity3.CompLinkField.Count");
+
+            Tsi1757TestEntity1 testEntity1 = testEntity3.CompLinkField[0] as Tsi1757TestEntity1;
+            Assert.IsNotNull(testEntity1, "testEntity1");
+            Assert.AreEqual("This is the textField of TSI-1757 Test Component 1", testEntity1.TextField, "testEntity1.TextField");
+            Assert.AreEqual("This is the embeddedTextField of TSI-1757 Test Component 1", testEntity1.EmbeddedTextField, "testEntity1.EmbeddedTextField");
+
+            Tsi1757TestEntity2 testEntity2 = testEntity3.CompLinkField[1] as Tsi1757TestEntity2;
+            Assert.IsNotNull(testEntity2, "testEntity2");
+            Assert.AreEqual("This is the textField of TSI-1757 Test Component 2", testEntity2.TextField, "testEntity2.TextField");
         }
 
         [TestMethod]

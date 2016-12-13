@@ -12,9 +12,9 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlWebDeliveryPackageVersion>8.5.0-beta-201611280942</SdlWebDeliveryPackageVersion>
-    <SdlWebContextClientPackageVersion>8.5.0-beta-201611280026</SdlWebContextClientPackageVersion>
-    <SdlWebContextImagePackageVersion>8.5.0-beta-201611280029</SdlWebContextImagePackageVersion>
+    <SdlWebDeliveryPackageVersion>8.5.0</SdlWebDeliveryPackageVersion>
+    <SdlWebContextClientPackageVersion>8.5.0</SdlWebContextClientPackageVersion>
+    <SdlWebContextImagePackageVersion>8.5.0</SdlWebContextImagePackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -45,27 +45,27 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DD4T.ContentModel">
-      <HintPath>..\packages\DD4T.Model.2.0.7\lib\net45\DD4T.ContentModel.dll</HintPath>
+      <HintPath>..\packages\DD4T.Model.2.1.0\lib\net45\DD4T.ContentModel.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DD4T.ContentModel.Contracts">
-      <HintPath>..\packages\DD4T.Model.2.0.7\lib\net45\DD4T.ContentModel.Contracts.dll</HintPath>
+      <HintPath>..\packages\DD4T.Model.2.1.0\lib\net45\DD4T.ContentModel.Contracts.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DD4T.Core.Contracts">
-      <HintPath>..\packages\DD4T.Core.2.0.8\lib\net45\DD4T.Core.Contracts.dll</HintPath>
+      <HintPath>..\packages\DD4T.Core.2.1.1.144-alpha\lib\net45\DD4T.Core.Contracts.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DD4T.Factories">
-      <HintPath>..\packages\DD4T.Core.2.0.8\lib\net45\DD4T.Factories.dll</HintPath>
+      <HintPath>..\packages\DD4T.Core.2.1.1.144-alpha\lib\net45\DD4T.Factories.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DD4T.Serialization">
-      <HintPath>..\packages\DD4T.Model.2.0.7\lib\net45\DD4T.Serialization.dll</HintPath>
+      <HintPath>..\packages\DD4T.Model.2.1.0\lib\net45\DD4T.Serialization.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DD4T.Utils">
-      <HintPath>..\packages\DD4T.Core.2.0.8\lib\net45\DD4T.Utils.dll</HintPath>
+      <HintPath>..\packages\DD4T.Core.2.1.1.144-alpha\lib\net45\DD4T.Utils.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Extensions.Caching.Abstractions">
@@ -138,7 +138,7 @@
       <HintPath>..\packages\Microsoft.Spatial.6.15.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="DD4T.Providers.SDLWeb8.CIL">
-      <HintPath>..\packages\DD4T.Providers.SDLWeb8.CIL.2.0.0.6-alpha\lib\net45\DD4T.Providers.SDLWeb8.CIL.dll</HintPath>
+      <HintPath>..\packages\DD4T.Providers.SDLWeb8.CIL.2.1.0\lib\net45\DD4T.Providers.SDLWeb8.CIL.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Tridion.ContentDelivery">

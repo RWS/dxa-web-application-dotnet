@@ -220,7 +220,7 @@ namespace Sdl.Web.Common.Models
             semanticInfo.MappedSemanticTypes.Add(SemanticMapping.GetQualifiedTypeName(bareTypeName));
 
             // Extract semantic info from SemanticEntity attributes on the Model Type.
-            foreach (SemanticEntityAttribute attribute in modelType.GetCustomAttributes(true).Where(a => a is SemanticEntityAttribute))
+            foreach (SemanticEntityAttribute attribute in modelType.GetCustomAttributes<SemanticEntityAttribute>(inherit: true))
             {
                 semanticInfo.MappedSemanticTypes.Add(SemanticMapping.GetQualifiedTypeName(attribute.EntityName, attribute.Vocab));
 
@@ -251,7 +251,7 @@ namespace Sdl.Web.Common.Models
             // Extract semantic info from SemanticEntity attributes on the Model Type's properties
             foreach (MemberInfo memberInfo in modelType.GetMembers(BindingFlags.Public | BindingFlags.Instance))
             {
-                foreach (SemanticPropertyAttribute attribute in memberInfo.GetCustomAttributes(true).Where(a => a is SemanticPropertyAttribute))
+                foreach (SemanticPropertyAttribute attribute in memberInfo.GetCustomAttributes<SemanticPropertyAttribute>(inherit: true))
                 {
                     if (string.IsNullOrEmpty(attribute.PropertyName))
                     {

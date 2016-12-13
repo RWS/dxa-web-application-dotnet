@@ -1,16 +1,16 @@
 ﻿@model RegionModel
 @if (WebRequestContext.IsInclude)
 {
-    <div class="xpm-button">
-        <a href="javascript:history.back()" title="Go Back" class="fa-stack fa-lg">
-            <i class="fa fa-square fa-stack-2x"></i>
-            <i class="fa fa-arrow-left fa-inverse fa-stack-1x"></i>
+    <div class="xpm-button @Model.HtmlClasses">
+        <a href=" javascript:history.back()" title="Go Back" class="fa-stack fa-lg">
+        <i class="fa fa-square fa-stack-2x"></i>
+        <i class="fa fa-arrow-left fa-inverse fa-stack-1x"></i>
         </a>
     </div>
 }
 else
 {
-    <div class="xpm-button">
+    <div class="xpm-button @Model.HtmlClasses">
         @{ string includePageUrlPath = string.Format("{0}/system/include/{1}", WebRequestContext.Localization.Path, Model.XpmMetadata[RegionModel.IncludedFromPageFileNameXpmMetadataKey]); }
         <a href="@includePageUrlPath" title="Edit @Model.XpmMetadata[RegionModel.IncludedFromPageTitleXpmMetadataKey]" class="fa-stack fa-lg">
             <i class="fa fa-square fa-stack-2x"></i>

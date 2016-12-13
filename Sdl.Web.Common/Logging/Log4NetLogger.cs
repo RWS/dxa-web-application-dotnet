@@ -15,6 +15,11 @@ namespace Sdl.Web.Common.Logging
 
         private const string TraceFormat = "url:{0},type:{1},time:{2},details:{3}";
 
+        public Log4NetLogger()
+        {
+            Configure();
+        }
+
         #region ILogger members
 
         public void Trace(string messageFormat, params object[] parameters)

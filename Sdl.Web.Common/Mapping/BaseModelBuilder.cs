@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -9,22 +8,19 @@ namespace Sdl.Web.Common.Mapping
 {
     public abstract class BaseModelBuilder
     {
-        private static readonly object SemanticsLock = new object();
+        private static readonly Dictionary<Type, Dictionary<string, List<SemanticProperty>>> _semanticPropertiesCache = 
+            new Dictionary<Type, Dictionary<string, List<SemanticProperty>>>();
 
-        private static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> _entityPropertySemantics;
+        [Obsolete("Deprecated in DXA 1.7.")]
         public static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> EntityPropertySemantics 
         {
             get
             {
-                if (_entityPropertySemantics == null)
-                {
-                    _entityPropertySemantics = new Dictionary<Type, Dictionary<string, List<SemanticProperty>>>();
-                }
-                return _entityPropertySemantics;
+                return _semanticPropertiesCache;
             }
             set
             {
-                _entityPropertySemantics = value;
+                throw new NotSupportedException("Setting this property is not supported in DXA 1.7.");
             }
         }        
 
@@ -74,78 +70,93 @@ namespace Sdl.Web.Common.Mapping
 
         protected virtual Dictionary<string, List<SemanticProperty>> LoadPropertySemantics(Type type)
         {
-            lock (SemanticsLock)
+            lock (_semanticPropertiesCache)
             {
-                if (!EntityPropertySemantics.ContainsKey(type))
+                // Try to get cached semantics
+                Dictionary<string, List<SemanticProperty>> result;
+                if (_semanticPropertiesCache.TryGetValue(type, out result))
                 {
-                    //The default prefix is empty - this implies that the prefix should be inherited from the parent object default prefix
-                    string defaultPrefix = String.Empty;
-                    bool mapAllProperties = true;
-                    SemanticDefaultsAttribute semanticDefaultsAttr = type.GetCustomAttributes().OfType<SemanticDefaultsAttribute>().FirstOrDefault();
-                    if (semanticDefaultsAttr != null)
-                    {
-                        defaultPrefix = semanticDefaultsAttr.Prefix;
-                        mapAllProperties = semanticDefaultsAttr.MapAllProperties;
-                    }
-
-                    Dictionary<string, List<SemanticProperty>> result = new Dictionary<string, List<SemanticProperty>>();
-                    foreach (PropertyInfo pi in type.GetProperties())
-                    {
-                        string name = pi.Name;
-                        //flag to indicate we have processed a default mapping, or we explicitly should ignore this property when mapping
-                        bool ignore = false;
-                        foreach (SemanticPropertyAttribute semanticPropertyAttr in pi.GetCustomAttributes(true).OfType<SemanticPropertyAttribute>())
-                        {
-                            if (!semanticPropertyAttr.IgnoreMapping)
-                            {
-                                if (!result.ContainsKey(name))
-                                {
-                                    result.Add(name, new List<SemanticProperty>());
-                                }
-                                string[] propertyNameParts = semanticPropertyAttr.PropertyName.Split(':');
-                                if (propertyNameParts.Length > 1)
-                                {
-                                    result[name].Add(new SemanticProperty(propertyNameParts[0], propertyNameParts[1]));
-                                }
-                                else
-                                {
-                                    //Add the default prefix and set the ignore flag - so no need to apply default mapping using property name
-                                    result[name].Add(new SemanticProperty(defaultPrefix, propertyNameParts[0]));
-                                    ignore = true;
-                                }
-                            }
-                            else
-                            {
-                                ignore = true;
-                            }
-                        }
-                        if (!ignore && mapAllProperties)
-                        {
-                            if (!result.ContainsKey(name))
-                            {
-                                result.Add(name, new List<SemanticProperty>());
-                            }
-                            //Add default semantics 
-                            result[name].Add(GetDefaultPropertySemantics(pi, defaultPrefix));
-                        }
-
-                    }
-                    EntityPropertySemantics.Add(type, result);
+                    return result;
                 }
+
+                string defaultPrefix;
+                bool mapAllProperties;
+                SemanticDefaultsAttribute semanticDefaultsAttr = type.GetCustomAttribute<SemanticDefaultsAttribute>();
+                if (semanticDefaultsAttr == null)
+                {
+                    defaultPrefix = string.Empty;
+                    mapAllProperties = true;
+                }
+                else
+                {
+                    defaultPrefix = semanticDefaultsAttr.Prefix;
+                    mapAllProperties = semanticDefaultsAttr.MapAllProperties;
+                }
+
+                result = new Dictionary<string, List<SemanticProperty>>();
+                foreach (PropertyInfo property in type.GetProperties())
+                {
+                    string propertyName = property.Name;
+
+                    bool ignoreMapping = false;
+                    bool useImplicitMapping = mapAllProperties;
+                    List<SemanticProperty> semanticProperties = new List<SemanticProperty>();
+                    foreach (SemanticPropertyAttribute semanticPropertyAttr in property.GetCustomAttributes<SemanticPropertyAttribute>(true))
+                    {
+                        if (semanticPropertyAttr.IgnoreMapping)
+                        {
+                            ignoreMapping = true;
+                            break;
+                        }
+
+                        string[] semanticPropertyNameParts = semanticPropertyAttr.PropertyName.Split(':');
+                        if (semanticPropertyNameParts.Length > 1)
+                        {
+                            semanticProperties.Add(new SemanticProperty(semanticPropertyNameParts[0], semanticPropertyNameParts[1]));
+                        }
+                        else
+                        {
+                            semanticProperties.Add(new SemanticProperty(defaultPrefix, semanticPropertyNameParts[0]));
+                            useImplicitMapping = false;
+                        }
+                    }
+
+                    if (useImplicitMapping)
+                    {
+                        semanticProperties.Add(GetDefaultPropertySemantics(property, defaultPrefix));
+                    }
+
+                    if (ignoreMapping || semanticProperties.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    if (result.ContainsKey(propertyName))
+                    {
+                        // Properties with same name can exist is a property is reintroduced with a different signature in a subclass.
+                        Log.Debug("Property with name '{0}' is declared multiple times in type {1}.", propertyName, type.FullName);
+                        continue;
+                    }
+
+                    result.Add(propertyName, semanticProperties);
+                }
+
+                _semanticPropertiesCache.Add(type, result);
+
+                return result;
             }
-            return EntityPropertySemantics[type];
         }
 
-        protected virtual SemanticProperty GetDefaultPropertySemantics(PropertyInfo pi, string defaultPrefix)
+        protected virtual SemanticProperty GetDefaultPropertySemantics(PropertyInfo property, string defaultPrefix)
         {
-            //This is where we map model class property names to Tridion schema xml field names
-            //Which is: the property name with the first character lower case and the last character removed if its an 's' and a List<> type (so Paragraphs becomes paragraph etc.)
-            string name = pi.Name.Substring(0, 1).ToLower() + pi.Name.Substring(1);
-            if (pi.PropertyType.IsGenericType && pi.PropertyType.GetGenericTypeDefinition() == typeof(List<>) && name.EndsWith("s"))
+            // Transform Pascal case into camel case.
+            string semanticPropertyName = property.Name.Substring(0, 1).ToLower() + property.Name.Substring(1);
+            if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>) && semanticPropertyName.EndsWith("s"))
             {
-                name = name.Substring(0,name.Length-1);
+                // Remove trailing 's' of List property name
+                semanticPropertyName = semanticPropertyName.Substring(0, semanticPropertyName.Length-1);
             }
-            return new SemanticProperty(defaultPrefix, name);
+            return new SemanticProperty(defaultPrefix, semanticPropertyName);
         }
     }
 }
