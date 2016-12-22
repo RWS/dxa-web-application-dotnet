@@ -28,6 +28,7 @@ namespace Sdl.Web.Tridion.Tests
         internal const string Tsi811PageUrlPath = "/autotest-parent/regression/tsi-811";
         internal const string Tsi1308PageUrlPath = "/autotest-parent/regression/tsi-1308";
         internal const string Tsi1757PageUrlPath = "/autotest-child/regression/tsi-1757";
+        internal const string Tsi2225PageUrlPath = "/autotest-parent/regression/tsi-2225";
         internal const string TaxonomyTestPage1UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1.html";
         internal const string TaxonomyTestPage2UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-2.html";
         internal const string TaxonomyIndexPageUrlPath = "/autotest-parent/regression/taxonomy";

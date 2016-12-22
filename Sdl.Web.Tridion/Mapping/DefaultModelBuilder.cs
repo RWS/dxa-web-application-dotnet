@@ -905,22 +905,36 @@ namespace Sdl.Web.Tridion.Mapping
             return values;
         }
 
-        private static IEnumerable<string> GetFieldValuesAsStrings(IField field, Localization localization)
+        private static IEnumerable<string> GetFieldValuesAsStrings(IField field, Localization localization, bool resolveComponentLinks = false)
         {
             switch (field.FieldType)
             {
                 case FieldType.Number:
                     return field.NumericValues.Select(v => v.ToString(CultureInfo.InvariantCulture));
+
                 case FieldType.Date:
                     return field.DateTimeValues.Select(v => v.ToString("s"));
+
                 case FieldType.ComponentLink:
-                    return field.LinkedComponentValues.Select(v => SiteConfiguration.LinkResolver.ResolveLink(v.Id));
+                    if (resolveComponentLinks)
+                    {
+                        return field.LinkedComponentValues.Select(v => SiteConfiguration.LinkResolver.ResolveLink(v.Id));
+                    }
+                    return field.LinkedComponentValues.Select(v => v.Id);
+
                 case FieldType.MultiMediaLink:
-                    return field.LinkedComponentValues.Select(v => v.Multimedia.Url);
+                    if (resolveComponentLinks)
+                    {
+                        return field.LinkedComponentValues.Select(v => v.Multimedia.Url);
+                    }
+                    return field.LinkedComponentValues.Select(v => v.Id);
+
                 case FieldType.Keyword:
                     return field.KeywordValues.Select(v => GetDisplayText(v));
+
                 case FieldType.Xhtml:
                     return field.Values.Select(v => SiteConfiguration.RichTextProcessor.ProcessRichText(v, localization).ToString());
+
                 default:
                     return field.Values;
             }
@@ -1028,7 +1042,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
             else
             {
-                meta[field.Name] = string.Join(", ", GetFieldValuesAsStrings(field, localization));
+                meta[field.Name] = string.Join(", ", GetFieldValuesAsStrings(field, localization, resolveComponentLinks: true));
             }
         }
                 
