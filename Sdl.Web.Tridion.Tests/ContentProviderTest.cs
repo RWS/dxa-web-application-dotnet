@@ -502,6 +502,21 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetPageModel_LanguageSelector_Success() // See TSI-2225
+        {
+            PageModel pageModel = _testContentProvider.GetPageModel(TestFixture.Tsi2225PageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Common.Models.Configuration configEntity = pageModel.Regions["Nav"].Entities[0] as Common.Models.Configuration;
+            Assert.IsNotNull(configEntity, "configEntity");
+            Assert.AreEqual("tcm:1065-9712", configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultCOntentLink']");
+            Assert.AreEqual("pt,mx", configEntity.Settings["suppressLocalizations"], "configEntity.Settings['suppressLocalizations']");
+        }
+
+
+        [TestMethod]
         public void PopulateDynamicList_TeaserFallbackToDescription_Success() // See TSI-1852
         {
             string testPageUrlPath = TestFixture.Tsi1852PageUrlPath;

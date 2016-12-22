@@ -12,7 +12,6 @@ namespace Sdl.Web.Common.Models
     [Serializable]
     public class SitemapItem : EntityModel
     {
-
         /// <summary>
         /// Represents the possible values for <see cref="SitemapItem.Type"/>
         /// </summary>
@@ -35,7 +34,20 @@ namespace Sdl.Web.Common.Models
         }
 
         public string Title { get; set; }
-        public string Url { get; set; }
+
+        private Lazy<string> _url;
+        public string Url 
+        {
+            get
+            {
+                return _url.Value;
+            }
+            set
+            {
+                _url = new Lazy<string>(()=>ResolveUrl(value), true);
+            }
+        }
+
         public string Type { get; set; }
         public List<SitemapItem> Items { get; set; }
         public DateTime? PublishedDate { get; set; } // NOTE: the type was changed from type string in DXA 1.6. It (de)serializes the same to/from JSON, though.
@@ -54,14 +66,9 @@ namespace Sdl.Web.Common.Models
         /// <returns>The <see cref="Link"/> Entity Model.</returns>
         public virtual Link CreateLink(Localization localization)
         {
-            string linkUrl = Url;
-            if (linkUrl != null && linkUrl.StartsWith("tcm:"))
-            {
-                linkUrl = SiteConfiguration.LinkResolver.ResolveLink(linkUrl);
-            }
             return new Link
             {
-                Url = linkUrl,
+                Url = Url,
                 LinkText = Title
             };
         }
@@ -81,5 +88,18 @@ namespace Sdl.Web.Common.Models
             return (Items == null) ? null : Items.Select(i => i.FindSitemapItem(urlPath)).FirstOrDefault(i => i != null);
         }
 
+        /// <summary>
+        /// Given a url if it represents a tcm item attempt to resolve to real url
+        /// </summary>
+        /// <param name="url">Url to attempt to resolve</param>
+        /// <returns>Resolved url</returns>
+        protected string ResolveUrl(string url)
+        {
+            if (url != null && url.StartsWith("tcm:"))
+            {
+                return SiteConfiguration.LinkResolver.ResolveLink(url);
+            }
+            return url;
+        }
     }
 }
