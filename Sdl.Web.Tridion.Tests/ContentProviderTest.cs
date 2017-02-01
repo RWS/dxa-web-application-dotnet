@@ -140,11 +140,11 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(15, pageMeta.Count, "pageMeta.Count");
             Assert.AreEqual("This is single line text", pageMeta["singleLineText"], "pageMeta[singleLineText]");
             Assert.AreEqual("This is multi line text line 1\nAnd line 2\n", pageMeta["multiLineText"], "pageMeta[multiLineText]");
-            Assert.AreEqual("This is <strong>rich</strong> text with a <a title=\"Test Article\" href=\"/autotest-parent/test_article_dynamic\">Component Link</a>", pageMeta["richText"], "pageMeta[richText]");
+            Assert.AreEqual($"This is <strong>rich</strong> text with a <a title=\"Test Article\" href=\"{TestLocalization.Path}/test_article_dynamic\">Component Link</a>", pageMeta["richText"], "pageMeta[richText]");
             Assert.AreEqual("News Article", pageMeta["keyword"], "pageMeta[keyword]");
-            Assert.AreEqual("/autotest-parent/test_article_dynamic", pageMeta["componentLink"], "pageMeta[componentLink]");
-            Assert.AreEqual("/autotest-parent/Images/company-news-placeholder_tcm1065-4480.png", pageMeta["mmComponentLink"], "pageMeta[mmComponentLink]");
-            Assert.AreEqual("1970-12-16T12:34:56", pageMeta["date"], "pageMeta[date]");
+            Assert.AreEqual($"{TestLocalization.Path}/test_article_dynamic", pageMeta["componentLink"], "pageMeta[componentLink]");
+            Assert.AreEqual($"{TestLocalization.Path}/Images/company-news-placeholder_tcm{TestLocalization.Id}-4480.png", pageMeta["mmComponentLink"], "pageMeta[mmComponentLink]");
+            StringAssert.StartsWith(pageMeta["date"], "1970-12-16T12:34:56", "pageMeta[date]");
             Assert.AreEqual("666.666", pageMeta["number"], "pageMeta[number]");
             Assert.AreEqual("Rick Pannekoek", pageMeta["author"], "pageMeta[author]");
             Assert.AreEqual("TSI-1308 Test Page", pageMeta["og:title"], "pageMeta[og: title]");

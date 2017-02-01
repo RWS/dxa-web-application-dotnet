@@ -38,7 +38,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                     HtmlClasses = pageModelData.HtmlClasses,
                     MvcData = CreateMvcData(pageModelData.MvcData, "PageModel"),
                     XpmMetadata = pageModelData.XpmMetadata,
-                    Meta = ResolveMetaLinks(pageModelData.Meta),
+                    Meta = ResolveMetaLinks(pageModelData.Meta), // TODO TSI-1267: Link Resolving should eventually be done in Model Service. 
                     Title = pageModelData.Title
                 };
 
@@ -135,7 +135,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             Dictionary<string, string> result = new Dictionary<string, string>(meta.Count);
             foreach (KeyValuePair<string, string> kvp in meta)
             {
-                string resolvedValue = _tcmUriRegEx.Replace(kvp.Value, match => linkResolver.ResolveLink(match.Value));
+                string resolvedValue = _tcmUriRegEx.Replace(kvp.Value, match => linkResolver.ResolveLink(match.Value, resolveToBinary: true));
                 result.Add(kvp.Key, resolvedValue);
             }
 

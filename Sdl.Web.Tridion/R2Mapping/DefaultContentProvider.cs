@@ -47,7 +47,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 // TODO: View Model Caching
                 PageModelData pageModelData = JsonConvert.DeserializeObject<PageModelData>(pageContent, DataModelBinder.SerializerSettings);
                 PageModel pageModel = ModelBuilderPipeline.CreatePageModel(pageModelData, addIncludes, localization);
-                pageModel.Url = canonicalUrlPath;
+                pageModel.Url = canonicalUrlPath; // TODO: generate canonical Page URL on CM-side (?)
 
                 return pageModel;
             }
