@@ -131,7 +131,7 @@ namespace Sdl.Web.Tridion.Navigation
         {
             using (new Tracer(localization))
             {
-                string navigationJsonUrlPath = SiteConfiguration.LocalizeUrl("navigation.json", localization);
+                string navigationJsonUrlPath = localization.GetAbsoluteUrlPath("navigation.json");
 
                 Log.Debug("Deserializing Navigation Model from raw content URL '{0}'", navigationJsonUrlPath);
                 IRawDataProvider rawDataProvider = SiteConfiguration.ContentProvider as IRawDataProvider;

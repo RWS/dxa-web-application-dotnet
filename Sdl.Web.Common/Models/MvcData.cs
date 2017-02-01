@@ -17,8 +17,8 @@ namespace Sdl.Web.Common.Models
         public string ViewName { get; set; }
         public string AreaName { get; set; }
         public string RegionName { get; set; }
-        public string RegionAreaName { get; set; } // TODO: Do we really need this?
-        public Dictionary<string, string> RouteValues { get; set; }
+        public string RegionAreaName { get; set; } // TODO TSI-878: Do we really need this?
+        public Dictionary<string, string> RouteValues { get; set; } // TODO TSI-878: deprecate/rename to Parameters
 
         #region Constructors
         /// <summary>

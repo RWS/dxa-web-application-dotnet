@@ -31,7 +31,7 @@ namespace Sdl.Web.Common.Models
         public IDictionary<string, string> Meta
         {
             get;
-            private set;
+            set;
         }
 
         /// <summary>

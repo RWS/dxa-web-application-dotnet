@@ -22,28 +22,6 @@ namespace Sdl.Web.Common.Interfaces
     /// </remarks>
     public interface IContentProvider
     {
-        #region Obsolete methods
-        [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.LinkResolver or SiteConfiguration.RichTextProcessor to get the new extension points.")]
-        IContentResolver ContentResolver { get; set; }
-
-        /// <summary>
-        /// Gets a Page Model for a given URL.
-        /// </summary>
-        /// <param name="urlPath">The URL.</param>
-        /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
-        /// <returns>The Page Model.</returns>
-        [Obsolete("Deprecated in DXA 1.1. Use the overload that has a Localization parameter.")]
-        PageModel GetPageModel(string urlPath, bool addIncludes = true);
-
-        /// <summary>
-        /// Populates a Dynamic List by executing the query it specifies.
-        /// </summary>
-        /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
-        [Obsolete("Deprecated in DXA 1.1. Use the overload that has a Localization parameter.")]
-        DynamicList PopulateDynamicList(DynamicList dynamicList);
-        #endregion
-
-
         /// <summary>
         /// Gets a Page Model for a given URL path.
         /// </summary>

@@ -318,7 +318,7 @@ namespace Sdl.Web.Tridion.Mapping
                 IEnumerable<string> includePageUrls = localization.GetIncludePageUrls(pageTemplateTcmUriParts[1]);
                 foreach (string includePageUrl in includePageUrls)
                 {
-                    IPage includePage = GetPage(SiteConfiguration.LocalizeUrl(includePageUrl, localization), localization);
+                    IPage includePage = GetPage(localization.GetAbsoluteUrlPath(includePageUrl), localization);
                     if (includePage == null)
                     {
                         Log.Error("Include Page '{0}' not found.", includePageUrl);

@@ -33,12 +33,15 @@ namespace Sdl.Web.Common.Configuration
         private IDictionary<string, SemanticVocabulary> _semanticVocabularyMap; 
         private readonly object _loadLock = new object();
 
+        public string Id => _data.Id;
+
         public string Path {
             get { return _data.Path; }
             set { _data.Path = value != null && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value; }
         }
-        
-        public string Culture { 
+
+        public string Culture
+        {
             get
             {
                 return _culture;
@@ -71,6 +74,7 @@ namespace Sdl.Web.Common.Configuration
             set { _data.Language = value; }
         }
 
+        // TODO TSI-878: deprecate (should use Id instead)
         public string LocalizationId
         {
             get { return _data.Id; }
@@ -245,6 +249,14 @@ namespace Sdl.Web.Common.Configuration
             }
             return _resources;
         }
+
+        /// <summary>
+        /// Gets an absolute (server-relative) URL path for a given context-relative URL path.
+        /// </summary>
+        /// <param name="contextRelativeUrlPath">The context-relative URL path. Should not start with a slash.</param>
+        /// <returns>The absolute URL path.</returns>
+        public string GetAbsoluteUrlPath(string contextRelativeUrlPath)
+            => (contextRelativeUrlPath.StartsWith("/")) ? Path + contextRelativeUrlPath : $"{Path}/{contextRelativeUrlPath}";
 
         /// <summary>
         /// Gets a versioned URL (including the version number of the HTML design/assets).

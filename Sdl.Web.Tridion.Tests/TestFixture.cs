@@ -38,9 +38,15 @@ namespace Sdl.Web.Tridion.Tests
         internal const string Keyword1_1Title = "Keyword 1.1";
         internal const string Keyword1_2Title = "Keyword 1.2";
 
+        internal const string ArticlePageRelativeUrlPath = "test_article_page.html";
+        internal const string Tsi1278PageRelativeUrlPath = "tsi-1278_trådløst.html";
+        internal const string MediaManagerTestPageRelativeUrlPath = "mm_test.html";
+        internal const string Tsi1308PageRelativeUrlPath = "regression/tsi-1308";
+
         private static readonly IEnumerable<Localization> _testLocalizations;
         private static readonly Localization _parentLocalization;
         private static readonly Localization _childLocalization;
+        private static readonly Localization _r2TestLocalization;
 
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
@@ -71,7 +77,13 @@ namespace Sdl.Web.Tridion.Tests
                 Path = "/autotest-child"
             };
 
-            _testLocalizations = new[] { _parentLocalization, _childLocalization };
+            _r2TestLocalization = new Localization
+            {
+                LocalizationId = "1081",
+                Path = "/autotest-r2"
+            };
+
+            _testLocalizations = new[] { _parentLocalization, _childLocalization, _r2TestLocalization };
 
             TestRegistration.RegisterViewModels();
         }
@@ -96,6 +108,16 @@ namespace Sdl.Web.Tridion.Tests
                 return _childLocalization;
             }
         }
+
+        internal static Localization R2TestLocalization
+        {
+            get
+            {
+                _r2TestLocalization.EnsureInitialized();
+                return _r2TestLocalization;
+            }
+        }
+
 
         internal static void InitializeProviders()
         {

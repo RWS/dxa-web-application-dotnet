@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <SdlDxaDataModelPackageVersion>2.0.0-alpha-201701301042</SdlDxaDataModelPackageVersion>
     <SdlWebDeliveryPackageVersion>8.5.0</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>8.5.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>8.5.0</SdlWebContextImagePackageVersion>
@@ -89,6 +90,10 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="Sdl.Web.DataModel">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Sdl.Dxa.DataModel.$(SdlDxaDataModelPackageVersion)\lib\net452\Sdl.Web.DataModel.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Delivery.Caching">
       <SpecificVersion>False</SpecificVersion>
@@ -193,6 +198,11 @@
     <Compile Include="Query\BrokerQuery.cs" />
     <Compile Include="..\CommonAssemblyInfo.cs" />
     <Compile Include="ContentManager\TcmUri.cs" />
+    <Compile Include="R2Mapping\IEntityModelBuilder.cs" />
+    <Compile Include="R2Mapping\IPageModelBuilder.cs" />
+    <Compile Include="R2Mapping\ModelBuilderPipeline.cs" />
+    <Compile Include="R2Mapping\DefaultContentProvider.cs" />
+    <Compile Include="R2Mapping\DefaultModelBuilder.cs" />
     <Compile Include="Statics\BinaryFileManager.cs" />
     <Compile Include="Statics\NamedLocker.cs" />
   </ItemGroup>
