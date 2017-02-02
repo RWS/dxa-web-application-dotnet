@@ -14,11 +14,10 @@ namespace Sdl.Web.Tridion.R2Mapping
         /// <summary>
         /// Builds a strongly typed Entity Model based on a given DXA R2 Data Model.
         /// </summary>
+        /// <param name="entityModel">The strongly typed Entity Model to build. Is <c>null</c> for the first Entity Model Builder in the pipeline.</param>
         /// <param name="entityModelData">The DXA R2 Data Model.</param>
         /// <param name="baseModelType">The base type for the Entity Model to build.</param>
-        /// <param name="inputEntityModel">Strongly typed Entity Model created by preceding Entity Model Builder; is <c>null</c> for the first Entity Model Builder in the chain.</param>
         /// <param name="localization">The context <see cref="Localization"/>.</param>
-        /// <returns>The strongly typed Entity Model. Will be of type <paramref name="baseModelType"/> or a subclass.</returns>
-        EntityModel BuildEntityModel(EntityModelData entityModelData, Type baseModelType, EntityModel inputEntityModel, Localization localization);
+        void BuildEntityModel(ref EntityModel entityModel, EntityModelData entityModelData, Type baseModelType, Localization localization);
     }
 }

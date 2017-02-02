@@ -13,11 +13,10 @@ namespace Sdl.Web.Tridion.R2Mapping
         /// <summary>
         /// Builds a strongly typed Page Model from a given DXA R2 Data Model.
         /// </summary>
+        /// <param name="pageModel">The strongly typed Page Model to build. Is <c>null</c> for the first Page Model Builder in the pipeline.</param>
         /// <param name="pageModelData">The DXA R2 Data Model.</param>
         /// <param name="includePageRegions">Indicates whether Include Page Regions should be included.</param>
-        /// <param name="inputPageModel">Strongly typed Page Model created by preceding Page Model Builder; is <c>null</c> for the first Page Model Builder in the chain.</param>
         /// <param name="localization">The context <see cref="Localization"/>.</param>
-        /// <returns>The strongly typed Page Model.</returns>
-        PageModel BuildPageModel(PageModelData pageModelData, bool includePageRegions, PageModel inputPageModel, Localization localization);
+        void BuildPageModel(ref PageModel pageModel, PageModelData pageModelData, bool includePageRegions, Localization localization);
     }
 }

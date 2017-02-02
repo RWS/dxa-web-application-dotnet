@@ -4,7 +4,7 @@ using Sdl.Web.Common.Configuration;
 namespace Sdl.Web.Common.Mapping
 {
     /// <summary>
-    /// General Semantic Mapping Class which reads schema mapping from json files on disk
+    /// Starting point for Semantic Mapping functionality.
     /// </summary>
     public static class SemanticMapping
     {
@@ -17,6 +17,7 @@ namespace Sdl.Web.Common.Mapping
         /// Default semantic vocabulary.
         /// </summary>
         public const string DefaultVocabulary = "http://www.sdl.com/web/schemas/core";
+
 
         /// <summary>
         /// Gets a qualified (semantic) type name consisting of vocabulary ID and (local) type name.

@@ -70,6 +70,7 @@ namespace Sdl.Web.Common.Mapping
 
         protected virtual Dictionary<string, List<SemanticProperty>> LoadPropertySemantics(Type type)
         {
+            // TODO TSI-878: rewire to ModelTypeRegistry.GetPropertySemantics.
             lock (_semanticPropertiesCache)
             {
                 // Try to get cached semantics

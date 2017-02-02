@@ -108,7 +108,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 PageModel pageModel = null;
                 foreach (IPageModelBuilder pageModelBuilder in _pageModelBuilders)
                 {
-                    pageModel = pageModelBuilder.BuildPageModel(pageModelData, includePageRegions, pageModel, localization);
+                    pageModelBuilder.BuildPageModel(ref pageModel, pageModelData, includePageRegions, localization);
                 }
                 return pageModel;
             }
@@ -128,7 +128,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 EntityModel entityModel = null;
                 foreach (IEntityModelBuilder entityModelBuilder in _entityModelBuilders)
                 {
-                    entityModel = entityModelBuilder.BuildEntityModel(entityModelData, baseModelType, entityModel, localization);
+                    entityModelBuilder.BuildEntityModel(ref entityModel, entityModelData, baseModelType, localization);
                 }
                 return entityModel;
             }

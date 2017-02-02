@@ -105,6 +105,7 @@
     <Compile Include="Mapping\SemanticProperty.cs" />
     <Compile Include="Mapping\SemanticSchema.cs" />
     <Compile Include="Mapping\SemanticSchemaField.cs" />
+    <Compile Include="Mapping\SemanticType.cs" />
     <Compile Include="Mapping\SemanticVocabulary.cs" />
     <Compile Include="Models\Entity\DynamicList.cs" />
     <Compile Include="Models\Entity\EclItem.cs" />

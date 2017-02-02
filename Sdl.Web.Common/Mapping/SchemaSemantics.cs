@@ -63,16 +63,20 @@ namespace Sdl.Web.Common.Mapping
         /// <summary>
         /// Initializes a new instance of the <see cref="SchemaSemantics"/> class.
         /// </summary>
-        /// <param name="prefix">Vocabulary prefix</param>
+        /// <param name="vocabOrPrefix">Vocabulary prefix</param>
         /// <param name="entity">Entity name</param>
-        /// <param name="localization">The context Localization (used to determine <see cref="Vocab"/>).</param>
-        public SchemaSemantics(string prefix, string entity, Localization localization)
+        /// <param name="localization">The context Localization (used to determine <see cref="Vocab"/> from <param name="vocabOrPrefix"></param>).</param>
+        public SchemaSemantics(string vocabOrPrefix, string entity, Localization localization)
         {
-            Prefix = prefix;
             Entity = entity;
 
-            if (localization != null)
+            if (localization == null)
             {
+                Vocab = vocabOrPrefix;
+            }
+            else
+            {
+                Prefix = vocabOrPrefix;
                 Initialize(localization);
             }
         }
