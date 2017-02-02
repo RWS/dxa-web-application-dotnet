@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -11,6 +12,7 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
+using Sdl.Web.Tridion.ContentManager;
 
 namespace Sdl.Web.Tridion.R2Mapping
 {
@@ -19,10 +21,12 @@ namespace Sdl.Web.Tridion.R2Mapping
     /// </summary>
     public class DefaultModelBuilder : IPageModelBuilder, IEntityModelBuilder
     {
-        private static readonly Regex _tcmUriRegEx = new Regex(@"tcm:\d+-\d+(-\d+)?", RegexOptions.Compiled);
+        private static readonly Regex _tcmUriRegex = new Regex(@"tcm:\d+-\d+(-\d+)?", RegexOptions.Compiled);
+        private static readonly Regex _compLinkRegex = new Regex(@"href=""(?<tcmUri>tcm:\d+-\d+)""", RegexOptions.Compiled);
 
         private class MappingData
         {
+            public string ModelId { get; set; }
             public Type ModelType { get; set; }
             public SemanticSchema SemanticSchema { get; set; }
             public SemanticSchemaField EmbeddedSemanticSchemaField { get; set; }
@@ -62,6 +66,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                     MappingData mappingData = new MappingData
                     {
                         SourceViewModel = pageModelData,
+                        ModelId = pageModelData.Id,
                         ModelType = ModelTypeRegistry.GetViewModelType(mvcData),
                         SemanticSchema = SemanticMapping.GetSchema(pageModelData.SchemaId, localization),
                         MetadataFields = pageModelData.Metadata,
@@ -121,7 +126,17 @@ namespace Sdl.Web.Tridion.R2Mapping
             ViewModelData viewModelData = mappingData.SourceViewModel;
             EntityModelData entityModelData = viewModelData as EntityModelData;
 
-            ViewModel result = (ViewModel) Activator.CreateInstance(mappingData.ModelType);
+            ViewModel result;
+            if (string.IsNullOrEmpty(mappingData.ModelId))
+            {
+                // Use parameterless constructor
+                result = (ViewModel) Activator.CreateInstance(mappingData.ModelType);
+            }
+            else
+            {
+                // Pass model Identifier in constructor.
+                result = (ViewModel) Activator.CreateInstance(mappingData.ModelType, mappingData.ModelId);
+            }
 
             result.ExtensionData = viewModelData.ExtensionData;
             result.HtmlClasses = viewModelData.HtmlClasses;
@@ -178,6 +193,13 @@ namespace Sdl.Web.Tridion.R2Mapping
                 string fieldXPath = null;
                 foreach (SemanticProperty semanticProperty in semanticProperties)
                 {
+                    if (semanticProperty.PropertyName == "_all")
+                    {
+                        modelProperty.SetValue(viewModel, GetAllFieldsAsDictionary(mappingData));
+                        isFieldMapped = true;
+                        break;
+                    }
+
                     FieldSemantics fieldSemantics = new FieldSemantics(
                         semanticProperty.SemanticType.Vocab,
                         semanticProperty.SemanticType.EntityName,
@@ -284,9 +306,24 @@ namespace Sdl.Web.Tridion.R2Mapping
             switch (sourceType.Name)
             {
                 case "String":
+                    NumberFormatInfo numberFormat = CultureInfo.InvariantCulture.NumberFormat;
                     if (isArray)
                     {
                         foreach (string fieldValue in (string[]) fieldValues)
+                        {
+                            mappedValues.Add(Convert.ChangeType(fieldValue, bareTargetType, numberFormat));
+                        }
+                    }
+                    else
+                    {
+                        mappedValues.Add(Convert.ChangeType(fieldValues, bareTargetType, numberFormat));
+                    }
+                    break;
+
+                case "DateTime":
+                    if (isArray)
+                    {
+                        foreach (DateTime fieldValue in (DateTime[]) fieldValues)
                         {
                             mappedValues.Add(Convert.ChangeType(fieldValue, bareTargetType));
                         }
@@ -324,7 +361,8 @@ namespace Sdl.Web.Tridion.R2Mapping
                     }
                     else
                     {
-                        mappedValues.Add(MapEmbeddedFields((ContentModelData) fieldValues, targetType, semanticSchemaField, fieldXPath, mappingData));
+                        string indexedFieldXPath = $"{fieldXPath}[1]";
+                        mappedValues.Add(MapEmbeddedFields((ContentModelData) fieldValues, targetType, semanticSchemaField, indexedFieldXPath, mappingData));
                     }
                     break;
 
@@ -394,33 +432,58 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             if (typeof(KeywordModel).IsAssignableFrom(targetType))
             {
+                KeywordModel result;
                 if (keywordModelData.SchemaId == null)
                 {
-                    return new KeywordModel
+                    result = new KeywordModel
                     {
-                        Id = keywordModelData.Id,
-                        Title = keywordModelData.Title,
-                        Description = keywordModelData.Description,
-                        Key = keywordModelData.Key,
-                        TaxonomyId = keywordModelData.TaxonomyId,
                         ExtensionData = keywordModelData.ExtensionData
                     };
                 }
-
-                MappingData keywordMappingData = new MappingData
+                else
                 {
-                    SourceViewModel = keywordModelData,
-                    ModelType = targetType,
-                    SemanticSchema = SemanticMapping.GetSchema(keywordModelData.SchemaId, localization),
-                    MetadataFields = keywordModelData.Metadata,
-                    Localization = localization
-                };
-                return CreateViewModel(keywordMappingData);
+                    MappingData keywordMappingData = new MappingData
+                    {
+                        SourceViewModel = keywordModelData,
+                        ModelType = targetType,
+                        SemanticSchema = SemanticMapping.GetSchema(keywordModelData.SchemaId, localization),
+                        MetadataFields = keywordModelData.Metadata,
+                        Localization = localization
+                    };
+
+                    result = (KeywordModel) CreateViewModel(keywordMappingData);
+                }
+
+                result.Id = keywordModelData.Id;
+                result.Title = keywordModelData.Title;
+                result.Description = keywordModelData.Description;
+                result.Key = keywordModelData.Key;
+                result.TaxonomyId = keywordModelData.TaxonomyId;
+
+                return result;
             }
 
-            // TODO: Tag
-            return keywordModelData.Description ?? keywordModelData.Title;
+            if (targetType == typeof(Tag))
+            {
+                return new Tag
+                {
+                    DisplayText = GetKeywordDisplayText(keywordModelData),
+                    Key = keywordModelData.Key,
+                    TagCategory = localization.GetCmUri(keywordModelData.TaxonomyId, (int) ItemType.Category)
+                };
+            }
+
+            if (targetType == typeof(bool))
+            {
+                string key = string.IsNullOrEmpty(keywordModelData.Key) ? keywordModelData.Title : keywordModelData.Key;
+                return Convert.ToBoolean(key);
+            }
+
+            return GetKeywordDisplayText(keywordModelData);
         }
+
+        private static string GetKeywordDisplayText(KeywordModelData keywordModelData)
+            => string.IsNullOrEmpty(keywordModelData.Description) ? keywordModelData.Title : keywordModelData.Description;
 
         private static string ResolveLinkUrl(EntityModelData entityModelData, Localization localization)
         {
@@ -436,6 +499,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 string htmlFragment = fragment as string;
                 if (htmlFragment == null)
                 {
+                    // Embedded Entity Model (for Media Items)
                     MediaItem mediaItem = (MediaItem) ModelBuilderPipeline.CreateEntityModel((EntityModelData) fragment, typeof(MediaItem), localization);
                     mediaItem.IsEmbedded = true;
                     if (mediaItem.MvcData == null)
@@ -446,6 +510,13 @@ namespace Sdl.Web.Tridion.R2Mapping
                 }
                 else
                 {
+                    // HTML fragment.
+                    // TODO TSI-1267: Component Links resolving should be done in Model Service.
+                    ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
+                    htmlFragment = _compLinkRegex.Replace(
+                        htmlFragment,
+                        match => $"href=\"{linkResolver.ResolveLink(match.Groups["tcmUri"].Value, resolveToBinary: true)}\""
+                        );
                     fragments.Add(new RichTextFragment(htmlFragment));
                 }
             }
@@ -476,6 +547,84 @@ namespace Sdl.Web.Tridion.R2Mapping
             return CreateViewModel(embeddedMappingData);
         }
 
+        private static IDictionary<string, string> GetAllFieldsAsDictionary(MappingData mappingData)
+        {
+            IDictionary<string, string> result = new Dictionary<string, string>();
+            if (mappingData.Fields != null)
+            {
+                foreach (KeyValuePair<string, object> field in mappingData.Fields)
+                {
+                    if ((field.Key == "settings"))
+                    {
+                        throw new NotImplementedException("'settings' field handling"); // TODO
+                    }
+                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData.Localization).FirstOrDefault();
+                }
+            }
+            if (mappingData.MetadataFields != null)
+            {
+                foreach (KeyValuePair<string, object> field in mappingData.MetadataFields)
+                {
+                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData.Localization).FirstOrDefault();
+                }
+            }
+            return result;
+        }
+
+        private static IEnumerable<string> GetFieldValuesAsStrings(object fieldValues, Localization localization, bool resolveComponentLinks = false)
+        {
+            Type sourceType = fieldValues.GetType();
+            bool isArray = sourceType.IsArray;
+            if (isArray)
+            {
+                sourceType = sourceType.GetElementType();
+            }
+
+            IList<string> result = new List<string>();
+            if (isArray)
+            {
+                result.Add("TODO"); // TODO
+            }
+            else
+            {
+                result.Add(fieldValues.ToString()); // TODO
+            }
+
+            return result;
+
+            //switch (field.FieldType)
+            //{
+            //    case FieldType.Number:
+            //        return field.NumericValues.Select(v => v.ToString(CultureInfo.InvariantCulture));
+
+            //    case FieldType.Date:
+            //        return field.DateTimeValues.Select(v => v.ToString("s"));
+
+            //    case FieldType.ComponentLink:
+            //        if (resolveComponentLinks)
+            //        {
+            //            return field.LinkedComponentValues.Select(v => SiteConfiguration.LinkResolver.ResolveLink(v.Id));
+            //        }
+            //        return field.LinkedComponentValues.Select(v => v.Id);
+
+            //    case FieldType.MultiMediaLink:
+            //        if (resolveComponentLinks)
+            //        {
+            //            return field.LinkedComponentValues.Select(v => v.Multimedia.Url);
+            //        }
+            //        return field.LinkedComponentValues.Select(v => v.Id);
+
+            //    case FieldType.Keyword:
+            //        return field.KeywordValues.Select(v => GetDisplayText(v));
+
+            //    case FieldType.Xhtml:
+            //        return field.Values.Select(v => SiteConfiguration.RichTextProcessor.ProcessRichText(v, localization).ToString());
+
+            //    default:
+            //        return field.Values;
+            //}
+        }
+
         private static IList CreateGenericList(Type listItemType)
         {
             ConstructorInfo genericListConstructor = typeof(List<>).MakeGenericType(listItemType).GetConstructor(Type.EmptyTypes);
@@ -496,7 +645,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             Dictionary<string, string> result = new Dictionary<string, string>(meta.Count);
             foreach (KeyValuePair<string, string> kvp in meta)
             {
-                string resolvedValue = _tcmUriRegEx.Replace(kvp.Value, match => linkResolver.ResolveLink(match.Value, resolveToBinary: true));
+                string resolvedValue = _tcmUriRegex.Replace(kvp.Value, match => linkResolver.ResolveLink(match.Value, resolveToBinary: true));
                 result.Add(kvp.Key, resolvedValue);
             }
 

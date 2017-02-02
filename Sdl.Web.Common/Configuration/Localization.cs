@@ -395,6 +395,15 @@ namespace Sdl.Web.Common.Configuration
             return result;
         }
 
+        /// <summary>
+        /// Gets a CM identifier (TCM URI) for a given Model identifier.
+        /// </summary>
+        /// <param name="modelId">The Model identifier.</param>
+        /// <param name="itemType">The item type identifier used in the CM URI.</param>
+        /// <returns>The CM URI.</returns>
+        public string GetCmUri(string modelId, int itemType = 16)
+            => (itemType == 16) ? $"tcm:{Id}-{modelId}" : $"tcm:{Id}-{modelId}-{itemType}";
+
         private void LoadStaticContentItem<T>(string relativeUrl, ref T deserializedObject)
         {
             using (new Tracer(relativeUrl, deserializedObject, this))

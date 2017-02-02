@@ -35,7 +35,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <summary>
         /// Gets an Entity Model for a given Entity Identifier.
         /// </summary>
-        /// <param name="id">The Entity Identifier.</param>
+        /// <param name="id">The Entity Identifier. Must be in format {ComponentID}-{TemplateID}.</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The Entity Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Entity Model exists for the given URL.</exception>

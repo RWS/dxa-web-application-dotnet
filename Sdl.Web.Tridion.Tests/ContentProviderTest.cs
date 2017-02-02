@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -314,6 +315,163 @@ namespace Sdl.Web.Tridion.Tests
             StringAssert.Matches(keywordModel.TaxonomyId, new Regex(@"\d+"), subjectName + ".TaxonomyId");
         }
 
+        [TestMethod]
+        public void GetPageModel_ConditionalEntities_Success()
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
+
+            // Verify pre-test state: Test Page should contain 1 Article
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+            Assert.IsNotNull(pageModel, "pageModel");
+            Assert.AreEqual(1, pageModel.Regions["Main"].Entities.Count, "pageModel.Regions[Main].Entities.Count");
+            Article testArticle = (Article) pageModel.Regions["Main"].Entities[0];
+
+            try
+            {
+                MockConditionalEntityEvaluator.EvaluatedEntities.Clear();
+                MockConditionalEntityEvaluator.ExcludeEntityIds.Add(testArticle.Id);
+
+                // Test Page's Article should now be suppressed by MockConditionalEntityEvaluator
+                PageModel pageModel2 = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+                Assert.IsNotNull(pageModel2, "pageModel2");
+                Assert.AreEqual(0, pageModel2.Regions["Main"].Entities.Count, "pageModel2.Regions[Main].Entities.Count");
+                Assert.AreEqual(1, MockConditionalEntityEvaluator.EvaluatedEntities.Count, "MockConditionalEntityEvaluator.EvaluatedEntities.Count");
+            }
+            finally
+            {
+                MockConditionalEntityEvaluator.ExcludeEntityIds.Clear();
+            }
+
+            // Verify post-test state: Test Page should still contain 1 Article
+            PageModel pageModel3 = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+            Assert.IsNotNull(pageModel3, "pageModel3");
+            Assert.AreEqual(1, pageModel3.Regions["Main"].Entities.Count, "pageModel3.Regions[Main].Entities.Count");
+        }
+
+        [TestMethod]
+        public void GetPageModel_RichTextProcessing_Success()
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Assert.AreEqual(testPageUrlPath, pageModel.Url, "pageModel.Url");
+
+            Article testArticle = pageModel.Regions["Main"].Entities[0] as Article;
+            Assert.IsNotNull(testArticle, "testArticle");
+            OutputJson(testArticle);
+
+            RichText content = testArticle.ArticleBody[0].Content;
+            Assert.IsNotNull(content, "content");
+            Assert.AreEqual(3, content.Fragments.Count(), "content.Fragments.Count");
+
+            Image image = content.Fragments.OfType<Image>().FirstOrDefault();
+            Assert.IsNotNull(image, "image");
+            Assert.IsTrue(image.IsEmbedded, "image.IsEmbedded");
+            Assert.IsNotNull(image.MvcData, "image.MvcData");
+            Assert.AreEqual("Image", image.MvcData.ViewName, "image.MvcData.ViewName");
+
+            string firstHtmlFragment = content.Fragments.First().ToHtml();
+            Assert.IsNotNull(firstHtmlFragment, "firstHtmlFragment");
+            StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(not published\): Test Component"));
+            StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(published\): <a title=""TSI-1758 Test Component"" href=""/autotest-parent/regression/tsi-1758"">TSI-1758 Test Component</a>"));
+            StringAssert.Matches(firstHtmlFragment, new Regex(@"MMC link: <a title=""bulls-eye"" href=""/autotest-parent/Images/bulls-eye.*"">bulls-eye</a>"));
+        }
+
+        [TestMethod]
+        public void GetPageModel_RichTextImageWithHtmlClass_Success() // See TSI-1614
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1614PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            Article testArticle = pageModel.Regions["Main"].Entities[0] as Article;
+            Assert.IsNotNull(testArticle, "Test Article not found on Page.");
+            Image testImage = testArticle.ArticleBody[0].Content.Fragments.OfType<Image>().FirstOrDefault();
+            Assert.IsNotNull(testImage, "Test Image not found in Rich Text");
+            Assert.AreEqual("test tsi1614", testImage.HtmlClasses, "Image.HtmlClasses");
+        }
+
+        [TestMethod]
+        public void GetPageModel_LanguageSelector_Success() // See TSI-2225
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2225PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Common.Models.Configuration configEntity = pageModel.Regions["Nav"].Entities[0] as Common.Models.Configuration;
+            Assert.IsNotNull(configEntity, "configEntity");
+            Assert.AreEqual("tcm:1065-9712", configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultContentLink']");
+            Assert.AreEqual("pt,mx", configEntity.Settings["suppressLocalizations"], "configEntity.Settings['suppressLocalizations']");
+        }
+
+        [TestMethod]
+        public void GetEntityModel_NonExistent_Exception()
+        {
+            AssertThrowsException<DxaItemNotFoundException>(() => TestContentProvider.GetEntityModel("666-666", TestLocalization));
+        }
+
+        [TestMethod]
+        public void GetEntityModel_InvalidId_Exception()
+        {
+            AssertThrowsException<DxaException>(() => TestContentProvider.GetEntityModel("666", TestLocalization));
+        }
+
+        [TestMethod]
+        public void GetEntityModel_XpmMetadataOnStaging_Success()
+        {
+            const string testEntityId = TestFixture.ArticleDcpEntityId;
+
+            EntityModel entityModel = TestContentProvider.GetEntityModel(testEntityId, TestLocalization);
+
+            Assert.IsNotNull(entityModel, "entityModel");
+            OutputJson(entityModel);
+
+            Assert.AreEqual(testEntityId, entityModel.Id, "entityModel.Id");
+            Assert.IsNotNull(entityModel.XpmMetadata, "entityModel.XpmMetadata");
+            Assert.IsNotNull(entityModel.XpmPropertyMetadata, "entityModel.XpmPropertyMetadata");
+
+            object isQueryBased;
+            Assert.IsTrue(entityModel.XpmMetadata.TryGetValue("IsQueryBased", out isQueryBased), "XpmMetadata contains 'IsQueryBased'");
+            Assert.AreEqual(true, isQueryBased, "IsQueryBased value");
+            object isRepositoryPublished;
+            Assert.IsTrue(entityModel.XpmMetadata.TryGetValue("IsRepositoryPublished", out isRepositoryPublished), "XpmMetadata contains 'IsRepositoryPublished'");
+            Assert.AreEqual(true, isRepositoryPublished, "IsRepositoryPublished value");
+
+            // NOTE: boolean value must not have quotes in XPM markup (TSI-1251)
+            string xpmMarkup = entityModel.GetXpmMarkup(TestFixture.ParentLocalization);
+            StringAssert.Contains(xpmMarkup, "\"IsQueryBased\":true", "XPM markup");
+            StringAssert.Contains(xpmMarkup, "\"IsRepositoryPublished\":true", "XPM markup");
+        }
+
+        [TestMethod]
+        public void GetStaticContentItem_NonExistent_Exception()
+        {
+            const string testStaticContentItemUrlPath = "/does/not/exist";
+            AssertThrowsException<DxaItemNotFoundException>(() => TestContentProvider.GetStaticContentItem(testStaticContentItemUrlPath, TestLocalization));
+        }
+
+        [TestMethod]
+        public void GetStaticContentItem_InternationalizedUrl_Success() // See TSI-1278
+        {
+            string testStaticContentItemUrlPath = TestLocalization.GetAbsoluteUrlPath(
+                string.Format(TestFixture.Tsi1278StaticContentItemRelativeUrlPath, TestLocalization.Id)
+                );
+
+            using (StaticContentItem testStaticContentItem = TestContentProvider.GetStaticContentItem(testStaticContentItemUrlPath, TestLocalization))
+            {
+                Assert.IsNotNull(testStaticContentItem, "testStaticContentItem");
+                Assert.AreEqual("image/jpeg", testStaticContentItem.ContentType, "testStaticContentItem.ContentType");
+                Stream contentStream = testStaticContentItem.GetContentStream();
+                Assert.IsNotNull(contentStream,"contentStream");
+                Assert.AreEqual(192129, contentStream.Length, "contentStream.Length");
+            }
+        }
 
     }
 }

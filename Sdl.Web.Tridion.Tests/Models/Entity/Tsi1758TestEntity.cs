@@ -4,12 +4,14 @@ using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Tridion.Tests.Models
 {
+    [SemanticEntity(EntityName = "TSI1758")]
     public class Tsi1758TestEntity : EntityModel
     {
         public List<Tsi1758TestEmbeddedEntity> EmbedField1 { get; set; }
         public List<Tsi1758TestEmbeddedEntity> EmbedField2 { get; set; }
     }
 
+    [SemanticEntity(EntityName = "TSI1758Embed")]
     public class Tsi1758TestEmbeddedEntity : EntityModel
     {
         public string TextField { get; set; }
@@ -22,6 +24,7 @@ namespace Sdl.Web.Tridion.Tests.Models
         }
     }
 
+    [SemanticEntity(EntityName = "TSI1758Embed2")]
     public class Tsi1758TestEmbedded2Entity : EntityModel
     {
         public string TextField { get; set; }

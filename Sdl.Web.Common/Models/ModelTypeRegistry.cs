@@ -320,7 +320,7 @@ namespace Sdl.Web.Common.Models
             IDictionary<string, SemanticType> prefixToSemanticTypeMap = new Dictionary<string, SemanticType>();
             foreach (SemanticEntityAttribute semanticEntityAttribute in semanticEntityAttributes)
             {
-                string prefix = semanticEntityAttribute.Prefix;
+                string prefix = semanticEntityAttribute.Prefix ?? string.Empty;
                 // There may be multiple Semantic Entity attributes for the same prefix. The first one will be used.
                 if (prefixToSemanticTypeMap.ContainsKey(prefix))
                 {
@@ -365,6 +365,18 @@ namespace Sdl.Web.Common.Models
                     {
                         ignoreMapping = true;
                         break;
+                    }
+
+                    if (semanticPropertyAttr.PropertyName == "_all")
+                    {
+                        if (!typeof(IDictionary<string, string>).IsAssignableFrom(property.PropertyType))
+                        {
+                            throw new DxaException(
+                                $"Invalid semantics for property {modelType.Name}.{propertyName}. Properties with [SemanticProperty(\"_all\")] annotation must be of type Dictionary<string, string>."
+                                );
+                        }
+                        semanticProperties.Add(new SemanticProperty(string.Empty, "_all", null));
+                        continue;
                     }
 
                     string[] semanticPropertyNameParts = semanticPropertyAttr.PropertyName.Split(':');

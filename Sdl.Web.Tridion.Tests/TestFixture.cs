@@ -43,9 +43,12 @@ namespace Sdl.Web.Tridion.Tests
         internal const string MediaManagerTestPageRelativeUrlPath = "mm_test.html";
         internal const string Tsi811PageRelativeUrlPath = "regression/tsi-811";
         internal const string Tsi1278PageRelativeUrlPath = "tsi-1278_trådløst.html";
+        internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-9791.jpg";
         internal const string Tsi1308PageRelativeUrlPath = "regression/tsi-1308";
+        internal const string Tsi1614PageRelativeUrlPath = "tsi-1614.html";
         internal const string Tsi1758PageRelativeUrlPath = "regression/tsi-1758.html";
         internal const string Tsi1946PageRelativeUrlPath = "regression/tsi-1946.html";
+        internal const string Tsi2225PageRelativeUrlPath = "regression/tsi-2225";
 
         private static readonly IEnumerable<Localization> _testLocalizations;
         private static readonly Localization _parentLocalization;
