@@ -16,11 +16,11 @@ namespace Sdl.Web.Tridion.R2Mapping
     /// <remarks>
     /// Each Model Builder in the pipeline is invoked and has the possibility to modify the resulting Page/Entity Model.
     /// The first Model Builder has to construct the View Models (it will get in <c>null</c>).
-    /// Normally, the <see cref="DefaultModelBuilder"/> will be the first and only one.
+    /// Normally, the <see cref="DefaultModelBuilderR2"/> will be the first and only one.
     /// </remarks>
     /// <seealso cref="IPageModelBuilder"/>
     /// <seealso cref="IEntityModelBuilder"/>
-    public static class ModelBuilderPipeline
+    public static class ModelBuilderPipelineR2
     {
         private static readonly IEnumerable<IPageModelBuilder> _pageModelBuilders;
         private static readonly IEnumerable<IEntityModelBuilder> _entityModelBuilders;
@@ -28,7 +28,7 @@ namespace Sdl.Web.Tridion.R2Mapping
         /// <summary>
         /// Initializes the Model Builder Pipeline (class constructor).
         /// </summary>
-        static ModelBuilderPipeline()
+        static ModelBuilderPipelineR2()
         {
             using (new Tracer())
             {
@@ -77,7 +77,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 // Ensure there is always at least one Page/Entity Model Buidler.
                 if (!pageModelBuilders.Any() || !entityModelBuilders.Any())
                 {
-                    DefaultModelBuilder defaultModelBuilder = new DefaultModelBuilder();
+                    DefaultModelBuilderR2 defaultModelBuilder = new DefaultModelBuilderR2();
                     if (!pageModelBuilders.Any())
                     {
                         pageModelBuilders.Add(defaultModelBuilder);

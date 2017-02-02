@@ -8,7 +8,7 @@ namespace Sdl.Web.Tridion.R2Mapping
     /// <summary>
     /// Interface for Entity Model Builders based on the DXA R2 Data Model.
     /// </summary>
-    /// <seealso cref="ModelBuilderPipeline"/>
+    /// <seealso cref="ModelBuilderPipelineR2"/>
     public interface IEntityModelBuilder
     {
         /// <summary>

@@ -2,7 +2,7 @@
 
 namespace Sdl.Web.Tridion.Tests.Models
 {
-    [SemanticEntity(EntityName = "TSI811PageMetadataSchema", Vocab = CoreVocabulary)]
+    [SemanticEntity("TSI811PageMetadataSchema")]
     public class Tsi811PageModel : PageModel
     {
         public Tsi811PageModel(string id) : base(id)

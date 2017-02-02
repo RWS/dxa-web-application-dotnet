@@ -4,7 +4,7 @@ using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Tridion.Tests.Models
 {
-    [SemanticEntity(EntityName = "TSI811")]
+    [SemanticEntity("TSI811")]
     public class Tsi811TestEntity : EntityModel
     {
         public List<Tsi811TestKeyword> Keyword1 { get; set; }
@@ -14,7 +14,7 @@ namespace Sdl.Web.Tridion.Tests.Models
         public bool BooleanProperty { get; set; }
     }
 
-    [SemanticEntity(EntityName = "TSI811KeywordMetadataSchema")]
+    [SemanticEntity("TSI811KeywordMetadataSchema")]
     public class Tsi811TestKeyword : KeywordModel
     {
         public string TextField { get; set; }

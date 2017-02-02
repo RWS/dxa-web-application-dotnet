@@ -67,7 +67,10 @@ namespace Sdl.Web.Common.Models
         public override ViewModel DeepCopy()
         {
             WebPage clone = (WebPage) base.DeepCopy();
-            clone.Meta = new Dictionary<string, string>(Meta);
+            if (Meta != null)
+            {
+                clone.Meta = new Dictionary<string, string>(Meta);
+            }
             return clone;
         }
         #endregion

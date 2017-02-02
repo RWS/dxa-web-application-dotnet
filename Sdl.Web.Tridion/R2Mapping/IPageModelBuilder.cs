@@ -7,7 +7,7 @@ namespace Sdl.Web.Tridion.R2Mapping
     /// <summary>
     /// Interface for Page Model Builders based on teh DXA R2 Data Model.
     /// </summary>
-    /// <seealso cref="ModelBuilderPipeline"/>
+    /// <seealso cref="ModelBuilderPipelineR2"/>
     public interface IPageModelBuilder
     {
         /// <summary>

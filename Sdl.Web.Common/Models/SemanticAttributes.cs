@@ -26,9 +26,20 @@ namespace Sdl.Web.Common.Models
         public SemanticEntityAttribute()
         {
             Vocab = SemanticMapping.DefaultVocabulary;
+            Prefix = string.Empty;
         }
 
-        public SemanticEntityAttribute(string vocab, string entityName, string prefix = null)
+        public SemanticEntityAttribute(string entityName)
+            : this(null, entityName, null)
+        {
+        }
+
+        public SemanticEntityAttribute(string vocab, string entityName)
+            : this(vocab, entityName, null)
+        {
+        }
+
+        public SemanticEntityAttribute(string vocab, string entityName, string prefix)
         {
             Vocab = vocab ?? SemanticMapping.DefaultVocabulary;
             EntityName = entityName;

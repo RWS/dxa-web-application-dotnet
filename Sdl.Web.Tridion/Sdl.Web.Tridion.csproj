@@ -200,9 +200,9 @@
     <Compile Include="ContentManager\TcmUri.cs" />
     <Compile Include="R2Mapping\IEntityModelBuilder.cs" />
     <Compile Include="R2Mapping\IPageModelBuilder.cs" />
-    <Compile Include="R2Mapping\ModelBuilderPipeline.cs" />
-    <Compile Include="R2Mapping\DefaultContentProvider.cs" />
-    <Compile Include="R2Mapping\DefaultModelBuilder.cs" />
+    <Compile Include="R2Mapping\ModelBuilderPipelineR2.cs" />
+    <Compile Include="R2Mapping\DefaultContentProviderR2.cs" />
+    <Compile Include="R2Mapping\DefaultModelBuilderR2.cs" />
     <Compile Include="Statics\BinaryFileManager.cs" />
     <Compile Include="Statics\NamedLocker.cs" />
   </ItemGroup>

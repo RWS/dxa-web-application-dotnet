@@ -11,6 +11,7 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
 using Sdl.Web.Tridion.ContentManager;
+using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.Statics;
 using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.DynamicContent.Query;
@@ -20,7 +21,7 @@ namespace Sdl.Web.Tridion.R2Mapping
     /// <summary>
     /// Default Content Provider implementation (based on DXA R2 Data Model).
     /// </summary>
-    public class DefaultContentProvider : IContentProvider
+    public class DefaultContentProviderR2 : IContentProvider, IRawDataProvider
     {
         /// <summary>
         /// Gets a Page Model for a given URL path.
@@ -62,7 +63,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                         CacheRegions.PageModel,
                         () =>
                         {
-                            PageModel pageModel = ModelBuilderPipeline.CreatePageModel(pageModelData, addIncludes, localization);
+                            PageModel pageModel = ModelBuilderPipelineR2.CreatePageModel(pageModelData, addIncludes, localization);
                             pageModel.Url = canonicalUrlPath; // TODO: generate canonical Page URL on CM-side (?)
                             if (pageModel.NoCache)
                             {
@@ -82,7 +83,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 }
                 else
                 {
-                    result = ModelBuilderPipeline.CreatePageModel(pageModelData, addIncludes, localization);
+                    result = ModelBuilderPipelineR2.CreatePageModel(pageModelData, addIncludes, localization);
                     result.Url = canonicalUrlPath;  // TODO: generate canonical Page URL on CM-side (?)
                 }
 
@@ -130,7 +131,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                     EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
                         $"{id}-{localization.Id}", // key
                         CacheRegions.EntityModel,
-                        () => ModelBuilderPipeline.CreateEntityModel(entityModelData, typeof(EntityModel), localization),
+                        () => ModelBuilderPipelineR2.CreateEntityModel(entityModelData, typeof(EntityModel), localization),
                         dependencies: new[] { componentUri }
                         );
 
@@ -139,7 +140,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 }
                 else
                 {
-                    result = ModelBuilderPipeline.CreateEntityModel(entityModelData, typeof(EntityModel), localization);
+                    result = ModelBuilderPipelineR2.CreateEntityModel(entityModelData, typeof(EntityModel), localization);
                 }
 
                 if (result.XpmMetadata != null)
@@ -178,6 +179,9 @@ namespace Sdl.Web.Tridion.R2Mapping
             throw new NotImplementedException(); // TODO TSI-1265
         }
 
+        string IRawDataProvider.GetPageContent(string urlPath, Localization localization)
+            => GetPageContent(urlPath, localization);
+
         private static string GetCanonicalUrlPath(string urlPath)
         {
             string result = urlPath ?? Constants.IndexPageUrlSuffix;
@@ -200,7 +204,7 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             using (new Tracer(urlPath, localization))
             {
-                if (!urlPath.EndsWith(Constants.DefaultExtension))
+                if (!urlPath.EndsWith(Constants.DefaultExtension) && !urlPath.EndsWith(".json"))
                 {
                     urlPath += Constants.DefaultExtension;
                 }
