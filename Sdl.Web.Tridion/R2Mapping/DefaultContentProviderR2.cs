@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Web;
 using Newtonsoft.Json;
@@ -12,9 +14,11 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
 using Sdl.Web.Tridion.ContentManager;
 using Sdl.Web.Tridion.Mapping;
+using Sdl.Web.Tridion.Query;
 using Sdl.Web.Tridion.Statics;
 using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.DynamicContent.Query;
+using Tridion.ContentDelivery.Meta;
 
 namespace Sdl.Web.Tridion.R2Mapping
 {
@@ -174,13 +178,67 @@ namespace Sdl.Web.Tridion.R2Mapping
             }
         }
 
+        /// <summary>
+        /// Populates a Dynamic List by executing the query it specifies.
+        /// </summary>
+        /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
+        /// <param name="localization">The context Localization.</param>
         public void PopulateDynamicList(DynamicList dynamicList, Localization localization)
         {
-            throw new NotImplementedException(); // TODO TSI-1265
+            using (new Tracer(dynamicList, localization))
+            {
+                SimpleBrokerQuery simpleBrokerQuery = dynamicList.GetQuery(localization) as SimpleBrokerQuery;
+                if (simpleBrokerQuery == null)
+                {
+                    throw new DxaException($"Unexpected result from {dynamicList.GetType().Name}.GetQuery: {dynamicList.GetQuery(localization)}");
+                }
+
+                BrokerQuery brokerQuery = new BrokerQuery(simpleBrokerQuery);
+                string[] componentUris = brokerQuery.ExecuteQuery().ToArray();
+                Log.Debug($"Broker Query returned {componentUris.Length} results. HasMore={brokerQuery.HasMore}");
+
+                if (componentUris.Length > 0)
+                {
+                    Type resultType = dynamicList.ResultType;
+                    ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(localization.GetCmUri());
+                    dynamicList.QueryResults = componentUris
+                        .Select(c => ModelBuilderPipelineR2.CreateEntityModel(CreateEntityModelData(componentMetaFactory.GetMeta(c)), resultType, localization))
+                        .ToList();
+                }
+
+                dynamicList.HasMore = brokerQuery.HasMore;
+            }
         }
 
         string IRawDataProvider.GetPageContent(string urlPath, Localization localization)
             => GetPageContent(urlPath, localization);
+
+        private static EntityModelData CreateEntityModelData(IComponentMeta componentMeta)
+        {
+            ContentModelData standardMeta = new ContentModelData();
+            foreach (DictionaryEntry entry in componentMeta.CustomMeta.NameValues)
+            {
+                standardMeta.Add(entry.Key.ToString(), ((NameValuePair) entry.Value).Value);
+            }
+
+            // The semantic mapping requires that some metadata fields exist. This may not be the case so we map some component meta properties onto them
+            // if they don't exist.
+            if (!standardMeta.ContainsKey("dateCreated"))
+            {
+                standardMeta.Add("dateCreated", componentMeta.LastPublicationDate);
+            }
+            if (!standardMeta.ContainsKey("name"))
+            {
+                standardMeta.Add("name", componentMeta.Title);
+            }
+
+            return new EntityModelData
+            {
+                Id = componentMeta.Id.ToString(),
+                SchemaId = componentMeta.SchemaId.ToString(),
+                Metadata = new ContentModelData { { "standardMeta", standardMeta } }
+            };
+        }
 
         private static string GetCanonicalUrlPath(string urlPath)
         {

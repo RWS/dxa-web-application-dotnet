@@ -193,11 +193,26 @@ namespace Sdl.Web.Tridion.R2Mapping
                 string fieldXPath = null;
                 foreach (SemanticProperty semanticProperty in semanticProperties)
                 {
-                    if (semanticProperty.PropertyName == "_all")
+                    if (semanticProperty.PropertyName == SemanticProperty.AllFields)
                     {
                         modelProperty.SetValue(viewModel, GetAllFieldsAsDictionary(mappingData));
                         isFieldMapped = true;
                         break;
+                    }
+                    if ((semanticProperty.PropertyName == SemanticProperty.Self) && mappingData.SemanticSchema.HasSemanticType(semanticProperty.SemanticType))
+                    {
+                        try
+                        {
+                            object mappedSelf = MapComponentLink((EntityModelData) mappingData.SourceViewModel, modelProperty.PropertyType, mappingData.Localization);
+                            modelProperty.SetValue(viewModel, mappedSelf);
+                            isFieldMapped = true;
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Debug($"Self mapping failed for {modelType.Name}.{modelProperty.Name}: {ex.Message}");
+                            continue;
+                        }
                     }
 
                     FieldSemantics fieldSemantics = new FieldSemantics(
@@ -248,7 +263,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 {
                     string formattedSemanticProperties = string.Join(", ", semanticProperties.Select(sp => sp.ToString()));
                     Log.Debug(
-                        $"Property {modelType.Name}.{modelProperty} cannot be mapped to a CM field of {mappingData.SemanticSchema}. Semantic properties: {formattedSemanticProperties}.");
+                        $"Property {modelType.Name}.{modelProperty.Name} cannot be mapped to a CM field of {mappingData.SemanticSchema}. Semantic properties: {formattedSemanticProperties}.");
                 }
             }
 
@@ -306,17 +321,16 @@ namespace Sdl.Web.Tridion.R2Mapping
             switch (sourceType.Name)
             {
                 case "String":
-                    NumberFormatInfo numberFormat = CultureInfo.InvariantCulture.NumberFormat;
                     if (isArray)
                     {
                         foreach (string fieldValue in (string[]) fieldValues)
                         {
-                            mappedValues.Add(Convert.ChangeType(fieldValue, bareTargetType, numberFormat));
+                            mappedValues.Add(MapString(fieldValue, bareTargetType));
                         }
                     }
                     else
                     {
-                        mappedValues.Add(Convert.ChangeType(fieldValues, bareTargetType, numberFormat));
+                        mappedValues.Add(MapString((string) fieldValues, bareTargetType));
                     }
                     break;
 
@@ -405,6 +419,15 @@ namespace Sdl.Web.Tridion.R2Mapping
             }
 
             return (mappedValues.Count == 0) ? null : mappedValues[0];
+        }
+
+        private static object MapString(string stringValue, Type targetType)
+        {
+            if (targetType == typeof(RichText))
+            {
+                return new RichText(stringValue);
+            }
+            return Convert.ChangeType(stringValue, targetType, CultureInfo.InvariantCulture.NumberFormat);
         }
 
         private static object MapComponentLink(EntityModelData entityModelData, Type targetType, Localization localization)

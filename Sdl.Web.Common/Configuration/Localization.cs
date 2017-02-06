@@ -396,6 +396,13 @@ namespace Sdl.Web.Common.Configuration
         }
 
         /// <summary>
+        /// Gets a CM identifier (TCM URI) for this Localization
+        /// </summary>
+        /// <returns>the CM URI.</returns>
+        public string GetCmUri()
+            => $"tcm:0-{Id}-1";
+
+        /// <summary>
         /// Gets a CM identifier (TCM URI) for a given Model identifier.
         /// </summary>
         /// <param name="modelId">The Model identifier.</param>

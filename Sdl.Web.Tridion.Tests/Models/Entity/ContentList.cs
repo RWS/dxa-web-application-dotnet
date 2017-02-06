@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 namespace Sdl.Web.Tridion.Tests.Models
 {
     [SemanticEntity(Vocab = SchemaOrgVocabulary, EntityName = "ItemList", Prefix = "s", Public = true)]
+    [SemanticEntity("ContentQuery")]
     public class ContentList<T> : DynamicList where T : EntityModel
     {
         //TODO add concept of filtering/query (filter options and active filters/query)

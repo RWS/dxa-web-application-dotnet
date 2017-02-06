@@ -7,6 +7,9 @@ namespace Sdl.Web.Common.Mapping
     /// </summary>
     public class SemanticProperty
     {
+        public const string AllFields = "_all";
+        public const string Self = "_self";
+
         public string Prefix { get; }
         public string PropertyName { get; }
         public SemanticType SemanticType { get; }
@@ -16,7 +19,7 @@ namespace Sdl.Web.Common.Mapping
         /// </summary>
         /// <param name="prefix"></param>
         /// <param name="name"></param>
-        [Obsolete("TODO: remove")]
+        [Obsolete("Deprecated in DXA 2.0. Use constructor with three parameters instead.")] // TODO TSI-878: Remove this constructor completely (?)
         public SemanticProperty(string prefix, string name)
         {
             Prefix = prefix;

@@ -349,6 +349,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        [Ignore] // TODO TSI-2265
         public void GetPageModel_RichTextProcessing_Success()
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
@@ -395,6 +396,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        [Ignore] // TODO TSI-2266
         public void GetPageModel_LanguageSelector_Success() // See TSI-2225
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2225PageRelativeUrlPath);
@@ -473,5 +475,26 @@ namespace Sdl.Web.Tridion.Tests
             }
         }
 
+        [TestMethod]
+        public void PopulateDynamicList_TeaserFallbackToDescription_Success() // See TSI-1852
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1852PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            ContentList<Teaser> testContentList = pageModel.Regions["Main"].Entities[0] as ContentList<Teaser>;
+            Assert.IsNotNull(testContentList, "testContentList");
+            Assert.IsNotNull(testContentList.ItemListElements, "testContentList.ItemListElements");
+            Assert.AreEqual(0, testContentList.ItemListElements.Count, "testContentList.ItemListElements is not empty before PopulateDynamicList");
+
+            TestContentProvider.PopulateDynamicList(testContentList, TestLocalization);
+            OutputJson(testContentList);
+
+            Teaser testTeaser = testContentList.ItemListElements.FirstOrDefault(t => t.Headline == "TSI-1852 Article");
+            Assert.IsNotNull(testTeaser, "testTeaser");
+            Assert.IsNotNull(testTeaser.Text, "testTeaser.Text");
+            StringAssert.StartsWith(testTeaser.Text.ToString(), "This is the standard metadata description", "testTeaser.Text");
+        }
     }
 }

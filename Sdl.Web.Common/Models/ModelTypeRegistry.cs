@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Web.Compilation;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
@@ -334,7 +335,8 @@ namespace Sdl.Web.Common.Models
             if (!prefixToSemanticTypeMap.ContainsKey(string.Empty))
             {
                 // If there is no SemanticEntity attribute without prefix, we add an implicit one:
-                prefixToSemanticTypeMap.Add(String.Empty, new SemanticType(modelType.Name, SemanticMapping.DefaultVocabulary));
+                string implicitSemanticTypeName = Regex.Replace(modelType.Name, @"`\d", string.Empty);
+                prefixToSemanticTypeMap.Add(string.Empty, new SemanticType(implicitSemanticTypeName, SemanticMapping.DefaultVocabulary));
             }
 
             string defaultPrefix;
@@ -367,16 +369,25 @@ namespace Sdl.Web.Common.Models
                         break;
                     }
 
-                    if (semanticPropertyAttr.PropertyName == "_all")
+                    switch (semanticPropertyAttr.PropertyName)
                     {
-                        if (!typeof(IDictionary<string, string>).IsAssignableFrom(property.PropertyType))
-                        {
-                            throw new DxaException(
-                                $"Invalid semantics for property {modelType.Name}.{propertyName}. Properties with [SemanticProperty(\"_all\")] annotation must be of type Dictionary<string, string>."
-                                );
-                        }
-                        semanticProperties.Add(new SemanticProperty(string.Empty, "_all", null));
-                        continue;
+                        case SemanticProperty.AllFields:
+                            if (!typeof(IDictionary<string, string>).IsAssignableFrom(property.PropertyType))
+                            {
+                                throw new DxaException(
+                                    $"Invalid semantics for property {modelType.Name}.{propertyName}. Properties with [SemanticProperty(\"_all\")] annotation must be of type Dictionary<string, string>."
+                                    );
+                            }
+                            break;
+
+                        case SemanticProperty.Self:
+                            Type elementType = GetElementType(property.PropertyType);
+                            if (!typeof(MediaItem).IsAssignableFrom(elementType) && !typeof(Link).IsAssignableFrom(elementType) && (elementType != typeof(string)))
+                            {
+                                throw new DxaException(
+                                    $"Invalid semantics for property {modelType.Name}.{propertyName}. Properties with [SemanticProperty(\"_self\")] annotation must be of type MediaItem, Link or String.");
+                            }
+                            break;
                     }
 
                     string[] semanticPropertyNameParts = semanticPropertyAttr.PropertyName.Split(':');
@@ -431,6 +442,12 @@ namespace Sdl.Web.Common.Models
             }
 
             return result;
+        }
+
+        private static Type GetElementType(Type propertyType)
+        {
+            bool isListProperty = propertyType.IsGenericType && (propertyType.GetGenericTypeDefinition() == typeof(List<>));
+            return isListProperty ? propertyType.GetGenericArguments()[0] : propertyType;
         }
 
         private static string GetDefaultSemanticPropertyName(PropertyInfo property)

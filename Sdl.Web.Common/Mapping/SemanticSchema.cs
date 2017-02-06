@@ -161,6 +161,12 @@ namespace Sdl.Web.Common.Mapping
             return baseModelType;
         }
 
+        public bool HasSemanticType(SemanticType semanticType)
+        {
+            SchemaSemantics semantics = new SchemaSemantics(semanticType.Vocab, semanticType.EntityName, null);
+            return Semantics.Any(s => s.Equals(semantics));
+        }
+
         /// <summary>
         /// Provides a string representation of the object.
         /// </summary>

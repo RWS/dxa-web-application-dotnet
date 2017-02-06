@@ -110,7 +110,7 @@ namespace Sdl.Web.Common.Mapping
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            FieldSemantics other = obj as FieldSemantics;
+            SchemaSemantics other = obj as SchemaSemantics;
             if (other == null)
             {
                 return false;

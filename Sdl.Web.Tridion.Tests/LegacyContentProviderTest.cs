@@ -1,7 +1,5 @@
 ﻿using System.Linq;
-using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sdl.Web.Common;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Tests.Models;
 using Sdl.Web.Common.Configuration;
@@ -87,26 +85,6 @@ namespace Sdl.Web.Tridion.Tests
             Tsi1757TestEntity2 testEntity2 = testEntity3.CompLinkField[1] as Tsi1757TestEntity2;
             Assert.IsNotNull(testEntity2, "testEntity2");
             Assert.AreEqual("This is the textField of TSI-1757 Test Component 2", testEntity2.TextField, "testEntity2.TextField");
-        }
-
-        [TestMethod]
-        public void PopulateDynamicList_TeaserFallbackToDescription_Success() // See TSI-1852
-        {
-            string testPageUrlPath = TestFixture.Tsi1852PageUrlPath;
-
-            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestFixture.ParentLocalization, addIncludes: false);
-
-            Assert.IsNotNull(pageModel, "pageModel");
-            ContentList<Teaser> testContentList = pageModel.Regions["Main"].Entities[0] as ContentList<Teaser>;
-            Assert.IsNotNull(testContentList, "testContentList");
-            Assert.IsNotNull(testContentList.ItemListElements, "testContentList.ItemListElements");
-            Assert.AreEqual(0, testContentList.ItemListElements.Count, "testContentList.ItemListElements is not empty before PopulateDynamicList");
-
-            TestContentProvider.PopulateDynamicList(testContentList, TestFixture.ParentLocalization);
-
-            Teaser testTeaser = testContentList.ItemListElements.FirstOrDefault(t => t.Headline == "TSI-1852 Article");
-            Assert.IsNotNull(testTeaser, "Test Teaser not found");
-            StringAssert.StartsWith(testTeaser.Text.ToString(), "This is the standard metadata description", "testTeaser.Text");
         }
     }
 }
