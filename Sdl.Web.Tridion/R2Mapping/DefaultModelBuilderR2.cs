@@ -100,9 +100,9 @@ namespace Sdl.Web.Tridion.R2Mapping
                 Common.Models.MvcData mvcData = CreateMvcData(entityModelData.MvcData, "EntityModel");
                 SemanticSchema semanticSchema = SemanticMapping.GetSchema(entityModelData.SchemaId, localization);
 
-                Type modelType = (mvcData == null) ?
-                    semanticSchema.GetModelTypeFromSemanticMapping(baseModelType) :
-                    ModelTypeRegistry.GetViewModelType(mvcData);
+                Type modelType = (baseModelType == null) ?
+                    ModelTypeRegistry.GetViewModelType(mvcData) :
+                    semanticSchema.GetModelTypeFromSemanticMapping(baseModelType);
 
                 MappingData mappingData = new MappingData
                 {
@@ -258,8 +258,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 {
                     xpmPropertyMetadata.Add(modelProperty.Name, fieldXPath);
                 }
-
-                if (!isFieldMapped)
+                else if (!isFieldMapped)
                 {
                     string formattedSemanticProperties = string.Join(", ", semanticProperties.Select(sp => sp.ToString()));
                     Log.Debug(
@@ -695,7 +694,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                     EntityModel entityModel;
                     try
                     {
-                        entityModel = ModelBuilderPipelineR2.CreateEntityModel(entityModelData, typeof(EntityModel), localization);
+                        entityModel = ModelBuilderPipelineR2.CreateEntityModel(entityModelData, null, localization);
                     }
                     catch (Exception ex)
                     {

@@ -140,7 +140,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                     EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
                         $"{id}-{localization.Id}", // key
                         CacheRegions.EntityModel,
-                        () => ModelBuilderPipelineR2.CreateEntityModel(entityModelData, typeof(EntityModel), localization),
+                        () => ModelBuilderPipelineR2.CreateEntityModel(entityModelData, null, localization),
                         dependencies: new[] { componentUri }
                         );
 
@@ -149,7 +149,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 }
                 else
                 {
-                    result = ModelBuilderPipelineR2.CreateEntityModel(entityModelData, typeof(EntityModel), localization);
+                    result = ModelBuilderPipelineR2.CreateEntityModel(entityModelData, null, localization);
                 }
 
                 if (result.XpmMetadata != null)

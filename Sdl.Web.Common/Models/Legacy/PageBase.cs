@@ -35,6 +35,7 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Gets or sets the Title of the Page which is typically rendered as HTML title tag.
         /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
         public string Title
         {
             get;
