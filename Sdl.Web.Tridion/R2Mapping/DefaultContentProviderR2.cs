@@ -54,6 +54,11 @@ namespace Sdl.Web.Tridion.R2Mapping
                 }
 
                 PageModelData pageModelData = JsonConvert.DeserializeObject<PageModelData>(pageContent, DataModelBinder.SerializerSettings);
+                if (pageModelData.MvcData == null)
+                {
+                    Log.Warn("Unexpected Page Content: {0}", pageContent);
+                    throw new DxaException($"Data Model for Page '{pageModelData.Title}' ({pageModelData.Id}) contains no MVC data. Ensure that the Page is published using the DXA R2 TBBs.");
+                }
 
                 string pageUri = localization.GetCmUri(pageModelData.Id, (int) ItemType.Page);
                 List<string> dependencies = new List<string>() { pageUri };
@@ -63,7 +68,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 if (CacheRegions.IsViewModelCachingEnabled)
                 {
                     PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                        $"{pageUri}:{addIncludes}", // Cache Page Models with and without includes separately
+                        $"{canonicalUrlPath}:{addIncludes}", // Cache Page Models with and without includes separately
                         CacheRegions.PageModel,
                         () =>
                         {

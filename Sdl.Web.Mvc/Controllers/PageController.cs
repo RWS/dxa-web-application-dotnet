@@ -57,9 +57,15 @@ namespace Sdl.Web.Mvc.Controllers
 
                     WebRequestContext.PageModel = model;
 
-                    Log.Debug("Page Request for URL path '{0}' maps to Model [{1}] with View '{2}'", absoluteUrlPath, model, model.MvcData.ViewName);
+                    MvcData mvcData = model.MvcData;
+                    if (mvcData == null)
+                    {
+                        throw new DxaException($"Page Model [{model}] has no MVC data.");
+                    }
 
-                    return View(model.MvcData.ViewName, model);
+                    Log.Debug("Page Request for URL path '{0}' maps to Model [{1}] with View '{2}'", absoluteUrlPath, model, mvcData.ViewName);
+
+                    return View(mvcData.ViewName, model);
                 }
                 catch (Exception ex)
                 {
