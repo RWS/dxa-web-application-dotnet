@@ -431,23 +431,23 @@ namespace Sdl.Web.Tridion.R2Mapping
 
         private static object MapComponentLink(EntityModelData entityModelData, Type targetType, Localization localization)
         {
-            if (typeof(EntityModel).IsAssignableFrom(targetType))
-            {
-                return ModelBuilderPipelineR2.CreateEntityModel(entityModelData, targetType, localization);
-            }
-
-            string resolvedLinkUrl = ResolveLinkUrl(entityModelData, localization); // TODO TSI-878: Use EntityModelData.LinkUrl (resolved by Model Service)
+            // TODO TSI-878: Use EntityModelData.LinkUrl (resolved by Model Service)
             if (targetType == typeof(Link))
             {
-                return new Link { Url = resolvedLinkUrl };
+                return new Link { Url = ResolveLinkUrl(entityModelData, localization) };
             }
 
-            if (targetType != typeof(string))
+            if (targetType == typeof(string))
+            {
+                return ResolveLinkUrl(entityModelData, localization);
+            }
+
+            if (!typeof(EntityModel).IsAssignableFrom(targetType))
             {
                 throw new DxaException($"Cannot map Component Link to property of type '{targetType.Name}'.");
             }
 
-            return resolvedLinkUrl;
+            return ModelBuilderPipelineR2.CreateEntityModel(entityModelData, targetType, localization);
         }
 
         private static object MapKeyword(KeywordModelData keywordModelData, Type targetType, Localization localization)
