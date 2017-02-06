@@ -15,7 +15,7 @@ namespace Sdl.Web.Tridion.Tests
     {
         internal const string HomePageId = "640";
         internal const string ArticleDcpEntityId = "9712-9711";
-        internal const string ArticlePageUrlPath = "/autotest-parent/test_article_page.html";
+        internal const string ArticlePageUrlPath = "/autotest-parent/test_article_page";
         internal const string ArticleChildPageUrlPath = "/autotest-child/test_article_page.html";
         internal const string ArticleDynamicPageUrlPath = "/autotest-parent/test_article_dynamic.html";
         internal const string MediaManagerTestPageUrlPath = "/autotest-parent/mm_test.html";
