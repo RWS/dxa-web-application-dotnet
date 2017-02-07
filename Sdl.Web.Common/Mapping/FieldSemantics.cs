@@ -30,37 +30,14 @@ namespace Sdl.Web.Common.Mapping
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FieldSemantics"/> class, using default semantic vocabulary prefix.
-        /// </summary>
-        /// <param name="entity">Entity name</param>
-        /// <param name="property">Semantic property name</param>
-        [Obsolete("Deprecated in DXA 1.7. Use the overload with four parameters.")]
-        public FieldSemantics(string entity, string property)
-            : this(SemanticMapping.DefaultPrefix, entity, property, null)
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="FieldSemantics"/> class.
         /// </summary>
-        /// <param name="prefix">Vocabulary prefix</param>
+        /// <param name="vocabOrPrefix">Vocabulary prefix</param>
         /// <param name="entity">Entity name</param>
         /// <param name="property">Semantic property name</param>
-        [Obsolete("Deprecated in DXA 1.7. Use the overload with four parameters.")]
-        public FieldSemantics(string prefix, string entity, string property) 
-            : this(prefix, entity, property, null)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FieldSemantics"/> class.
-        /// </summary>
-        /// <param name="prefix">Vocabulary prefix</param>
-        /// <param name="entity">Entity name</param>
-        /// <param name="property">Semantic property name</param>
-        /// <param name="localization">The context Localization (used to determine the semantic Vocabulary URI).</param>
-        public FieldSemantics(string prefix, string entity, string property, Localization localization)
-            : base(prefix, entity, localization)
+        /// <param name="localization">The context Localization (used to determine the semantic Vocabulary URI from <paramref name="vocabOrPrefix"/>).</param>
+        public FieldSemantics(string vocabOrPrefix, string entity, string property, Localization localization)
+            : base(vocabOrPrefix, entity, localization)
         {
             Property = property;
         }

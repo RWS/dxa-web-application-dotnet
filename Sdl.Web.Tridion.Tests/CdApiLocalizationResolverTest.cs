@@ -10,7 +10,7 @@ namespace Sdl.Web.Tridion.Tests
     [TestClass]
     public class CdApiLocalizationResolverTest : TestClass
     {
-        private const string TestBaseUrl = "http://localhost:8880";
+        private const string TestBaseUrl = "http://localhost:8882";
 
         private static readonly ILocalizationResolver _testLocalizationResolver = new CdApiLocalizationResolver();
 

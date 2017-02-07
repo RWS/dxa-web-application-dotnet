@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
-using System.Web.Configuration;
 using DD4T.ContentModel;
 using DD4T.ContentModel.Factories;
 using Sdl.Web.Common;
@@ -15,6 +15,8 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Statics;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Query;
+using Tridion.ContentDelivery.Meta;
+using IComponentMeta = Tridion.ContentDelivery.Meta.IComponentMeta;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.Tridion.Mapping
@@ -236,13 +238,25 @@ namespace Sdl.Web.Tridion.Mapping
         {
             using (new Tracer(dynamicList, localization))
             {
-                Common.Models.Query query = dynamicList.GetQuery(localization);
-                if (query == null || !(query is SimpleBrokerQuery))
+                SimpleBrokerQuery simpleBrokerQuery = dynamicList.GetQuery(localization) as SimpleBrokerQuery;
+                if (simpleBrokerQuery == null)
                 {
-                    throw new DxaException(string.Format("Unexpected result from {0}.GetQuery: {1}", dynamicList.GetType().Name, query));
+                    throw new DxaException($"Unexpected result from {dynamicList.GetType().Name}.GetQuery: {dynamicList.GetQuery(localization)}");
                 }
-                BrokerQuery brokerQuery = new BrokerQuery((SimpleBrokerQuery) query);
-                dynamicList.QueryResults = brokerQuery.ExecuteQuery(dynamicList.ResultType).ToList();
+
+                BrokerQuery brokerQuery = new BrokerQuery(simpleBrokerQuery);
+                string[] componentUris = brokerQuery.ExecuteQuery().ToArray();
+                Log.Debug($"Broker Query returned {componentUris.Length} results. HasMore={brokerQuery.HasMore}");
+
+                if (componentUris.Length > 0)
+                {
+                    Type resultType = dynamicList.ResultType;
+                    ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(localization.GetCmUri());
+                    dynamicList.QueryResults = componentUris
+                        .Select(c => ModelBuilderPipeline.CreateEntityModel(CreateComponent(componentMetaFactory.GetMeta(c)), resultType, localization))
+                        .ToList();
+                }
+
                 dynamicList.HasMore = brokerQuery.HasMore;
             }
         }
@@ -263,6 +277,55 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
         #endregion
+
+        /// <summary>
+        /// Creates a lightweight DD4T Component that contains enough information such that the semantic model builder can cope and build a strongly typed model from it.
+        /// </summary>
+        /// <param name="componentMeta">A <see cref="DD4T.ContentModel.IComponentMeta"/> instance obtained from CD API.</param>
+        /// <returns>A DD4T Component.</returns>
+        private static IComponent CreateComponent(IComponentMeta componentMeta)
+        {
+            Component component = new Component
+            {
+                Id = $"tcm:{componentMeta.PublicationId}-{componentMeta.Id}",
+                LastPublishedDate = componentMeta.LastPublicationDate,
+                RevisionDate = componentMeta.ModificationDate,
+                Schema = new Schema
+                {
+                    PublicationId = componentMeta.PublicationId.ToString(),
+                    Id = $"tcm:{componentMeta.PublicationId}-{componentMeta.SchemaId}"
+                },
+                MetadataFields = new FieldSet()
+            };
+
+            FieldSet metadataFields = new FieldSet();
+            component.MetadataFields.Add("standardMeta", new Field { EmbeddedValues = new List<FieldSet> { metadataFields } });
+            foreach (DictionaryEntry de in componentMeta.CustomMeta.NameValues)
+            {
+                object v = ((NameValuePair) de.Value).Value;
+                if (v == null)
+                {
+                    continue;
+                }
+                string k = de.Key.ToString();
+                metadataFields.Add(k, new Field { Name = k, Values = new List<string> { v.ToString() }});
+            }
+
+            // The semantic mapping requires that some metadata fields exist. This may not be the case so we map some component meta properties onto them
+            // if they don't exist.
+            if (!metadataFields.ContainsKey("dateCreated"))
+            {
+                metadataFields.Add("dateCreated", new Field { Name = "dateCreated", DateTimeValues = new List<DateTime> { componentMeta.LastPublicationDate } });
+            }
+
+            if (!metadataFields.ContainsKey("name"))
+            {
+                metadataFields.Add("name", new Field { Name = "name", Values = new List<string> { componentMeta.Title } });
+            }
+
+            return component;
+        }
+
 
         /// <summary>
         /// Converts a request URL path into a CMS URL (for example adding default page name and file extension)
@@ -318,7 +381,7 @@ namespace Sdl.Web.Tridion.Mapping
                 IEnumerable<string> includePageUrls = localization.GetIncludePageUrls(pageTemplateTcmUriParts[1]);
                 foreach (string includePageUrl in includePageUrls)
                 {
-                    IPage includePage = GetPage(SiteConfiguration.LocalizeUrl(includePageUrl, localization), localization);
+                    IPage includePage = GetPage(localization.GetAbsoluteUrlPath(includePageUrl), localization);
                     if (includePage == null)
                     {
                         Log.Error("Include Page '{0}' not found.", includePageUrl);

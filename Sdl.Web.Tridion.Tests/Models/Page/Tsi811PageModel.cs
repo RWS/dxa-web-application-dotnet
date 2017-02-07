@@ -2,6 +2,7 @@
 
 namespace Sdl.Web.Tridion.Tests.Models
 {
+    [SemanticEntity("TSI811PageMetadataSchema")]
     public class Tsi811PageModel : PageModel
     {
         public Tsi811PageModel(string id) : base(id)

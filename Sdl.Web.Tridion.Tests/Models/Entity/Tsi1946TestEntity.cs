@@ -3,6 +3,7 @@ using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Tridion.Tests.Models
 {
+    [SemanticEntity(EntityName = "TSI1946")]
     public class Tsi1946TestEntity : EntityModel
     {
         public string SingleLineText { get; set; }

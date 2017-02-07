@@ -224,14 +224,9 @@ namespace Sdl.Web.Common.Configuration
         /// <param name="url">The URL to localize</param>
         /// <param name="localization">The localization to use</param>
         /// <returns>A localized URL</returns>
+        [Obsolete("Deprecated in DXA 2.0. Use Localization.GetAbsoluteUrlPath instead.")]
         public static string LocalizeUrl(string url, Localization localization)
-        {
-            if (!String.IsNullOrEmpty(localization.Path))
-            {
-                return localization.Path + "/" + url;
-            }
-            return url;
-        }
+            => localization.GetAbsoluteUrlPath(url);
 
         /// <summary>
         /// Take a partial URL (so not including protocol, domain, port) and make it full by

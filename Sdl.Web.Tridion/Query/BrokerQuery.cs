@@ -4,6 +4,7 @@ using Sdl.Web.Tridion.Mapping;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Tridion.ContentDelivery.DynamicContent.Query;
 using Tridion.ContentDelivery.Meta;
 using Tridion.ContentDelivery.Taxonomies;
@@ -22,7 +23,7 @@ namespace Sdl.Web.Tridion.Query
             _queryParameters = queryParameters;
         }
 
-        internal IEnumerable<EntityModel> ExecuteQuery(Type resultType)
+        internal IEnumerable<string> ExecuteQuery()
         {
             Criteria criteria = BuildCriteria();
             global::Tridion.ContentDelivery.DynamicContent.Query.Query query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(criteria);
@@ -34,93 +35,29 @@ namespace Sdl.Web.Tridion.Query
             {
                 query.SetResultFilter(new LimitFilter(_queryParameters.MaxResults));
             }
-            if (_queryParameters.PageSize > 0)
+
+            int pageSize = _queryParameters.PageSize;
+            if (pageSize > 0)
             {
                 //We set the page size to one more than what we need, to see if there are more pages to come...
-                query.SetResultFilter(new PagingFilter(_queryParameters.Start, _queryParameters.PageSize + 1));
+                query.SetResultFilter(new PagingFilter(_queryParameters.Start, pageSize + 1));
             }
             try
             {
-                List<EntityModel> models = new List<EntityModel>();
-
                 string[] componentIds = query.ExecuteQuery();
-                if (componentIds == null || componentIds.Length == 0)
+                if (componentIds == null)
                 {
-                    return models;
+                    return new string[0];
                 }
 
-                ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(_queryParameters.PublicationId);
-                int pageSize = _queryParameters.PageSize;
-                int count = 0;
-                foreach (string componentId in componentIds)
-                {
-                    IComponentMeta componentMeta = componentMetaFactory.GetMeta(componentId);
-                    DD4T.ContentModel.IComponent dd4tComponent = CreateComponent(componentMeta);
-                    EntityModel model = ModelBuilderPipeline.CreateEntityModel(dd4tComponent, resultType, _queryParameters.Localization);
-                    models.Add(model);
-                    if (++count == pageSize)
-                    {
-                        break;
-                    }
-                }
-                HasMore = componentIds.Length > count;
-                return models;
+                HasMore = componentIds.Length > pageSize;
+
+                return (pageSize > 0) ? componentIds.Take(pageSize) : componentIds;
             }
             catch (Exception ex)
             {
                 throw new DxaException("Error executing Broker Query", ex);
             }
-        }
-
-        /// <summary>
-        /// Creates a lightweight DD4T Component that contains enough information such that the semantic model builder can cope and build a strongly typed model from it.
-        /// </summary>
-        /// <param name="componentMeta">A <see cref="IComponentMeta"/> instance obtained from CD API.</param>
-        /// <returns>A DD4T Component.</returns>
-        private static DD4T.ContentModel.IComponent CreateComponent(IComponentMeta componentMeta)
-        {
-            DD4T.ContentModel.Component component = new DD4T.ContentModel.Component
-            {
-                Id = string.Format("tcm:{0}-{1}", componentMeta.PublicationId, componentMeta.Id),
-                LastPublishedDate = componentMeta.LastPublicationDate,
-                RevisionDate = componentMeta.ModificationDate,
-                Schema = new DD4T.ContentModel.Schema
-                {
-                    PublicationId = componentMeta.PublicationId.ToString(),
-                    Id = string.Format("tcm:{0}-{1}", componentMeta.PublicationId, componentMeta.SchemaId)
-                },
-                MetadataFields = new DD4T.ContentModel.FieldSet()
-            };
-
-            DD4T.ContentModel.FieldSet metadataFields = new DD4T.ContentModel.FieldSet();
-            component.MetadataFields.Add("standardMeta", new DD4T.ContentModel.Field { EmbeddedValues = new List<DD4T.ContentModel.FieldSet> { metadataFields } });
-            foreach (DictionaryEntry de in componentMeta.CustomMeta.NameValues)
-            {
-                object v = ((NameValuePair)de.Value).Value;
-                if (v != null)
-                {
-                    string k = de.Key.ToString();
-                    metadataFields.Add(k, new DD4T.ContentModel.Field
-                    {
-                        Name = k,
-                        Values = new List<string> { v.ToString() }
-                    });
-                }
-            }
-
-            // The semantic mapping requires that some metadata fields exist. This may not be the case so we map some component meta properties onto them
-            // if they don't exist.
-            if (!metadataFields.ContainsKey("dateCreated"))
-            {
-                metadataFields.Add("dateCreated", new DD4T.ContentModel.Field { Name = "dateCreated", Values = new List<string> { componentMeta.LastPublicationDate.ToString() } });
-            }
-
-            if (!metadataFields.ContainsKey("name"))
-            {
-                metadataFields.Add("name", new DD4T.ContentModel.Field { Name = "name", Values = new List<string> { componentMeta.Title } });
-            }
-
-            return component;
         }
 
         /// <summary>

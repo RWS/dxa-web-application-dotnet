@@ -1,4 +1,5 @@
 ﻿using System;
+using Sdl.Web.Common.Mapping;
 
 namespace Sdl.Web.Common.Models
 {
@@ -18,30 +19,37 @@ namespace Sdl.Web.Common.Models
         public string Prefix { get; set; }
         public bool MapAllProperties { get; set; }
     }
-    
+
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class SemanticEntityAttribute : Attribute
     {
-        public SemanticEntityAttribute() { }
-        public SemanticEntityAttribute(string vocab) : this(vocab, null) { }
-        public SemanticEntityAttribute(string vocab, string entityName) : this(vocab, entityName, String.Empty) { }
+        public SemanticEntityAttribute()
+        {
+            Vocab = SemanticMapping.DefaultVocabulary;
+            Prefix = string.Empty;
+        }
+
+        public SemanticEntityAttribute(string entityName)
+            : this(null, entityName, null)
+        {
+        }
+
+        public SemanticEntityAttribute(string vocab, string entityName)
+            : this(vocab, entityName, null)
+        {
+        }
+
         public SemanticEntityAttribute(string vocab, string entityName, string prefix)
         {
-            Vocab = vocab;
+            Vocab = vocab ?? SemanticMapping.DefaultVocabulary;
             EntityName = entityName;
-            Prefix = prefix;
+            Prefix = prefix ?? string.Empty;
         }
         public string Vocab { get; set; }
         public string Prefix { get; set; }
         public string EntityName { get; set; }
         public bool Public { get; set; }
-        public override object TypeId
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override object TypeId => this;
     }
 
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]

@@ -11,6 +11,7 @@ namespace Sdl.Web.Tridion.Tests.Models
     [SemanticEntity(EntityName = "Article", Prefix = "a", Vocab = CoreVocabulary)]
     [SemanticEntity(EntityName = "NewsArticle", Prefix = "na", Vocab = CoreVocabulary)]
     [SemanticEntity(EntityName = "Place", Prefix = "p", Vocab = CoreVocabulary)]
+    [SemanticEntity(EntityName = "StandardMetadata", Prefix = "m", Vocab = CoreVocabulary)]
     public class Teaser : EntityModel, ISyndicationFeedItemProvider
     {
         //A teaser can be mapped from an article or place, in which case the link should be to the item itself
@@ -36,6 +37,7 @@ namespace Sdl.Web.Tridion.Tests.Models
         [SemanticProperty("a:introText")]
         [SemanticProperty("content")]
         [SemanticProperty("description")]
+        [SemanticProperty("m:description")]
         public RichText Text { get; set; }
 
         [SemanticProperty("dateCreated")]

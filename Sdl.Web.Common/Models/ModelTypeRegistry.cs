@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Web.Compilation;
-using System.Web.UI.WebControls;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 
@@ -17,6 +17,9 @@ namespace Sdl.Web.Common.Models
         private static readonly IDictionary<MvcData, Type> _viewToModelTypeMapping = new Dictionary<MvcData, Type>();
         private static readonly IDictionary<Type, SemanticInfo> _modelTypeToSemanticInfoMapping = new Dictionary<Type, SemanticInfo>();
         private static readonly IDictionary<string, ISet<Type>> _semanticTypeToModelTypesMapping = new Dictionary<string, ISet<Type>>();
+        private static readonly Dictionary<Type, Dictionary<string, List<SemanticProperty>>> _modelTypeToPropertySemanticsMapping =
+            new Dictionary<Type, Dictionary<string, List<SemanticProperty>>>();
+
 
         private class SemanticInfo
         {
@@ -87,7 +90,7 @@ namespace Sdl.Web.Common.Models
                     }
                     catch (Exception ex)
                     {
-                        throw new DxaException(string.Format("Error occurred while compiling View '{0}'", viewVirtualPath), ex);
+                        throw new DxaException(String.Format("Error occurred while compiling View '{0}'", viewVirtualPath), ex);
                     }
                 }
             }
@@ -110,7 +113,7 @@ namespace Sdl.Web.Common.Models
             if (!_viewToModelTypeMapping.TryGetValue(bareMvcData, out modelType))
             {
                 throw new DxaException(
-                    string.Format("No View Model registered for View '{0}'. Check that you have registered this View in the '{1}' area registration.", viewData, viewData.AreaName)
+                    String.Format("No View Model registered for View '{0}'. Check that you have registered this View in the '{1}' area registration.", viewData, viewData.AreaName)
                     );
             }
             return modelType;
@@ -165,6 +168,9 @@ namespace Sdl.Web.Common.Models
         {
             using (new Tracer(modelType))
             {
+                _modelTypeToPropertySemanticsMapping[modelType] = ExtractPropertySemantics(modelType);
+
+                // TODO: Combine SemanticInfo extraction with Property Semantics extraction.
                 SemanticInfo semanticInfo = ExtractSemanticInfo(modelType);
                 _modelTypeToSemanticInfoMapping.Add(modelType, semanticInfo);
 
@@ -181,10 +187,10 @@ namespace Sdl.Web.Common.Models
 
                 if (semanticInfo.PublicSemanticTypes.Any())
                 {
-                    Log.Debug("Model type '{0}' has semantic type(s) '{1}'.", modelType.FullName, string.Join(" ", semanticInfo.PublicSemanticTypes));
+                    Log.Debug("Model type '{0}' has semantic type(s) '{1}'.", modelType.FullName, String.Join(" ", semanticInfo.PublicSemanticTypes));
                     foreach (KeyValuePair<string, IList<string>> kvp in semanticInfo.SemanticProperties)
                     {
-                        Log.Debug("\tRegistered property '{0}' as semantic property '{1}'", kvp.Key, string.Join(" ", kvp.Value));
+                        Log.Debug("\tRegistered property '{0}' as semantic property '{1}'", kvp.Key, String.Join(" ", kvp.Value));
                     }
                 }
 
@@ -211,6 +217,9 @@ namespace Sdl.Web.Common.Models
             return semanticInfo;
         }
 
+        private static void EnsureModelTypeRegistered(Type modelType)
+            => GetSemanticInfo(modelType);
+
         private static SemanticInfo ExtractSemanticInfo(Type modelType)
         {
             SemanticInfo semanticInfo = new SemanticInfo();
@@ -224,7 +233,7 @@ namespace Sdl.Web.Common.Models
             {
                 semanticInfo.MappedSemanticTypes.Add(SemanticMapping.GetQualifiedTypeName(attribute.EntityName, attribute.Vocab));
 
-                if (!attribute.Public || string.IsNullOrEmpty(attribute.Prefix))
+                if (!attribute.Public || String.IsNullOrEmpty(attribute.Prefix))
                     continue;
 
                 string prefix = attribute.Prefix;
@@ -235,7 +244,7 @@ namespace Sdl.Web.Common.Models
                     if (attribute.Vocab != registeredVocab)
                     {
                         throw new DxaException(
-                            string.Format("Attempt to use semantic prefix '{0}' for vocabulary '{1}', but is is already used for vocabulary '{2}", 
+                            String.Format("Attempt to use semantic prefix '{0}' for vocabulary '{1}', but is is already used for vocabulary '{2}", 
                                 prefix, attribute.Vocab, registeredVocab)
                             );
                     }
@@ -253,7 +262,7 @@ namespace Sdl.Web.Common.Models
             {
                 foreach (SemanticPropertyAttribute attribute in memberInfo.GetCustomAttributes<SemanticPropertyAttribute>(inherit: true))
                 {
-                    if (string.IsNullOrEmpty(attribute.PropertyName))
+                    if (String.IsNullOrEmpty(attribute.PropertyName))
                     {
                         // Skip properties without name.
                         continue;
@@ -284,5 +293,173 @@ namespace Sdl.Web.Common.Models
             return semanticInfo;
         }
 
+        /// <summary>
+        /// Gets a mapping from property names to associated Semantic Properties for a given Model Type.
+        /// </summary>
+        /// <param name="modelType">The Model Type.</param>
+        /// <returns>A a mapping from property names to associated Semantic Properties.</returns>
+        public static Dictionary<string, List<SemanticProperty>> GetPropertySemantics(Type modelType)
+        {
+            EnsureModelTypeRegistered(modelType);
+
+            Dictionary<string, List<SemanticProperty>> result;
+            if (!_modelTypeToPropertySemanticsMapping.TryGetValue(modelType, out result))
+            {
+                throw new DxaException($"No Property Semantics found for Model Type '{modelType.FullName}'.");
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets a mapping from property names to associated Semantic Properties for a given Model Type.
+        /// </summary>
+        /// <param name="modelType">The Model Type.</param>
+        /// <returns>A a mapping from property names to associated Semantic Properties.</returns>
+        private static Dictionary<string, List<SemanticProperty>> ExtractPropertySemantics(Type modelType)
+        {
+            IEnumerable<SemanticEntityAttribute> semanticEntityAttributes = modelType.GetCustomAttributes<SemanticEntityAttribute>();
+            IDictionary<string, SemanticType> prefixToSemanticTypeMap = new Dictionary<string, SemanticType>();
+            foreach (SemanticEntityAttribute semanticEntityAttribute in semanticEntityAttributes)
+            {
+                string prefix = semanticEntityAttribute.Prefix ?? string.Empty;
+                // There may be multiple Semantic Entity attributes for the same prefix. The first one will be used.
+                if (prefixToSemanticTypeMap.ContainsKey(prefix))
+                {
+                    Log.Debug($"Type '{modelType.FullName}' has multiple SemanticEntity attributes for prefix '{prefix}'. Ignoring '{semanticEntityAttribute.EntityName}'.");
+                }
+                else
+                {
+                    prefixToSemanticTypeMap.Add(prefix, new SemanticType(semanticEntityAttribute.EntityName, semanticEntityAttribute.Vocab));
+                }
+            }
+            if (!prefixToSemanticTypeMap.ContainsKey(string.Empty))
+            {
+                // If there is no SemanticEntity attribute without prefix, we add an implicit one:
+                string implicitSemanticTypeName = Regex.Replace(modelType.Name, @"`\d", string.Empty);
+                prefixToSemanticTypeMap.Add(string.Empty, new SemanticType(implicitSemanticTypeName, SemanticMapping.DefaultVocabulary));
+            }
+
+            string defaultPrefix;
+            bool mapAllProperties;
+            SemanticDefaultsAttribute semanticDefaultsAttr = modelType.GetCustomAttribute<SemanticDefaultsAttribute>();
+            if (semanticDefaultsAttr == null)
+            {
+                defaultPrefix = string.Empty;
+                mapAllProperties = true;
+            }
+            else
+            {
+                defaultPrefix = semanticDefaultsAttr.Prefix;
+                mapAllProperties = semanticDefaultsAttr.MapAllProperties;
+            }
+
+            Dictionary<string, List<SemanticProperty>> result = new Dictionary<string, List<SemanticProperty>>();
+            foreach (PropertyInfo property in modelType.GetProperties())
+            {
+                string propertyName = property.Name;
+
+                bool ignoreMapping = false;
+                bool useImplicitMapping = mapAllProperties;
+                List<SemanticProperty> semanticProperties = new List<SemanticProperty>();
+                foreach (SemanticPropertyAttribute semanticPropertyAttr in property.GetCustomAttributes<SemanticPropertyAttribute>(true))
+                {
+                    if (semanticPropertyAttr.IgnoreMapping)
+                    {
+                        ignoreMapping = true;
+                        break;
+                    }
+
+                    switch (semanticPropertyAttr.PropertyName)
+                    {
+                        case SemanticProperty.AllFields:
+                            if (!typeof(IDictionary<string, string>).IsAssignableFrom(property.PropertyType))
+                            {
+                                throw new DxaException(
+                                    $"Invalid semantics for property {modelType.Name}.{propertyName}. Properties with [SemanticProperty(\"_all\")] annotation must be of type Dictionary<string, string>."
+                                    );
+                            }
+                            break;
+
+                        case SemanticProperty.Self:
+                            Type elementType = GetElementType(property.PropertyType);
+                            if (!typeof(MediaItem).IsAssignableFrom(elementType) && !typeof(Link).IsAssignableFrom(elementType) && (elementType != typeof(string)))
+                            {
+                                throw new DxaException(
+                                    $"Invalid semantics for property {modelType.Name}.{propertyName}. Properties with [SemanticProperty(\"_self\")] annotation must be of type MediaItem, Link or String.");
+                            }
+                            break;
+                    }
+
+                    string[] semanticPropertyNameParts = semanticPropertyAttr.PropertyName.Split(':');
+                    string prefix;
+                    string name;
+                    if (semanticPropertyNameParts.Length > 1)
+                    {
+                        prefix = semanticPropertyNameParts[0];
+                        name = semanticPropertyNameParts[1];
+                    }
+                    else
+                    {
+                        prefix = defaultPrefix;
+                        name = semanticPropertyNameParts[0];
+                        useImplicitMapping = false;
+                    }
+                    SemanticType semanticType;
+                    if (!prefixToSemanticTypeMap.TryGetValue(prefix, out semanticType))
+                    {
+                        throw new DxaException($"Use of undeclared prefix '{prefix}' in property '{propertyName}' in type '{modelType.FullName}'.");
+                    }
+                    semanticProperties.Add(new SemanticProperty(prefix, name, semanticType));
+                }
+
+                if (useImplicitMapping)
+                {
+                    SemanticType semanticType;
+                    if (!prefixToSemanticTypeMap.TryGetValue(defaultPrefix, out semanticType))
+                    {
+                        throw new DxaException($"Use of undeclared prefix '{defaultPrefix}' in property '{propertyName}' in type '{modelType.FullName}'.");
+                    }
+                    SemanticProperty implicitSemanticProperty = new SemanticProperty(
+                        String.Empty, GetDefaultSemanticPropertyName(property),
+                        semanticType
+                        );
+                    semanticProperties.Add(implicitSemanticProperty);
+                }
+
+                if (ignoreMapping || semanticProperties.Count == 0)
+                {
+                    continue;
+                }
+
+                if (result.ContainsKey(propertyName))
+                {
+                    // Properties with same name can exist is a property is reintroduced with a different signature in a subclass.
+                    Log.Debug("Property with name '{0}' is declared multiple times in type {1}.", propertyName, modelType.FullName);
+                    continue;
+                }
+
+                result.Add(propertyName, semanticProperties);
+            }
+
+            return result;
+        }
+
+        private static Type GetElementType(Type propertyType)
+        {
+            bool isListProperty = propertyType.IsGenericType && (propertyType.GetGenericTypeDefinition() == typeof(List<>));
+            return isListProperty ? propertyType.GetGenericArguments()[0] : propertyType;
+        }
+
+        private static string GetDefaultSemanticPropertyName(PropertyInfo property)
+        {
+            // Transform Pascal case into camel case.
+            string semanticPropertyName = property.Name.Substring(0, 1).ToLower() + property.Name.Substring(1);
+            if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>) && semanticPropertyName.EndsWith("s"))
+            {
+                // Remove trailing 's' of List property name
+                semanticPropertyName = semanticPropertyName.Substring(0, semanticPropertyName.Length - 1);
+            }
+            return semanticPropertyName;
+        }
     }
 }

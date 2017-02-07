@@ -15,7 +15,7 @@ namespace Sdl.Web.Tridion.Tests
     {
         internal const string HomePageId = "640";
         internal const string ArticleDcpEntityId = "9712-9711";
-        internal const string ArticlePageUrlPath = "/autotest-parent/test_article_page.html";
+        internal const string ArticlePageUrlPath = "/autotest-parent/test_article_page";
         internal const string ArticleChildPageUrlPath = "/autotest-child/test_article_page.html";
         internal const string ArticleDynamicPageUrlPath = "/autotest-parent/test_article_dynamic.html";
         internal const string MediaManagerTestPageUrlPath = "/autotest-parent/mm_test.html";
@@ -38,9 +38,23 @@ namespace Sdl.Web.Tridion.Tests
         internal const string Keyword1_1Title = "Keyword 1.1";
         internal const string Keyword1_2Title = "Keyword 1.2";
 
+        internal const string ArticlePageRelativeUrlPath = "test_article_page";
+        internal const string ArticleDynamicPageRelativeUrlPath = "test_article_dynamic";
+        internal const string MediaManagerTestPageRelativeUrlPath = "mm_test.html";
+        internal const string Tsi811PageRelativeUrlPath = "regression/tsi-811";
+        internal const string Tsi1278PageRelativeUrlPath = "tsi-1278_trådløst.html";
+        internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-9791.jpg";
+        internal const string Tsi1308PageRelativeUrlPath = "regression/tsi-1308";
+        internal const string Tsi1614PageRelativeUrlPath = "tsi-1614.html";
+        internal const string Tsi1758PageRelativeUrlPath = "regression/tsi-1758.html";
+        internal const string Tsi1852PageRelativeUrlPath = "regression/tsi-1852.html";
+        internal const string Tsi1946PageRelativeUrlPath = "regression/tsi-1946.html";
+        internal const string Tsi2225PageRelativeUrlPath = "regression/tsi-2225";
+
         private static readonly IEnumerable<Localization> _testLocalizations;
         private static readonly Localization _parentLocalization;
         private static readonly Localization _childLocalization;
+        private static readonly Localization _r2TestLocalization;
 
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
@@ -71,7 +85,13 @@ namespace Sdl.Web.Tridion.Tests
                 Path = "/autotest-child"
             };
 
-            _testLocalizations = new[] { _parentLocalization, _childLocalization };
+            _r2TestLocalization = new Localization
+            {
+                LocalizationId = "1081",
+                Path = "/autotest-r2"
+            };
+
+            _testLocalizations = new[] { _parentLocalization, _childLocalization, _r2TestLocalization };
 
             TestRegistration.RegisterViewModels();
         }
@@ -96,6 +116,16 @@ namespace Sdl.Web.Tridion.Tests
                 return _childLocalization;
             }
         }
+
+        internal static Localization R2TestLocalization
+        {
+            get
+            {
+                _r2TestLocalization.EnsureInitialized();
+                return _r2TestLocalization;
+            }
+        }
+
 
         internal static void InitializeProviders()
         {

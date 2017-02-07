@@ -33,12 +33,15 @@ namespace Sdl.Web.Common.Configuration
         private IDictionary<string, SemanticVocabulary> _semanticVocabularyMap; 
         private readonly object _loadLock = new object();
 
+        public string Id => _data.Id;
+
         public string Path {
             get { return _data.Path; }
             set { _data.Path = value != null && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value; }
         }
-        
-        public string Culture { 
+
+        public string Culture
+        {
             get
             {
                 return _culture;
@@ -71,6 +74,7 @@ namespace Sdl.Web.Common.Configuration
             set { _data.Language = value; }
         }
 
+        // TODO TSI-878: deprecate (should use Id instead)
         public string LocalizationId
         {
             get { return _data.Id; }
@@ -247,6 +251,14 @@ namespace Sdl.Web.Common.Configuration
         }
 
         /// <summary>
+        /// Gets an absolute (server-relative) URL path for a given context-relative URL path.
+        /// </summary>
+        /// <param name="contextRelativeUrlPath">The context-relative URL path. Should not start with a slash.</param>
+        /// <returns>The absolute URL path.</returns>
+        public string GetAbsoluteUrlPath(string contextRelativeUrlPath)
+            => (contextRelativeUrlPath.StartsWith("/")) ? Path + contextRelativeUrlPath : $"{Path}/{contextRelativeUrlPath}";
+
+        /// <summary>
         /// Gets a versioned URL (including the version number of the HTML design/assets).
         /// </summary>
         /// <param name="relativePath">The (unversioned) URL path relative to the system folder</param>
@@ -382,6 +394,22 @@ namespace Sdl.Web.Common.Configuration
 
             return result;
         }
+
+        /// <summary>
+        /// Gets a CM identifier (TCM URI) for this Localization
+        /// </summary>
+        /// <returns>the CM URI.</returns>
+        public string GetCmUri()
+            => $"tcm:0-{Id}-1";
+
+        /// <summary>
+        /// Gets a CM identifier (TCM URI) for a given Model identifier.
+        /// </summary>
+        /// <param name="modelId">The Model identifier.</param>
+        /// <param name="itemType">The item type identifier used in the CM URI.</param>
+        /// <returns>The CM URI.</returns>
+        public string GetCmUri(string modelId, int itemType = 16)
+            => (itemType == 16) ? $"tcm:{Id}-{modelId}" : $"tcm:{Id}-{modelId}-{itemType}";
 
         private void LoadStaticContentItem<T>(string relativeUrl, ref T deserializedObject)
         {

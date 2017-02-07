@@ -95,17 +95,6 @@ namespace Sdl.Web.Common.Models
         {
             return (richText == null) ? null : richText.ToString();
         }
-
-        /// <summary>
-        /// Implicit cast from string
-        /// </summary>
-        /// <param name="html">The string containing HTML.</param>
-        /// <returns>A new <see cref="RichText"/> instance representing the HTML.</returns>
-        public static implicit operator RichText(string html)
-        {
-            return (html == null) ? null : new RichText(html);
-        }
-
         #endregion
     }
 
