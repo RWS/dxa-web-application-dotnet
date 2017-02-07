@@ -695,6 +695,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                     try
                     {
                         entityModel = ModelBuilderPipelineR2.CreateEntityModel(entityModelData, null, localization);
+                        entityModel.MvcData.RegionName = regionModelData.Name;
                     }
                     catch (Exception ex)
                     {
