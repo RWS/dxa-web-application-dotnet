@@ -129,7 +129,6 @@
     <Compile Include="Models\Entity\Link.cs" />
     <Compile Include="Models\Entity\MediaItem.cs" />
     <Compile Include="Models\Entity\Tag.cs" />
-    <Compile Include="Models\Entity\TagLink.cs" />
     <Compile Include="Models\MvcData.cs" />
     <Compile Include="Interfaces\IContentProvider.cs" />
     <Compile Include="Interfaces\ILogger.cs" />
