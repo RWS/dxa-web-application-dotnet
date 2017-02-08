@@ -413,6 +413,24 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetPageModel_SmartTarget_Success()
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.SmartTargetTestPageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            SmartTargetRegion example1Region = (SmartTargetRegion) pageModel.Regions["Example1"];
+            Assert.IsNotNull(example1Region, "example1Region");
+
+            SmartTargetRegion example2Region = (SmartTargetRegion) pageModel.Regions["Example2"];
+            Assert.IsNotNull(example2Region, "example2Region");
+        }
+
+
+        [TestMethod]
         public void GetEntityModel_NonExistent_Exception()
         {
             AssertThrowsException<DxaItemNotFoundException>(() => TestContentProvider.GetEntityModel("666-666", TestLocalization));

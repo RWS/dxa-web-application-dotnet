@@ -51,6 +51,9 @@ namespace Sdl.Web.Tridion.Tests
             RegisterViewModel("Nav", typeof(RegionModel));
             RegisterViewModel("Tools", typeof(RegionModel));
 
+            RegisterViewModel("SmartTarget:SmartTargetRegion", typeof(SmartTargetRegion));
+            RegisterViewModel("SmartTarget:2-Column", typeof(SmartTargetRegion));
+
             // Region Views for Include Pages
             RegisterViewModel("Header", typeof(RegionModel));
             RegisterViewModel("Footer", typeof(RegionModel));

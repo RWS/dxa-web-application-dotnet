@@ -78,6 +78,7 @@
     <Compile Include="Models\Entity\Tsi811TestEntity.cs" />
     <Compile Include="Models\Page\Tsi811PageModel.cs" />
     <Compile Include="ContentProviderTest.cs" />
+    <Compile Include="Models\Region\SmartTargetRegion.cs" />
     <Compile Include="R2ContentProviderTest.cs" />
     <Compile Include="StaticNavigationProviderTest.cs" />
     <Compile Include="TestClass.cs" />
@@ -93,6 +94,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
       <ItemGroup>

@@ -673,13 +673,15 @@ namespace Sdl.Web.Tridion.R2Mapping
 
         private static RegionModel CreateRegionModel(RegionModelData regionModelData, Localization localization)
         {
-            RegionModel result = new RegionModel(regionModelData.Name)
-            {
-                ExtensionData = regionModelData.ExtensionData,
-                HtmlClasses = regionModelData.HtmlClasses,
-                MvcData = CreateMvcData(regionModelData.MvcData, "RegionModel"),
-                XpmMetadata = regionModelData.XpmMetadata
-            };
+            Common.Models.MvcData mvcData = CreateMvcData(regionModelData.MvcData, "RegionModel");
+            Type regionModelType = ModelTypeRegistry.GetViewModelType(mvcData);
+
+            RegionModel result = (RegionModel) Activator.CreateInstance(regionModelType, regionModelData.Name);
+
+            result.ExtensionData = regionModelData.ExtensionData;
+            result.HtmlClasses = regionModelData.HtmlClasses;
+            result.MvcData = mvcData;
+            result.XpmMetadata = regionModelData.XpmMetadata;
 
             if (regionModelData.Regions != null)
             {
