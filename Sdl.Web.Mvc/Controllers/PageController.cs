@@ -2,6 +2,7 @@
 using System.Web;
 using System.Web.Mvc;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -80,17 +81,27 @@ namespace Sdl.Web.Mvc.Controllers
         /// </summary>
         /// <param name="itemId">The ID of the Page to resolve.</param>
         /// <param name="localizationId">The context Localization in which to resolve.</param>
-        /// <param name="defaultItemId">Optional ID of a Component to resolve in case the Page cannot be resolved.</param>
+        /// <param name="defaultItem">Optional ID of a Component to resolve in case the Page cannot be resolved.</param>
         /// <param name="defaultPath"></param>
         /// <returns>null - response is redirected if the URL can be resolved</returns>
-        public virtual ActionResult Resolve(string itemId, int localizationId, string defaultItemId = null, string defaultPath = null)
+        public virtual ActionResult Resolve(string itemId, int localizationId, string defaultItem = null, string defaultPath = null)
         {
-            using (new Tracer(itemId, localizationId, defaultItemId, defaultPath))
+            using (new Tracer(itemId, localizationId, defaultItem, defaultPath))
             {
                 string url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}-64", localizationId, itemId));
-                if (url == null && defaultItemId != null)
+                if (url == null && defaultItem != null)
                 {
-                    url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}", localizationId, defaultItemId));
+                    if (defaultItem.IsCmIdentifier())
+                    {
+                        // we need to resolve this cm uri
+                        string defaultItemId = defaultItem.Split('-')[1];
+                        url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}", localizationId, defaultItemId));
+                    }
+                    else
+                    {
+                        // must of already been resolved in the model building pipeline
+                        url = defaultItem;
+                    }
                 }
                 if (url == null)
                 {
