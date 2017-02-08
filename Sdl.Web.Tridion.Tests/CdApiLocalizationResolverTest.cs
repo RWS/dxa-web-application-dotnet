@@ -41,7 +41,9 @@ namespace Sdl.Web.Tridion.Tests
         public void ResolveLocalization_EscapedChars_Success() // See CRQ-1585
         {
             Localization testLocalization = TestFixture.ParentLocalization;
-            Uri testUrl = new Uri(TestBaseUrl + TestFixture.Tsi1278PageUrlPath);
+            string testPageUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1278PageRelativeUrlPath);
+
+            Uri testUrl = new Uri(TestBaseUrl + testPageUrlPath);
 
             Localization resolvedLocalization = _testLocalizationResolver.ResolveLocalization(testUrl);
 
