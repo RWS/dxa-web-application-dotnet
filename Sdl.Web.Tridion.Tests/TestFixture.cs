@@ -42,6 +42,7 @@ namespace Sdl.Web.Tridion.Tests
         internal const string ArticleDynamicPageRelativeUrlPath = "test_article_dynamic";
         internal const string MediaManagerTestPageRelativeUrlPath = "mm_test.html";
         internal const string SmartTargetTestPageRelativeUrlPath = "smoke/smart-target-smoke-test";
+        internal const string ContextExpressionsTestPageRelativeUrlPath = "smoke/context-expression-smoke-test";
         internal const string Tsi811PageRelativeUrlPath = "regression/tsi-811";
         internal const string Tsi1278PageRelativeUrlPath = "tsi-1278_trådløst.html";
         internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-9791.jpg";
