@@ -397,8 +397,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        [Ignore] // TODO TSI-2266
-        public void GetPageModel_LanguageSelector_Success() // See TSI-2225
+        public virtual void GetPageModel_LanguageSelector_Success() // See TSI-2225
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2225PageRelativeUrlPath);
 
