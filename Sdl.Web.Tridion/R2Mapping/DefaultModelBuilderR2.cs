@@ -170,6 +170,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                         );
                 }
                 eclItem.EclDisplayTypeId = externalContent.DisplayTypeId;
+                eclItem.EclTemplateFragment = externalContent.TemplateFragment;
                 eclItem.EclExternalMetadata = externalContent.Metadata;
                 eclItem.EclUri = externalContent.Id;
             }

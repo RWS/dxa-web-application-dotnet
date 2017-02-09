@@ -124,7 +124,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(mmDistribution.EclUri, "mmDistribution.EclUri");
             StringAssert.Matches(mmDistribution.EclUri, new Regex(@"ecl:\d+-mm-.*"), "mmDistribution.EclUri");
             Assert.AreEqual("imagedist", mmDistribution.EclDisplayTypeId, "mmDistribution.EclDisplayTypeId");
-           // TODO: Assert.IsNotNull(mmDistribution.EclTemplateFragment, "mmDistribution.EclTemplateFragment");
+            Assert.IsNotNull(mmDistribution.EclTemplateFragment, "mmDistribution.EclTemplateFragment");
             Assert.IsNotNull(mmDistribution.EclExternalMetadata, "mmDistribution.EclExternalMetadata");
             Assert.IsTrue(mmDistribution.EclExternalMetadata.Keys.Count >= 11, "mmDistribution.EclExternalMetadata.Keys.Count");
             Assert.AreEqual("Image", mmDistribution.EclExternalMetadata["OutletType"], "mmDistribution.EclExternalMetadata['OutletType']");
