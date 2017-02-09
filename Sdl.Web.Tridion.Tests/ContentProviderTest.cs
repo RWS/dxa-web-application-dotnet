@@ -349,7 +349,6 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        [Ignore] // TODO TSI-2265
         public void GetPageModel_RichTextProcessing_Success()
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
@@ -375,9 +374,11 @@ namespace Sdl.Web.Tridion.Tests
 
             string firstHtmlFragment = content.Fragments.First().ToHtml();
             Assert.IsNotNull(firstHtmlFragment, "firstHtmlFragment");
+            string linkPattern1 = string.Format(@"Component link \(published\): <a title=""TSI-1758 Test Component"" href=""{0}/regression/tsi-1758"">TSI-1758 Test Component</a>", TestLocalization.Path);
+            string linkPattern2 = string.Format(@"MMC link: <a title=""bulls-eye"" href=""{0}/Images/bulls-eye.*"">bulls-eye</a>", TestLocalization.Path);
             StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(not published\): Test Component"));
-            StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(published\): <a title=""TSI-1758 Test Component"" href=""/autotest-parent/regression/tsi-1758"">TSI-1758 Test Component</a>"));
-            StringAssert.Matches(firstHtmlFragment, new Regex(@"MMC link: <a title=""bulls-eye"" href=""/autotest-parent/Images/bulls-eye.*"">bulls-eye</a>"));
+            StringAssert.Matches(firstHtmlFragment, new Regex(linkPattern1));
+            StringAssert.Matches(firstHtmlFragment, new Regex(linkPattern2));
         }
 
         [TestMethod]

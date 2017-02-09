@@ -22,7 +22,8 @@ namespace Sdl.Web.Tridion.R2Mapping
     public class DefaultModelBuilderR2 : IPageModelBuilder, IEntityModelBuilder
     {
         private static readonly Regex _tcmUriRegex = new Regex(@"tcm:\d+-\d+(-\d+)?", RegexOptions.Compiled);
-        private static readonly Regex _compLinkRegex = new Regex(@"href=""(?<tcmUri>tcm:\d+-\d+)""", RegexOptions.Compiled);
+        private static readonly Regex _compLinkStartTagRegex = new Regex(@"(?<before><a\s.*href="")(?<tcmUri>tcm:\d+-\d+)(?<after>""[^>]*>)", RegexOptions.Compiled);
+        private static readonly Regex _compLinkEndTagRegex = new Regex(@"(?<before></a><!--CompLink\s)(?<tcmUri>tcm:\d+-\d+)(?<after>-->)", RegexOptions.Compiled);
 
         private class MappingData
         {
@@ -515,6 +516,9 @@ namespace Sdl.Web.Tridion.R2Mapping
 
         private static object MapRichText(RichTextData richTextData, Type targetType, Localization localization)
         {
+            // TODO TSI-1267: Component Links resolving should be done in Model Service.
+            ResolveRichTextLinks(richTextData);
+
             IList<IRichTextFragment> fragments = new List<IRichTextFragment>();
             foreach (object fragment in richTextData.Fragments)
             {
@@ -533,12 +537,6 @@ namespace Sdl.Web.Tridion.R2Mapping
                 else
                 {
                     // HTML fragment.
-                    // TODO TSI-1267: Component Links resolving should be done in Model Service.
-                    ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
-                    htmlFragment = _compLinkRegex.Replace(
-                        htmlFragment,
-                        match => $"href=\"{linkResolver.ResolveLink(match.Groups["tcmUri"].Value, resolveToBinary: true)}\""
-                        );
                     fragments.Add(new RichTextFragment(htmlFragment));
                 }
             }
@@ -550,6 +548,62 @@ namespace Sdl.Web.Tridion.R2Mapping
             }
 
             return richText.ToString();
+        }
+
+        private static void ResolveRichTextLinks(RichTextData richTextData)
+        {
+            // 1st pass: resolve Component Links and suppress hyperlink start tags if needed.
+            ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
+            List<string> suppressCompLinks = new List<string>();
+            for (int i = 0; i < richTextData.Fragments.Count; i++)
+            {
+                string htmlFragment = richTextData.Fragments[i] as string;
+                if (htmlFragment == null)
+                {
+                    // This is not an HTML fragment, but an embedded Entity Model.
+                    continue;
+                }
+
+                string resolvedHtmlFragment = _compLinkStartTagRegex.Replace(
+                    htmlFragment,
+                    match =>
+                    {
+                        string tcmUri = match.Groups["tcmUri"].Value;
+                        string resolvedLink = linkResolver.ResolveLink(tcmUri, resolveToBinary: true);
+                        if (!string.IsNullOrEmpty(resolvedLink))
+                        {
+                            return match.Groups["before"] + resolvedLink + match.Groups["after"];
+                        }
+                        Log.Warn($"Link to Component '{tcmUri}' did not resolve; suppressing hyperlink in rich text.");
+                        suppressCompLinks.Add(tcmUri);
+                        return string.Empty; // This suppresses the hyperlink start tag only; end tag will be done later.
+                    }
+                    );
+
+                richTextData.Fragments[i] = resolvedHtmlFragment;
+            }
+
+            // 2nd pass: remove the CompLink markers and suppress hyperlink end tags if needed.
+            for (int i = 0; i < richTextData.Fragments.Count; i++)
+            {
+                string htmlFragment = richTextData.Fragments[i] as string;
+                if (htmlFragment == null)
+                {
+                    // This is not an HTML fragment, but an embedded Entity Model.
+                    continue;
+                }
+
+                string resolvedHtmlFragment = _compLinkEndTagRegex.Replace(
+                    htmlFragment,
+                    match =>
+                    {
+                        string tcmUri = match.Groups["tcmUri"].Value;
+                        return suppressCompLinks.Contains(tcmUri) ? string.Empty : "</a>";
+                    }
+                    );
+
+                richTextData.Fragments[i] = resolvedHtmlFragment;
+            }
         }
 
         private static object MapEmbeddedFields(ContentModelData embeddedFields, Type targetType, SemanticSchemaField semanticSchemaField, string contextXPath, MappingData mappingData)
