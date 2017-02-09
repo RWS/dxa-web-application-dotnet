@@ -51,9 +51,11 @@ namespace Sdl.Web.Tridion.R2Mapping
             using (new Tracer(pageModel, pageModelData, includePageRegions, localization))
             {
                 Common.Models.MvcData mvcData = CreateMvcData(pageModelData.MvcData, "PageModel");
+                Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
-                if (pageModelData.SchemaId == null)
+                if (modelType == typeof(PageModel))
                 {
+                    // Standard Page Model.
                     pageModel = new PageModel(pageModelData.Id)
                     {
                         ExtensionData = pageModelData.ExtensionData,
@@ -61,8 +63,17 @@ namespace Sdl.Web.Tridion.R2Mapping
                         XpmMetadata = pageModelData.XpmMetadata,
                     };
                 }
+                else if (pageModelData.SchemaId == null)
+                {
+                    // Custom Page Model, but no custom metadata.
+                    pageModel = (PageModel) Activator.CreateInstance(modelType, pageModelData.Id);
+                    pageModel.ExtensionData = pageModelData.ExtensionData;
+                    pageModel.HtmlClasses = pageModelData.HtmlClasses;
+                    pageModel.XpmMetadata = pageModelData.XpmMetadata;
+                }
                 else
                 {
+                    // Custom Page Model with custom metadata; do full-blown model mapping.
                     MappingData mappingData = new MappingData
                     {
                         SourceViewModel = pageModelData,

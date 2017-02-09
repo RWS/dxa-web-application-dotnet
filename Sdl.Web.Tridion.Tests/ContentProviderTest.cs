@@ -462,6 +462,20 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetPageModel_CustomPageModelNoMetadata_Success() // See TSI-2285
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2285PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Tsi2285PageModel customPageModel = pageModel as Tsi2285PageModel;
+            Assert.IsNotNull(customPageModel, "customPageModel");
+        }
+
+        [TestMethod]
         public void GetEntityModel_NonExistent_Exception()
         {
             AssertThrowsException<DxaItemNotFoundException>(() => TestContentProvider.GetEntityModel("666-666", TestLocalization));
