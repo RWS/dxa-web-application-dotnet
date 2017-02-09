@@ -676,7 +676,12 @@ namespace Sdl.Web.Tridion.R2Mapping
             Dictionary<string, string> result = new Dictionary<string, string>(meta.Count);
             foreach (KeyValuePair<string, string> kvp in meta)
             {
-                string resolvedValue = _tcmUriRegex.Replace(kvp.Value, match => linkResolver.ResolveLink(match.Value, resolveToBinary: true));
+                // Remove CompLink markers
+                string resolvedValue = _compLinkEndTagRegex.Replace(kvp.Value, match => "</a>");
+
+                // Resolve Component TCM URIs
+                resolvedValue = _tcmUriRegex.Replace(resolvedValue, match => linkResolver.ResolveLink(match.Value, resolveToBinary: true));
+
                 result.Add(kvp.Key, resolvedValue);
             }
 
