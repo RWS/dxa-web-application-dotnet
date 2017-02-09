@@ -37,5 +37,21 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(6, entitiesWithCxInclude.Length, "entitiesWithCxInclude.Length");
             Assert.AreEqual(4, entitiesWithCxExclude.Length, "entitiesWithCxExclude.Length");
         }
+
+        [TestMethod]
+        public override void GetPageModel_LanguageSelector_Success() // See TSI-2225
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2225PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Common.Models.Configuration configEntity = pageModel.Regions["Nav"].Entities[0] as Common.Models.Configuration;
+            Assert.IsNotNull(configEntity, "configEntity");
+            Assert.AreEqual("/autotest-r2/test_article_dynamic", configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultContentLink']");
+            Assert.AreEqual("pt,mx", configEntity.Settings["suppressLocalizations"], "configEntity.Settings['suppressLocalizations']");
+        }
     }
 }
