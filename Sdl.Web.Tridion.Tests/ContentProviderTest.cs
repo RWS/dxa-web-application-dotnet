@@ -140,6 +140,8 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(pageModel, "pageModel");
             OutputJson(pageModel);
 
+            Assert.AreEqual("TSI-1308 Test Page | My Site", pageModel.Title, "pageModel.Title");
+
             IDictionary<string, string> pageMeta = pageModel.Meta;
             Assert.IsNotNull(pageMeta, "pageMeta");
             Assert.AreEqual(15, pageMeta.Count, "pageMeta.Count");
@@ -154,6 +156,36 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual("Rick Pannekoek", pageMeta["author"], "pageMeta[author]");
             Assert.AreEqual("TSI-1308 Test Page", pageMeta["og:title"], "pageMeta[og: title]");
             Assert.AreEqual("TSI-1308 Test Page", pageMeta["description"], "pageMeta[description]");
+        }
+
+        [TestMethod]
+        public void GetPageModel_TitleDescriptionImage_Success() // See TSI-2277
+        {
+            string testPage1UrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2277Page1RelativeUrlPath);
+            string testPage2UrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2277Page2RelativeUrlPath);
+
+            PageModel pageModel1 = TestContentProvider.GetPageModel(testPage1UrlPath, TestLocalization, addIncludes: false);
+            PageModel pageModel2 = TestContentProvider.GetPageModel(testPage2UrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel1, "pageModel1");
+            OutputJson(pageModel1);
+            Assert.IsNotNull(pageModel2, "pageModel1");
+            OutputJson(pageModel2);
+
+            const string articleHeadline = "Article headline";
+            const string articleStandardMetaName = "Article standardMeta name";
+            const string articleStandardMetaDescription = "Article standardMeta description";
+            const string siteSuffix = " | My Site";
+
+            Assert.AreEqual(articleHeadline + siteSuffix, pageModel1.Title, "pageModel1.Title");
+            Assert.AreEqual(articleHeadline, pageModel1.Meta["description"], "pageModel1.Meta['description']");
+            Assert.IsFalse(pageModel1.Meta.ContainsKey("og:description"));
+
+            Assert.AreEqual(articleStandardMetaName + siteSuffix, pageModel2.Title, "pageModel2.Title");
+            Assert.AreEqual(articleStandardMetaDescription, pageModel2.Meta["description"], "pageModel2.Meta['description']");
+            string ogDescription;
+            Assert.IsTrue(pageModel2.Meta.TryGetValue("og:description", out ogDescription), "pageModel2.Meta['og: description']");
+            Assert.AreEqual(articleStandardMetaDescription, ogDescription, "ogDescription");
         }
 
         [TestMethod]

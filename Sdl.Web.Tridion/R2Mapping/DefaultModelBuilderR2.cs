@@ -77,7 +77,7 @@ namespace Sdl.Web.Tridion.R2Mapping
 
                 pageModel.MvcData = mvcData;
                 pageModel.Meta = ResolveMetaLinks(pageModelData.Meta); // TODO TSI-1267: Link Resolving should eventually be done in Model Service. 
-                pageModel.Title = pageModelData.Title;
+                pageModel.Title = PostProcessPageTitle(pageModelData.Title, localization); // TODO TSI-24: This should eventually be done in Model Service.
 
                 if (pageModelData.Regions != null)
                 {
@@ -764,6 +764,13 @@ namespace Sdl.Web.Tridion.R2Mapping
             }
 
             return result;
+        }
+
+        private static string PostProcessPageTitle(string pageTitle, Localization localization)
+        {
+            IDictionary coreResources = localization.GetResources("core");
+            string titlePostfix = coreResources["core.pageTitleSeparator"].ToString() + coreResources["core.pageTitlePostfix"].ToString();
+            return pageTitle + titlePostfix;
         }
     }
 }
