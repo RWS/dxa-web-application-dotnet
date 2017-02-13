@@ -1,5 +1,6 @@
 ﻿using System;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Tridion.ContentManager;
@@ -29,7 +30,7 @@ namespace Sdl.Web.Tridion.Linking
             }
 
             string url;
-            if (sourceUri.StartsWith("tcm:"))
+            if (sourceUri.IsCmIdentifier())
             {
                 TcmUri tcmUri = new TcmUri(sourceUri);
                 url = ResolveLink(tcmUri, resolveToBinary, localization);
