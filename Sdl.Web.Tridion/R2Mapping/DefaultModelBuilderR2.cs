@@ -309,7 +309,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             return fieldValue;
         }
 
-        private static object MapField(object fieldValues, Type modelPropertyType, SemanticSchemaField semanticSchemaField, MappingData mappingData)
+        private static object MapField(object fieldValues, Type modelPropertyType, SemanticSchemaField semanticSchemaField, MappingData mappingData, bool resolveComponentLinks = true)
         {
             Type sourceType = fieldValues.GetType();
             bool isArray = sourceType.IsArray;
@@ -397,12 +397,12 @@ namespace Sdl.Web.Tridion.R2Mapping
                     {
                         foreach (EntityModelData entityModelData in (EntityModelData[]) fieldValues)
                         {
-                            mappedValues.Add(MapComponentLink(entityModelData, targetType, mappingData.Localization));
+                            mappedValues.Add(MapComponentLink(entityModelData, targetType, mappingData.Localization, resolveComponentLinks));
                         }
                     }
                     else
                     {
-                        mappedValues.Add(MapComponentLink((EntityModelData) fieldValues, targetType, mappingData.Localization));
+                        mappedValues.Add(MapComponentLink((EntityModelData) fieldValues, targetType, mappingData.Localization, resolveComponentLinks));
                     }
                     break;
 
@@ -442,25 +442,32 @@ namespace Sdl.Web.Tridion.R2Mapping
             return Convert.ChangeType(stringValue, targetType, CultureInfo.InvariantCulture.NumberFormat);
         }
 
-        private static object MapComponentLink(EntityModelData entityModelData, Type targetType, Localization localization)
+        private static object MapComponentLink(EntityModelData entityModelData, Type targetType, Localization localization, bool resolveComponentLink = true)
         {
-            // TODO TSI-878: Use EntityModelData.LinkUrl (resolved by Model Service)
-            if (targetType == typeof(Link))
+            if (resolveComponentLink)
             {
-                return new Link { Url = ResolveLinkUrl(entityModelData, localization) };
-            }
+                // TODO TSI-878: Use EntityModelData.LinkUrl (resolved by Model Service)
+                if (targetType == typeof(Link))
+                {
+                    return new Link { Url = ResolveLinkUrl(entityModelData, localization) };
+                }
 
-            if (targetType == typeof(string))
+                if (targetType == typeof(string))
+                {
+                    return ResolveLinkUrl(entityModelData, localization);
+                }
+
+                if (!typeof(EntityModel).IsAssignableFrom(targetType))
+                {
+                    throw new DxaException($"Cannot map Component Link to property of type '{targetType.Name}'.");
+                }
+
+                return ModelBuilderPipelineR2.CreateEntityModel(entityModelData, targetType, localization);
+            }
+            else
             {
-                return ResolveLinkUrl(entityModelData, localization);
+                return localization.GetCmUri(entityModelData.Id);
             }
-
-            if (!typeof(EntityModel).IsAssignableFrom(targetType))
-            {
-                throw new DxaException($"Cannot map Component Link to property of type '{targetType.Name}'.");
-            }
-
-            return ModelBuilderPipelineR2.CreateEntityModel(entityModelData, targetType, localization);
         }
 
         private static object MapKeyword(KeywordModelData keywordModelData, Type targetType, Localization localization)
@@ -646,21 +653,21 @@ namespace Sdl.Web.Tridion.R2Mapping
                     {
                         throw new NotImplementedException("'settings' field handling"); // TODO
                     }
-                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData).FirstOrDefault();
+                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData, false).FirstOrDefault();
                 }
             }
             if (mappingData.MetadataFields != null)
             {
                 foreach (KeyValuePair<string, object> field in mappingData.MetadataFields)
                 {
-                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData).FirstOrDefault();
+                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData, false).FirstOrDefault();
                 }
             }
             return result;
         }
 
-        private static IEnumerable<string> GetFieldValuesAsStrings(object fieldValues, MappingData mappingData)
-            => (IEnumerable<string>) MapField(fieldValues, typeof(List<string>), null, mappingData);
+        private static IEnumerable<string> GetFieldValuesAsStrings(object fieldValues, MappingData mappingData, bool resolveComponentLinks = true)
+            => (IEnumerable<string>) MapField(fieldValues, typeof(List<string>), null, mappingData, resolveComponentLinks);
 
         private static IList CreateGenericList(Type listItemType)
         {

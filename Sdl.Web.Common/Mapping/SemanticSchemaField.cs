@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 
@@ -75,15 +76,7 @@ namespace Sdl.Web.Common.Mapping
             {
                 // path of an embedded field contains more than two forward slashes, 
                 // e.g. /Article/articleBody/subheading
-                int count = 0;
-                foreach (char c in Path)
-                {
-                    if (c == '/')
-                    {
-                        count++;
-                    }                    
-                }
-                return count > 2;
+                return Path.HasNOrMoreOccurancesOfChar(3, '/');                
             }
         }
 

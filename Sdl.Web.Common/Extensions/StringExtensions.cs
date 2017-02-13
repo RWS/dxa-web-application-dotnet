@@ -18,6 +18,19 @@ namespace Sdl.Web.Common.Extensions
             return (prefixWithSlash ? "\\" : "") + value.Replace('/', '\\').Trim('\\');
         }
 
+        public static bool HasNOrMoreOccurancesOfChar(this string str, int n, char c)
+        {
+            int count = 0;
+            for (int i = 0; i < str.Length || count >= n; i++)
+            {
+                if (str[i] == c)
+                {
+                    count++;
+                }
+            }
+            return count >= n;
+        }
+
         /// <summary>
         /// Returns a new string in which all occurances of a specifid string are replaced with a new string
         /// using the provided string comparison option

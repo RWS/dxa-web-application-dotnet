@@ -50,7 +50,7 @@ namespace Sdl.Web.Tridion.Tests
 
             Common.Models.Configuration configEntity = pageModel.Regions["Nav"].Entities[0] as Common.Models.Configuration;
             Assert.IsNotNull(configEntity, "configEntity");
-            Assert.AreEqual("/autotest-r2/test_article_dynamic", configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultContentLink']");
+            Assert.AreEqual("tcm:1081-9712", configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultContentLink']");
             Assert.AreEqual("pt,mx", configEntity.Settings["suppressLocalizations"], "configEntity.Settings['suppressLocalizations']");
         }
     }
