@@ -403,6 +403,11 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsTrue(image.IsEmbedded, "image.IsEmbedded");
             Assert.IsNotNull(image.MvcData, "image.MvcData");
             Assert.AreEqual("Image", image.MvcData.ViewName, "image.MvcData.ViewName");
+            Assert.AreEqual("image/jpeg", image.MimeType, "image.MimeType");
+
+            // The test image has no value in its "altText" metadata field, but there is an "alt" attribute in the source XHTML; see TSI-2289.
+            Assert.IsNotNull(image.AlternateText, "image.AlternateText");
+            Assert.AreEqual("calculator", image.AlternateText, "image.AlternateText");
 
             string firstHtmlFragment = content.Fragments.First().ToHtml();
             Assert.IsNotNull(firstHtmlFragment, "firstHtmlFragment");
