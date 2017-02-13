@@ -95,6 +95,20 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetPageModel_IncludePage_Success() // See TSI-2287
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2287PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: true);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Assert.AreEqual("Header", pageModel.Title, "pageModel.Title");
+            Assert.AreEqual(2, pageModel.Regions.Count, "pageModel.Regions.Count");
+        }
+
+        [TestMethod]
         public void GetPageModel_InternationalizedUrl_Success() // See TSI-1278
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1278PageRelativeUrlPath);
