@@ -448,7 +448,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public virtual void GetPageModel_LanguageSelector_Success() // See TSI-2225
+        public void GetPageModel_LanguageSelector_Success() // See TSI-2225
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2225PageRelativeUrlPath);
 
@@ -459,7 +459,8 @@ namespace Sdl.Web.Tridion.Tests
 
             Common.Models.Configuration configEntity = pageModel.Regions["Nav"].Entities[0] as Common.Models.Configuration;
             Assert.IsNotNull(configEntity, "configEntity");
-            Assert.AreEqual("tcm:1065-9712", configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultContentLink']");
+            string rawCompLink = TestLocalization.GetCmUri("9712");
+            Assert.AreEqual(rawCompLink, configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultContentLink']");
             Assert.AreEqual("pt,mx", configEntity.Settings["suppressLocalizations"], "configEntity.Settings['suppressLocalizations']");
         }
 
