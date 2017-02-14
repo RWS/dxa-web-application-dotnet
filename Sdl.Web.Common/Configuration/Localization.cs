@@ -30,51 +30,106 @@ namespace Sdl.Web.Common.Configuration
         private SemanticSchema[] _semanticSchemas;
         private IDictionary<string, SemanticSchema> _semanticSchemaMap;
         private SemanticVocabulary[] _semanticVocabularies;
-        private IDictionary<string, SemanticVocabulary> _semanticVocabularyMap; 
+        private IDictionary<string, SemanticVocabulary> _semanticVocabularyMap;
         private readonly object _loadLock = new object();
 
+        /// <summary>
+        /// Gets the Localization Identifier.
+        /// </summary>
+        /// <remarks>
+        /// This corresponds to the (numeric) CM Publication Identifier. That is: the middle number in the Publication TCM URI.
+        /// </remarks>
         public string Id => _data.Id;
 
-        public string Path {
-            get { return _data.Path; }
-            set { _data.Path = value != null && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value; }
+        /// <summary>
+        /// Gets or sets the (URL) Path of the Localization.
+        /// </summary>
+        /// <value>
+        /// Is empty for a root-level Localization. It never ends with a slash.
+        /// </value>
+        /// <remarks>
+        /// This property should only be set by the DXA Framework itself (in particular: by Localization Resolvers).
+        /// </remarks>
+        public string Path
+        {
+            get
+            {
+                return _data.Path;
+            }
+            set
+            {
+                string canonicalPath = (value != null) && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value;
+                _data.Path = canonicalPath;
+            }
         }
 
+        /// <summary>
+        /// Gets the Culture/Locale of the Localization as a string value.
+        /// </summary>
+        /// <remarks>
+        /// The value is obtained from CM: the <c>core.culture</c> configuration value.
+        /// It is used by the <see cref="CultureInfo"/> property and also as Language (!) of Atom/RSS feeds.
+        /// For that reason, it must be a valid language tag as defined by Microsoft: https://msdn.microsoft.com/en-us/library/cc233982.aspx
+        /// </remarks>
+        /// <seealso cref="CultureInfo"/>
         public string Culture
         {
             get
             {
                 return _culture;
             }
-            set
+            private set
             {
+                _culture = value;
                 try
                 {
-                    _culture = value;
                     CultureInfo = new CultureInfo(value);
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    Log.Error("Failed to set the Culture of Localization {0} to '{1}': {2}", this, value, e.Message);
-                    CultureInfo = new CultureInfo("en-US");
-                    _culture = "en-US";
+                    Log.Error("Failed to set the Culture of Localization {0} to '{1}': {2}", this, value, ex.Message);
                 }
             }
         }
 
-        public CultureInfo CultureInfo 
-        { 
-            get; 
-            private set; 
+        /// <summary>
+        /// Get the Culture/Locale of the Localization as a <see cref="CultureInfo"/> object.
+        /// </summary>
+        /// <remarks>
+        /// The Culture/Locale is used to format dates (e.g. by <see cref="HtmlHelperExtensions.Date"/>) and numbers.
+        /// </remarks>
+        /// <seealso cref="Culture"/>
+        public CultureInfo CultureInfo
+        {
+            get;
+            private set;
         }
 
+        /// <summary>
+        /// Gets the Language of the Localization.
+        /// </summary>
+        /// <remarks>
+        /// The value is obtained from CM: the <c>core.language</c> configuration value.
+        /// Is used for display purposes and doesn't have to conform to any standard.
+        /// </remarks>
+        /// <seealso cref="Culture"/>
         public string Language
         {
-            get { return _data.Language; } 
-            set { _data.Language = value; }
+            get
+            {
+                return _data.Language;
+            }
+            private set
+            {
+                _data.Language = value;
+            }
         }
 
-        // TODO TSI-878: deprecate (should use Id instead)
+        /// <summary>
+        /// Gets the Localization Identifier.
+        /// </summary>
+        /// <seealso cref="Id"/>
+        // TODO TSI-878: [Obsolete("Deprecated in DXA 2.0. Use Id property instead.")]
         public string LocalizationId
         {
             get { return _data.Id; }
@@ -83,7 +138,7 @@ namespace Sdl.Web.Common.Configuration
 
         public string StaticContentUrlPattern
         {
-            get; 
+            get;
             set;
         }
 
@@ -95,7 +150,7 @@ namespace Sdl.Web.Common.Configuration
 
         public bool IsHtmlDesignPublished
         {
-            get; 
+            get;
             set;
         }
 
@@ -107,19 +162,19 @@ namespace Sdl.Web.Common.Configuration
 
         public string Version
         {
-            get; 
+            get;
             set;
         }
 
         public List<string> DataFormats
         {
-            get; 
+            get;
             set;
         }
 
         public List<Localization> SiteLocalizations
         {
-            get; 
+            get;
             set;
         }
 
@@ -206,9 +261,7 @@ namespace Sdl.Web.Common.Configuration
                 string[] keyParts = key.Split('.');
                 if (keyParts.Length < 2)
                 {
-                    throw new DxaException(
-                        string.Format("Configuration key '{0}' is in the wrong format. It must be in the format [section].[key]", key)
-                        );
+                    throw new DxaException($"Configuration key '{key}' is in the wrong format. It must be in the format [section].[key]");
                 }
 
                 //We actually allow more than one . in the key (for example core.schemas.article) in this case the section
@@ -272,7 +325,7 @@ namespace Sdl.Web.Common.Configuration
             {
                 relativePath = relativePath.Substring(1);
             }
-            return string.Format("{0}/{1}/{2}/{3}", Path, SiteConfiguration.SystemFolder, Version, relativePath);
+            return $"{Path}/{SiteConfiguration.SystemFolder}/{Version}/{relativePath}";
         }
 
         /// <summary>
@@ -298,7 +351,7 @@ namespace Sdl.Web.Common.Configuration
                 if (!_includePageUrls.TryGetValue(pageTypeIdentifier, out result))
                 {
                     throw new DxaException(
-                        String.Format("Localization [{0}] does not contain includes for Page Type '{1}'. {2}", this, pageTypeIdentifier, Constants.CheckSettingsUpToDate)
+                        $"Localization [{this}] does not contain includes for Page Type '{pageTypeIdentifier}'. {Constants.CheckSettingsUpToDate}"
                         );
                 }
 
@@ -351,7 +404,7 @@ namespace Sdl.Web.Common.Configuration
             if (!_semanticSchemaMap.TryGetValue(schemaId, out result))
             {
                 throw new DxaException(
-                    string.Format("Semantic schema '{0}' not defined in Localization [{1}]. {2}",schemaId, this, Constants.CheckSettingsUpToDate)
+                    $"Semantic schema '{schemaId}' not defined in Localization [{this}]. {Constants.CheckSettingsUpToDate}"
                     );
             }
 
@@ -387,9 +440,7 @@ namespace Sdl.Web.Common.Configuration
             SemanticVocabulary result;
             if (!_semanticVocabularyMap.TryGetValue(prefix, out result))
             {
-                throw new DxaException(
-                    string.Format("No vocabulary defined for prefix '{0}' in Localization [{1}]. {2}", prefix, this, Constants.CheckSettingsUpToDate)
-                    );
+                throw new DxaException($"No vocabulary defined for prefix '{prefix}' in Localization [{this}]. {Constants.CheckSettingsUpToDate}");
             }
 
             return result;
@@ -423,7 +474,7 @@ namespace Sdl.Web.Common.Configuration
                         return;
                     }
 
-                    string urlPath = (relativeUrl.StartsWith("/")) ? Path + relativeUrl : string.Format("{0}/{1}/{2}", Path, SiteConfiguration.SystemFolder, relativeUrl);
+                    string urlPath = (relativeUrl.StartsWith("/")) ? Path + relativeUrl : $"{Path}/{SiteConfiguration.SystemFolder}/{relativeUrl}";
                     string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(urlPath, this).GetText();
                     deserializedObject = JsonConvert.DeserializeObject<T>(jsonData);
                 }
@@ -444,7 +495,7 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
-        private void Load() 
+        private void Load()
         {
             using (new Tracer(this))
             {
@@ -491,13 +542,13 @@ namespace Sdl.Web.Common.Configuration
                         if (!mediaRoot.StartsWith("/"))
                         {
                             // SDL Web 8 context-relative URL
-                            mediaRoot = string.Format("{0}/{1}", Path, mediaRoot);
+                            mediaRoot = $"{Path}/{mediaRoot}";
                         }
                         if (!mediaRoot.EndsWith("/"))
                         {
                             mediaRoot += "/";
                         }
-                        mediaPatterns.Add(string.Format("^{0}.*", mediaRoot));
+                        mediaPatterns.Add($"^{mediaRoot}.*");
                     }
 
                     if (_data.SiteLocalizations != null)
@@ -525,9 +576,9 @@ namespace Sdl.Web.Common.Configuration
                     if (IsHtmlDesignPublished)
                     {
                         mediaPatterns.Add("^/favicon.ico");
-                        mediaPatterns.Add(String.Format("^{0}/{1}/assets/.*", Path, SiteConfiguration.SystemFolder));
+                        mediaPatterns.Add($"^{Path}/{SiteConfiguration.SystemFolder}/assets/.*");
                     }
-                    mediaPatterns.Add(String.Format("^{0}/{1}/.*\\.json$", Path, SiteConfiguration.SystemFolder));
+                    mediaPatterns.Add($"^{Path}/{SiteConfiguration.SystemFolder}/.*\\.json$");
 
                     StaticContentUrlPattern = String.Join("|", mediaPatterns);
                     _staticContentUrlRegex = new Regex(StaticContentUrlPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -551,7 +602,7 @@ namespace Sdl.Web.Common.Configuration
                         _config = new Dictionary<string, IDictionary<string, string>>();
                     }
 
-                    string configItemUrl = string.Format("{0}/{1}/config/{2}.json", Path, SiteConfiguration.SystemFolder, sectionName);
+                    string configItemUrl = $"{Path}/{SiteConfiguration.SystemFolder}/config/{sectionName}.json";
                     string configJson = SiteConfiguration.ContentProvider.GetStaticContentItem(configItemUrl, this).GetText();
                     IDictionary<string, string> configSection = JsonConvert.DeserializeObject<Dictionary<string, string>>(configJson);
                     _config[sectionName] = configSection;
@@ -577,7 +628,7 @@ namespace Sdl.Web.Common.Configuration
                     foreach (KeyValuePair<string, object> resource in resources)
                     {
                         //we ensure resource key uniqueness by adding the type (which comes from the filename)
-                        _resources.Add(String.Format("{0}.{1}", type, resource.Key), resource.Value);
+                        _resources.Add($"{type}.{resource.Key}", resource.Value);
                     }
                 }
             }
@@ -612,24 +663,8 @@ namespace Sdl.Web.Common.Configuration
         /// A string that represents the current object.
         /// </returns>
         public override string ToString()
-        {
-            return string.IsNullOrEmpty(Language) ?
-                LocalizationId :
-                string.Format("{0} ('{1}')", LocalizationId, Language);
-        }
+            => string.IsNullOrEmpty(Language) ? Id : $"{Id} ('{Language}')";
 
         #endregion
-
-        #region Obsolete methods in DXA 1.1
-
-        [Obsolete("Localizations are no longer fixed to a particular Domain, so this property is no longer used",true)]
-        public string Domain { get; set; }
-        [Obsolete("Localizations are no longer fixed to a particular Port, so this property is no longer used", true)]
-        public string Port { get; set; }
-        [Obsolete("Localizations are no longer fixed to a particular Protocol, so this property is no longer used", true)]
-        public string Protocol { get; set; }
-
-        #endregion
-
     }
 }

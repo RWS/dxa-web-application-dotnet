@@ -78,7 +78,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                     {
                         SourceViewModel = pageModelData,
                         ModelId = pageModelData.Id,
-                        ModelType = ModelTypeRegistry.GetViewModelType(mvcData),
+                        ModelType = modelType,
                         SemanticSchema = SemanticMapping.GetSchema(pageModelData.SchemaId, localization),
                         MetadataFields = pageModelData.Metadata,
                         Localization = localization
