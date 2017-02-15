@@ -65,6 +65,7 @@
     <Compile Include="DD4TCacheProviderTest.cs" />
     <Compile Include="DefaultCacheProviderTest.cs" />
     <Compile Include="DynamicNavigationProviderTest.cs" />
+    <Compile Include="LocalizationTest.cs" />
     <Compile Include="MockConditionalEntityEvaluator.cs" />
     <Compile Include="Models\Entity\Article.cs" />
     <Compile Include="Models\Entity\ContentList.cs" />

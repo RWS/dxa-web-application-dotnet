@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
-using Sdl.Web.Common.Models.Data;
+using Sdl.Web.DataModel.Configuration;
 
 namespace Sdl.Web.Common.Configuration
 {
@@ -19,7 +19,7 @@ namespace Sdl.Web.Common.Configuration
     /// </summary>
     public class Localization
     {
-        private LocalizationData _data = new LocalizationData();
+        private string _path;
         private string _culture;
         private Regex _staticContentUrlRegex;
         private IDictionary<string, IDictionary<string, string>> _config;
@@ -33,16 +33,27 @@ namespace Sdl.Web.Common.Configuration
         private IDictionary<string, SemanticVocabulary> _semanticVocabularyMap;
         private readonly object _loadLock = new object();
 
+        #region Nested classes
+        /// <summary>
+        /// Represents the (JSON) data for versioning as stored in /version.json.
+        /// </summary>
+        private class VersionData
+        {
+            [JsonProperty("version")]
+            public string Version { get; set; }
+        }
+        #endregion
+
         /// <summary>
         /// Gets the Localization Identifier.
         /// </summary>
         /// <remarks>
         /// This corresponds to the (numeric) CM Publication Identifier. That is: the middle number in the Publication TCM URI.
         /// </remarks>
-        public string Id => _data.Id;
+        public string Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the (URL) Path of the Localization.
+        /// Gets or sets the URL Path of the Localization.
         /// </summary>
         /// <value>
         /// Is empty for a root-level Localization. It never ends with a slash.
@@ -54,12 +65,12 @@ namespace Sdl.Web.Common.Configuration
         {
             get
             {
-                return _data.Path;
+                return _path;
             }
             set
             {
                 string canonicalPath = (value != null) && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value;
-                _data.Path = canonicalPath;
+                _path = canonicalPath;
             }
         }
 
@@ -99,11 +110,7 @@ namespace Sdl.Web.Common.Configuration
         /// The Culture/Locale is used to format dates (e.g. by <see cref="HtmlHelperExtensions.Date"/>) and numbers.
         /// </remarks>
         /// <seealso cref="Culture"/>
-        public CultureInfo CultureInfo
-        {
-            get;
-            private set;
-        }
+        public CultureInfo CultureInfo { get; private set; }
 
         /// <summary>
         /// Gets the Language of the Localization.
@@ -113,17 +120,7 @@ namespace Sdl.Web.Common.Configuration
         /// Is used for display purposes and doesn't have to conform to any standard.
         /// </remarks>
         /// <seealso cref="Culture"/>
-        public string Language
-        {
-            get
-            {
-                return _data.Language;
-            }
-            private set
-            {
-                _data.Language = value;
-            }
-        }
+        public string Language { get; private set; }
 
         /// <summary>
         /// Gets the Localization Identifier.
@@ -132,60 +129,67 @@ namespace Sdl.Web.Common.Configuration
         // TODO TSI-878: [Obsolete("Deprecated in DXA 2.0. Use Id property instead.")]
         public string LocalizationId
         {
-            get { return _data.Id; }
-            set { _data.Id = value; }
+            get { return Id; }
+            set { Id = value; }
         }
 
-        public string StaticContentUrlPattern
-        {
-            get;
-            set;
-        }
+        /// <summary>
+        /// Gets the URL pattern (Regular Expression) used to determine if a URL represents a Static Content Item.
+        /// </summary>
+        public string StaticContentUrlPattern { get; private set; }
 
+        /// <summary>
+        /// Gets (or sets) whether the Localization is XPM Enabled (a.k.a. a "Staging" environment).
+        /// </summary>
+        public bool IsXpmEnabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the Localization represents a "Staging" environment.
+        /// </summary>
+        // TODO TSI-878: [Obsolete("Deprecated in DXA 2.0. Use IsXpmEnabled property instead.")]
         public bool IsStaging
         {
-            get { return _data.IsXpmEnabled; }
-            set { _data.IsXpmEnabled = value; }
+            get { return IsXpmEnabled; }
+            set { IsXpmEnabled = value; }
         }
 
-        public bool IsHtmlDesignPublished
-        {
-            get;
-            set;
-        }
+        /// <summary>
+        /// Gets whether the Localization has an HTML Design which is published from CM.
+        /// </summary>
+        public bool IsHtmlDesignPublished { get; private set; }
 
-        public bool IsDefaultLocalization
-        {
-            get { return _data.IsDefaultLocalization; }
-            set { _data.IsDefaultLocalization = value; }
-        }
+        /// <summary>
+        /// Gets whether the Localization is the default one in the set of "Site Localizations"
+        /// </summary>
+        /// <seealso cref="SiteLocalizations"/>
+        public bool IsDefaultLocalization { get; private set; }
 
-        public string Version
-        {
-            get;
-            set;
-        }
+        /// <summary>
+        /// Gets the version of the HTML Design.
+        /// </summary>
+        /// <remarks>
+        /// The version is obtained from a <c>version.json</c> file.
+        /// </remarks>
+        /// <seealso cref="IsHtmlDesignPublished"/>
+        public string Version { get; private set; }
 
-        public List<string> DataFormats
-        {
-            get;
-            set;
-        }
+        /// <summary>
+        /// Gets the Data Formats supported in this Localization.
+        /// </summary>
+        public List<string> DataFormats { get; private set; }
 
-        public List<Localization> SiteLocalizations
-        {
-            get;
-            set;
-        }
+        /// <summary>
+        /// Gets the "Site Localizations": a list of Localizations in the same "Site Group".
+        /// </summary>
+        /// <remarks>
+        /// A typical use case is a multi-language site consisting of separate Localizations for each language.
+        /// </remarks>
+        public List<Localization> SiteLocalizations { get; private set; }
 
         /// <summary>
         /// Gets the date/time at which this <see cref="Localization"/> was last (re-)loaded.
         /// </summary>
-        public DateTime LastRefresh
-        {
-            get;
-            private set;
-        }
+        public DateTime LastRefresh { get; private set; }
 
         /// <summary>
         /// Ensures that the <see cref="Localization"/> is initialized.
@@ -481,20 +485,6 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
-        private void SetData(LocalizationData data)
-        {
-            LocalizationData oldData = _data;
-            _data = data;
-            if (data.Id == null)
-            {
-                _data.Id = oldData.Id;
-            }
-            if (data.Path == null)
-            {
-                _data.Path = oldData.Path;
-            }
-        }
-
         private void Load()
         {
             using (new Tracer(this))
@@ -534,11 +524,13 @@ namespace Sdl.Web.Common.Configuration
 
                     LocalizationData localizationData = null;
                     LoadStaticContentItem("config/_all.json", ref localizationData);
-                    SetData(localizationData);
 
-                    if (_data.MediaRoot != null)
+                    IsDefaultLocalization = localizationData.IsDefaultLocalization;
+                    IsXpmEnabled = localizationData.IsXpmEnabled;
+
+                    if (localizationData.MediaRoot != null)
                     {
-                        string mediaRoot = _data.MediaRoot;
+                        string mediaRoot = localizationData.MediaRoot;
                         if (!mediaRoot.StartsWith("/"))
                         {
                             // SDL Web 8 context-relative URL
@@ -551,18 +543,22 @@ namespace Sdl.Web.Common.Configuration
                         mediaPatterns.Add($"^{mediaRoot}.*");
                     }
 
-                    if (_data.SiteLocalizations != null)
+                    if (localizationData.SiteLocalizations != null)
                     {
                         ILocalizationResolver localizationResolver = SiteConfiguration.LocalizationResolver;
                         SiteLocalizations = new List<Localization>();
-                        foreach (LocalizationData siteLocalizationData in _data.SiteLocalizations)
+                        foreach (SiteLocalizationData siteLocalizationData in localizationData.SiteLocalizations)
                         {
                             try
                             {
                                 Localization siteLocalization = localizationResolver.GetLocalization(siteLocalizationData.Id);
                                 if (siteLocalization.LastRefresh == DateTime.MinValue)
                                 {
-                                    siteLocalization.SetData(siteLocalizationData);
+                                    // Localization is not fully initialized yet; partially initialize it using the Site Localization Data.
+                                    siteLocalization.Id = siteLocalizationData.Id;
+                                    siteLocalization.Path = siteLocalizationData.Path;
+                                    siteLocalization.IsDefaultLocalization = siteLocalizationData.IsMaster;
+                                    siteLocalization.Language = siteLocalizationData.Language;
                                 }
                                 SiteLocalizations.Add(siteLocalization);
                             }
@@ -615,11 +611,11 @@ namespace Sdl.Web.Common.Configuration
         {
             using (new Tracer(this))
             {
-                ResourcesData resourcesData = null;
+                BootstrapData resourcesData = null;
                 LoadStaticContentItem("resources/_all.json", ref resourcesData);
 
                 _resources = new Hashtable();
-                foreach (string staticContentItemUrl in resourcesData.StaticContentItemUrls)
+                foreach (string staticContentItemUrl in resourcesData.Files)
                 {
                     string type = staticContentItemUrl.Substring(staticContentItemUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
                     type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();

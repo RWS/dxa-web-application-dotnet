@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <SdlDxaDataModelPackageVersion>2.0.0-alpha-201702091547</SdlDxaDataModelPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -54,6 +55,9 @@
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="Sdl.Web.DataModel">
+      <HintPath>..\packages\Sdl.Dxa.DataModel.$(SdlDxaDataModelPackageVersion)\lib\net452\Sdl.Web.DataModel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -154,12 +158,6 @@
     <None Include="Interfaces\ExtensionPoints.cd" />
     <None Include="Models\ViewModels.cd" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Sdl.Web.Common.Models\Sdl.Web.Common.Models.csproj">
-      <Project>{9a3ceda6-6fcc-46e7-9e06-4d6ceb5ceabe}</Project>
-      <Name>Sdl.Web.Common.Models</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
