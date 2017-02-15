@@ -87,7 +87,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 }
 
                 pageModel.MvcData = mvcData;
-                pageModel.Meta = ResolveMetaLinks(pageModelData.Meta); // TODO TSI-1267: Link Resolving should eventually be done in Model Service. 
+                pageModel.Meta = ResolveMetaLinks(pageModelData.Meta) ?? new Dictionary<string, string>(); // TODO TSI-1267: Link Resolving should eventually be done in Model Service. 
                 pageModel.Title = PostProcessPageTitle(pageModelData, localization); // TODO TSI-24: This should eventually be done in Model Service.
 
                 if (pageModelData.Regions != null)
