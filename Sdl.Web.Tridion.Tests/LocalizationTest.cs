@@ -30,7 +30,9 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(testLocalization.CultureInfo, "testLocalization.CultureInfo");
             Assert.AreEqual("AutoParentLang", testLocalization.Language, "testLocalization.Language");
             Assert.IsTrue(testLocalization.IsXpmEnabled, "testLocalization.IsXpmEnabled");
+#pragma warning disable 618
             Assert.AreEqual(testLocalization.IsXpmEnabled, testLocalization.IsStaging, "testLocalization.IsStaging");
+#pragma warning restore 618
             Assert.IsTrue(testLocalization.IsHtmlDesignPublished, "testLocalization.IsHtmlDesignPublished");
             Assert.IsTrue(testLocalization.IsDefaultLocalization, "testLocalization.IsDefaultLocalization");
             StringAssert.Matches(testLocalization.Version, new Regex(@"^v\d+\.\d+$"));

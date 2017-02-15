@@ -161,7 +161,7 @@ namespace Sdl.Web.Common.Configuration
         /// <summary>
         /// Gets or sets whether the Localization represents a "Staging" environment.
         /// </summary>
-        // TODO TSI-878: [Obsolete("Deprecated in DXA 2.0. Use IsXpmEnabled property instead.")]
+        [Obsolete("Deprecated in DXA 2.0. Use IsXpmEnabled property instead.")]
         public bool IsStaging
         {
             get { return IsXpmEnabled; }

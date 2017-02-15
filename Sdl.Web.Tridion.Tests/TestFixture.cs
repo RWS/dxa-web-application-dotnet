@@ -106,7 +106,7 @@ namespace Sdl.Web.Tridion.Tests
                 _childLocalization.EnsureInitialized();
 
                 // Trick to allow us to test on a "Live" (not XPM-enabled) configuration even though we're actually on a Staging CD Environment:
-                _childLocalization.IsStaging = false;
+                _childLocalization.IsXpmEnabled = false;
                 return _childLocalization;
             }
         }

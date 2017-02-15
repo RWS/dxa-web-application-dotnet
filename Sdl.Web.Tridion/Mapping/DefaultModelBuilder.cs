@@ -151,7 +151,7 @@ namespace Sdl.Web.Tridion.Mapping
                 // NOTE: not using ModelBuilderPipeline here, but directly calling our own implementation.
                 BuildEntityModel(ref entityModel, cp.Component, modelType, localization);
 
-                if (localization.IsStaging)
+                if (localization.IsXpmEnabled)
                 {
                     entityModel.XpmMetadata = GetXpmMetadata(cp);
                 }
@@ -359,7 +359,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             pageModel.MvcData = pageMvcData;
-            if (localization.IsStaging)
+            if (localization.IsXpmEnabled)
             {
                 pageModel.XpmMetadata = GetXpmMetadata(page);
             }
@@ -494,7 +494,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             EntityModel entityModel = model as EntityModel;
-            if (entityModel != null && mappingData.Localization.IsStaging)
+            if (entityModel != null && mappingData.Localization.IsXpmEnabled)
             {
                 entityModel.XpmPropertyMetadata = xpmPropertyMetadata;
             }
@@ -1120,7 +1120,7 @@ namespace Sdl.Web.Tridion.Mapping
                 MvcData = regionMvcData
             };
 
-            if (localization.IsStaging)
+            if (localization.IsXpmEnabled)
             {
                 result.XpmMetadata = new Dictionary<string, object>
                 {

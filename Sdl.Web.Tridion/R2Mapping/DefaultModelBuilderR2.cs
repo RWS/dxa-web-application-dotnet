@@ -280,7 +280,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             }
 
             EntityModel entityModel = viewModel as EntityModel;
-            if ((entityModel != null) && mappingData.Localization.IsStaging)
+            if ((entityModel != null) && mappingData.Localization.IsXpmEnabled)
             {
                 entityModel.XpmPropertyMetadata = xpmPropertyMetadata;
             }
