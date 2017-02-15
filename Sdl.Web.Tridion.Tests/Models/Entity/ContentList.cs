@@ -33,7 +33,7 @@ namespace Sdl.Web.Tridion.Tests.Models
             {
                 Start = Start,
                 PageSize = PageSize,
-                PublicationId = Int32.Parse(localization.LocalizationId),
+                PublicationId = Int32.Parse(localization.Id),
                 SchemaId = MapSchema(ContentType.Key, localization),
                 Sort = Sort.Key,
                 Localization = localization

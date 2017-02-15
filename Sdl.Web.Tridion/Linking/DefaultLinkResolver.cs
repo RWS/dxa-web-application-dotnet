@@ -55,46 +55,45 @@ namespace Sdl.Web.Tridion.Linking
 
         private static string ResolveLink(TcmUri tcmUri, bool resolveToBinary, Localization localization)
         {
-            int localizationId = (localization == null) ? 0 : Convert.ToInt32(localization.LocalizationId);
             switch ((ItemType)tcmUri.ItemTypeId)
             {
                 case ItemType.Page:
-                    return ResolvePageLink(tcmUri, localizationId);
+                    return ResolvePageLink(tcmUri, localization);
 
                 case ItemType.Component:
                     // If requested (resolveToBinary = true), try to resolve Binary Link first.
                     string binaryLink = null;
                     if (resolveToBinary)
                     {
-                        binaryLink = ResolveBinaryLink(tcmUri, localizationId);
+                        binaryLink = ResolveBinaryLink(tcmUri, localization);
                     }
-                    return binaryLink ?? ResolveComponentLink(tcmUri, localizationId);
+                    return binaryLink ?? ResolveComponentLink(tcmUri, localization);
 
                 default:
                     throw new DxaException("Unexpected item type in TCM URI: " + tcmUri);
             }
         }
 
-        private static string ResolveComponentLink(TcmUri tcmUri, int localizationId = 0)
+        private static string GetPublicationUri(TcmUri tcmUri, Localization localization)
+            => (localization == null) ? $"tcm:0-{tcmUri.PublicationId}-1" : localization.GetCmUri();
+
+        private static string ResolveComponentLink(TcmUri tcmUri, Localization localization)
         {
-            int publicationId = localizationId == 0 ? tcmUri.PublicationId : localizationId;
-            ComponentLink linker = new ComponentLink(publicationId);
+            ComponentLink linker = new ComponentLink(GetPublicationUri(tcmUri, localization));
             Link link = linker.GetLink(tcmUri.ItemId);
             return link.IsResolved ? link.Url : null;
         }
 
-        private static string ResolveBinaryLink(TcmUri tcmUri, int localizationId = 0)
+        private static string ResolveBinaryLink(TcmUri tcmUri, Localization localization)
         {
-            int publicationId = localizationId == 0 ? tcmUri.PublicationId : localizationId;
-            BinaryLink linker = new BinaryLink(publicationId);
+            BinaryLink linker = new BinaryLink(GetPublicationUri(tcmUri, localization));
             Link link = linker.GetLink(tcmUri.ToString(), null, null, null, false);
             return link.IsResolved ? link.Url : null;
         }
 
-        private static string ResolvePageLink(TcmUri tcmUri, int localizationId = 0)
+        private static string ResolvePageLink(TcmUri tcmUri, Localization localization)
         {
-            int publicationId = localizationId == 0 ? tcmUri.PublicationId : localizationId;
-            PageLink linker = new PageLink(publicationId);
+            PageLink linker = new PageLink(GetPublicationUri(tcmUri, localization));
             Link link = linker.GetLink(tcmUri.ItemId);
             return link.IsResolved ? link.Url : null;
         }

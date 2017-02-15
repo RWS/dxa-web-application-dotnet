@@ -42,7 +42,7 @@ namespace Sdl.Web.Tridion.Mapping
             lock (_pageFactories)
             {
                 IPageFactory pageFactory;
-                if (!_pageFactories.TryGetValue(localization.LocalizationId, out pageFactory))
+                if (!_pageFactories.TryGetValue(localization.Id, out pageFactory))
                 {
                     IPublicationResolver publicationResolver = new PublicationResolver(localization);
                     IProvidersCommonServices providersCommonServices = new ProvidersCommonServices(publicationResolver, _logger, _config);
@@ -52,7 +52,7 @@ namespace Sdl.Web.Tridion.Mapping
                         GetComponentPresentationFactory(localization), 
                         factoryCommonServices
                         ); 
-                    _pageFactories.Add(localization.LocalizationId, pageFactory);
+                    _pageFactories.Add(localization.Id, pageFactory);
                 }
 
                 return pageFactory;
@@ -64,7 +64,7 @@ namespace Sdl.Web.Tridion.Mapping
             lock (_componentPresentationFactories)
             {
                 IComponentPresentationFactory componentPresentationFactory;
-                if (!_componentPresentationFactories.TryGetValue(localization.LocalizationId, out componentPresentationFactory))
+                if (!_componentPresentationFactories.TryGetValue(localization.Id, out componentPresentationFactory))
                 {
                     IPublicationResolver publicationResolver = new PublicationResolver(localization);
                     IProvidersCommonServices providersCommonServices = new ProvidersCommonServices(publicationResolver, _logger, _config);
@@ -72,7 +72,7 @@ namespace Sdl.Web.Tridion.Mapping
                     componentPresentationFactory = new ComponentPresentationFactory(
                         new TridionComponentPresentationProvider(providersCommonServices), 
                         factoryCommonServices);
-                    _componentPresentationFactories.Add(localization.LocalizationId, componentPresentationFactory);
+                    _componentPresentationFactories.Add(localization.Id, componentPresentationFactory);
                 }
 
                 return componentPresentationFactory;
@@ -85,14 +85,14 @@ namespace Sdl.Web.Tridion.Mapping
             lock (_componentFactories)
             {
                 IComponentFactory componentFactory;
-                if (!_componentFactories.TryGetValue(localization.LocalizationId, out componentFactory))
+                if (!_componentFactories.TryGetValue(localization.Id, out componentFactory))
                 {
                     IPublicationResolver publicationResolver = new PublicationResolver(localization);
                     IFactoryCommonServices factoryCommonServices = new FactoryCommonServices(publicationResolver, _logger, _config, CreateCacheAgent());
                     componentFactory = new ComponentFactory(
                         GetComponentPresentationFactory(localization),
                         factoryCommonServices );
-                    _componentFactories.Add(localization.LocalizationId, componentFactory);
+                    _componentFactories.Add(localization.Id, componentFactory);
                 }
 
                 return componentFactory;
@@ -104,7 +104,7 @@ namespace Sdl.Web.Tridion.Mapping
             lock (_binaryFactories)
             {
                 IBinaryFactory binaryFactory;
-                if (!_binaryFactories.TryGetValue(localization.LocalizationId, out binaryFactory))
+                if (!_binaryFactories.TryGetValue(localization.Id, out binaryFactory))
                 {
                     IPublicationResolver publicationResolver = new PublicationResolver(localization);
                     IProvidersCommonServices providersCommonServices = new ProvidersCommonServices(publicationResolver, _logger, _config);
@@ -112,7 +112,7 @@ namespace Sdl.Web.Tridion.Mapping
                     binaryFactory = new BinaryFactory(
                         new TridionBinaryProvider(providersCommonServices),
                         factoryCommonServices);
-                    _binaryFactories.Add(localization.LocalizationId, binaryFactory);
+                    _binaryFactories.Add(localization.Id, binaryFactory);
                 }
 
                 return binaryFactory;

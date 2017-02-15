@@ -31,7 +31,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(resolvedLocalization, "resolvedLocalization");
             OutputJson(resolvedLocalization);
 
-            Assert.AreEqual(testLocalization.LocalizationId, resolvedLocalization.LocalizationId, "resolvedLocalization.LocalizationId");
+            Assert.AreEqual(testLocalization.Id, resolvedLocalization.Id, "resolvedLocalization.Id");
             Assert.AreEqual(testLocalization.Path, resolvedLocalization.Path, "resolvedLocalization.Path");
             Assert.AreNotEqual(DateTime.MinValue, resolvedLocalization.LastRefresh, "resolvedLocalization.LastRefresh");
         }
@@ -50,7 +50,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(resolvedLocalization, "resolvedLocalization");
             OutputJson(resolvedLocalization);
 
-            Assert.AreEqual(testLocalization.LocalizationId, resolvedLocalization.LocalizationId, "resolvedLocalization.LocalizationId");
+            Assert.AreEqual(testLocalization.Id, resolvedLocalization.Id, "resolvedLocalization.Id");
             Assert.AreEqual(testLocalization.Path, resolvedLocalization.Path, "resolvedLocalization.Path");
             Assert.AreNotEqual(DateTime.MinValue, resolvedLocalization.LastRefresh, "resolvedLocalization.LastRefresh");
         }
@@ -72,12 +72,12 @@ namespace Sdl.Web.Tridion.Tests
             // Ensure that the test Localization is Known and initialized before starting the test
             _testLocalizationResolver.ResolveLocalization(testUrl);
 
-            Localization resolvedLocalization = _testLocalizationResolver.GetLocalization(testLocalization.LocalizationId);
+            Localization resolvedLocalization = _testLocalizationResolver.GetLocalization(testLocalization.Id);
 
             Assert.IsNotNull(resolvedLocalization, "resolvedLocalization");
             OutputJson(resolvedLocalization);
 
-            Assert.AreEqual(testLocalization.LocalizationId, resolvedLocalization.LocalizationId, "resolvedLocalization.LocalizationId");
+            Assert.AreEqual(testLocalization.Id, resolvedLocalization.Id, "resolvedLocalization.Id");
             Assert.AreEqual(testLocalization.Path, resolvedLocalization.Path, "resolvedLocalization.Path");
             Assert.AreNotEqual(DateTime.MinValue, resolvedLocalization.LastRefresh, "resolvedLocalization.LastRefresh");
         }
@@ -93,7 +93,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(resolvedLocalization, "resolvedLocalization");
             OutputJson(resolvedLocalization);
 
-            Assert.AreEqual(testLocalizationId, resolvedLocalization.LocalizationId, "resolvedLocalization.LocalizationId");
+            Assert.AreEqual(testLocalizationId, resolvedLocalization.Id, "resolvedLocalization.Id");
             Assert.IsNull(resolvedLocalization.Path, "resolvedLocalization.Path");
             Assert.AreEqual(DateTime.MinValue, resolvedLocalization.LastRefresh, "resolvedLocalization.LastRefresh");
         }

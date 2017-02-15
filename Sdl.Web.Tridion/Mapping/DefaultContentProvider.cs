@@ -14,6 +14,7 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Statics;
 using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Tridion.ContentManager;
 using Sdl.Web.Tridion.Query;
 using Tridion.ContentDelivery.Meta;
 using IComponentMeta = Tridion.ContentDelivery.Meta.IComponentMeta;
@@ -102,7 +103,7 @@ namespace Sdl.Web.Tridion.Mapping
 
                 if (page == null)
                 {
-                    throw new DxaItemNotFoundException(urlPath, localization.LocalizationId);
+                    throw new DxaItemNotFoundException(urlPath, localization.Id);
                 }
 
                 IPage[] includes = addIncludes ? GetIncludesFromModel(page, localization).ToArray() : new IPage[0];
@@ -171,21 +172,21 @@ namespace Sdl.Web.Tridion.Mapping
                     throw new DxaException(String.Format("Invalid Entity Identifier '{0}'. Must be in format ComponentID-TemplateID.", id));
                 }
 
-                string componentUri = string.Format("tcm:{0}-{1}", localization.LocalizationId, idParts[0]);
-                string templateUri = string.Format("tcm:{0}-{1}-32", localization.LocalizationId, idParts[1]);
+                string componentUri = localization.GetCmUri(idParts[0]);
+                string templateUri = localization.GetCmUri(idParts[1], (int) ItemType.ComponentTemplate);
 
                 IComponentPresentationFactory componentPresentationFactory = DD4TFactoryCache.GetComponentPresentationFactory(localization);
                 IComponentPresentation dcp;
                 if (!componentPresentationFactory.TryGetComponentPresentation(out dcp, componentUri, templateUri))
                 {
-                    throw new DxaItemNotFoundException(id, localization.LocalizationId);
+                    throw new DxaItemNotFoundException(id, localization.Id);
                 }
 
                 EntityModel result;
                 if (CacheRegions.IsViewModelCachingEnabled)
                 {
                     EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                        string.Format("{0}-{1}", id, localization.LocalizationId), // key
+                        string.Format("{0}-{1}", id, localization.Id), // key
                         CacheRegions.EntityModel,
                         () => ModelBuilderPipeline.CreateEntityModel(dcp, localization),
                         dependencies: new[] {componentUri}

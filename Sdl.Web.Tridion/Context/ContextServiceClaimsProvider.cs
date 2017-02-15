@@ -101,7 +101,7 @@ namespace Sdl.Web.Tridion.Context
                     EvidenceBuilder evidenceBuilder = new EvidenceBuilder().With("user-agent", userAgent);
                     if (_usePublicationEvidence)
                     {
-                        evidenceBuilder.WithPublicationId(Convert.ToInt32(localization.LocalizationId));
+                        evidenceBuilder.WithPublicationId(Convert.ToInt32(localization.Id)); // TODO: What about URI scheme?
                     }
                     if (!string.IsNullOrEmpty(contextCookieValue))
                     {

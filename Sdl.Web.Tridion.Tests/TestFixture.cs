@@ -69,19 +69,19 @@ namespace Sdl.Web.Tridion.Tests
 
             _parentLocalization = new Localization
             {
-                LocalizationId = "1065",
+                Id = "1065",
                 Path = "/autotest-parent"
             };
 
             _childLocalization = new Localization
             {
-                LocalizationId = "1078",
+                Id = "1078",
                 Path = "/autotest-child"
             };
 
             _r2TestLocalization = new Localization
             {
-                LocalizationId = "1081",
+                Id = "1081",
                 Path = "/autotest-r2"
             };
 
@@ -139,7 +139,7 @@ namespace Sdl.Web.Tridion.Tests
 
         public Localization GetLocalization(string localizationId)
         {
-            Localization result = _testLocalizations.FirstOrDefault(loc => loc.LocalizationId == localizationId);
+            Localization result = _testLocalizations.FirstOrDefault(loc => loc.Id == localizationId);
             if (result == null)
             {
                 throw new DxaUnknownLocalizationException("Unknown Localization ID: " + localizationId);

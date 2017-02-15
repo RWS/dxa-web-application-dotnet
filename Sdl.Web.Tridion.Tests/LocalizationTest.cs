@@ -22,7 +22,9 @@ namespace Sdl.Web.Tridion.Tests
             OutputJson(testLocalization);
 
             Assert.IsNotNull(testLocalization.Id, "testLocalization.Id");
+#pragma warning disable 618
             Assert.AreEqual(testLocalization.Id, testLocalization.LocalizationId, "testLocalization.LocalizationId");
+#pragma warning restore 618
             Assert.IsNotNull(testLocalization.Path, "testLocalization.Path");
             Assert.AreEqual("en-US", testLocalization.Culture, "testLocalization.Culture");
             Assert.IsNotNull(testLocalization.CultureInfo, "testLocalization.CultureInfo");

@@ -123,10 +123,18 @@ namespace Sdl.Web.Common.Configuration
         public string Language { get; private set; }
 
         /// <summary>
+        /// Gets the URI scheme used for CM URIs.
+        /// </summary>
+        /// <remarks>
+        /// Is always "tcm" for now, but can also become "ish" in the future (KC Web App support).
+        /// </remarks>
+        public string CmUriScheme => "tcm";
+
+        /// <summary>
         /// Gets the Localization Identifier.
         /// </summary>
         /// <seealso cref="Id"/>
-        // TODO TSI-878: [Obsolete("Deprecated in DXA 2.0. Use Id property instead.")]
+        [Obsolete("Deprecated in DXA 2.0. Use Id property instead.")]
         public string LocalizationId
         {
             get { return Id; }
@@ -137,6 +145,13 @@ namespace Sdl.Web.Common.Configuration
         /// Gets the URL pattern (Regular Expression) used to determine if a URL represents a Static Content Item.
         /// </summary>
         public string StaticContentUrlPattern { get; private set; }
+
+
+        /// <summary>
+        /// Gets the root folder of the binaries cache for this Localization.
+        /// </summary>
+        public string BinaryCacheFolder
+            => $"{SiteConfiguration.StaticsFolder}\\{Id}";
 
         /// <summary>
         /// Gets (or sets) whether the Localization is XPM Enabled (a.k.a. a "Staging" environment).
@@ -451,20 +466,20 @@ namespace Sdl.Web.Common.Configuration
         }
 
         /// <summary>
-        /// Gets a CM identifier (TCM URI) for this Localization
+        /// Gets a CM identifier (URI) for this Localization
         /// </summary>
         /// <returns>the CM URI.</returns>
         public string GetCmUri()
-            => $"tcm:0-{Id}-1";
+            => $"{CmUriScheme}:0-{Id}-1";
 
         /// <summary>
-        /// Gets a CM identifier (TCM URI) for a given Model identifier.
+        /// Gets a CM identifier (URI) for a given Model identifier.
         /// </summary>
         /// <param name="modelId">The Model identifier.</param>
         /// <param name="itemType">The item type identifier used in the CM URI.</param>
         /// <returns>The CM URI.</returns>
         public string GetCmUri(string modelId, int itemType = 16)
-            => (itemType == 16) ? $"tcm:{Id}-{modelId}" : $"tcm:{Id}-{modelId}-{itemType}";
+            => (itemType == 16) ? $"{CmUriScheme}:{Id}-{modelId}" : $"{CmUriScheme}:{Id}-{modelId}-{itemType}";
 
         private void LoadStaticContentItem<T>(string relativeUrl, ref T deserializedObject)
         {

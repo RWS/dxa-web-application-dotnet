@@ -43,7 +43,7 @@ namespace Sdl.Web.Tridion
                         {
                             localization = new Localization
                             {
-                                LocalizationId = publicationId,
+                                Id = publicationId,
                                 Path = hostElement.Attribute("Path").Value
                             };
                             KnownLocalizations.Add(publicationId, localization);

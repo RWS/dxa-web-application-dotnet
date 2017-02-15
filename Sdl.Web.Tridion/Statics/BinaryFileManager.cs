@@ -53,20 +53,23 @@ namespace Sdl.Web.Tridion.Statics
             }
         }
 
-        private static BinaryMeta GetBinaryMeta(string urlPath, int publicationId)
+        private static int GetPublicationId(string publicationUri)
+            => Convert.ToInt32(publicationUri.Split('-')[1]); // TODO: what about CM URI scheme?
+
+        private static BinaryMeta GetBinaryMeta(string urlPath, string publicationUri)
         {
             BinaryMetaFactory binaryMetaFactory = new BinaryMetaFactory();
-            return binaryMetaFactory.GetMetaByUrl(publicationId, urlPath);
+            return binaryMetaFactory.GetMetaByUrl(GetPublicationId(publicationUri), urlPath);
         }
 
-        private static DateTime GetBinaryLastPublishDate(string urlPath, int publicationId)
+        private static DateTime GetBinaryLastPublishDate(string urlPath, string publicationUri)
         {
-            BinaryMeta binaryMeta = GetBinaryMeta(urlPath, publicationId);
+            BinaryMeta binaryMeta = GetBinaryMeta(urlPath, publicationUri);
             if (binaryMeta == null || !binaryMeta.IsComponent)
             {
                 return DateTime.MinValue;
             }
-            ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(publicationId);
+            ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(publicationUri);
             IComponentMeta componentMeta = componentMetaFactory.GetMeta(binaryMeta.Id);
             return componentMeta.LastPublicationDate;
         }
@@ -79,17 +82,17 @@ namespace Sdl.Web.Tridion.Statics
         /// <returns>The path to the local file.</returns>
         internal string GetCachedFile(string urlPath, Localization localization)
         {
-            string localFilePath = GetFilePathFromUrl(urlPath, localization);
+            string localFilePath = $"{localization.BinaryCacheFolder}/{urlPath}";
             using (new Tracer(urlPath, localization, localFilePath))
             {
                 Dimensions dimensions;
                 urlPath = StripDimensions(urlPath, out dimensions);
-                int publicationId = Convert.ToInt32(localization.LocalizationId);
+                string publicationUri = localization.GetCmUri();
 
                 DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
                     urlPath,
                     CacheRegions.BinaryPublishDate,
-                    () => GetBinaryLastPublishDate(urlPath, publicationId)
+                    () => GetBinaryLastPublishDate(urlPath, publicationUri)
                     );
 
                 if (lastPublishedDate != DateTime.MinValue)
@@ -116,7 +119,7 @@ namespace Sdl.Web.Tridion.Statics
                 }
 
                 // Binary does not exist or cached binary is out-of-date
-                BinaryMeta binaryMeta = GetBinaryMeta(urlPath, publicationId);
+                BinaryMeta binaryMeta = GetBinaryMeta(urlPath, publicationUri);
                 if (binaryMeta == null)
                 {
                     // Binary does not exist in Tridion, it should be removed from the local file system too
@@ -124,23 +127,14 @@ namespace Sdl.Web.Tridion.Statics
                     {
                         CleanupLocalFile(localFilePath);
                     }
-                    throw new DxaItemNotFoundException(urlPath, localization.LocalizationId);
+                    throw new DxaItemNotFoundException(urlPath, localization.Id);
                 }
                 BinaryFactory binaryFactory = new BinaryFactory();
-                BinaryData binaryData = binaryFactory.GetBinary(publicationId, binaryMeta.Id, binaryMeta.VariantId);
+                BinaryData binaryData = binaryFactory.GetBinary(GetPublicationId(publicationUri), binaryMeta.Id, binaryMeta.VariantId);
 
                 WriteBinaryToFile(binaryData.Bytes, localFilePath, dimensions);
                 return localFilePath;
             }
-        }
-
-        private static string GetFilePathFromUrl(string urlPath, Localization loc)
-        {
-            // TODO: not nice to use HttpContext at this level
-            HttpContext httpContext = HttpContext.Current;
-            return (httpContext == null) ?
-                string.Format("{0}/{1}", SiteConfiguration.GetLocalStaticsFolder(loc.LocalizationId), Uri.UnescapeDataString(urlPath)) :
-                httpContext.Server.MapPath("~/" + SiteConfiguration.GetLocalStaticsFolder(loc.LocalizationId) + urlPath);
         }
 
         /// <summary>

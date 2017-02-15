@@ -10,7 +10,7 @@ namespace Sdl.Web.Tridion.Mapping
 
         public PublicationResolver(Localization localization)
         {
-            _publicationId = Convert.ToInt32(localization.LocalizationId);
+            _publicationId = Convert.ToInt32(localization.Id);
         }
 
         public int ResolvePublicationId()
