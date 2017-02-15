@@ -82,7 +82,8 @@ namespace Sdl.Web.Tridion.Statics
         /// <returns>The path to the local file.</returns>
         internal string GetCachedFile(string urlPath, Localization localization)
         {
-            string localFilePath = $"{localization.BinaryCacheFolder}/{urlPath}";
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string localFilePath = $"{baseDir}/{localization.BinaryCacheFolder}/{urlPath}";
             using (new Tracer(urlPath, localization, localFilePath))
             {
                 Dimensions dimensions;
