@@ -24,7 +24,6 @@ namespace Sdl.Web.Common.Models
             internal readonly IList<string> PublicSemanticTypes = new List<string>();
             internal readonly IList<string> MappedSemanticTypes = new List<string>();
             internal readonly IDictionary<string, IList<string>> SemanticProperties = new Dictionary<string, IList<string>>();
-
             internal readonly Dictionary<string, List<SemanticProperty>> PropertySemantics = new Dictionary<string, List<SemanticProperty>>();
             internal readonly IDictionary<string, SemanticType> PrefixToSemanticTypeMap = new Dictionary<string, SemanticType>();
         }
@@ -190,12 +189,16 @@ namespace Sdl.Web.Common.Models
                     mappedModelTypes.Add(modelType);
                 }
 
-                if (semanticInfo.PublicSemanticTypes.Any())
+                // this is only for debug info only
+                if (Log.AllowDebug)
                 {
-                    Log.Debug("Model type '{0}' has semantic type(s) '{1}'.", modelType.FullName, String.Join(" ", semanticInfo.PublicSemanticTypes));
-                    foreach (KeyValuePair<string, IList<string>> kvp in semanticInfo.SemanticProperties)
+                    if (semanticInfo.PublicSemanticTypes.Any())
                     {
-                        Log.Debug("\tRegistered property '{0}' as semantic property '{1}'", kvp.Key, String.Join(" ", kvp.Value));
+                        Log.Debug("Model type '{0}' has semantic type(s) '{1}'.", modelType.FullName, String.Join(" ", semanticInfo.PublicSemanticTypes));
+                        foreach (KeyValuePair<string, IList<string>> kvp in semanticInfo.SemanticProperties)
+                        {
+                            Log.Debug("\tRegistered property '{0}' as semantic property '{1}'", kvp.Key, String.Join(" ", kvp.Value));
+                        }
                     }
                 }
 
@@ -260,7 +263,8 @@ namespace Sdl.Web.Common.Models
                 // There may be multiple Semantic Entity attributes for the same prefix. The first one will be used.
                 if (semanticInfo.PrefixToSemanticTypeMap.ContainsKey(prefix))
                 {
-                    Log.Debug($"Type '{modelType.FullName}' has multiple SemanticEntity attributes for prefix '{prefix}'. Ignoring '{attribute.EntityName}'.");
+                    if(Log.AllowDebug)
+                        Log.Debug($"Type '{modelType.FullName}' has multiple SemanticEntity attributes for prefix '{prefix}'. Ignoring '{attribute.EntityName}'.");
                 }
                 else
                 {
@@ -328,13 +332,10 @@ namespace Sdl.Web.Common.Models
                             break;
                     }
 
-                    string prefix;
-                    string name;
-                    string[] semanticPropertyNameParts = attribute.PropertyName.Split(':');
-                    if (semanticPropertyNameParts.Length > 1)
-                    {
-                        prefix = semanticPropertyNameParts[0];
-                        name = semanticPropertyNameParts[1];
+                    string prefix = attribute.Prefix;
+                    string name = attribute.PropertyName;
+                    if(prefix!=null)
+                    {                    
                         if (semanticInfo.PrefixMappings.ContainsKey(prefix))
                         {
                             IList<string> semanticPropertyNames;
@@ -350,7 +351,6 @@ namespace Sdl.Web.Common.Models
                     {
                         // Skip property names without prefix.
                         prefix = defaultPrefix;
-                        name = semanticPropertyNameParts[0];
                         useImplicitMapping = false;
                     }
 
@@ -382,7 +382,8 @@ namespace Sdl.Web.Common.Models
                     if (semanticInfo.PropertySemantics.ContainsKey(propertyInfo.Name))
                     {
                         // Properties with same name can exist is a property is reintroduced with a different signature in a subclass.
-                        Log.Debug("Property with name '{0}' is declared multiple times in type {1}.", propertyInfo.Name, modelType.FullName);
+                        if(Log.AllowDebug)
+                            Log.Debug("Property with name '{0}' is declared multiple times in type {1}.", propertyInfo.Name, modelType.FullName);
                     }
                     else
                     {
