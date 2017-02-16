@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Web.Compilation;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
+using Sdl.Web.Common.Extensions;
 
 namespace Sdl.Web.Common.Models
 {
@@ -229,9 +230,11 @@ namespace Sdl.Web.Common.Models
         {           
             SemanticInfo semanticInfo = new SemanticInfo();
 
+            // Get model type name
+            string modelTypeName = modelType.BareTypeName();
+
             // Built-in semantic type mapping
-            string bareTypeName = modelType.Name.Split('`')[0]; // Type name without generic type parameters (if any)
-            semanticInfo.MappedSemanticTypes.Add(SemanticMapping.GetQualifiedTypeName(bareTypeName));
+            semanticInfo.MappedSemanticTypes.Add(SemanticMapping.GetQualifiedTypeName(modelTypeName));
 
             // Extract semantic info from SemanticEntity attributes on the Model Type.
             foreach (SemanticEntityAttribute attribute in modelType.GetCustomAttributes<SemanticEntityAttribute>(inherit: true))
@@ -275,8 +278,7 @@ namespace Sdl.Web.Common.Models
             if (!semanticInfo.PrefixToSemanticTypeMap.ContainsKey(string.Empty))
             {
                 // If there is no SemanticEntity attribute without prefix, we add an implicit one:
-                string implicitSemanticTypeName = Regex.Replace(modelType.Name, @"`\d", string.Empty);
-                semanticInfo.PrefixToSemanticTypeMap.Add(string.Empty, new SemanticType(implicitSemanticTypeName, SemanticMapping.DefaultVocabulary));
+                semanticInfo.PrefixToSemanticTypeMap.Add(string.Empty, new SemanticType(modelTypeName, SemanticMapping.DefaultVocabulary));
             }
 
             string defaultPrefix;
@@ -397,15 +399,14 @@ namespace Sdl.Web.Common.Models
 
         private static Type GetElementType(Type propertyType)
         {
-            bool isListProperty = propertyType.IsGenericType && (propertyType.GetGenericTypeDefinition() == typeof(List<>));
-            return isListProperty ? propertyType.GetGenericArguments()[0] : propertyType;
+            return propertyType.IsGenericList() ? propertyType.GetGenericArguments()[0] : propertyType;
         }
 
         private static string GetDefaultSemanticPropertyName(PropertyInfo property)
         {
             // Transform Pascal case into camel case.
-            string semanticPropertyName = property.Name.Substring(0, 1).ToLower() + property.Name.Substring(1);
-            if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>) && semanticPropertyName.EndsWith("s"))
+            string semanticPropertyName = property.Name.ToCamelCase();
+            if (property.PropertyType.IsGenericList() && semanticPropertyName.EndsWith("s"))
             {
                 // Remove trailing 's' of List property name
                 semanticPropertyName = semanticPropertyName.Substring(0, semanticPropertyName.Length - 1);

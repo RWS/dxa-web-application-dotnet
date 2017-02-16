@@ -31,6 +31,11 @@ namespace Sdl.Web.Common.Extensions
             return count >= n;
         }
 
+        public static string ToCamelCase(this string str)
+        {
+            return str.Substring(0, 1).ToLower() + str.Substring(1);
+        }
+
         /// <summary>
         /// Returns a new string in which all occurances of a specifid string are replaced with a new string
         /// using the provided string comparison option
