@@ -11,6 +11,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.DataModel;
 using Sdl.Web.Tridion.ContentManager;
 
@@ -66,7 +67,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 else if (pageModelData.SchemaId == null)
                 {
                     // Custom Page Model, but no custom metadata.
-                    pageModel = (PageModel) Activator.CreateInstance(modelType, pageModelData.Id);
+                    pageModel = (PageModel) modelType.CreateInstance(pageModelData.Id);
                     pageModel.ExtensionData = pageModelData.ExtensionData;
                     pageModel.HtmlClasses = pageModelData.HtmlClasses;
                     pageModel.XpmMetadata = pageModelData.XpmMetadata;
@@ -142,12 +143,12 @@ namespace Sdl.Web.Tridion.R2Mapping
             if (string.IsNullOrEmpty(mappingData.ModelId))
             {
                 // Use parameterless constructor
-                result = (ViewModel) Activator.CreateInstance(mappingData.ModelType);
+                result = (ViewModel) mappingData.ModelType.CreateInstance();
             }
             else
             {
                 // Pass model Identifier in constructor.
-                result = (ViewModel) Activator.CreateInstance(mappingData.ModelType, mappingData.ModelId);
+                result = (ViewModel) mappingData.ModelType.CreateInstance(mappingData.ModelId);
             }
 
             result.ExtensionData = viewModelData.ExtensionData;
@@ -318,17 +319,13 @@ namespace Sdl.Web.Tridion.R2Mapping
                 sourceType = sourceType.GetElementType();
             }
 
-            bool isListProperty = modelPropertyType.IsGenericType && (modelPropertyType.GetGenericTypeDefinition() == typeof(List<>));
-            Type targetType = isListProperty ? modelPropertyType.GetGenericArguments()[0] : modelPropertyType;
+            bool isListProperty = modelPropertyType.IsGenericList();
+            Type targetType = isListProperty ? modelPropertyType.GetUnderlyingGenericListType() : modelPropertyType;
 
             // Convert.ChangeType cannot convert non-nullable types to nullable types, so don't try that.
-            Type bareTargetType = targetType;
-            if (modelPropertyType.IsGenericType && modelPropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                bareTargetType = modelPropertyType.GenericTypeArguments[0];
-            }
+            Type bareTargetType = modelPropertyType.GetUnderlyingNullableType() ?? targetType;
 
-            IList mappedValues = CreateGenericList(targetType);
+            IList mappedValues = targetType.CreateGenericList();
 
             switch (sourceType.Name)
             {
@@ -668,20 +665,7 @@ namespace Sdl.Web.Tridion.R2Mapping
 
         private static IEnumerable<string> GetFieldValuesAsStrings(object fieldValues, MappingData mappingData, bool resolveComponentLinks = true)
             => (IEnumerable<string>) MapField(fieldValues, typeof(List<string>), null, mappingData, resolveComponentLinks);
-
-        private static IList CreateGenericList(Type listItemType)
-        {
-            ConstructorInfo genericListConstructor = typeof(List<>).MakeGenericType(listItemType).GetConstructor(Type.EmptyTypes);
-            if (genericListConstructor == null)
-            {
-                // This should never happen.
-                throw new DxaException($"Unable get constructor for generic list of '{listItemType.FullName}'.");
-            }
-
-            return (IList) genericListConstructor.Invoke(null);
-        }
-
-
+      
         private static IDictionary<string, string> ResolveMetaLinks(IDictionary<string, string> meta)
         {
             if (meta == null)
@@ -754,7 +738,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             Common.Models.MvcData mvcData = CreateMvcData(regionModelData.MvcData, "RegionModel");
             Type regionModelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
-            RegionModel result = (RegionModel) Activator.CreateInstance(regionModelType, regionModelData.Name);
+            RegionModel result = (RegionModel) regionModelType.CreateInstance(regionModelData.Name);
 
             result.ExtensionData = regionModelData.ExtensionData;
             result.HtmlClasses = regionModelData.HtmlClasses;

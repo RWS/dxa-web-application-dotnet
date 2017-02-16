@@ -5,6 +5,7 @@ using System.Linq;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.DataModel;
 using Sdl.Web.Tridion.Configuration;
 
@@ -46,7 +47,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                         foreach (ModelBuilderSettings modelBuilderSettings in config.ModelBuilders)
                         {
                             Type modelBuilderType = Type.GetType(modelBuilderSettings.Type, throwOnError: true, ignoreCase: true);
-                            object modelBuilder = Activator.CreateInstance(modelBuilderType);
+                            object modelBuilder = modelBuilderType.CreateInstance();
                             IPageModelBuilder pageModelBuilder = modelBuilder as IPageModelBuilder;
                             IEntityModelBuilder entityModelBuilder = modelBuilder as IEntityModelBuilder;
                             if ((pageModelBuilder == null) && (entityModelBuilder == null))
