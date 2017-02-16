@@ -111,13 +111,13 @@ namespace Sdl.Web.Common.Mapping
                         }
 
                         string[] semanticPropertyNameParts = semanticPropertyAttr.PropertyName.Split(':');
-                        if (semanticPropertyNameParts.Length > 1)
+                        if (semanticPropertyAttr.Prefix != null)
                         {
-                            semanticProperties.Add(new SemanticProperty(semanticPropertyNameParts[0], semanticPropertyNameParts[1]));
+                            semanticProperties.Add(new SemanticProperty(semanticPropertyAttr.Prefix, semanticPropertyAttr.PropertyName));
                         }
                         else
                         {
-                            semanticProperties.Add(new SemanticProperty(defaultPrefix, semanticPropertyNameParts[0]));
+                            semanticProperties.Add(new SemanticProperty(defaultPrefix, semanticPropertyAttr.PropertyName));
                             useImplicitMapping = false;
                         }
                     }
