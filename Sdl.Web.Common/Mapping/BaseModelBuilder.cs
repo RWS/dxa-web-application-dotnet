@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Mapping

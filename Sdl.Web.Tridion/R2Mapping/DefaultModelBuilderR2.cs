@@ -272,7 +272,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 {
                     xpmPropertyMetadata.Add(modelProperty.Name, fieldXPath);
                 }
-                else if (!isFieldMapped)
+                else if (!isFieldMapped && Log.IsDebugEnabled)
                 {
                     string formattedSemanticProperties = string.Join(", ", semanticProperties.Select(sp => sp.ToString()));
                     Log.Debug(
@@ -320,7 +320,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             }
 
             bool isListProperty = modelPropertyType.IsGenericList();
-            Type targetType = isListProperty ? modelPropertyType.GetUnderlyingGenericListType() : modelPropertyType;
+            Type targetType = modelPropertyType.GetUnderlyingGenericListType() ?? modelPropertyType;
 
             // Convert.ChangeType cannot convert non-nullable types to nullable types, so don't try that.
             Type bareTargetType = modelPropertyType.GetUnderlyingNullableType() ?? targetType;

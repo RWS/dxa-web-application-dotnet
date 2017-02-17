@@ -189,8 +189,7 @@ namespace Sdl.Web.Common.Models
                     mappedModelTypes.Add(modelType);
                 }
 
-                // this is only for debug info only
-                if (Log.AllowDebug)
+                if (Log.IsDebugEnabled)
                 {
                     if (semanticInfo.PublicSemanticTypes.Any())
                     {
@@ -265,7 +264,7 @@ namespace Sdl.Web.Common.Models
                 // There may be multiple Semantic Entity attributes for the same prefix. The first one will be used.
                 if (semanticInfo.PrefixToSemanticTypeMap.ContainsKey(prefix))
                 {
-                    if(Log.AllowDebug)
+                    if(Log.IsDebugEnabled)
                         Log.Debug($"Type '{modelType.FullName}' has multiple SemanticEntity attributes for prefix '{prefix}'. Ignoring '{attribute.EntityName}'.");
                 }
                 else
@@ -383,7 +382,7 @@ namespace Sdl.Web.Common.Models
                     if (semanticInfo.PropertySemantics.ContainsKey(propertyInfo.Name))
                     {
                         // Properties with same name can exist is a property is reintroduced with a different signature in a subclass.
-                        if(Log.AllowDebug)
+                        if(Log.IsDebugEnabled)
                             Log.Debug("Property with name '{0}' is declared multiple times in type {1}.", propertyInfo.Name, modelType.FullName);
                     }
                     else
@@ -398,7 +397,7 @@ namespace Sdl.Web.Common.Models
 
         private static Type GetElementType(Type propertyType)
         {
-            return propertyType.IsGenericList() ? propertyType.GetGenericArguments()[0] : propertyType;
+            return propertyType.GetUnderlyingGenericListType() ?? propertyType;
         }
 
         private static string GetDefaultSemanticPropertyName(PropertyInfo property)
