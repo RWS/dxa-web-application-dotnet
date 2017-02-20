@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -111,6 +112,10 @@ namespace Sdl.Web.Tridion.R2Mapping
                 {
                     pageModelBuilder.BuildPageModel(ref pageModel, pageModelData, includePageRegions, localization);
                 }
+                if (pageModel == null)
+                {
+                    throw new DxaException("Page Model is null after all Page Model Builders have been run.");
+                }
                 return pageModel;
             }
         }
@@ -130,6 +135,10 @@ namespace Sdl.Web.Tridion.R2Mapping
                 foreach (IEntityModelBuilder entityModelBuilder in _entityModelBuilders)
                 {
                     entityModelBuilder.BuildEntityModel(ref entityModel, entityModelData, baseModelType, localization);
+                }
+                if (entityModel == null)
+                {
+                    throw new DxaException("Entity Model is null after all Entity Model Builders have been run.");
                 }
                 return entityModel;
             }
