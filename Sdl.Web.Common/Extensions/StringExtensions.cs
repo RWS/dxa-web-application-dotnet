@@ -1,8 +1,13 @@
 ﻿using System;
+using System.Text.RegularExpressions;
+
 namespace Sdl.Web.Common.Extensions
 {
     public static class StringExtensions
     {
+        // Regex to identify a valid cm identifier, currently only working with tcm namespace
+        private static readonly Regex CmUriRegEx = new Regex(@"^tcm:\d+-\d+(-\d+){0,2}$", RegexOptions.Compiled);
+
         public static string RemoveSpaces(this string value)
         {
             return value.Replace(" ", string.Empty);
@@ -11,6 +16,24 @@ namespace Sdl.Web.Common.Extensions
         public static string ToCombinePath(this string value, bool prefixWithSlash = false)
         {
             return (prefixWithSlash ? "\\" : "") + value.Replace('/', '\\').Trim('\\');
+        }
+
+        public static bool HasNOrMoreOccurancesOfChar(this string str, int n, char c)
+        {
+            int count = 0;
+            for (int i = 0; i < str.Length || count >= n; i++)
+            {
+                if (str[i] == c)
+                {
+                    count++;
+                }
+            }
+            return count >= n;
+        }
+
+        public static string ToCamelCase(this string str)
+        {
+            return str.Substring(0, 1).ToLower() + str.Substring(1);
         }
 
         /// <summary>
@@ -66,6 +89,16 @@ namespace Sdl.Web.Common.Extensions
                 urlPath += Constants.DefaultExtensionLessPageName;
             }
             return urlPath;
+        }
+
+        /// <summary>
+        /// Determins if a string is CM identifier (Tcm uri).
+        /// </summary>
+        /// <param name="str">String to check</param>
+        /// <returns>True if a valid CM identifier</returns>
+        public static bool IsCmIdentifier(this string str)
+        {
+            return CmUriRegEx.IsMatch(str);
         }
     }
 }

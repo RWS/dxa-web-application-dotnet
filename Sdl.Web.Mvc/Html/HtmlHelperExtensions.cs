@@ -503,7 +503,7 @@ namespace Sdl.Web.Mvc.Html
         public static MvcHtmlString DxaPageMarkup(this HtmlHelper htmlHelper)
         {
             // TODO TSI-776: this method should output "semantic" attributes on the HTML element representing the Page like we do for DxaRegionMarkup, DxaEntityMarkup and DxaPropertyMarkup
-            if (!WebRequestContext.Localization.IsStaging)
+            if (!WebRequestContext.Localization.IsXpmEnabled)
             {
                 return MvcHtmlString.Empty;
             }

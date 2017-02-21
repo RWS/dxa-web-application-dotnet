@@ -11,6 +11,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Common.Extensions;
 
 namespace Sdl.Web.Tridion.Mapping
 {
@@ -113,7 +114,7 @@ namespace Sdl.Web.Tridion.Mapping
 
                 // The semantic mapping may resolve to a more specific model type than specified here (e.g. YouTubeVideo instead of just MediaItem)
                 Type modelType = semanticSchema.GetModelTypeFromSemanticMapping(typeof(MediaItem));
-                MediaItem mediaItem = (MediaItem)Activator.CreateInstance(modelType);
+                MediaItem mediaItem = (MediaItem)modelType.CreateInstance();
                 mediaItem.ReadFromXhtmlElement(imgElement);
                 if (mediaItem.MvcData == null)
                 {

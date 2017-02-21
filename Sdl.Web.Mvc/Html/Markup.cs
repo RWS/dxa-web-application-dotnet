@@ -8,6 +8,7 @@ using HtmlAgilityPack;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Html
@@ -101,7 +102,7 @@ namespace Sdl.Web.Mvc.Html
         {
             using (new Tracer(markupDecoratorType))
             {
-                IMarkupDecorator markupDecorator = (IMarkupDecorator) Activator.CreateInstance(markupDecoratorType);
+                IMarkupDecorator markupDecorator = (IMarkupDecorator) markupDecoratorType.CreateInstance();
                 _markupDecorators.Add(markupDecorator);
             }
         }

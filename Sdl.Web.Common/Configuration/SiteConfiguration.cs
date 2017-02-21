@@ -240,16 +240,14 @@ namespace Sdl.Web.Common.Configuration
             }
             return url.StartsWith("http") ? url : loc.GetBaseUrl() + url;
         }
-        
-        public static string GetLocalStaticsFolder(string localizationId)
-        {
-            return String.Format("{0}\\{1}", StaticsFolder, localizationId);
-        }
 
+        [Obsolete("Deprecated in DXA 2.0. Use Localization.BinaryCacheFolder instead.")]
+        public static string GetLocalStaticsFolder(string localizationId)
+            => LocalizationResolver.GetLocalization(localizationId).BinaryCacheFolder;
+
+        [Obsolete("Deprecated in DXA 2.0. Use Localization.BinaryCacheFolder instead.")]
         public static string GetLocalStaticsUrl(string localizationId)
-        {
-            return GetLocalStaticsFolder(localizationId).Replace("\\","/");
-        }
+            => LocalizationResolver.GetLocalization(localizationId).BinaryCacheFolder.Replace("\\","/");
 
         /// <summary>
         /// Generic a GUID
@@ -272,7 +270,7 @@ namespace Sdl.Web.Common.Configuration
         public static bool CheckSettingsNeedRefresh(string type, Localization localization) // TODO: Move to class Localization
         {
             Dictionary<string, DateTime> localizationRefreshStates;
-            if (!_refreshStates.TryGetValue(localization.LocalizationId, out localizationRefreshStates))
+            if (!_refreshStates.TryGetValue(localization.Id, out localizationRefreshStates))
             {
                 return false;
             }

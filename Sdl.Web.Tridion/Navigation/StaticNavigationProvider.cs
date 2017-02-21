@@ -29,7 +29,7 @@ namespace Sdl.Web.Tridion.Navigation
             using (new Tracer(localization))
             {
                 return SiteConfiguration.CacheProvider.GetOrAdd(
-                    localization.LocalizationId, 
+                    localization.Id, // key
                     CacheRegions.StaticNavigation,
                     () => BuildNavigationModel(localization)
                     // TODO: dependency on navigation.json Page

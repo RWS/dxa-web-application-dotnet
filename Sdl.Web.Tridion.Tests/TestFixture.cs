@@ -15,23 +15,7 @@ namespace Sdl.Web.Tridion.Tests
     {
         internal const string HomePageId = "640";
         internal const string ArticleDcpEntityId = "9712-9711";
-        internal const string ArticlePageUrlPath = "/autotest-parent/test_article_page";
         internal const string ArticleChildPageUrlPath = "/autotest-child/test_article_page.html";
-        internal const string ArticleDynamicPageUrlPath = "/autotest-parent/test_article_dynamic.html";
-        internal const string MediaManagerTestPageUrlPath = "/autotest-parent/mm_test.html";
-        internal const string Tsi1278PageUrlPath = "/autotest-parent/tsi-1278_trådløst.html";
-        internal const string Tsi1278StaticContentItemUrlPath = "/autotest-parent/Images/trådløst_tcm1065-9791.jpg";
-        internal const string Tsi1614PageUrlPath = "/autotest-parent/tsi-1614.html";
-        internal const string Tsi1758PageUrlPath = "/autotest-parent/regression/tsi-1758.html";
-        internal const string Tsi1852PageUrlPath = "/autotest-parent/regression/tsi-1852.html";
-        internal const string Tsi1946PageUrlPath = "/autotest-parent/regression/tsi-1946.html";
-        internal const string Tsi811PageUrlPath = "/autotest-parent/regression/tsi-811";
-        internal const string Tsi1308PageUrlPath = "/autotest-parent/regression/tsi-1308";
-        internal const string Tsi1757PageUrlPath = "/autotest-child/regression/tsi-1757";
-        internal const string Tsi2225PageUrlPath = "/autotest-parent/regression/tsi-2225";
-        internal const string TaxonomyTestPage1UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1.html";
-        internal const string TaxonomyTestPage2UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-2.html";
-        internal const string TaxonomyIndexPageUrlPath = "/autotest-parent/regression/taxonomy";
         internal const string NavigationTaxonomyTitle = "Test Taxonomy [Navigation]";
         internal const string TopLevelKeyword1Title = "Top-level Keyword 1";
         internal const string TopLevelKeyword2Title = "Top-level Keyword 2";
@@ -41,15 +25,25 @@ namespace Sdl.Web.Tridion.Tests
         internal const string ArticlePageRelativeUrlPath = "test_article_page";
         internal const string ArticleDynamicPageRelativeUrlPath = "test_article_dynamic";
         internal const string MediaManagerTestPageRelativeUrlPath = "mm_test.html";
+        internal const string SmartTargetTestPageRelativeUrlPath = "smoke/smart-target-smoke-test";
+        internal const string ContextExpressionsTestPageRelativeUrlPath = "smoke/context-expression-smoke-test";
+        internal const string TaxonomyTestPage1RelativeUrlPath = "regression/taxonomy/nav-taxonomy-test-1.html";
+        internal const string TaxonomyTestPage2RelativeUrlPath = "regression/taxonomy/nav-taxonomy-test-2.html";
+        internal const string TaxonomyIndexPageRelativeUrlPath = "regression/taxonomy";
         internal const string Tsi811PageRelativeUrlPath = "regression/tsi-811";
         internal const string Tsi1278PageRelativeUrlPath = "tsi-1278_trådløst.html";
         internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-9791.jpg";
         internal const string Tsi1308PageRelativeUrlPath = "regression/tsi-1308";
+        internal const string Tsi1757PageRelativeUrlPath = "regression/tsi-1757";
         internal const string Tsi1614PageRelativeUrlPath = "tsi-1614.html";
         internal const string Tsi1758PageRelativeUrlPath = "regression/tsi-1758.html";
         internal const string Tsi1852PageRelativeUrlPath = "regression/tsi-1852.html";
         internal const string Tsi1946PageRelativeUrlPath = "regression/tsi-1946.html";
         internal const string Tsi2225PageRelativeUrlPath = "regression/tsi-2225";
+        internal const string Tsi2277Page1RelativeUrlPath = "regression/tsi-2277-1";
+        internal const string Tsi2277Page2RelativeUrlPath = "regression/tsi-2277-2";
+        internal const string Tsi2285PageRelativeUrlPath = "regression/tsi-2285";
+        internal const string Tsi2287PageRelativeUrlPath = "system/include/header";
 
         private static readonly IEnumerable<Localization> _testLocalizations;
         private static readonly Localization _parentLocalization;
@@ -75,19 +69,19 @@ namespace Sdl.Web.Tridion.Tests
 
             _parentLocalization = new Localization
             {
-                LocalizationId = "1065",
+                Id = "1065",
                 Path = "/autotest-parent"
             };
 
             _childLocalization = new Localization
             {
-                LocalizationId = "1078",
+                Id = "1078",
                 Path = "/autotest-child"
             };
 
             _r2TestLocalization = new Localization
             {
-                LocalizationId = "1081",
+                Id = "1081",
                 Path = "/autotest-r2"
             };
 
@@ -112,7 +106,7 @@ namespace Sdl.Web.Tridion.Tests
                 _childLocalization.EnsureInitialized();
 
                 // Trick to allow us to test on a "Live" (not XPM-enabled) configuration even though we're actually on a Staging CD Environment:
-                _childLocalization.IsStaging = false;
+                _childLocalization.IsXpmEnabled = false;
                 return _childLocalization;
             }
         }
@@ -145,7 +139,7 @@ namespace Sdl.Web.Tridion.Tests
 
         public Localization GetLocalization(string localizationId)
         {
-            Localization result = _testLocalizations.FirstOrDefault(loc => loc.LocalizationId == localizationId);
+            Localization result = _testLocalizations.FirstOrDefault(loc => loc.Id == localizationId);
             if (result == null)
             {
                 throw new DxaUnknownLocalizationException("Unknown Localization ID: " + localizationId);

@@ -45,7 +45,7 @@ namespace Sdl.Web.Tridion.Navigation
                 }
 
                 return SiteConfiguration.CacheProvider.GetOrAdd(
-                    localization.LocalizationId, // key
+                    localization.Id, // key
                     CacheRegions.DynamicNavigation, 
                     () => BuildNavigationModel(navTaxonomyUri, localization), 
                     new [] { navTaxonomyUri } // dependency on Taxonomy
@@ -186,10 +186,9 @@ namespace Sdl.Web.Tridion.Navigation
                 string keywordId;
                 string pageId;
                 ParseSitemapItemId(sitemapItemId, out taxonomyId, out keywordId, out pageId);
-                string publicationId = localization.LocalizationId;
-                string taxonomyUri = string.Format("tcm:{0}-{1}-512", publicationId, taxonomyId);
-                string keywordUri = string.IsNullOrEmpty(keywordId) ?  taxonomyUri : string.Format("tcm:{0}-{1}-1024", publicationId, keywordId);
-                string pageUri = string.Format("tcm:{0}-{1}-64", publicationId, pageId);
+                string taxonomyUri = localization.GetCmUri(taxonomyId, (int) ItemType.Category);
+                string keywordUri = string.IsNullOrEmpty(keywordId) ?  taxonomyUri : localization.GetCmUri(keywordId, (int) ItemType.Keyword);
+                string pageUri = localization.GetCmUri(pageId, (int) ItemType.Page);
 
                 IEnumerable<SitemapItem> result = new SitemapItem[0];
                 if (filter.IncludeAncestors)
@@ -258,9 +257,8 @@ namespace Sdl.Web.Tridion.Navigation
                 string keywordId;
                 string pageId;
                 ParseSitemapItemId(taxonomyNode.Id, out taxonomyId, out keywordId, out pageId);
-                string publicationId = localization.LocalizationId;
-                string taxonomyUri = string.Format("tcm:{0}-{1}-512", publicationId, taxonomyId);
-                string keywordUri = string.IsNullOrEmpty(keywordId) ? taxonomyUri : string.Format("tcm:{0}-{1}-1024", publicationId, keywordId);
+                string taxonomyUri = localization.GetCmUri(taxonomyId, (int) ItemType.Category);
+                string keywordUri = string.IsNullOrEmpty(keywordId) ? taxonomyUri : localization.GetCmUri(keywordId, (int) ItemType.Keyword);
 
                 IEnumerable<SitemapItem> additionalChildren = ExpandDescendants(keywordUri, taxonomyUri, filter, localization);
                 foreach (SitemapItem additionalChildItem in additionalChildren.Where(childItem => children.All(i => i.Id != childItem.Id)))
@@ -278,7 +276,7 @@ namespace Sdl.Web.Tridion.Navigation
             using (new Tracer(filter, localization))
             {
                 TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
-                string[] taxonomyIds = taxonomyFactory.GetTaxonomies(GetPublicationTcmUri(localization));
+                string[] taxonomyIds = taxonomyFactory.GetTaxonomies(localization.GetCmUri());
 
                 int depth= filter.DescendantLevels > 0 ? (filter.DescendantLevels - 1) : filter.DescendantLevels;
                 TaxonomyFilter taxonomyFilter = new DepthFilter(depth, DepthFilter.FilterDown);
@@ -373,7 +371,7 @@ namespace Sdl.Web.Tridion.Navigation
         private static string GetNavigationTaxonomyUri(Localization localization)
         {
             return SiteConfiguration.CacheProvider.GetOrAdd(
-                localization.LocalizationId, // key
+                localization.Id, // key
                 CacheRegions.NavigationTaxonomy,
                 () => ResolveNavigationTaxonomyUri(localization)
                 );
@@ -384,7 +382,7 @@ namespace Sdl.Web.Tridion.Navigation
             using (new Tracer(localization))
             {
                 TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
-                string[] taxonomyIds = taxonomyFactory.GetTaxonomies(GetPublicationTcmUri(localization));
+                string[] taxonomyIds = taxonomyFactory.GetTaxonomies(localization.GetCmUri());
 
                 Keyword navTaxonomyRoot = taxonomyIds.Select(id => taxonomyFactory.GetTaxonomyKeyword(id)).FirstOrDefault(tax => tax.KeywordName.Contains(TaxonomyNavigationMarker));
                 if (navTaxonomyRoot == null)
@@ -478,7 +476,7 @@ namespace Sdl.Web.Tridion.Navigation
             using (new Tracer(keyword.KeywordUri, taxonomyId, localization))
             {
                 // Return SitemapItems for all classified Pages (ordered by Page Title, including sequence prefix if any)
-                PageMetaFactory pageMetaFactory = new PageMetaFactory(GetPublicationTcmUri(localization));
+                PageMetaFactory pageMetaFactory = new PageMetaFactory(localization.GetCmUri());
                 IPageMeta[] classifiedPageMetas = pageMetaFactory.GetTaxonomyPages(keyword, includeBranchedFacets: false);
                 SitemapItem[] result = classifiedPageMetas.Select(pageMeta => CreateSitemapItem(pageMeta, taxonomyId)).ToArray();
                 return result;
@@ -517,15 +515,10 @@ namespace Sdl.Web.Tridion.Navigation
             return urlPath;
         }
 
-        private static string GetPublicationTcmUri(Localization localization)
-        {
-            return string.Format("tcm:0-{0}-1", localization.LocalizationId);
-        }
-
         private static string FormatKeywordNodeId(string keywordUri, string taxonomyId)
         {
             string keywordId = keywordUri.Split('-')[1];
-            return string.Format("t{0}-k{1}", taxonomyId, keywordId);
+            return $"t{taxonomyId}-k{keywordId}";
         }
 
     }

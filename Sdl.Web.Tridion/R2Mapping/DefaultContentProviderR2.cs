@@ -49,7 +49,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                     pageContent = GetPageContent(canonicalUrlPath, localization);
                     if (pageContent == null)
                     {
-                        throw new DxaItemNotFoundException(urlPath, localization.LocalizationId);
+                        throw new DxaItemNotFoundException(urlPath, localization.Id);
                     }
                 }
 

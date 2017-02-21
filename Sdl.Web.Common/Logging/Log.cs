@@ -31,6 +31,12 @@ namespace Sdl.Web.Common.Logging
             }
         }
 
+        public static bool IsDebugEnabled
+            => Logger.IsDebugEnabled;
+
+        public static bool IsTraceEnabled
+            => Logger.IsTracingEnabled;
+
         public static void Trace(string messageFormat, params object[] parameters)
         {
             Logger.Trace(messageFormat, parameters);

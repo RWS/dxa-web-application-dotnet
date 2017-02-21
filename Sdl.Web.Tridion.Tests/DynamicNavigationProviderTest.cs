@@ -121,8 +121,8 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetContextNavigationLinks_TaxonomyTestPage2_Success()
         {
-            const string testUrlPath = TestFixture.TaxonomyTestPage2UrlPath;
             Localization testLocalization = TestFixture.ParentLocalization;
+            string testUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.TaxonomyTestPage2RelativeUrlPath);
 
             NavigationLinks navLinks = _testNavigationProvider.GetContextNavigationLinks(testUrlPath, testLocalization);
 
@@ -135,9 +135,9 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetContextNavigationLinks_TaxonomyIndexPage_Success()
         {
-            const string testUrlPathWithoutIndexSuffix = TestFixture.TaxonomyIndexPageUrlPath;
-            const string testUrlPathWithIndexSuffix = testUrlPathWithoutIndexSuffix + "/index";
             Localization testLocalization = TestFixture.ParentLocalization;
+            string testUrlPathWithoutIndexSuffix = testLocalization.GetAbsoluteUrlPath(TestFixture.TaxonomyIndexPageRelativeUrlPath);
+            string testUrlPathWithIndexSuffix = testUrlPathWithoutIndexSuffix + "/index";
 
             NavigationLinks navLinks = _testNavigationProvider.GetContextNavigationLinks(testUrlPathWithoutIndexSuffix, testLocalization);
             NavigationLinks navLinks2 = _testNavigationProvider.GetContextNavigationLinks(testUrlPathWithIndexSuffix, testLocalization);
@@ -155,8 +155,9 @@ namespace Sdl.Web.Tridion.Tests
         public void GetContextNavigationLinks_UnclassifiedPage_Success() // See TSI-1916
         {
             Localization testLocalization = TestFixture.ParentLocalization;
+            string testPageUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
 
-            NavigationLinks navLinks = _testNavigationProvider.GetContextNavigationLinks(TestFixture.ArticlePageUrlPath, testLocalization);
+            NavigationLinks navLinks = _testNavigationProvider.GetContextNavigationLinks(testPageUrlPath, testLocalization);
 
             Assert.IsNotNull(navLinks, "navLinks");
             OutputJson(navLinks);
@@ -169,8 +170,9 @@ namespace Sdl.Web.Tridion.Tests
         public void GetBreadcrumbNavigationLinks_UnclassifiedPage_Success() // See TSI-1916
         {
             Localization testLocalization = TestFixture.ParentLocalization;
+            string testPageUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
 
-            NavigationLinks navLinks = _testNavigationProvider.GetBreadcrumbNavigationLinks(TestFixture.ArticlePageUrlPath, testLocalization);
+            NavigationLinks navLinks = _testNavigationProvider.GetBreadcrumbNavigationLinks(testPageUrlPath, testLocalization);
 
             Assert.IsNotNull(navLinks, "navLinks");
             OutputJson(navLinks);
@@ -182,8 +184,8 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetBreadcrumbNavigationLinks_TaxonomyTestPage1_Success()
         {
-            const string testUrlPath = TestFixture.TaxonomyTestPage1UrlPath;
             Localization testLocalization = TestFixture.ParentLocalization;
+            string testUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.TaxonomyTestPage1RelativeUrlPath);
 
             NavigationLinks navLinks = _testNavigationProvider.GetBreadcrumbNavigationLinks(testUrlPath, testLocalization);
 
@@ -330,7 +332,10 @@ namespace Sdl.Web.Tridion.Tests
         {
             Localization testLocalization = TestFixture.ParentLocalization;
             TaxonomyNode testTaxonomyRoot = GetTestTaxonomy();
-            PageModel testPageModel = SiteConfiguration.ContentProvider.GetPageModel(TestFixture.TaxonomyTestPage1UrlPath, testLocalization);
+            string testPageUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.TaxonomyTestPage1RelativeUrlPath);
+
+
+            PageModel testPageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, testLocalization);
             string testPageSitemapItemId = string.Format("{0}-p{1}", testTaxonomyRoot.Id, testPageModel.Id);
             NavigationFilter testNavFilter = new NavigationFilter { DescendantLevels = 1 };
 
@@ -440,12 +445,14 @@ namespace Sdl.Web.Tridion.Tests
         public void GetNavigationSubtree_IncludeAncestorsClassifiedPage_Success()
         {
             Localization testLocalization = TestFixture.ParentLocalization;
+            string testPageUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.TaxonomyTestPage1RelativeUrlPath);
             TaxonomyNode testTaxonomyRoot = GetTestTaxonomy(null, -1);
             TaxonomyNode testTopLevelKeyword1 = testTaxonomyRoot.Items.FirstOrDefault(i => i.Title == TestFixture.TopLevelKeyword1Title) as TaxonomyNode;
             Assert.IsNotNull(testTopLevelKeyword1, "testTopLevelKeyword1");
             TaxonomyNode testKeyword11 = testTopLevelKeyword1.Items.FirstOrDefault(i => i.Title == TestFixture.Keyword1_1Title) as TaxonomyNode;
             Assert.IsNotNull(testKeyword11, "testKeyword11");
-            PageModel testPageModel = SiteConfiguration.ContentProvider.GetPageModel(TestFixture.TaxonomyTestPage1UrlPath, testLocalization);
+
+            PageModel testPageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, testLocalization);
             string testPageSitemapItemId = string.Format("{0}-p{1}", testTaxonomyRoot.Id, testPageModel.Id);
             NavigationFilter testNavFilter = new NavigationFilter { IncludeAncestors = true, DescendantLevels = 0 };
 
@@ -473,12 +480,13 @@ namespace Sdl.Web.Tridion.Tests
         public void GetNavigationSubtree_IncludeAncestorsAndChildrenClassifiedPage_Success()
         {
             Localization testLocalization = TestFixture.ParentLocalization;
+            string testPageUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.TaxonomyTestPage1RelativeUrlPath);
             TaxonomyNode testTaxonomyRoot = GetTestTaxonomy(null, -1);
             TaxonomyNode testTopLevelKeyword1 = testTaxonomyRoot.Items.FirstOrDefault(i => i.Title == TestFixture.TopLevelKeyword1Title) as TaxonomyNode;
             Assert.IsNotNull(testTopLevelKeyword1, "testTopLevelKeyword1");
             TaxonomyNode testKeyword11 = testTopLevelKeyword1.Items.FirstOrDefault(i => i.Title == TestFixture.Keyword1_1Title) as TaxonomyNode;
             Assert.IsNotNull(testKeyword11, "testKeyword11");
-            PageModel testPageModel = SiteConfiguration.ContentProvider.GetPageModel(TestFixture.TaxonomyTestPage1UrlPath, testLocalization);
+            PageModel testPageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, testLocalization);
             string testPageSitemapItemId = string.Format("{0}-p{1}", testTaxonomyRoot.Id, testPageModel.Id);
             NavigationFilter testNavFilter = new NavigationFilter { IncludeAncestors = true, DescendantLevels = 1 };
 
@@ -511,8 +519,10 @@ namespace Sdl.Web.Tridion.Tests
         public void GetNavigationSubtree_IncludeAncestorsUnclassifiedPage_Success()
         {
             Localization testLocalization = TestFixture.ParentLocalization;
+            string testPageUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
+
             TaxonomyNode testTaxonomyRoot = GetTestTaxonomy();
-            PageModel testPageModel = SiteConfiguration.ContentProvider.GetPageModel(TestFixture.ArticlePageUrlPath, testLocalization);
+            PageModel testPageModel = SiteConfiguration.ContentProvider.GetPageModel(testPageUrlPath, testLocalization);
             string testPageSitemapItemId = string.Format("{0}-p{1}", testTaxonomyRoot.Id, testPageModel.Id);
             NavigationFilter testNavFilter = new NavigationFilter { IncludeAncestors = true, DescendantLevels = 0 };
 

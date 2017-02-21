@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Mapping
@@ -25,7 +24,7 @@ namespace Sdl.Web.Common.Mapping
         }        
 
         protected virtual Dictionary<string, KeyValuePair<string, string>> GetEntityDataFromType(Type type)
-        {
+        {            
             Dictionary<string, KeyValuePair<string, string>> res = new Dictionary<string, KeyValuePair<string, string>>();
             foreach (Attribute attr in type.GetCustomAttributes())
             {
@@ -70,94 +69,18 @@ namespace Sdl.Web.Common.Mapping
 
         protected virtual Dictionary<string, List<SemanticProperty>> LoadPropertySemantics(Type type)
         {
-            // TODO TSI-878: rewire to ModelTypeRegistry.GetPropertySemantics.
             lock (_semanticPropertiesCache)
-            {
+            {              
                 // Try to get cached semantics
                 Dictionary<string, List<SemanticProperty>> result;
                 if (_semanticPropertiesCache.TryGetValue(type, out result))
                 {
                     return result;
                 }
-
-                string defaultPrefix;
-                bool mapAllProperties;
-                SemanticDefaultsAttribute semanticDefaultsAttr = type.GetCustomAttribute<SemanticDefaultsAttribute>();
-                if (semanticDefaultsAttr == null)
-                {
-                    defaultPrefix = string.Empty;
-                    mapAllProperties = true;
-                }
-                else
-                {
-                    defaultPrefix = semanticDefaultsAttr.Prefix;
-                    mapAllProperties = semanticDefaultsAttr.MapAllProperties;
-                }
-
-                result = new Dictionary<string, List<SemanticProperty>>();
-                foreach (PropertyInfo property in type.GetProperties())
-                {
-                    string propertyName = property.Name;
-
-                    bool ignoreMapping = false;
-                    bool useImplicitMapping = mapAllProperties;
-                    List<SemanticProperty> semanticProperties = new List<SemanticProperty>();
-                    foreach (SemanticPropertyAttribute semanticPropertyAttr in property.GetCustomAttributes<SemanticPropertyAttribute>(true))
-                    {
-                        if (semanticPropertyAttr.IgnoreMapping)
-                        {
-                            ignoreMapping = true;
-                            break;
-                        }
-
-                        string[] semanticPropertyNameParts = semanticPropertyAttr.PropertyName.Split(':');
-                        if (semanticPropertyNameParts.Length > 1)
-                        {
-                            semanticProperties.Add(new SemanticProperty(semanticPropertyNameParts[0], semanticPropertyNameParts[1]));
-                        }
-                        else
-                        {
-                            semanticProperties.Add(new SemanticProperty(defaultPrefix, semanticPropertyNameParts[0]));
-                            useImplicitMapping = false;
-                        }
-                    }
-
-                    if (useImplicitMapping)
-                    {
-                        semanticProperties.Add(GetDefaultPropertySemantics(property, defaultPrefix));
-                    }
-
-                    if (ignoreMapping || semanticProperties.Count == 0)
-                    {
-                        continue;
-                    }
-
-                    if (result.ContainsKey(propertyName))
-                    {
-                        // Properties with same name can exist is a property is reintroduced with a different signature in a subclass.
-                        Log.Debug("Property with name '{0}' is declared multiple times in type {1}.", propertyName, type.FullName);
-                        continue;
-                    }
-
-                    result.Add(propertyName, semanticProperties);
-                }
-
+                result = ModelTypeRegistry.GetPropertySemantics(type);
                 _semanticPropertiesCache.Add(type, result);
-
                 return result;
             }
-        }
-
-        protected virtual SemanticProperty GetDefaultPropertySemantics(PropertyInfo property, string defaultPrefix)
-        {
-            // Transform Pascal case into camel case.
-            string semanticPropertyName = property.Name.Substring(0, 1).ToLower() + property.Name.Substring(1);
-            if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>) && semanticPropertyName.EndsWith("s"))
-            {
-                // Remove trailing 's' of List property name
-                semanticPropertyName = semanticPropertyName.Substring(0, semanticPropertyName.Length-1);
-            }
-            return new SemanticProperty(defaultPrefix, semanticPropertyName);
         }
     }
 }

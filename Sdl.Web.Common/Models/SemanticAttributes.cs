@@ -55,6 +55,8 @@ namespace Sdl.Web.Common.Models
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public class SemanticPropertyAttribute : Attribute
     {
+        private string _prefix;
+        private string _name;
         public SemanticPropertyAttribute() { }
         public SemanticPropertyAttribute(string property)
         {
@@ -64,13 +66,48 @@ namespace Sdl.Web.Common.Models
         {
             IgnoreMapping = ignoreMapping;
         }
-        public string PropertyName { get; set; }
+        public string PropertyName
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    string[] parts = value.Split(':');
+                    if (parts.Length > 1)
+                    {
+                        _prefix = parts[0];
+                        _name = parts[1];
+                    }
+                    else
+                    {
+                        _prefix = null;
+                        _name = value;
+                    }
+                }
+                else
+                {
+                    _prefix = null;
+                    _name = value;
+                }
+            }
+        }
         public bool IgnoreMapping { get; set; }
         public override object TypeId
         {
             get
             {
                 return this;
+            }
+        }
+        public string Prefix
+        {
+            get
+            {
+                return _prefix;
             }
         }
     }

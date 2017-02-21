@@ -69,8 +69,8 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetContextNavigationLinks_TaxonomyTestPage1_Success()
         {
-            const string testUrlPath = TestFixture.TaxonomyTestPage1UrlPath;
             Localization testLocalization = TestFixture.ParentLocalization;
+            string testUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.TaxonomyTestPage1RelativeUrlPath);
 
             NavigationLinks navLinks = _testNavigationProvider.GetContextNavigationLinks(testUrlPath, testLocalization);
 
@@ -101,8 +101,8 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetBreadcrumbNavigationLinks_TaxonomyTestPage1_Success()
         {
-            const string testUrlPath = TestFixture.TaxonomyTestPage1UrlPath;
             Localization testLocalization = TestFixture.ParentLocalization;
+            string testUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.TaxonomyTestPage1RelativeUrlPath);
 
             NavigationLinks navLinks = _testNavigationProvider.GetBreadcrumbNavigationLinks(testUrlPath, testLocalization);
 

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.DataModel;
 using Sdl.Web.Tridion.Configuration;
 
@@ -46,7 +48,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                         foreach (ModelBuilderSettings modelBuilderSettings in config.ModelBuilders)
                         {
                             Type modelBuilderType = Type.GetType(modelBuilderSettings.Type, throwOnError: true, ignoreCase: true);
-                            object modelBuilder = Activator.CreateInstance(modelBuilderType);
+                            object modelBuilder = modelBuilderType.CreateInstance();
                             IPageModelBuilder pageModelBuilder = modelBuilder as IPageModelBuilder;
                             IEntityModelBuilder entityModelBuilder = modelBuilder as IEntityModelBuilder;
                             if ((pageModelBuilder == null) && (entityModelBuilder == null))
@@ -110,6 +112,10 @@ namespace Sdl.Web.Tridion.R2Mapping
                 {
                     pageModelBuilder.BuildPageModel(ref pageModel, pageModelData, includePageRegions, localization);
                 }
+                if (pageModel == null)
+                {
+                    throw new DxaException("Page Model is null after all Page Model Builders have been run.");
+                }
                 return pageModel;
             }
         }
@@ -129,6 +135,10 @@ namespace Sdl.Web.Tridion.R2Mapping
                 foreach (IEntityModelBuilder entityModelBuilder in _entityModelBuilders)
                 {
                     entityModelBuilder.BuildEntityModel(ref entityModel, entityModelData, baseModelType, localization);
+                }
+                if (entityModel == null)
+                {
+                    throw new DxaException("Entity Model is null after all Entity Model Builders have been run.");
                 }
                 return entityModel;
             }

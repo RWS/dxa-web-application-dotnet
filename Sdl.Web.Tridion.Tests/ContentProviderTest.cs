@@ -95,6 +95,20 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetPageModel_IncludePage_Success() // See TSI-2287
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2287PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: true);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Assert.AreEqual("Header", pageModel.Title, "pageModel.Title");
+            Assert.AreEqual(2, pageModel.Regions.Count, "pageModel.Regions.Count");
+        }
+
+        [TestMethod]
         public void GetPageModel_InternationalizedUrl_Success() // See TSI-1278
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1278PageRelativeUrlPath);
@@ -124,7 +138,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(mmDistribution.EclUri, "mmDistribution.EclUri");
             StringAssert.Matches(mmDistribution.EclUri, new Regex(@"ecl:\d+-mm-.*"), "mmDistribution.EclUri");
             Assert.AreEqual("imagedist", mmDistribution.EclDisplayTypeId, "mmDistribution.EclDisplayTypeId");
-           // TODO: Assert.IsNotNull(mmDistribution.EclTemplateFragment, "mmDistribution.EclTemplateFragment");
+            Assert.IsNotNull(mmDistribution.EclTemplateFragment, "mmDistribution.EclTemplateFragment");
             Assert.IsNotNull(mmDistribution.EclExternalMetadata, "mmDistribution.EclExternalMetadata");
             Assert.IsTrue(mmDistribution.EclExternalMetadata.Keys.Count >= 11, "mmDistribution.EclExternalMetadata.Keys.Count");
             Assert.AreEqual("Image", mmDistribution.EclExternalMetadata["OutletType"], "mmDistribution.EclExternalMetadata['OutletType']");
@@ -140,6 +154,8 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(pageModel, "pageModel");
             OutputJson(pageModel);
 
+            Assert.AreEqual("TSI-1308 Test Page | My Site", pageModel.Title, "pageModel.Title");
+
             IDictionary<string, string> pageMeta = pageModel.Meta;
             Assert.IsNotNull(pageMeta, "pageMeta");
             Assert.AreEqual(15, pageMeta.Count, "pageMeta.Count");
@@ -154,6 +170,36 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual("Rick Pannekoek", pageMeta["author"], "pageMeta[author]");
             Assert.AreEqual("TSI-1308 Test Page", pageMeta["og:title"], "pageMeta[og: title]");
             Assert.AreEqual("TSI-1308 Test Page", pageMeta["description"], "pageMeta[description]");
+        }
+
+        [TestMethod]
+        public void GetPageModel_TitleDescriptionImage_Success() // See TSI-2277
+        {
+            string testPage1UrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2277Page1RelativeUrlPath);
+            string testPage2UrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2277Page2RelativeUrlPath);
+
+            PageModel pageModel1 = TestContentProvider.GetPageModel(testPage1UrlPath, TestLocalization, addIncludes: false);
+            PageModel pageModel2 = TestContentProvider.GetPageModel(testPage2UrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel1, "pageModel1");
+            OutputJson(pageModel1);
+            Assert.IsNotNull(pageModel2, "pageModel1");
+            OutputJson(pageModel2);
+
+            const string articleHeadline = "Article headline";
+            const string articleStandardMetaName = "Article standardMeta name";
+            const string articleStandardMetaDescription = "Article standardMeta description";
+            const string siteSuffix = " | My Site";
+
+            Assert.AreEqual(articleHeadline + siteSuffix, pageModel1.Title, "pageModel1.Title");
+            Assert.AreEqual(articleHeadline, pageModel1.Meta["description"], "pageModel1.Meta['description']");
+            Assert.IsFalse(pageModel1.Meta.ContainsKey("og:description"));
+
+            Assert.AreEqual(articleStandardMetaName + siteSuffix, pageModel2.Title, "pageModel2.Title");
+            Assert.AreEqual(articleStandardMetaDescription, pageModel2.Meta["description"], "pageModel2.Meta['description']");
+            string ogDescription;
+            Assert.IsTrue(pageModel2.Meta.TryGetValue("og:description", out ogDescription), "pageModel2.Meta['og: description']");
+            Assert.AreEqual(articleStandardMetaDescription, ogDescription, "ogDescription");
         }
 
         [TestMethod]
@@ -349,7 +395,6 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        [Ignore] // TODO TSI-2265
         public void GetPageModel_RichTextProcessing_Success()
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
@@ -372,12 +417,19 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsTrue(image.IsEmbedded, "image.IsEmbedded");
             Assert.IsNotNull(image.MvcData, "image.MvcData");
             Assert.AreEqual("Image", image.MvcData.ViewName, "image.MvcData.ViewName");
+            Assert.AreEqual("image/jpeg", image.MimeType, "image.MimeType");
+
+            // The test image has no value in its "altText" metadata field, but there is an "alt" attribute in the source XHTML; see TSI-2289.
+            Assert.IsNotNull(image.AlternateText, "image.AlternateText");
+            Assert.AreEqual("calculator", image.AlternateText, "image.AlternateText");
 
             string firstHtmlFragment = content.Fragments.First().ToHtml();
             Assert.IsNotNull(firstHtmlFragment, "firstHtmlFragment");
+            string linkPattern1 = string.Format(@"Component link \(published\): <a title=""TSI-1758 Test Component"" href=""{0}/regression/tsi-1758"">TSI-1758 Test Component</a>", TestLocalization.Path);
+            string linkPattern2 = string.Format(@"MMC link: <a title=""bulls-eye"" href=""{0}/Images/bulls-eye.*"">bulls-eye</a>", TestLocalization.Path);
             StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(not published\): Test Component"));
-            StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(published\): <a title=""TSI-1758 Test Component"" href=""/autotest-parent/regression/tsi-1758"">TSI-1758 Test Component</a>"));
-            StringAssert.Matches(firstHtmlFragment, new Regex(@"MMC link: <a title=""bulls-eye"" href=""/autotest-parent/Images/bulls-eye.*"">bulls-eye</a>"));
+            StringAssert.Matches(firstHtmlFragment, new Regex(linkPattern1));
+            StringAssert.Matches(firstHtmlFragment, new Regex(linkPattern2));
         }
 
         [TestMethod]
@@ -396,7 +448,6 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        [Ignore] // TODO TSI-2266
         public void GetPageModel_LanguageSelector_Success() // See TSI-2225
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2225PageRelativeUrlPath);
@@ -408,8 +459,40 @@ namespace Sdl.Web.Tridion.Tests
 
             Common.Models.Configuration configEntity = pageModel.Regions["Nav"].Entities[0] as Common.Models.Configuration;
             Assert.IsNotNull(configEntity, "configEntity");
-            Assert.AreEqual("tcm:1065-9712", configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultContentLink']");
+            string rawCompLink = TestLocalization.GetCmUri("9712");
+            Assert.AreEqual(rawCompLink, configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultContentLink']");
             Assert.AreEqual("pt,mx", configEntity.Settings["suppressLocalizations"], "configEntity.Settings['suppressLocalizations']");
+        }
+
+        [TestMethod]
+        public void GetPageModel_SmartTarget_Success()
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.SmartTargetTestPageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            SmartTargetRegion example1Region = (SmartTargetRegion) pageModel.Regions["Example1"];
+            Assert.IsNotNull(example1Region, "example1Region");
+
+            SmartTargetRegion example2Region = (SmartTargetRegion) pageModel.Regions["Example2"];
+            Assert.IsNotNull(example2Region, "example2Region");
+        }
+
+        [TestMethod]
+        public void GetPageModel_CustomPageModelNoMetadata_Success() // See TSI-2285
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2285PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Tsi2285PageModel customPageModel = pageModel as Tsi2285PageModel;
+            Assert.IsNotNull(customPageModel, "customPageModel");
         }
 
         [TestMethod]

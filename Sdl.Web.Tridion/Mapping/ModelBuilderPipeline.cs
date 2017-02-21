@@ -5,6 +5,7 @@ using DD4T.ContentModel;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Tridion.Configuration;
 using IPage = DD4T.ContentModel.IPage;
 
@@ -40,7 +41,7 @@ namespace Sdl.Web.Tridion.Mapping
                         foreach (ModelBuilderSettings modelBuilderSettings in config.ModelBuilders)
                         {
                             Type modelBuilderType = Type.GetType(modelBuilderSettings.Type, throwOnError: true, ignoreCase: true);
-                            IModelBuilder modelBuilder = (IModelBuilder)Activator.CreateInstance(modelBuilderType);
+                            IModelBuilder modelBuilder = (IModelBuilder)modelBuilderType.CreateInstance();
                             modelBuilders.Add(modelBuilder);
                         }
                     }

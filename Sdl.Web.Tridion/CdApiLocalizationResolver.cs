@@ -79,7 +79,7 @@ namespace Sdl.Web.Tridion
                     {
                         result = new Localization
                         {
-                            LocalizationId = localizationId,
+                            Id = localizationId,
                             Path = mapping.Path
                         };
                         KnownLocalizations.Add(localizationId, result);
@@ -104,18 +104,16 @@ namespace Sdl.Web.Tridion
                 Localization result;
                 if (!KnownLocalizations.TryGetValue(localizationId, out result))
                 {
-                    // no localization found so lets return a partially constructed one
-                    // and fully resolve it later.
+                    // No localization found so lets return a partially constructed one and fully resolve it later.
                     result = new Localization
                     {
-                        LocalizationId = localizationId                       
+                        Id = localizationId
                     };
                 }
 
                 return result;
             }
         }
-       
         #endregion
     }
 }

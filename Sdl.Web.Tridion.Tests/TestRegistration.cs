@@ -37,6 +37,7 @@ namespace Sdl.Web.Tridion.Tests
 
             RegisterViewModel("Test:SimpleTestPage", typeof(PageModel));
             RegisterViewModel("Test:TSI811TestPage", typeof(Tsi811PageModel));
+            RegisterViewModel("Test:TSI2285TestPage", typeof(Tsi2285PageModel));
 
             // Region Views
             RegisterViewModel("2-Column", typeof(RegionModel));
@@ -50,6 +51,9 @@ namespace Sdl.Web.Tridion.Tests
             RegisterViewModel("Main", typeof(RegionModel));
             RegisterViewModel("Nav", typeof(RegionModel));
             RegisterViewModel("Tools", typeof(RegionModel));
+
+            RegisterViewModel("SmartTarget:SmartTargetRegion", typeof(SmartTargetRegion));
+            RegisterViewModel("SmartTarget:2-Column", typeof(SmartTargetRegion));
 
             // Region Views for Include Pages
             RegisterViewModel("Header", typeof(RegionModel));

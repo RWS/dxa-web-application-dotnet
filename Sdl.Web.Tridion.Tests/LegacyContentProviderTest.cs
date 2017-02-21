@@ -65,7 +65,10 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetPageModel_RetrofitMapping_Success() // See TSI-1757
         {
-            PageModel pageModel = TestContentProvider.GetPageModel(TestFixture.Tsi1757PageUrlPath, TestFixture.ChildLocalization, addIncludes: false);
+            Localization testLocalization = TestFixture.ChildLocalization;
+            string testPageUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1757PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
             OutputJson(pageModel);

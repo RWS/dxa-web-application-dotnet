@@ -116,7 +116,7 @@ namespace Sdl.Web.Mvc.Statics
             using (new Tracer(sender, eventArgs, urlPath, ifModifiedSince))
             {
                 Localization localization = WebRequestContext.Localization;
-                string staticsRootUrl = SiteConfiguration.GetLocalStaticsUrl(localization.LocalizationId);
+                string staticsRootUrl = localization.BinaryCacheFolder.Replace("\\", "/");
                 urlPath = urlPath.StartsWith("/" + staticsRootUrl) ? urlPath.Substring(staticsRootUrl.Length + 1) : urlPath;
                 if (!localization.IsStaticContentUrl(urlPath))
                 {

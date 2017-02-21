@@ -65,6 +65,7 @@
     <Compile Include="DD4TCacheProviderTest.cs" />
     <Compile Include="DefaultCacheProviderTest.cs" />
     <Compile Include="DynamicNavigationProviderTest.cs" />
+    <Compile Include="LocalizationTest.cs" />
     <Compile Include="MockConditionalEntityEvaluator.cs" />
     <Compile Include="Models\Entity\Article.cs" />
     <Compile Include="Models\Entity\ContentList.cs" />
@@ -76,8 +77,10 @@
     <Compile Include="Models\Entity\Tsi1946TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi1758TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi811TestEntity.cs" />
+    <Compile Include="Models\Page\Tsi2285PageModel.cs" />
     <Compile Include="Models\Page\Tsi811PageModel.cs" />
     <Compile Include="ContentProviderTest.cs" />
+    <Compile Include="Models\Region\SmartTargetRegion.cs" />
     <Compile Include="R2ContentProviderTest.cs" />
     <Compile Include="StaticNavigationProviderTest.cs" />
     <Compile Include="TestClass.cs" />
@@ -93,6 +96,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
       <ItemGroup>

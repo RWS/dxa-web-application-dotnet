@@ -151,7 +151,7 @@ namespace Sdl.Web.Tridion.Mapping
                 // NOTE: not using ModelBuilderPipeline here, but directly calling our own implementation.
                 BuildEntityModel(ref entityModel, cp.Component, modelType, localization);
 
-                if (localization.IsStaging)
+                if (localization.IsXpmEnabled)
                 {
                     entityModel.XpmMetadata = GetXpmMetadata(cp);
                 }
@@ -336,7 +336,7 @@ namespace Sdl.Web.Tridion.Mapping
             else if (pageMetadataSchema == null)
             {
                 // Custom Page Model but no Page metadata that can be mapped; simply create a Page Model instance of the right type.
-                pageModel = (PageModel)Activator.CreateInstance(pageModelType, pageId);
+                pageModel = (PageModel)pageModelType.CreateInstance(pageId);
             }
             else
             {
@@ -359,7 +359,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             pageModel.MvcData = pageMvcData;
-            if (localization.IsStaging)
+            if (localization.IsXpmEnabled)
             {
                 pageModel.XpmMetadata = GetXpmMetadata(page);
             }
@@ -386,12 +386,12 @@ namespace Sdl.Web.Tridion.Mapping
             if (string.IsNullOrEmpty(mappingData.ModelId))
             {
                 // Use parameterless constructor
-                model = (ViewModel)Activator.CreateInstance(modelType);
+                model = (ViewModel)modelType.CreateInstance();
             }
             else
             {
                 // Pass model Identifier in constructor.
-                model = (ViewModel)Activator.CreateInstance(modelType, mappingData.ModelId);
+                model = (ViewModel)modelType.CreateInstance(mappingData.ModelId);
             }
 
             Dictionary<string, string> xpmPropertyMetadata = new Dictionary<string, string>();
@@ -406,8 +406,8 @@ namespace Sdl.Web.Tridion.Mapping
                 }
 
                 Type modelPropertyType = modelProperty.PropertyType;
-                bool isCollection = modelPropertyType.IsGenericType && (modelPropertyType.GetGenericTypeDefinition() == typeof(List<>));
-                Type valueType = isCollection ? modelPropertyType.GetGenericArguments()[0] : modelPropertyType;
+                bool isCollection = modelPropertyType.IsGenericList();
+                Type valueType = isCollection ? modelPropertyType.GetUnderlyingGenericListType() : modelPropertyType;
                 string fieldXPath = null;
                 bool isFieldMapped = false;
 
@@ -443,7 +443,7 @@ namespace Sdl.Web.Tridion.Mapping
                             object mappedSelf = MapComponent(mappingData.SourceEntity, valueType, mappingData.Localization);
                             if (isCollection)
                             {
-                                IList genericList = CreateGenericList(valueType);
+                                IList genericList = valueType.CreateGenericList();
                                 genericList.Add(mappedSelf);
                                 modelProperty.SetValue(model, genericList);
                             }
@@ -494,7 +494,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             EntityModel entityModel = model as EntityModel;
-            if (entityModel != null && mappingData.Localization.IsStaging)
+            if (entityModel != null && mappingData.Localization.IsXpmEnabled)
             {
                 entityModel.XpmPropertyMetadata = xpmPropertyMetadata;
             }
@@ -607,32 +607,13 @@ namespace Sdl.Web.Tridion.Mapping
             return matchedField;
         }
 
-
-        private static IList CreateGenericList(Type listItemType)
-        {
-            ConstructorInfo genericListConstructor = typeof(List<>).MakeGenericType(listItemType).GetConstructor(Type.EmptyTypes);
-            if (genericListConstructor == null)
-            {
-                // This should never happen.
-                throw new DxaException(String.Format("Unable get constructor for generic list of '{0}'.", listItemType.FullName));
-            }
-
-            return (IList)genericListConstructor.Invoke(null);
-        }
-
-
         private object MapFieldValues(IField field, Type modelType, bool multival, MappingData mapData, SemanticSchemaField semanticSchemaField)
         {
             try
             {
                 // Convert.ChangeType cannot convert non-nullable types to nullable types, so don't try that.
-                Type bareModelType = modelType;
-                if (modelType.IsGenericType && modelType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                {
-                    bareModelType = modelType.GenericTypeArguments[0];
-                }
-
-                IList mappedValues = CreateGenericList(modelType);
+                Type bareModelType = modelType.GetUnderlyingNullableType() ?? modelType;               
+                IList mappedValues = modelType.CreateGenericList();
                 switch (field.FieldType)
                 {
                     case FieldType.Date:
@@ -1120,7 +1101,7 @@ namespace Sdl.Web.Tridion.Mapping
                 MvcData = regionMvcData
             };
 
-            if (localization.IsStaging)
+            if (localization.IsXpmEnabled)
             {
                 result.XpmMetadata = new Dictionary<string, object>
                 {
@@ -1141,7 +1122,7 @@ namespace Sdl.Web.Tridion.Mapping
             string regionName = regionMvcData.RegionName ?? regionMvcData.ViewName;
 
             Type regionModelType = ModelTypeRegistry.GetViewModelType(regionMvcData);
-            RegionModel regionModel = (RegionModel) Activator.CreateInstance(regionModelType, regionName);
+            RegionModel regionModel = (RegionModel) regionModelType.CreateInstance(regionName);
             regionModel.MvcData = new MvcData(regionMvcData)
             {
                 RegionName = null // Suppress RegionName in the final model.
