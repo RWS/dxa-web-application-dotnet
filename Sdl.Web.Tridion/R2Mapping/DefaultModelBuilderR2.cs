@@ -51,7 +51,7 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             using (new Tracer(pageModel, pageModelData, includePageRegions, localization))
             {
-                Common.Models.MvcData mvcData = CreateMvcData(pageModelData.MvcData, "PageModel");
+                Common.Models.MvcData mvcData = CreateMvcData(pageModelData.MvcData, "Page");
                 Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
                 if (modelType == typeof(PageModel))
@@ -110,7 +110,7 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             using (new Tracer(entityModel, entityModelData, baseModelType, localization))
             {
-                Common.Models.MvcData mvcData = CreateMvcData(entityModelData.MvcData, "EntityModel");
+                Common.Models.MvcData mvcData = CreateMvcData(entityModelData.MvcData, "Entity");
                 SemanticSchema semanticSchema = SemanticMapping.GetSchema(entityModelData.SchemaId, localization);
 
                 Type modelType = (baseModelType == null) ?
@@ -519,7 +519,7 @@ namespace Sdl.Web.Tridion.R2Mapping
 
         private static string ResolveLinkUrl(EntityModelData entityModelData, Localization localization)
         {
-            string componentUri = $"tcm:{localization.Id}-{entityModelData.Id}";
+            string componentUri =  localization.GetCmUri(entityModelData.Id);
             return SiteConfiguration.LinkResolver.ResolveLink(componentUri);
         }
 
@@ -700,7 +700,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             return result;
         }
 
-        private static Common.Models.MvcData CreateMvcData(DataModel.MvcData data, string baseModelTypeName)
+        private static Common.Models.MvcData CreateMvcData(DataModel.MvcData data, string defaultControllerName)
         {
             if (data == null)
             {
@@ -711,32 +711,11 @@ namespace Sdl.Web.Tridion.R2Mapping
                 throw new DxaException("No View Name specified in MVC Data.");
             }
 
-            string defaultControllerName;
-            string defaultActionName;
-
-            switch (baseModelTypeName)
-            {
-                case "PageModel":
-                    defaultControllerName = "Page";
-                    defaultActionName = "Page";
-                    break;
-                case "RegionModel":
-                    defaultControllerName = "Region";
-                    defaultActionName = "Region";
-                    break;
-                case "EntityModel":
-                    defaultControllerName = "Entity";
-                    defaultActionName = "Entity";
-                    break;
-                default:
-                    throw new DxaException($"Unexpected baseModelTypeName '{baseModelTypeName}'");
-            }
-
             return new Common.Models.MvcData
             {
                 ControllerName = data.ControllerName ?? defaultControllerName,
                 ControllerAreaName = data.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName(),
-                ActionName = data.ActionName ?? defaultActionName,
+                ActionName = data.ActionName ?? defaultControllerName,
                 ViewName = data.ViewName,
                 AreaName = data.AreaName ?? SiteConfiguration.GetDefaultModuleName(),
                 RouteValues = data.Parameters
@@ -745,7 +724,7 @@ namespace Sdl.Web.Tridion.R2Mapping
 
         private static RegionModel CreateRegionModel(RegionModelData regionModelData, Localization localization)
         {
-            Common.Models.MvcData mvcData = CreateMvcData(regionModelData.MvcData, "RegionModel");
+            Common.Models.MvcData mvcData = CreateMvcData(regionModelData.MvcData, "Region");
             Type regionModelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
             RegionModel result = (RegionModel) regionModelType.CreateInstance(regionModelData.Name);
