@@ -20,6 +20,7 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Gets or sets the name of the Region.
         /// </summary>
+        [Obsolete("Deprecated in DXA 1.1.")]
         public string Name
         {
             get

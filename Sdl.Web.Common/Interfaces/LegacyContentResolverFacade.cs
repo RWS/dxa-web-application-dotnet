@@ -13,6 +13,7 @@ namespace Sdl.Web.Common.Interfaces
     {
         #region IContentResolver Members
 
+        [Obsolete("Deprecated in DXA 1.1.")]
         public string DefaultExtensionLessPageName
         {
             get
@@ -25,6 +26,7 @@ namespace Sdl.Web.Common.Interfaces
             }
         }
 
+        [Obsolete("Deprecated in DXA 1.1.")]
         public string DefaultPageName
         {
             get
@@ -37,6 +39,7 @@ namespace Sdl.Web.Common.Interfaces
             }
         }
 
+        [Obsolete("Deprecated in DXA 1.1.")]
         public string DefaultExtension
         {
             get
@@ -57,6 +60,7 @@ namespace Sdl.Web.Common.Interfaces
             return SiteConfiguration.LinkResolver.ResolveLink((string) linkData, localization: contextLocalization);
         }
 
+        [Obsolete("Deprecated in DXA 1.1.")]
         public object ResolveContent(object content, object resolveInstruction = null)
         {
             throw new NotSupportedException("ResolveContent is not supported in DXA 1.1.");
