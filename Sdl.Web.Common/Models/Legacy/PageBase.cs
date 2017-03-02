@@ -20,6 +20,7 @@ namespace Sdl.Web.Common.Models
         /// Gets or sets the identifier for the Page.
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
+        [Obsolete("Deprecated in DXA 1.1. Use PageModel constructor to set Id instead.")]
         public string Id
         {
             get
