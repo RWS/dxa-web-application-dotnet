@@ -28,12 +28,6 @@ namespace Sdl.Web.Mvc.Configuration
         }
 
         #endregion
-
-        [Obsolete("Deprecated in DXA 1.3. Use Localization.GetResources() instead.")]
-        public IDictionary Resources(Localization localization)
-        {
-            return localization.GetResources();
-        }
     }
 
     internal sealed class ResourceReader : IResourceReader

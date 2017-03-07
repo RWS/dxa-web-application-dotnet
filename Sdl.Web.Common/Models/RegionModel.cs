@@ -11,16 +11,11 @@ namespace Sdl.Web.Common.Models
     /// <summary>
     /// Represents the View Model for a Page Region.
     /// </summary>
-#pragma warning disable 618
-    // TODO DXA 2.0: Ideally this would inherit directly from ViewModel, but for backward compatibility we need the legacy type inbetween.
     [Serializable]
-    public class RegionModel : Region, ISyndicationFeedItemProvider
-#pragma warning restore 618
+    public class RegionModel : ViewModel, ISyndicationFeedItemProvider
     {
         private const string XpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], minOccurs: {2}}} -->";
         private const string XpmComponentTypeMarkup = "{{schema: \"{0}\", template: \"{1}\"}}";
-
-        private RegionModelSet _regions = new RegionModelSet();
 
         /// <summary>
         /// The XPM metadata key used for the ID of the (Include) Page from which the Region originates. Avoid using this in implementation code because it may change in a future release.
@@ -37,28 +32,21 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         public const string IncludedFromPageFileNameXpmMetadataKey = "IncludedFromPageFileName";
 
+
+        /// <summary>
+        /// Gets or sets the name of the Region.
+        /// </summary>
+        public string Name { get; }
+
         /// <summary>
         /// Gets the Entities that the Region contains.
         /// </summary>
-        public IList<EntityModel> Entities
-        {
-            get
-            {
-                return _entities;
-            }
-        }
+        public IList<EntityModel> Entities { get; private set; } = new List<EntityModel>();
 
         /// <summary>
         /// Gets the (nested) Regions within this Region.
         /// </summary>
-        public RegionModelSet Regions
-        {
-            get
-            {
-                return _regions;
-            }
-        }
-
+        public RegionModelSet Regions { get; private set; } = new RegionModelSet();
 
         #region Constructors
         /// <summary>
@@ -66,8 +54,12 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         /// <param name="name">The name of the Region.</param>
         public RegionModel(string name)
-            : base(name)
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new DxaException("Region must have a non-empty name.");
+            }
+            Name = name;
         }
 
         /// <summary>
@@ -76,7 +68,7 @@ namespace Sdl.Web.Common.Models
         /// <param name="name">The name of the Region.</param>
         /// <param name="qualifiedViewName">The qualified name of the View to use to render the Region. Format: format AreaName:ControllerName:ViewName.</param>
         public RegionModel(string name, string qualifiedViewName) 
-            : base(name)
+            : this(name)
         {
             MvcData = new MvcData(qualifiedViewName)
             {
@@ -155,7 +147,8 @@ namespace Sdl.Web.Common.Models
         public override ViewModel DeepCopy()
         {
             RegionModel clone = (RegionModel) base.DeepCopy();
-            clone._regions = new RegionModelSet(_regions.Select(r => (RegionModel) r.DeepCopy()));
+            clone.Entities = Entities.Select(e => (EntityModel) e.DeepCopy()).ToList();
+            clone.Regions = new RegionModelSet(Regions.Select(r => (RegionModel) r.DeepCopy()));
             return clone;
         }
         #endregion

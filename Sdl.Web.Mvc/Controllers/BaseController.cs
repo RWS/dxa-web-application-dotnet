@@ -16,23 +16,6 @@ namespace Sdl.Web.Mvc.Controllers
     public abstract class BaseController : Controller
     {
         private IContentProvider _contentProvider;
-#pragma warning disable 618
-        private IRenderer _renderer = new BaseRenderer();
-
-        [Obsolete("Renderers are deprecated in DXA 1.1. Rendering should be done using DXA 1.1 HtmlHelper extension methods.")]
-        protected IRenderer Renderer
-        {
-            get
-            {
-                return _renderer;
-            }
-            set
-            {
-                // To support (deprecated) Dependency Injection
-                _renderer = value;
-            }
-        }
-#pragma warning restore 618
 
         /// <summary>
         /// Gets or sets the Content Provider.
@@ -57,13 +40,6 @@ namespace Sdl.Web.Mvc.Controllers
             }
         }
 
-        [Obsolete("Deprecated in DXA 1.1. The Model Type should be determined using the ViewModel class hierarchy.")]
-        protected ModelType ModelType
-        {
-            get; 
-            set;
-        }
-
         /// <summary>
         /// Enriches the View Model as obtained from the Content Provider.
         /// </summary>
@@ -74,27 +50,7 @@ namespace Sdl.Web.Mvc.Controllers
         /// For example retrieving additional information from another system.
         /// </remarks>
         protected virtual ViewModel EnrichModel(ViewModel model)
-        {
-#pragma warning disable 618
-            return (ViewModel) ProcessModel(model, model.GetType()); // To support legacy overrides
-#pragma warning restore 618
-        }
-
-
-        /// <summary>
-        /// Turns a domain model into a strongly typed View Model.
-        /// </summary>
-        /// <param name="sourceModel">The model to process</param>
-        /// <param name="type">The type of view model required</param>
-        /// <returns>A processed view model</returns>
-        /// <remarks>
-        /// This method is intentionally loosely typed for backwards compatibility; this was part of the V1.0 (semi-)public API
-        /// </remarks>
-        [Obsolete("Deprecated in DXA 1.1. Override EnrichModel instead.")]
-        protected virtual object ProcessModel(object sourceModel, Type type)
-        {
-            return sourceModel;
-        }
+            => model;
 
         protected virtual ActionResult GetRawActionResult(string type, string rawContent)
         {
@@ -118,11 +74,6 @@ namespace Sdl.Web.Mvc.Controllers
 
         protected virtual void SetupViewData(int containerSize = 0, MvcData viewData = null)
         {
-#pragma warning disable 618
-            // To support (deprecated) use of ViewBag.Renderer in Views.
-            ViewData[DxaViewDataItems.Renderer] = Renderer;
-#pragma warning restore 618
-
             ViewData[DxaViewDataItems.ContainerSize] = containerSize;
             if (viewData != null)
             {
@@ -134,31 +85,7 @@ namespace Sdl.Web.Mvc.Controllers
 
         protected virtual void SetupViewData(ViewModel viewModel, int containerSize = 0)
         {
-#pragma warning disable 618
-            // Set the (deprecated) ModelType property based on the View Model type.
-            if (viewModel is PageModel)
-            {
-                ModelType = ModelType.Page;
-            }
-            else if (viewModel is RegionModel)
-            {
-                ModelType = ModelType.Region;
-            }
-#pragma warning restore 618
-
             SetupViewData(containerSize, viewModel.MvcData);
-        }
-
-        [Obsolete("Deprecated in DXA 1.1.")]
-        protected virtual Type GetViewType(MvcData viewData)
-        {
-            return ModelTypeRegistry.GetViewModelType(viewData);
-        }
-
-        [Obsolete("Deprecated in DXA 1.1. Use ViewModel.MvcData directly.")]
-        protected virtual MvcData GetViewData(ViewModel viewModel)
-        {
-            return viewModel == null ? null : viewModel.MvcData;
         }
 
         /// <summary>

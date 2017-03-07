@@ -4,32 +4,24 @@ using Newtonsoft.Json;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using System;
+using System.Linq;
 
 namespace Sdl.Web.Common.Models
 {
     /// <summary>
     /// Represents the View Model for a Page
     /// </summary>
-#pragma warning disable 618
-    // TODO DXA 2.0: Should inherit directly from ViewModel, but for now we need the legacy classes inbetween for compatibility.
     [Serializable]
-    public class PageModel : WebPage, ISyndicationFeedItemProvider
-#pragma warning restore 618
+    public class PageModel : ViewModel, ISyndicationFeedItemProvider
     {
-        private const string _xpmPageSettingsMarkup = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\"}} -->";
-        private const string _xpmPageScript = "<script type=\"text/javascript\" language=\"javascript\" defer=\"defer\" src=\"{0}/WebUI/Editors/SiteEdit/Views/Bootstrap/Bootstrap.aspx?mode=js\" id=\"tridion.siteedit\"></script>";
+        private const string XpmPageSettingsMarkup = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\"}} -->";
+        private const string XpmPageScript = "<script type=\"text/javascript\" language=\"javascript\" defer=\"defer\" src=\"{0}/WebUI/Editors/SiteEdit/Views/Bootstrap/Bootstrap.aspx?mode=js\" id=\"tridion.siteedit\"></script>";
 
         /// <summary>
         /// Gets the Page Regions.
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
-        public new RegionModelSet Regions
-        {
-            get
-            {
-                return _regions;
-            }
-        }
+        public RegionModelSet Regions { get; private set; } = new RegionModelSet();
 
         /// <summary>
         /// Specifies whether the Page Model can be cached or not.
@@ -39,12 +31,42 @@ namespace Sdl.Web.Common.Models
         public bool NoCache { get; set; }
 
         /// <summary>
+        /// Gets or sets the URL path of the Page.
+        /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
+        public string Url { get;  set; }
+
+        /// <summary>
+        /// Gets or sets the Page metadata which is typically rendered as HTML meta tags (name/value pairs).
+        /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
+        public IDictionary<string, string> Meta { get; set; }
+
+        /// <summary>
+        /// Gets or sets the identifier for the Page.
+        /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
+        public string Id { get; }
+
+        /// <summary>
+        /// Gets or sets the Title of the Page which is typically rendered as HTML title tag.
+        /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
+        public string Title { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of PageModel.
         /// </summary>
         /// <param name="id">The identifier of the Page.</param>
         public PageModel(string id)
-            : base(id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new DxaException("Page Model must have a non-empty identifier.");
+            }
+            Id = id;
+
+            Meta = new Dictionary<string, string>();
         }
 
         #region Overrides
@@ -78,16 +100,16 @@ namespace Sdl.Web.Common.Models
             }
 
             return string.Format(
-                _xpmPageSettingsMarkup,
+                XpmPageSettingsMarkup,
                 XpmMetadata["PageID"],
                 XpmMetadata["PageModified"],
                 XpmMetadata["PageTemplateID"],
                 XpmMetadata["PageTemplateModified"]
-                ) + 
-                string.Format(_xpmPageScript, cmsUrl);
+                ) +
+                string.Format(XpmPageScript, cmsUrl);
         }
 
-        #endregion  
+        #endregion
 
         #region ISyndicationFeedItemProvider members
         /// <summary>
@@ -115,6 +137,56 @@ namespace Sdl.Web.Common.Models
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a deep copy of this View Model.
+        /// </summary>
+        /// <returns>The copied View Model.</returns>
+        public override ViewModel DeepCopy()
+        {
+            PageModel clone = (PageModel) base.DeepCopy();
+            clone.Regions = new RegionModelSet(Regions.Select(r => (RegionModel) r.DeepCopy()));
+            if (Meta != null)
+            {
+                clone.Meta = new Dictionary<string, string>(Meta);
+            }
+            return clone;
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to the current Page Model.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if the specified object in an Page Model with the same <see cref="Id"/> as the current one.
+        /// </returns>
+        /// <param name="obj">The object to compare with the current object. </param>
+        public override bool Equals(object obj)
+        {
+            PageModel other = obj as PageModel;
+            if (other == null)
+            {
+                return false;
+            }
+            return other.Id == Id;
+        }
+
+        /// <summary>
+        /// Serves as a hash function for a particular type. 
+        /// </summary>
+        /// <returns>
+        /// A hash code for the current Page Model.
+        /// </returns>
+        public override int GetHashCode()
+            => Id.GetHashCode();
+
+        /// <summary>
+        /// Returns a string that represents the current object.
+        /// </summary>
+        /// <returns>
+        /// A string containing the type, identifier and title of the Page.
+        /// </returns>
+        public override string ToString()
+            => $"{GetType().Name}: {Id} ('{Title}')";
     }
 
 }

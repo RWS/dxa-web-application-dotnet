@@ -111,11 +111,9 @@
     <Compile Include="Configuration\ResourceProviderFactory.cs" />
     <Compile Include="Configuration\ResourceProvider.cs" />
     <Compile Include="Controllers\BaseController.cs" />
-    <Compile Include="Html\BaseRenderer.cs" />
     <Compile Include="Html\HtmlHelperExtensions.cs" />
     <Compile Include="Html\UrlHelperExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Statics\BaseStaticFileManager.cs" />
     <Compile Include="Statics\StaticContentModule.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -10,18 +10,6 @@ namespace Sdl.Web.Common.Mapping
         private static readonly Dictionary<Type, Dictionary<string, List<SemanticProperty>>> _semanticPropertiesCache = 
             new Dictionary<Type, Dictionary<string, List<SemanticProperty>>>();
 
-        [Obsolete("Deprecated in DXA 1.7.")]
-        public static Dictionary<Type, Dictionary<string, List<SemanticProperty>>> EntityPropertySemantics 
-        {
-            get
-            {
-                return _semanticPropertiesCache;
-            }
-            set
-            {
-                throw new NotSupportedException("Setting this property is not supported in DXA 1.7.");
-            }
-        }        
 
         protected virtual Dictionary<string, KeyValuePair<string, string>> GetEntityDataFromType(Type type)
         {            

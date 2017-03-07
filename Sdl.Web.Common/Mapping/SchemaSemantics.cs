@@ -40,27 +40,6 @@ namespace Sdl.Web.Common.Mapping
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SchemaSemantics"/> class, using default semantic vocabulary prefix.
-        /// </summary>
-        /// <param name="entity">Entity name.</param>
-        [Obsolete("Deprecated in DXA 1.7. Use the overload with three parameters.")]
-        public SchemaSemantics(string entity)
-            : this(SemanticMapping.DefaultPrefix, entity, null)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SchemaSemantics"/> class.
-        /// </summary>
-        /// <param name="prefix">Vocabulary prefix</param>
-        /// <param name="entity">Entity name</param>
-        [Obsolete("Deprecated in DXA 1.7. Use the overload with three parameters.")]
-        public SchemaSemantics(string prefix, string entity)
-            : this(prefix, entity, null)
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="SchemaSemantics"/> class.
         /// </summary>
         /// <param name="vocabOrPrefix">Vocabulary prefix</param>

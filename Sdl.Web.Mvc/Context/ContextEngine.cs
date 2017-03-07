@@ -238,34 +238,5 @@ namespace Sdl.Web.Mvc.Context
 
             return ContextClaims.CastValue<T>(claimValue);
         }
-
-        #region Obsolete
-        [Obsolete("Deprecated in DXA 1.1. Use GetClaims<BrowserClaims>() instead.")]
-        public BrowserClaims Browser
-        {
-            get
-            {
-                return GetClaims<BrowserClaims>();
-            }
-        }
-
-        [Obsolete("Deprecated in DXA 1.1. Use GetClaims<DeviceClaims>() instead.")]
-        public DeviceClaims Device
-        {
-            get
-            {
-                return GetClaims<DeviceClaims>();
-            }
-        }
-
-        [Obsolete("Deprecated in DXA 1.1. Use GetClaims<OperatingSystemClaims>() instead.")]
-        public OperatingSystemClaims Os
-        {
-            get
-            {
-                return GetClaims<OperatingSystemClaims>();
-            }
-        }
-        #endregion
     }
 }

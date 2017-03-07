@@ -19,37 +19,25 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// The Vocabulary ID for types defined by schema.org.
         /// </summary>
-        public const string SchemaOrgVocabulary = "http://schema.org/"; 
+        public const string SchemaOrgVocabulary = "http://schema.org/";
 
         /// <summary>
         /// Gets or sets MVC data used to determine which View to use.
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
-        public MvcData MvcData
-        {
-            get;
-            set;
-        }
+        public MvcData MvcData { get; set; }
 
         /// <summary>
         /// Gets or sets HTML CSS classes for use in View top level HTML element.
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
-        public string HtmlClasses
-        {
-            get;
-            set;            
-        }
+        public string HtmlClasses { get; set; }
 
         /// <summary>
         /// Gets or sets metadata used to render XPM markup
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
-        public IDictionary<string, object> XpmMetadata
-        {
-            get;
-            set;
-        }
+        public IDictionary<string, object> XpmMetadata { get; set; }
 
         /// <summary>
         /// Gets or sets extension data (additional properties which can be used by custom Model Builders, Controllers and/or Views)
@@ -58,11 +46,7 @@ namespace Sdl.Web.Common.Models
         /// The value is <c>null</c> if no extension data has been set.
         /// </value>
         [SemanticProperty(IgnoreMapping = true)]
-        public IDictionary<string, object> ExtensionData
-        {
-            get;
-            set;
-        }
+        public IDictionary<string, object> ExtensionData { get; set; }
 
         /// <summary>
         ///  Sets an extension data key/value pair.
@@ -113,7 +97,7 @@ namespace Sdl.Web.Common.Models
         /// <returns>The syndication item link or <c>null</c> if <paramref name="link"/> is <c>null</c> or an empty link.</returns>
         protected SyndicationLink CreateSyndicationLink(Link link, Localization localization)
         {
-            if (link == null || string.IsNullOrEmpty(link.Url))
+            if (string.IsNullOrEmpty(link?.Url))
             {
                 return null;
             }

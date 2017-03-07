@@ -52,47 +52,6 @@ namespace Sdl.Web.Mvc.Html
             }
         }
 
-        #region Obsolete Public API
-#pragma warning disable 618
-
-        /// <summary>
-        /// Generates semantic markup (HTML/RDFa attributes) for a given Region.
-        /// </summary>
-        /// <param name="region">The Region.</param>
-        /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
-        [Obsolete("Deprecated in DXA 1.1. Use @Html.DxaRegionMarkup instead.")]
-        public static MvcHtmlString Region(IRegion region)
-        {
-            return RenderRegionAttributes((RegionModel) region);
-        }
-
-        /// <summary>
-        /// Generates semantic markup (HTML/RDFa attributes) for a given Entity.
-        /// </summary>
-        /// <param name="entity">The Entity.</param>
-        /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
-        [Obsolete("Deprecated in DXA 1.1. Use @Html.DxaEntityMarkup instead.")]
-        public static MvcHtmlString Entity(IEntity entity)
-        {
-            return RenderEntityAttributes((EntityModel) entity);
-        }
-
-        /// <summary>
-        /// Generates semantic markup (HTML/RDFa attributes) for a given property of a given Entity.
-        /// </summary>
-        /// <param name="entity">The Entity which contains the property.</param>
-        /// <param name="propertyName">The name of the property.</param>
-        /// <param name="index">The index of the property value (for multi-value properties).</param>
-        /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
-        [Obsolete("Deprecated in DXA 1.1. Use @Html.DxaPropertyMarkup instead.")]
-        public static MvcHtmlString Property(IEntity entity, string propertyName, int index = 0)
-        {
-            return RenderPropertyAttributes((EntityModel) entity, propertyName, index);
-        }
-
-#pragma warning restore 618
-        #endregion
-
         /// <summary>
         /// Registers a <see cref="IMarkupDecorator"/> implementation.
         /// </summary>
