@@ -51,7 +51,7 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             using (new Tracer(pageModel, pageModelData, includePageRegions, localization))
             {
-                Common.Models.MvcData mvcData = CreateMvcData(pageModelData.MvcData, "PageModel");
+                Common.Models.MvcData mvcData = CreateMvcData(pageModelData.MvcData, "Page");
                 Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
                 if (modelType == typeof(PageModel))
@@ -110,7 +110,7 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             using (new Tracer(entityModel, entityModelData, baseModelType, localization))
             {
-                Common.Models.MvcData mvcData = CreateMvcData(entityModelData.MvcData, "EntityModel");
+                Common.Models.MvcData mvcData = CreateMvcData(entityModelData.MvcData, "Entity");
                 SemanticSchema semanticSchema = SemanticMapping.GetSchema(entityModelData.SchemaId, localization);
 
                 Type modelType = (baseModelType == null) ?
@@ -310,7 +310,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             return fieldValue;
         }
 
-        private static object MapField(object fieldValues, Type modelPropertyType, SemanticSchemaField semanticSchemaField, MappingData mappingData, bool resolveComponentLinks = true)
+        private static object MapField(object fieldValues, Type modelPropertyType, SemanticSchemaField semanticSchemaField, MappingData mappingData)
         {
             Type sourceType = fieldValues.GetType();
             bool isArray = sourceType.IsArray;
@@ -394,12 +394,12 @@ namespace Sdl.Web.Tridion.R2Mapping
                     {
                         foreach (EntityModelData entityModelData in (EntityModelData[]) fieldValues)
                         {
-                            mappedValues.Add(MapComponentLink(entityModelData, targetType, mappingData.Localization, resolveComponentLinks));
+                            mappedValues.Add(MapComponentLink(entityModelData, targetType, mappingData.Localization));
                         }
                     }
                     else
                     {
-                        mappedValues.Add(MapComponentLink((EntityModelData) fieldValues, targetType, mappingData.Localization, resolveComponentLinks));
+                        mappedValues.Add(MapComponentLink((EntityModelData) fieldValues, targetType, mappingData.Localization));
                     }
                     break;
 
@@ -439,32 +439,25 @@ namespace Sdl.Web.Tridion.R2Mapping
             return Convert.ChangeType(stringValue, targetType, CultureInfo.InvariantCulture.NumberFormat);
         }
 
-        private static object MapComponentLink(EntityModelData entityModelData, Type targetType, Localization localization, bool resolveComponentLink = true)
+        private static object MapComponentLink(EntityModelData entityModelData, Type targetType, Localization localization)
         {
-            if (resolveComponentLink)
+            // TODO TSI-878: Use EntityModelData.LinkUrl (resolved by Model Service)
+            if (targetType == typeof(Link))
             {
-                // TODO TSI-878: Use EntityModelData.LinkUrl (resolved by Model Service)
-                if (targetType == typeof(Link))
-                {
-                    return new Link { Url = ResolveLinkUrl(entityModelData, localization) };
-                }
-
-                if (targetType == typeof(string))
-                {
-                    return ResolveLinkUrl(entityModelData, localization);
-                }
-
-                if (!typeof(EntityModel).IsAssignableFrom(targetType))
-                {
-                    throw new DxaException($"Cannot map Component Link to property of type '{targetType.Name}'.");
-                }
-
-                return ModelBuilderPipelineR2.CreateEntityModel(entityModelData, targetType, localization);
+                return new Link { Url = ResolveLinkUrl(entityModelData, localization) };
             }
-            else
+
+            if (targetType == typeof(string))
             {
-                return localization.GetCmUri(entityModelData.Id);
+                return ResolveLinkUrl(entityModelData, localization);
             }
+
+            if (!typeof(EntityModel).IsAssignableFrom(targetType))
+            {
+                throw new DxaException($"Cannot map Component Link to property of type '{targetType.Name}'.");
+            }
+
+            return ModelBuilderPipelineR2.CreateEntityModel(entityModelData, targetType, localization);
         }
 
         private static object MapKeyword(KeywordModelData keywordModelData, Type targetType, Localization localization)
@@ -526,7 +519,7 @@ namespace Sdl.Web.Tridion.R2Mapping
 
         private static string ResolveLinkUrl(EntityModelData entityModelData, Localization localization)
         {
-            string componentUri = $"tcm:{localization.Id}-{entityModelData.Id}";
+            string componentUri =  localization.GetCmUri(entityModelData.Id);
             return SiteConfiguration.LinkResolver.ResolveLink(componentUri);
         }
 
@@ -650,22 +643,39 @@ namespace Sdl.Web.Tridion.R2Mapping
                     {
                         throw new NotImplementedException("'settings' field handling"); // TODO
                     }
-                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData, false).FirstOrDefault();
+                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData,  resolveComponentLinks: false).FirstOrDefault();
                 }
             }
             if (mappingData.MetadataFields != null)
             {
                 foreach (KeyValuePair<string, object> field in mappingData.MetadataFields)
                 {
-                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData, false).FirstOrDefault();
+                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData, resolveComponentLinks: false).FirstOrDefault();
                 }
             }
             return result;
         }
 
-        private static IEnumerable<string> GetFieldValuesAsStrings(object fieldValues, MappingData mappingData, bool resolveComponentLinks = true)
-            => (IEnumerable<string>) MapField(fieldValues, typeof(List<string>), null, mappingData, resolveComponentLinks);
-      
+        private static IEnumerable<string> GetFieldValuesAsStrings(object fieldValues, MappingData mappingData, bool resolveComponentLinks)
+        {
+            if (!resolveComponentLinks)
+            {
+                // Handle Component Links here, because standard model mapping will resolve them.
+                Localization localization = mappingData.Localization;
+                if (fieldValues is EntityModelData)
+                {
+                    return new[] { localization.GetCmUri(((EntityModelData) fieldValues).Id) };
+                }
+                if (fieldValues is EntityModelData[])
+                {
+                    return ((EntityModelData[]) fieldValues).Select(emd => localization.GetCmUri(emd.Id));
+                }
+            }
+
+            // Use standard model mapping to map the field to a list of strings.
+            return (IEnumerable<string>) MapField(fieldValues, typeof(List<string>), null, mappingData);
+        }
+
         private static IDictionary<string, string> ResolveMetaLinks(IDictionary<string, string> meta)
         {
             if (meta == null)
@@ -690,7 +700,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             return result;
         }
 
-        private static Common.Models.MvcData CreateMvcData(DataModel.MvcData data, string baseModelTypeName)
+        private static Common.Models.MvcData CreateMvcData(DataModel.MvcData data, string defaultControllerName)
         {
             if (data == null)
             {
@@ -701,32 +711,11 @@ namespace Sdl.Web.Tridion.R2Mapping
                 throw new DxaException("No View Name specified in MVC Data.");
             }
 
-            string defaultControllerName;
-            string defaultActionName;
-
-            switch (baseModelTypeName)
-            {
-                case "PageModel":
-                    defaultControllerName = "Page";
-                    defaultActionName = "Page";
-                    break;
-                case "RegionModel":
-                    defaultControllerName = "Region";
-                    defaultActionName = "Region";
-                    break;
-                case "EntityModel":
-                    defaultControllerName = "Entity";
-                    defaultActionName = "Entity";
-                    break;
-                default:
-                    throw new DxaException($"Unexpected baseModelTypeName '{baseModelTypeName}'");
-            }
-
             return new Common.Models.MvcData
             {
                 ControllerName = data.ControllerName ?? defaultControllerName,
                 ControllerAreaName = data.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName(),
-                ActionName = data.ActionName ?? defaultActionName,
+                ActionName = data.ActionName ?? defaultControllerName,
                 ViewName = data.ViewName,
                 AreaName = data.AreaName ?? SiteConfiguration.GetDefaultModuleName(),
                 RouteValues = data.Parameters
@@ -735,7 +724,7 @@ namespace Sdl.Web.Tridion.R2Mapping
 
         private static RegionModel CreateRegionModel(RegionModelData regionModelData, Localization localization)
         {
-            Common.Models.MvcData mvcData = CreateMvcData(regionModelData.MvcData, "RegionModel");
+            Common.Models.MvcData mvcData = CreateMvcData(regionModelData.MvcData, "Region");
             Type regionModelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
             RegionModel result = (RegionModel) regionModelType.CreateInstance(regionModelData.Name);

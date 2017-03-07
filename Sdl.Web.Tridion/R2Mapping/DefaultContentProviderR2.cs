@@ -41,12 +41,55 @@ namespace Sdl.Web.Tridion.R2Mapping
             {
                 string canonicalUrlPath = GetCanonicalUrlPath(urlPath);
 
-                string pageContent = GetPageContent(canonicalUrlPath, localization);
+                PageModel result = null;
+                if (CacheRegions.IsViewModelCachingEnabled)
+                {
+                    PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                        $"{canonicalUrlPath}:{addIncludes}", // Cache Page Models with and without includes separately
+                        CacheRegions.PageModel,
+                        () =>
+                        {
+                            PageModel pageModel = LoadPageModel(ref canonicalUrlPath, addIncludes, localization);
+                            if (pageModel.NoCache)
+                            {
+                                result = pageModel;
+                                return null;
+                            }
+                            return pageModel;
+                        }
+                        );
+
+                    if (cachedPageModel != null)
+                    {
+                        // Don't return the cached Page Model itself, because we don't want dynamic logic to modify the cached state.
+                        result = (PageModel) cachedPageModel.DeepCopy();
+                    }
+                }
+                else
+                {
+                    result = LoadPageModel(ref canonicalUrlPath, addIncludes, localization);
+                }
+
+                if (SiteConfiguration.ConditionalEntityEvaluator != null)
+                {
+                    result.FilterConditionalEntities(localization);
+                }
+
+                return result;
+            }
+        }
+
+
+        private static PageModel LoadPageModel(ref string urlPath, bool addIncludes, Localization localization)
+        {
+            using (new Tracer(urlPath, addIncludes, localization))
+            {
+                string pageContent = GetPageContent(urlPath, localization);
                 if (pageContent == null)
                 {
                     // This may be a SG URL path; try if the index page exists.
-                    canonicalUrlPath += Constants.IndexPageUrlSuffix;
-                    pageContent = GetPageContent(canonicalUrlPath, localization);
+                    urlPath += Constants.IndexPageUrlSuffix;
+                    pageContent = GetPageContent(urlPath, localization);
                     if (pageContent == null)
                     {
                         throw new DxaItemNotFoundException(urlPath, localization.Id);
@@ -60,50 +103,50 @@ namespace Sdl.Web.Tridion.R2Mapping
                     throw new DxaException($"Data Model for Page '{pageModelData.Title}' ({pageModelData.Id}) contains no MVC data. Ensure that the Page is published using the DXA R2 TBBs.");
                 }
 
-                string pageUri = localization.GetCmUri(pageModelData.Id, (int) ItemType.Page);
-                List<string> dependencies = new List<string>() { pageUri };
-                // TODO: add include Page TCM URIs to dependencies
-
-                PageModel result = null;
-                if (CacheRegions.IsViewModelCachingEnabled)
-                {
-                    PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                        $"{canonicalUrlPath}:{addIncludes}", // Cache Page Models with and without includes separately
-                        CacheRegions.PageModel,
-                        () =>
-                        {
-                            PageModel pageModel = ModelBuilderPipelineR2.CreatePageModel(pageModelData, addIncludes, localization);
-                            pageModel.Url = canonicalUrlPath; // TODO: generate canonical Page URL on CM-side (?)
-                            if (pageModel.NoCache)
-                            {
-                                result = pageModel;
-                                return null;
-                            }
-                            return pageModel;
-                        },
-                        dependencies
-                        );
-
-                    if (cachedPageModel != null)
-                    {
-                        // Don't return the cached Page Model itself, because we don't want dynamic logic to modify the cached state.
-                        result = (PageModel) cachedPageModel.DeepCopy();
-                    }
-                }
-                else
-                {
-                    result = ModelBuilderPipelineR2.CreatePageModel(pageModelData, addIncludes, localization);
-                    result.Url = canonicalUrlPath;  // TODO: generate canonical Page URL on CM-side (?)
-                }
-
-                if (SiteConfiguration.ConditionalEntityEvaluator != null)
-                {
-                    result.FilterConditionalEntities(localization);
-                }
+                PageModel result = ModelBuilderPipelineR2.CreatePageModel(pageModelData, addIncludes, localization);
+                result.Url = urlPath;  // TODO: generate canonical Page URL on CM-side (?)
 
                 return result;
             }
         }
+
+        private static string GetPageContent(string urlPath, Localization localization)
+        {
+            using (new Tracer(urlPath, localization))
+            {
+                if (!urlPath.EndsWith(Constants.DefaultExtension) && !urlPath.EndsWith(".json"))
+                {
+                    urlPath += Constants.DefaultExtension;
+                }
+
+                string escapedUrlPath = Uri.EscapeUriString(urlPath);
+
+                global::Tridion.ContentDelivery.DynamicContent.Query.Query brokerQuery = new global::Tridion.ContentDelivery.DynamicContent.Query.Query
+                {
+                    Criteria = CriteriaFactory.And(new Criteria[]
+                    {
+                        new PageURLCriteria(escapedUrlPath),
+                        new PublicationCriteria(Convert.ToInt32(localization.Id)),
+                        new ItemTypeCriteria(64)
+                    })
+                };
+
+
+                string[] pageUris = brokerQuery.ExecuteQuery();
+                if (pageUris.Length == 0)
+                {
+                    return null;
+                }
+                if (pageUris.Length > 1)
+                {
+                    throw new DxaException($"Broker Query for Page URL path '{urlPath}' in Publication '{localization.Id}' returned {pageUris.Length} results.");
+                }
+
+                PageContentAssembler pageContentAssembler = new PageContentAssembler();
+                return pageContentAssembler.GetContent(pageUris[0]);
+            }
+        }
+
 
         /// <summary>
         /// Gets an Entity Model for a given Entity Identifier.
@@ -113,6 +156,31 @@ namespace Sdl.Web.Tridion.R2Mapping
         /// <returns>The Entity Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Entity Model exists for the given URL.</exception>
         public EntityModel GetEntityModel(string id, Localization localization)
+        {
+            using (new Tracer(id, localization))
+            {
+                EntityModel result;
+                if (CacheRegions.IsViewModelCachingEnabled)
+                {
+                    EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                        $"{id}-{localization.Id}", // key
+                        CacheRegions.EntityModel,
+                        () => LoadEntityModel(id, localization)
+                        );
+
+                    // Don't return the cached Entity Model itself, because we don't want dynamic logic to modify the cached state.
+                    result = (EntityModel) cachedEntityModel.DeepCopy();
+                }
+                else
+                {
+                    result = LoadEntityModel(id, localization);
+                }
+
+                return result;
+            }
+        }
+
+        private static EntityModel LoadEntityModel(string id, Localization localization)
         {
             using (new Tracer(id, localization))
             {
@@ -134,23 +202,7 @@ namespace Sdl.Web.Tridion.R2Mapping
 
                 EntityModelData entityModelData = JsonConvert.DeserializeObject<EntityModelData>(dcp.Content, DataModelBinder.SerializerSettings);
 
-                EntityModel result;
-                if (CacheRegions.IsViewModelCachingEnabled)
-                {
-                    EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                        $"{id}-{localization.Id}", // key
-                        CacheRegions.EntityModel,
-                        () => ModelBuilderPipelineR2.CreateEntityModel(entityModelData, null, localization),
-                        dependencies: new[] { componentUri }
-                        );
-
-                    // Don't return the cached Entity Model itself, because we don't want dynamic logic to modify the cached state.
-                    result = (EntityModel) cachedEntityModel.DeepCopy();
-                }
-                else
-                {
-                    result = ModelBuilderPipelineR2.CreateEntityModel(entityModelData, null, localization);
-                }
+                EntityModel result = ModelBuilderPipelineR2.CreateEntityModel(entityModelData, null, localization);
 
                 if (result.XpmMetadata != null)
                 {
@@ -261,43 +313,6 @@ namespace Sdl.Web.Tridion.R2Mapping
                 result = result.Substring(0, result.Length - Constants.DefaultExtension.Length);
             }
             return result;
-        }
-
-        private static string GetPageContent(string urlPath, Localization localization)
-        {
-            using (new Tracer(urlPath, localization))
-            {
-                if (!urlPath.EndsWith(Constants.DefaultExtension) && !urlPath.EndsWith(".json"))
-                {
-                    urlPath += Constants.DefaultExtension;
-                }
-
-                string escapedUrlPath = Uri.EscapeUriString(urlPath);
-
-                global::Tridion.ContentDelivery.DynamicContent.Query.Query brokerQuery = new global::Tridion.ContentDelivery.DynamicContent.Query.Query
-                {
-                    Criteria = CriteriaFactory.And(new Criteria[]
-                    {
-                        new PageURLCriteria(escapedUrlPath),
-                        new PublicationCriteria(Convert.ToInt32(localization.Id)),
-                        new ItemTypeCriteria(64)
-                    })
-                };
-
-
-                string[] pageUris = brokerQuery.ExecuteQuery();
-                if (pageUris.Length == 0)
-                {
-                    return null;
-                }
-                if (pageUris.Length > 1)
-                {
-                    throw new DxaException($"Broker Query for Page URL path '{urlPath}' in Publication '{localization.Id}' returned {pageUris.Length} results.");
-                }
-
-                PageContentAssembler pageContentAssembler = new PageContentAssembler();
-                return pageContentAssembler.GetContent(pageUris[0]);
-            }
         }
     }
 }
