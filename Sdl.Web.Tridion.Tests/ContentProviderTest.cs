@@ -496,6 +496,35 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public void GetPageModel_ComponentLinks_Success()
+        {
+            const int expectedNumberOfLinks = 1;
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ComponentLinkTestPageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            CompLinkTest testEntity = pageModel.Regions["Main"].Entities[0] as CompLinkTest;
+            Assert.IsNotNull(testEntity, "testEntity");
+            Assert.IsNotNull(testEntity.CompLinkAsEntityModel, "testEntity.CompLinkAsEntityModel");
+            Assert.IsNotNull(testEntity.CompLinkAsString, "testEntity.CompLinkAsString");
+            Assert.IsNotNull(testEntity.CompLinkAsLink, "testEntity.CompLinkAsLink");
+            Assert.AreEqual(expectedNumberOfLinks, testEntity.CompLinkAsEntityModel.Count, "testEntity.CompLinkAsEntityModel.Count");
+            Assert.AreEqual(expectedNumberOfLinks, testEntity.CompLinkAsString.Count, "testEntity.CompLinkAsString.Count");
+            Assert.AreEqual(expectedNumberOfLinks, testEntity.CompLinkAsLink.Count, "testEntity.CompLinkAsLink.Count");
+
+            Article linkedArticle = testEntity.CompLinkAsEntityModel[0] as Article;
+            Assert.IsNotNull(linkedArticle, "linkedArticle");
+            Assert.AreEqual("Test Article used for Automated Testing (Sdl.Web.Tridion.Tests)", linkedArticle.Headline, "linkedArticle.Headline");
+
+            Link articleLink = (Link) testEntity.CompLinkAsLink[0];
+            Assert.IsNotNull(articleLink.Id, "articleLink.Id");
+            Assert.AreEqual($"{TestLocalization.Path}/test_article_dynamic", articleLink.Url, "articleLink.Url");
+        }
+
+        [TestMethod]
         public void GetEntityModel_NonExistent_Exception()
         {
             AssertThrowsException<DxaItemNotFoundException>(() => TestContentProvider.GetEntityModel("666-666", TestLocalization));
