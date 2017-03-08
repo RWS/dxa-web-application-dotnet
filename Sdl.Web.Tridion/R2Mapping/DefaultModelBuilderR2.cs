@@ -444,7 +444,11 @@ namespace Sdl.Web.Tridion.R2Mapping
             // TODO TSI-878: Use EntityModelData.LinkUrl (resolved by Model Service)
             if (targetType == typeof(Link))
             {
-                return new Link { Url = ResolveLinkUrl(entityModelData, localization) };
+                return new Link
+                {
+                    Id = entityModelData.Id,
+                    Url = ResolveLinkUrl(entityModelData, localization)
+                };
             }
 
             if (targetType == typeof(string))

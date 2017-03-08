@@ -519,7 +519,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(linkedArticle, "linkedArticle");
             Assert.AreEqual("Test Article used for Automated Testing (Sdl.Web.Tridion.Tests)", linkedArticle.Headline, "linkedArticle.Headline");
 
-            Link articleLink = (Link) testEntity.CompLinkAsLink[0];
+            Link articleLink = testEntity.CompLinkAsLink[0];
             Assert.IsNotNull(articleLink.Id, "articleLink.Id");
             Assert.AreEqual($"{TestLocalization.Path}/test_article_dynamic", articleLink.Url, "articleLink.Url");
         }
