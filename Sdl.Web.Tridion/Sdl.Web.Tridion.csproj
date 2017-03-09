@@ -99,6 +99,18 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.Caching.dll</HintPath>
     </Reference>
+    <Reference Include="Sdl.Web.Delivery.DiscoveryService, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Sdl.Web.Delivery.DiscoveryService.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.Delivery.OAuthClient, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Sdl.Web.Delivery.OAuthClient.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.Delivery.Service, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Sdl.Web.Delivery.Service.dll</HintPath>
+    </Reference>
     <Reference Include="StackExchange.Redis.StrongName">
       <HintPath>..\packages\StackExchange.Redis.StrongName.1.1.605\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>
     </Reference>
@@ -203,6 +215,7 @@
     <Compile Include="R2Mapping\ModelBuilderPipelineR2.cs" />
     <Compile Include="R2Mapping\DefaultContentProviderR2.cs" />
     <Compile Include="R2Mapping\DefaultModelBuilderR2.cs" />
+    <Compile Include="R2Mapping\ModelBuilderServiceClient.cs" />
     <Compile Include="Statics\BinaryFileManager.cs" />
     <Compile Include="Statics\NamedLocker.cs" />
   </ItemGroup>
