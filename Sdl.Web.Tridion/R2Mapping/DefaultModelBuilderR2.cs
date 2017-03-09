@@ -492,8 +492,8 @@ namespace Sdl.Web.Tridion.R2Mapping
 
                 result.Id = keywordModelData.Id;
                 result.Title = keywordModelData.Title;
-                result.Description = keywordModelData.Description;
-                result.Key = keywordModelData.Key;
+                result.Description = keywordModelData.Description ?? string.Empty;
+                result.Key = keywordModelData.Key ?? string.Empty;
                 result.TaxonomyId = keywordModelData.TaxonomyId;
 
                 return result;
