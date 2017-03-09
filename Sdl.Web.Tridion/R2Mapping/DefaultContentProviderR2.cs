@@ -78,13 +78,7 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             using (new Tracer(urlPath, addIncludes, localization))
             {
-                PageModelData pageModelData = _client.GetPageModel(urlPath, localization, addIncludes);
-
-                if (pageModelData == null)
-                {
-                    throw new DxaItemNotFoundException(urlPath, localization.Id);
-                }
-               
+                PageModelData pageModelData = _client.GetPageModelData(urlPath, localization, addIncludes);
                 if (pageModelData.MvcData == null)
                 {
                     throw new DxaException($"Data Model for Page '{pageModelData.Title}' ({pageModelData.Id}) contains no MVC data. Ensure that the Page is published using the DXA R2 TBBs.");
@@ -130,11 +124,7 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             using (new Tracer(id, localization))
             {
-                EntityModelData entityModelData = _client.GetEntityModel(id, localization);
-                if (entityModelData == null)
-                {
-                    throw new DxaItemNotFoundException(id, localization.Id);
-                }
+                EntityModelData entityModelData = _client.GetEntityModelData(id, localization);              
           
                 EntityModel result = ModelBuilderPipelineR2.CreateEntityModel(entityModelData, null, localization);
 
@@ -202,8 +192,8 @@ namespace Sdl.Web.Tridion.R2Mapping
         }
 
         private string GetPageContent(string urlPath, Localization loc)
-        {          
-            return _client.GetPageContent(urlPath, loc);
+        {
+            return "";//TODO: _client.GetPageContent(urlPath, loc);
         }
 
         string IRawDataProvider.GetPageContent(string urlPath, Localization localization)

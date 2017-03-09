@@ -8,6 +8,8 @@ using Sdl.Web.DataModel;
 using Newtonsoft.Json;
 using Sdl.Web.Delivery.Service;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Models;
+using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Tridion.R2Mapping
 {
@@ -22,34 +24,25 @@ namespace Sdl.Web.Tridion.R2Mapping
         public ModelBuilderServiceClient()
         {
             _modelBuilderService = GetModelBuilderServiceEndpoint();
+            Log.Debug($"DXA Model Builder Service: {_modelBuilderService}.");
             _tokenProvider = DiscoveryServiceProvider.DefaultTokenProvider;
         }
 
-        public PageModelData GetPageModel(string urlPath, Localization localization, bool addIncludes = true)
+        public PageModelData GetPageModelData(string urlPath, Localization localization, bool addIncludes = true)
         {
             urlPath = GetCanonicalUrlPath(urlPath);
-
-            string pageContent = GetPageContent(urlPath, localization);
-            if (pageContent != null)
-            {
-                return JsonConvert.DeserializeObject<PageModelData>(pageContent, DataModelBinder.SerializerSettings);
-            }
-            return null;
+            return LoadData<PageModelData>(CreatePageModelRequestUri(urlPath, localization));
         }
 
-        public EntityModelData GetEntityModel(string id, Localization localization)
+        public EntityModelData GetEntityModelData(string id, Localization localization)
         {
-            string entityContent = ProcessRequest(CreateEntityModelRequestUri(id, localization));
-            if (entityContent != null)
-            {
-                return JsonConvert.DeserializeObject<EntityModelData>(entityContent, DataModelBinder.SerializerSettings);
-            }
-            return null;
-        }      
+            return LoadData<EntityModelData>(CreateEntityModelRequestUri(id, localization));
+        }
 
-        public string GetPageContent(string urlPath, Localization localization)
+        public T GetViewModel<T>(string urlPath, Localization localization) where T : ViewModel
         {
-            return ProcessRequest(CreatePageModelRequestUri(urlPath, localization));
+            //TODO
+            return default(T);
         }
 
         private Uri CreatePageModelRequestUri(string urlPath, Localization localization)
@@ -62,33 +55,44 @@ namespace Sdl.Web.Tridion.R2Mapping
             return new Uri(_modelBuilderService, $"/EntityModel/tcm/{localization.Id}/{tcmId}");
         }
 
-        private string ProcessRequest(Uri requestUri)
+        private T LoadData<T>(Uri requestUri)
         {
             try
-            {                
-                WebRequest request = WebRequest.Create(requestUri);
-                request.ContentType = "application/json; charset=utf-8";
-                if (_tokenProvider != null)
+            {
+                string content = ProcessRequest(requestUri);
+                if (content == null)
                 {
-                    request.Headers.Add(_tokenProvider.AuthRequestHeaderName, _tokenProvider.AuthRequestHeaderValue);
+                    throw new DxaItemNotFoundException($"Failed to load model for '{requestUri}' from model builder service.");
                 }
-                using (WebResponse response = request.GetResponse())
+                return JsonConvert.DeserializeObject<T>(content, DataModelBinder.SerializerSettings);
+            }
+            catch(Exception e)
+            {
+                Log.Error($"Failed to load data from model service at '{requestUri}'. Exception {e.Message} occured.");
+                throw new DxaItemNotFoundException($"Failed to load model for '{requestUri}' from model builder service.");
+            }           
+        }
+
+        private string ProcessRequest(Uri requestUri)
+        {
+            WebRequest request = WebRequest.Create(requestUri);
+            request.ContentType = "application/json; charset=utf-8";
+            if (_tokenProvider != null)
+            {
+                request.Headers.Add(_tokenProvider.AuthRequestHeaderName, _tokenProvider.AuthRequestHeaderValue);
+            }
+            using (WebResponse response = request.GetResponse())
+            {
+                using (Stream responseStream = response.GetResponseStream())
                 {
-                    using (Stream responseStream = response.GetResponseStream())
+                    if (responseStream != null)
                     {
-                        if (responseStream != null)
+                        using (StreamReader streamReader = new StreamReader(responseStream))
                         {
-                            using (StreamReader streamReader = new StreamReader(responseStream))
-                            {
-                                return streamReader.ReadToEnd();
-                            }
+                            return streamReader.ReadToEnd();
                         }
                     }
                 }
-            }
-            catch
-            {
-                // todo: need to handle any exceptions and log things here
             }
             return null;
         }
