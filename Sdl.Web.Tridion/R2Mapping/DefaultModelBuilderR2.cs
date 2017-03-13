@@ -90,10 +90,10 @@ namespace Sdl.Web.Tridion.R2Mapping
                 pageModel.MvcData = mvcData;
                 pageModel.Meta = ResolveMetaLinks(pageModelData.Meta) ?? new Dictionary<string, string>(); // TODO TSI-1267: Link Resolving should eventually be done in Model Service. 
                 pageModel.Title = PostProcessPageTitle(pageModelData, localization); // TODO TSI-24: This should eventually be done in Model Service.
-
+                pageModel.Url = pageModelData.UrlPath;
                 if (pageModelData.Regions != null)
                 {
-                    IEnumerable<RegionModelData> regions = includePageRegions ? pageModelData.Regions : pageModelData.Regions.Where(r => r.IncludePageUrl == null);
+                    IEnumerable<RegionModelData> regions = includePageRegions ? pageModelData.Regions : pageModelData.Regions.Where(r => r.IncludePageId == null);
                     pageModel.Regions.UnionWith(regions.Select(data => CreateRegionModel(data, localization)));
                 }
             }
