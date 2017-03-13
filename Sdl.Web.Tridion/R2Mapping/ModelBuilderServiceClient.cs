@@ -29,9 +29,9 @@ namespace Sdl.Web.Tridion.R2Mapping
             _tokenProvider = DiscoveryServiceProvider.DefaultTokenProvider;
         }
 
-        public PageModelData GetPageModelData(string urlPath, Localization localization)
+        public PageModelData GetPageModelData(string urlPath, Localization localization, bool addIncludes)
         {            
-            return LoadData<PageModelData>(CreatePageModelRequestUri(urlPath, localization));
+            return LoadData<PageModelData>(CreatePageModelRequestUri(urlPath, localization, addIncludes));
         }
 
         public string GetRawPageModelData(string urlPath, Localization localization)
@@ -51,7 +51,12 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             return LoadData<EntityModelData>(CreateEntityModelRequestUri(id, localization));
         }
-      
+
+        private Uri CreatePageModelRequestUri(string urlPath, Localization localization, bool addIncludes)
+        {
+            return new Uri(_modelBuilderService, $"/PageModel/tcm/{localization.Id}{GetCanonicalUrlPath(urlPath)}?includes={addIncludes}");
+        }
+
         private Uri CreatePageModelRequestUri(string urlPath, Localization localization)
         {
             return new Uri(_modelBuilderService, $"/PageModel/tcm/{localization.Id}{GetCanonicalUrlPath(urlPath)}");
