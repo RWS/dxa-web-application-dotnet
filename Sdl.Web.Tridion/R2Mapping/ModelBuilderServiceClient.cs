@@ -18,6 +18,7 @@ namespace Sdl.Web.Tridion.R2Mapping
     /// </summary>
     public class ModelBuilderServiceClient
     {
+        private static readonly string ExtensionProperty = "dxa-model-service";
         private readonly Uri _modelBuilderService;
         private readonly IOAuthTokenProvider _tokenProvider;
 
@@ -28,26 +29,32 @@ namespace Sdl.Web.Tridion.R2Mapping
             _tokenProvider = DiscoveryServiceProvider.DefaultTokenProvider;
         }
 
-        public PageModelData GetPageModelData(string urlPath, Localization localization, bool addIncludes = true)
-        {
-            urlPath = GetCanonicalUrlPath(urlPath);
+        public PageModelData GetPageModelData(string urlPath, Localization localization)
+        {            
             return LoadData<PageModelData>(CreatePageModelRequestUri(urlPath, localization));
+        }
+
+        public string GetRawPageModelData(string urlPath, Localization localization)
+        {
+            try
+            {
+                return ProcessRequest(CreatePageModelRequestUri(urlPath, localization));
+            }
+            catch(Exception e)
+            {
+                Log.Error($"Failed to load data from model service at '{urlPath}'. Exception {e.Message} occured.");
+                throw new DxaItemNotFoundException($"Failed to load model for '{urlPath}' from model builder service.");
+            }
         }
 
         public EntityModelData GetEntityModelData(string id, Localization localization)
         {
             return LoadData<EntityModelData>(CreateEntityModelRequestUri(id, localization));
         }
-
-        public T GetViewModel<T>(string urlPath, Localization localization) where T : ViewModel
-        {
-            //TODO
-            return default(T);
-        }
-
+      
         private Uri CreatePageModelRequestUri(string urlPath, Localization localization)
         {
-            return new Uri(_modelBuilderService, $"/PageModel/tcm/{localization.Id}{urlPath}");
+            return new Uri(_modelBuilderService, $"/PageModel/tcm/{localization.Id}{GetCanonicalUrlPath(urlPath)}");
         }
 
         private Uri CreateEntityModelRequestUri(string tcmId, Localization localization)
@@ -119,7 +126,7 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             IDiscoveryService service = DiscoveryServiceProvider.Instance.ServiceClient;
             var contentService = service.CreateQuery<Delivery.DiscoveryService.Tridion.WebDelivery.Platform.ContentServiceCapability>().Take(1).FirstOrDefault();
-            var modelBuilderService = contentService.ExtensionProperties.Single(x => x.Key.Equals("dxa-model-service", StringComparison.OrdinalIgnoreCase));
+            var modelBuilderService = contentService.ExtensionProperties.Single(x => x.Key.Equals(ExtensionProperty, StringComparison.OrdinalIgnoreCase));
             return modelBuilderService != null ? new Uri(modelBuilderService.Value) : null;
         }
     }

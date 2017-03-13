@@ -92,8 +92,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.DataModel">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Sdl.Dxa.DataModel.$(SdlDxaDataModelPackageVersion)\lib\net452\Sdl.Web.DataModel.dll</HintPath>
+      <HintPath>..\packages\Sdl.Dxa.DataModel.2.0.0-alpha-201703101439\lib\net452\Sdl.Web.DataModel.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Delivery.Caching">
       <SpecificVersion>False</SpecificVersion>

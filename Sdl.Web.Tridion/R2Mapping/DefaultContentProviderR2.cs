@@ -78,7 +78,7 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             using (new Tracer(urlPath, addIncludes, localization))
             {
-                PageModelData pageModelData = _client.GetPageModelData(urlPath, localization, addIncludes);
+                PageModelData pageModelData = _client.GetPageModelData(urlPath, localization);
                 if (pageModelData.MvcData == null)
                 {
                     throw new DxaException($"Data Model for Page '{pageModelData.Title}' ({pageModelData.Id}) contains no MVC data. Ensure that the Page is published using the DXA R2 TBBs.");
@@ -193,7 +193,7 @@ namespace Sdl.Web.Tridion.R2Mapping
 
         private string GetPageContent(string urlPath, Localization loc)
         {
-            return "";//TODO: _client.GetPageContent(urlPath, loc);
+            return _client.GetRawPageModelData(urlPath, loc);
         }
 
         string IRawDataProvider.GetPageContent(string urlPath, Localization localization)

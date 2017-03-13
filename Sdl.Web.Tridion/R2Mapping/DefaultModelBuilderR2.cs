@@ -93,7 +93,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 pageModel.Url = pageModelData.UrlPath;
                 if (pageModelData.Regions != null)
                 {
-                    IEnumerable<RegionModelData> regions = includePageRegions ? pageModelData.Regions : pageModelData.Regions.Where(r => r.IncludePageUrl == null);
+                    IEnumerable<RegionModelData> regions = includePageRegions ? pageModelData.Regions : pageModelData.Regions.Where(r => r.IncludePageId == null);
                     pageModel.Regions.UnionWith(regions.Select(data => CreateRegionModel(data, localization)));
                 }
             }
