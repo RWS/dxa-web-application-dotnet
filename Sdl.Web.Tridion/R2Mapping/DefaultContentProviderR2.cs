@@ -192,9 +192,7 @@ namespace Sdl.Web.Tridion.R2Mapping
         }
 
         private string GetPageContent(string urlPath, Localization loc)
-        {
-            return _client.GetRawPageModelData(urlPath, loc);
-        }
+            => _client.GetRawPageData(urlPath, loc);
 
         string IRawDataProvider.GetPageContent(string urlPath, Localization localization)
             => GetPageContent(urlPath, localization);
