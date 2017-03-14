@@ -13,6 +13,8 @@ using Sdl.Web.DataModel;
 using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.Query;
 using Sdl.Web.Tridion.Statics;
+using Tridion.ContentDelivery.DynamicContent;
+using Tridion.ContentDelivery.DynamicContent.Query;
 using Tridion.ContentDelivery.Meta;
 
 namespace Sdl.Web.Tridion.R2Mapping
@@ -22,7 +24,7 @@ namespace Sdl.Web.Tridion.R2Mapping
     /// </summary>
     public class DefaultContentProviderR2 : IContentProvider, IRawDataProvider
     {
-        private readonly ModelBuilderServiceClient _client = new ModelBuilderServiceClient();
+        private readonly ModelServiceClient _modelService = new ModelServiceClient();
 
         /// <summary>
         /// Gets a Page Model for a given URL path.
@@ -35,7 +37,7 @@ namespace Sdl.Web.Tridion.R2Mapping
         public PageModel GetPageModel(string urlPath, Localization localization, bool addIncludes = true)
         {
             using (new Tracer(urlPath, localization, addIncludes))
-            {            
+            {
                 PageModel result = null;
                 if (CacheRegions.IsViewModelCachingEnabled)
                 {
@@ -78,7 +80,13 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             using (new Tracer(urlPath, addIncludes, localization))
             {
-                PageModelData pageModelData = _client.GetPageModelData(urlPath, localization, addIncludes);
+                PageModelData pageModelData = _modelService.GetPageModelData(urlPath, localization, addIncludes);
+
+                if (pageModelData == null)
+                {
+                    throw new DxaItemNotFoundException(urlPath);
+                }
+
                 if (pageModelData.MvcData == null)
                 {
                     throw new DxaException($"Data Model for Page '{pageModelData.Title}' ({pageModelData.Id}) contains no MVC data. Ensure that the Page is published using the DXA R2 TBBs.");
@@ -124,8 +132,13 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             using (new Tracer(id, localization))
             {
-                EntityModelData entityModelData = _client.GetEntityModelData(id, localization);              
-          
+                EntityModelData entityModelData = _modelService.GetEntityModelData(id, localization);
+
+                if (entityModelData == null)
+                {
+                    throw new DxaItemNotFoundException(id);
+                }
+
                 EntityModel result = ModelBuilderPipelineR2.CreateEntityModel(entityModelData, null, localization);
 
                 if (result.XpmMetadata != null)
@@ -191,12 +204,6 @@ namespace Sdl.Web.Tridion.R2Mapping
             }
         }
 
-        private string GetPageContent(string urlPath, Localization loc)
-            => _client.GetRawPageData(urlPath, loc);
-
-        string IRawDataProvider.GetPageContent(string urlPath, Localization localization)
-            => GetPageContent(urlPath, localization);
-
         private EntityModelData CreateEntityModelData(IComponentMeta componentMeta)
         {
             ContentModelData standardMeta = new ContentModelData();
@@ -222,6 +229,42 @@ namespace Sdl.Web.Tridion.R2Mapping
                 SchemaId = componentMeta.SchemaId.ToString(),
                 Metadata = new ContentModelData { { "standardMeta", standardMeta } }
             };
-        }       
+        }
+
+        string IRawDataProvider.GetPageContent(string urlPath, Localization localization)
+        {
+            // TODO: let the DXA Model Service provide raw Page Content too (?)
+            using (new Tracer(urlPath, localization))
+            {
+                if (!urlPath.EndsWith(Constants.DefaultExtension) && !urlPath.EndsWith(".json"))
+                {
+                    urlPath += Constants.DefaultExtension;
+                }
+                string escapedUrlPath = Uri.EscapeUriString(urlPath);
+                global::Tridion.ContentDelivery.DynamicContent.Query.Query brokerQuery = new global::Tridion.ContentDelivery.DynamicContent.Query.Query
+                {
+                    Criteria = CriteriaFactory.And(new Criteria[]
+                    {
+                        new PageURLCriteria(escapedUrlPath),
+                        new PublicationCriteria(Convert.ToInt32(localization.Id)),
+                        new ItemTypeCriteria(64)
+                    })
+                };
+
+                string[] pageUris = brokerQuery.ExecuteQuery();
+                if (pageUris.Length == 0)
+                {
+                    return null;
+                }
+                if (pageUris.Length > 1)
+                {
+                    throw new DxaException($"Broker Query for Page URL path '{urlPath}' in Publication '{localization.Id}' returned {pageUris.Length} results.");
+                }
+
+                PageContentAssembler pageContentAssembler = new PageContentAssembler();
+                return pageContentAssembler.GetContent(pageUris[0]);
+            }
+        }
+
     }
 }
