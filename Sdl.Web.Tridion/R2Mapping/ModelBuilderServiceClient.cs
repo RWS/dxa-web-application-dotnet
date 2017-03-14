@@ -8,9 +8,9 @@ using Sdl.Web.DataModel;
 using Newtonsoft.Json;
 using Sdl.Web.Delivery.Service;
 using Sdl.Web.Common;
-using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Logging;
 using System.Collections.Generic;
+using Sdl.Web.Delivery.DiscoveryService.Tridion.WebDelivery.Platform;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore;
 using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.DynamicContent.Query;
@@ -22,12 +22,30 @@ namespace Sdl.Web.Tridion.R2Mapping
     /// </summary>
     public class ModelBuilderServiceClient
     {
-        private static readonly string ExtensionProperty = "dxa-model-service";
-        private static readonly string PreviewSessionTokenHeader = "x-preview-session-token";
-        private static readonly string PreviewSessionTokenCookie = "preview-session-token";
+        private const string DxaModelServiceExtensionProperty = "dxa-model-service";
+        private const string PreviewSessionTokenHeader = "x-preview-session-token";
+        private const string PreviewSessionTokenCookie = "preview-session-token";
 
         private readonly Uri _modelBuilderService;
         private readonly IOAuthTokenProvider _tokenProvider;
+
+        private class ModelServiceError
+        {
+            [JsonProperty("status")]
+            public int Status { get; set; }
+
+            [JsonProperty("error")]
+            public string Error { get; set; }
+
+            [JsonProperty("exception")]
+            public string Exception { get; set; }
+
+            [JsonProperty("message")]
+            public string Message { get; set; }
+
+            [JsonProperty("path")]
+            public string Path { get; set; }
+        }
 
         public ModelBuilderServiceClient()
         {
@@ -36,20 +54,20 @@ namespace Sdl.Web.Tridion.R2Mapping
             _tokenProvider = DiscoveryServiceProvider.DefaultTokenProvider;
         }
 
-        public PageModelData GetPageModelData(string urlPath, Localization localization, bool addIncludes)      
-            => LoadData<PageModelData>(CreatePageModelRequestUri(urlPath, localization, addIncludes));
+        public PageModelData GetPageModelData(string urlPath, Localization localization, bool addIncludes)
+            => LoadData<PageModelData>(CreatePageModelRequestUri(urlPath, localization, addIncludes), urlPath);
 
         public EntityModelData GetEntityModelData(string id, Localization localization)
-           => LoadData<EntityModelData>(CreateEntityModelRequestUri(id, localization));
+           => LoadData<EntityModelData>(CreateEntityModelRequestUri(id, localization), id);
 
         private Uri CreatePageModelRequestUri(string urlPath, Localization localization, bool addIncludes)
-            => new Uri(_modelBuilderService, $"/PageModel/tcm/{localization.Id}{GetCanonicalUrlPath(urlPath)}?includes={addIncludes}");
+            => new Uri(_modelBuilderService, $"/PageModel/{localization.CmUriScheme}/{localization.Id}{GetCanonicalUrlPath(urlPath)}?{GetIncludesParam(addIncludes)}");
 
-        private Uri CreatePageModelRequestUri(string urlPath, Localization localization)
-            => new Uri(_modelBuilderService, $"/PageModel/tcm/{localization.Id}{GetCanonicalUrlPath(urlPath)}");
-        
+        private static string GetIncludesParam(bool addIncludes)
+            => "includes=" + (addIncludes ? "INCLUDE" : "EXCLUDE");
+
         private Uri CreateEntityModelRequestUri(string tcmId, Localization localization)
-            => new Uri(_modelBuilderService, $"/EntityModel/tcm/{localization.Id}/{tcmId}");
+            => new Uri(_modelBuilderService, $"/EntityModel/{localization.CmUriScheme}/{localization.Id}/{tcmId}");
 
         public string GetRawPageData(string urlPath, Localization localization)
         {
@@ -87,25 +105,35 @@ namespace Sdl.Web.Tridion.R2Mapping
             }
         }
 
-        private T LoadData<T>(Uri requestUri)
+        private T LoadData<T>(Uri requestUri, string itemId)
         {
+            WebExceptionStatus status;
+            string responseBody = ProcessRequest(requestUri, out status);
+            if (status == WebExceptionStatus.Success)
+            {
+                return JsonConvert.DeserializeObject<T>(responseBody, DataModelBinder.SerializerSettings);
+            }
+
+            ModelServiceError serviceError;
             try
             {
-                string content = ProcessRequest(requestUri);
-                if (content == null)
-                {
-                    throw new DxaItemNotFoundException($"Failed to load model for '{requestUri}' from model builder service.");
-                }
-                return JsonConvert.DeserializeObject<T>(content, DataModelBinder.SerializerSettings);
+                serviceError = JsonConvert.DeserializeObject<ModelServiceError>(responseBody);
             }
-            catch(Exception e)
+            catch (Exception)
             {
-                Log.Error($"Failed to load data from model service at '{requestUri}'. Exception {e.Message} occured.");
-                throw new DxaItemNotFoundException($"Failed to load model for '{requestUri}' from model builder service.");
-            }           
+                throw new DxaException($"DXA Model Service returned an unexpected response: {responseBody}");
+            }
+
+            if (serviceError.Status == (int) HttpStatusCode.NotFound)
+            {
+                throw new DxaItemNotFoundException(itemId);
+            }
+
+            Log.Debug($"DXA Model service returned a '{serviceError.Error ?? serviceError.Status.ToString()}' error for request URL '{requestUri}'");
+            throw new DxaException($"DXA Model Service returned an error: {serviceError.Message ?? serviceError.Status.ToString()}");
         }
 
-        private string ProcessRequest(Uri requestUri)
+        private string ProcessRequest(Uri requestUri, out WebExceptionStatus status)
         {
             WebRequest request = WebRequest.Create(requestUri);
             request.ContentType = "application/json; charset=utf-8";
@@ -134,20 +162,36 @@ namespace Sdl.Web.Tridion.R2Mapping
                     cookie += cookies[PreviewSessionTokenCookie];
                 }
             }
-            using (WebResponse response = request.GetResponse())
+
+            try
             {
-                using (Stream responseStream = response.GetResponseStream())
+                using (WebResponse response = request.GetResponse())
                 {
-                    if (responseStream != null)
-                    {
-                        using (StreamReader streamReader = new StreamReader(responseStream))
-                        {
-                            return streamReader.ReadToEnd();
-                        }
-                    }
+                    string responseBody = GetResponseBody(response);
+                    status = WebExceptionStatus.Success;
+                    return responseBody;
                 }
             }
-            return null;
+            catch (WebException ex)
+            {
+                status = ex.Status;
+                return GetResponseBody(ex.Response);
+            }
+        }
+
+        private static string GetResponseBody(WebResponse webResponse)
+        {
+            using (Stream responseStream = webResponse.GetResponseStream())
+            {
+                if (responseStream == null)
+                {
+                    return null;
+                }
+                using (StreamReader streamReader = new StreamReader(responseStream))
+                {
+                    return streamReader.ReadToEnd();
+                }
+            }
         }
 
         private string GetCanonicalUrlPath(string urlPath)
@@ -171,9 +215,18 @@ namespace Sdl.Web.Tridion.R2Mapping
         private Uri GetModelBuilderServiceEndpoint()
         {
             IDiscoveryService service = DiscoveryServiceProvider.Instance.ServiceClient;
-            var contentService = service.CreateQuery<Delivery.DiscoveryService.Tridion.WebDelivery.Platform.ContentServiceCapability>().Take(1).FirstOrDefault();
-            var modelBuilderService = contentService.ExtensionProperties.Single(x => x.Key.Equals(ExtensionProperty, StringComparison.OrdinalIgnoreCase));
-            return modelBuilderService != null ? new Uri(modelBuilderService.Value) : null;
+            ContentServiceCapability contentService = service.CreateQuery<ContentServiceCapability>().Take(1).FirstOrDefault();
+            if (contentService == null)
+            {
+                throw new DxaException("Content Service Capability not found in Discovery Service.");
+            }
+            ContentKeyValuePair dxaModelServiceExtensionProperty = contentService.ExtensionProperties
+                .Take(1).FirstOrDefault(xp => xp.Key.Equals(DxaModelServiceExtensionProperty, StringComparison.OrdinalIgnoreCase));
+            if (dxaModelServiceExtensionProperty == null)
+            {
+                throw new DxaException($"DXA Model Service is not registered; no extension property called '{DxaModelServiceExtensionProperty}' found on Content Service Capability.");
+            }
+            return new Uri(dxaModelServiceExtensionProperty.Value);
         }
     }
 }
