@@ -160,6 +160,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                     if (!string.IsNullOrEmpty(cookie))
                         cookie += ";";
                     cookie += cookies[PreviewSessionTokenCookie];
+                    request.Headers["cookie"] = cookie;
                 }
             }
 
@@ -194,7 +195,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             }
         }
 
-        private string GetCanonicalUrlPath(string urlPath)
+        private static string GetCanonicalUrlPath(string urlPath)
         {
             string result = urlPath ?? Constants.IndexPageUrlSuffix;
             if (!result.StartsWith("/"))
@@ -212,7 +213,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             return result;
         }
 
-        private Uri GetModelBuilderServiceEndpoint()
+        private static Uri GetModelBuilderServiceEndpoint()
         {
             IDiscoveryService service = DiscoveryServiceProvider.Instance.ServiceClient;
             ContentServiceCapability contentService = service.CreateQuery<ContentServiceCapability>().Take(1).FirstOrDefault();
