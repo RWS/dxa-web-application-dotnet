@@ -44,6 +44,9 @@ namespace Sdl.Web.Tridion.R2Mapping
 
             [JsonProperty("path")]
             public string Path { get; set; }
+
+            public override string ToString()
+                => $"Status={Status}, Error='{Error}', Exception='{Exception}', Message='{Message}', Path='{Path}'";
         }
 
         public ModelServiceClient()
@@ -65,90 +68,100 @@ namespace Sdl.Web.Tridion.R2Mapping
         private static string GetIncludesParam(bool addIncludes)
             => "includes=" + (addIncludes ? "INCLUDE" : "EXCLUDE");
 
-        private Uri CreateEntityModelRequestUri(string tcmId, Localization localization)
-            => new Uri(_modelServiceBaseUri, $"/EntityModel/{localization.CmUriScheme}/{localization.Id}/{tcmId}");
+        private Uri CreateEntityModelRequestUri(string entityId, Localization localization)
+            => new Uri(_modelServiceBaseUri, $"/EntityModel/{localization.CmUriScheme}/{localization.Id}/{entityId}");
 
 
         private T LoadData<T>(Uri requestUri) where T: ViewModelData
         {
-            WebExceptionStatus status;
-            string responseBody = ProcessRequest(requestUri, out status);
-            if (status == WebExceptionStatus.Success)
-            {
-                return JsonConvert.DeserializeObject<T>(responseBody, DataModelBinder.SerializerSettings);
-            }
+            bool success;
+            string responseBody = ProcessRequest(requestUri, out success);
 
+            // Deserialize the response body (should be ViewModelData or ModelServiceError)
             ModelServiceError serviceError;
             try
             {
+                if (success)
+                {
+                    return JsonConvert.DeserializeObject<T>(responseBody, DataModelBinder.SerializerSettings);
+                }
                 serviceError = JsonConvert.DeserializeObject<ModelServiceError>(responseBody);
             }
             catch (Exception)
             {
-                throw new DxaException($"{ModelServiceName} returned an unexpected response: {responseBody}");
+                Log.Error("{0} returned an unexpected response for URL '{1}':\n{2} ", ModelServiceName, requestUri, responseBody);
+                throw new DxaException($"{ModelServiceName} returned an unexpected response.");
             }
 
             if (serviceError.Status == (int) HttpStatusCode.NotFound)
             {
+                // Item not found; return null. The Content Provider will throw an DxaItemNotFoundException.
                 return null;
             }
 
-            Log.Debug($"{ModelServiceName} returned a '{serviceError.Error ?? serviceError.Status.ToString()}' error for request URL '{requestUri}'");
-            throw new DxaException($"{ModelServiceName} returned an error: {serviceError.Message ?? serviceError.Status.ToString()}");
+            Log.Error("{0} returned an error response: {1}", ModelServiceName, serviceError);
+            throw new DxaException($"{ModelServiceName} returned an error: {serviceError.Message ?? serviceError.Error}");
         }
 
-        private string ProcessRequest(Uri requestUri, out WebExceptionStatus status)
+        private string ProcessRequest(Uri requestUri, out bool success)
         {
-            Log.Debug($"Sending {ModelServiceName} Request: {requestUri}");
-
-            WebRequest request = WebRequest.Create(requestUri);
-            request.ContentType = "application/json; charset=utf-8";
-            // handle OAuth if available/required
-            if (_tokenProvider != null)
+            using (new Tracer(requestUri))
             {
-                request.Headers.Add(_tokenProvider.AuthRequestHeaderName, _tokenProvider.AuthRequestHeaderValue);
-            }
+                Log.Debug($"Sending {ModelServiceName} Request: {requestUri}");
 
-            // forward on session preview cookie/header if available in ADF claimstore
-            IClaimStore claimStore = AmbientDataContext.CurrentClaimStore;
-            if (claimStore != null)
-            {
-                Dictionary<string, string[]> headers = claimStore.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
-                if (headers != null && headers.ContainsKey(PreviewSessionTokenHeader))
+                WebRequest request = WebRequest.Create(requestUri);
+                request.ContentType = "application/json; charset=utf-8";
+                // handle OAuth if available/required
+                if (_tokenProvider != null)
                 {
-                    request.Headers.Add(PreviewSessionTokenHeader, headers[PreviewSessionTokenHeader][0]);
+                    request.Headers.Add(_tokenProvider.AuthRequestHeaderName, _tokenProvider.AuthRequestHeaderValue);
                 }
 
-                Dictionary<string, string> cookies = claimStore.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
-                if (cookies != null && cookies.ContainsKey(PreviewSessionTokenCookie))
+                // forward on session preview cookie/header if available in ADF claimstore
+                IClaimStore claimStore = AmbientDataContext.CurrentClaimStore;
+                if (claimStore != null)
                 {
-                    string cookie = request.Headers["cookie"];
-                    if (!string.IsNullOrEmpty(cookie))
-                        cookie += ";";
-                    cookie += cookies[PreviewSessionTokenCookie];
-                    request.Headers["cookie"] = cookie;
-                }
-            }
+                    Dictionary<string, string[]> headers = claimStore.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
+                    if (headers != null && headers.ContainsKey(PreviewSessionTokenHeader))
+                    {
+                        request.Headers.Add(PreviewSessionTokenHeader, headers[PreviewSessionTokenHeader][0]);
+                    }
 
-            try
-            {
-                using (WebResponse response = request.GetResponse())
-                {
-                    string responseBody = GetResponseBody(response);
-                    status = WebExceptionStatus.Success;
-                    return responseBody;
+                    Dictionary<string, string> cookies = claimStore.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
+                    if (cookies != null && cookies.ContainsKey(PreviewSessionTokenCookie))
+                    {
+                        string cookie = request.Headers["cookie"];
+                        if (!string.IsNullOrEmpty(cookie))
+                            cookie += ";";
+                        cookie += cookies[PreviewSessionTokenCookie];
+                        request.Headers["cookie"] = cookie;
+                    }
                 }
-            }
-            catch (WebException ex)
-            {
-                status = ex.Status;
-                return GetResponseBody(ex.Response);
+
+                try
+                {
+                    using (WebResponse response = request.GetResponse())
+                    {
+                        string responseBody = GetResponseBody(response);
+                        success = true;
+                        return responseBody;
+                    }
+                }
+                catch (WebException ex)
+                {
+                    if (ex.Status != WebExceptionStatus.ProtocolError)
+                    {
+                        throw new DxaException($"{ModelServiceName} request for URL '{requestUri}' failed: {ex.Status}", ex);
+                    }
+                    success = false;
+                    return GetResponseBody(ex.Response);
+                }
             }
         }
 
         private static string GetResponseBody(WebResponse webResponse)
         {
-            using (Stream responseStream = webResponse.GetResponseStream())
+            using (Stream responseStream = webResponse?.GetResponseStream())
             {
                 if (responseStream == null)
                 {
