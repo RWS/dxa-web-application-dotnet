@@ -85,6 +85,7 @@
     <Compile Include="Models\Entity\Tsi1946TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi1758TestEntity.cs" />
     <Compile Include="Models\Entity\CompLinkTest.cs" />
+    <Compile Include="Models\Entity\Tsi2316TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi811TestEntity.cs" />
     <Compile Include="Models\Page\Tsi2285PageModel.cs" />
     <Compile Include="Models\Page\Tsi811PageModel.cs" />
