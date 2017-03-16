@@ -46,8 +46,8 @@ namespace Sdl.Web.Tridion.Navigation
 
                 return SiteConfiguration.CacheProvider.GetOrAdd(
                     localization.Id, // key
-                    CacheRegions.DynamicNavigation, 
-                    () => BuildNavigationModel(navTaxonomyUri, localization), 
+                    CacheRegions.DynamicNavigation,
+                    () => BuildNavigationModel(navTaxonomyUri, localization),
                     new [] { navTaxonomyUri } // dependency on Taxonomy
                     );
             }
@@ -226,7 +226,7 @@ namespace Sdl.Web.Tridion.Navigation
         private static bool IsHome(SitemapItem sitemapItem, Localization localization)
         {
             string homePath = string.IsNullOrEmpty(localization.Path) ? "/" : localization.Path;
-            return sitemapItem != null && sitemapItem.Url != null && sitemapItem.Url.Equals(homePath, StringComparison.InvariantCultureIgnoreCase);
+            return (sitemapItem?.Url != null) && sitemapItem.Url.Equals(homePath, StringComparison.InvariantCultureIgnoreCase);
         }
 
         private static void ParseSitemapItemId(string sitemapItemId, out string taxonomyId, out string keywordId, out string pageId)
@@ -234,7 +234,7 @@ namespace Sdl.Web.Tridion.Navigation
             Match sitemapItemIdMatch = _sitemapItemIdRegex.Match(sitemapItemId);
             if (!sitemapItemIdMatch.Success)
             {
-                throw new DxaException(string.Format("Invalid Sitemap Item identifier: '{0}'", sitemapItemId));
+                throw new DxaException($"Invalid Sitemap Item identifier: '{sitemapItemId}'");
             }
             taxonomyId = sitemapItemIdMatch.Groups["taxonomyId"].Value;
             keywordId = sitemapItemIdMatch.Groups["keywordId"].Value;
@@ -411,6 +411,11 @@ namespace Sdl.Web.Tridion.Navigation
 
         private static TaxonomyNode CreateTaxonomyNode(Keyword keyword, int expandLevels, NavigationFilter filter, Localization localization)
         {
+            if (keyword == null)
+            {
+                return null;
+            }
+
             string taxonomyId = keyword.TaxonomyUri.Split('-')[1];
             bool isRoot = (keyword.KeywordUri == keyword.TaxonomyUri);
             int classifiedItemsCount = keyword.ReferencedContentCount;
@@ -443,10 +448,10 @@ namespace Sdl.Web.Tridion.Navigation
                 childItems = childItems.OrderBy(i => i.OriginalTitle).ToList();
             }
 
-            string sequencePrefix; 
+            string sequencePrefix;
             TaxonomyNode result = new TaxonomyNode
             {
-                Id = isRoot ? string.Format("t{0}", taxonomyId) : FormatKeywordNodeId(keyword.KeywordUri, taxonomyId),
+                Id = isRoot ? $"t{taxonomyId}" : FormatKeywordNodeId(keyword.KeywordUri, taxonomyId),
                 Type =  SitemapItem.Types.TaxonomyNode,
                 OriginalTitle = keyword.KeywordName,
                 Title = StripSequencePrefix(keyword.KeywordName, out sequencePrefix),
@@ -489,7 +494,7 @@ namespace Sdl.Web.Tridion.Navigation
 
             return new SitemapItem
             {
-                Id = string.Format("t{0}-p{1}", taxonomyId, pageMeta.Id),
+                Id = $"t{taxonomyId}-p{pageMeta.Id}",
                 Type = SitemapItem.Types.Page,
                 OriginalTitle = pageMeta.Title,
                 Title = StripSequencePrefix(pageMeta.Title, out sequencePrefix),
