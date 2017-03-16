@@ -523,7 +523,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetPageModel_ComponentLinks_Success()
         {
-            const int expectedNumberOfLinks = 1;
+            const int expectedNumberOfLinks = 2;
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ComponentLinkTestPageRelativeUrlPath);
 
             PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
@@ -543,6 +543,14 @@ namespace Sdl.Web.Tridion.Tests
             Article linkedArticle = testEntity.CompLinkAsEntityModel[0] as Article;
             Assert.IsNotNull(linkedArticle, "linkedArticle");
             Assert.AreEqual("Test Article used for Automated Testing (Sdl.Web.Tridion.Tests)", linkedArticle.Headline, "linkedArticle.Headline");
+
+            TestEntity linkedTestEntity = testEntity.CompLinkAsEntityModel[1] as TestEntity;
+            Assert.IsNotNull(linkedTestEntity, "linkedTestEntity");
+            Assert.IsNotNull(linkedTestEntity.SingleLineTextField, "linkedTestEntity.SingleLineTextField");
+            Assert.AreEqual(2, linkedTestEntity.SingleLineTextField.Count, "linkedTestEntity.SingleLineTextField.Count");
+            Assert.AreEqual("This is a single line text field", linkedTestEntity.SingleLineTextField[0]);
+            Assert.IsNotNull(linkedTestEntity.MultiLineTextField, "linkedTestEntity.MultiLineTextField");
+            Assert.AreEqual(1, linkedTestEntity.MultiLineTextField.Count, "linkedTestEntity.MultiLineTextField.Count");
 
             Link articleLink = testEntity.CompLinkAsLink[0];
             Assert.IsNotNull(articleLink.Id, "articleLink.Id");

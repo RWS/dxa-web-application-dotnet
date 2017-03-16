@@ -81,6 +81,7 @@
     <Compile Include="Models\Entity\MediaManagerDistribution.cs" />
     <Compile Include="Models\Entity\Paragraph.cs" />
     <Compile Include="Models\Entity\Teaser.cs" />
+    <Compile Include="Models\Entity\TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi1757TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi1946TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi1758TestEntity.cs" />

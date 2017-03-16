@@ -51,6 +51,7 @@ namespace Sdl.Web.Tridion.Tests
         private static readonly Localization _parentLocalization;
         private static readonly Localization _childLocalization;
         private static readonly Localization _r2TestLocalization;
+        private static readonly Localization _r2TestChildLocalization;
 
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
@@ -87,7 +88,13 @@ namespace Sdl.Web.Tridion.Tests
                 Path = "/autotest-r2"
             };
 
-            _testLocalizations = new[] { _parentLocalization, _childLocalization, _r2TestLocalization };
+            _r2TestChildLocalization = new Localization
+            {
+                Id = "1083",
+                Path = "/autotest-child-r2"
+            };
+
+            _testLocalizations = new[] { _parentLocalization, _childLocalization, _r2TestLocalization, _r2TestChildLocalization };
 
             TestRegistration.RegisterViewModels();
         }
