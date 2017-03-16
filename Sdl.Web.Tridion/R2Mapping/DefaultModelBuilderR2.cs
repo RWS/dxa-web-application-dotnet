@@ -344,9 +344,11 @@ namespace Sdl.Web.Tridion.R2Mapping
                     break;
 
                 case "DateTime":
+                case "Single":
+                case "Double":
                     if (isArray)
                     {
-                        foreach (DateTime fieldValue in (DateTime[]) fieldValues)
+                        foreach (object fieldValue in (Array) fieldValues)
                         {
                             mappedValues.Add(Convert.ChangeType(fieldValue, bareTargetType));
                         }
@@ -436,6 +438,21 @@ namespace Sdl.Web.Tridion.R2Mapping
             {
                 return new RichText(stringValue);
             }
+
+            if (targetType == typeof(Link))
+            {
+                // Trying to map a text field to a Link (?); if the text is a TCM URI, it can work...
+                if (!ContentManager.TcmUri.IsValid(stringValue))
+                {
+                    throw new DxaException($"Cannot map string to type Link: '{stringValue}'");
+                }
+                return new Link
+                {
+                    Id = stringValue.Split('-')[1],
+                    Url = SiteConfiguration.LinkResolver.ResolveLink(stringValue, resolveToBinary: true)
+                };
+            }
+
             return Convert.ChangeType(stringValue, targetType, CultureInfo.InvariantCulture.NumberFormat);
         }
 
