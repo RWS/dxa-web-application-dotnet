@@ -48,10 +48,18 @@ namespace Sdl.Web.Common.Models
         public string TaxonomyId { get; set; }
 
         #region Overrides
+        /// <summary>
+        /// Returns a string that represents the current object.
+        /// </summary>
+        /// <returns>
+        /// A string containing the type and identifier of the Entity.
+        /// </returns>
+        public override string ToString()
+            => $"{GetType().Name}: {Id}";
+
         public override string GetXpmMarkup(Localization localization)
-        {
-            return string.Empty;
-        }
+            => string.Empty;
+
         #endregion
     }
 }
