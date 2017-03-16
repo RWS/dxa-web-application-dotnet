@@ -87,10 +87,15 @@ namespace Sdl.Web.Tridion.R2Mapping
                 }
                 serviceError = JsonConvert.DeserializeObject<ModelServiceError>(responseBody);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                const int maxCharactersToLog = 1000;
+                if ((responseBody != null) && (responseBody.Length > maxCharactersToLog))
+                {
+                    responseBody = responseBody.Substring(0, maxCharactersToLog) + "...";
+                }
                 Log.Error("{0} returned an unexpected response for URL '{1}':\n{2} ", ModelServiceName, requestUri, responseBody);
-                throw new DxaException($"{ModelServiceName} returned an unexpected response.");
+                throw new DxaException($"{ModelServiceName} returned an unexpected response.", ex);
             }
 
             if (serviceError.Status == (int) HttpStatusCode.NotFound)
