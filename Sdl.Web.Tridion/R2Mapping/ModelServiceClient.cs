@@ -12,6 +12,8 @@ using Sdl.Web.Common.Logging;
 using System.Collections.Generic;
 using Sdl.Web.Delivery.DiscoveryService.Tridion.WebDelivery.Platform;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore;
+using System.Web.Configuration;
+using System.Threading.Tasks;
 
 namespace Sdl.Web.Tridion.R2Mapping
 {
@@ -25,8 +27,10 @@ namespace Sdl.Web.Tridion.R2Mapping
         private const string PreviewSessionTokenHeader = "x-preview-session-token";
         private const string PreviewSessionTokenCookie = "preview-session-token";
 
-        private readonly Uri _modelServiceBaseUri;
         private readonly IOAuthTokenProvider _tokenProvider;
+        private readonly Uri _modelServiceBaseUri;
+        private readonly int _serviceTimeout;
+        private readonly int _serviceRetryCount;
 
         private class ModelServiceError
         {
@@ -54,6 +58,16 @@ namespace Sdl.Web.Tridion.R2Mapping
             _modelServiceBaseUri = GetModelServiceUri();
             Log.Debug($"{ModelServiceName} found at URL '{_modelServiceBaseUri}'");
             _tokenProvider = DiscoveryServiceProvider.DefaultTokenProvider;
+            int n;
+            _serviceRetryCount = int.TryParse(
+                WebConfigurationManager.AppSettings["model-builder-service-retries"], out n)
+                ? n
+                : 4; // default to 4 retry attempts
+
+            _serviceTimeout = int.TryParse(
+                WebConfigurationManager.AppSettings["model-builder-service-timeout"], out n)
+                ? n
+                : 100000; // default 100seconds
         }
 
         public PageModelData GetPageModelData(string urlPath, Localization localization, bool addIncludes)
@@ -70,7 +84,6 @@ namespace Sdl.Web.Tridion.R2Mapping
 
         private Uri CreateEntityModelRequestUri(string entityId, Localization localization)
             => new Uri(_modelServiceBaseUri, $"/EntityModel/{localization.CmUriScheme}/{localization.Id}/{entityId}");
-
 
         private T LoadData<T>(Uri requestUri) where T: ViewModelData
         {
@@ -115,6 +128,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 Log.Debug($"Sending {ModelServiceName} Request: {requestUri}");
 
                 WebRequest request = WebRequest.Create(requestUri);
+                request.Timeout = _serviceTimeout;
                 request.ContentType = "application/json; charset=utf-8";
                 // handle OAuth if available/required
                 if (_tokenProvider != null)
@@ -126,13 +140,15 @@ namespace Sdl.Web.Tridion.R2Mapping
                 IClaimStore claimStore = AmbientDataContext.CurrentClaimStore;
                 if (claimStore != null)
                 {
-                    Dictionary<string, string[]> headers = claimStore.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
+                    Dictionary<string, string[]> headers =
+                        claimStore.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
                     if (headers != null && headers.ContainsKey(PreviewSessionTokenHeader))
                     {
                         request.Headers.Add(PreviewSessionTokenHeader, headers[PreviewSessionTokenHeader][0]);
                     }
 
-                    Dictionary<string, string> cookies = claimStore.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
+                    Dictionary<string, string> cookies =
+                        claimStore.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
                     if (cookies != null && cookies.ContainsKey(PreviewSessionTokenCookie))
                     {
                         string cookie = request.Headers["cookie"];
@@ -143,24 +159,39 @@ namespace Sdl.Web.Tridion.R2Mapping
                     }
                 }
 
-                try
+                int attempt = 0;
+                do
                 {
-                    using (WebResponse response = request.GetResponse())
+                    try
                     {
-                        string responseBody = GetResponseBody(response);
-                        success = true;
-                        return responseBody;
+                        attempt++;
+                        using (WebResponse response = request.GetResponse())
+                        {
+                            string responseBody = GetResponseBody(response);
+                            success = true;
+                            return responseBody;
+                        }
                     }
-                }
-                catch (WebException ex)
-                {
-                    if (ex.Status != WebExceptionStatus.ProtocolError)
+                    catch (WebException ex)
                     {
-                        throw new DxaException($"{ModelServiceName} request for URL '{requestUri}' failed: {ex.Status}", ex);
+                        if (ex.Status == WebExceptionStatus.Timeout && attempt < _serviceRetryCount)
+                        {
+                            Log.Debug("{0} timed out, attempting a retry request for URL '{1}'.", ModelServiceName,
+                                requestUri);
+                            Task.Delay(TimeSpan.FromMilliseconds(2000)).Wait();
+                        }
+                        else
+                        {
+                            if (ex.Status != WebExceptionStatus.ProtocolError)
+                            {
+                                throw new DxaException(
+                                    $"{ModelServiceName} request for URL '{requestUri}' failed: {ex.Status}", ex);
+                            }
+                            success = false;
+                            return GetResponseBody(ex.Response);
+                        }
                     }
-                    success = false;
-                    return GetResponseBody(ex.Response);
-                }
+                } while (true);
             }
         }
 
