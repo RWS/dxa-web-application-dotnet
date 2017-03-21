@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.0.0-alpha-201702091547</SdlDxaDataModelPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.0.0-alpha-201703201047</SdlDxaDataModelPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -57,7 +57,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.DataModel">
-      <HintPath>..\packages\Sdl.Dxa.DataModel.$(SdlDxaDataModelPackageVersion)\lib\net452\Sdl.Web.DataModel.dll</HintPath>
+	  <HintPath>..\packages\Sdl.Dxa.DataModel.$(SdlDxaDataModelPackageVersion)\lib\net452\Sdl.Web.DataModel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -91,7 +91,6 @@
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Interfaces\ICacheProvider.cs" />
     <Compile Include="Interfaces\IConditionalEntityEvaluator.cs" />
-    <Compile Include="Interfaces\IContentResolver.cs" />
     <Compile Include="Interfaces\IContextClaimsProvider.cs" />
     <Compile Include="Interfaces\ILinkResolver.cs" />
     <Compile Include="Interfaces\ILocalizationResolver.cs" />
@@ -99,7 +98,6 @@
     <Compile Include="Interfaces\IOnDemandNavigationProvider.cs" />
     <Compile Include="Interfaces\IRichTextProcessor.cs" />
     <Compile Include="Interfaces\IUnknownLocalizationHandler.cs" />
-    <Compile Include="Interfaces\LegacyContentResolverFacade.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />
     <Compile Include="Logging\Log.cs" />
     <Compile Include="Logging\Tracer.cs" />
@@ -120,32 +118,22 @@
     <Compile Include="Models\KeywordModel.cs" />
     <Compile Include="Models\Navigation\TaxonomyNode.cs" />
     <Compile Include="Models\ISyndicationFeedItemProvider.cs" />
-    <Compile Include="Models\Legacy\IPage.cs" />
-    <Compile Include="Models\Legacy\IEntity.cs" />
     <Compile Include="Interfaces\IMediaHelper.cs" />
-    <Compile Include="Models\Legacy\IRegion.cs" />
     <Compile Include="Models\Navigation\NavigationFilter.cs" />
     <Compile Include="Models\PageModelWithHttpResponseData.cs" />
     <Compile Include="Models\RedirectModel.cs" />
     <Compile Include="Models\RichText.cs" />
     <Compile Include="Models\SemanticAttributes.cs" />
-    <Compile Include="Models\Legacy\EntityBase.cs" />
-    <Compile Include="Models\Legacy\ModelType.cs" />
     <Compile Include="Models\Entity\Link.cs" />
     <Compile Include="Models\Entity\MediaItem.cs" />
     <Compile Include="Models\Entity\Tag.cs" />
     <Compile Include="Models\MvcData.cs" />
     <Compile Include="Interfaces\IContentProvider.cs" />
     <Compile Include="Interfaces\ILogger.cs" />
-    <Compile Include="Interfaces\IRenderer.cs" />
-    <Compile Include="Interfaces\IStaticFileManager.cs" />
     <Compile Include="Models\Navigation\NavigationLinks.cs" />
     <Compile Include="Models\Navigation\SitemapItem.cs" />
     <Compile Include="Models\PageModel.cs" />
-    <Compile Include="Models\Legacy\PageBase.cs" />
-    <Compile Include="Models\Legacy\Region.cs" />
     <Compile Include="Models\RegionModel.cs" />
-    <Compile Include="Models\Legacy\WebPage.cs" />
     <Compile Include="Models\RegionModelSet.cs" />
     <Compile Include="Models\StaticContentItem.cs" />
     <Compile Include="Models\ViewModel.cs" />

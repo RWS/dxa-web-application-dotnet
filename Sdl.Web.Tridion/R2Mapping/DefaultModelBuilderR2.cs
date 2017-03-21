@@ -4,10 +4,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
@@ -22,10 +20,6 @@ namespace Sdl.Web.Tridion.R2Mapping
     /// </summary>
     public class DefaultModelBuilderR2 : IPageModelBuilder, IEntityModelBuilder
     {
-        private static readonly Regex _tcmUriRegex = new Regex(@"tcm:\d+-\d+(-\d+)?", RegexOptions.Compiled);
-        private static readonly Regex _compLinkStartTagRegex = new Regex(@"(?<before><a\s.*href="")(?<tcmUri>tcm:\d+-\d+)(?<after>""[^>]*>)", RegexOptions.Compiled);
-        private static readonly Regex _compLinkEndTagRegex = new Regex(@"(?<before></a><!--CompLink\s)(?<tcmUri>tcm:\d+-\d+)(?<after>-->)", RegexOptions.Compiled);
-
         private class MappingData
         {
             public string ModelId { get; set; }
@@ -88,12 +82,12 @@ namespace Sdl.Web.Tridion.R2Mapping
                 }
 
                 pageModel.MvcData = mvcData;
-                pageModel.Meta = ResolveMetaLinks(pageModelData.Meta) ?? new Dictionary<string, string>(); // TODO TSI-1267: Link Resolving should eventually be done in Model Service. 
-                pageModel.Title = PostProcessPageTitle(pageModelData, localization); // TODO TSI-24: This should eventually be done in Model Service.
-
+                pageModel.Meta = pageModelData.Meta ?? new Dictionary<string, string>();
+                pageModel.Title = PostProcessPageTitle(pageModelData, localization); // TODO TSI-2210: This should eventually be done in Model Service.
+                pageModel.Url = pageModelData.UrlPath;
                 if (pageModelData.Regions != null)
                 {
-                    IEnumerable<RegionModelData> regions = includePageRegions ? pageModelData.Regions : pageModelData.Regions.Where(r => r.IncludePageUrl == null);
+                    IEnumerable<RegionModelData> regions = includePageRegions ? pageModelData.Regions : pageModelData.Regions.Where(r => r.IncludePageId == null);
                     pageModel.Regions.UnionWith(regions.Select(data => CreateRegionModel(data, localization)));
                 }
             }
@@ -344,9 +338,11 @@ namespace Sdl.Web.Tridion.R2Mapping
                     break;
 
                 case "DateTime":
+                case "Single":
+                case "Double":
                     if (isArray)
                     {
-                        foreach (DateTime fieldValue in (DateTime[]) fieldValues)
+                        foreach (object fieldValue in (Array) fieldValues)
                         {
                             mappedValues.Add(Convert.ChangeType(fieldValue, bareTargetType));
                         }
@@ -436,20 +432,38 @@ namespace Sdl.Web.Tridion.R2Mapping
             {
                 return new RichText(stringValue);
             }
+
+            if (targetType == typeof(Link))
+            {
+                // Trying to map a text field to a Link (?); if the text is a TCM URI, it can work...
+                if (!ContentManager.TcmUri.IsValid(stringValue))
+                {
+                    throw new DxaException($"Cannot map string to type Link: '{stringValue}'");
+                }
+                return new Link
+                {
+                    Id = stringValue.Split('-')[1],
+                    Url = SiteConfiguration.LinkResolver.ResolveLink(stringValue, resolveToBinary: true)
+                };
+            }
+
             return Convert.ChangeType(stringValue, targetType, CultureInfo.InvariantCulture.NumberFormat);
         }
 
         private static object MapComponentLink(EntityModelData entityModelData, Type targetType, Localization localization)
         {
-            // TODO TSI-878: Use EntityModelData.LinkUrl (resolved by Model Service)
             if (targetType == typeof(Link))
             {
-                return new Link { Url = ResolveLinkUrl(entityModelData, localization) };
+                return new Link
+                {
+                    Id = entityModelData.Id,
+                    Url = GetLinkUrl(entityModelData, localization)
+                };
             }
 
             if (targetType == typeof(string))
             {
-                return ResolveLinkUrl(entityModelData, localization);
+                return GetLinkUrl(entityModelData, localization);
             }
 
             if (!typeof(EntityModel).IsAssignableFrom(targetType))
@@ -488,8 +502,8 @@ namespace Sdl.Web.Tridion.R2Mapping
 
                 result.Id = keywordModelData.Id;
                 result.Title = keywordModelData.Title;
-                result.Description = keywordModelData.Description;
-                result.Key = keywordModelData.Key;
+                result.Description = keywordModelData.Description ?? string.Empty;
+                result.Key = keywordModelData.Key ?? string.Empty;
                 result.TaxonomyId = keywordModelData.TaxonomyId;
 
                 return result;
@@ -517,17 +531,20 @@ namespace Sdl.Web.Tridion.R2Mapping
         private static string GetKeywordDisplayText(KeywordModelData keywordModelData)
             => string.IsNullOrEmpty(keywordModelData.Description) ? keywordModelData.Title : keywordModelData.Description;
 
-        private static string ResolveLinkUrl(EntityModelData entityModelData, Localization localization)
+        private static string GetLinkUrl(EntityModelData entityModelData, Localization localization)
         {
-            string componentUri =  localization.GetCmUri(entityModelData.Id);
+            if (entityModelData.LinkUrl != null)
+            {
+                return entityModelData.LinkUrl;
+            }
+
+            Log.Debug($"Link URL for Entity Model '{entityModelData.Id}' not resolved by Model Service.");
+            string componentUri = localization.GetCmUri(entityModelData.Id);
             return SiteConfiguration.LinkResolver.ResolveLink(componentUri);
         }
 
         private static object MapRichText(RichTextData richTextData, Type targetType, Localization localization)
         {
-            // TODO TSI-1267: Component Links resolving should be done in Model Service.
-            ResolveRichTextLinks(richTextData);
-
             IList<IRichTextFragment> fragments = new List<IRichTextFragment>();
             foreach (object fragment in richTextData.Fragments)
             {
@@ -557,62 +574,6 @@ namespace Sdl.Web.Tridion.R2Mapping
             }
 
             return richText.ToString();
-        }
-
-        private static void ResolveRichTextLinks(RichTextData richTextData)
-        {
-            // 1st pass: resolve Component Links and suppress hyperlink start tags if needed.
-            ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
-            List<string> suppressCompLinks = new List<string>();
-            for (int i = 0; i < richTextData.Fragments.Count; i++)
-            {
-                string htmlFragment = richTextData.Fragments[i] as string;
-                if (htmlFragment == null)
-                {
-                    // This is not an HTML fragment, but an embedded Entity Model.
-                    continue;
-                }
-
-                string resolvedHtmlFragment = _compLinkStartTagRegex.Replace(
-                    htmlFragment,
-                    match =>
-                    {
-                        string tcmUri = match.Groups["tcmUri"].Value;
-                        string resolvedLink = linkResolver.ResolveLink(tcmUri, resolveToBinary: true);
-                        if (!string.IsNullOrEmpty(resolvedLink))
-                        {
-                            return match.Groups["before"] + resolvedLink + match.Groups["after"];
-                        }
-                        Log.Warn($"Link to Component '{tcmUri}' did not resolve; suppressing hyperlink in rich text.");
-                        suppressCompLinks.Add(tcmUri);
-                        return string.Empty; // This suppresses the hyperlink start tag only; end tag will be done later.
-                    }
-                    );
-
-                richTextData.Fragments[i] = resolvedHtmlFragment;
-            }
-
-            // 2nd pass: remove the CompLink markers and suppress hyperlink end tags if needed.
-            for (int i = 0; i < richTextData.Fragments.Count; i++)
-            {
-                string htmlFragment = richTextData.Fragments[i] as string;
-                if (htmlFragment == null)
-                {
-                    // This is not an HTML fragment, but an embedded Entity Model.
-                    continue;
-                }
-
-                string resolvedHtmlFragment = _compLinkEndTagRegex.Replace(
-                    htmlFragment,
-                    match =>
-                    {
-                        string tcmUri = match.Groups["tcmUri"].Value;
-                        return suppressCompLinks.Contains(tcmUri) ? string.Empty : "</a>";
-                    }
-                    );
-
-                richTextData.Fragments[i] = resolvedHtmlFragment;
-            }
         }
 
         private static object MapEmbeddedFields(ContentModelData embeddedFields, Type targetType, SemanticSchemaField semanticSchemaField, string contextXPath, MappingData mappingData)
@@ -674,30 +635,6 @@ namespace Sdl.Web.Tridion.R2Mapping
 
             // Use standard model mapping to map the field to a list of strings.
             return (IEnumerable<string>) MapField(fieldValues, typeof(List<string>), null, mappingData);
-        }
-
-        private static IDictionary<string, string> ResolveMetaLinks(IDictionary<string, string> meta)
-        {
-            if (meta == null)
-            {
-                return null;
-            }
-
-            ILinkResolver linkResolver = SiteConfiguration.LinkResolver;
-
-            Dictionary<string, string> result = new Dictionary<string, string>(meta.Count);
-            foreach (KeyValuePair<string, string> kvp in meta)
-            {
-                // Remove CompLink markers
-                string resolvedValue = _compLinkEndTagRegex.Replace(kvp.Value, match => "</a>");
-
-                // Resolve Component TCM URIs
-                resolvedValue = _tcmUriRegex.Replace(resolvedValue, match => linkResolver.ResolveLink(match.Value, resolveToBinary: true));
-
-                result.Add(kvp.Key, resolvedValue);
-            }
-
-            return result;
         }
 
         private static Common.Models.MvcData CreateMvcData(DataModel.MvcData data, string defaultControllerName)

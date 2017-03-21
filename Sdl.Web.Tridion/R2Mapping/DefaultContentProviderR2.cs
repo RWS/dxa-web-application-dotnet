@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
-using Newtonsoft.Json;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
-using Sdl.Web.Tridion.ContentManager;
 using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.Query;
 using Sdl.Web.Tridion.Statics;
@@ -27,6 +24,8 @@ namespace Sdl.Web.Tridion.R2Mapping
     /// </summary>
     public class DefaultContentProviderR2 : IContentProvider, IRawDataProvider
     {
+        private readonly ModelServiceClient _modelService = new ModelServiceClient();
+
         /// <summary>
         /// Gets a Page Model for a given URL path.
         /// </summary>
@@ -39,17 +38,15 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             using (new Tracer(urlPath, localization, addIncludes))
             {
-                string canonicalUrlPath = GetCanonicalUrlPath(urlPath);
-
                 PageModel result = null;
                 if (CacheRegions.IsViewModelCachingEnabled)
                 {
                     PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                        $"{canonicalUrlPath}:{addIncludes}", // Cache Page Models with and without includes separately
+                        $"{urlPath}:{addIncludes}", // Cache Page Models with and without includes separately
                         CacheRegions.PageModel,
                         () =>
                         {
-                            PageModel pageModel = LoadPageModel(ref canonicalUrlPath, addIncludes, localization);
+                            PageModel pageModel = LoadPageModel(ref urlPath, addIncludes, localization);
                             if (pageModel.NoCache)
                             {
                                 result = pageModel;
@@ -67,7 +64,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 }
                 else
                 {
-                    result = LoadPageModel(ref canonicalUrlPath, addIncludes, localization);
+                    result = LoadPageModel(ref urlPath, addIncludes, localization);
                 }
 
                 if (SiteConfiguration.ConditionalEntityEvaluator != null)
@@ -79,74 +76,25 @@ namespace Sdl.Web.Tridion.R2Mapping
             }
         }
 
-
-        private static PageModel LoadPageModel(ref string urlPath, bool addIncludes, Localization localization)
+        private PageModel LoadPageModel(ref string urlPath, bool addIncludes, Localization localization)
         {
             using (new Tracer(urlPath, addIncludes, localization))
             {
-                string pageContent = GetPageContent(urlPath, localization);
-                if (pageContent == null)
+                PageModelData pageModelData = _modelService.GetPageModelData(urlPath, localization, addIncludes);
+
+                if (pageModelData == null)
                 {
-                    // This may be a SG URL path; try if the index page exists.
-                    urlPath += Constants.IndexPageUrlSuffix;
-                    pageContent = GetPageContent(urlPath, localization);
-                    if (pageContent == null)
-                    {
-                        throw new DxaItemNotFoundException(urlPath, localization.Id);
-                    }
+                    throw new DxaItemNotFoundException(urlPath);
                 }
 
-                PageModelData pageModelData = JsonConvert.DeserializeObject<PageModelData>(pageContent, DataModelBinder.SerializerSettings);
                 if (pageModelData.MvcData == null)
                 {
-                    Log.Warn("Unexpected Page Content: {0}", pageContent);
                     throw new DxaException($"Data Model for Page '{pageModelData.Title}' ({pageModelData.Id}) contains no MVC data. Ensure that the Page is published using the DXA R2 TBBs.");
                 }
 
-                PageModel result = ModelBuilderPipelineR2.CreatePageModel(pageModelData, addIncludes, localization);
-                result.Url = urlPath;  // TODO: generate canonical Page URL on CM-side (?)
-
-                return result;
+                return ModelBuilderPipelineR2.CreatePageModel(pageModelData, addIncludes, localization);
             }
         }
-
-        private static string GetPageContent(string urlPath, Localization localization)
-        {
-            using (new Tracer(urlPath, localization))
-            {
-                if (!urlPath.EndsWith(Constants.DefaultExtension) && !urlPath.EndsWith(".json"))
-                {
-                    urlPath += Constants.DefaultExtension;
-                }
-
-                string escapedUrlPath = Uri.EscapeUriString(urlPath);
-
-                global::Tridion.ContentDelivery.DynamicContent.Query.Query brokerQuery = new global::Tridion.ContentDelivery.DynamicContent.Query.Query
-                {
-                    Criteria = CriteriaFactory.And(new Criteria[]
-                    {
-                        new PageURLCriteria(escapedUrlPath),
-                        new PublicationCriteria(Convert.ToInt32(localization.Id)),
-                        new ItemTypeCriteria(64)
-                    })
-                };
-
-
-                string[] pageUris = brokerQuery.ExecuteQuery();
-                if (pageUris.Length == 0)
-                {
-                    return null;
-                }
-                if (pageUris.Length > 1)
-                {
-                    throw new DxaException($"Broker Query for Page URL path '{urlPath}' in Publication '{localization.Id}' returned {pageUris.Length} results.");
-                }
-
-                PageContentAssembler pageContentAssembler = new PageContentAssembler();
-                return pageContentAssembler.GetContent(pageUris[0]);
-            }
-        }
-
 
         /// <summary>
         /// Gets an Entity Model for a given Entity Identifier.
@@ -180,27 +128,16 @@ namespace Sdl.Web.Tridion.R2Mapping
             }
         }
 
-        private static EntityModel LoadEntityModel(string id, Localization localization)
+        private EntityModel LoadEntityModel(string id, Localization localization)
         {
             using (new Tracer(id, localization))
             {
-                string[] idParts = id.Split('-');
-                if (idParts.Length != 2)
+                EntityModelData entityModelData = _modelService.GetEntityModelData(id, localization);
+
+                if (entityModelData == null)
                 {
-                    throw new DxaException($"Invalid Entity Identifier '{id}'. Must be in format ComponentID-TemplateID.");
+                    throw new DxaItemNotFoundException(id);
                 }
-
-                string componentUri = localization.GetCmUri(idParts[0]);
-                string templateUri = localization.GetCmUri(idParts[1], (int) ItemType.ComponentTemplate);
-
-                ComponentPresentationFactory cpFactory = new ComponentPresentationFactory(componentUri);
-                ComponentPresentation dcp = cpFactory.GetComponentPresentation(componentUri, templateUri);
-                if (dcp == null)
-                {
-                    throw new DxaItemNotFoundException(id, localization.Id);
-                }
-
-                EntityModelData entityModelData = JsonConvert.DeserializeObject<EntityModelData>(dcp.Content, DataModelBinder.SerializerSettings);
 
                 EntityModel result = ModelBuilderPipelineR2.CreateEntityModel(entityModelData, null, localization);
 
@@ -267,10 +204,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             }
         }
 
-        string IRawDataProvider.GetPageContent(string urlPath, Localization localization)
-            => GetPageContent(urlPath, localization);
-
-        private static EntityModelData CreateEntityModelData(IComponentMeta componentMeta)
+        private EntityModelData CreateEntityModelData(IComponentMeta componentMeta)
         {
             ContentModelData standardMeta = new ContentModelData();
             foreach (DictionaryEntry entry in componentMeta.CustomMeta.NameValues)
@@ -297,22 +231,40 @@ namespace Sdl.Web.Tridion.R2Mapping
             };
         }
 
-        private static string GetCanonicalUrlPath(string urlPath)
+        string IRawDataProvider.GetPageContent(string urlPath, Localization localization)
         {
-            string result = urlPath ?? Constants.IndexPageUrlSuffix;
-            if (!result.StartsWith("/"))
+            // TODO: let the DXA Model Service provide raw Page Content too (?)
+            using (new Tracer(urlPath, localization))
             {
-                result = "/" + result;
+                if (!urlPath.EndsWith(Constants.DefaultExtension) && !urlPath.EndsWith(".json"))
+                {
+                    urlPath += Constants.DefaultExtension;
+                }
+                string escapedUrlPath = Uri.EscapeUriString(urlPath);
+                global::Tridion.ContentDelivery.DynamicContent.Query.Query brokerQuery = new global::Tridion.ContentDelivery.DynamicContent.Query.Query
+                {
+                    Criteria = CriteriaFactory.And(new Criteria[]
+                    {
+                        new PageURLCriteria(escapedUrlPath),
+                        new PublicationCriteria(Convert.ToInt32(localization.Id)),
+                        new ItemTypeCriteria(64)
+                    })
+                };
+
+                string[] pageUris = brokerQuery.ExecuteQuery();
+                if (pageUris.Length == 0)
+                {
+                    return null;
+                }
+                if (pageUris.Length > 1)
+                {
+                    throw new DxaException($"Broker Query for Page URL path '{urlPath}' in Publication '{localization.Id}' returned {pageUris.Length} results.");
+                }
+
+                PageContentAssembler pageContentAssembler = new PageContentAssembler();
+                return pageContentAssembler.GetContent(pageUris[0]);
             }
-            if (result.EndsWith("/"))
-            {
-                result += Constants.DefaultExtensionLessPageName;
-            }
-            else if (result.EndsWith(Constants.DefaultExtension))
-            {
-                result = result.Substring(0, result.Length - Constants.DefaultExtension.Length);
-            }
-            return result;
         }
+
     }
 }

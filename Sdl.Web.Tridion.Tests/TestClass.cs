@@ -5,6 +5,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Delivery.Core;
+using Sdl.Web.Delivery.Model.Meta;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -13,6 +15,12 @@ namespace Sdl.Web.Tridion.Tests
     /// </summary>
     public abstract class TestClass
     {
+        static TestClass()
+        {
+            // HACK: due to a bug/assumption in the CIL we need to force loading types here
+            TypeLoader.FindConcreteType(typeof(IBinaryMeta));
+        }
+
         protected static void DefaultInitialize(TestContext testContext)
         {
             Log.Info("==== {0} ====", testContext.FullyQualifiedTestClassName);

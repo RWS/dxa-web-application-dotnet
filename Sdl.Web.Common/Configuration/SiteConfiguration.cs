@@ -79,14 +79,6 @@ namespace Sdl.Web.Common.Configuration
         /// </summary>
         public static IMediaHelper MediaHelper  { get; private set; }
 
-#pragma warning disable 618
-        /// <summary>
-        /// Gets the Static File Manager used for serializing and accessing static files published from the CMS (config/resources/HTML design assets etc.)
-        /// </summary>
-        [Obsolete("Deprecated in DXA 1.1. Use ContentProvider.GetStaticContentItem to get static content.")]
-        public static IStaticFileManager StaticFileManager { get;  private set; }
-#pragma warning restore 618
-
         /// <summary>
         /// Gets the Localization Resolver used for mapping URLs to Localizations.
         /// </summary>
@@ -133,9 +125,6 @@ namespace Sdl.Web.Common.Configuration
                 ConditionalEntityEvaluator = GetProvider<IConditionalEntityEvaluator>(dependencyResolver, isOptional: true);
                 MediaHelper = GetProvider<IMediaHelper>(dependencyResolver);
                 LocalizationResolver = GetProvider<ILocalizationResolver>(dependencyResolver);
-#pragma warning disable 618
-                StaticFileManager = GetProvider<IStaticFileManager>(dependencyResolver, isOptional: true);
-#pragma warning restore 618
                 UnknownLocalizationHandler = GetProvider<IUnknownLocalizationHandler>(dependencyResolver, isOptional: true);
             }
         }
@@ -258,15 +247,8 @@ namespace Sdl.Web.Common.Configuration
         {
             return prefix + Guid.NewGuid().ToString("N");
         }
-        
-        #region Thread Safe Settings Update Helper Methods
 
-        [Obsolete("Deprecated in DXA 1.1. Use the overload that takes a Localization instance.")]
-        public static bool CheckSettingsNeedRefresh(string type, string localizationId)
-        {
-            return CheckSettingsNeedRefresh(type, LocalizationResolver.GetLocalization(localizationId));
-        }
-        
+        #region Thread Safe Settings Update Helper Methods
         public static bool CheckSettingsNeedRefresh(string type, Localization localization) // TODO: Move to class Localization
         {
             Dictionary<string, DateTime> localizationRefreshStates;
@@ -322,151 +304,5 @@ namespace Sdl.Web.Common.Configuration
         }
 
         #endregion
-
-
-        #region Obsolete 
-        /// <summary>
-        /// Gets the include Page URLs for a given Page Type and Localization.
-        /// </summary>
-        /// <param name="pageTypeIdentifier">The Page Type Identifier.</param>
-        /// <param name="localization">The Localization</param>
-        /// <returns>The URLs of Include Pages</returns>
-        /// <remarks>
-        /// The concept of Include Pages will be removed in a future version of DXA.
-        /// As of DXA 1.1 Include Pages are represented as <see cref="Sdl.Web.Common.Models.PageModel.Regions"/>.
-        /// Implementations should avoid using this method directly.
-        /// </remarks>
-        [Obsolete("Deprecated in DXA 1.3. Use Localization.GetIncludePageUrls instead (avoid using this method in general).")]
-        public static IEnumerable<string> GetIncludePageUrls(string pageTypeIdentifier, Localization localization)
-        {
-            using (new Tracer(pageTypeIdentifier, localization))
-            {
-                return localization.GetIncludePageUrls(pageTypeIdentifier);
-            }
-        }
-
-        /// <summary>
-        /// A registry of View Path -> View Model Type mappings to enable the correct View Model to be mapped for a given View
-        /// </summary>
-        [Obsolete("Dropped in DXA 1.1. Use ModelTypeRegistry.GetViewModelType instead.", true)]
-        public static Dictionary<string, Type> ViewModelRegistry
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Adds a View->View Model Type mapping to the view model registry
-        /// </summary>
-        /// <param name="viewData">The View Data used to determine the registry key and model type</param>
-        /// <param name="viewPath">The path to the view</param>
-        [Obsolete("Method is deprecated in DXA 1.1. Use BaseAreaRegistration.RegisterViewModel instead.")]
-        public static void AddViewModelToRegistry(MvcData viewData, string viewPath)
-        {
-            ModelTypeRegistry.RegisterViewModel(viewData, viewPath);
-        }
-
-        [Obsolete("Method is deprecated in DXA 1.1. Use ModelTypeRegistry instead.")]
-        public static string GetViewModelRegistryKey(MvcData mvcData)
-        {
-            return String.Format("{0}:{1}:{2}", mvcData.AreaName, mvcData.ControllerName, mvcData.ViewName);
-        }
-
-        [Obsolete("Method is deprecated in DXA 1.1. Use BaseAreaRegistration.RegisterViewModel instead.")]
-        public static void AddViewModelToRegistry(MvcData mvcData, Type modelType)
-        {
-            ModelTypeRegistry.RegisterViewModel(mvcData, modelType);
-        }
-
-
-        /// <summary>
-        /// Gets a (localized) configuration setting
-        /// </summary>
-        /// <param name="key">The configuration key, in the format "section.name" (eg "Environment.CmsUrl")</param>
-        /// <param name="localization">The localization to get config for</param>
-        /// <returns>The configuration matching the key for the given localization</returns>
-        [Obsolete("Deprecated in DXA 1.1 Use Localization.GetConfigValue instead.")]
-        public static string GetConfig(string key, Localization localization)
-        {
-            using (new Tracer(key, localization))
-            {
-                return localization.GetConfigValue(key);
-            }
-
-        }
-
-        [Obsolete("Dropped in DXA 1.1. Use Localization.GetConfigValue instead.", error: true)]
-        public static string GetConfig(string key)
-        {
-            return null;
-        }
-
-        [Obsolete("Dropped in DXA 1.1. Use Localization.Refresh instead.", error: true)]
-        public static void Refresh(Localization localization = null)
-        {
-        }
-
-
-        [Obsolete("Use Localization.IsStaging property of current localization (eg via WebRequestContext.Localization.IsStaging)", true)]
-        public static bool IsStaging { get; set; }
-        
-        [Obsolete("There is no longer the concept of a global default localization. The Localization.IsDefaultLocalization property can help you find if a localization is the default for its site.", true)]
-        public static string DefaultLocalization { get; private set; }
-
-        [Obsolete("Configuration should not be access directly, but rather via the GetConfig(string, Localization) method.", true)]
-        public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LocalConfiguration { get; set; }
-
-        [Obsolete("Configuration should not be access directly, but rather via the GetConfig(string, Localization) method. There is also no longer a concept of Global Configuration, all configuration is local to a particular localization.", true)]
-        public static Dictionary<string, Dictionary<string, Dictionary<string, string>>> GlobalConfiguration { get; set; }
-
-        [Obsolete("Settings refresh is now applied at a localization level, rather than globally", true)]
-        public static DateTime LastSettingsRefresh { get; set; }
-
-        [Obsolete("Use Localization.MediaUrlRegex property of current localization (eg via WebRequestContext.Localization.IsStaging)", true)]
-        public static string MediaUrlRegex { get; set; }
-
-        [Obsolete("GetGlobalConfig(string,string) is deprecated, please use GetConfig(string, Localization) by combining the key and module parameters in the format {module.key} (eg core.schemas.article)", true)]
-        public static string GetGlobalConfig(string key, string module = CoreModuleName)
-        {
-            return null;
-        }
-
-        [Obsolete("Use Version property of current Localization instead. Eg WebRequestContext.Localization.Version.", true)]
-        public static string SiteVersion { get; set; }
-
-        [Obsolete("Configuration is now lazy loaded on demand per localization, so there is no need to call Load.", true)]
-        public static void Load(string applicationRoot)
-        {
-        }
-
-        [Obsolete("Localizations are now loaded on demand in the web application so this is no longer required", true)]
-        public static void SetLocalizations(List<Dictionary<string, string>> localizations)
-        {
-        }
-
-        [Obsolete("Localizations are now loaded on demand in the web application so this is no longer required", true)]
-        public static void Initialize(List<Dictionary<string, string>> localizationList)
-        {            
-        }
-
-        [Obsolete("Localizations are now loaded on demand in the web application so this is no longer available. Use the SiteConfiguration.LocalizationResolver.GetLocalizationByUri or GetLocalizationById methods", true)]
-        public static Dictionary<string, Localization> Localizations { get; set; }
-
-        /// <summary>
-        /// Gets a XPM region by name.
-        /// </summary>
-        /// <param name="name">The region name</param>
-        /// <param name="loc"></param>
-        /// <returns>The XPM region matching the name for the given module</returns>
-        [Obsolete("Deprecated in DXA 1.3. Use Localization.GetXpmRegionConfiguration instead.")]
-        public static XpmRegion GetXpmRegion(string name, Localization loc)
-        {
-            using (new Tracer(name, loc))
-            {
-                return loc.GetXpmRegionConfiguration(name);
-            }
-        }
-        #endregion
-
     }
 }

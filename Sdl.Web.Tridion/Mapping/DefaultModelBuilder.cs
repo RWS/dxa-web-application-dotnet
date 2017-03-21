@@ -126,11 +126,6 @@ namespace Sdl.Web.Tridion.Mapping
                             includePageRegion.Regions.UnionWith(includePageModel.Regions);
                             regions.Add(includePageRegion);
                         }
-
-#pragma warning disable 618
-                        // Legacy WebPage.Includes support:
-                        pageModel.Includes.Add(includePage.Title, includePageModel);
-#pragma warning restore 618
                     }
 
                     if (pageModel.MvcData.ViewName != "IncludePage")

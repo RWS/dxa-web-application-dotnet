@@ -351,6 +351,31 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(999.99, pageKeyword.NumberProperty, "pageKeyword.NumberProperty");
         }
 
+        [TestMethod]
+        [Ignore] // See TSI-2362
+        public void GetPageModel_KeywordExpansion_Success() // See TSI-2316 (only applies to R2 Model mapping)
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2316PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Tsi2316TestEntity testEntity = (Tsi2316TestEntity) pageModel.Regions["Main"].Entities[0];
+
+            AssertValidKeywordModel(testEntity.NotPublishedKeyword, "Facebook", string.Empty, "facebook", "testEntity.NotPublishedKeyword");
+            AssertValidKeywordModel(testEntity.PublishedKeyword, "TSI-2316 Test Keyword", "Published Keyword with metadata", "TSI-2316", "testEntity.NotPublishedKeyword");
+
+            Tsi2316TestKeyword publishedKeyword = testEntity.PublishedKeyword;
+            Assert.AreEqual("This is a text field", publishedKeyword.TextField, "publishedKeyword.TextField");
+            Assert.AreEqual(666.666, publishedKeyword.NumberField, "publishedKeyword.NumberField");
+            Assert.AreEqual(new DateTime(1970, 12, 16), publishedKeyword.NumberField, "publishedKeyword.NumberField");
+            Assert.AreEqual("TODO", publishedKeyword.CompLinkField, "publishedKeyword.CompLinkField");
+            Assert.IsNotNull(publishedKeyword.KeywordField, "publishedKeyword.KeywordField");
+            Assert.AreEqual("Keyword 1.1", publishedKeyword.KeywordField.Title, "publishedKeyword.KeywordField");
+        }
+
         private static void AssertValidKeywordModel(KeywordModel keywordModel, string expectedTitle, string expectedDescription, string expectedKey, string subjectName)
         {
             Assert.IsNotNull(keywordModel, subjectName);
@@ -493,6 +518,43 @@ namespace Sdl.Web.Tridion.Tests
 
             Tsi2285PageModel customPageModel = pageModel as Tsi2285PageModel;
             Assert.IsNotNull(customPageModel, "customPageModel");
+        }
+
+        [TestMethod]
+        public void GetPageModel_ComponentLinks_Success()
+        {
+            const int expectedNumberOfLinks = 2;
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ComponentLinkTestPageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            CompLinkTest testEntity = pageModel.Regions["Main"].Entities[0] as CompLinkTest;
+            Assert.IsNotNull(testEntity, "testEntity");
+            Assert.IsNotNull(testEntity.CompLinkAsEntityModel, "testEntity.CompLinkAsEntityModel");
+            Assert.IsNotNull(testEntity.CompLinkAsString, "testEntity.CompLinkAsString");
+            Assert.IsNotNull(testEntity.CompLinkAsLink, "testEntity.CompLinkAsLink");
+            Assert.AreEqual(expectedNumberOfLinks, testEntity.CompLinkAsEntityModel.Count, "testEntity.CompLinkAsEntityModel.Count");
+            Assert.AreEqual(expectedNumberOfLinks, testEntity.CompLinkAsString.Count, "testEntity.CompLinkAsString.Count");
+            Assert.AreEqual(expectedNumberOfLinks, testEntity.CompLinkAsLink.Count, "testEntity.CompLinkAsLink.Count");
+
+            Article linkedArticle = testEntity.CompLinkAsEntityModel[0] as Article;
+            Assert.IsNotNull(linkedArticle, "linkedArticle");
+            Assert.AreEqual("Test Article used for Automated Testing (Sdl.Web.Tridion.Tests)", linkedArticle.Headline, "linkedArticle.Headline");
+
+            TestEntity linkedTestEntity = testEntity.CompLinkAsEntityModel[1] as TestEntity;
+            Assert.IsNotNull(linkedTestEntity, "linkedTestEntity");
+            Assert.IsNotNull(linkedTestEntity.SingleLineTextField, "linkedTestEntity.SingleLineTextField");
+            Assert.AreEqual(2, linkedTestEntity.SingleLineTextField.Count, "linkedTestEntity.SingleLineTextField.Count");
+            Assert.AreEqual("This is a single line text field", linkedTestEntity.SingleLineTextField[0]);
+            Assert.IsNotNull(linkedTestEntity.MultiLineTextField, "linkedTestEntity.MultiLineTextField");
+            Assert.AreEqual(1, linkedTestEntity.MultiLineTextField.Count, "linkedTestEntity.MultiLineTextField.Count");
+
+            Link articleLink = testEntity.CompLinkAsLink[0];
+            Assert.IsNotNull(articleLink.Id, "articleLink.Id");
+            Assert.AreEqual($"{TestLocalization.Path}/test_article_dynamic", articleLink.Url, "articleLink.Url");
         }
 
         [TestMethod]

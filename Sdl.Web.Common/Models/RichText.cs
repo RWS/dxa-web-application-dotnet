@@ -78,24 +78,6 @@ namespace Sdl.Web.Common.Models
         {
             return (richText == null) || richText.IsEmpty();
         }
-
-        #region Operator overloads
-
-        /// <summary>
-        /// Implicit cast to string
-        /// </summary>
-        /// <param name="richText">The <see cref="RichText"/> instance to be cast to string.</param>
-        /// <returns>A string containing the richt text as HTML.</returns>
-        /// <remarks>
-        /// This implicit cast operator facilitates migration of View Model properties from type string to <see cref="RichText"/>: code that still assumes it is a string will still work.
-        /// However, it should be avoided. The reason to use type <see cref="RichText"/> in the View Model is to be able to use Html.DxaRichText in the View code.
-        /// </remarks>
-        [Obsolete("Implicit cast from type RichText to string. Use Html.DxaRichText or RichText.IsNullOrEmpty in view code.")]
-        public static implicit operator string(RichText richText)
-        {
-            return (richText == null) ? null : richText.ToString();
-        }
-        #endregion
     }
 
     /// <summary>

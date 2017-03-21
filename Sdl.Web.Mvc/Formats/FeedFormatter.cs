@@ -12,12 +12,6 @@ namespace Sdl.Web.Mvc.Formats
     /// </summary>
     public abstract class FeedFormatter : BaseFormatter
     {
-        [Obsolete("Deprecated in DXA 1.6. Use ExtractSyndicationFeed instead.")]
-        protected SyndicationFeed GetData(object model)
-        {
-            return ExtractSyndicationFeed(model as PageModel);
-        }
-
         /// <summary>
         /// Extracts a syndication feed from a given View Model.
         /// </summary>

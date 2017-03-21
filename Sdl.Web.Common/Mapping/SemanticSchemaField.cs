@@ -112,17 +112,6 @@ namespace Sdl.Web.Common.Mapping
         }
 
         /// <summary>
-        /// Check if current field contains given semantics.
-        /// </summary>
-        /// <param name="fieldSemantics">The semantics to check against</param>
-        /// <returns>True if this field contains given semantics, false otherwise</returns>
-        [Obsolete("Deprecated in DXA 1.6. Use HasSemantics instead.")]
-        public bool ContainsSemantics(FieldSemantics fieldSemantics)
-        {
-            return HasSemantics(fieldSemantics);
-        }
-
-        /// <summary>
         /// Check if current field has given semantics.
         /// </summary>
         /// <param name="fieldSemantics">The semantics to check against</param>

@@ -53,15 +53,17 @@ namespace Sdl.Web.Tridion.R2Mapping
                             IEntityModelBuilder entityModelBuilder = modelBuilder as IEntityModelBuilder;
                             if ((pageModelBuilder == null) && (entityModelBuilder == null))
                             {
-                                Log.Error($"Configured Model Builder Type '{modelBuilderType.FullName}' does not implement IPageModelBuilder nor IEntityModelBuilder; skipping.");
+                                Log.Warn($"Configured Model Builder Type '{modelBuilderType.FullName}' does not implement IPageModelBuilder nor IEntityModelBuilder; skipping.");
                                 continue;
                             }
                             if (pageModelBuilder != null)
                             {
+                                Log.Info($"Using Page Model Builder Type '{modelBuilderType.FullName}'");
                                 pageModelBuilders.Add(pageModelBuilder);
                             }
                             if (entityModelBuilder != null)
                             {
+                                Log.Info($"Using Entity Model Builder Type '{modelBuilderType.FullName}'");
                                 entityModelBuilders.Add(entityModelBuilder);
                             }
                         }
@@ -82,10 +84,12 @@ namespace Sdl.Web.Tridion.R2Mapping
                     DefaultModelBuilderR2 defaultModelBuilder = new DefaultModelBuilderR2();
                     if (!pageModelBuilders.Any())
                     {
+                        Log.Warn($"No Page Model Builders configured; using '{defaultModelBuilder.GetType().FullName}' only.");
                         pageModelBuilders.Add(defaultModelBuilder);
                     }
                     if (!entityModelBuilders.Any())
                     {
+                        Log.Warn($"No Entity Model Builders configured; using '{defaultModelBuilder.GetType().FullName}' only.");
                         entityModelBuilders.Add(defaultModelBuilder);
                     }
                 }

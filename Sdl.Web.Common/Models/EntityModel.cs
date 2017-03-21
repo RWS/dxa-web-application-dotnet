@@ -9,57 +9,8 @@ namespace Sdl.Web.Common.Models
     /// Abstract base class for View Models for Entities.
     /// </summary>
     [Serializable]
-#pragma warning disable 618
-    public abstract class EntityModel : ViewModel, IRichTextFragment, IEntity
-#pragma warning restore 618
+    public abstract class EntityModel : ViewModel, IRichTextFragment
     {
-        #region IEntity members (obsolete)
-        [SemanticProperty(IgnoreMapping = true)]
-        [JsonIgnore]
-        [Obsolete("Deprecated in DXA 1.1. Use property XpmMetadata instead.")]
-        public Dictionary<string, string> EntityData
-        {
-            get
-            {
-                return XpmMetadata as Dictionary<string, string>;
-            }
-            set
-            {
-                throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property XpmMetadata instead.");
-            }
-        }
-
-        [SemanticProperty(IgnoreMapping = true)]
-        [JsonIgnore]
-        [Obsolete("Deprecated in DXA 1.1. Use property XpmPropertyMetadata instead.")]
-        public Dictionary<string, string> PropertyData
-        {
-            get
-            {
-                return XpmPropertyMetadata as Dictionary<string, string>;
-            }
-            set
-            {
-                throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property XpmPropertyMetadata instead.");
-            }
-        }
-
-        [SemanticProperty(IgnoreMapping = true)]
-        [JsonIgnore]
-        [Obsolete("Deprecated in DXA 1.1. Use property MvcData instead.")]
-        public MvcData AppData
-        {
-            get
-            {
-                return MvcData;
-            }
-            set
-            {
-                throw new NotSupportedException("Setting this property is not supported in DXA 1.1. Use property MvcData instead.");
-            }
-        }
-        #endregion
-
         /// <summary>
         /// Gets or sets the identifier for the Entity.
         /// </summary>
@@ -68,21 +19,13 @@ namespace Sdl.Web.Common.Models
         /// Therefore, <see cref="Id"/> can be <c>null</c>.
         /// </remarks>
         [SemanticProperty(IgnoreMapping = true)]
-        public string Id
-        {
-            get;
-            set;
-        }
+        public string Id { get; set; }
 
         /// <summary>
         /// Gets or sets metadata used to render XPM property markup.
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
-        public IDictionary<string, string> XpmPropertyMetadata
-        {
-            get;
-            set;
-        }
+        public IDictionary<string, string> XpmPropertyMetadata { get; set; }
 
         #region IRichTextFragment Members
 
@@ -102,9 +45,9 @@ namespace Sdl.Web.Common.Models
         public virtual string ToHtml()
         {
             throw new NotSupportedException(
-                string.Format("Direct rendering of View Model type '{0}' to HTML is not supported." + 
+                string.Format("Direct rendering of View Model type '{0}' to HTML is not supported." +
                 " Consider using View Model property of type RichText in combination with @Html.DxaRichText() in view code to avoid direct rendering to HTML." +
-                " Alternatively, override method {0}.ToHtml().", 
+                " Alternatively, override method {0}.ToHtml().",
                 GetType().FullName)
                 );
         }
@@ -119,10 +62,8 @@ namespace Sdl.Web.Common.Models
         /// <remarks>
         /// If this method is overridden in a subclass, it will be possible to render "embedded" Entity Models of that type using the Html.DxaEntity method.
         /// </remarks>
-        public virtual MvcData GetDefaultView(Localization localization)
-        {
-            return null;
-        }
+        public virtual MvcData GetDefaultView(Localization localization) => null;
+
         #endregion
 
         #region Overrides
@@ -133,9 +74,7 @@ namespace Sdl.Web.Common.Models
         /// <param name="localization">The context Localization.</param>
         /// <returns>The XPM markup.</returns>
         public override string GetXpmMarkup(Localization localization)
-        {
-            return (XpmMetadata == null) ? string.Empty : string.Format("<!-- Start Component Presentation: {0} -->", JsonConvert.SerializeObject(XpmMetadata));
-        }
+            => (XpmMetadata == null) ? string.Empty : $"<!-- Start Component Presentation: {JsonConvert.SerializeObject(XpmMetadata)} -->";
 
         /// <summary>
         /// Determines whether the specified object is equal to the current Entity Model.
@@ -161,9 +100,7 @@ namespace Sdl.Web.Common.Models
         /// A hash code for the current Entity Model.
         /// </returns>
         public override int GetHashCode()
-        {
-            return (Id == null) ? base.GetHashCode() : Id.GetHashCode();
-        }
+            => (Id == null) ? base.GetHashCode() : Id.GetHashCode();
 
         /// <summary>
         /// Returns a string that represents the current object.
@@ -172,9 +109,7 @@ namespace Sdl.Web.Common.Models
         /// A string containing the type and identifier of the Entity.
         /// </returns>
         public override string ToString()
-        {
-            return (Id == null) ? GetType().Name : String.Format("{0}: {1}", GetType().Name, Id);
-        }
+            => (Id == null) ? GetType().Name : $"{GetType().Name}: {Id}";
 
         /// <summary>
         /// Creates a deep copy of this View Model.

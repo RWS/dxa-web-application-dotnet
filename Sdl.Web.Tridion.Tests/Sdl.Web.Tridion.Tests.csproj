@@ -44,6 +44,14 @@
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Sdl.Web.Delivery.Core, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Sdl.Web.Delivery.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.Delivery.Model, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Sdl.Web.Delivery.Model.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.XML" />
@@ -73,9 +81,12 @@
     <Compile Include="Models\Entity\MediaManagerDistribution.cs" />
     <Compile Include="Models\Entity\Paragraph.cs" />
     <Compile Include="Models\Entity\Teaser.cs" />
+    <Compile Include="Models\Entity\TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi1757TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi1946TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi1758TestEntity.cs" />
+    <Compile Include="Models\Entity\CompLinkTest.cs" />
+    <Compile Include="Models\Entity\Tsi2316TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi811TestEntity.cs" />
     <Compile Include="Models\Page\Tsi2285PageModel.cs" />
     <Compile Include="Models\Page\Tsi811PageModel.cs" />

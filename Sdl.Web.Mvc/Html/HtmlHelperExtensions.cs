@@ -68,21 +68,6 @@ namespace Sdl.Web.Mvc.Html
         }
 
         /// <summary>
-        /// Read a configuration value
-        /// </summary>
-        /// <param name="htmlHelper">HtmlHelper</param>
-        /// <param name="configName">The config key (eg core.cmsUrl)</param>
-        /// <returns>The config value</returns>
-        [Obsolete("Deprecated in DXA 1.1. Use Localization.GetConfigValue instead.")]
-        public static string Config(this HtmlHelper htmlHelper, string configName)
-        {
-            using (new Tracer(htmlHelper, configName))
-            {
-                return WebRequestContext.Localization.GetConfigValue(configName);
-            }
-        }
-
-        /// <summary>
         /// Read a resource value
         /// </summary>
         /// <param name="htmlHelper">HtmlHelper</param>
@@ -146,57 +131,6 @@ namespace Sdl.Web.Mvc.Html
             }
 
             return string.Format("{0} {1}", Math.Ceiling(len), sizes[order]);
-        }
-
-        /// <summary>
-        /// Write out an img tag with a responsive image url
-        /// </summary>
-        /// <param name="helper"></param>
-        /// <param name="image">The image to write out</param>
-        /// <param name="aspect">The aspect ratio for the image</param>
-        /// <param name="widthFactor">The factor to apply to the width - can be % (eg "100%") or absolute (eg "120")</param>
-        /// <param name="cssClass">Css class to apply to img tag</param>
-        /// <param name="containerSize">The size (in grid column units) of the containing element</param>
-        /// <returns>Complete img tag with all required attributes</returns>
-        [Obsolete("Deprecated in DXA 1.6. Use @Html.Media instead.")]      
-        public static MvcHtmlString Image(this HtmlHelper helper, MediaItem image, string widthFactor, double aspect, string cssClass = null, int containerSize = 0)
-        {
-            return Media(helper, image, widthFactor, aspect, cssClass, containerSize);
-        }
-
-        /// <summary>
-        /// Write out an youtube video item
-        /// </summary>
-        /// <param name="helper"></param>
-        /// <param name="video">The video item to write out</param>
-        /// <param name="widthFactor">The factor to apply to the width - can be % (eg "100%") or absolute (eg "120")</param>
-        /// <param name="aspect">The aspect ratio for the video</param>
-        /// <param name="cssClass">Css class to apply</param>
-        /// <param name="containerSize">The size (in grid column units) of the containing element</param>
-        /// <returns>Complete video markup with all required attributes</returns>
-        [Obsolete("Deprecated in DXA 1.1. This method renders HTML which may have to be customized. Use Html.DxaEntity to render the YouTubeVideo Model with an appropriate View instead.")]
-        public static MvcHtmlString YouTubeVideo(this HtmlHelper helper, MediaItem video, string widthFactor, double aspect, string cssClass, int containerSize)
-        {
-            return Media(helper, video, widthFactor, aspect, cssClass, containerSize);           
-        }
-
-        /// <summary>
-        /// Write out a download link
-        /// </summary>
-        /// <param name="helper"></param>
-        /// <param name="download">The download item to render</param>
-        /// <returns></returns>
-        [Obsolete("Deprecated in DXA 1.1. This method renders HTML which may have to be customized. Use Html.DxaEntity to render the Download Model with an appropriate View instead.")]
-        public static MvcHtmlString Download(this HtmlHelper helper, MediaItem download)
-        {
-            using (new Tracer(helper, download))
-            {
-                if (download == null)
-                {
-                    return MvcHtmlString.Empty;
-                }
-                return new MvcHtmlString(download.ToHtml(null));
-            }
         }
 
         /// <summary>
@@ -663,41 +597,6 @@ namespace Sdl.Web.Mvc.Html
 
             return new MvcHtmlString(htmlBuilder.ToString());
         }
-
-
-        #region Obsolete
-
-        [Obsolete("Not supported in DXA 1.1. Use Html.Media or YouTubeVideo.ToHtml instead.", error: true)]
-        public static string GetYouTubeEmbed(string videoId, string cssClass = null)
-        {
-            throw new NotSupportedException("Not supported in DXA 1.1. Use Html.Media or YouTubeVideo.ToHtml instead.");
-        }
-
-        [Obsolete("Not supported in DXA 1.1. Use Html.Media or YouTubeVideo.ToHtml instead.", error: true)]
-        public static string GetYouTubePlaceholder(string videoId, string imageUrl, string altText = null, string cssClass = null, string elementName = "div", bool xmlCompliant = false)
-        {
-            throw new NotSupportedException("Not supported in DXA 1.1. Use Html.Media or YouTubeVideo.ToHtml instead.");
-        }
-
-        [Obsolete("Deprecated in DXA 1.1. Use Url.ResponsiveImage instead.")]
-        public static string GetResponsiveImageUrl(string url)
-        {
-            return GetResponsiveImageUrl(url, SiteConfiguration.MediaHelper.DefaultMediaFill);
-        }
-
-        [Obsolete("Deprecated in DXA 1.1. Use Url.ResponsiveImage instead.")]
-        public static string GetResponsiveImageUrl(string url, double aspect, int containerSize = 0)
-        {
-            return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(url, aspect, SiteConfiguration.MediaHelper.DefaultMediaFill, containerSize);
-        }
-
-        [Obsolete("Deprecated in DXA 1.1. Use Url.ResponsiveImage instead.")]
-        public static string GetResponsiveImageUrl(string url, string widthFactor, int containerSize = 0)
-        {
-            return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(url, SiteConfiguration.MediaHelper.DefaultMediaAspect, widthFactor, containerSize);
-        }
-
-        #endregion
 
         /// <summary>
         /// Gets the Regions from a Page or Region Model.

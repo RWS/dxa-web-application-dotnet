@@ -24,6 +24,7 @@ namespace Sdl.Web.Tridion.Tests
 
         internal const string ArticlePageRelativeUrlPath = "test_article_page";
         internal const string ArticleDynamicPageRelativeUrlPath = "test_article_dynamic";
+        internal const string ComponentLinkTestPageRelativeUrlPath = "comp_link_test_page";
         internal const string MediaManagerTestPageRelativeUrlPath = "mm_test.html";
         internal const string SmartTargetTestPageRelativeUrlPath = "smoke/smart-target-smoke-test";
         internal const string ContextExpressionsTestPageRelativeUrlPath = "smoke/context-expression-smoke-test";
@@ -44,11 +45,13 @@ namespace Sdl.Web.Tridion.Tests
         internal const string Tsi2277Page2RelativeUrlPath = "regression/tsi-2277-2";
         internal const string Tsi2285PageRelativeUrlPath = "regression/tsi-2285";
         internal const string Tsi2287PageRelativeUrlPath = "system/include/header";
+        internal const string Tsi2316PageRelativeUrlPath = "regression/tsi-2316";
 
         private static readonly IEnumerable<Localization> _testLocalizations;
         private static readonly Localization _parentLocalization;
         private static readonly Localization _childLocalization;
         private static readonly Localization _r2TestLocalization;
+        private static readonly Localization _r2TestChildLocalization;
 
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
@@ -85,7 +88,13 @@ namespace Sdl.Web.Tridion.Tests
                 Path = "/autotest-r2"
             };
 
-            _testLocalizations = new[] { _parentLocalization, _childLocalization, _r2TestLocalization };
+            _r2TestChildLocalization = new Localization
+            {
+                Id = "1083",
+                Path = "/autotest-child-r2"
+            };
+
+            _testLocalizations = new[] { _parentLocalization, _childLocalization, _r2TestLocalization, _r2TestChildLocalization };
 
             TestRegistration.RegisterViewModels();
         }

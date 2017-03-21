@@ -13,7 +13,6 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Statics;
-using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.ContentManager;
 using Sdl.Web.Tridion.Query;
 using Tridion.ContentDelivery.Meta;
@@ -28,46 +27,6 @@ namespace Sdl.Web.Tridion.Mapping
     public class DefaultContentProvider : IContentProvider, IRawDataProvider
     {
         #region IContentProvider members
-#pragma warning disable 618
-        [Obsolete("Deprecated in DXA 1.1. Use SiteConfiguration.LinkResolver or SiteConfiguration.RichTextProcessor to get the new extension points.")]
-        public IContentResolver ContentResolver
-        {
-            get
-            {
-                return new LegacyContentResolverFacade();
-            }
-            set
-            {
-                throw new NotSupportedException("Setting this property is not supported in DXA 1.1.");
-            }
-        }
-
-        /// <summary>
-        /// Gets a Page Model for a given URL.
-        /// </summary>
-        /// <param name="urlPath">The URL.</param>
-        /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
-        /// <returns>The Page Model.</returns>
-        [Obsolete("Deprecated in DXA 1.1. Use the overload that has a Localization parameter.")]
-        public PageModel GetPageModel(string urlPath, bool addIncludes = true)
-        {
-            return GetPageModel(urlPath, WebRequestContext.Localization, addIncludes);
-        }
-
-        /// <summary>
-        /// Populates a Dynamic List by executing the query it specifies.
-        /// </summary>
-        /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
-        [Obsolete("Deprecated in DXA 1.1. Use the overload that has a Localization parameter.")]
-        public DynamicList PopulateDynamicList(DynamicList dynamicList)
-        {
-            PopulateDynamicList(dynamicList, WebRequestContext.Localization);
-            return dynamicList;
-        }
-
-#pragma warning restore 618
-
-
         /// <summary>
         /// Gets a Page Model for a given URL.
         /// </summary>
@@ -77,7 +36,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// <returns>The Page Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given URL.</exception>
         public virtual PageModel GetPageModel(string urlPath, Localization localization, bool addIncludes)
-        {        
+        {
             using (new Tracer(urlPath, localization, addIncludes))
             {
                 if (urlPath == null)
