@@ -8,6 +8,7 @@ using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.Navigation;
 using Sdl.Web.Tridion.Caching;
+using Sdl.Web.Tridion.R2Mapping;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -15,7 +16,6 @@ namespace Sdl.Web.Tridion.Tests
     {
         internal const string HomePageId = "640";
         internal const string ArticleDcpEntityId = "9712-9711";
-        internal const string ArticleChildPageUrlPath = "/autotest-child/test_article_page.html";
         internal const string NavigationTaxonomyTitle = "Test Taxonomy [Navigation]";
         internal const string TopLevelKeyword1Title = "Top-level Keyword 1";
         internal const string TopLevelKeyword2Title = "Top-level Keyword 2";
@@ -50,13 +50,13 @@ namespace Sdl.Web.Tridion.Tests
         private static readonly IEnumerable<Localization> _testLocalizations;
         private static readonly Localization _parentLocalization;
         private static readonly Localization _childLocalization;
-        private static readonly Localization _r2TestLocalization;
-        private static readonly Localization _r2TestChildLocalization;
+        private static readonly Localization _legacyParentLocalization;
+        private static readonly Localization _legacyChildLocalization;
 
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
             { typeof(ICacheProvider), new DefaultCacheProvider() },
-            { typeof(IContentProvider), new DefaultContentProvider() },
+            { typeof(IContentProvider), new DefaultContentProviderR2() },
             { typeof(INavigationProvider), new StaticNavigationProvider() },
             { typeof(ILinkResolver), new DefaultLinkResolver() },
             { typeof(IRichTextProcessor), new DefaultRichTextProcessor() },
@@ -82,19 +82,19 @@ namespace Sdl.Web.Tridion.Tests
                 Path = "/autotest-child"
             };
 
-            _r2TestLocalization = new Localization
+            _legacyParentLocalization = new Localization
             {
                 Id = "1081",
-                Path = "/autotest-r2"
+                Path = "/autotest-parent-legacy"
             };
 
-            _r2TestChildLocalization = new Localization
+            _legacyChildLocalization = new Localization
             {
                 Id = "1083",
-                Path = "/autotest-child-r2"
+                Path = "/autotest-child-legacy"
             };
 
-            _testLocalizations = new[] { _parentLocalization, _childLocalization, _r2TestLocalization, _r2TestChildLocalization };
+            _testLocalizations = new[] { _parentLocalization, _childLocalization, _legacyParentLocalization, _legacyChildLocalization };
 
             TestRegistration.RegisterViewModels();
         }
@@ -113,22 +113,30 @@ namespace Sdl.Web.Tridion.Tests
             get
             {
                 _childLocalization.EnsureInitialized();
-
-                // Trick to allow us to test on a "Live" (not XPM-enabled) configuration even though we're actually on a Staging CD Environment:
-                _childLocalization.IsXpmEnabled = false;
                 return _childLocalization;
             }
         }
 
-        internal static Localization R2TestLocalization
+        internal static Localization LegacyParentLocalization
         {
             get
             {
-                _r2TestLocalization.EnsureInitialized();
-                return _r2TestLocalization;
+                _legacyParentLocalization.EnsureInitialized();
+                return _legacyParentLocalization;
             }
         }
 
+        internal static Localization LegacyChildLocalization
+        {
+            get
+            {
+                _legacyChildLocalization.EnsureInitialized();
+
+                // Trick to allow us to test on a "Live" (not XPM-enabled) configuration even though we're actually on a Staging CD Environment:
+                _legacyChildLocalization.IsXpmEnabled = false;
+                return _legacyChildLocalization;
+            }
+        }
 
         internal static void InitializeProviders()
         {
