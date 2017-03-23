@@ -523,7 +523,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetPageModel_ComponentLinks_Success()
         {
-            const int expectedNumberOfLinks = 3;
+            const int expectedNumberOfLinks = 4;
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ComponentLinkTestPageRelativeUrlPath);
 
             PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);

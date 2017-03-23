@@ -77,6 +77,7 @@
     <Compile Include="MockConditionalEntityEvaluator.cs" />
     <Compile Include="Models\Entity\Article.cs" />
     <Compile Include="Models\Entity\ContentList.cs" />
+    <Compile Include="Models\Entity\Download.cs" />
     <Compile Include="Models\Entity\Image.cs" />
     <Compile Include="Models\Entity\MediaManagerDistribution.cs" />
     <Compile Include="Models\Entity\Paragraph.cs" />

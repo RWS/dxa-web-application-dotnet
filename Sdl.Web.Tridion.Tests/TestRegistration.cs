@@ -11,6 +11,7 @@ namespace Sdl.Web.Tridion.Tests
             // Entity Views
             RegisterViewModel("Article", typeof(Article));
             RegisterViewModel("Image", typeof(Image));
+            RegisterViewModel("Download", typeof(Download));
             RegisterViewModel("TestEntity", typeof(TestEntity));
 
             RegisterViewModel("LanguageSelector", typeof(Common.Models.Configuration));
