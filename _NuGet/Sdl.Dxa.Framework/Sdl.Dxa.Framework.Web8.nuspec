@@ -21,7 +21,8 @@
         </references>
         <dependencies>
             <!-- NOTE: We don't use package dependencies for everything, because we don't want direct references to transitive dependencies and the explicit reference above don't control those.-->
-            <dependency id="Newtonsoft.Json" version="7.0.0" />
+			<dependency id="Log4net" version="2.0.3" />
+			<dependency id="Newtonsoft.Json" version="7.0.0" />
             <dependency id="Sdl.Web.Delivery" version="8.5.0" />
             <dependency id="Sdl.Web.Context.Image" version="8.5.0" />
             <dependency id="Sdl.Web.Context.Client" version="8.5.0" />
@@ -29,7 +30,7 @@
     </metadata>
     <files>
         <!-- NOTE: We're excluding assemblies which come from dependent packages -->
-        <file src="..\..\Sdl.Web.Tridion\bin\Release\*.dll" exclude="**\Sdl.Web.Delivery*.dll;**\Sdl.Web.Context*.dll;**\Tridion.ContentDelivery*.dll;**\Microsoft.*.dll;**\System.Spatial.dll;**\System.Web*.dll;**\Newtonsoft.Json.dll" target="lib\net452" />
+        <file src="..\..\Sdl.Web.Tridion\bin\Release\*.dll" exclude="**\Sdl.Web.Delivery*.dll;**\Sdl.Web.Context*.dll;**\Tridion.ContentDelivery*.dll;**\Microsoft.*.dll;**\System.Spatial.dll;**\System.Web*.dll;**\log4net.dll;**\Newtonsoft.Json.dll" target="lib\net452" />
         <file src="Sdl.Dxa.Framework.Web8.targets" target="build\net452" />
     </files>
 </package>
