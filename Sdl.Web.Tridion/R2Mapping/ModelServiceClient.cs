@@ -237,7 +237,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 throw new DxaException("Content Service Capability not found in Discovery Service.");
             }
             ContentKeyValuePair modelServiceExtensionProperty = contentService.ExtensionProperties
-                .Take(1).FirstOrDefault(xp => xp.Key.Equals(ModelServiceExtensionPropertyName, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(xp => xp.Key.Equals(ModelServiceExtensionPropertyName, StringComparison.OrdinalIgnoreCase));
             if (modelServiceExtensionProperty == null)
             {
                 throw new DxaException($"{ModelServiceName} is not registered; no extension property called '{ModelServiceExtensionPropertyName}' found on Content Service Capability.");
