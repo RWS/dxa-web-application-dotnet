@@ -352,7 +352,6 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        [Ignore] // See TSI-2362
         public void GetPageModel_KeywordExpansion_Success() // See TSI-2316 (only applies to R2 Model mapping)
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2316PageRelativeUrlPath);
@@ -370,8 +369,9 @@ namespace Sdl.Web.Tridion.Tests
             Tsi2316TestKeyword publishedKeyword = testEntity.PublishedKeyword;
             Assert.AreEqual("This is a text field", publishedKeyword.TextField, "publishedKeyword.TextField");
             Assert.AreEqual(666.666, publishedKeyword.NumberField, "publishedKeyword.NumberField");
-            Assert.AreEqual(new DateTime(1970, 12, 16), publishedKeyword.NumberField, "publishedKeyword.NumberField");
-            Assert.AreEqual("TODO", publishedKeyword.CompLinkField, "publishedKeyword.CompLinkField");
+            Assert.AreEqual(new DateTime(1970, 12, 16, 12, 34, 56), publishedKeyword.DateField, "publishedKeyword.DateField");
+            Assert.IsNotNull(publishedKeyword.CompLinkField, "publishedKeyword.CompLinkField");
+            Assert.AreEqual("9712", publishedKeyword.CompLinkField.Id, "publishedKeyword.CompLinkField.Id");
             Assert.IsNotNull(publishedKeyword.KeywordField, "publishedKeyword.KeywordField");
             Assert.AreEqual("Keyword 1.1", publishedKeyword.KeywordField.Title, "publishedKeyword.KeywordField");
         }
@@ -523,7 +523,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetPageModel_ComponentLinks_Success()
         {
-            const int expectedNumberOfLinks = 2;
+            const int expectedNumberOfLinks = 4;
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ComponentLinkTestPageRelativeUrlPath);
 
             PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);

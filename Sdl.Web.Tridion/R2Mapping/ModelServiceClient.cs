@@ -127,7 +127,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             {
                 Log.Debug($"Sending {ModelServiceName} Request: {requestUri}");
 
-                WebRequest request = WebRequest.Create(requestUri);
+                HttpWebRequest request = (HttpWebRequest) WebRequest.Create(requestUri);
                 request.Timeout = _serviceTimeout;
                 request.ContentType = "application/json; charset=utf-8";
                 // handle OAuth if available/required
@@ -140,22 +140,17 @@ namespace Sdl.Web.Tridion.R2Mapping
                 IClaimStore claimStore = AmbientDataContext.CurrentClaimStore;
                 if (claimStore != null)
                 {
-                    Dictionary<string, string[]> headers =
-                        claimStore.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
-                    if (headers != null && headers.ContainsKey(PreviewSessionTokenHeader))
+                    Dictionary<string, string[]> headers = claimStore.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
+                    if ((headers != null) && headers.ContainsKey(PreviewSessionTokenHeader))
                     {
-                        request.Headers.Add(PreviewSessionTokenHeader, headers[PreviewSessionTokenHeader][0]);
+                        // See CRQ-3935
+                        SetCookie(request, PreviewSessionTokenCookie, headers[PreviewSessionTokenHeader][0]);
                     }
 
-                    Dictionary<string, string> cookies =
-                        claimStore.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
-                    if (cookies != null && cookies.ContainsKey(PreviewSessionTokenCookie))
+                    Dictionary<string, string> cookies = claimStore.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
+                    if ((cookies != null) && cookies.ContainsKey(PreviewSessionTokenCookie))
                     {
-                        string cookie = request.Headers["cookie"];
-                        if (!string.IsNullOrEmpty(cookie))
-                            cookie += ";";
-                        cookie += cookies[PreviewSessionTokenCookie];
-                        request.Headers["cookie"] = cookie;
+                        SetCookie(request, PreviewSessionTokenCookie, cookies[PreviewSessionTokenCookie]);
                     }
                 }
 
@@ -193,6 +188,12 @@ namespace Sdl.Web.Tridion.R2Mapping
                     }
                 } while (true);
             }
+        }
+
+        private static void SetCookie(HttpWebRequest httpWebRequest, string name, string value)
+        {
+            // Quick-and-dirty way: just directly set the "Cookie" HTTP header
+            httpWebRequest.Headers.Add("Cookie", $"{name}={value}");
         }
 
         private static string GetResponseBody(WebResponse webResponse)
@@ -237,7 +238,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 throw new DxaException("Content Service Capability not found in Discovery Service.");
             }
             ContentKeyValuePair modelServiceExtensionProperty = contentService.ExtensionProperties
-                .Take(1).FirstOrDefault(xp => xp.Key.Equals(ModelServiceExtensionPropertyName, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(xp => xp.Key.Equals(ModelServiceExtensionPropertyName, StringComparison.OrdinalIgnoreCase));
             if (modelServiceExtensionProperty == null)
             {
                 throw new DxaException($"{ModelServiceName} is not registered; no extension property called '{ModelServiceExtensionPropertyName}' found on Content Service Capability.");
