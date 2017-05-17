@@ -125,68 +125,84 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             using (new Tracer(requestUri))
             {
-                Log.Debug($"Sending {ModelServiceName} Request: {requestUri}");
-
-                HttpWebRequest request = (HttpWebRequest) WebRequest.Create(requestUri);
-                request.Timeout = _serviceTimeout;
-                request.ContentType = "application/json; charset=utf-8";
-                // handle OAuth if available/required
-                if (_tokenProvider != null)
-                {
-                    request.Headers.Add(_tokenProvider.AuthRequestHeaderName, _tokenProvider.AuthRequestHeaderValue);
-                }
-
-                // forward on session preview cookie/header if available in ADF claimstore
-                IClaimStore claimStore = AmbientDataContext.CurrentClaimStore;
-                if (claimStore != null)
-                {
-                    Dictionary<string, string[]> headers = claimStore.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
-                    if ((headers != null) && headers.ContainsKey(PreviewSessionTokenHeader))
+                bool successR = true;
+                // perform caching at this stage since PageModels are not cacheable at this moment with a distributed
+                // cache due to serialization issues
+                string json = SiteConfiguration.CacheProvider.GetOrAdd(
+                    $"{requestUri}",
+                    CacheRegions.ModelService,
+                    () =>
                     {
-                        // See CRQ-3935
-                        SetCookie(request, PreviewSessionTokenCookie, headers[PreviewSessionTokenHeader][0]);
-                    }
+                        Log.Debug($"Sending {ModelServiceName} Request: {requestUri}");
 
-                    Dictionary<string, string> cookies = claimStore.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
-                    if ((cookies != null) && cookies.ContainsKey(PreviewSessionTokenCookie))
-                    {
-                        SetCookie(request, PreviewSessionTokenCookie, cookies[PreviewSessionTokenCookie]);
-                    }
-                }
-
-                int attempt = 0;
-                do
-                {
-                    try
-                    {
-                        attempt++;
-                        using (WebResponse response = request.GetResponse())
+                        HttpWebRequest request = (HttpWebRequest) WebRequest.Create(requestUri);
+                        request.Timeout = _serviceTimeout;
+                        request.ContentType = "application/json; charset=utf-8";
+                        // handle OAuth if available/required
+                        if (_tokenProvider != null)
                         {
-                            string responseBody = GetResponseBody(response);
-                            success = true;
-                            return responseBody;
+                            request.Headers.Add(_tokenProvider.AuthRequestHeaderName,
+                                _tokenProvider.AuthRequestHeaderValue);
                         }
-                    }
-                    catch (WebException ex)
-                    {
-                        if (ex.Status == WebExceptionStatus.Timeout && attempt < _serviceRetryCount)
+
+                        // forward on session preview cookie/header if available in ADF claimstore
+                        IClaimStore claimStore = AmbientDataContext.CurrentClaimStore;
+                        if (claimStore != null)
                         {
-                            Log.Debug("{0} timed out, attempting a retry request for URL '{1}'.", ModelServiceName,
-                                requestUri);
-                            Task.Delay(TimeSpan.FromMilliseconds(2000)).Wait();
-                        }
-                        else
-                        {
-                            if (ex.Status != WebExceptionStatus.ProtocolError)
+                            Dictionary<string, string[]> headers =
+                                claimStore.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
+                            if ((headers != null) && headers.ContainsKey(PreviewSessionTokenHeader))
                             {
-                                throw new DxaException(
-                                    $"{ModelServiceName} request for URL '{requestUri}' failed: {ex.Status}", ex);
+                                // See CRQ-3935
+                                SetCookie(request, PreviewSessionTokenCookie, headers[PreviewSessionTokenHeader][0]);
                             }
-                            success = false;
-                            return GetResponseBody(ex.Response);
+
+                            Dictionary<string, string> cookies =
+                                claimStore.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
+                            if ((cookies != null) && cookies.ContainsKey(PreviewSessionTokenCookie))
+                            {
+                                SetCookie(request, PreviewSessionTokenCookie, cookies[PreviewSessionTokenCookie]);
+                            }
                         }
-                    }
-                } while (true);
+
+                        int attempt = 0;
+                        do
+                        {
+                            try
+                            {
+                                attempt++;
+                                using (WebResponse response = request.GetResponse())
+                                {
+                                    string responseBody = GetResponseBody(response);
+                                    successR = true;
+                                    return responseBody;
+                                }
+                            }
+                            catch (WebException ex)
+                            {
+                                if (ex.Status == WebExceptionStatus.Timeout && attempt < _serviceRetryCount)
+                                {
+                                    Log.Debug("{0} timed out, attempting a retry request for URL '{1}'.",
+                                        ModelServiceName,
+                                        requestUri);
+                                    Task.Delay(TimeSpan.FromMilliseconds(2000)).Wait();
+                                }
+                                else
+                                {
+                                    if (ex.Status != WebExceptionStatus.ProtocolError)
+                                    {
+                                        throw new DxaException(
+                                            $"{ModelServiceName} request for URL '{requestUri}' failed: {ex.Status}", ex);
+                                    }
+                                    successR = false;
+                                    return GetResponseBody(ex.Response);
+                                }
+                            }
+                        } while (true);
+                    });
+
+                success = successR;
+                return json;
             }
         }
 
