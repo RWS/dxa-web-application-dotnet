@@ -46,13 +46,18 @@ namespace Sdl.Web.Common.Models
         /// Gets or sets the identifier for the Page.
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
-        public string Id { get; }
+        public string Id { get; private set; }
 
         /// <summary>
         /// Gets or sets the Title of the Page which is typically rendered as HTML title tag.
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
         public string Title { get; set; }
+
+        public PageModel()
+        {
+            // required for deserialization
+        }
 
         /// <summary>
         /// Initializes a new instance of PageModel.

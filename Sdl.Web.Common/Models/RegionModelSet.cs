@@ -52,7 +52,7 @@ namespace Sdl.Web.Common.Models
                 RegionModel region;
                 if (!TryGetValue(name, out region))
                 {
-                    throw new DxaException(string.Format("Region '{0}' not found.", name));
+                    throw new DxaException($"Region '{name}' not found.");
                 }
                 return region;
             }

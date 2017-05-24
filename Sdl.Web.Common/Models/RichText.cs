@@ -28,6 +28,11 @@ namespace Sdl.Web.Common.Models
         }
 
         #region Constructors
+
+        internal RichText()
+        {
+        }
+
         /// <summary>
         /// Initializes a new <see cref="RichText"/> instance for a given piece of HTML.
         /// </summary>
@@ -108,6 +113,11 @@ namespace Sdl.Web.Common.Models
         }
 
         #region Constructors
+
+        internal RichTextFragment()
+        {
+        }
+
         /// <summary>
         /// Initializes a new <see cref="RichTextFragment"/> instance for a given piece of HTML.
         /// </summary>

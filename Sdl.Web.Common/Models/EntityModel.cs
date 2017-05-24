@@ -10,7 +10,7 @@ namespace Sdl.Web.Common.Models
     /// </summary>
     [Serializable]
     public abstract class EntityModel : ViewModel, IRichTextFragment
-    {
+    {       
         /// <summary>
         /// Gets or sets the identifier for the Entity.
         /// </summary>
