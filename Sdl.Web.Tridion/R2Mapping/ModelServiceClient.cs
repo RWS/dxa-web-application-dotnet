@@ -77,13 +77,13 @@ namespace Sdl.Web.Tridion.R2Mapping
            => LoadData<EntityModelData>(CreateEntityModelRequestUri(id, localization));
 
         private Uri CreatePageModelRequestUri(string urlPath, Localization localization, bool addIncludes)
-            => new Uri(_modelServiceBaseUri, $"/PageModel/{localization.CmUriScheme}/{localization.Id}{GetCanonicalUrlPath(urlPath)}?{GetIncludesParam(addIncludes)}");
+            => new Uri(_modelServiceBaseUri, $"PageModel/{localization.CmUriScheme}/{localization.Id}{GetCanonicalUrlPath(urlPath)}?{GetIncludesParam(addIncludes)}");
 
         private static string GetIncludesParam(bool addIncludes)
             => "includes=" + (addIncludes ? "INCLUDE" : "EXCLUDE");
 
         private Uri CreateEntityModelRequestUri(string entityId, Localization localization)
-            => new Uri(_modelServiceBaseUri, $"/EntityModel/{localization.CmUriScheme}/{localization.Id}/{entityId}");
+            => new Uri(_modelServiceBaseUri, $"EntityModel/{localization.CmUriScheme}/{localization.Id}/{entityId}");
 
         private T LoadData<T>(Uri requestUri) where T: ViewModelData
         {
@@ -259,7 +259,13 @@ namespace Sdl.Web.Tridion.R2Mapping
             {
                 throw new DxaException($"{ModelServiceName} is not registered; no extension property called '{ModelServiceExtensionPropertyName}' found on Content Service Capability.");
             }
-            return new Uri(modelServiceExtensionProperty.Value);
+            Uri baseUri;
+            string uri = (modelServiceExtensionProperty.Value ?? string.Empty).TrimEnd('/') + '/';
+            if (!Uri.TryCreate(uri, UriKind.Absolute, out baseUri))
+            {
+                throw new DxaException($"{ModelServiceName} is using an invalid uri '{modelServiceExtensionProperty.Value}'.");
+            }
+            return baseUri;
         }
     }
 }
