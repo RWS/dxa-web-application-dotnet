@@ -40,7 +40,7 @@ namespace Sdl.Web.Common.Models
         {
             get
             {
-                return _url.Value;
+                return _url?.Value;
             }
             set
             {
@@ -85,7 +85,7 @@ namespace Sdl.Web.Common.Models
                 return this;
             }
 
-            return (Items == null) ? null : Items.Select(i => i.FindSitemapItem(urlPath)).FirstOrDefault(i => i != null);
+            return Items?.Select(i => i.FindSitemapItem(urlPath)).FirstOrDefault(i => i != null);
         }
 
         /// <summary>

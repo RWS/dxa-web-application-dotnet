@@ -10,13 +10,16 @@ using Sdl.Web.Delivery.Service;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Logging;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Sdl.Web.Delivery.DiscoveryService.Tridion.WebDelivery.Platform;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore;
 using System.Web.Configuration;
 using System.Threading.Tasks;
+using Sdl.Web.Common.Models;
+using Sdl.Web.Common.Models.Navigation;
 
 namespace Sdl.Web.Tridion.R2Mapping
-{
+{    
     /// <summary>
     /// Client for the DXA Model Service
     /// </summary>
@@ -31,6 +34,30 @@ namespace Sdl.Web.Tridion.R2Mapping
         private readonly Uri _modelServiceBaseUri;
         private readonly int _serviceTimeout;
         private readonly int _serviceRetryCount;
+
+        private class Binder : DataModelBinder
+        {
+            public static readonly JsonSerializerSettings Settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                Binder = (SerializationBinder)new Binder(),
+                NullValueHandling = NullValueHandling.Ignore,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+
+            public override Type BindToType(string assemblyName, string typeName)
+            {
+                if (typeName == "TaxonomyNodeModelData")
+                {
+                    return typeof (TaxonomyNode);
+                }
+                if (typeName == "SitemapItemModelData")
+                {
+                    return typeof (SitemapItem);
+                }
+                return base.BindToType(assemblyName, typeName);
+            }
+        }
 
         private class ModelServiceError
         {
@@ -74,10 +101,19 @@ namespace Sdl.Web.Tridion.R2Mapping
             => LoadData<PageModelData>(CreatePageModelRequestUri(urlPath, localization, addIncludes));
 
         public EntityModelData GetEntityModelData(string id, Localization localization)
-           => LoadData<EntityModelData>(CreateEntityModelRequestUri(id, localization));
+            => LoadData<EntityModelData>(CreateEntityModelRequestUri(id, localization));
+
+        public TaxonomyNode GetSitemapItem(Localization localization)
+            => LoadData<TaxonomyNode>(CreateSitemapItemRequestUri(localization));
+
+        public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, Localization localization,
+            bool includeAncestors, int descendantLevels)
+            => LoadData<SitemapItem[]>(CreateSitemapChildItemsRequestUri(parentSitemapItemId, localization,
+                    includeAncestors, descendantLevels));
 
         private Uri CreatePageModelRequestUri(string urlPath, Localization localization, bool addIncludes)
-            => new Uri(_modelServiceBaseUri, $"PageModel/{localization.CmUriScheme}/{localization.Id}{GetCanonicalUrlPath(urlPath)}?{GetIncludesParam(addIncludes)}");
+            => new Uri(_modelServiceBaseUri,
+                    $"PageModel/{localization.CmUriScheme}/{localization.Id}{GetCanonicalUrlPath(urlPath)}?{GetIncludesParam(addIncludes)}");
 
         private static string GetIncludesParam(bool addIncludes)
             => "includes=" + (addIncludes ? "INCLUDE" : "EXCLUDE");
@@ -85,7 +121,16 @@ namespace Sdl.Web.Tridion.R2Mapping
         private Uri CreateEntityModelRequestUri(string entityId, Localization localization)
             => new Uri(_modelServiceBaseUri, $"EntityModel/{localization.CmUriScheme}/{localization.Id}/{entityId}");
 
-        private T LoadData<T>(Uri requestUri) where T: ViewModelData
+        private Uri CreateSitemapItemRequestUri(Localization localization)
+            => new Uri(_modelServiceBaseUri, $"api/navigation/{localization.Id}");
+
+        private Uri CreateSitemapChildItemsRequestUri(string parentSitemapItemId, Localization localization,
+            bool includeAncestors, int descendantLevels)
+            =>
+                new Uri(_modelServiceBaseUri,
+                    $"api/navigation/{localization.Id}/subtree/{parentSitemapItemId}?includeAncestors={includeAncestors}&descendantLevels={descendantLevels}");
+
+        private T LoadData<T>(Uri requestUri)
         {
             bool success;
             string responseBody = ProcessRequest(requestUri, out success);
@@ -96,7 +141,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             {
                 if (success)
                 {
-                    return JsonConvert.DeserializeObject<T>(responseBody, DataModelBinder.SerializerSettings);
+                    return JsonConvert.DeserializeObject<T>(responseBody, Binder.Settings);
                 }
                 serviceError = JsonConvert.DeserializeObject<ModelServiceError>(responseBody);
             }
@@ -107,14 +152,15 @@ namespace Sdl.Web.Tridion.R2Mapping
                 {
                     responseBody = responseBody.Substring(0, maxCharactersToLog) + "...";
                 }
-                Log.Error("{0} returned an unexpected response for URL '{1}':\n{2} ", ModelServiceName, requestUri, responseBody);
+                Log.Error("{0} returned an unexpected response for URL '{1}':\n{2} ", ModelServiceName, requestUri,
+                    responseBody);
                 throw new DxaException($"{ModelServiceName} returned an unexpected response.", ex);
             }
 
             if (serviceError.Status == (int) HttpStatusCode.NotFound)
             {
                 // Item not found; return null. The Content Provider will throw an DxaItemNotFoundException.
-                return null;
+                return default(T);
             }
 
             Log.Error("{0} returned an error response: {1}", ModelServiceName, serviceError);
@@ -247,23 +293,31 @@ namespace Sdl.Web.Tridion.R2Mapping
 
         private static Uri GetModelServiceUri()
         {
-            IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
-            ContentServiceCapability contentService = discoveryService.CreateQuery<ContentServiceCapability>().Take(1).FirstOrDefault();
-            if (contentService == null)
+            string uri = WebConfigurationManager.AppSettings["model-builder-service-uri"];
+            if (uri == null)
             {
-                throw new DxaException("Content Service Capability not found in Discovery Service.");
+                IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
+                ContentServiceCapability contentService =
+                    discoveryService.CreateQuery<ContentServiceCapability>().Take(1).FirstOrDefault();
+                if (contentService == null)
+                {
+                    throw new DxaException("Content Service Capability not found in Discovery Service.");
+                }
+                ContentKeyValuePair modelServiceExtensionProperty = contentService.ExtensionProperties
+                    .FirstOrDefault(
+                        xp => xp.Key.Equals(ModelServiceExtensionPropertyName, StringComparison.OrdinalIgnoreCase));
+                if (modelServiceExtensionProperty == null)
+                {
+                    throw new DxaException(
+                        $"{ModelServiceName} is not registered; no extension property called '{ModelServiceExtensionPropertyName}' found on Content Service Capability.");
+                }
+                uri = modelServiceExtensionProperty.Value ?? string.Empty;
             }
-            ContentKeyValuePair modelServiceExtensionProperty = contentService.ExtensionProperties
-                .FirstOrDefault(xp => xp.Key.Equals(ModelServiceExtensionPropertyName, StringComparison.OrdinalIgnoreCase));
-            if (modelServiceExtensionProperty == null)
-            {
-                throw new DxaException($"{ModelServiceName} is not registered; no extension property called '{ModelServiceExtensionPropertyName}' found on Content Service Capability.");
-            }
-            Uri baseUri;
-            string uri = (modelServiceExtensionProperty.Value ?? string.Empty).TrimEnd('/') + '/';
+            uri = uri.TrimEnd('/') + '/';
+            Uri baseUri;          
             if (!Uri.TryCreate(uri, UriKind.Absolute, out baseUri))
             {
-                throw new DxaException($"{ModelServiceName} is using an invalid uri '{modelServiceExtensionProperty.Value}'.");
+                throw new DxaException($"{ModelServiceName} is using an invalid uri '{uri}'.");
             }
             return baseUri;
         }
