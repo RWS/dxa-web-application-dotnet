@@ -157,7 +157,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 throw new DxaException($"{ModelServiceName} returned an unexpected response.", ex);
             }
 
-            if (serviceError.Status == (int) HttpStatusCode.NotFound)
+            if (serviceError == null || serviceError.Status == (int) HttpStatusCode.NotFound)
             {
                 // Item not found; return null. The Content Provider will throw an DxaItemNotFoundException.
                 return default(T);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Caching;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
@@ -183,16 +184,27 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
         {
             using (new Tracer(sitemapItemId, filter, localization))
             {
+                if (filter == null)
+                {   // default
+                    filter = new NavigationFilter {DescendantLevels = 1, IncludeAncestors = false};
+                }
                 var cachedNavModel = SiteConfiguration.CacheProvider.GetOrAdd(
                     $"GetNavigationSubtree:{sitemapItemId}-{localization.Id}-{filter.IncludeAncestors}-{filter.DescendantLevels}",
                     CacheRegions.DynamicNavigation,
                     () =>
                     {
-                        var items = _modelService.GetChildSitemapItems(sitemapItemId, localization,
+                        IEnumerable<SitemapItem> items;
+                        try
+                        {
+                            items = _modelService.GetChildSitemapItems(sitemapItemId, localization,
                             filter.IncludeAncestors,
-                            filter.DescendantLevels);
-
-                        RebuildParentRelationships(items, null);
+                            filter.DescendantLevels) ?? new SitemapItem[0];
+                            RebuildParentRelationships(items, null);                            
+                        }
+                        catch (Exception)
+                        {
+                            items = new SitemapItem[0];
+                        }
                         return items;
                     });
 
@@ -205,6 +217,7 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
 
         private static void RebuildParentRelationships(IEnumerable<SitemapItem> children, SitemapItem parent)
         {
+            if (children == null) return;
             foreach (var child in children)
             {
                 child.Parent = parent;
