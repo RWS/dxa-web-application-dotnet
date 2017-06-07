@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Caching;
+using System.Text.RegularExpressions;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
@@ -21,7 +21,7 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
     {
         private readonly ModelServiceClient _modelService = new ModelServiceClient();
         private static readonly INavigationProvider FallbackNavigationProvider = new StaticNavigationProvider();
-
+        private static readonly Regex SitemapItemIdRegex = new Regex(@"^t(?<taxonomyId>\d+)((-k(?<keywordId>\d+))|(-p(?<pageId>\d+)))?$", RegexOptions.Compiled);
         #region INavigationProvider members
 
         /// <summary>
@@ -184,36 +184,45 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
         {
             using (new Tracer(sitemapItemId, filter, localization))
             {
+                if (!string.IsNullOrEmpty(sitemapItemId))
+                {
+                    Match sitemapItemIdMatch = SitemapItemIdRegex.Match(sitemapItemId);
+                    if (!sitemapItemIdMatch.Success)
+                    {
+                        throw new DxaException($"Invalid Sitemap Item identifier: '{sitemapItemId}'");
+                    }
+                }
+
                 if (filter == null)
                 {   // default
                     filter = new NavigationFilter {DescendantLevels = 1, IncludeAncestors = false};
                 }
-                var cachedNavModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                IEnumerable<SitemapItem> cachedNavModel = SiteConfiguration.CacheProvider.GetOrAdd(
                     $"GetNavigationSubtree:{sitemapItemId}-{localization.Id}-{filter.IncludeAncestors}-{filter.DescendantLevels}",
                     CacheRegions.DynamicNavigation,
                     () =>
                     {
-                        IEnumerable<SitemapItem> items;
                         try
                         {
-                            items = _modelService.GetChildSitemapItems(sitemapItemId, localization,
-                            filter.IncludeAncestors,
-                            filter.DescendantLevels) ?? new SitemapItem[0];
-                            RebuildParentRelationships(items, null);                            
+                            IEnumerable<SitemapItem> items = _modelService.GetChildSitemapItems(sitemapItemId, localization,
+                                filter.IncludeAncestors,
+                                filter.DescendantLevels) ?? new SitemapItem[0];
+                            items = items.OrderBy(i => i.OriginalTitle);
+                            RebuildParentRelationships(items, null);
+                            return items;
                         }
-                        catch (Exception)
+                        catch
                         {
-                            items = new SitemapItem[0];
-                        }
-                        return items;
+                            return new SitemapItem[0];
+                        }                      
                     });
 
-                if (cachedNavModel != null)
-                    RebuildParentRelationships(cachedNavModel, null);
+                if (cachedNavModel == null) return null;
+                RebuildParentRelationships(cachedNavModel, null);
                 return cachedNavModel;
             }
         }
-        #endregion
+        #endregion      
 
         private static void RebuildParentRelationships(IEnumerable<SitemapItem> children, SitemapItem parent)
         {
@@ -221,6 +230,7 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
             foreach (var child in children)
             {
                 child.Parent = parent;
+                child.Items = child.Items.OrderBy(i => i.OriginalTitle).ToList();
                 RebuildParentRelationships(child.Items, child);
             }
         }

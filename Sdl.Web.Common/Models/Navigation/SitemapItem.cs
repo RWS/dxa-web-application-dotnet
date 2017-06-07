@@ -59,6 +59,12 @@ namespace Sdl.Web.Common.Models
         [JsonIgnore]
         public string OriginalTitle { get; set; }
 
+        [JsonProperty("OriginalTitle")]
+        private string OriginalTitleSetter
+        {
+            set { OriginalTitle = value; }
+        }
+
         /// <summary>
         /// Creates a <see cref="Link"/> out of this <see cref="SitemapItem"/>.
         /// </summary>
