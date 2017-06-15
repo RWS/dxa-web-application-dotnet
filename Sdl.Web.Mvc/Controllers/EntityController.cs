@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using System.Web.Helpers;
+using Sdl.Web.Mvc.OutputCache;
 
 namespace Sdl.Web.Mvc.Controllers
 {
@@ -18,6 +19,7 @@ namespace Sdl.Web.Mvc.Controllers
         /// <param name="containerSize">The size (in grid units) of the container the entity is in</param>
         /// <returns>Rendered entity model</returns>
         [HandleSectionError(View = "SectionError")]
+        [DxaOutputCache]
         public virtual ActionResult Entity(EntityModel entity, int containerSize = 0)
         {
             SetupViewData(entity, containerSize);
@@ -31,6 +33,8 @@ namespace Sdl.Web.Mvc.Controllers
                 Response.End();
                 return null;
             }
+
+            ViewData.Model = model;
 
             return View(model.MvcData.ViewName, model);
         }

@@ -143,6 +143,11 @@ namespace Sdl.Web.Common.Models
         #endregion
 
         /// <summary>
+        /// Returns true if View Model is volatile and should not be cached
+        /// </summary>
+        public virtual bool IsVolatile => false;
+
+        /// <summary>
         /// Creates a deep copy of this View Model.
         /// </summary>
         /// <returns>The copied View Model.</returns>
