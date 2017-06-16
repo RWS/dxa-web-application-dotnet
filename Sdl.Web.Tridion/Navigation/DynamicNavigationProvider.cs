@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.Tridion.R2Mapping;
@@ -13,13 +12,22 @@ namespace Sdl.Web.Tridion.Navigation
     /// </summary>
     public class DynamicNavigationProvider : INavigationProvider, IOnDemandNavigationProvider
     {
-        private static readonly INavigationProvider DyanmicNavigationProviderR2 = new Sdl.Web.Tridion.Navigation.ModelServiceImpl.DynamicNavigationProvider();
-        private static readonly INavigationProvider DyanmicNavigationProviderLegacy = new Sdl.Web.Tridion.Navigation.CILImpl.DynamicNavigationProvider();
+        private static INavigationProvider _dyanmicNavigationProviderR2; 
+        private static INavigationProvider _dyanmicNavigationProviderLegacy;
 
-        private INavigationProvider NavigationProvider 
-            => SiteConfiguration.ContentProvider is DefaultContentProviderR2
-            ? DyanmicNavigationProviderR2
-            : DyanmicNavigationProviderLegacy;
+        private INavigationProvider NavigationProvider
+        {
+            get
+            {
+                if (SiteConfiguration.ContentProvider is DefaultContentProviderR2)
+                {
+                    return _dyanmicNavigationProviderR2 ??
+                           (_dyanmicNavigationProviderR2 = new ModelServiceImpl.DynamicNavigationProvider());
+                }
+                return _dyanmicNavigationProviderLegacy ??
+                       (_dyanmicNavigationProviderLegacy = new CILImpl.DynamicNavigationProvider());
+            }
+        }
 
         #region INavigationProvider members
         /// <summary>

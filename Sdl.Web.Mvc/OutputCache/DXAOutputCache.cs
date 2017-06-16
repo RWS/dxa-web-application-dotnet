@@ -32,7 +32,8 @@ namespace Sdl.Web.Mvc.OutputCache
         {
             // used to override our check for being in a preview session. if this property is found in the
             // configuration we ignore preview sessions
-            _ignorePreview = WebConfigurationManager.AppSettings["output-caching-in-preview"] != null;
+            string setting = WebConfigurationManager.AppSettings["output-caching-in-preview"];
+            _ignorePreview = !string.IsNullOrEmpty(setting) && setting.Equals("true", StringComparison.InvariantCultureIgnoreCase);
         }
 
         public override void OnActionExecuting(ActionExecutingContext filterContext)
@@ -85,7 +86,7 @@ namespace Sdl.Web.Mvc.OutputCache
 
             // we normally do not want view rendered output cached in preview but we can have the option to turn this off if set in the
             // web.config (for debug/testing purposes)            
-            commitCache = (_ignorePreview || !WebRequestContext.IsPreview) && commitCache;
+            commitCache = (_ignorePreview || !WebRequestContext.IsPreview) && (Attribute.GetCustomAttribute(filterContext.Controller.GetType(), typeof(DxaNoOutputCacheAttribute)) == null) && commitCache;
 
             if (_originalResponseWriter != null)
             {
