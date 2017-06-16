@@ -26,18 +26,24 @@ namespace Sdl.Web.Mvc.OutputCache
         private HtmlTextWriter _responseWriter;
         private TextWriter _originalResponseWriter;
         private string _cacheKey;
+        private readonly bool _enabled;
         private readonly bool _ignorePreview;
 
         public DxaOutputCacheAttribute()
         {
+            string setting = WebConfigurationManager.AppSettings["output-caching-enabled"];
+            _enabled = !string.IsNullOrEmpty(setting) && setting.Equals("true", StringComparison.InvariantCultureIgnoreCase);
+
             // used to override our check for being in a preview session. if this property is found in the
             // configuration we ignore preview sessions
-            string setting = WebConfigurationManager.AppSettings["output-caching-in-preview"];
+            setting = WebConfigurationManager.AppSettings["output-caching-in-preview"];
             _ignorePreview = !string.IsNullOrEmpty(setting) && setting.Equals("true", StringComparison.InvariantCultureIgnoreCase);
         }
 
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
+            if (!_enabled) return;
+
             _originalResponseWriter = null;
             _responseWriter = new HtmlTextWriter(new StringWriter());                    
             _cacheKey = CalcCacheKey(filterContext);
@@ -66,7 +72,8 @@ namespace Sdl.Web.Mvc.OutputCache
         }   
 
         public override void OnResultExecuted(ResultExecutedContext filterContext)
-        {           
+        {
+            if (!_enabled) return;
             bool commitCache = filterContext.IsChildAction || !filterContext.Controller.TempData.ContainsKey(DxaDisableOutputCache);
             EntityModel model = filterContext.Controller.ViewData.Model as EntityModel;
             if (filterContext.IsChildAction)
@@ -106,7 +113,6 @@ namespace Sdl.Web.Mvc.OutputCache
                     SiteConfiguration.CacheProvider.Store(_cacheKey, CacheRegions.RenderedOutput, html);
                 }
             }
-            _responseWriter.Dispose();
         }
 
         private static string CalcCacheKey(ActionExecutingContext filterContext)
