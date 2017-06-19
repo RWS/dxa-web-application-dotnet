@@ -41,6 +41,13 @@ namespace Sdl.Web.Mvc.OutputCache
         public override void OnActionExecuting(ActionExecutingContext ctx)
         {
             if (!_enabled) return;
+
+            if (IgnoreCaching(ctx.Controller))
+            {
+                var controller = GetTopLevelController(ctx);
+                controller.TempData[DxaDisableOutputCache] = true;
+            }
+
             string cachedOutput;
             string cacheKey = CalcCacheKey(ctx);
             PushCacheKey(ctx, cacheKey);
@@ -54,6 +61,11 @@ namespace Sdl.Web.Mvc.OutputCache
         public override void OnResultExecuting(ResultExecutingContext ctx)
         {
             if (!_enabled) return;
+            if (IgnoreCaching(ctx.Controller))
+            {
+                var controller = GetTopLevelController(ctx);
+                controller.TempData[DxaDisableOutputCache] = true;
+            }
             StringWriter cachingWriter = new StringWriter((IFormatProvider)CultureInfo.InvariantCulture);
             TextWriter originalWriter = ctx.HttpContext.Response.Output;
             ctx.HttpContext.Response.Output = cachingWriter;
@@ -79,6 +91,11 @@ namespace Sdl.Web.Mvc.OutputCache
         public override void OnResultExecuted(ResultExecutedContext ctx)
         {
             if (!_enabled) return;
+            if (IgnoreCaching(ctx.Controller))
+            {
+                var controller = GetTopLevelController(ctx);
+                controller.TempData[DxaDisableOutputCache] = true;
+            }
             if (ctx.Exception != null)
             {
                 RemoveCallback(ctx);
@@ -94,9 +111,7 @@ namespace Sdl.Web.Mvc.OutputCache
                 // check if the entity is marked for no output caching or returns volatile. in this case we tell our parent
                 // controller which would be the page controller not to perform output caching at the page level and instead
                 // we just switch over to entity level caching but not for this particular model.             
-                if (model != null &&
-                    (Attribute.GetCustomAttribute(model.GetType(), typeof(DxaNoOutputCacheAttribute)) != null ||
-                     model.IsVolatile))
+                if (model != null && (IgnoreCaching(model) || model.IsVolatile))
                 {
                     var controller = GetTopLevelController(ctx);
                     controller.TempData[DxaDisableOutputCache] = true;
@@ -106,9 +121,7 @@ namespace Sdl.Web.Mvc.OutputCache
 
             // we normally do not want view rendered output cached in preview but we can have the option to turn this off if set in the
             // web.config (for debug/testing purposes)            
-            commitCache = (_ignorePreview || !WebRequestContext.IsPreview) &&
-                          (Attribute.GetCustomAttribute(ctx.Controller.GetType(),
-                              typeof(DxaNoOutputCacheAttribute)) == null) && commitCache;
+            commitCache = (_ignorePreview || !WebRequestContext.IsPreview) && (!IgnoreCaching(ctx.Controller)) && commitCache;
             Action<EntityModel, bool> callback = GetCallback(ctx);
             if (callback == null) return;
             RemoveCallback(ctx);
@@ -171,5 +184,7 @@ namespace Sdl.Web.Mvc.OutputCache
             Stack<string> stack = ctx.HttpContext.Items[CacheKeyStack] as Stack<string>;
             return stack?.Pop();
         }
+
+        private static bool IgnoreCaching(object obj) => Attribute.GetCustomAttribute(obj.GetType(), typeof (DxaNoOutputCacheAttribute)) != null;
     }
 }
