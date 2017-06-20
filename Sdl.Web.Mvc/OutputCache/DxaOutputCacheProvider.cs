@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Web.Caching;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 
-namespace Sdl.Web.Common
+namespace Sdl.Web.Mvc.OutputCache
 {
     /// <summary>
     /// DxaOutputCacheProvider
