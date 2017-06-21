@@ -86,6 +86,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="DxaException.cs" />
     <Compile Include="DxaItemNotFoundException.cs" />
+    <Compile Include="DxaNoCacheAttribute.cs" />
     <Compile Include="DxaNoOutputCacheAttribute.cs" />
     <Compile Include="DxaUnkownLocalizationException.cs" />
     <Compile Include="Extensions\LinkExtensions.cs" />
