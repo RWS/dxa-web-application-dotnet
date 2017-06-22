@@ -9,6 +9,7 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Extensions;
 using Sdl.Web.DataModel;
 using Sdl.Web.Tridion.Configuration;
+using Sdl.Web.Common.Utils;
 
 namespace Sdl.Web.Tridion.R2Mapping
 {
@@ -161,7 +162,9 @@ namespace Sdl.Web.Tridion.R2Mapping
                 EntityModel entityModel = null;               
                 if (CacheRegions.IsViewModelCachingEnabled) // quick way to avoid all caching on viewmodels
                 {
-                    string key = $"{entityModelData.Id}-{localization.Id}";
+                    int h1 = entityModelData.Id?.GetHashCode() ?? 0;
+                    int h2 = entityModelData.HtmlClasses?.GetHashCode() ?? 0;                   
+                    string key = $"{localization.Id}-{Hash.CombineHashCodes(h1,h2)}";
                     EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
                        key,
                        CacheRegions.EntityModel,

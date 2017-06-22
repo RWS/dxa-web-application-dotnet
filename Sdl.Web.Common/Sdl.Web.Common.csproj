@@ -145,6 +145,7 @@
     <Compile Include="Models\ModelTypeRegistry.cs" />
     <Compile Include="Models\Query\Query.cs" />
     <Compile Include="Models\Query\SimpleBrokerQuery.cs" />
+    <Compile Include="Utils\Hash.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Interfaces\ExtensionPoints.cd" />
