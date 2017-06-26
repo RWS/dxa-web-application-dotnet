@@ -147,6 +147,17 @@ namespace Sdl.Web.Tridion.R2Mapping
                 return pageModel;
             }
         }      
+        
+        private static int CalcHash(EntityModelData entityModelData)
+        {
+            int h0 = entityModelData.Id?.GetHashCode() ?? 0;
+            int h1 = entityModelData.HtmlClasses?.GetHashCode() ?? 0;
+            int h2 = (int)entityModelData.SerializationHashCode;
+            int h3 = entityModelData.LinkUrl?.GetHashCode() ?? 0;
+            int h4 = entityModelData.MvcData?.GetHashCode() ?? 0;
+
+            return Hash.CombineHashCodes(h0, h1, h2, h3, h4);
+        }
 
         /// <summary>
         /// Creates a Strongly Typed Entity Model for a given DXA R2 Data Model.
@@ -156,15 +167,13 @@ namespace Sdl.Web.Tridion.R2Mapping
         /// <param name="localization">The context <see cref="Localization"/>.</param>
         /// <returns>The strongly typed Entity Model. Will be of type <paramref name="baseModelType"/> or a subclass.</returns>
         public static EntityModel CreateEntityModel(EntityModelData entityModelData, Type baseModelType, Localization localization)
-        {
+        {                        
             using (new Tracer(entityModelData, localization))
             {
                 EntityModel entityModel = null;               
                 if (CacheRegions.IsViewModelCachingEnabled) // quick way to avoid all caching on viewmodels
                 {
-                    int h1 = entityModelData.Id?.GetHashCode() ?? 0;
-                    int h2 = entityModelData.HtmlClasses?.GetHashCode() ?? 0;                   
-                    string key = $"{localization.Id}-{Hash.CombineHashCodes(h1,h2)}";
+                    string key = $"{localization.Id}-{CalcHash(entityModelData)}";
                     EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
                        key,
                        CacheRegions.EntityModel,
