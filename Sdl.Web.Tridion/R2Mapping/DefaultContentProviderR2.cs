@@ -38,41 +38,29 @@ namespace Sdl.Web.Tridion.R2Mapping
         {
             using (new Tracer(urlPath, localization, addIncludes))
             {
-                PageModel result = null;
-                if (CacheRegions.IsViewModelCachingEnabled)
-                {
-                    PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                        $"{urlPath}:{addIncludes}", // Cache Page Models with and without includes separately
-                        CacheRegions.PageModel,
-                        () =>
-                        {
-                            PageModel pageModel = LoadPageModel(ref urlPath, addIncludes, localization);
-                            if (pageModel.NoCache)
-                            {
-                                result = pageModel;
-                                return null;
-                            }
-                            return pageModel;
-                        }
-                        );
-
-                    if (cachedPageModel != null)
-                    {
-                        // Don't return the cached Page Model itself, because we don't want dynamic logic to modify the cached state.
-                        result = (PageModel) cachedPageModel.DeepCopy();
-                    }
-                }
-                else
-                {
-                    result = LoadPageModel(ref urlPath, addIncludes, localization);
-                }
+                PageModel pageModel = LoadPageModel(ref urlPath, addIncludes, localization);
 
                 if (SiteConfiguration.ConditionalEntityEvaluator != null)
                 {
-                    result.FilterConditionalEntities(localization);
+                    pageModel.FilterConditionalEntities(localization);
                 }
 
-                return result;
+                return pageModel;
+            }
+        }
+
+        /// <summary>
+        /// Gets an Entity Model for a given Entity Identifier.
+        /// </summary>
+        /// <param name="id">The Entity Identifier. Must be in format {ComponentID}-{TemplateID}.</param>
+        /// <param name="localization">The context Localization.</param>
+        /// <returns>The Entity Model.</returns>
+        /// <exception cref="DxaItemNotFoundException">If no Entity Model exists for the given URL.</exception>
+        public EntityModel GetEntityModel(string id, Localization localization)
+        {
+            using (new Tracer(id, localization))
+            {
+                return LoadEntityModel(id, localization);
             }
         }
 
@@ -94,39 +82,7 @@ namespace Sdl.Web.Tridion.R2Mapping
 
                 return ModelBuilderPipelineR2.CreatePageModel(pageModelData, addIncludes, localization);
             }
-        }
-
-        /// <summary>
-        /// Gets an Entity Model for a given Entity Identifier.
-        /// </summary>
-        /// <param name="id">The Entity Identifier. Must be in format {ComponentID}-{TemplateID}.</param>
-        /// <param name="localization">The context Localization.</param>
-        /// <returns>The Entity Model.</returns>
-        /// <exception cref="DxaItemNotFoundException">If no Entity Model exists for the given URL.</exception>
-        public EntityModel GetEntityModel(string id, Localization localization)
-        {
-            using (new Tracer(id, localization))
-            {
-                EntityModel result;
-                if (CacheRegions.IsViewModelCachingEnabled)
-                {
-                    EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                        $"{id}-{localization.Id}", // key
-                        CacheRegions.EntityModel,
-                        () => LoadEntityModel(id, localization)
-                        );
-
-                    // Don't return the cached Entity Model itself, because we don't want dynamic logic to modify the cached state.
-                    result = (EntityModel) cachedEntityModel.DeepCopy();
-                }
-                else
-                {
-                    result = LoadEntityModel(id, localization);
-                }
-
-                return result;
-            }
-        }
+        }       
 
         private EntityModel LoadEntityModel(string id, Localization localization)
         {

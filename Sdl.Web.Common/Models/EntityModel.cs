@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Utils;
 
 namespace Sdl.Web.Common.Models
 {
@@ -100,7 +102,14 @@ namespace Sdl.Web.Common.Models
         /// A hash code for the current Entity Model.
         /// </returns>
         public override int GetHashCode()
-            => (Id == null) ? base.GetHashCode() : Id.GetHashCode();
+        {
+            if(Id == null)
+                return base.GetHashCode();
+
+            int h1 = Id?.GetHashCode() ?? 0;
+            int h2 = HtmlClasses?.GetHashCode() ?? 0;          
+            return Hash.CombineHashCodes(h1, h2);
+        }
 
         /// <summary>
         /// Returns a string that represents the current object.

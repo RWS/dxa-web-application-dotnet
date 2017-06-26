@@ -17,6 +17,7 @@ using System.Web.Configuration;
 using System.Threading.Tasks;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
+using Sdl.Web.Delivery.Core;
 
 namespace Sdl.Web.Tridion.R2Mapping
 {    
@@ -98,10 +99,20 @@ namespace Sdl.Web.Tridion.R2Mapping
         }
 
         public PageModelData GetPageModelData(string urlPath, Localization localization, bool addIncludes)
-            => LoadData<PageModelData>(CreatePageModelRequestUri(urlPath, localization, addIncludes));
+        {
+            uint hash;
+            PageModelData pageModelData = LoadData<PageModelData>(CreatePageModelRequestUri(urlPath, localization, addIncludes), out hash);
+            if(pageModelData != null) pageModelData.SerializationHashCode = hash;
+            return pageModelData;
+        }
 
         public EntityModelData GetEntityModelData(string id, Localization localization)
-            => LoadData<EntityModelData>(CreateEntityModelRequestUri(id, localization));
+        {
+            uint hash;
+            EntityModelData entityModelData = LoadData<EntityModelData>(CreateEntityModelRequestUri(id, localization), out hash);
+            if(entityModelData != null) entityModelData.SerializationHashCode = hash;
+            return entityModelData;
+        }
 
         public TaxonomyNode GetSitemapItem(Localization localization)
             => LoadData<TaxonomyNode>(CreateSitemapItemRequestUri(localization));
@@ -132,9 +143,16 @@ namespace Sdl.Web.Tridion.R2Mapping
 
         private T LoadData<T>(Uri requestUri)
         {
+            uint hash;
+            return LoadData<T>(requestUri, out hash);
+        }
+
+        private T LoadData<T>(Uri requestUri, out uint hash)
+        {
             bool success;
             string responseBody = ProcessRequest(requestUri, out success);
-
+            hash = Murmur3.Hash(responseBody);
+            
             // Deserialize the response body (should be ViewModelData or ModelServiceError)
             ModelServiceError serviceError;
             try
