@@ -22,8 +22,16 @@ namespace Sdl.Web.Mvc.OutputCache
     /// </summary>
     public class DxaOutputCacheAttribute : ActionFilterAttribute
     {
-        private static readonly object CacheKeyStack = new object();
-        private const string DxaDisableOutputCache = "DxaDisableOutputCache";
+        [Serializable]
+        private sealed class OutputCacheItem
+        {
+            public string ContentType { get; set; }
+            public Encoding ContentEncoding { get; set; }
+            public string Content { get; set; }
+        }
+
+        private static readonly object CacheKeyStack = new object();        
+        private static readonly object DisablePageOutputCacheKey = new object();
         private readonly bool _enabled;
         private readonly bool _ignorePreview;
 
@@ -41,61 +49,80 @@ namespace Sdl.Web.Mvc.OutputCache
         public override void OnActionExecuting(ActionExecutingContext ctx)
         {
             if (!_enabled) return;
-
             if (IgnoreCaching(ctx.Controller))
             {
-                var controller = GetTopLevelController(ctx);
-                controller.TempData[DxaDisableOutputCache] = true;
+                return;
             }
 
-            string cachedOutput;
+            OutputCacheItem cachedOutput = null;
             string cacheKey = CalcCacheKey(ctx);
             PushCacheKey(ctx, cacheKey);
             SiteConfiguration.CacheProvider.TryGet(cacheKey, CacheRegions.RenderedOutput, out cachedOutput);
             if (cachedOutput != null)
             {
-                ctx.Result = new ContentResult { Content = cachedOutput };
+                ctx.Result = new ContentResult
+                {
+                    Content = cachedOutput.Content,
+                    ContentType = cachedOutput.ContentType,
+                    ContentEncoding = cachedOutput.ContentEncoding
+                };
             }
         }      
 
         public override void OnResultExecuting(ResultExecutingContext ctx)
         {
             if (!_enabled) return;
+            if(ctx.Result is ContentResult) return;
+            
             if (IgnoreCaching(ctx.Controller))
             {
-                var controller = GetTopLevelController(ctx);
-                controller.TempData[DxaDisableOutputCache] = true;
+                SetDisablePageOutputCache(ctx, true);
             }
-            StringWriter cachingWriter = new StringWriter((IFormatProvider)CultureInfo.InvariantCulture);
-            TextWriter originalWriter = ctx.HttpContext.Response.Output;
-            ViewModel model = ctx.Controller.ViewData.Model as ViewModel;
-            ctx.HttpContext.Response.Output = cachingWriter;
-            SetCallback(ctx, (viewModel, commitCache) =>
+            string cacheKey = PopCacheKey(ctx);
+            if (cacheKey == null) return;
+            OutputCacheItem cachedOutput;
+            SiteConfiguration.CacheProvider.TryGet(cacheKey, CacheRegions.RenderedOutput, out cachedOutput);
+            if (cachedOutput == null)
             {
-                ctx.HttpContext.Response.Output = originalWriter;
-                string html = cachingWriter.ToString();
-                ctx.HttpContext.Response.Write(html);
-                if (!commitCache) return;                
-                // since our model is cached we need to make sure we decorate the markup with XPM markup
-                // as this is done outside the child action normally on a non-cached entity.
-                if (model != null && WebRequestContext.IsPreview)
+                StringWriter cachingWriter = new StringWriter((IFormatProvider) CultureInfo.InvariantCulture);
+                TextWriter originalWriter = ctx.HttpContext.Response.Output;
+                ViewModel model = ctx.Controller.ViewData.Model as ViewModel;
+                ctx.HttpContext.Response.Output = cachingWriter;
+                SetCallback(ctx, (viewModel, commitCache) =>
                 {
-                    html = Markup.TransformXpmMarkupAttributes(html);
-                }
-                html = Markup.DecorateMarkup(new MvcHtmlString(html), model).ToString();
-                // we finally have a fully rendered model's html that we can cache to our region
-                string cacheKey = PopCacheKey(ctx);
-                SiteConfiguration.CacheProvider.Store(cacheKey, CacheRegions.RenderedOutput, html);
-            });
+                    ctx.HttpContext.Response.Output = originalWriter;
+                    string html = cachingWriter.ToString();
+                    ctx.HttpContext.Response.Write(html);
+                    if (!commitCache) return;
+                    // since our model is cached we need to make sure we decorate the markup with XPM markup
+                    // as this is done outside the child action normally on a non-cached entity.
+                    if (model != null && WebRequestContext.IsPreview)
+                    {
+                        html = Markup.TransformXpmMarkupAttributes(html);
+                    }
+                    html = Markup.DecorateMarkup(new MvcHtmlString(html), model).ToString();
+                    OutputCacheItem cacheItem = new OutputCacheItem
+                    {
+                        Content = html,
+                        ContentType = ctx.HttpContext.Response.ContentType,
+                        ContentEncoding = ctx.HttpContext.Response.ContentEncoding
+                    };
+                    // we finally have a fully rendered model's html that we can cache to our region              
+                    SiteConfiguration.CacheProvider.Store(cacheKey, CacheRegions.RenderedOutput, cacheItem);
+                });
+            }
         }
 
         public override void OnResultExecuted(ResultExecutedContext ctx)
         {
             if (!_enabled) return;
+            if (ctx.Result is ContentResult) return;
+
             if (IgnoreCaching(ctx.Controller))
             {
-                var controller = GetTopLevelController(ctx);
-                controller.TempData[DxaDisableOutputCache] = true;
+                //var controller = GetTopLevelController(ctx);
+                //controller.TempData[DxaDisableOutputCache] = true;
+                SetDisablePageOutputCache(ctx, true);
             }
             if (ctx.Exception != null)
             {
@@ -103,8 +130,8 @@ namespace Sdl.Web.Mvc.OutputCache
                 return;
             }
 
-            bool commitCache = ctx.IsChildAction ||
-                               !ctx.Controller.TempData.ContainsKey(DxaDisableOutputCache);
+            bool commitCache = ctx.IsChildAction || !DisablePageOutputCache(ctx);
+            
             ViewModel model = ctx.Controller.ViewData.Model as ViewModel;
             if (ctx.IsChildAction)
             {
@@ -114,8 +141,7 @@ namespace Sdl.Web.Mvc.OutputCache
                 // we just switch over to entity level caching but not for this particular model.             
                 if (model != null && (IgnoreCaching(model) || model.IsVolatile))
                 {
-                    var controller = GetTopLevelController(ctx);
-                    controller.TempData[DxaDisableOutputCache] = true;
+                    SetDisablePageOutputCache(ctx, true);
                     commitCache = false;
                 }
             }
@@ -127,18 +153,7 @@ namespace Sdl.Web.Mvc.OutputCache
             if (callback == null) return;
             RemoveCallback(ctx);
             callback(model, commitCache);
-        }
-
-        private static ControllerBase GetTopLevelController(ControllerContext filterContext)
-        {
-            ViewContext viewContext = filterContext.ParentActionViewContext;
-            if (viewContext == null) return filterContext.Controller;
-            while (viewContext.ParentActionViewContext != null)
-            {
-                viewContext = viewContext.ParentActionViewContext;
-            }
-            return viewContext.Controller;
-        }
+        }      
 
         private static string CalcCacheKey(ActionExecutingContext ctx)
         {
@@ -149,6 +164,21 @@ namespace Sdl.Web.Mvc.OutputCache
                 sb.Append($"{p.Key.GetHashCode()}:{p.Value.GetHashCode()}-");
             }
             return sb.ToString();
+        }
+
+        private static bool DisablePageOutputCache(ControllerContext ctx)
+        {
+            bool result = false;
+            if (ctx.HttpContext.Items.Contains(DisablePageOutputCacheKey))
+            {
+                result = (bool)ctx.HttpContext.Items[DisablePageOutputCacheKey];
+            }
+            return result;
+        }
+
+        private static void SetDisablePageOutputCache(ControllerContext ctx, bool disable)
+        {
+            ctx.HttpContext.Items[DisablePageOutputCacheKey] = disable;
         }
 
         private static string GetKey(ControllerContext ctx)
@@ -183,6 +213,7 @@ namespace Sdl.Web.Mvc.OutputCache
         private static string PopCacheKey(ControllerContext ctx)
         {
             Stack<string> stack = ctx.HttpContext.Items[CacheKeyStack] as Stack<string>;
+            if (stack == null || stack.Count == 0) return null;
             return stack?.Pop();
         }
 
