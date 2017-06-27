@@ -68,8 +68,9 @@ namespace Sdl.Web.Mvc.OutputCache
             }
             StringWriter cachingWriter = new StringWriter((IFormatProvider)CultureInfo.InvariantCulture);
             TextWriter originalWriter = ctx.HttpContext.Response.Output;
+            ViewModel model = ctx.Controller.ViewData.Model as ViewModel;
             ctx.HttpContext.Response.Output = cachingWriter;
-            SetCallback(ctx, (model, commitCache) =>
+            SetCallback(ctx, (viewModel, commitCache) =>
             {
                 ctx.HttpContext.Response.Output = originalWriter;
                 string html = cachingWriter.ToString();
@@ -104,7 +105,7 @@ namespace Sdl.Web.Mvc.OutputCache
 
             bool commitCache = ctx.IsChildAction ||
                                !ctx.Controller.TempData.ContainsKey(DxaDisableOutputCache);
-            EntityModel model = ctx.Controller.ViewData.Model as EntityModel;
+            ViewModel model = ctx.Controller.ViewData.Model as ViewModel;
             if (ctx.IsChildAction)
             {
                 // since we are dealing with a child action it's likely we are working with an entity model. if so we should
@@ -122,7 +123,7 @@ namespace Sdl.Web.Mvc.OutputCache
             // we normally do not want view rendered output cached in preview but we can have the option to turn this off if set in the
             // web.config (for debug/testing purposes)            
             commitCache = (_ignorePreview || !WebRequestContext.IsPreview) && (!IgnoreCaching(ctx.Controller)) && commitCache;
-            Action<EntityModel, bool> callback = GetCallback(ctx);
+            Action<ViewModel,bool> callback = GetCallback(ctx);
             if (callback == null) return;
             RemoveCallback(ctx);
             callback(model, commitCache);
@@ -154,9 +155,9 @@ namespace Sdl.Web.Mvc.OutputCache
         {
             string key = "__dxa__";
             if (ctx.IsChildAction) key += "c";
-            EntityModel model = ctx.Controller.ViewData.Model as EntityModel;
+            ViewModel model = ctx.Controller.ViewData.Model as ViewModel;
             if (model == null) return key;
-            key += model.Id;
+            key += model.GetHashCode();
             return key;
         }
 
@@ -164,9 +165,9 @@ namespace Sdl.Web.Mvc.OutputCache
 
         private static void RemoveCallback(ControllerContext ctx) => ctx.HttpContext.Items.Remove(GetCallbackKeyObject(ctx));
 
-        private static Action<EntityModel, bool> GetCallback(ControllerContext ctx) => ctx.HttpContext.Items[GetCallbackKeyObject(ctx)] as Action<EntityModel, bool>;
+        private static Action<ViewModel,bool> GetCallback(ControllerContext ctx) => ctx.HttpContext.Items[GetCallbackKeyObject(ctx)] as Action<ViewModel,bool>;
 
-        private static void SetCallback(ControllerContext ctx, Action<EntityModel, bool> callback) => ctx.HttpContext.Items[GetCallbackKeyObject(ctx)] = (object)callback;
+        private static void SetCallback(ControllerContext ctx, Action<ViewModel,bool> callback) => ctx.HttpContext.Items[GetCallbackKeyObject(ctx)] = (object)callback;
 
         private static void PushCacheKey(ControllerContext ctx, string key)
         {
