@@ -97,11 +97,15 @@ namespace Sdl.Web.Mvc.OutputCache
                     if (!commitCache) return;
                     // since our model is cached we need to make sure we decorate the markup with XPM markup
                     // as this is done outside the child action normally on a non-cached entity.
-                    if (model != null && WebRequestContext.IsPreview)
+                    // n.b. we should only do this if our text/html content
+                    if (ctx.HttpContext.Response.ContentType.Equals("text/html"))
                     {
-                        html = Markup.TransformXpmMarkupAttributes(html);
+                        if (model != null && WebRequestContext.IsPreview)
+                        {
+                            html = Markup.TransformXpmMarkupAttributes(html);
+                        }
+                        html = Markup.DecorateMarkup(new MvcHtmlString(html), model).ToString();
                     }
-                    html = Markup.DecorateMarkup(new MvcHtmlString(html), model).ToString();
                     OutputCacheItem cacheItem = new OutputCacheItem
                     {
                         Content = html,
