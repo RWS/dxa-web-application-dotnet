@@ -103,12 +103,10 @@ namespace Sdl.Web.Common.Models
         /// </returns>
         public override int GetHashCode()
         {
-            if(Id == null)
-                return base.GetHashCode();
-
-            int h1 = Id?.GetHashCode() ?? 0;
-            int h2 = HtmlClasses?.GetHashCode() ?? 0;          
-            return Hash.CombineHashCodes(h1, h2);
+            int h0 = Id?.GetHashCode() ?? base.GetHashCode();
+            int h1 = HtmlClasses?.GetHashCode() ?? 0;
+            int h2 = MvcData?.GetHashCode() ?? 0;
+            return Hash.CombineHashCodes(h0, h1, h2);
         }
 
         /// <summary>
