@@ -3,6 +3,7 @@ using System.Web.Mvc;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Common;
+using Sdl.Web.Mvc.OutputCache;
 
 namespace Sdl.Web.Mvc.Controllers
 {
@@ -15,6 +16,7 @@ namespace Sdl.Web.Mvc.Controllers
         /// <param name="containerSize">The size (in grid units) of the container the entity is in</param>
         /// <returns>Rendered list entity model</returns>
         [HandleSectionError(View = "SectionError")]
+        [DxaOutputCache]
         public ActionResult List(EntityModel entity, int containerSize = 0)
         {
             // The List action is effectively just an alias for the general Entity action (we keep it for backward compatibility).

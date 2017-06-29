@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
+﻿using System.Collections.Generic;
 using System.Web.Mvc;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
@@ -9,6 +7,7 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.Mvc.Configuration;
+using Sdl.Web.Mvc.OutputCache;
 
 namespace Sdl.Web.Mvc.Controllers
 {
@@ -22,6 +21,7 @@ namespace Sdl.Web.Mvc.Controllers
         /// <param name="containerSize">The size (in grid units) of the container the navigation element is in</param>
         /// <returns></returns>
         [HandleSectionError(View = "SectionError")]
+        [DxaOutputCache]
         public virtual ActionResult Navigation(EntityModel entity, string navType, int containerSize = 0)
         {
             using (new Tracer(entity, navType, containerSize))

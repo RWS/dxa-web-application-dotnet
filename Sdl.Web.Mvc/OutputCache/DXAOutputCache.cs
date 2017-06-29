@@ -20,6 +20,7 @@ namespace Sdl.Web.Mvc.OutputCache
     /// Allows view rendering output caching using the Dxa caching mechanism. Any Entity Models that should not be cached
     /// on the page can be annotated with the [DxaNoOutputCache] attribute.
     /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public class DxaOutputCacheAttribute : ActionFilterAttribute
     {
         [Serializable]
