@@ -126,10 +126,10 @@ namespace Sdl.Web.Tridion.R2Mapping
                            if (pageModel.NoCache || pageModel.IsVolatile || pageModel.HasNoCacheAttribute)
                            {
                                // this page has been marked to no caching so we return null to prevent a cache write                               
-                               Log.Trace($"PageModel with id={pageModelData.Id} includePageRegions={includePageRegions} localization={localization.Id} was marked for no caching.");
+                               Log.Trace($"PageModel with id={pageModelData.Id} MvcData={pageModel.MvcData} includePageRegions={includePageRegions} localization={localization.Id} was marked for no caching.");
                                return null;
                            }
-                           Log.Trace($"PageModel with id={pageModelData.Id} includePageRegions={includePageRegions} localization={localization.Id} added to cache.");
+                           Log.Trace($"PageModel with id={pageModelData.Id} MvcData={pageModel.MvcData} includePageRegions={includePageRegions} localization={localization.Id} added to cache.");
                            return pageModel;
                        }
                        );
@@ -183,11 +183,11 @@ namespace Sdl.Web.Tridion.R2Mapping
                            if (entityModel.IsVolatile || entityModel.HasNoCacheAttribute)
                            {
                                // this entity has been marked for no caching so we return null to prevent a cache write                         
-                               Log.Trace($"EntityModel with id={entityModelData.Id} localization={localization.Id} was marked for no caching.");
+                               Log.Trace($"EntityModel with id={entityModelData.Id} MvcData={entityModel.MvcData} localization={localization.Id} was marked for no caching.");
                                entityModel.IsVolatile = true;
                                return null;
                            }
-                           Log.Trace($"EntityModel with id={entityModelData.Id} localization={localization.Id} was added to cache.");
+                           Log.Trace($"EntityModel with id={entityModelData.Id} MvcData={entityModel.MvcData} localization={localization.Id} was added to cache.");
                            return entityModel;
                        }
                        );

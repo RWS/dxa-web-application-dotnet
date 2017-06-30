@@ -8,6 +8,7 @@ using System.Web.Configuration;
 using System.Web.Mvc;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.Html;
@@ -114,6 +115,7 @@ namespace Sdl.Web.Mvc.OutputCache
                     };
                     // we finally have a fully rendered model's html that we can cache to our region              
                     SiteConfiguration.CacheProvider.Store(cacheKey, CacheRegions.RenderedOutput, cacheItem);
+                    Log.Trace($"ViewModel={viewModel.MvcData} added to DxaOutputCache.");
                 });
             }
         }
@@ -148,6 +150,7 @@ namespace Sdl.Web.Mvc.OutputCache
                 {
                     SetDisablePageOutputCache(ctx, true);
                     commitCache = false;
+                    Log.Trace($"ViewModel={model.MvcData} is marked not to be added to DxaOutputCache.");
                 }
             }
 
