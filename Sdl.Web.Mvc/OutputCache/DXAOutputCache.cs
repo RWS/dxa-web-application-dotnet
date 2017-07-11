@@ -51,6 +51,7 @@ namespace Sdl.Web.Mvc.OutputCache
         public override void OnActionExecuting(ActionExecutingContext ctx)
         {
             if (!_enabled) return;
+            if(ctx.Controller.ViewData[DxaViewDataItems.DisableOutputCache] != null && (bool)ctx.Controller.ViewData[DxaViewDataItems.DisableOutputCache]) return;
             if (IgnoreCaching(ctx.Controller))
             {
                 return;

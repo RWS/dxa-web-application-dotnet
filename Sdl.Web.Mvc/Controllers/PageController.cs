@@ -20,8 +20,8 @@ namespace Sdl.Web.Mvc.Controllers
         /// </summary>
         /// <param name="pageUrl">The page URL path (unescaped).</param>
         /// <returns>Rendered Page View Model</returns>
-        [FormatData]
         [DxaOutputCache]
+        [FormatData] // must come first in execution order before output cache      
         public virtual ActionResult Page(string pageUrl)
         {
             // The pageUrl parameter provided by ASP.NET MVC is relative to the Web App, but we need a server-relative (i.e. absolute) URL path.
