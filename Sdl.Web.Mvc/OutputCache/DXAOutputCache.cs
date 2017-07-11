@@ -116,7 +116,7 @@ namespace Sdl.Web.Mvc.OutputCache
                     };
                     // we finally have a fully rendered model's html that we can cache to our region              
                     SiteConfiguration.CacheProvider.Store(cacheKey, CacheRegions.RenderedOutput, cacheItem);
-                    Log.Trace($"ViewModel={viewModel.MvcData} added to DxaOutputCache.");
+                    if(viewModel!=null) Log.Trace($"ViewModel={viewModel.MvcData} added to DxaOutputCache.");
                 });
             }
         }
