@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using System;
+using System.Globalization;
 using System.Linq;
 
 namespace Sdl.Web.Common.Models
@@ -16,6 +17,7 @@ namespace Sdl.Web.Common.Models
     {
         private const string XpmPageSettingsMarkup = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\"}} -->";
         private const string XpmPageScript = "<script type=\"text/javascript\" language=\"javascript\" defer=\"defer\" src=\"{0}/WebUI/Editors/SiteEdit/Views/Bootstrap/Bootstrap.aspx?mode=js\" id=\"tridion.siteedit\"></script>";
+        private const string XpmDateTimeFormat = "yyyy-MM-ddTHH:mm:ss";
 
         /// <summary>
         /// Gets the Page Regions.
@@ -107,10 +109,9 @@ namespace Sdl.Web.Common.Models
             return string.Format(
                 XpmPageSettingsMarkup,
                 XpmMetadata["PageID"],
-                XpmMetadata["PageModified"],
+                ((DateTime)XpmMetadata["PageModified"]).ToString(XpmDateTimeFormat, CultureInfo.InvariantCulture),
                 XpmMetadata["PageTemplateID"],
-                XpmMetadata["PageTemplateModified"]
-                ) +
+                ((DateTime)XpmMetadata["PageTemplateModified"]).ToString(XpmDateTimeFormat, CultureInfo.InvariantCulture)) +
                 string.Format(XpmPageScript, cmsUrl);
         }
 
