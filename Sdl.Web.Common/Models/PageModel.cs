@@ -109,10 +109,18 @@ namespace Sdl.Web.Common.Models
             return string.Format(
                 XpmPageSettingsMarkup,
                 XpmMetadata["PageID"],
-                ((DateTime)XpmMetadata["PageModified"]).ToString(XpmDateTimeFormat, CultureInfo.InvariantCulture),
+                GetDateTimeStr(XpmMetadata["PageModified"]),             
                 XpmMetadata["PageTemplateID"],
-                ((DateTime)XpmMetadata["PageTemplateModified"]).ToString(XpmDateTimeFormat, CultureInfo.InvariantCulture)) +
+                GetDateTimeStr(XpmMetadata["PageTemplateModified"])) +
                 string.Format(XpmPageScript, cmsUrl);
+        }
+
+        private static string GetDateTimeStr(object datetime)
+        {
+            // legacy will pass a string here but R2 uses DateTime and so must be converted to the right
+            // format
+            var s = datetime as string;
+            return s ?? ((DateTime) datetime).ToString(XpmDateTimeFormat, CultureInfo.InvariantCulture);
         }
 
         #endregion
