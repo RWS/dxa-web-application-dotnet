@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.0.0-alpha-201703201047</SdlDxaDataModelPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.0.0-beta-201707211209</SdlDxaDataModelPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -57,9 +57,10 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.DataModel">
-	  <HintPath>..\packages\Sdl.Dxa.DataModel.$(SdlDxaDataModelPackageVersion)\lib\net452\Sdl.Web.DataModel.dll</HintPath>
+      <HintPath>..\packages\Sdl.Dxa.DataModel.$(SdlDxaDataModelPackageVersion)\lib\net452\Sdl.Web.DataModel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
@@ -85,6 +86,8 @@
     <Compile Include="Constants.cs" />
     <Compile Include="DxaException.cs" />
     <Compile Include="DxaItemNotFoundException.cs" />
+    <Compile Include="DxaNoCacheAttribute.cs" />
+    <Compile Include="DxaNoOutputCacheAttribute.cs" />
     <Compile Include="DxaUnkownLocalizationException.cs" />
     <Compile Include="Extensions\LinkExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
@@ -142,6 +145,7 @@
     <Compile Include="Models\ModelTypeRegistry.cs" />
     <Compile Include="Models\Query\Query.cs" />
     <Compile Include="Models\Query\SimpleBrokerQuery.cs" />
+    <Compile Include="Utils\Hash.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Interfaces\ExtensionPoints.cd" />

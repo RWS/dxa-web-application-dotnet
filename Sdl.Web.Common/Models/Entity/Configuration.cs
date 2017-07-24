@@ -3,6 +3,7 @@ using System.Collections.Generic;
 namespace Sdl.Web.Common.Models
 {
     [Serializable]
+    [DxaNoOutputCache]
     public class Configuration : EntityModel
     {
         [SemanticProperty("_all")]

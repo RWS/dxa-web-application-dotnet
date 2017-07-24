@@ -23,8 +23,7 @@ namespace Sdl.Web.Common.Models
 
         [SemanticProperty(IgnoreMapping = true)]
         public bool HasMore { get; set; }
-
-        [JsonIgnore]
+        
         [SemanticProperty(IgnoreMapping = true)]
         public List<EntityModel> QueryResults { get; set; }
 

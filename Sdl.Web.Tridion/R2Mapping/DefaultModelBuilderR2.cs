@@ -89,6 +89,7 @@ namespace Sdl.Web.Tridion.R2Mapping
                 {
                     IEnumerable<RegionModelData> regions = includePageRegions ? pageModelData.Regions : pageModelData.Regions.Where(r => r.IncludePageId == null);
                     pageModel.Regions.UnionWith(regions.Select(data => CreateRegionModel(data, localization)));
+                    pageModel.IsVolatile |= pageModel.Regions.Any(region => region.IsVolatile);
                 }
             }
         }
@@ -675,6 +676,7 @@ namespace Sdl.Web.Tridion.R2Mapping
             {
                 IEnumerable<RegionModel> nestedRegionModels = regionModelData.Regions.Select(data => CreateRegionModel(data, localization));
                 result.Regions.UnionWith(nestedRegionModels);
+                result.IsVolatile |= result.Regions.Any(region => region.IsVolatile);
             }
 
             if (regionModelData.Entities != null)
@@ -685,6 +687,8 @@ namespace Sdl.Web.Tridion.R2Mapping
                     try
                     {
                         entityModel = ModelBuilderPipelineR2.CreateEntityModel(entityModelData, null, localization);
+                        // indicate to region model that this region is potentially volatile if it contains a volatile entity
+                        result.IsVolatile |= entityModel.IsVolatile;
                         entityModel.MvcData.RegionName = regionModelData.Name;
                     }
                     catch (Exception ex)

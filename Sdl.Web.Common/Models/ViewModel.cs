@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ServiceModel.Syndication;
+using Newtonsoft.Json;
 using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
@@ -141,6 +142,20 @@ namespace Sdl.Web.Common.Models
             return result;
         }
         #endregion
+
+        /// <summary>
+        /// Returns true if View Model is volatile and should not be cached
+        /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
+        [JsonIgnore]
+        public virtual bool IsVolatile { get; set; }
+
+        /// <summary>
+        /// Returns true if View Model has been annotated with the DxaNoCacheAttribute
+        /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
+        [JsonIgnore]
+        public bool HasNoCacheAttribute => Attribute.GetCustomAttribute(GetType(), typeof (DxaNoCacheAttribute)) != null;
 
         /// <summary>
         /// Creates a deep copy of this View Model.

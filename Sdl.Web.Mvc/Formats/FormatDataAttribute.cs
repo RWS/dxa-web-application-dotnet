@@ -18,8 +18,13 @@ namespace Sdl.Web.Mvc.Formats
             IDataFormatter formatter = DataFormatters.GetFormatter(filterContext);
             if (formatter != null)
             {
+                filterContext.Controller.ViewData[DxaViewDataItems.DisableOutputCache] = true;
                 filterContext.Controller.ViewData[DxaViewDataItems.DataFormatter] = formatter;
                 filterContext.Controller.ViewData[DxaViewDataItems.AddIncludes] = formatter.AddIncludes;
+            }
+            else
+            {
+                filterContext.Controller.ViewData[DxaViewDataItems.DisableOutputCache] = false;
             }
             base.OnActionExecuting(filterContext);
         }

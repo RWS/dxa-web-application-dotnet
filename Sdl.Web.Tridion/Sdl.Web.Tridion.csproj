@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.0.0-alpha-201703201047</SdlDxaDataModelPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.0.0-beta-201707211209</SdlDxaDataModelPackageVersion>
     <SdlWebDeliveryPackageVersion>8.5.0</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>8.5.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>8.5.0</SdlWebContextImagePackageVersion>
@@ -97,6 +97,10 @@
     <Reference Include="Sdl.Web.Delivery.Caching">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.Caching.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.Delivery.Core, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.Core.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Delivery.DiscoveryService, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -208,6 +212,8 @@
     <Compile Include="Mapping\ModelBuilderPipeline.cs" />
     <Compile Include="Mapping\PublicationResolver.cs" />
     <Compile Include="Navigation\DynamicNavigationProvider.cs" />
+    <Compile Include="Navigation\ModelServiceImpl\DynamicNavigationProvider.cs" />
+    <Compile Include="Navigation\CILImpl\DynamicNavigationProvider.cs" />
     <Compile Include="Navigation\StaticNavigationProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query\BrokerQuery.cs" />

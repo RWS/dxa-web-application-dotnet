@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
+﻿using System.Collections.Generic;
 using System.Web.Mvc;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;

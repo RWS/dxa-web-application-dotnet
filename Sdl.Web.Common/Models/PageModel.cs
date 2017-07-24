@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using System;
+using System.Globalization;
 using System.Linq;
 
 namespace Sdl.Web.Common.Models
@@ -16,6 +17,7 @@ namespace Sdl.Web.Common.Models
     {
         private const string XpmPageSettingsMarkup = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\"}} -->";
         private const string XpmPageScript = "<script type=\"text/javascript\" language=\"javascript\" defer=\"defer\" src=\"{0}/WebUI/Editors/SiteEdit/Views/Bootstrap/Bootstrap.aspx?mode=js\" id=\"tridion.siteedit\"></script>";
+        private const string XpmDateTimeFormat = "yyyy-MM-ddTHH:mm:ss";
 
         /// <summary>
         /// Gets the Page Regions.
@@ -46,13 +48,18 @@ namespace Sdl.Web.Common.Models
         /// Gets or sets the identifier for the Page.
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
-        public string Id { get; }
+        public string Id { get; private set; }
 
         /// <summary>
         /// Gets or sets the Title of the Page which is typically rendered as HTML title tag.
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
         public string Title { get; set; }
+
+        public PageModel()
+        {
+            // required for deserialization
+        }
 
         /// <summary>
         /// Initializes a new instance of PageModel.
@@ -102,11 +109,18 @@ namespace Sdl.Web.Common.Models
             return string.Format(
                 XpmPageSettingsMarkup,
                 XpmMetadata["PageID"],
-                XpmMetadata["PageModified"],
+                GetDateTimeStr(XpmMetadata["PageModified"]),             
                 XpmMetadata["PageTemplateID"],
-                XpmMetadata["PageTemplateModified"]
-                ) +
+                GetDateTimeStr(XpmMetadata["PageTemplateModified"])) +
                 string.Format(XpmPageScript, cmsUrl);
+        }
+
+        private static string GetDateTimeStr(object datetime)
+        {
+            // legacy will pass a string here but R2 uses DateTime and so must be converted to the right
+            // format
+            var s = datetime as string;
+            return s ?? ((DateTime) datetime).ToString(XpmDateTimeFormat, CultureInfo.InvariantCulture);
         }
 
         #endregion

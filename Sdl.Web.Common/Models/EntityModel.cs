@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Utils;
 
 namespace Sdl.Web.Common.Models
 {
@@ -10,7 +12,7 @@ namespace Sdl.Web.Common.Models
     /// </summary>
     [Serializable]
     public abstract class EntityModel : ViewModel, IRichTextFragment
-    {
+    {       
         /// <summary>
         /// Gets or sets the identifier for the Entity.
         /// </summary>
@@ -100,7 +102,12 @@ namespace Sdl.Web.Common.Models
         /// A hash code for the current Entity Model.
         /// </returns>
         public override int GetHashCode()
-            => (Id == null) ? base.GetHashCode() : Id.GetHashCode();
+        {
+            int h0 = Id?.GetHashCode() ?? base.GetHashCode();
+            int h1 = HtmlClasses?.GetHashCode() ?? 0;
+            int h2 = MvcData?.GetHashCode() ?? 0;
+            return Hash.CombineHashCodes(h0, h1, h2);
+        }
 
         /// <summary>
         /// Returns a string that represents the current object.

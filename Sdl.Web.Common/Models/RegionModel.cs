@@ -36,7 +36,7 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Gets or sets the name of the Region.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Gets the Entities that the Region contains.
@@ -49,6 +49,12 @@ namespace Sdl.Web.Common.Models
         public RegionModelSet Regions { get; private set; } = new RegionModelSet();
 
         #region Constructors
+
+        public RegionModel()
+        {
+            
+        }
+
         /// <summary>
         /// Initializes a new <see cref="RegionModel"/> instance.
         /// </summary>

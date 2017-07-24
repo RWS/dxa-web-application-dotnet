@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Models;
 using Sdl.Web.Delivery.Caching;
 
 namespace Sdl.Web.Tridion.Caching
@@ -22,12 +25,12 @@ namespace Sdl.Web.Tridion.Caching
         /// <param name="dependencies">An optional set of dependent item IDs. Can be used to invalidate the cached item.</param>
         /// <typeparam name="T">The type of the value to add.</typeparam>
         public override void Store<T>(string key, string region, T value, IEnumerable<string> dependencies = null)
-        {
-            _cilCacheProvider.Remove(key, region);
+        {      
+            _cilCacheProvider.Remove(key, region);  //TODO: remove when using latest UDP version since this is no longer needed
             if (value != null)
             {
                 _cilCacheProvider.Set(key, value, region);
-            }
+            }          
         }
 
         /// <summary>

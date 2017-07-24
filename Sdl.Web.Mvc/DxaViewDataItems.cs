@@ -10,5 +10,6 @@
         public const string ContainerSize = "ContainerSize";
         public const string AddIncludes = "AddIncludes";
         public const string DataFormatter = "DataFormatter";
+        public const string DisableOutputCache = "DisableOutputCache";
     }
 }
