@@ -10,7 +10,6 @@ using DD4T.Providers.SDLWeb85.CIL;
 using DD4T.Utils;
 using DD4T.Utils.Caching;
 using Sdl.Web.Common.Configuration;
-using Sdl.Web.Legacy;
 using Sdl.Web.Tridion.Caching;
 
 namespace Sdl.Web.Tridion.Mapping
