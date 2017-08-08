@@ -45,30 +45,6 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DD4T.ContentModel">
-      <HintPath>..\packages\DD4T.Model.2.1.0\lib\net45\DD4T.ContentModel.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="DD4T.ContentModel.Contracts">
-      <HintPath>..\packages\DD4T.Model.2.1.0\lib\net45\DD4T.ContentModel.Contracts.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="DD4T.Core.Contracts">
-      <HintPath>..\packages\DD4T.Core.2.1.1.144-alpha\lib\net45\DD4T.Core.Contracts.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="DD4T.Factories">
-      <HintPath>..\packages\DD4T.Core.2.1.1.144-alpha\lib\net45\DD4T.Factories.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="DD4T.Serialization">
-      <HintPath>..\packages\DD4T.Model.2.1.0\lib\net45\DD4T.Serialization.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="DD4T.Utils">
-      <HintPath>..\packages\DD4T.Core.2.1.1.144-alpha\lib\net45\DD4T.Utils.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.Extensions.Caching.Abstractions">
       <HintPath>..\packages\Microsoft.Extensions.Caching.Abstractions.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Caching.Abstractions.dll</HintPath>
     </Reference>
@@ -88,8 +64,7 @@
       <HintPath>..\packages\Microsoft.Extensions.Primitives.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Primitives.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.DataModel">
       <HintPath>..\packages\Sdl.Dxa.DataModel.$(SdlDxaDataModelPackageVersion)\lib\net452\Sdl.Web.DataModel.dll</HintPath>
@@ -118,6 +93,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
     </Reference>
+    <Reference Include="Sdl.Web.Legacy">
+      <HintPath>..\Sdl.Web.Legacy\bin\Debug\Sdl.Web.Legacy.dll</HintPath>
+    </Reference>
     <Reference Include="StackExchange.Redis.StrongName">
       <HintPath>..\packages\StackExchange.Redis.StrongName.1.1.605\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>
     </Reference>
@@ -131,19 +109,19 @@
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.Data.Edm">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Data.Edm.5.6.4\lib\net40\Microsoft.Data.Edm.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Data.Edm.5.8.2\lib\net40\Microsoft.Data.Edm.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Data.OData">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Data.OData.5.6.4\lib\net40\Microsoft.Data.OData.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Data.OData.5.8.2\lib\net40\Microsoft.Data.OData.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Data.Services.Client">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Data.Services.Client.5.6.4\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Data.Services.Client.5.8.2\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
     </Reference>
     <Reference Include="System.Spatial">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\System.Spatial.5.6.4\lib\net40\System.Spatial.dll</HintPath>
+      <HintPath>..\packages\System.Spatial.5.8.2\lib\net40\System.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.OData.Client">
       <SpecificVersion>False</SpecificVersion>
@@ -160,10 +138,6 @@
     <Reference Include="Microsoft.Spatial">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Spatial.6.15.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
-    </Reference>
-    <Reference Include="DD4T.Providers.SDLWeb8.CIL">
-      <HintPath>..\packages\DD4T.Providers.SDLWeb8.CIL.2.1.0\lib\net45\DD4T.Providers.SDLWeb8.CIL.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="Tridion.ContentDelivery">
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Tridion.ContentDelivery.dll</HintPath>

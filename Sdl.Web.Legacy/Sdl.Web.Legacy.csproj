@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{266CF812-C726-47ED-9F6E-2D6A5C1BCBB0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Sdl.Web.Legacy</RootNamespace>
+    <AssemblyName>Sdl.Web.Legacy.Temp</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PostBuildEvent>"C:\Program Files (x86)\Microsoft\ILMerge\ILMerge.exe"  ^
+    /wildcards ^
+    /targetplatform:v4 ^
+    /out:Sdl.Web.Legacy.dll Sdl.Web.Legacy.Temp.dll $(SolutionDir)DD4T\build\bin\DD4T*.dll   
+    </PostBuildEvent>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="LegacyClassTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DD4T\DD4T.ContentModel.Contracts\DD4T.ContentModel.Contracts.csproj">
+      <Project>{c21f66f0-01ce-4af3-b76c-cd262b7ea1c0}</Project>
+      <Name>DD4T.ContentModel.Contracts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.ContentModel\DD4T.ContentModel.csproj">
+      <Project>{83f5cfc2-14d5-4190-b51d-7af7a69b67e9}</Project>
+      <Name>DD4T.ContentModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Core.Contracts\DD4T.Core.Contracts.csproj">
+      <Project>{f90a1191-cd6e-4016-9005-b28a96f7964e}</Project>
+      <Name>DD4T.Core.Contracts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Factories\DD4T.Factories.csproj">
+      <Project>{9e96efe0-7478-4551-a47a-1f04b9f01df7}</Project>
+      <Name>DD4T.Factories</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\DD4T.Providers.SDLWeb8.5.CIL.csproj">
+      <Project>{425402d5-e8ad-427a-8a0c-3cfd4391d533}</Project>
+      <Name>DD4T.Providers.SDLWeb8.5.CIL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Serialization\DD4T.Serialization.csproj">
+      <Project>{849a21d3-5863-4c43-98d3-6b8b83b9300f}</Project>
+      <Name>DD4T.Serialization</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Utils\DD4T.Utils.csproj">
+      <Project>{d2ce08be-7281-4697-adfe-e7a031cb59ec}</Project>
+      <Name>DD4T.Utils</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.ViewModels\DD4T.ViewModels.csproj">
+      <Project>{cc2b55da-ffbc-44b9-ada5-c087876ac199}</Project>
+      <Name>DD4T.ViewModels</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="DD4T.ContentModel.XmlSerializers">
+      <HintPath>..\DD4T\build\bin\DD4T.ContentModel.XmlSerializers.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

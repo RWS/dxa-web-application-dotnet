@@ -6,10 +6,11 @@ using DD4T.ContentModel.Contracts.Providers;
 using DD4T.ContentModel.Contracts.Resolvers;
 using DD4T.ContentModel.Factories;
 using DD4T.Factories;
-using DD4T.Providers.SDLWeb8.CIL;
+using DD4T.Providers.SDLWeb85.CIL;
 using DD4T.Utils;
 using DD4T.Utils.Caching;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Legacy;
 using Sdl.Web.Tridion.Caching;
 
 namespace Sdl.Web.Tridion.Mapping

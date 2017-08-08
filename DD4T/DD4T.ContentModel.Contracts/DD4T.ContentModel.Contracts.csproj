@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C21F66F0-01CE-4AF3-B76C-CD262B7EA1C0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DD4T.ContentModel.Contracts</RootNamespace>
+    <AssemblyName>DD4T.ContentModel.Contracts</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\build\bin</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\build\bin</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>dynamicdelivery.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="IBinaryMeta.cs" />
+    <Compile Include="ICondition.cs" />
+    <Compile Include="IModel.cs" />
+    <Compile Include="IItem.cs" />
+    <Compile Include="IFieldSet.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="IBinary.cs" />
+    <Compile Include="ICategory.cs" />
+    <Compile Include="IComponent.cs" />
+    <Compile Include="IComponentMeta.cs" />
+    <Compile Include="IComponentPresentation.cs" />
+    <Compile Include="IComponentTemplate.cs" />
+    <Compile Include="IField.cs" />
+    <Compile Include="IKeyword.cs" />
+    <Compile Include="IMultimedia.cs" />
+    <Compile Include="ITargetGroup.cs" />
+    <Compile Include="IOrganizationalItem.cs" />
+    <Compile Include="IPage.cs" />
+    <Compile Include="IPageTemplate.cs" />
+    <Compile Include="IPublication.cs" />
+    <Compile Include="IRepositoryLocal.cs" />
+    <Compile Include="ISchema.cs" />
+    <Compile Include="ITargetGroupCondition.cs" />
+    <Compile Include="ITemplate.cs" />
+    <Compile Include="IViewable.cs" />
+    <Compile Include="Properties\SpecificAssemblyInfo.cs" />
+    <Compile Include="Serializing\ISerializationProperties.cs" />
+    <Compile Include="Serializing\ISerializerService.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ContentModelContractsClassDiagram.cd" />
+    <None Include="dynamicdelivery.snk" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
