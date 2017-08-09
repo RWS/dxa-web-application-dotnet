@@ -92,10 +92,7 @@
     <Reference Include="Sdl.Web.Delivery.ServicesCore, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
-    </Reference>
-    <Reference Include="Sdl.Web.Legacy">
-      <HintPath>..\Sdl.Web.Legacy\bin\Debug\Sdl.Web.Legacy.dll</HintPath>
-    </Reference>
+    </Reference>   
     <Reference Include="StackExchange.Redis.StrongName">
       <HintPath>..\packages\StackExchange.Redis.StrongName.1.1.605\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>
     </Reference>
@@ -157,6 +154,10 @@
     <Reference Include="Sdl.Web.Context.OData.Client">
       <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
+    <Reference Include="Sdl.Web.Legacy">
+      <HintPath>..\Sdl.Web.Legacy\bin\$(Configuration)\Sdl.Web.Legacy.dll</HintPath>
+    </Reference>
+
     <Compile Include="Caching\CacheProvider.cs" />
     <Compile Include="Caching\DD4TCacheAgentAdapter.cs" />
     <Compile Include="Caching\DefaultCacheProvider.cs" />
