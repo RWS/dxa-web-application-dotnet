@@ -70,6 +70,10 @@
       <Project>{9e96efe0-7478-4551-a47a-1f04b9f01df7}</Project>
       <Name>DD4T.Factories</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.MVC5\DD4T.MVC5.csproj">
+      <Project>{02f3851b-93d2-4b29-880e-ffb274ddaf34}</Project>
+      <Name>DD4T.MVC5</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\DD4T.Providers.SDLWeb8.5.CIL.csproj">
       <Project>{425402d5-e8ad-427a-8a0c-3cfd4391d533}</Project>
       <Name>DD4T.Providers.SDLWeb8.5.CIL</Name>
@@ -85,6 +89,10 @@
     <ProjectReference Include="..\DD4T\DD4T.ViewModels\DD4T.ViewModels.csproj">
       <Project>{cc2b55da-ffbc-44b9-ada5-c087876ac199}</Project>
       <Name>DD4T.ViewModels</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Web.MVC5\DD4T.Web.MVC5.csproj">
+      <Project>{7809cf7e-2902-419b-8e71-890512fab6a3}</Project>
+      <Name>DD4T.Web.MVC5</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>
