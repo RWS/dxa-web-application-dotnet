@@ -40,11 +40,11 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>"C:\Program Files (x86)\Microsoft\ILMerge\ILMerge.exe"  ^
+    <PreBuildEvent>"C:\Program Files (x86)\Microsoft\ILMerge\ILMerge.exe"  ^
     /wildcards ^
     /targetplatform:v4 ^
     /out:Sdl.Web.Legacy.dll Sdl.Web.Legacy.Temp.dll $(OutputDir)DD4T*.dll   
-    </PostBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\DD4T\DD4T.ContentModel.Contracts\DD4T.ContentModel.Contracts.csproj">
