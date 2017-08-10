@@ -70,6 +70,10 @@
       <Project>{9e96efe0-7478-4551-a47a-1f04b9f01df7}</Project>
       <Name>DD4T.Factories</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Logging.Log4net\DD4T.Logging.Log4net.csproj">
+      <Project>{718ed623-028b-496d-805a-6acd3c2fd2b4}</Project>
+      <Name>DD4T.Logging.Log4net</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DD4T\DD4T.MVC5\DD4T.MVC5.csproj">
       <Project>{02f3851b-93d2-4b29-880e-ffb274ddaf34}</Project>
       <Name>DD4T.MVC5</Name>
