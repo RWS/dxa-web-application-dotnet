@@ -79,6 +79,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DD4T.DI.Unity", "DD4T\DD4T.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DD4T.Providers.SDLWeb8.CIL", "DD4T\DD4T.Providers.SDLWeb8.CIL\DD4T.Providers.SDLWeb8.CIL.csproj", "{BF052B64-B588-46B1-9B8B-08034EC3740D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Legacy.DataModel", "Sdl.Web.Legacy.DataModel\Sdl.Web.Legacy.DataModel.csproj", "{56203D9C-DF21-4DBF-860C-02CC63FE94EF}"
+EndProject
 Global
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
@@ -181,6 +183,10 @@ Global
 		{BF052B64-B588-46B1-9B8B-08034EC3740D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF052B64-B588-46B1-9B8B-08034EC3740D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF052B64-B588-46B1-9B8B-08034EC3740D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56203D9C-DF21-4DBF-860C-02CC63FE94EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56203D9C-DF21-4DBF-860C-02CC63FE94EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56203D9C-DF21-4DBF-860C-02CC63FE94EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56203D9C-DF21-4DBF-860C-02CC63FE94EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

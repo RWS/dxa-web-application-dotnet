@@ -21,7 +21,7 @@
         </references>
         <dependencies>
             <!-- NOTE: We don't use package dependencies for everything, because we don't want direct references to transitive dependencies and the explicit reference above don't control those.-->
-            <dependency id="Newtonsoft.Json" version="7.0.0" />
+            <dependency id="Newtonsoft.Json" version="10.0.0" />
             <dependency id="Sdl.Web.Delivery" version="8.5.0" />
             <dependency id="Sdl.Web.Context.Image" version="8.5.0" />
             <dependency id="Sdl.Web.Context.Client" version="8.5.0" />
