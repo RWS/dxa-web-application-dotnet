@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{266CF812-C726-47ED-9F6E-2D6A5C1BCBB0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Sdl.Web.Legacy</RootNamespace>
+    <AssemblyName>Sdl.Web.Legacy.Temp</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>"C:\Program Files (x86)\Microsoft\ILMerge\ILMerge.exe"  ^
+    /wildcards ^
+    /targetplatform:v4 ^
+    /out:Sdl.Web.Legacy.dll Sdl.Web.Legacy.Temp.dll $(OutputDir)DD4T*.dll   
+</PostBuildEvent>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DD4T\DD4T.Caching.ApacheMQ\DD4T.Caching.ApacheMQ.csproj">
+      <Project>{77983c8a-f783-450d-9d0c-d7b5c6d9a6b2}</Project>
+      <Name>DD4T.Caching.ApacheMQ</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.ContentModel.Contracts\DD4T.ContentModel.Contracts.csproj">
+      <Project>{c21f66f0-01ce-4af3-b76c-cd262b7ea1c0}</Project>
+      <Name>DD4T.ContentModel.Contracts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.ContentModel\DD4T.ContentModel.csproj">
+      <Project>{83f5cfc2-14d5-4190-b51d-7af7a69b67e9}</Project>
+      <Name>DD4T.ContentModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Core.Contracts\DD4T.Core.Contracts.csproj">
+      <Project>{f90a1191-cd6e-4016-9005-b28a96f7964e}</Project>
+      <Name>DD4T.Core.Contracts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.DI.Autofac\DD4T.DI.Autofac.csproj">
+      <Project>{ee699f46-d354-4384-88b8-ef9daf4586f4}</Project>
+      <Name>DD4T.DI.Autofac</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.DI.Ninject\DD4T.DI.Ninject.csproj">
+      <Project>{df35e8fc-35cb-4ad3-af29-36f07964a17c}</Project>
+      <Name>DD4T.DI.Ninject</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.DI.Unity\DD4T.DI.Unity.csproj">
+      <Project>{872f961b-88e7-4a64-ba3c-9d809e236ba8}</Project>
+      <Name>DD4T.DI.Unity</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Factories\DD4T.Factories.csproj">
+      <Project>{9e96efe0-7478-4551-a47a-1f04b9f01df7}</Project>
+      <Name>DD4T.Factories</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Logging.Log4net\DD4T.Logging.Log4net.csproj">
+      <Project>{718ed623-028b-496d-805a-6acd3c2fd2b4}</Project>
+      <Name>DD4T.Logging.Log4net</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.MVC5\DD4T.MVC5.csproj">
+      <Project>{02f3851b-93d2-4b29-880e-ffb274ddaf34}</Project>
+      <Name>DD4T.MVC5</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\DD4T.Providers.SDLWeb8.5.CIL.csproj">
+      <Project>{425402d5-e8ad-427a-8a0c-3cfd4391d533}</Project>
+      <Name>DD4T.Providers.SDLWeb8.5.CIL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Providers.SDLWeb8.CIL\DD4T.Providers.SDLWeb8.CIL.csproj">
+      <Project>{bf052b64-b588-46b1-9b8b-08034ec3740d}</Project>
+      <Name>DD4T.Providers.SDLWeb8.CIL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Serialization\DD4T.Serialization.csproj">
+      <Project>{849a21d3-5863-4c43-98d3-6b8b83b9300f}</Project>
+      <Name>DD4T.Serialization</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Utils\DD4T.Utils.csproj">
+      <Project>{d2ce08be-7281-4697-adfe-e7a031cb59ec}</Project>
+      <Name>DD4T.Utils</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.ViewModels\DD4T.ViewModels.csproj">
+      <Project>{cc2b55da-ffbc-44b9-ada5-c087876ac199}</Project>
+      <Name>DD4T.ViewModels</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DD4T\DD4T.Web.MVC5\DD4T.Web.MVC5.csproj">
+      <Project>{7809cf7e-2902-419b-8e71-890512fab6a3}</Project>
+      <Name>DD4T.Web.MVC5</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+</Project>
