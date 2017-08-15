@@ -72,6 +72,7 @@
     <Target Name="RunBuild">
         <Message Text="Running build commands..." Importance="high" />
 
+        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Legacy.Model\Sdl.Web.Legacy.Model.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Legacy\Sdl.Web.Legacy.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
         <MSBuild Projects="$(ProjectDirectory)\Site\Sdl.Web.Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
