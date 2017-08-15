@@ -36,7 +36,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>dynamicdelivery.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
@@ -59,7 +59,6 @@
     <Compile Include="BaseSerializerService.cs" />
     <Compile Include="Compressor.cs" />
     <Compile Include="JSONSerializerService.cs" />
-    <Compile Include="Properties\SpecificAssemblyInfo.cs" />
     <Compile Include="SerializationFormats.cs" />
     <Compile Include="SerializationProperties.cs" />
     <Compile Include="SerializerServiceFactory.cs" />
@@ -78,6 +77,9 @@
       <Project>{83f5cfc2-14d5-4190-b51d-7af7a69b67e9}</Project>
       <Name>DD4T.ContentModel</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

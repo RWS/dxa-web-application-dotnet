@@ -186,7 +186,7 @@ namespace Sdl.Web.Tridion.Mapping
         {
             string componentUri = linkElement.GetAttribute("xlink:href");
             IComponentFactory componentFactory = DD4TFactoryCache.GetComponentFactory(localization);
-            IComponent component = componentFactory.GetComponent(componentUri);
+            DD4T.ContentModel.IComponent component = componentFactory.GetComponent(componentUri);
             return (component == null) ? linkElement.GetAttribute("title") : component.Title;
         }
 

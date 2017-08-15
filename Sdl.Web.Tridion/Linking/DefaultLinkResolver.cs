@@ -55,7 +55,7 @@ namespace Sdl.Web.Tridion.Linking
 
         private static string ResolveLink(TcmUri tcmUri, bool resolveToBinary, Localization localization)
         {
-            switch ((ItemType)tcmUri.ItemTypeId)
+            switch (tcmUri.ItemType)
             {
                 case ItemType.Page:
                     return ResolvePageLink(tcmUri, localization);

@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Sdl.Web.Legacy</RootNamespace>
-    <AssemblyName>Sdl.Web.Legacy.Temp</AssemblyName>
+    <AssemblyName>Sdl.Web.Legacy</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -42,67 +42,233 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent>"C:\Program Files (x86)\Microsoft\ILMerge\ILMerge.exe"  ^
-    /wildcards ^
-    /targetplatform:v4 ^
-    /out:Sdl.Web.Legacy.dll Sdl.Web.Legacy.Temp.dll $(OutputDir)DD4T*.dll   
-</PostBuildEvent>
-  </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DD4T\DD4T.Caching.ApacheMQ\DD4T.Caching.ApacheMQ.csproj">
-      <Project>{77983c8a-f783-450d-9d0c-d7b5c6d9a6b2}</Project>
-      <Name>DD4T.Caching.ApacheMQ</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DD4T\DD4T.DI.Autofac\DD4T.DI.Autofac.csproj">
-      <Project>{ee699f46-d354-4384-88b8-ef9daf4586f4}</Project>
-      <Name>DD4T.DI.Autofac</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DD4T\DD4T.DI.Ninject\DD4T.DI.Ninject.csproj">
-      <Project>{df35e8fc-35cb-4ad3-af29-36f07964a17c}</Project>
-      <Name>DD4T.DI.Ninject</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DD4T\DD4T.DI.Unity\DD4T.DI.Unity.csproj">
-      <Project>{872f961b-88e7-4a64-ba3c-9d809e236ba8}</Project>
-      <Name>DD4T.DI.Unity</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DD4T\DD4T.Logging.Log4net\DD4T.Logging.Log4net.csproj">
-      <Project>{718ed623-028b-496d-805a-6acd3c2fd2b4}</Project>
-      <Name>DD4T.Logging.Log4net</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DD4T\DD4T.MVC5\DD4T.MVC5.csproj">
-      <Project>{02f3851b-93d2-4b29-880e-ffb274ddaf34}</Project>
-      <Name>DD4T.MVC5</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\DD4T.Providers.SDLWeb8.5.CIL.csproj">
-      <Project>{425402d5-e8ad-427a-8a0c-3cfd4391d533}</Project>
-      <Name>DD4T.Providers.SDLWeb8.5.CIL</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DD4T\DD4T.Providers.SDLWeb8.CIL\DD4T.Providers.SDLWeb8.CIL.csproj">
-      <Project>{bf052b64-b588-46b1-9b8b-08034ec3740d}</Project>
-      <Name>DD4T.Providers.SDLWeb8.CIL</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DD4T\DD4T.ViewModels\DD4T.ViewModels.csproj">
-      <Project>{cc2b55da-ffbc-44b9-ada5-c087876ac199}</Project>
-      <Name>DD4T.ViewModels</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DD4T\DD4T.Web.MVC5\DD4T.Web.MVC5.csproj">
-      <Project>{7809cf7e-2902-419b-8e71-890512fab6a3}</Project>
-      <Name>DD4T.Web.MVC5</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Sdl.Web.Legacy.DataModel\Sdl.Web.Legacy.DataModel.csproj">
-      <Project>{56203d9c-df21-4dbf-860c-02cc63fe94ef}</Project>
-      <Name>Sdl.Web.Legacy.DataModel</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Data.Edm, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Data.Edm.5.8.2\lib\net40\Microsoft.Data.Edm.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.OData, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Data.OData.5.8.2\lib\net40\Microsoft.Data.OData.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.Services.Client, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Data.Services.Client.5.8.2\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Caching.Abstractions">
+      <HintPath>..\packages\Microsoft.Extensions.Caching.Abstractions.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Caching.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Caching.Memory">
+      <HintPath>..\packages\Microsoft.Extensions.Caching.Memory.1.1.0\lib\net451\Microsoft.Extensions.Caching.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Caching.Redis">
+      <HintPath>..\packages\Microsoft.Extensions.Caching.Redis.1.1.0\lib\net451\Microsoft.Extensions.Caching.Redis.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.1.1.0\lib\netstandard1.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Options">
+      <HintPath>..\packages\Microsoft.Extensions.Options.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Options.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Primitives">
+      <HintPath>..\packages\Microsoft.Extensions.Primitives.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.OData.Client">
+      <HintPath>..\packages\Microsoft.OData.Client.6.15.0\lib\net40\Microsoft.OData.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.OData.Core">
+      <HintPath>..\packages\Microsoft.OData.Core.6.15.0\lib\portable-net45+win+wpa81\Microsoft.OData.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.OData.Edm">
+      <HintPath>..\packages\Microsoft.OData.Edm.6.15.0\lib\portable-net45+win+wpa81\Microsoft.OData.Edm.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.Legacy.Model">
+      <HintPath>..\Sdl.Web.Legacy.Model\bin\Debug\Sdl.Web.Legacy.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="StackExchange.Redis.StrongName">
+      <HintPath>..\packages\StackExchange.Redis.StrongName.1.1.605\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Spatial, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\System.Spatial.5.8.2\lib\portable-net45+wp8+win8+wpa\System.Spatial.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=4.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Tridion.ContentDelivery">
+      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Tridion.ContentDelivery.dll</HintPath>
+    </Reference>
+    <Reference Include="Tridion.ContentDelivery.AmbientData">
+      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Tridion.ContentDelivery.AmbientData.dll</HintPath>
+    </Reference>
+    <Reference Include="Tridion.ContentDelivery.Preview">
+      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Tridion.ContentDelivery.Preview.dll</HintPath>
+    </Reference>
+    <Reference Include="Tridion.ContentDelivery.UGC">
+      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Tridion.ContentDelivery.UGC.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\ICacheAgent.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\ICacheEvent.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\IEvent.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\IMessageProvider.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Configuration\IDD4TConfiguration.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\DependencyInjection\IDependencyMapper.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Exceptions\BinaryNotFoundException.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Exceptions\ComponentNotFoundException.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Exceptions\ComponentPresentationNotFoundException.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Exceptions\ConfigurationException.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Exceptions\KeywordNotFoundException.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Exceptions\ModelNotCreatedException.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Exceptions\PageNotFoundException.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Factories\IBinaryFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Factories\IComponentFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Factories\IComponentPresentationFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Factories\IFactoryCommonServices.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Factories\ILinkFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Factories\IPageFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Factories\ITaxonomyFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Logging\ILogger.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Providers\IBinaryProvider.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Providers\IComponentPresentationProvider.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Providers\IComponentProvider.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Providers\ILinkProvider.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Providers\IPageProvider.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Providers\IProvider.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Providers\IProvidersCommonServices.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Providers\ITaxonomyProvider.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Providers\ProviderVersion.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Querying\IQuery.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Resolvers\ILinkResolver.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Resolvers\IPublicationResolver.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\Resolvers\IRichTextResolver.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\ViewModels\Binding.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Contracts\ViewModels\Contracts.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Factories\BinaryFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Factories\ComponentFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Factories\ComponentPresentationFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Factories\DependencyMappings.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Factories\FactoryBase.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Factories\FactoryCommonServices.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Factories\LinkFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Factories\PageFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.Core.Factories\TaxonomyFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\Caching\CacheEvent.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\Caching\CacheKeyFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\Caching\DefaultCacheAgent.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\Caching\NullCacheAgent.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\Caching\TridionBackedCacheAgent.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\ClassLoader.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\ConfigurationKeys.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\DD4TConfiguration.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\DependencyMappings.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\ExtensionMethods\Contracts.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\ExtensionMethods\DD4TConfigurationExtensions.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\Logging\NullLogger.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\Resolver\DefaultLinkResolver.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\Resolver\DefaultPublicationResolver.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\Resolver\DefaultRichTextResolver.cs" />
+    <Compile Include="DD4T\Core\DD4T.Utils\TcmUri.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\Attributes.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\AttributesBase.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\BaseClasses.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\Binding.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\BindingImpl.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\Core.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\DefaultContextResolver.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\Defaults\DefaultPage.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\DependencyMappings.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\Exceptions.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\NestedFieldAttributes.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\Reflection.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\RenderData.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\ViewModelFactory.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\XpmRenderer.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\XPM\XpmExtensions.cs" />
+    <Compile Include="DD4T\Core\DD4T.ViewModels\XPM\XpmMarkupService.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Attributes\UsesTridionPage.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Caching\SchemaComponentsCacheDependency.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Caching\SitemapCacheDependency.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Caching\WebCacheAgent.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Controllers\DD4TControllerBase.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Controllers\IComponentController.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Controllers\IComponentPresentationController.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Controllers\IPageController.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Controllers\ModelControllerBase.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Controllers\TridionControllerBase.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\DependencyMapper.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\FactoryService.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Html\DefaultComponentPresentationRenderer.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Html\IComponentPresentationRenderer.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Html\ImageHelper.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Html\RenderHelper.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Html\RichTextHelper.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Html\SiteEditHelper.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Html\TridionHelper.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Providers\TridionSiteMapNode.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\Providers\TridionSiteMapProvider.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\ServiceLocator.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\SiteEdit\SiteEditService.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\SiteEdit\SiteEditSettings.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\SiteLogger.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\ViewModels\Attributes\Attributes.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\ViewModels\XpmRenderer.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\ViewModels\XPM\Contracts.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\ViewModels\XPM\XpmExtensions.cs" />
+    <Compile Include="DD4T\MVC\DD4T.MVC\ViewModels\XPM\XpmMarkupService.cs" />
+    <Compile Include="DD4T\MVC\DD4T.Web.MVC\Binaries\BinaryDistributionModule.cs" />
+    <Compile Include="DD4T\MVC\DD4T.Web.MVC\Binaries\BinaryFileManager.cs" />
+    <Compile Include="DD4T\MVC\DD4T.Web.MVC\Binaries\IBinaryFileManager.cs" />
+    <Compile Include="DD4T\MVC\DD4T.Web.MVC\ResourceManagement\DynamicResourceManagement.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\BaseProvider.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ExtendedQueryParameters.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ITridionQueryWrapper.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ProvidersCommonServices.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionBinaryProvider.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionComponentPresentationProvider.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionComponentProvider.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionLinkProvider.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionPageProvider.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionTaxonomyProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DD4T\MVC\DD4T.MVC\SiteEdit\SiteEdit_config.xml" />
   </ItemGroup>
 </Project>

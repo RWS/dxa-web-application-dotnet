@@ -34,7 +34,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>dynamicdelivery.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
@@ -73,13 +73,15 @@
     <Compile Include="ITargetGroupCondition.cs" />
     <Compile Include="ITemplate.cs" />
     <Compile Include="IViewable.cs" />
-    <Compile Include="Properties\SpecificAssemblyInfo.cs" />
     <Compile Include="Serializing\ISerializationProperties.cs" />
     <Compile Include="Serializing\ISerializerService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ContentModelContractsClassDiagram.cd" />
     <None Include="dynamicdelivery.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
