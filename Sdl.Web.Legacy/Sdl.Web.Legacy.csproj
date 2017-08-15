@@ -84,7 +84,7 @@
       <HintPath>..\packages\Microsoft.OData.Edm.6.15.0\lib\portable-net45+win+wpa81\Microsoft.OData.Edm.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Legacy.Model">
-      <HintPath>..\Sdl.Web.Legacy.Model\bin\Debug\Sdl.Web.Legacy.Model.dll</HintPath>
+      <HintPath>..\Sdl.Web.Legacy.Model\bin\$(Configuration)\Sdl.Web.Legacy.Model.dll</HintPath>
     </Reference>
     <Reference Include="StackExchange.Redis.StrongName">
       <HintPath>..\packages\StackExchange.Redis.StrongName.1.1.605\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>
