@@ -43,6 +43,22 @@
   </Target>
   -->
   <ItemGroup>
+    <Reference Include="Apache.NMS, Version=1.7.1.3894, Culture=neutral, PublicKeyToken=82756feee3957618, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Apache.NMS.1.7.1\lib\net40\Apache.NMS.dll</HintPath>
+    </Reference>
+    <Reference Include="Apache.NMS.ActiveMQ, Version=1.7.2.4108, Culture=neutral, PublicKeyToken=82756feee3957618, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Apache.NMS.ActiveMQ.1.7.2\lib\net40\Apache.NMS.ActiveMQ.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac, Version=4.0.1.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Autofac.4.0.1\lib\net45\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Data.Edm, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -82,6 +98,21 @@
     </Reference>
     <Reference Include="Microsoft.OData.Edm">
       <HintPath>..\packages\Microsoft.OData.Edm.6.15.0\lib\portable-net45+win+wpa81\Microsoft.OData.Edm.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\portable-net45+wp80+win8+MonoAndroid10+MonoTouch10\Microsoft.Practices.Unity.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog">
+      <HintPath>..\packages\NLog.4.4.4\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Legacy.Model">
       <HintPath>..\Sdl.Web.Legacy.Model\bin\$(Configuration)\Sdl.Web.Legacy.Model.dll</HintPath>
@@ -140,6 +171,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DD4T\Caching\DD4T.Caching.ApacheMQ\DependencyMappings.cs" />
+    <Compile Include="DD4T\Caching\DD4T.Caching.ApacheMQ\JMSMessageProvider.cs" />
     <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\ICacheAgent.cs" />
     <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\ICacheEvent.cs" />
     <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\IEvent.cs" />
@@ -218,6 +251,36 @@
     <Compile Include="DD4T\Core\DD4T.ViewModels\XpmRenderer.cs" />
     <Compile Include="DD4T\Core\DD4T.ViewModels\XPM\XpmExtensions.cs" />
     <Compile Include="DD4T\Core\DD4T.ViewModels\XPM\XpmMarkupService.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\Bootstrap.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\Exceptions\ProviderNotFoundException.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\Factories.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\Mvc.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\Providers.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\Resolvers.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\RestProvider.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\ViewModels.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\Bootstrap.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\Exceptions\ProviderNotFoundException.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\Factories.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\Mvc.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\Providers.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\Resolvers.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\RestProvider.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\ViewModels.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\Bootstrap.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\Exceptions\ProviderNotFoundException.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\Factories.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\Mvc.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\MVCTypes.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\Providers.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\Resolvers.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\RestProvider.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\RestProviderTypes.cs" />
+    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\ViewModels.cs" />
+    <Compile Include="DD4T\Logging\DD4T.Logging.Log4net\DefaultLogger.cs" />
+    <Compile Include="DD4T\Logging\DD4T.Logging.Log4net\DependencyMappings.cs" />
+    <Compile Include="DD4T\Logging\DD4T.Logging.NLog\DependencyMappings.cs" />
+    <Compile Include="DD4T\Logging\DD4T.Logging.NLog\NLog.cs" />
     <Compile Include="DD4T\MVC\DD4T.MVC\Attributes\UsesTridionPage.cs" />
     <Compile Include="DD4T\MVC\DD4T.MVC\Caching\SchemaComponentsCacheDependency.cs" />
     <Compile Include="DD4T\MVC\DD4T.MVC\Caching\SitemapCacheDependency.cs" />
@@ -252,6 +315,16 @@
     <Compile Include="DD4T\MVC\DD4T.Web.MVC\Binaries\BinaryFileManager.cs" />
     <Compile Include="DD4T\MVC\DD4T.Web.MVC\Binaries\IBinaryFileManager.cs" />
     <Compile Include="DD4T\MVC\DD4T.Web.MVC\ResourceManagement\DynamicResourceManagement.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\BaseProvider.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\ExtendedQueryParameters.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\ITridionQueryWrapper.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\ProvidersCommonServices.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionBinaryProvider.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionComponentPresentationProvider.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionComponentProvider.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionLinkProvider.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionPageProvider.cs" />
+    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionTaxonomyProvider.cs" />
     <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\BaseProvider.cs" />
     <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ExtendedQueryParameters.cs" />
     <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ITridionQueryWrapper.cs" />
