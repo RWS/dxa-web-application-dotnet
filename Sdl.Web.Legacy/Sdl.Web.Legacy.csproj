@@ -171,6 +171,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>CommonAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="DD4T\Caching\DD4T.Caching.ApacheMQ\DependencyMappings.cs" />
     <Compile Include="DD4T\Caching\DD4T.Caching.ApacheMQ\JMSMessageProvider.cs" />
     <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\ICacheAgent.cs" />
