@@ -93,6 +93,8 @@
             Value="..\packages\Sdl.Dxa.Framework.Web8.$(PackageVersion)\lib\net452\*.*" />
 
         <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.Web8.nuspec -Version $(PackageVersion)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
+
+         <Exec Command="$(NuGet) pack DD4T.Providers.DxaModelService.nuspec -Version $(PackageVersion)" WorkingDirectory="$(NuGetPackageDirectory)" />
     </Target>
 
     <!-- =============================================================================================================================================  -->
@@ -100,6 +102,8 @@
         <Message Text="Publishing NuGet packages to '$(NuGetRepositoryUrl)' ..." Importance="high" />
 
         <Exec Command="$(NuGet) push Sdl.Dxa.Framework.Web8.$(PackageVersion).nupkg -Source $(NuGetRepositoryUrl)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
+
+        <Exec Command="$(NuGet) push DD4T.Providers.DxaModelService.$(PackageVersion).nupkg -Source $(NuGetRepositoryUrl)" WorkingDirectory="$(NuGetPackageDirectory)" />
     </Target>
     
     <!-- =============================================================================================================================================  -->

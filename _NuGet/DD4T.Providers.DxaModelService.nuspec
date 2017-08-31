@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package >
+    <metadata>
+        <id>DD4T.Providers.DxaModelService</id>
+        <!-- Version is set by ciBuild.proj -->
+        <version>0.0.0</version>
+        <!-- NOTE: Visual Studio's NuGet UI only shows 'id' and 'description' -->
+        <title>SDL Digital eXperience Accelerator R2 Data Model</title>
+        <authors>SDL Group</authors>
+        <projectUrl>https://github.com/sdl/dxa-web-application-dotnet</projectUrl>
+        <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+        <iconUrl>http://dr0muzwhcp26z.cloudfront.net/static/corporate/SDL-logo-2014.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>SDL Digital eXperience Accelerator R2 Data Model.</description>
+        <copyright>Copyright 2015-2017 SDL Group</copyright>
+        <tags>SDL DD4T DXA Model Service Provider</tags>
+        <references>
+            <reference file="DD4T.Providers.DxaModelService.dll" />
+        </references>
+        <dependencies>
+            <dependency id="Newtonsoft.Json" version="10.0.0" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\DD4T\build\bin\DD4T.Providers.DxaModelService.dll" target="lib\net452" />
+    </files>
+</package>
