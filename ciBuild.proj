@@ -49,6 +49,7 @@
 
         <Message Text="Restoring NuGet packages..."/>
         <Exec Command="_tools\RestorePackages DxaFramework.sln" WorkingDirectory="$(ProjectDirectory)" />
+        <Exec Command="_tools\RestorePackages DD4T\DD4T.Providers.DxaModelService\DD4T.Providers.DxaModelService.csproj" WorkingDirectory="$(ProjectDirectory)" />
 
         <ItemGroup>
             <AssemblyInfo Include="[assembly: AssemblyVersion(&quot;$(VersionMajor).$(VersionMinor).$(VersionPatch).0&quot;)]" />
@@ -66,7 +67,6 @@
         <Message Text="Updating NuGet Package References..." Importance="high" />
 
         <Exec Command="$(NuGet) update &quot;$(ProjectDirectory)\Site\DxaWebApp.csproj&quot; -Prerelease -Id Sdl.Dxa.Framework.Web8" />
-        <Exec Command="$(NuGet) update &quot;$(ProjectDirectory)\DD4T\DD4T.Providers.DxaModelService\DD4T.Providers.DxaModelService.csproj&quot;" />
     </Target>
 
     <!-- =============================================================================================================================================  -->
