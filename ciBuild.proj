@@ -49,7 +49,7 @@
 
         <Message Text="Restoring NuGet packages..."/>
         <Exec Command="_tools\RestorePackages DxaFramework.sln" WorkingDirectory="$(ProjectDirectory)" />
-        <Exec Command="_tools\RestorePackages DD4T\DD4T.Providers.DxaModelService\DD4T.Providers.DxaModelService.csproj" WorkingDirectory="$(ProjectDirectory)" />
+        <Exec Command="$(NuGet) restore DD4T\DD4T.Providers.DxaModelService\DD4T.Providers.DxaModelService.csproj -PackagesDirectory packages " WorkingDirectory="$(ProjectDirectory)" />
 
         <ItemGroup>
             <AssemblyInfo Include="[assembly: AssemblyVersion(&quot;$(VersionMajor).$(VersionMinor).$(VersionPatch).0&quot;)]" />
