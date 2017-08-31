@@ -23,7 +23,7 @@ namespace Sdl.Web.ModelService.Request
 
         public string ItemId { get; set; }
 
-        public ContentType ContentType { get; set; }      
+        public ContentType ContentType { get; set; } = ContentType.MODEL;  
 
         public DataModelType DataModelType { get; set; } = DataModelType.R2;
 

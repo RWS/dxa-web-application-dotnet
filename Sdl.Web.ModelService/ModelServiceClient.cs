@@ -95,60 +95,58 @@ namespace Sdl.Web.ModelService
 
         public ModelServiceResponse<T> PerformRequest<T>(IModelServiceRequest request)
         {
+            Uri requestUri = request.BuildRequestUri(this);
+            bool success = true;
+            uint hashcode = 0;
+            string responseBody = null;
             try
             {
-                Uri requestUri = request.BuildRequestUri(this);
-                bool success = true;
-                uint hashcode = 0;
-                string responseBody = null;
-                try
-                {
-                    responseBody = PerformRequest(requestUri);
-                    hashcode = Murmur3.Hash(responseBody);
-                }
-                catch
-                {
-                    success = false;
-                }
-
-                ModelServiceError serviceError;
-                try
-                {
-                    if (success)
-                    {
-                        T responseObject;
-                        if (typeof (T) == typeof (string))
-                            responseObject = (T) Convert.ChangeType(responseBody, typeof (T));
-                        else
-                            responseObject = JsonConvert.DeserializeObject<T>(responseBody, JsonSettings(request.Binder));
-                        return ModelServiceResponse<T>.Create(responseObject, hashcode);
-                    }
-                    serviceError = JsonConvert.DeserializeObject<ModelServiceError>(responseBody);
-                }
-                catch (Exception ex)
-                {
-                    const int maxCharactersToLog = 1000;
-                    if ((responseBody != null) && (responseBody.Length > maxCharactersToLog))
-                    {
-                        responseBody = responseBody.Substring(0, maxCharactersToLog) + "...";
-                    }
-                    throw new ModelServiceException(
-                        $"{ModelServiceName} returned an unexpected response of {responseBody}", ex);
-                }
-
-                if (serviceError == null || serviceError.Status == (int) HttpStatusCode.NotFound)
-                {
-                    throw new ItemNotFoundException(
-                        $"{ModelServiceName} failed to locate item from request {requestUri}.");
-                }
-
-                throw new ModelServiceException(
-                    $"{ModelServiceName} returned an error: {serviceError.Message ?? serviceError.Error}");
+                responseBody = PerformRequest(requestUri);
+                hashcode = Murmur3.Hash(responseBody);
             }
-            catch(Exception e)
+            catch (ModelServiceRequestException e)
             {
-                throw new ModelServiceException($"{ModelServiceName} returned an error.", e);
+                success = false;
+                responseBody = e.ResponseBody;
             }
+            catch
+            {
+                success = false;
+            }
+
+            ModelServiceError serviceError;
+            try
+            {
+                if (success)
+                {
+                    T responseObject;
+                    if (typeof (T) == typeof (string))
+                        responseObject = (T) Convert.ChangeType(responseBody, typeof (T));
+                    else
+                        responseObject = JsonConvert.DeserializeObject<T>(responseBody, JsonSettings(request.Binder));
+                    return ModelServiceResponse<T>.Create(responseObject, hashcode);
+                }
+                serviceError = JsonConvert.DeserializeObject<ModelServiceError>(responseBody);
+            }
+            catch (Exception ex)
+            {
+                const int maxCharactersToLog = 1000;
+                if ((responseBody != null) && (responseBody.Length > maxCharactersToLog))
+                {
+                    responseBody = responseBody.Substring(0, maxCharactersToLog) + "...";
+                }
+                throw new ModelServiceException(
+                    $"{ModelServiceName} returned an unexpected response of {responseBody}", ex);
+            }
+
+            if (serviceError == null || serviceError.Status == (int) HttpStatusCode.NotFound)
+            {
+                throw new ItemNotFoundException(
+                    $"{ModelServiceName} failed to locate item from request {requestUri}.");
+            }
+
+            throw new ModelServiceException(
+                $"{ModelServiceName} returned an error: {serviceError.Message ?? serviceError.Error}");
         }
 
         private string PerformRequest(Uri requestUri)
