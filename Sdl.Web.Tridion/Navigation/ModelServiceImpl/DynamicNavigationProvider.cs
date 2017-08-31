@@ -9,17 +9,17 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
-using Sdl.Web.Tridion.R2Mapping;
 
 namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
 {
+    using ModelService;
     /// <summary>
     /// Navigation Provider implementation based on Taxonomies (Categories and Keywords)
     /// This implementation uses the model service to construct the sitemap items.
     /// </summary>
     public class DynamicNavigationProvider : INavigationProvider, IOnDemandNavigationProvider
     {
-        private readonly ModelServiceClient _modelService = new ModelServiceClient();
+        private readonly ModelService _modelService = new ModelService();
         private static readonly INavigationProvider FallbackNavigationProvider = new StaticNavigationProvider();
         private static readonly Regex SitemapItemIdRegex = new Regex(@"^t(?<taxonomyId>\d+)((-k(?<keywordId>\d+))|(-p(?<pageId>\d+)))?$", RegexOptions.Compiled);
         #region INavigationProvider members

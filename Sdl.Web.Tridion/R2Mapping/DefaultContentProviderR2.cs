@@ -19,12 +19,14 @@ using Tridion.ContentDelivery.Meta;
 
 namespace Sdl.Web.Tridion.R2Mapping
 {
+    using ModelService = ModelService.ModelService;
+
     /// <summary>
     /// Default Content Provider implementation (based on DXA R2 Data Model).
     /// </summary>
     public class DefaultContentProviderR2 : IContentProvider, IRawDataProvider
     {
-        private readonly ModelServiceClient _modelService = new ModelServiceClient();
+        private readonly ModelService _modelService = new ModelService();
 
         /// <summary>
         /// Gets a Page Model for a given URL path.
