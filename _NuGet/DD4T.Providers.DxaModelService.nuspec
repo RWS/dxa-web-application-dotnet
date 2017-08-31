@@ -16,6 +16,7 @@
         <tags>SDL DD4T DXA Model Service Provider</tags>
         <references>
             <reference file="DD4T.Providers.DxaModelService.dll" />
+            <reference file="Sdl.Web.ModelService.dll" />
         </references>
         <dependencies>
             <dependency id="Newtonsoft.Json" version="10.0.0" />
@@ -23,5 +24,6 @@
     </metadata>
     <files>
         <file src="..\DD4T\build\bin\DD4T.Providers.DxaModelService.dll" target="lib\net452" />
+        <file src="..\Sdl.Web.ModelService\bin\Release\Sdl.Web.ModelService.dll" target="lib\net452" />
     </files>
 </package>
