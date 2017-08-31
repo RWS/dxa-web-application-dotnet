@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.0.0-beta-201707211209</SdlDxaDataModelPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.0.0-beta-201708301729</SdlDxaDataModelPackageVersion>
     <SdlWebDeliveryPackageVersion>8.5.0</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>8.5.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>8.5.0</SdlWebContextImagePackageVersion>
@@ -184,6 +184,7 @@
     <Compile Include="Mapping\IRawDataProvider.cs" />
     <Compile Include="Mapping\MappingData.cs" />
     <Compile Include="Mapping\ModelBuilderPipeline.cs" />
+    <Compile Include="ModelService\ModelService.cs" />
     <Compile Include="Mapping\PublicationResolver.cs" />
     <Compile Include="Navigation\DynamicNavigationProvider.cs" />
     <Compile Include="Navigation\ModelServiceImpl\DynamicNavigationProvider.cs" />
@@ -198,7 +199,6 @@
     <Compile Include="R2Mapping\ModelBuilderPipelineR2.cs" />
     <Compile Include="R2Mapping\DefaultContentProviderR2.cs" />
     <Compile Include="R2Mapping\DefaultModelBuilderR2.cs" />
-    <Compile Include="R2Mapping\ModelServiceClient.cs" />
     <Compile Include="Statics\BinaryFileManager.cs" />
     <Compile Include="Statics\NamedLocker.cs" />
   </ItemGroup>
@@ -210,6 +210,10 @@
     <ProjectReference Include="..\Sdl.Web.Legacy\Sdl.Web.Legacy.csproj">
       <Project>{266cf812-c726-47ed-9f6e-2d6a5c1bcbb0}</Project>
       <Name>Sdl.Web.Legacy</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sdl.Web.ModelService\Sdl.Web.ModelService.csproj">
+      <Project>{5a58a2b2-6c7e-4183-8eff-76d4282e5c66}</Project>
+      <Name>Sdl.Web.ModelService</Name>
     </ProjectReference>
     <ProjectReference Include="..\Sdl.Web.Mvc\Sdl.Web.Mvc.csproj">
       <Project>{923b2009-9a0b-4425-88a5-bf7af25c8f8b}</Project>
