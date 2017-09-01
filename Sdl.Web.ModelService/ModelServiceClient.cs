@@ -136,13 +136,13 @@ namespace Sdl.Web.ModelService
                     responseBody = responseBody.Substring(0, maxCharactersToLog) + "...";
                 }
                 throw new ModelServiceException(
-                    $"{ModelServiceName} returned an unexpected response of {responseBody}", ex);
+                    $"{ModelServiceName} returned an unexpected response from request '{requestUri}' of {responseBody}.", ex);
             }
 
             if (serviceError == null || serviceError.Status == (int) HttpStatusCode.NotFound)
             {
                 throw new ItemNotFoundException(
-                    $"{ModelServiceName} failed to locate item from request {requestUri}.");
+                    $"{ModelServiceName} failed to locate item from request '{requestUri}'.");
             }
 
             throw new ModelServiceException(
