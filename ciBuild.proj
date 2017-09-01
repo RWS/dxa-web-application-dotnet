@@ -49,6 +49,7 @@
 
         <Message Text="Restoring NuGet packages..."/>
         <Exec Command="_tools\RestorePackages DxaFramework.sln" WorkingDirectory="$(ProjectDirectory)" />
+        <Exec Command="$(NuGet) restore DD4T\DD4T.Providers.DxaModelService\DD4T.Providers.DxaModelService.csproj -PackagesDirectory packages " WorkingDirectory="$(ProjectDirectory)" />
 
         <ItemGroup>
             <AssemblyInfo Include="[assembly: AssemblyVersion(&quot;$(VersionMajor).$(VersionMinor).$(VersionPatch).0&quot;)]" />
@@ -76,6 +77,7 @@
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Legacy\Sdl.Web.Legacy.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
         <MSBuild Projects="$(ProjectDirectory)\Site\Sdl.Web.Site.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
+        <MSBuild Projects="$(ProjectDirectory)\DD4T\DD4T.Providers.DxaModelService\DD4T.Providers.DxaModelService.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion.Tests\Sdl.Web.Tridion.Tests.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true" />
     </Target>
 
@@ -93,6 +95,8 @@
             Value="..\packages\Sdl.Dxa.Framework.Web8.$(PackageVersion)\lib\net452\*.*" />
 
         <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.Web8.nuspec -Version $(PackageVersion)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
+
+         <Exec Command="$(NuGet) pack DD4T.Providers.DxaModelService.nuspec -Version $(PackageVersion)" WorkingDirectory="$(NuGetPackageDirectory)" />
     </Target>
 
     <!-- =============================================================================================================================================  -->
@@ -100,6 +104,8 @@
         <Message Text="Publishing NuGet packages to '$(NuGetRepositoryUrl)' ..." Importance="high" />
 
         <Exec Command="$(NuGet) push Sdl.Dxa.Framework.Web8.$(PackageVersion).nupkg -Source $(NuGetRepositoryUrl)" WorkingDirectory="$(DxaFrameworkPackageDirectory)" />
+
+        <Exec Command="$(NuGet) push DD4T.Providers.DxaModelService.$(PackageVersion).nupkg -Source $(NuGetRepositoryUrl)" WorkingDirectory="$(NuGetPackageDirectory)" />
     </Target>
     
     <!-- =============================================================================================================================================  -->
