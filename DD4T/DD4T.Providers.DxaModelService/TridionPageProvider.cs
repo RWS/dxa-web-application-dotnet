@@ -92,7 +92,14 @@ namespace DD4T.Providers.DxaModelService
                 PageInclusion = PageInclusion.INCLUDE,
                 Path = url
             };
-            return ModelServiceClient.PerformRequest(req).Response;
+            try
+            {
+                return ModelServiceClient.PerformRequest(req).Response;
+            }
+            catch
+            {
+            }
+            return null;
         }
 
         /// <summary>

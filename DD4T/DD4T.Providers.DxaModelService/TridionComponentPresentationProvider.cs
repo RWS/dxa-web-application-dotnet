@@ -8,6 +8,7 @@ using DD4T.ContentModel.Contracts.Providers;
 using DD4T.ContentModel.Querying;
 using DD4T.ContentModel.Contracts.Logging;
 using DD4T.Utils;
+using Sdl.Web.ModelService;
 using Sdl.Web.ModelService.Request;
 
 namespace DD4T.Providers.DxaModelService
@@ -29,6 +30,7 @@ namespace DD4T.Providers.DxaModelService
         }
 
         #region IComponentProvider
+
         public string GetContent(string uri, string templateUri = "")
         {
             LoggerService.Debug(">>GetContent({0})", LoggingCategory.Performance, uri);
@@ -49,8 +51,15 @@ namespace DD4T.Providers.DxaModelService
                 request.TemplateId = templateTcmUri.ItemId;
             }
 
-            var response = ModelServiceClient.PerformRequest<IDictionary<string, object>>(request);
-            return response.Response["Content"] as string;
+            try
+            {
+                var response = ModelServiceClient.PerformRequest<IDictionary<string, object>>(request);
+                return response.Response["Content"] as string;
+            }
+            catch
+            {
+            }
+            return null;
         }
 
         /// <summary>
