@@ -10,9 +10,8 @@ using DD4T.Utils;
 using DD4T.ContentModel.Contracts.Resolvers;
 using DD4T.ContentModel.Contracts.Configuration;
 using DD4T.ContentModel.Contracts.Logging;
-using TcmUri = DD4T.Utils.TcmUri;
 
-namespace DD4T.Providers.SDLWeb85.CIL
+namespace DD4T.Providers.SDLWeb8.CIL
 {
     /// <summary>
     /// 

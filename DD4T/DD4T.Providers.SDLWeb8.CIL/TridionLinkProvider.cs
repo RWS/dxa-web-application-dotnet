@@ -1,25 +1,42 @@
-﻿using DD4T.Utils;
+﻿using DD4T.ContentModel;
 
-namespace DD4T.Providers.DxaModelService
+namespace DD4T.Providers.SDLWeb8.CIL
 {
     using System;
     using System.Collections.Generic;
     using Tridion.ContentDelivery.Web.Linking;
-    using ContentModel.Contracts.Providers;
-    using Utils.ExtensionMethods;
+    using DD4T.ContentModel.Contracts.Providers;
+    using DD4T.Utils;
+    using DD4T.Utils.ExtensionMethods;
+    using DD4T.ContentModel.Contracts.Configuration;
+    using DD4T.ContentModel.Contracts.Resolvers;
+
 
     public class TridionLinkProvider : BaseProvider, ILinkProvider, IDisposable
     {
+
         public TridionLinkProvider(IProvidersCommonServices providersCommonServices)
             : base(providersCommonServices)
-        { }
+        {
 
-        private ComponentLink _componentLink = null;
-        private static readonly TcmUri EmptyTcmUri = new TcmUri("tcm:0-0-0");
+        }
 
-        public ComponentLink ComponentLink => _componentLink ?? (_componentLink = new ComponentLink(PublicationId));
-        private readonly Dictionary<int, ComponentLink> _componentLinks = new Dictionary<int, ComponentLink>();
-        private readonly object lock1 = new object();
+        private ComponentLink componentLink = null;
+        //private const string uriPrefix = "tcm:";
+        private static TcmUri emptyTcmUri = new TcmUri("tcm:0-0-0");
+
+
+        public ComponentLink ComponentLink
+        {
+            get
+            {
+                if (componentLink == null)
+                    componentLink = new ComponentLink(PublicationId);
+                return componentLink;
+            }
+        }
+        private Dictionary<int, ComponentLink> _componentLinks = new Dictionary<int, ComponentLink>();
+        private object lock1 = new object();
         protected ComponentLink GetComponentLink(TcmUri uri)
         {
             if (_componentLinks.ContainsKey(uri.PublicationId))
@@ -35,7 +52,12 @@ namespace DD4T.Providers.DxaModelService
             return _componentLinks[uri.PublicationId];
         }
 
-        public string ResolveLink(string componentUri) => ResolveLink(TcmUri.NullUri.ToString(), componentUri, TcmUri.NullUri.ToString());
+
+
+        public string ResolveLink(string componentUri)
+        {
+            return ResolveLink(TcmUri.NullUri.ToString(), componentUri, TcmUri.NullUri.ToString());
+        }
 
         public virtual string ResolveLink(string sourcePageUri, string componentUri, string excludeComponentTemplateUri)
         {
@@ -44,7 +66,7 @@ namespace DD4T.Providers.DxaModelService
             TcmUri componentTemplateUri = new TcmUri(excludeComponentTemplateUri);
             var linkToAnchor = Configuration.LinkToAnchor;
 
-            if (!componentUriToLinkTo.Equals(EmptyTcmUri))
+            if (!componentUriToLinkTo.Equals(emptyTcmUri))
             {
                 Link link = GetComponentLink(componentUriToLinkTo).GetLink(pageUri.ToString(), componentUriToLinkTo.ToString(), componentTemplateUri.ToString(), String.Empty, String.Empty, false, linkToAnchor);
                 if (!link.IsResolved)
@@ -52,28 +74,32 @@ namespace DD4T.Providers.DxaModelService
                     return null;
                 }
 
-                return linkToAnchor && link.Anchor != "0" ?
-                    $"{link.Url}#{Configuration.UseUriAsAnchor.GetLocalAnchorTag(componentUriToLinkTo, link.Anchor)}"
-                    : link.Url;
+                return linkToAnchor && link.Anchor != "0" ? string.Format("{0}#{1}", link.Url, Configuration.UseUriAsAnchor.GetLocalAnchorTag(componentUriToLinkTo, link.Anchor)) : link.Url;
             }
 
             return null;
         }
 
+
         #region IDisposable
         protected virtual void Dispose(bool isDisposed)
         {
-            if (isDisposed) return;
-            if (_componentLink != null)
+            if (!isDisposed)
             {
-                _componentLink.Dispose();
-                _componentLink = null;
+                if (componentLink != null)
+                {
+                    componentLink.Dispose();
+                    componentLink = null;
+                }
+                foreach (ComponentLink cl in _componentLinks.Values)
+                {
+                    if (cl != null)
+                    {
+                        cl.Dispose();
+                    }
+                }
+                _componentLinks.Clear();
             }
-            foreach (ComponentLink cl in _componentLinks.Values)
-            {
-                cl?.Dispose();
-            }
-            _componentLinks.Clear();
         }
 
         public void Dispose()

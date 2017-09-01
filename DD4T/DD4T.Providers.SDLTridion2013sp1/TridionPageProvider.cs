@@ -6,11 +6,9 @@ using Tridion.ContentDelivery.Meta;
 using DD4T.ContentModel;
 using System.Collections.Generic;
 using DD4T.ContentModel.Contracts.Providers;
-using DD4T.Utils;
 using DD4T.ContentModel.Contracts.Resolvers;
 using DD4T.ContentModel.Contracts.Configuration;
 using DD4T.ContentModel.Contracts.Logging;
-using TcmUri = DD4T.Utils.TcmUri;
 
 namespace DD4T.Providers.SDLTridion2013sp1
 {
@@ -79,7 +77,7 @@ namespace DD4T.Providers.SDLTridion2013sp1
             List<string> pageUrls = new List<string>();
             foreach (string uri in pageUris)
             {
-                Utils.TcmUri tcmUri = new Utils.TcmUri(uri);
+                TcmUri tcmUri = new TcmUri(uri);
                 PageMetaFactory metaFactory = GetPageMetaFactory(tcmUri.PublicationId);
                 IPageMeta currentMeta = metaFactory.GetMeta(uri);
                 pageUrls.Add(currentMeta.UrlPath);

@@ -3,19 +3,28 @@ using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.DynamicContent.Query;
 using Query = Tridion.ContentDelivery.DynamicContent.Query.Query;
 using Tridion.ContentDelivery.Meta;
+using DD4T.ContentModel;
 using System.Collections.Generic;
 using DD4T.ContentModel.Contracts.Providers;
+using DD4T.ContentModel.Contracts.Resolvers;
+using DD4T.ContentModel.Contracts.Configuration;
 using DD4T.ContentModel.Contracts.Logging;
-using DD4T.Utils;
-using Sdl.Web.ModelService.Request;
 
-namespace DD4T.Providers.DxaModelService
-{  
+namespace DD4T.Providers.SDLWeb85.CIL
+{
+    /// <summary>
+    /// 
+    /// </summary>
     public class TridionPageProvider : BaseProvider, IPageProvider
     {
+
+        private static IDictionary<string, DateTime> lastPublishedDates = new Dictionary<string, DateTime>();
+
         public TridionPageProvider(IProvidersCommonServices providersCommonServices)
             : base(providersCommonServices)
-        { }
+        {
+
+        }
 
         #region IPageProvider Members
 
@@ -76,23 +85,56 @@ namespace DD4T.Providers.DxaModelService
             return pageUrls.ToArray();
         }
 
+
         /// <summary>
         /// Gets the raw string (xml) from the broker db by URL
         /// </summary>
         /// <param name="Url">URL of the page</param>
         /// <returns>String with page xml or empty string if no page was found</returns>
-        public string GetContentByUrl(string url)
+        public string GetContentByUrl(string Url)
         {
-            LoggerService.Debug(">>GetContentByUrl({0})", LoggingCategory.Performance, url);
-            PageModelRequest req = new PageModelRequest
+
+            LoggerService.Debug(">>GetContentByUrl({0})", LoggingCategory.Performance, Url);
+            string retVal = string.Empty;
+
+            LoggerService.Debug("GetContentByUrl: about to create query", LoggingCategory.Performance);
+            using (var pageQuery = new Query())
             {
-                PublicationId = PublicationId,
-                ContentType = ContentType.RAW,
-                DataModelType = DataModelType.DD4T,
-                PageInclusion = PageInclusion.INCLUDE,
-                Path = url
-            };
-            return ModelServiceClient.PerformRequest(req).Response;
+                LoggerService.Debug("GetContentByUrl: created query", LoggingCategory.Performance);
+                using (var isPage = new ItemTypeCriteria(64))
+                {
+                    using (var pageUrl = new PageURLCriteria(Url))
+                    {
+                        using (var allCriteria = CriteriaFactory.And(isPage, pageUrl))
+                        {
+                            if (this.PublicationId != 0)
+                            {
+                                using (var correctSite = new PublicationCriteria(this.PublicationId))
+                                {
+                                    allCriteria.AddCriteria(correctSite);
+                                }
+                            }
+
+                            pageQuery.Criteria = allCriteria;
+                        }
+                    }
+                }
+                LoggerService.Debug("GetContentByUrl: added criteria to query", LoggingCategory.Performance);
+
+                LoggerService.Debug("GetContentByUrl: about to execute query", LoggingCategory.Performance);
+                string[] resultUris = pageQuery.ExecuteQuery();
+                pageQuery.Dispose();
+                LoggerService.Debug("GetContentByUrl: executed query", LoggingCategory.Performance);
+
+
+                if (resultUris.Length > 0)
+                {
+                    retVal = PageContentAssembler.GetContent(resultUris[0]);
+                    LoggerService.Debug("GetContentByUrl: executed PageContentAssembler", LoggingCategory.Performance);
+                }
+                LoggerService.Debug("<<GetContentByUrl({0})", LoggingCategory.Performance, Url);
+                return retVal;
+            }
         }
 
         /// <summary>
@@ -100,12 +142,13 @@ namespace DD4T.Providers.DxaModelService
         /// </summary>
         /// <param name="Url">TCM URI of the page</param>
         /// <returns>String with page xml or empty string if no page was found</returns>
-        public string GetContentByUri(string tcmUri)
+        public string GetContentByUri(string TcmUri)
         {
-            TcmUri tcm = new TcmUri(tcmUri);
-            PageMetaFactory metaFactory = GetPageMetaFactory(tcm.PublicationId);
-            return GetContentByUrl(metaFactory.GetMeta(tcm.ItemId).UrlPath);
+            string retVal = string.Empty;
+            retVal = PageContentAssembler.GetContent(TcmUri);
+            return retVal;
         }
+
 
         public DateTime GetLastPublishedDateByUrl(string url)
         {
@@ -115,7 +158,12 @@ namespace DD4T.Providers.DxaModelService
             {
                 IPageMeta pageInfo = pMetaFactory.GetMetaByUrl(pubId, url); // TODO: Temporarily removed using statement, because IPageMeta is not IDisposable (yet) in CDaaS build #422
                 {
-                    return pageInfo?.LastPublicationDate ?? DateTime.Now;
+                    if (pageInfo == null)
+                    {
+                        return DateTime.Now;
+                    }
+
+                    return pageInfo.LastPublicationDate;
                 }
             }
         }
@@ -125,11 +173,20 @@ namespace DD4T.Providers.DxaModelService
             TcmUri tcmUri = new TcmUri(uri);
             PageMetaFactory pMetaFactory = GetPageMetaFactory(tcmUri.PublicationId);
             var pageInfo = pMetaFactory.GetMeta(uri);
-            return pageInfo?.LastPublicationDate ?? DateTime.Now;
+
+            if (pageInfo == null)
+            {
+                return DateTime.Now;
+            }
+            else
+            {
+                return pageInfo.LastPublicationDate;
+            }
         }
 
-        private readonly object lock1 = new object();
-        private readonly Dictionary<int, PageMetaFactory> _pmFactoryList = new Dictionary<int, PageMetaFactory>();
+
+        private object lock1 = new object();
+        private Dictionary<int, PageMetaFactory> _pmFactoryList = new Dictionary<int, PageMetaFactory>();
         private PageMetaFactory GetPageMetaFactory(int publicationId)
         {
             if (_pmFactoryList.ContainsKey(publicationId))
@@ -144,6 +201,18 @@ namespace DD4T.Providers.DxaModelService
             }
             return _pmFactoryList[publicationId];
         }
+
         #endregion
+
+        private PageContentAssembler _pageContentAssember = null;
+        private PageContentAssembler PageContentAssembler
+        {
+            get
+            {
+                if (_pageContentAssember == null)
+                    _pageContentAssember = new PageContentAssembler();
+                return _pageContentAssember;
+            }
+        }
     }
 }

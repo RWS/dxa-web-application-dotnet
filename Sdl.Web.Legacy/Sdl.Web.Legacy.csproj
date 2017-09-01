@@ -174,6 +174,96 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\BaseProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\BaseProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ExtendedQueryParameters.cs">
+      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\ExtendedQueryParameters.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ITridionQueryWrapper.cs">
+      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\ITridionQueryWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ProvidersCommonServices.cs">
+      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\ProvidersCommonServices.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionBinaryProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionBinaryProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionComponentPresentationProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionComponentPresentationProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionComponentProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionComponentProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionLinkProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionLinkProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionPageProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionPageProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionTaxonomyProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionTaxonomyProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\BaseProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\BaseProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\ExtendedQueryParameters.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\ExtendedQueryParameters.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\ITridionQueryWrapper.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\ITridionQueryWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\ProvidersCommonServices.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\ProvidersCommonServices.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\TridionBinaryProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionBinaryProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\TridionComponentPresentationProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionComponentPresentationProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\TridionComponentProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionComponentProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\TridionLinkProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionLinkProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\TridionPageProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionPageProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\TridionTaxonomyProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionTaxonomyProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\BaseProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\BaseProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\ExtendedQueryParameters.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ExtendedQueryParameters.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\ITridionQueryWrapper.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ITridionQueryWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\ProvidersCommonServices.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ProvidersCommonServices.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\TridionBinaryProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionBinaryProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\TridionComponentPresentationProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionComponentPresentationProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\TridionComponentProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionComponentProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\TridionLinkProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionLinkProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\TridionPageProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionPageProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\TridionTaxonomyProvider.cs">
+      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionTaxonomyProvider.cs</Link>
+    </Compile>
     <Compile Include="DD4T\Caching\DD4T.Caching.ApacheMQ\DependencyMappings.cs" />
     <Compile Include="DD4T\Caching\DD4T.Caching.ApacheMQ\JMSMessageProvider.cs" />
     <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\ICacheAgent.cs" />
@@ -318,29 +408,14 @@
     <Compile Include="DD4T\MVC\DD4T.Web.MVC\Binaries\BinaryFileManager.cs" />
     <Compile Include="DD4T\MVC\DD4T.Web.MVC\Binaries\IBinaryFileManager.cs" />
     <Compile Include="DD4T\MVC\DD4T.Web.MVC\ResourceManagement\DynamicResourceManagement.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\BaseProvider.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\ExtendedQueryParameters.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\ITridionQueryWrapper.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\ProvidersCommonServices.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionBinaryProvider.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionComponentPresentationProvider.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionComponentProvider.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionLinkProvider.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionPageProvider.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionTaxonomyProvider.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\BaseProvider.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ExtendedQueryParameters.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ITridionQueryWrapper.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ProvidersCommonServices.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionBinaryProvider.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionComponentPresentationProvider.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionComponentProvider.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionLinkProvider.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionPageProvider.cs" />
-    <Compile Include="DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionTaxonomyProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Sdl.Web.ModelService\Sdl.Web.ModelService.csproj">
+      <Project>{5a58a2b2-6c7e-4183-8eff-76d4282e5c66}</Project>
+      <Name>Sdl.Web.ModelService</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

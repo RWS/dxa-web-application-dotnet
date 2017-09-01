@@ -8,10 +8,9 @@ using System.Collections.Generic;
 using DD4T.ContentModel.Contracts.Providers;
 using System.Collections;
 using DD4T.ContentModel.Querying;
-using DD4T.Utils;
 using DD4T.ContentModel.Contracts.Logging;
 
-namespace DD4T.Providers.SDLTridion2013sp1
+namespace DD4T.Providers.SDLWeb85.CIL
 {
     /// <summary>
     /// 
@@ -28,8 +27,8 @@ namespace DD4T.Providers.SDLTridion2013sp1
         public TridionComponentPresentationProvider(IProvidersCommonServices providersCommonServices)
             : base(providersCommonServices)
         {
-            selectByComponentTemplateId = Configuration.SelectComponentPresentationByComponentTemplateId;
-            selectByOutputFormat = Configuration.SelectComponentPresentationByOutputFormat;
+            selectByComponentTemplateId = Configuration.SelectComponentByComponentTemplateId;
+            selectByOutputFormat = Configuration.SelectComponentByOutputFormat;
             _cpFactoryList = new Dictionary<int, T.ComponentPresentationFactory>();
             _cmFactoryList = new Dictionary<int,TMeta.ComponentMetaFactory>();
 
@@ -40,9 +39,9 @@ namespace DD4T.Providers.SDLTridion2013sp1
         {
             LoggerService.Debug(">>GetContent({0})", LoggingCategory.Performance, uri);
 
-            Utils.TcmUri tcmUri = new Utils.TcmUri(uri);
+            TcmUri tcmUri = new TcmUri(uri);
 
-            Utils.TcmUri templateTcmUri = new Utils.TcmUri(templateUri);
+            TcmUri templateTcmUri = new TcmUri(templateUri);
 
             T.ComponentPresentationFactory cpFactory = GetComponentPresentationFactory(tcmUri.PublicationId);
 
@@ -77,15 +76,9 @@ namespace DD4T.Providers.SDLTridion2013sp1
             cp = cpFactory.GetComponentPresentationWithHighestPriority(tcmUri.ItemId);
             LoggerService.Debug("GetContent: get component presentations with Highst Priority for {0}", LoggingCategory.Performance, tcmUri.ToString());
             if (cp != null)
+            {
                 return cp.Content;
-            //foreach (Tridion.ContentDelivery.DynamicContent.ComponentPresentation _cp in cps)
-            //{
-            //    if (_cp != null)
-            //    {
-            //        LoggerService.Debug("<<GetContent({0}) - find all", LoggingCategory.Performance, uri);
-            //        return _cp.Content;
-            //    }
-            //}
+            }
             LoggerService.Debug("<<GetContent({0}) - not found", LoggingCategory.Performance, uri);
             return string.Empty;
         }
@@ -100,7 +93,7 @@ namespace DD4T.Providers.SDLTridion2013sp1
 //            TcmUri uri = new TcmUri(componentUris.First());
             var components =
                 componentUris
-                .Select(componentUri => { Utils.TcmUri uri = new Utils.TcmUri(componentUri); return (T.ComponentPresentation)GetComponentPresentationFactory(uri.PublicationId).FindAllComponentPresentations(componentUri)[0]; })
+                .Select(componentUri => { TcmUri uri = new TcmUri(componentUri); return (T.ComponentPresentation)GetComponentPresentationFactory(uri.PublicationId).FindAllComponentPresentations(componentUri)[0]; })
                 .Where(cp => cp != null)
                 .Select(cp => cp.Content)
                 .ToList();
@@ -121,7 +114,7 @@ namespace DD4T.Providers.SDLTridion2013sp1
 
         public DateTime GetLastPublishedDate(string uri)
         {
-            Utils.TcmUri tcmUri = new Utils.TcmUri(uri);
+            TcmUri tcmUri = new TcmUri(uri);
             TMeta.IComponentMeta cmeta = GetComponentMetaFactory(tcmUri.PublicationId).GetMeta(tcmUri.ItemId);
             return cmeta == null ? DateTime.Now : cmeta.LastPublicationDate;
         }

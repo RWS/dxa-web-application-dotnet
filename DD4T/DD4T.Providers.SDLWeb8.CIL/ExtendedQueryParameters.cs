@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DD4T.Utils;
 using Tridion.ContentDelivery.DynamicContent.Query;
+using DD4T.ContentModel;
 
-namespace DD4T.Providers.DxaModelService
+namespace DD4T.Providers.SDLWeb8.CIL
 {
     public class ExtendedQueryParameters : ITridionQueryWrapper
-    {
+    { 
         public enum QueryLogic
         {
             AllCriteriaMatch,
@@ -19,6 +19,8 @@ namespace DD4T.Providers.DxaModelService
             Ascending,
             Descending
         }
+
+       
 
         public string[] QuerySchemas { get; set; }
         public IList<MetaQueryItem> MetaQueryValues { get; set; }
@@ -37,7 +39,7 @@ namespace DD4T.Providers.DxaModelService
         public ExtendedQueryParameters()
         {
             // Default all parameters
-            QuerySchemas = new string[] { };
+            QuerySchemas = new string[]{};
             MetaQueryValues = new List<MetaQueryItem>();
             MetaQueryLogic = QueryLogic.AllCriteriaMatch;
 
@@ -51,6 +53,9 @@ namespace DD4T.Providers.DxaModelService
             QuerySortOrder = MetaQueryOrder.Ascending;
             MaximumComponents = int.MaxValue;
         }
+
+
+
 
         public Tridion.ContentDelivery.DynamicContent.Query.Query ToTridionQuery()
         {
@@ -233,7 +238,7 @@ namespace DD4T.Providers.DxaModelService
         }
         public QueryOperator MetaOperator { get; set; }
 
-        public MetaQueryItem(string fieldName, object fieldValue) : this(fieldName, fieldValue, QueryOperator.Equal)
+        public MetaQueryItem(string fieldName, object fieldValue): this(fieldName, fieldValue, QueryOperator.Equal)
         {
         }
 
