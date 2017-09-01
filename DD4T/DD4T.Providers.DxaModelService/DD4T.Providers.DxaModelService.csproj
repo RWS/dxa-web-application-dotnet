@@ -43,20 +43,20 @@
       <HintPath>..\..\packages\DD4T.Model.2.2.1\lib\net45\DD4T.ContentModel.XmlSerializers.dll</HintPath>
     </Reference>
     <Reference Include="DD4T.Core.Contracts">
-      <HintPath>..\..\packages\DD4T.Core.2.2.2\lib\net45\DD4T.Core.Contracts.dll</HintPath>
+      <HintPath>..\..\packages\DD4T.Core.2.2.3\lib\net45\DD4T.Core.Contracts.dll</HintPath>
     </Reference>
     <Reference Include="DD4T.Factories">
-      <HintPath>..\..\packages\DD4T.Core.2.2.2\lib\net45\DD4T.Factories.dll</HintPath>
+      <HintPath>..\..\packages\DD4T.Core.2.2.3\lib\net45\DD4T.Factories.dll</HintPath>
     </Reference>
     <Reference Include="DD4T.Serialization, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\DD4T.Model.2.2.1\lib\net45\DD4T.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="DD4T.Utils">
-      <HintPath>..\..\packages\DD4T.Core.2.2.2\lib\net45\DD4T.Utils.dll</HintPath>
+      <HintPath>..\..\packages\DD4T.Core.2.2.3\lib\net45\DD4T.Utils.dll</HintPath>
     </Reference>
     <Reference Include="DD4T.ViewModels">
-      <HintPath>..\..\packages\DD4T.Core.2.2.2\lib\net45\DD4T.ViewModels.dll</HintPath>
+      <HintPath>..\..\packages\DD4T.Core.2.2.3\lib\net45\DD4T.ViewModels.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Data.Edm, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
