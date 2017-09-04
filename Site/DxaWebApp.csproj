@@ -123,7 +123,7 @@
       <HintPath>..\packages\Sdl.Dxa.Framework.Web8.2.0.0-beta-201709041826\lib\net452\Sdl.Web.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Sdl.Web.Common">
+    <Reference Include="Sdl.Web.Legacy">
       <HintPath>..\packages\Sdl.Dxa.Framework.Web8.2.0.0-beta-201709041826\lib\net452\Sdl.Web.Legacy.dll</HintPath>
       <Private>True</Private>
     </Reference>
