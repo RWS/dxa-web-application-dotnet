@@ -15,6 +15,10 @@ using Sdl.Web.Mvc.Context;
 using Sdl.Web.Mvc.Formats;
 using Sdl.Web.Mvc.Html;
 using Unity.Mvc5;
+using DD4T.DI.Unity;
+using System.Reflection;
+using System.Linq;
+using DD4T.Utils;
 
 namespace Sdl.Web.Site
 {
@@ -156,14 +160,42 @@ namespace Sdl.Web.Site
         protected IUnityContainer InitializeDependencyInjection()
         {
             IUnityContainer container = BuildUnityContainer();
+          
+            AppDomain.CurrentDomain.AssemblyResolve += (s, args) =>
+            {
+                // DXA 2.0 specific:
+                // Redirect all DD4T types to our Sdl.Web.Legacy.* assemblies. This is required because if anyone drops in a DD4T.* assembly
+                // containing an implementation of a provider or such and we try to load it through dependency injection we will fail due
+                // to failure to load DD4T.Core/DD4T.ContentModel/etc assemblies as they no longer exist inside DXA 2.0
+                if (!args.Name.StartsWith("DD4T")) return null;
+                Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                if (args.Name.StartsWith("DD4T.ContentModel") || args.Name.StartsWith("DD4T.Serialization"))
+                {
+                    return
+                        assemblies.Where(x => x.FullName.StartsWith("Sdl.Web.Legacy.Model"))
+                            .Select(x => x)
+                            .FirstOrDefault();
+                }
+                return
+                    assemblies.Where(x => x.FullName.StartsWith("Sdl.Web.Legacy")).Select(x => x).FirstOrDefault();
+            };
+         
             DependencyResolver.SetResolver(new UnityDependencyResolver(container));
+            try
+            {
+                container.UseDD4T();
+            }
+            catch (Exception e)
+            {
+                Log.Debug("Problem initializing DD4T dependency injection.", e);
+            }
             return container;
         }
-
+      
         protected IUnityContainer BuildUnityContainer()
         {
             UnityConfigurationSection section = (UnityConfigurationSection)System.Configuration.ConfigurationManager.GetSection("unity");
-            IUnityContainer container = section.Configure(new UnityContainer(), "main");
+            IUnityContainer container = section.Configure(new UnityContainer(), "main");            
             ServiceLocator.SetLocatorProvider(() => new UnityServiceLocator(container));
             return container;
         }

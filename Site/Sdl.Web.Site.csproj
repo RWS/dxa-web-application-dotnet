@@ -61,6 +61,14 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
+    <Reference Include="Sdl.Web.Legacy">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Sdl.Web.Legacy\bin\${Configuration}\Sdl.Web.Legacy.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.Legacy.Model">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Sdl.Web.Legacy.Model\bin\${Configuration}\Sdl.Web.Legacy.Model.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions" />
@@ -130,6 +138,10 @@
     <ProjectReference Include="..\Sdl.Web.Common\Sdl.Web.Common.csproj">
       <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
       <Name>Sdl.Web.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj">
+      <Project>{ae4651df-a42f-4863-a0e1-870eacf3d072}</Project>
+      <Name>Sdl.Web.Tridion</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

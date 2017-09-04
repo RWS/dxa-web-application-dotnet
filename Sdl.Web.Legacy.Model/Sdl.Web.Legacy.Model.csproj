@@ -32,6 +32,12 @@
   <PropertyGroup>
     <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>dynamicdelivery.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DD4T.ContentModel.XmlSerializers">
       <HintPath>..\DD4T\build\bin\DD4T.ContentModel.XmlSerializers.dll</HintPath>
@@ -65,6 +71,9 @@
       <Name>DD4T.Serialization</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dynamicdelivery.snk" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -74,8 +83,8 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>"C:\Program Files (x86)\Microsoft\ILMerge\ILMerge.exe" /targetplatform:v4 /t:library ^
+    <PostBuildEvent>"C:\Program Files (x86)\Microsoft\ILMerge\ILMerge.exe" /targetplatform:v4 /keyfile:..\..\dynamicdelivery.snk /t:library ^
     /out:Sdl.Web.Legacy.Model.dll Sdl.Web.Legacy.Model.Temp.dll DD4T.ContentModel.dll DD4T.ContentModel.Contracts.dll DD4T.ContentModel.XmlSerializers.dll DD4T.Serialization.dll
-    </PostBuildEvent>
+</PostBuildEvent>
   </PropertyGroup>
 </Project>

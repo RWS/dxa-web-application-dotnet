@@ -34,6 +34,12 @@
   <PropertyGroup>
     <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>dynamicdelivery.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -174,98 +180,45 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\BaseProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\BaseProvider.cs</Link>
+    <Compile Include="..\DD4T\DD4T.Caching.ApacheMQ\DependencyMappings.cs">
+      <Link>DD4T\Caching\DD4T.Caching.ApacheMQ\DependencyMappings.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ExtendedQueryParameters.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\ExtendedQueryParameters.cs</Link>
+    <Compile Include="..\DD4T\DD4T.Caching.ApacheMQ\JMSMessageProvider.cs">
+      <Link>DD4T\Caching\DD4T.Caching.ApacheMQ\JMSMessageProvider.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ITridionQueryWrapper.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\ITridionQueryWrapper.cs</Link>
+    <Compile Include="..\DD4T\DD4T.DI.Unity\Exceptions\ProviderNotFoundException.cs">
+      <Link>DD4T\DependencyInjection\DD4T.DI.Unity\Exceptions\ProviderNotFoundException.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ProvidersCommonServices.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\ProvidersCommonServices.cs</Link>
+    <Compile Include="..\DD4T\DD4T.DI.Unity\Factories.cs">
+      <Link>DD4T\DependencyInjection\DD4T.DI.Unity\Factories.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionBinaryProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionBinaryProvider.cs</Link>
+    <Compile Include="..\DD4T\DD4T.DI.Unity\Mvc.cs">
+      <Link>DD4T\DependencyInjection\DD4T.DI.Unity\Mvc.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionComponentPresentationProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionComponentPresentationProvider.cs</Link>
+    <Compile Include="..\DD4T\DD4T.DI.Unity\MVCTypes.cs">
+      <Link>DD4T\DependencyInjection\DD4T.DI.Unity\MVCTypes.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionComponentProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionComponentProvider.cs</Link>
+    <Compile Include="..\DD4T\DD4T.DI.Unity\Providers.cs">
+      <Link>DD4T\DependencyInjection\DD4T.DI.Unity\Providers.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionLinkProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionLinkProvider.cs</Link>
+    <Compile Include="..\DD4T\DD4T.DI.Unity\Resolvers.cs">
+      <Link>DD4T\DependencyInjection\DD4T.DI.Unity\Resolvers.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionPageProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionPageProvider.cs</Link>
+    <Compile Include="..\DD4T\DD4T.DI.Unity\RestProvider.cs">
+      <Link>DD4T\DependencyInjection\DD4T.DI.Unity\RestProvider.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionTaxonomyProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionTaxonomyProvider.cs</Link>
+    <Compile Include="..\DD4T\DD4T.DI.Unity\RestProviderTypes.cs">
+      <Link>DD4T\DependencyInjection\DD4T.DI.Unity\RestProviderTypes.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\BaseProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\BaseProvider.cs</Link>
+    <Compile Include="..\DD4T\DD4T.DI.Unity\ViewModels.cs">
+      <Link>DD4T\DependencyInjection\DD4T.DI.Unity\ViewModels.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\ExtendedQueryParameters.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\ExtendedQueryParameters.cs</Link>
+    <Compile Include="..\DD4T\DD4T.Logging.Log4net\DefaultLogger.cs">
+      <Link>DD4T\Logging\DD4T.Logging.Log4net\DefaultLogger.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\ITridionQueryWrapper.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\ITridionQueryWrapper.cs</Link>
+    <Compile Include="..\DD4T\DD4T.Logging.Log4net\DependencyMappings.cs">
+      <Link>DD4T\Logging\DD4T.Logging.Log4net\DependencyMappings.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\ProvidersCommonServices.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\ProvidersCommonServices.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\TridionBinaryProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionBinaryProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\TridionComponentPresentationProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionComponentPresentationProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\TridionComponentProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionComponentProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\TridionLinkProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionLinkProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\TridionPageProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionPageProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLTridion2013sp1\TridionTaxonomyProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLTridion2013sp1\TridionTaxonomyProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\BaseProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\BaseProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\ExtendedQueryParameters.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ExtendedQueryParameters.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\ITridionQueryWrapper.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ITridionQueryWrapper.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\ProvidersCommonServices.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\ProvidersCommonServices.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\TridionBinaryProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionBinaryProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\TridionComponentPresentationProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionComponentPresentationProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\TridionComponentProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionComponentProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\TridionLinkProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionLinkProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\TridionPageProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionPageProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.SDLWeb8.5.CIL\TridionTaxonomyProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.SDLWeb8.5.CIL\TridionTaxonomyProvider.cs</Link>
-    </Compile>
-    <Compile Include="DD4T\Caching\DD4T.Caching.ApacheMQ\DependencyMappings.cs" />
-    <Compile Include="DD4T\Caching\DD4T.Caching.ApacheMQ\JMSMessageProvider.cs" />
     <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\ICacheAgent.cs" />
     <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\ICacheEvent.cs" />
     <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\IEvent.cs" />
@@ -344,36 +297,7 @@
     <Compile Include="DD4T\Core\DD4T.ViewModels\XpmRenderer.cs" />
     <Compile Include="DD4T\Core\DD4T.ViewModels\XPM\XpmExtensions.cs" />
     <Compile Include="DD4T\Core\DD4T.ViewModels\XPM\XpmMarkupService.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\Bootstrap.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\Exceptions\ProviderNotFoundException.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\Factories.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\Mvc.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\Providers.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\Resolvers.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\RestProvider.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Autofac\ViewModels.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\Bootstrap.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\Exceptions\ProviderNotFoundException.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\Factories.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\Mvc.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\Providers.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\Resolvers.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\RestProvider.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Ninject\ViewModels.cs" />
     <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\Bootstrap.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\Exceptions\ProviderNotFoundException.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\Factories.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\Mvc.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\MVCTypes.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\Providers.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\Resolvers.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\RestProvider.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\RestProviderTypes.cs" />
-    <Compile Include="DD4T\DependencyInjection\DD4T.DI.Unity\ViewModels.cs" />
-    <Compile Include="DD4T\Logging\DD4T.Logging.Log4net\DefaultLogger.cs" />
-    <Compile Include="DD4T\Logging\DD4T.Logging.Log4net\DependencyMappings.cs" />
-    <Compile Include="DD4T\Logging\DD4T.Logging.NLog\DependencyMappings.cs" />
-    <Compile Include="DD4T\Logging\DD4T.Logging.NLog\NLog.cs" />
     <Compile Include="DD4T\MVC\DD4T.MVC\Attributes\UsesTridionPage.cs" />
     <Compile Include="DD4T\MVC\DD4T.MVC\Caching\SchemaComponentsCacheDependency.cs" />
     <Compile Include="DD4T\MVC\DD4T.MVC\Caching\SitemapCacheDependency.cs" />
@@ -411,12 +335,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sdl.Web.ModelService\Sdl.Web.ModelService.csproj">
-      <Project>{5a58a2b2-6c7e-4183-8eff-76d4282e5c66}</Project>
-      <Name>Sdl.Web.ModelService</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="dynamicdelivery.snk" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

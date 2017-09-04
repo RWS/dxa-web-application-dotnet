@@ -63,6 +63,16 @@
     <Reference Include="Microsoft.Extensions.Primitives">
       <HintPath>..\packages\Microsoft.Extensions.Primitives.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Primitives.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Practices.Unity, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Configuration">
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.RegistrationByConvention">
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.RegistrationByConvention.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -105,6 +115,10 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.Data.Edm">
@@ -157,11 +171,44 @@
     <Reference Include="Sdl.Web.Context.OData.Client">
       <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\BaseProvider.cs">
+      <Link>Mapping\Provider\BaseProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ExtendedQueryParameters.cs">
+      <Link>Mapping\Provider\ExtendedQueryParameters.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ITridionQueryWrapper.cs">
+      <Link>Mapping\Provider\ITridionQueryWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ProvidersCommonServices.cs">
+      <Link>Mapping\Provider\ProvidersCommonServices.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionBinaryProvider.cs">
+      <Link>Mapping\Provider\TridionBinaryProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionComponentPresentationProvider.cs">
+      <Link>Mapping\Provider\TridionComponentPresentationProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionComponentProvider.cs">
+      <Link>Mapping\Provider\TridionComponentProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionLinkProvider.cs">
+      <Link>Mapping\Provider\TridionLinkProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionPageProvider.cs">
+      <Link>Mapping\Provider\TridionPageProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionTaxonomyProvider.cs">
+      <Link>Mapping\Provider\TridionTaxonomyProvider.cs</Link>
+    </Compile>
     <Compile Include="Caching\CacheProvider.cs" />
     <Compile Include="Caching\DD4TCacheAgentAdapter.cs" />
     <Compile Include="Caching\DefaultCacheProvider.cs" />
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
     <Compile Include="CdApiLocalizationResolver.cs" />
+    <Reference Include="Unity.Mvc5">
+      <HintPath>..\packages\Unity.Mvc5.1.1\lib\net45\Unity.Mvc5.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CdConfigLocalizationResolver.cs" />

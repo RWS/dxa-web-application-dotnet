@@ -1,10 +1,11 @@
 ﻿using System;
 using DD4T.ContentModel.Contracts.Resolvers;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Tridion.Mapping
 {
-    internal class PublicationResolver : IPublicationResolver
+    public class PublicationResolver : IPublicationResolver
     {
         private readonly int _publicationId;
 
@@ -15,7 +16,7 @@ namespace Sdl.Web.Tridion.Mapping
 
         public int ResolvePublicationId()
         {
-            return _publicationId;
+            return _publicationId == 0 ? Convert.ToInt32(WebRequestContext.Localization.Id) : _publicationId;
         }
     }
 }

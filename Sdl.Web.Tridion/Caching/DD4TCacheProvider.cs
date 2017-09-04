@@ -12,7 +12,7 @@ namespace Sdl.Web.Tridion.Caching
     /// </summary>
     public class DD4TCacheProvider : CacheProvider
     {
-        private readonly ICacheAgent _cacheAgent = DD4TFactoryCache.CreateDefaultCacheAgent();
+        private readonly ICacheAgent _cacheAgent = DD4TFactoryCache.CacheAgent();
 
         #region ICacheProvider members
         /// <summary>
