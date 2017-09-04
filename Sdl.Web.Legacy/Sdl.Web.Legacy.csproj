@@ -219,36 +219,6 @@
     <Compile Include="..\DD4T\DD4T.Logging.Log4net\DependencyMappings.cs">
       <Link>DD4T\Logging\DD4T.Logging.Log4net\DependencyMappings.cs</Link>
     </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\BaseProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\BaseProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ExtendedQueryParameters.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\ExtendedQueryParameters.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ITridionQueryWrapper.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\ITridionQueryWrapper.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ProvidersCommonServices.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\ProvidersCommonServices.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionBinaryProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionBinaryProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionComponentPresentationProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionComponentPresentationProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionComponentProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionComponentProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionLinkProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionLinkProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionPageProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionPageProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionTaxonomyProvider.cs">
-      <Link>DD4T\Providers\DD4T.Providers.DxaModelService\TridionTaxonomyProvider.cs</Link>
-    </Compile>
     <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\ICacheAgent.cs" />
     <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\ICacheEvent.cs" />
     <Compile Include="DD4T\Core\DD4T.Core.Contracts\Caching\IEvent.cs" />
@@ -363,12 +333,6 @@
     <Compile Include="DD4T\MVC\DD4T.Web.MVC\Binaries\IBinaryFileManager.cs" />
     <Compile Include="DD4T\MVC\DD4T.Web.MVC\ResourceManagement\DynamicResourceManagement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Sdl.Web.ModelService\Sdl.Web.ModelService.csproj">
-      <Project>{5a58a2b2-6c7e-4183-8eff-76d4282e5c66}</Project>
-      <Name>Sdl.Web.ModelService</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="dynamicdelivery.snk" />

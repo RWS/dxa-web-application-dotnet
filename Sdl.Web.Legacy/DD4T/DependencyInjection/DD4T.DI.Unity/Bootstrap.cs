@@ -22,7 +22,7 @@ namespace DD4T.DI.Unity
 
             //allowing to register types from any other DD4T.* package into the container:
             //functionality introduced to allow a more plugabble architecture into the framework.            
-            var loadedAssemblies = Directory.GetFiles(binDirectory, "DD4T.*").Select(s => Assembly.LoadFile(s));
+            var loadedAssemblies = Directory.GetFiles(binDirectory, "DD4T.*.dll").Select(s => Assembly.LoadFile(s));
 
             var mappers = AppDomain.CurrentDomain.GetAssemblies()
                                    .Where(ass => ass.FullName.StartsWith("DD4T.")||ass.FullName.StartsWith("Sdl.Web.Legacy"))
@@ -35,7 +35,7 @@ namespace DD4T.DI.Unity
             if (!Directory.Exists(binDirectory))
                 return;
 
-            var file = Directory.GetFiles(binDirectory, "DD4T.Providers.*").FirstOrDefault();
+            var file = Directory.GetFiles(binDirectory, "DD4T.Providers.*.dll").FirstOrDefault();
             if (file == null)
                 throw new ProviderNotFoundException();
 

@@ -134,7 +134,7 @@ namespace Sdl.Web.Tridion.Mapping
                 string componentUri = localization.GetCmUri(idParts[0]);
                 string templateUri = localization.GetCmUri(idParts[1], (int) ItemType.ComponentTemplate);
 
-                IComponentPresentationFactory componentPresentationFactory = DD4TFactory.GetComponentPresentationFactory(localization);
+                IComponentPresentationFactory componentPresentationFactory = DD4TFactoryCache.GetComponentPresentationFactory(localization);
                 IComponentPresentation dcp;
                 if (!componentPresentationFactory.TryGetComponentPresentation(out dcp, componentUri, templateUri))
                 {
@@ -230,7 +230,7 @@ namespace Sdl.Web.Tridion.Mapping
 
             using (new Tracer(urlPath, cmUrl))
             {
-                IPageFactory pageFactory = DD4TFactory.GetPageFactory(localization);
+                IPageFactory pageFactory = DD4TFactoryCache.GetPageFactory(localization);
                 string result;
                 pageFactory.TryFindPageContent(GetCmUrl(urlPath), out result);
                 return result;
@@ -325,7 +325,7 @@ namespace Sdl.Web.Tridion.Mapping
 
             using (new Tracer(urlPath, localization, cmUrl))
             {
-                IPageFactory pageFactory = DD4TFactory.GetPageFactory(localization);
+                IPageFactory pageFactory = DD4TFactoryCache.GetPageFactory(localization);
                 IPage result;
                 pageFactory.TryFindPage(cmUrl, out result);
                 return result;

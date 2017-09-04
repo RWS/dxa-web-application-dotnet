@@ -160,26 +160,24 @@ namespace Sdl.Web.Site
         protected IUnityContainer InitializeDependencyInjection()
         {
             IUnityContainer container = BuildUnityContainer();
-
+          
             AppDomain.CurrentDomain.AssemblyResolve += (s, args) =>
             {
                 // DXA 2.0 specific:
                 // Redirect all DD4T types to our Sdl.Web.Legacy.* assemblies. This is required because if anyone drops in a DD4T.* assembly
                 // containing an implementation of a provider or such and we try to load it through dependency injection we will fail due
                 // to failure to load DD4T.Core/DD4T.ContentModel/etc assemblies as they no longer exist inside DXA 2.0
-                if (args.Name.StartsWith("DD4T"))
+                if (!args.Name.StartsWith("DD4T")) return null;
+                Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                if (args.Name.StartsWith("DD4T.ContentModel") || args.Name.StartsWith("DD4T.Serialization"))
                 {
-                    Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                    if (args.Name.StartsWith("DD4T.ContentModel") || args.Name.StartsWith("DD4T.Serialization"))
-                    {
-                        return assemblies.Where(x => x.FullName.StartsWith("Sdl.Web.Legacy.Model")).Select(x => x).FirstOrDefault();
-                    }
-                    else
-                    {
-                        return assemblies.Where(x => x.FullName.StartsWith("Sdl.Web.Legacy")).Select(x => x).FirstOrDefault();
-                    }
+                    return
+                        assemblies.Where(x => x.FullName.StartsWith("Sdl.Web.Legacy.Model"))
+                            .Select(x => x)
+                            .FirstOrDefault();
                 }
-                return null;
+                return
+                    assemblies.Where(x => x.FullName.StartsWith("Sdl.Web.Legacy")).Select(x => x).FirstOrDefault();
             };
          
             DependencyResolver.SetResolver(new UnityDependencyResolver(container));
@@ -193,12 +191,11 @@ namespace Sdl.Web.Site
             }
             return container;
         }
-
+      
         protected IUnityContainer BuildUnityContainer()
         {
             UnityConfigurationSection section = (UnityConfigurationSection)System.Configuration.ConfigurationManager.GetSection("unity");
-            IUnityContainer container = section.Configure(new UnityContainer(), "main");
-            
+            IUnityContainer container = section.Configure(new UnityContainer(), "main");            
             ServiceLocator.SetLocatorProvider(() => new UnityServiceLocator(container));
             return container;
         }
