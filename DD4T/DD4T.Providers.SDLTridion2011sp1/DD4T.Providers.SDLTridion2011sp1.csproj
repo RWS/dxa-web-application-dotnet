@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{CBD555B9-CA2F-480B-81C9-8E61D92B0075}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DD4T.Providers.SDLTridion2011sp1</RootNamespace>
+    <AssemblyName>DD4T.Providers.SDLTridion2011sp1</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <TargetFrameworkProfile />
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\build\bin</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\build\bin</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DD4T.ContentModel, Version=2.2.1.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Model.2.2.1\lib\net45\DD4T.ContentModel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DD4T.ContentModel.Contracts, Version=2.2.1.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Model.2.2.1\lib\net45\DD4T.ContentModel.Contracts.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DD4T.ContentModel.XmlSerializers, Version=2.2.1.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Model.2.2.1\lib\net45\DD4T.ContentModel.XmlSerializers.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DD4T.Core.Contracts, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Core.2.2.2\lib\net45\DD4T.Core.Contracts.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DD4T.Factories, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Core.2.2.2\lib\net45\DD4T.Factories.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DD4T.Serialization, Version=2.2.1.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Model.2.2.1\lib\net45\DD4T.Serialization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DD4T.Utils, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Core.2.2.2\lib\net45\DD4T.Utils.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DD4T.ViewModels, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DD4T.Core.2.2.2\lib\net45\DD4T.ViewModels.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Data" />
+    <Reference Include="Tridion.ContentDelivery, Version=6.1.0.348, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+      <HintPath>..\packages\sdl-tridion-content-delivery-2011-sp1.1.0.2\lib\net45\Tridion.ContentDelivery.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Tridion.ContentDelivery.AmbientData, Version=6.1.0.348, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=AMD64">
+      <HintPath>..\packages\sdl-tridion-content-delivery-2011-sp1.1.0.2\lib\net45\Tridion.ContentDelivery.AmbientData.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Tridion.ContentDelivery.Configuration, Version=6.1.0.348, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+      <HintPath>..\packages\sdl-tridion-content-delivery-2011-sp1.1.0.2\lib\net45\Tridion.ContentDelivery.Configuration.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Tridion.ContentDelivery.Interop, Version=6.1.0.43, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+      <HintPath>..\packages\sdl-tridion-content-delivery-2011-sp1.1.0.2\lib\net45\Tridion.ContentDelivery.Interop.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BaseProvider.cs" />
+    <Compile Include="ExtendedQueryParameters.cs" />
+    <Compile Include="ITridionQueryWrapper.cs" />
+    <Compile Include="ProvidersCommonServices.cs" />
+    <Compile Include="TridionBinaryProvider.cs" />
+    <Compile Include="TridionComponentPresentationProvider.cs" />
+    <Compile Include="TridionComponentProvider.cs" />
+    <Compile Include="TridionLinkProvider.cs" />
+    <Compile Include="TridionPageProvider.cs" />
+    <Compile Include="TridionTaxonomyProvider.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if not exist "$(OutDir)\nuget" mkdir "$(OutDir)\nuget"
+copy "$(TargetPath)" "$(OutDir)\nuget"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <Import Project="..\..\DD4T Providers.Targets" />
+  <Target Name="AfterBuild">
+    <CallTarget Targets="Package" />
+    <Message Text="Installing package to local NuGet repo" Importance="high" Condition="'$(NUGET_LOCALREPO)' != ''" />
+    <CallTarget Targets="Install" Condition="'$(NUGET_LOCALREPO)' != ''" />
+  </Target>
+  <Target Name="BeforeBuild">
+    <Message Text="Mimic Tridion NuGet packages if there are files in the dependency folder" Importance="high" />
+    <CallTarget Targets="MimicPackages" />
+  </Target>
+</Project>

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using DD4T.ContentModel.Contracts.Providers;
 using System.Collections;
 using DD4T.ContentModel.Querying;
+using DD4T.Utils;
 using DD4T.ContentModel.Contracts.Logging;
 
 namespace DD4T.Providers.SDLWeb85.CIL
