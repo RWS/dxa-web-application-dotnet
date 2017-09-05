@@ -32,7 +32,7 @@ namespace Sdl.Web.Tridion.Linking
             string url;
             if (sourceUri.IsCmIdentifier())
             {
-                TcmUri tcmUri = new TcmUri(sourceUri);
+                Tridion.ContentManager.TcmUri tcmUri = new Tridion.ContentManager.TcmUri(sourceUri);
                 url = ResolveLink(tcmUri, resolveToBinary, localization);
             }
             else
@@ -53,7 +53,7 @@ namespace Sdl.Web.Tridion.Linking
         }
         #endregion
 
-        private static string ResolveLink(TcmUri tcmUri, bool resolveToBinary, Localization localization)
+        private static string ResolveLink(Tridion.ContentManager.TcmUri tcmUri, bool resolveToBinary, Localization localization)
         {
             switch (tcmUri.ItemType)
             {
@@ -74,24 +74,24 @@ namespace Sdl.Web.Tridion.Linking
             }
         }
 
-        private static string GetPublicationUri(TcmUri tcmUri, Localization localization)
+        private static string GetPublicationUri(Tridion.ContentManager.TcmUri tcmUri, Localization localization)
             => (localization == null) ? $"tcm:0-{tcmUri.PublicationId}-1" : localization.GetCmUri();
 
-        private static string ResolveComponentLink(TcmUri tcmUri, Localization localization)
+        private static string ResolveComponentLink(Tridion.ContentManager.TcmUri tcmUri, Localization localization)
         {
             ComponentLink linker = new ComponentLink(GetPublicationUri(tcmUri, localization));
             Link link = linker.GetLink(tcmUri.ItemId);
             return link.IsResolved ? link.Url : null;
         }
 
-        private static string ResolveBinaryLink(TcmUri tcmUri, Localization localization)
+        private static string ResolveBinaryLink(Tridion.ContentManager.TcmUri tcmUri, Localization localization)
         {
             BinaryLink linker = new BinaryLink(GetPublicationUri(tcmUri, localization));
             Link link = linker.GetLink(tcmUri.ToString(), null, null, null, false);
             return link.IsResolved ? link.Url : null;
         }
 
-        private static string ResolvePageLink(TcmUri tcmUri, Localization localization)
+        private static string ResolvePageLink(Tridion.ContentManager.TcmUri tcmUri, Localization localization)
         {
             PageLink linker = new PageLink(GetPublicationUri(tcmUri, localization));
             Link link = linker.GetLink(tcmUri.ItemId);

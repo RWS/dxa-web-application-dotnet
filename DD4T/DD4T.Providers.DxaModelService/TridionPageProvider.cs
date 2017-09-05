@@ -83,7 +83,7 @@ namespace DD4T.Providers.DxaModelService
         /// <returns>String with page xml or empty string if no page was found</returns>
         public string GetContentByUrl(string url)
         {
-            LoggerService.Debug(">>GetContentByUrl({0})", LoggingCategory.Performance, url);
+            LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUrl({0})", LoggingCategory.Performance, url);
             PageModelRequest req = new PageModelRequest
             {
                 PublicationId = PublicationId,

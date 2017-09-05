@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using DD4T.ContentModel.Contracts.Providers;
 using DD4T.ContentModel.Querying;
 using DD4T.ContentModel.Contracts.Logging;
-using DD4T.Utils;
-using Sdl.Web.ModelService;
 using Sdl.Web.ModelService.Request;
 
 namespace DD4T.Providers.DxaModelService
@@ -33,8 +31,8 @@ namespace DD4T.Providers.DxaModelService
 
         public string GetContent(string uri, string templateUri = "")
         {
-            LoggerService.Debug(">>GetContent({0})", LoggingCategory.Performance, uri);
-            LoggerService.Debug(">>GetContent({0})", LoggingCategory.Performance, uri);
+            LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContent({0})", LoggingCategory.Performance, uri);
+            LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContent({0})", LoggingCategory.Performance, uri);
             TcmUri tcmUri = new TcmUri(uri);
             TcmUri templateTcmUri = new TcmUri(templateUri);
             EntityModelRequest request = new EntityModelRequest

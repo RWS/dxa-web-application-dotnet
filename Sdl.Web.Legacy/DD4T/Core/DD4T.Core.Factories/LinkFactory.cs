@@ -19,7 +19,7 @@ namespace DD4T.Factories
         public const string CacheRegion = "Link";
 
         //private const string uriPrefix = "tcm:";
-        private static Utils.TcmUri emptyTcmUri = new Utils.TcmUri("tcm:0-0-0");
+        private static TcmUri emptyTcmUri = new TcmUri("tcm:0-0-0");
         private Dictionary<int, ILinkProvider> _linkProviders = new Dictionary<int, ILinkProvider>();
 
         public ILinkProvider LinkProvider { get; set; }
