@@ -448,6 +448,11 @@ namespace Sdl.Web.Tridion.R2Mapping
                 };
             }
 
+            if (!string.IsNullOrEmpty(stringValue) && targetType == typeof (int) && stringValue.Contains("."))
+            {
+                // Simple cast from floating point to int
+                return (int) (double)Convert.ChangeType(stringValue, typeof (double), CultureInfo.InvariantCulture.NumberFormat);
+            }
             return Convert.ChangeType(stringValue, targetType, CultureInfo.InvariantCulture.NumberFormat);
         }
 
