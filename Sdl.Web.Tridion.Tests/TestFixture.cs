@@ -8,6 +8,7 @@ using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Navigation;
 using Sdl.Web.Tridion.Caching;
 using Sdl.Web.Tridion.Mapping;
+using Sdl.Web.Tridion.ModelService;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -55,6 +56,7 @@ namespace Sdl.Web.Tridion.Tests
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
             { typeof(ICacheProvider), new DefaultCacheProvider() },
+            { typeof(IModelServiceProvider), new DefaultModelServiceProvider() },
             { typeof(IContentProvider), new DefaultContentProvider() },
             { typeof(INavigationProvider), new StaticNavigationProvider() },
             { typeof(ILinkResolver), new DefaultLinkResolver() },
