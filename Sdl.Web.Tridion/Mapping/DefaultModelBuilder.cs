@@ -4,1282 +4,721 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
-using DD4T.ContentModel;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Extensions;
-using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Tridion.Extensions;
-using IPage = DD4T.ContentModel.IPage;
+using Sdl.Web.Common.Extensions;
+using Sdl.Web.DataModel;
+using Sdl.Web.Tridion.ContentManager;
 
 namespace Sdl.Web.Tridion.Mapping
 {
     /// <summary>
-    /// Default Model Builder implementation (DD4T-based).
+    /// Default Page and Entity Model Builder implementation (based on DXA R2 Data Model).
     /// </summary>
-    /// <remarks>
-    /// Typically this model builder is the only one in the <see cref="ModelBuilderPipeline"/>, but advanced modules (like the SmartTarget module)
-    /// may add their own model builder to the pipeline (to post-process the resulting Strongly Typed View Models).
-    /// Note that the default model building creates the View Models and ignores any existing ones so should normally be the first in the pipeline.
-    /// </remarks>
-    public class DefaultModelBuilder : BaseModelBuilder, IModelBuilder
+    public class DefaultModelBuilder : IPageModelBuilder, IEntityModelBuilder
     {
-        // TODO: while it works perfectly well, this class is in need of some refactoring to make its behaviour a bit more understandable and maintainable,
-        // as its currently very easy to get lost in the semantic mapping logic
-
-        private const string StandardMetadataXmlFieldName = "standardMeta";
-        private const string StandardMetadataTitleXmlFieldName = "name";
-        private const string StandardMetadataDescriptionXmlFieldName = "description";
-        private const string RegionForPageTitleComponent = "Main";
-        private const string ComponentXmlFieldNameForPageTitle = "headline";
-
-        #region IModelBuilder members
-
-        public virtual void BuildPageModel(ref PageModel pageModel, IPage page, IEnumerable<IPage> includes, Localization localization)
+        private class MappingData
         {
-            using (new Tracer(pageModel, page, includes, localization))
-            {
-                pageModel = CreatePageModel(page, localization);
-                RegionModelSet regions = pageModel.Regions;
-
-                // Create predefined Regions from Page Template Metadata
-                CreatePredefinedRegions(regions, page.PageTemplate);
-
-                // Create Regions/Entities from Component Presentations
-                foreach (IComponentPresentation cp in page.ComponentPresentations)
-                {
-                    MvcData cpRegionMvcData = GetRegionMvcData(cp);
-                    string regionName = cpRegionMvcData.RegionName ?? cpRegionMvcData.ViewName;
-                    RegionModel region;
-                    if (regions.TryGetValue(regionName, out region))
-                    {
-                        // Region already exists in Page Model; MVC data should match.
-                        if (!region.MvcData.Equals(cpRegionMvcData))
-                        {
-                            Log.Warn("Region '{0}' is defined with conflicting MVC data: [{1}] and [{2}]. Using the former.", region.Name, region.MvcData, cpRegionMvcData);
-                        }
-                    }
-                    else
-                    {
-                        // Region does not exist in Page Model yet; create Region Model and add it.
-                        region = CreateRegionModel(cpRegionMvcData);
-                        regions.Add(region);
-                    }
-
-                    try
-                    {
-                        EntityModel entity = ModelBuilderPipeline.CreateEntityModel(cp, localization);
-                            region.Entities.Add(entity);
-                    }
-                    catch (Exception ex)
-                    {
-                        // If there is a problem mapping an Entity, we replace it with an ExceptionEntity which holds the error details and carry on.
-                        Log.Error(ex);
-                        region.Entities.Add(new ExceptionEntity(ex));
-                    }
-                }
-
-                // Create Regions from Include Pages
-                if (includes != null)
-                {
-                    foreach (IPage includePage in includes)
-                    {
-                        PageModel includePageModel;
-                        if (CacheRegions.IsViewModelCachingEnabled)
-                        {
-                            includePageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                                includePage.Id,
-                                CacheRegions.IncludePageModel,
-                                () => ModelBuilderPipeline.CreatePageModel(includePage, null, localization),
-                                dependencies: new[] { includePage.Id }
-                                );
-                        }
-                        else
-                        {
-                            includePageModel = ModelBuilderPipeline.CreatePageModel(includePage, null, localization);
-                        }
-
-                        // Model Include Page as Region:
-                        RegionModel includePageRegion = GetRegionFromIncludePage(includePage, localization);
-                        RegionModel existingRegion;
-                        if (regions.TryGetValue(includePageRegion.Name, out existingRegion))
-                        {
-                            // Region with same name already exists; merge include Page Region.
-                            existingRegion.Regions.UnionWith(includePageModel.Regions);
-
-                            if (existingRegion.XpmMetadata != null)
-                            {
-                                existingRegion.XpmMetadata.Remove(RegionModel.IncludedFromPageIdXpmMetadataKey);
-                                existingRegion.XpmMetadata.Remove(RegionModel.IncludedFromPageTitleXpmMetadataKey);
-                                existingRegion.XpmMetadata.Remove(RegionModel.IncludedFromPageFileNameXpmMetadataKey);
-                            }
-
-                            Log.Info("Merged Include Page [{0}] into Region [{1}]. Note that merged Regions can't be edited properly in XPM (yet).",
-                                includePageModel, existingRegion);
-                        }
-                        else
-                        {
-                            includePageRegion.Regions.UnionWith(includePageModel.Regions);
-                            regions.Add(includePageRegion);
-                        }
-                    }
-
-                    if (pageModel.MvcData.ViewName != "IncludePage")
-                    {
-                        pageModel.Title = ProcessPageMetadata(page, pageModel.Meta, localization);
-                    }
-                }
-            }
+            public string ModelId { get; set; }
+            public Type ModelType { get; set; }
+            public SemanticSchema SemanticSchema { get; set; }
+            public SemanticSchemaField EmbeddedSemanticSchemaField { get; set; }
+            public int EmbedLevel { get; set; }
+            public ViewModelData SourceViewModel { get; set; }
+            public ContentModelData Fields { get; set; }
+            public ContentModelData MetadataFields { get; set; }
+            public string ContextXPath { get; set; }
+            public Localization Localization { get; set; }
         }
 
-        public virtual void BuildEntityModel(ref EntityModel entityModel, IComponentPresentation cp, Localization localization)
+        /// <summary>
+        /// Builds a strongly typed Page Model from a given DXA R2 Data Model.
+        /// </summary>
+        /// <param name="pageModel">The strongly typed Page Model to build. Is <c>null</c> for the first Page Model Builder in the pipeline.</param>
+        /// <param name="pageModelData">The DXA R2 Data Model.</param>
+        /// <param name="includePageRegions">Indicates whether Include Page Regions should be included.</param>
+        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        public void BuildPageModel(ref PageModel pageModel, PageModelData pageModelData, bool includePageRegions, Localization localization)
         {
-            using (new Tracer(entityModel, cp, localization))
+            using (new Tracer(pageModel, pageModelData, includePageRegions, localization))
             {
-                MvcData mvcData = GetMvcData(cp);
+                Common.Models.MvcData mvcData = CreateMvcData(pageModelData.MvcData, "Page");
                 Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
-                // NOTE: not using ModelBuilderPipeline here, but directly calling our own implementation.
-                BuildEntityModel(ref entityModel, cp.Component, modelType, localization);
-
-                if (localization.IsXpmEnabled)
+                if (modelType == typeof(PageModel))
                 {
-                    entityModel.XpmMetadata = GetXpmMetadata(cp);
-                }
-                entityModel.MvcData = mvcData;
-
-                // add html classes to model from metadata
-                // TODO: move to CreateViewModel so it can be merged with the same code for a Page/PageTemplate
-                IComponentTemplate template = cp.ComponentTemplate;
-                if (template.MetadataFields != null && template.MetadataFields.ContainsKey("htmlClasses"))
-                {
-                    // strip illegal characters to ensure valid html in the view (allow spaces for multiple classes)
-                    entityModel.HtmlClasses = template.MetadataFields["htmlClasses"].Value.StripIllegalCharacters(@"[^\w\-\ ]");
-                }
-
-                if (cp.IsDynamic)
-                {
-                    // update Entity Identifier to that of a DCP
-                    entityModel.Id = GetDxaIdentifierFromTcmUri(cp.Component.Id, cp.ComponentTemplate.Id);
-                }
-            }
-        }
-
-        public virtual void BuildEntityModel(ref EntityModel entityModel, IComponent component, Type baseModelType, Localization localization)
-        {
-            using (new Tracer(entityModel, component, baseModelType, localization))
-            {
-                string[] schemaTcmUriParts = component.Schema.Id.Split('-');
-                SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaTcmUriParts[1], localization);
-
-                // The semantic mapping may resolve to a more specific model type than specified by the View Model itself (e.g. Image instead of just MediaItem for Teaser.Media)
-                Type modelType = semanticSchema.GetModelTypeFromSemanticMapping(baseModelType);
-
-                MappingData mappingData = new MappingData
-                {
-                    SemanticSchema = semanticSchema,
-                    EntityNames = semanticSchema.GetEntityNames(),
-                    TargetEntitiesByPrefix = GetEntityDataFromType(modelType),
-                    Content = component.Fields,
-                    Meta = component.MetadataFields,
-                    TargetType = modelType,
-                    SourceEntity = component,
-                    Localization = localization
-                };
-
-                entityModel = (EntityModel)CreateViewModel(mappingData);
-                entityModel.Id = GetDxaIdentifierFromTcmUri(component.Id);
-
-                if (entityModel is MediaItem && component.Multimedia != null && component.Multimedia.Url != null)
-                {
-                    MediaItem mediaItem = (MediaItem)entityModel;
-                    mediaItem.Url = component.Multimedia.Url;
-                    mediaItem.FileName = component.Multimedia.FileName;
-                    mediaItem.FileSize = component.Multimedia.Size;
-                    mediaItem.MimeType = component.Multimedia.MimeType;
-                }
-
-                if (entityModel is EclItem)
-                {
-                    MapEclItem((EclItem) entityModel, component);
-                }
-
-                if (entityModel is Link)
-                {
-                    Link link = (Link)entityModel;
-                    if (String.IsNullOrEmpty(link.Url))
+                    // Standard Page Model.
+                    pageModel = new PageModel(pageModelData.Id)
                     {
-                        link.Url = SiteConfiguration.LinkResolver.ResolveLink(component.Id);
-                    }
+                        ExtensionData = pageModelData.ExtensionData,
+                        HtmlClasses = pageModelData.HtmlClasses,
+                        XpmMetadata = pageModelData.XpmMetadata,
+                    };
                 }
-
-                // Set the Entity Model's default View (if any) after it has been fully initialized.
-                entityModel.MvcData = entityModel.GetDefaultView(localization);
-            }
-        }
-            
-        #endregion
-
-        private static void MapEclItem(EclItem eclItem, IComponent component)
-        {
-            eclItem.EclUri = component.EclId;
-
-            IFieldSet eclExtensionDataFields;
-            if (component.ExtensionData == null || !component.ExtensionData.TryGetValue("ECL", out eclExtensionDataFields))
-            {
-                Log.Warn("Encountered ECL Stub Component without ECL Extension Data: {0}", component.Id);
-                return;
-            }
-
-            eclItem.EclDisplayTypeId = GetFieldValue("DisplayTypeId", eclExtensionDataFields);
-            eclItem.EclTemplateFragment = GetFieldValue("TemplateFragment", eclExtensionDataFields);
-            string eclFileName = GetFieldValue("FileName", eclExtensionDataFields);
-            if (!string.IsNullOrEmpty(eclFileName))
-            {
-                eclItem.FileName = eclFileName;
-            }
-            string eclMimeType = GetFieldValue("MimeType", eclExtensionDataFields);
-            if (!string.IsNullOrEmpty(eclMimeType))
-            {
-                eclItem.MimeType = eclMimeType;
-            }
-
-            IFieldSet eclExternalMetadataFields;
-            if (component.ExtensionData.TryGetValue("ECL-ExternalMetadata", out eclExternalMetadataFields))
-            {
-                eclItem.EclExternalMetadata = MapEclExternalMetadata(eclExternalMetadataFields);
-            }
-        }
-
-
-        private static IDictionary<string, object> MapEclExternalMetadata(IFieldSet fields)
-        {
-            IDictionary<string, object> result = new Dictionary<string, object>();
-            foreach (IField field in fields.Values)
-            {
-                object mappedValue;
-                switch (field.FieldType)
+                else if (pageModelData.SchemaId == null)
                 {
-                    case FieldType.Number:
-                        mappedValue = GetFieldValue(field.NumericValues);
-                        break;
-
-                    case FieldType.Date:
-                        mappedValue = GetFieldValue(field.DateTimeValues);
-                        break;
-
-                    case FieldType.Embedded:
-                        if (field.EmbeddedValues.Count == 1)
-                        {
-                            mappedValue = MapEclExternalMetadata(field.EmbeddedValues[0]);
-                        }
-                        else
-                        {
-                            mappedValue = field.EmbeddedValues.Select(MapEclExternalMetadata).ToArray();
-                        }
-                        break;
-
-                    default:
-                        mappedValue = GetFieldValue(field.Values);
-                        break;
+                    // Custom Page Model, but no custom metadata.
+                    pageModel = (PageModel) modelType.CreateInstance(pageModelData.Id);
+                    pageModel.ExtensionData = pageModelData.ExtensionData;
+                    pageModel.HtmlClasses = pageModelData.HtmlClasses;
+                    pageModel.XpmMetadata = pageModelData.XpmMetadata;
                 }
-                result.Add(field.Name, mappedValue);
+                else
+                {
+                    // Custom Page Model with custom metadata; do full-blown model mapping.
+                    MappingData mappingData = new MappingData
+                    {
+                        SourceViewModel = pageModelData,
+                        ModelId = pageModelData.Id,
+                        ModelType = modelType,
+                        SemanticSchema = SemanticMapping.GetSchema(pageModelData.SchemaId, localization),
+                        MetadataFields = pageModelData.Metadata,
+                        Localization = localization
+                    };
+                    pageModel = (PageModel) CreateViewModel(mappingData);
+                }
+
+                pageModel.MvcData = mvcData;
+                pageModel.Meta = pageModelData.Meta ?? new Dictionary<string, string>();
+                pageModel.Title = PostProcessPageTitle(pageModelData, localization); // TODO TSI-2210: This should eventually be done in Model Service.
+                pageModel.Url = pageModelData.UrlPath;
+                if (pageModelData.Regions != null)
+                {
+                    IEnumerable<RegionModelData> regions = includePageRegions ? pageModelData.Regions : pageModelData.Regions.Where(r => r.IncludePageId == null);
+                    pageModel.Regions.UnionWith(regions.Select(data => CreateRegionModel(data, localization)));
+                    pageModel.IsVolatile |= pageModel.Regions.Any(region => region.IsVolatile);
+                }
             }
-            return result;
         }
 
-        private static object GetFieldValue<T>(IList<T> fieldValues)
+        /// <summary>
+        /// Builds a strongly typed Entity Model based on a given DXA R2 Data Model.
+        /// </summary>
+        /// <param name="entityModel">The strongly typed Entity Model to build. Is <c>null</c> for the first Entity Model Builder in the pipeline.</param>
+        /// <param name="entityModelData">The DXA R2 Data Model.</param>
+        /// <param name="baseModelType">The base type for the Entity Model to build.</param>
+        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        public void BuildEntityModel(ref EntityModel entityModel, EntityModelData entityModelData, Type baseModelType, Localization localization)
         {
-            switch (fieldValues.Count)
+            using (new Tracer(entityModel, entityModelData, baseModelType, localization))
             {
-                case 0:
-                    return null;
-                case 1:
-                    return fieldValues[0];
-                default:
-                    return fieldValues;
-            }
-        }
+                Common.Models.MvcData mvcData = CreateMvcData(entityModelData.MvcData, "Entity");
+                SemanticSchema semanticSchema = SemanticMapping.GetSchema(entityModelData.SchemaId, localization);
 
-        private static string GetFieldValue(string fieldName, IFieldSet fields)
-        {
-            IField field;
-            if (!fields.TryGetValue(fieldName, out field))
-            {
-                return null;
-            }
-            return field.Value;
-        }
-
-        private PageModel CreatePageModel(IPage page, Localization localization)
-        {
-            MvcData pageMvcData = GetMvcData(page);
-            Type pageModelType = ModelTypeRegistry.GetViewModelType(pageMvcData);
-            string pageId = GetDxaIdentifierFromTcmUri(page.Id);
-            ISchema pageMetadataSchema = page.Schema;
-
-            PageModel pageModel;
-            if (pageModelType == typeof(PageModel))
-            {
-                // Standard Page Model
-                pageModel = new PageModel(pageId);
-            }
-            else if (pageMetadataSchema == null)
-            {
-                // Custom Page Model but no Page metadata that can be mapped; simply create a Page Model instance of the right type.
-                pageModel = (PageModel)pageModelType.CreateInstance(pageId);
-            }
-            else
-            {
-                // Custom Page Model and Page metadata is present; do full-blown model mapping.
-                string[] schemaTcmUriParts = pageMetadataSchema.Id.Split('-');
-                SemanticSchema semanticSchema = SemanticMapping.GetSchema(schemaTcmUriParts[1], localization);
+                Type modelType = (baseModelType == null) ?
+                    ModelTypeRegistry.GetViewModelType(mvcData) :
+                    semanticSchema.GetModelTypeFromSemanticMapping(baseModelType);
 
                 MappingData mappingData = new MappingData
                 {
-                    TargetType = pageModelType,
+                    SourceViewModel = entityModelData,
+                    ModelType = modelType,
                     SemanticSchema = semanticSchema,
-                    EntityNames = semanticSchema.GetEntityNames(),
-                    TargetEntitiesByPrefix = GetEntityDataFromType(pageModelType),
-                    Meta = page.MetadataFields,
-                    ModelId = pageId,
+                    Fields = entityModelData.Content,
+                    MetadataFields = entityModelData.Metadata,
                     Localization = localization
                 };
 
-                pageModel = (PageModel) CreateViewModel(mappingData);
-            }
+                entityModel = (EntityModel) CreateViewModel(mappingData);
 
-            pageModel.MvcData = pageMvcData;
-            if (localization.IsXpmEnabled)
-            {
-                pageModel.XpmMetadata = GetXpmMetadata(page);
+                entityModel.Id = entityModelData.Id;
+                entityModel.MvcData = mvcData ?? entityModel.GetDefaultView(localization);
             }
-            pageModel.Title = page.Title;
-
-            // add html classes to model from metadata
-            // TODO: move to CreateViewModel so it can be merged with the same code for a Component/ComponentTemplate
-            IPageTemplate template = page.PageTemplate;
-            if (template.MetadataFields != null && template.MetadataFields.ContainsKey("htmlClasses"))
-            {
-                // strip illegal characters to ensure valid html in the view (allow spaces for multiple classes)
-                pageModel.HtmlClasses = template.MetadataFields["htmlClasses"].Value.StripIllegalCharacters(@"[^\w\-\ ]");
-            }
-
-            return pageModel;
         }
 
-
-        protected virtual ViewModel CreateViewModel(MappingData mappingData)
+        private static ViewModel CreateViewModel(MappingData mappingData)
         {
-            Type modelType = mappingData.TargetType;
+            ViewModelData viewModelData = mappingData.SourceViewModel;
+            EntityModelData entityModelData = viewModelData as EntityModelData;
 
-            ViewModel model;
+            ViewModel result;
             if (string.IsNullOrEmpty(mappingData.ModelId))
             {
                 // Use parameterless constructor
-                model = (ViewModel)modelType.CreateInstance();
+                result = (ViewModel) mappingData.ModelType.CreateInstance();
             }
             else
             {
                 // Pass model Identifier in constructor.
-                model = (ViewModel)modelType.CreateInstance(mappingData.ModelId);
+                result = (ViewModel) mappingData.ModelType.CreateInstance(mappingData.ModelId);
             }
 
-            Dictionary<string, string> xpmPropertyMetadata = new Dictionary<string, string>();
-            Dictionary<string, List<SemanticProperty>> propertySemantics = LoadPropertySemantics(modelType);
-            propertySemantics = FilterPropertySemanticsByEntity(propertySemantics, mappingData);
+            result.ExtensionData = viewModelData.ExtensionData;
+            result.HtmlClasses = viewModelData.HtmlClasses;
+            result.XpmMetadata = viewModelData.XpmMetadata;
 
-            foreach (PropertyInfo modelProperty in modelType.GetProperties())
+            MediaItem mediaItem = result as MediaItem;
+            if (mediaItem != null)
             {
-                if (!propertySemantics.ContainsKey(modelProperty.Name))
+                BinaryContentData binaryContent = entityModelData?.BinaryContent;
+                if (binaryContent == null)
                 {
-                    continue;
+                    throw new DxaException(
+                        $"Unable to create Media Item ('{mappingData.ModelType.Name}') because the Data Model '{entityModelData?.Id}' does not contain Binary Content Data."
+                        );
                 }
+                mediaItem.Url = binaryContent.Url;
+                mediaItem.FileName = binaryContent.FileName;
+                mediaItem.MimeType = binaryContent.MimeType;
+                mediaItem.FileSize = binaryContent.FileSize;
+            }
 
-                Type modelPropertyType = modelProperty.PropertyType;
-                bool isCollection = modelPropertyType.IsGenericList();
-                Type valueType = isCollection ? modelPropertyType.GetUnderlyingGenericListType() : modelPropertyType;
-                string fieldXPath = null;
+            EclItem eclItem = result as EclItem;
+            if (eclItem != null)
+            {
+                ExternalContentData externalContent = entityModelData.ExternalContent;
+                if (externalContent == null)
+                {
+                    throw new DxaException(
+                        $"Unable to create ECL Item ('{mappingData.ModelType.Name}') because the Data Model '{entityModelData.Id}' does not contain External Content Data."
+                        );
+                }
+                eclItem.EclDisplayTypeId = externalContent.DisplayTypeId;
+                eclItem.EclTemplateFragment = externalContent.TemplateFragment;
+                eclItem.EclExternalMetadata = externalContent.Metadata;
+                eclItem.EclUri = externalContent.Id;
+            }
+
+            MapSemanticProperties(result, mappingData);
+
+            return result;
+        }
+
+        private static void MapSemanticProperties(ViewModel viewModel, MappingData mappingData)
+        {
+            Type modelType = viewModel.GetType();
+            IDictionary<string, List<SemanticProperty>> propertySemanticsMap = ModelTypeRegistry.GetPropertySemantics(modelType);
+            IDictionary<string, string> xpmPropertyMetadata = new Dictionary<string, string>();
+
+            foreach (KeyValuePair<string, List<SemanticProperty>> propertySemantics in propertySemanticsMap)
+            {
+                PropertyInfo modelProperty = modelType.GetProperty(propertySemantics.Key);
+                List<SemanticProperty> semanticProperties = propertySemantics.Value;
+
                 bool isFieldMapped = false;
-
-                List<SemanticProperty> semanticProperties = propertySemantics[modelProperty.Name];
+                string fieldXPath = null;
                 foreach (SemanticProperty semanticProperty in semanticProperties)
                 {
-                    SemanticSchemaField semanticSchemaField;
-                    IField dd4tField = GetFieldFromSemantics(mappingData, semanticProperty, out semanticSchemaField);
-                    if (dd4tField != null)
+                    if (semanticProperty.PropertyName == SemanticProperty.AllFields)
                     {
-                        object propertyValue = MapFieldValues(dd4tField, valueType, isCollection, mappingData, semanticSchemaField);
-                        if (propertyValue != null)
-                        {
-                            modelProperty.SetValue(model, propertyValue);
-                        }
-                        fieldXPath = dd4tField.XPath;
+                        modelProperty.SetValue(viewModel, GetAllFieldsAsDictionary(mappingData));
                         isFieldMapped = true;
                         break;
                     }
-
-                    // Special mapping cases require SourceEntity to be set
-                    if (mappingData.SourceEntity != null)
+                    if ((semanticProperty.PropertyName == SemanticProperty.Self) && mappingData.SemanticSchema.HasSemanticType(semanticProperty.SemanticType))
                     {
-                        if (semanticProperty.PropertyName == "_self")
+                        try
                         {
-                            // Map the current Component to a MediaItem, Link or String (resolved URL) property.
-                            if (!typeof(MediaItem).IsAssignableFrom(valueType) && !typeof(Link).IsAssignableFrom(valueType) && valueType != typeof(string))
-                            {
-                                throw new DxaException(
-                                    string.Format("Invalid semantics for property {0}.{1}. Properties with [SemanticProperty(\"_self\")] annotation must be of type MediaItem, Link or String.",
-                                        modelType.Name, modelProperty.Name));
-                            }
-                            object mappedSelf = MapComponent(mappingData.SourceEntity, valueType, mappingData.Localization);
-                            if (isCollection)
-                            {
-                                IList genericList = valueType.CreateGenericList();
-                                genericList.Add(mappedSelf);
-                                modelProperty.SetValue(model, genericList);
-                            }
-                            else
-                            {
-                                modelProperty.SetValue(model, mappedSelf);
-                            }
+                            object mappedSelf = MapComponentLink((EntityModelData) mappingData.SourceViewModel, modelProperty.PropertyType, mappingData.Localization);
+                            modelProperty.SetValue(viewModel, mappedSelf);
                             isFieldMapped = true;
                             break;
                         }
-
-                        if (semanticProperty.PropertyName == "_all")
+                        catch (Exception ex)
                         {
-                            // Map all fields into a Dictionary property
-                            if (!typeof(IDictionary<string, string>).IsAssignableFrom(modelPropertyType))
-                            {
-                                throw new DxaException(
-                                    string.Format("Invalid semantics for property {0}.{1}. Properties with [SemanticProperty(\"_all\")] annotation must be of type Dictionary<string, string>.",
-                                        modelType.Name, modelProperty.Name));
-                            }
-                            modelProperty.SetValue(model, GetAllFieldsAsDictionary(mappingData.SourceEntity, mappingData.Localization));
-                            isFieldMapped = true;
-                            break;
+                            Log.Debug($"Self mapping failed for {modelType.Name}.{modelProperty.Name}: {ex.Message}");
+                            continue;
                         }
                     }
 
-                    if (semanticSchemaField != null)
+                    FieldSemantics fieldSemantics = new FieldSemantics(
+                        semanticProperty.SemanticType.Vocab,
+                        semanticProperty.SemanticType.EntityName,
+                        semanticProperty.PropertyName,
+                        null);
+                    SemanticSchemaField semanticSchemaField = (mappingData.EmbeddedSemanticSchemaField == null) ?
+                        mappingData.SemanticSchema.FindFieldBySemantics(fieldSemantics) :
+                        mappingData.EmbeddedSemanticSchemaField.FindFieldBySemantics(fieldSemantics);
+                    if (semanticSchemaField == null)
                     {
-                        isFieldMapped = true;
-                        if (fieldXPath == null)
-                        {
-                            // Property can be mapped to a CM field, but the field is not present in the DD4T data model (i.e. empty field in CM).
-                            fieldXPath = semanticSchemaField.GetXPath(mappingData.ContextXPath);
-                        }
+                        // No matching Semantic Schema Field found for this Semantic Property; maybe another one will match.
+                        continue;
                     }
-                }
 
-                if (!isFieldMapped)
-                {
-                    Log.Debug("Property {0}.{1} cannot be mapped to a CM field of {2}. Semantic properties: {3}.",
-                        modelType.Name, modelProperty.Name, mappingData.SemanticSchema, string.Join(", ", semanticProperties.Select(sp => sp.ToString())));
+                    // Matching Semantic Schema Field found
+                    fieldXPath = semanticSchemaField.GetXPath(mappingData.ContextXPath);
+                    ContentModelData fields = semanticSchemaField.IsMetadata ? mappingData.MetadataFields : mappingData.Fields;
+                    object fieldValue = FindFieldValue(semanticSchemaField, fields, mappingData.EmbedLevel);
+                    if (fieldValue == null)
+                    {
+                        // No field value found; maybe we will find a value for another Semantic Property.
+                        continue;
+                    }
+
+                    try
+                    {
+                        object mappedPropertyValue = MapField(fieldValue, modelProperty.PropertyType, semanticSchemaField, mappingData);
+                        modelProperty.SetValue(viewModel, mappedPropertyValue);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new DxaException(
+                            $"Unable to map field '{semanticSchemaField.Name}' to property {modelType.Name}.{modelProperty.Name} of type '{modelProperty.PropertyType.FullName}'.",
+                            ex);
+                    }
+                    isFieldMapped = true;
+                    break;
                 }
 
                 if (fieldXPath != null)
                 {
                     xpmPropertyMetadata.Add(modelProperty.Name, fieldXPath);
                 }
+                else if (!isFieldMapped && Log.IsDebugEnabled)
+                {
+                    string formattedSemanticProperties = string.Join(", ", semanticProperties.Select(sp => sp.ToString()));
+                    Log.Debug(
+                        $"Property {modelType.Name}.{modelProperty.Name} cannot be mapped to a CM field of {mappingData.SemanticSchema}. Semantic properties: {formattedSemanticProperties}.");
+                }
             }
 
-            EntityModel entityModel = model as EntityModel;
-            if (entityModel != null && mappingData.Localization.IsXpmEnabled)
+            EntityModel entityModel = viewModel as EntityModel;
+            if ((entityModel != null) && mappingData.Localization.IsXpmEnabled)
             {
                 entityModel.XpmPropertyMetadata = xpmPropertyMetadata;
             }
-
-            return model;
         }
 
-        protected virtual Dictionary<string, List<SemanticProperty>> FilterPropertySemanticsByEntity(Dictionary<string, List<SemanticProperty>> propertySemantics, MappingData mapData)
+        private static object FindFieldValue(SemanticSchemaField semanticSchemaField, ContentModelData fields, int embedLevel)
         {
-            Dictionary<string, List<SemanticProperty>> filtered = new Dictionary<string, List<SemanticProperty>>();
-            foreach (KeyValuePair<string, List<SemanticProperty>> property in propertySemantics)
+            string[] pathSegments = semanticSchemaField.Path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            object fieldValue = null;
+            foreach (string pathSegment in pathSegments.Skip(embedLevel + 1))
             {
-                filtered.Add(property.Key, new List<SemanticProperty>());
-                List<SemanticProperty> defaultProperties = new List<SemanticProperty>();
-                foreach (SemanticProperty semanticProperty in property.Value)
+                if ((fields == null) || !fields.TryGetValue(pathSegment, out fieldValue))
                 {
-                    //Default prefix is always OK, but should be added last
-                    if (string.IsNullOrEmpty(semanticProperty.Prefix))
+                    return null;
+                }
+                if (fieldValue is ContentModelData[])
+                {
+                    fields = ((ContentModelData[]) fieldValue)[0];
+                }
+                else
+                {
+                    fields = fieldValue as ContentModelData;
+                }
+            }
+
+            return fieldValue;
+        }
+
+        private static object MapField(object fieldValues, Type modelPropertyType, SemanticSchemaField semanticSchemaField, MappingData mappingData)
+        {
+            Type sourceType = fieldValues.GetType();
+            bool isArray = sourceType.IsArray;
+            if (isArray)
+            {
+                sourceType = sourceType.GetElementType();
+            }
+
+            bool isListProperty = modelPropertyType.IsGenericList();
+            Type targetType = modelPropertyType.GetUnderlyingGenericListType() ?? modelPropertyType;
+
+            // Convert.ChangeType cannot convert non-nullable types to nullable types, so don't try that.
+            Type bareTargetType = modelPropertyType.GetUnderlyingNullableType() ?? targetType;
+
+            IList mappedValues = targetType.CreateGenericList();
+
+            switch (sourceType.Name)
+            {
+                case "String":
+                    if (isArray)
                     {
-                        defaultProperties.Add(semanticProperty);
+                        foreach (string fieldValue in (string[]) fieldValues)
+                        {
+                            mappedValues.Add(MapString(fieldValue, bareTargetType));
+                        }
                     }
                     else
                     {
-                        //Filter out any properties belonging to other entities than the source entity
-                        KeyValuePair<string, string>? entityData = GetEntityData(semanticProperty.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
-                        if (entityData != null && mapData.EntityNames!=null && mapData.EntityNames.Contains(entityData.Value.Key))
-                        {
-                            if (mapData.EntityNames[entityData.Value.Key].First() == entityData.Value.Value)
-                            {
-                                filtered[property.Key].Add(semanticProperty);
-                            }
-                        }
+                        mappedValues.Add(MapString((string) fieldValues, bareTargetType));
                     }
-                }
-                filtered[property.Key].AddRange(defaultProperties);
-            }
-            return filtered;
-        }
+                    break;
 
-        private static IField GetFieldFromSemantics(MappingData mapData, SemanticProperty info, out SemanticSchemaField semanticSchemaField)
-        {
-            KeyValuePair<string, string>? entityData = GetEntityData(info.Prefix, mapData.TargetEntitiesByPrefix, mapData.ParentDefaultPrefix);
-            if (entityData != null)
-            {
-                // determine field semantics
-                string vocab = entityData.Value.Key;
-                string prefix = SemanticMapping.GetPrefix(vocab, mapData.Localization);
-                if (prefix != null && mapData.EntityNames!=null)
-                {
-                    string property = info.PropertyName;
-                    string entity = mapData.EntityNames[vocab].FirstOrDefault();
-                    if (entity != null && mapData.SemanticSchema!=null)
+                case "DateTime":
+                case "Single":
+                case "Double":
+                    if (isArray)
                     {
-                        FieldSemantics fieldSemantics = new FieldSemantics(prefix, entity, property, mapData.Localization);
-                        // locate semantic schema field
-                        semanticSchemaField = (mapData.EmbeddedSemanticSchemaField == null) ?
-                            mapData.SemanticSchema.FindFieldBySemantics(fieldSemantics) : // Used for top-level fields
-                            mapData.EmbeddedSemanticSchemaField.FindFieldBySemantics(fieldSemantics); // Used for embedded fields
-                        if (semanticSchemaField != null)
+                        foreach (object fieldValue in (Array) fieldValues)
                         {
-                            return ExtractMatchedField(semanticSchemaField, (semanticSchemaField.IsMetadata && mapData.Meta!=null) ? mapData.Meta : mapData.Content, mapData.EmbedLevel);
+                            mappedValues.Add(Convert.ChangeType(fieldValue, bareTargetType));
                         }
                     }
-                }
-            }
+                    else
+                    {
+                        mappedValues.Add(Convert.ChangeType(fieldValues, bareTargetType));
+                    }
+                    break;
 
-            semanticSchemaField = null;
-            return null;
-        }
-
-        private static KeyValuePair<string, string>? GetEntityData(string prefix, Dictionary<string, KeyValuePair<string, string>> entityData, string defaultPrefix)
-        {
-            if (defaultPrefix != null && String.IsNullOrEmpty(prefix))
-            {
-                prefix = defaultPrefix;
-            }
-            if (entityData.ContainsKey(prefix))
-            {
-                return entityData[prefix];
-            }
-            return null;
-        }
-
-
-        private static IField ExtractMatchedField(SemanticSchemaField semanticField, IFieldSet fields, int embedLevel)
-        {
-            // Split the path in segments. The first segment represents the root element name.
-            string[] pathSegments = semanticField.Path.Split(new [] {'/'}, StringSplitOptions.RemoveEmptyEntries);
-            if (pathSegments.Length < embedLevel + 2)
-            {
-                throw new DxaException(
-                    string.Format("Semantic field path '{0}' is too short for the current embed level: {1}.", semanticField.Path, embedLevel)
-                    );
-            }
-            string currentPathSegment = pathSegments[embedLevel + 1];
-
-            IField matchedField;
-            if (!fields.TryGetValue(currentPathSegment, out matchedField))
-            {
-                // No matching field found.
-                return null;
-            }
-
-            if (pathSegments.Length > embedLevel + 2)
-            {
-                // The semantic field is within an embedded field; flatten the structure.
-                matchedField = ExtractMatchedField(semanticField, matchedField.EmbeddedValues[0], embedLevel + 1);
-            }
-
-            return matchedField;
-        }
-
-        private object MapFieldValues(IField field, Type modelType, bool multival, MappingData mapData, SemanticSchemaField semanticSchemaField)
-        {
-            try
-            {
-                // Convert.ChangeType cannot convert non-nullable types to nullable types, so don't try that.
-                Type bareModelType = modelType.GetUnderlyingNullableType() ?? modelType;               
-                IList mappedValues = modelType.CreateGenericList();
-                switch (field.FieldType)
-                {
-                    case FieldType.Date:
-                        foreach (DateTime value in field.DateTimeValues)
+                case "RichTextData":
+                    if (isArray)
+                    {
+                        foreach (RichTextData fieldValue in (RichTextData[]) fieldValues)
                         {
-                            mappedValues.Add(Convert.ChangeType(value, bareModelType));
+                            mappedValues.Add(MapRichText(fieldValue, targetType, mappingData.Localization));
                         }
-                        break;
+                    }
+                    else
+                    {
+                        mappedValues.Add(MapRichText((RichTextData) fieldValues, targetType, mappingData.Localization));
+                    }
+                    break;
 
-                    case FieldType.Number:
-                        foreach (Double value in field.NumericValues)
-                        {
-                            mappedValues.Add(Convert.ChangeType(value, bareModelType));
-                        }
-                        break;
-
-                    case FieldType.MultiMediaLink:
-                    case FieldType.ComponentLink:
-                        foreach (IComponent value in field.LinkedComponentValues)
-                        {
-                            mappedValues.Add(MapComponent(value, modelType, mapData.Localization));
-                        }
-                        break;
-
-                    case FieldType.Embedded:
+                case "ContentModelData":
+                    string fieldXPath = semanticSchemaField.GetXPath(mappingData.ContextXPath);
+                    if (isArray)
+                    {
                         int index = 1;
-                        foreach (IFieldSet value in field.EmbeddedValues)
+                        foreach (ContentModelData embeddedFields in (ContentModelData[]) fieldValues)
                         {
-                            string contextXPath = string.Format("{0}[{1}]", field.XPath, index++);
-                            mappedValues.Add(MapEmbeddedFields(value, modelType, mapData, semanticSchemaField, contextXPath));
+                            string indexedFieldXPath = $"{fieldXPath}[{index++}]";
+                            mappedValues.Add(MapEmbeddedFields(embeddedFields, targetType, semanticSchemaField, indexedFieldXPath, mappingData));
                         }
-                        break;
+                    }
+                    else
+                    {
+                        string indexedFieldXPath = $"{fieldXPath}[1]";
+                        mappedValues.Add(MapEmbeddedFields((ContentModelData) fieldValues, targetType, semanticSchemaField, indexedFieldXPath, mappingData));
+                    }
+                    break;
 
-                    case FieldType.Keyword:
-                        foreach (IKeyword value in field.Keywords)
+                case "EntityModelData":
+                    if (isArray)
+                    {
+                        foreach (EntityModelData entityModelData in (EntityModelData[]) fieldValues)
                         {
-                            mappedValues.Add(MapKeyword(value, modelType, mapData.Localization));
+                            mappedValues.Add(MapComponentLink(entityModelData, targetType, mappingData.Localization));
                         }
-                        break;
+                    }
+                    else
+                    {
+                        mappedValues.Add(MapComponentLink((EntityModelData) fieldValues, targetType, mappingData.Localization));
+                    }
+                    break;
 
-                    case FieldType.Xhtml:
-                        IRichTextProcessor richTextProcessor = SiteConfiguration.RichTextProcessor;
-                        foreach (string value in field.Values)
+                case "KeywordModelData":
+                    if (isArray)
+                    {
+                        foreach (KeywordModelData keywordModelData in (KeywordModelData[]) fieldValues)
                         {
-                            RichText richText = richTextProcessor.ProcessRichText(value, mapData.Localization);
-                            if (modelType == typeof(string))
-                            {
-                                mappedValues.Add(richText.ToString());
-                            }
-                            else
-                            {
-                                mappedValues.Add(richText);
-                            }
+                            mappedValues.Add(MapKeyword(keywordModelData, targetType, mappingData.Localization));
                         }
-                        break;
+                    }
+                    else
+                    {
+                        mappedValues.Add(MapKeyword((KeywordModelData) fieldValues, targetType, mappingData.Localization));
+                    }
+                    break;
 
-                    default:
-                        foreach (string value in field.Values)
-                        {
-                            object mappedValue = (modelType == typeof(RichText)) ? new RichText(value) : Convert.ChangeType(value, bareModelType);
-                            mappedValues.Add(mappedValue);
-                        }
-                        break;
-                }
 
-                if (multival)
+                default:
+                    throw new DxaException($"Unexpected field type: '{sourceType.Name}'.");
+            }
+
+            if (isListProperty)
+            {
+                return mappedValues;
+            }
+
+            return (mappedValues.Count == 0) ? null : mappedValues[0];
+        }
+
+        private static object MapString(string stringValue, Type targetType)
+        {
+            if (targetType == typeof(RichText))
+            {
+                return new RichText(stringValue);
+            }
+
+            if (targetType == typeof(Link))
+            {
+                // Trying to map a text field to a Link (?); if the text is a TCM URI, it can work...
+                if (!ContentManager.TcmUri.IsValid(stringValue))
                 {
-                    return mappedValues;
+                    throw new DxaException($"Cannot map string to type Link: '{stringValue}'");
                 }
-                
-                return mappedValues.Count == 0 ? null : mappedValues[0];
-
+                return new Link
+                {
+                    Id = stringValue.Split('-')[1],
+                    Url = SiteConfiguration.LinkResolver.ResolveLink(stringValue, resolveToBinary: true)
+                };
             }
-            catch (Exception ex)
+
+            if (!string.IsNullOrEmpty(stringValue) && targetType == typeof (int) && stringValue.Contains("."))
             {
-                throw new DxaException(String.Format("Unable to map field '{0}' to property of type '{1}'.", field.Name, modelType.FullName), ex);
+                // Simple cast from floating point to int
+                return (int) (double)Convert.ChangeType(stringValue, typeof (double), CultureInfo.InvariantCulture.NumberFormat);
             }
+            return Convert.ChangeType(stringValue, targetType, CultureInfo.InvariantCulture.NumberFormat);
         }
 
-        protected virtual IDictionary<string, object> GetXpmMetadata(IComponentPresentation cp)
+        private static object MapComponentLink(EntityModelData entityModelData, Type targetType, Localization localization)
         {
-            IDictionary<string, object> result = new Dictionary<string, object>();
-            result.Add("ComponentID", cp.Component.Id);
-            result.Add("ComponentModified", cp.Component.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
-            result.Add("ComponentTemplateID", cp.ComponentTemplate.Id);
-            result.Add("ComponentTemplateModified", cp.ComponentTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
-            result.Add("IsRepositoryPublished", cp.IsDynamic);
-            return result;
-        }
-
-        protected virtual IDictionary<string, object> GetXpmMetadata(IPage page)
-        {
-            IDictionary<string, object> result = new Dictionary<string, object>();
-            if (page != null)
+            if (targetType == typeof(Link))
             {
-                result.Add("PageID", page.Id);
-                result.Add("PageModified", page.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
-                result.Add("PageTemplateID", page.PageTemplate.Id);
-                result.Add("PageTemplateModified", page.PageTemplate.RevisionDate.ToString("yyyy-MM-ddTHH:mm:ss"));
+                return new Link
+                {
+                    Id = entityModelData.Id,
+                    Url = GetLinkUrl(entityModelData, localization)
+                };
             }
-            return result;
+
+            if (targetType == typeof(string))
+            {
+                return GetLinkUrl(entityModelData, localization);
+            }
+
+            if (!typeof(EntityModel).IsAssignableFrom(targetType))
+            {
+                throw new DxaException($"Cannot map Component Link to property of type '{targetType.Name}'.");
+            }
+
+            return ModelBuilderPipeline.CreateEntityModel(entityModelData, targetType, localization);
         }
 
-        private static string GetDisplayText(IKeyword keyword)
+        private static object MapKeyword(KeywordModelData keywordModelData, Type targetType, Localization localization)
         {
-            return string.IsNullOrEmpty(keyword.Description) ? keyword.Title : keyword.Description;
-        }
+            if (typeof(KeywordModel).IsAssignableFrom(targetType))
+            {
+                KeywordModel result;
+                if (keywordModelData.SchemaId == null)
+                {
+                    result = new KeywordModel
+                    {
+                        ExtensionData = keywordModelData.ExtensionData
+                    };
+                }
+                else
+                {
+                    MappingData keywordMappingData = new MappingData
+                    {
+                        SourceViewModel = keywordModelData,
+                        ModelType = targetType,
+                        SemanticSchema = SemanticMapping.GetSchema(keywordModelData.SchemaId, localization),
+                        MetadataFields = keywordModelData.Metadata,
+                        Localization = localization
+                    };
 
-        protected virtual object MapKeyword(IKeyword keyword, Type modelType, Localization localization)
-        {
-            if (modelType == typeof(Tag))
+                    result = (KeywordModel) CreateViewModel(keywordMappingData);
+                }
+
+                result.Id = keywordModelData.Id;
+                result.Title = keywordModelData.Title;
+                result.Description = keywordModelData.Description ?? string.Empty;
+                result.Key = keywordModelData.Key ?? string.Empty;
+                result.TaxonomyId = keywordModelData.TaxonomyId;
+
+                return result;
+            }
+
+            if (targetType == typeof(Tag))
             {
                 return new Tag
                 {
-                    DisplayText = GetDisplayText(keyword),
-                    Key = string.IsNullOrEmpty(keyword.Key) ? keyword.Id : keyword.Key,
-                    TagCategory = keyword.TaxonomyId
+                    DisplayText = GetKeywordDisplayText(keywordModelData),
+                    Key = keywordModelData.Key,
+                    TagCategory = localization.GetCmUri(keywordModelData.TaxonomyId, (int) ItemType.Category)
                 };
-            } 
-            
-            if (modelType == typeof(bool))
-            {
-                //For booleans we assume the Keyword's Key/Title can be converted to bool
-                return Convert.ToBoolean(string.IsNullOrEmpty(keyword.Key) ? keyword.Title : keyword.Key);
-            }
-            
-            if (modelType == typeof(string))
-            {
-                return GetDisplayText(keyword);
             }
 
-            if (!typeof(KeywordModel).IsAssignableFrom(modelType))
+            if (targetType == typeof(bool))
             {
-                throw new DxaException(string.Format("Cannot map Keyword to type '{0}'. The type must be string, bool, Tag or (a subclass of) KeywordModel.", modelType));
+                string key = string.IsNullOrEmpty(keywordModelData.Key) ? keywordModelData.Title : keywordModelData.Key;
+                return Convert.ToBoolean(key);
             }
 
-            KeywordModel result;
-            string metadataSchemaId = GetMetadataSchemaId(keyword);
-            if (string.IsNullOrEmpty(metadataSchemaId))
-            {
-                // Keyword has no Metadata (Schema) : create a KeywordModel instance.
-                result = new KeywordModel();
-            }
-            else
-            {
-                // Keyword has Metadata: do full-blown model mapping.
-                SemanticSchema semanticSchema = SemanticMapping.GetSchema(GetDxaIdentifierFromTcmUri(metadataSchemaId), localization);
+            return GetKeywordDisplayText(keywordModelData);
+        }
 
-                MappingData keywordMappingData = new MappingData
+        private static string GetKeywordDisplayText(KeywordModelData keywordModelData)
+            => string.IsNullOrEmpty(keywordModelData.Description) ? keywordModelData.Title : keywordModelData.Description;
+
+        private static string GetLinkUrl(EntityModelData entityModelData, Localization localization)
+        {
+            if (entityModelData.LinkUrl != null)
+            {
+                return entityModelData.LinkUrl;
+            }
+
+            Log.Debug($"Link URL for Entity Model '{entityModelData.Id}' not resolved by Model Service.");
+            string componentUri = localization.GetCmUri(entityModelData.Id);
+            return SiteConfiguration.LinkResolver.ResolveLink(componentUri);
+        }
+
+        private static object MapRichText(RichTextData richTextData, Type targetType, Localization localization)
+        {
+            IList<IRichTextFragment> fragments = new List<IRichTextFragment>();
+            foreach (object fragment in richTextData.Fragments)
+            {
+                string htmlFragment = fragment as string;
+                if (htmlFragment == null)
                 {
-                    TargetType = modelType,
-                    SemanticSchema = semanticSchema,
-                    EntityNames = semanticSchema.GetEntityNames(),
-                    TargetEntitiesByPrefix = GetEntityDataFromType(modelType),
-                    Meta = keyword.MetadataFields,
-                    Localization = localization
-                };
+                    // Embedded Entity Model (for Media Items)
+                    MediaItem mediaItem = (MediaItem) ModelBuilderPipeline.CreateEntityModel((EntityModelData) fragment, typeof(MediaItem), localization);
+                    mediaItem.IsEmbedded = true;
+                    if (mediaItem.MvcData == null)
+                    {
+                        mediaItem.MvcData = mediaItem.GetDefaultView(localization);
+                    }
+                    fragments.Add(mediaItem);
+                }
+                else
+                {
+                    // HTML fragment.
+                    fragments.Add(new RichTextFragment(htmlFragment));
+                }
+            }
+            RichText richText = new RichText(fragments);
 
-                result = (KeywordModel) CreateViewModel(keywordMappingData);
+            if (targetType == typeof(RichText))
+            {
+                return richText;
             }
 
-            result.Id = GetDxaIdentifierFromTcmUri(keyword.Id);
-            result.Title = keyword.Title;
-            result.Description = keyword.Description;
-            result.Key = keyword.Key;
-            result.TaxonomyId = GetDxaIdentifierFromTcmUri(keyword.TaxonomyId);
-
-            return result;
+            return richText.ToString();
         }
 
-        private static string GetMetadataSchemaId(IKeyword keyword)
+        private static object MapEmbeddedFields(ContentModelData embeddedFields, Type targetType, SemanticSchemaField semanticSchemaField, string contextXPath, MappingData mappingData)
         {
-            if (keyword.ExtensionData == null)
+            MappingData embeddedMappingData = new MappingData
             {
-                return null;
-            }
-
-            IFieldSet dxaExtensionData;
-            if (!keyword.ExtensionData.TryGetValue("DXA", out dxaExtensionData))
-            {
-                return null;
-            }
-
-            IField metadataSchemaIdField;
-            if (!dxaExtensionData.TryGetValue("MetadataSchemaId", out metadataSchemaIdField))
-            {
-                return null;
-            }
-
-            return metadataSchemaIdField.Value;
-        }
-
-        protected virtual object MapComponent(IComponent component, Type modelType, Localization localization)
-        {
-            if (modelType == typeof(string))
-            {
-                return SiteConfiguration.LinkResolver.ResolveLink(component.Id);
-            }
-
-            if (!typeof(EntityModel).IsAssignableFrom(modelType))
-            {
-                throw new DxaException(String.Format("Cannot map a Component to type '{0}'. The type must be String or (a subclass of) EntityModel.", modelType));
-            }
-
-            return ModelBuilderPipeline.CreateEntityModel(component, modelType, localization);
-        }
-
-        private ViewModel MapEmbeddedFields(IFieldSet embeddedFields, Type modelType, MappingData mapData, SemanticSchemaField semanticSchemaField, string contextXPath)
-        {
-            MappingData embeddedMappingData = new MappingData(mapData)
-            {
-                TargetType = modelType,
-                Content = embeddedFields,
-                Meta = null,
+                ModelType = targetType,
+                SemanticSchema = mappingData.SemanticSchema,
                 EmbeddedSemanticSchemaField = semanticSchemaField,
-                EmbedLevel = mapData.EmbedLevel + 1,
-                ContextXPath = contextXPath
+                EmbedLevel = mappingData.EmbedLevel + 1,
+                SourceViewModel = mappingData.SourceViewModel,
+                Fields = embeddedFields,
+                MetadataFields = embeddedFields,
+                ContextXPath = contextXPath,
+                Localization = mappingData.Localization
             };
+            return CreateViewModel(embeddedMappingData);
+        }
 
-            EntityModel result = (EntityModel) CreateViewModel(embeddedMappingData);
-            result.MvcData = result.GetDefaultView(mapData.Localization);
+        private static IDictionary<string, string> GetAllFieldsAsDictionary(MappingData mappingData)
+        {
+            IDictionary<string, string> result = new Dictionary<string, string>();
+            if (mappingData.Fields != null)
+            {
+                foreach (KeyValuePair<string, object> field in mappingData.Fields)
+                {
+                    if ((field.Key == "settings"))
+                    {
+                        throw new NotImplementedException("'settings' field handling"); // TODO
+                    }
+                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData,  resolveComponentLinks: false).FirstOrDefault();
+                }
+            }
+            if (mappingData.MetadataFields != null)
+            {
+                foreach (KeyValuePair<string, object> field in mappingData.MetadataFields)
+                {
+                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData, resolveComponentLinks: false).FirstOrDefault();
+                }
+            }
             return result;
         }
 
-        protected Dictionary<string, string> GetAllFieldsAsDictionary(IComponent component, Localization localization)
+        private static IEnumerable<string> GetFieldValuesAsStrings(object fieldValues, MappingData mappingData, bool resolveComponentLinks)
         {
-            Dictionary<string, string> values = new Dictionary<string, string>();
-            foreach (string fieldname in component.Fields.Keys)
+            if (!resolveComponentLinks)
             {
-                if (!values.ContainsKey(fieldname))
+                // Handle Component Links here, because standard model mapping will resolve them.
+                Localization localization = mappingData.Localization;
+                if (fieldValues is EntityModelData)
                 {
-                    //special case for multival embedded name/value pair fields
-                    if (fieldname == "settings" && component.Fields[fieldname].FieldType == FieldType.Embedded)
-                    {
-                        foreach (IFieldSet embedFieldset in component.Fields[fieldname].EmbeddedValues)
-                        {
-                            string key = embedFieldset.ContainsKey("name") ? embedFieldset["name"].Value : null;
-                            if (key != null)
-                            {
-                                string value = embedFieldset.ContainsKey("value") ? embedFieldset["value"].Value : null;
-                                if (!values.ContainsKey(key))
-                                {
-                                    values.Add(key, value);
-                                }
-                            }
-                        }
-                    }
-                    //Default is to add the value as plain text
-                    else
-                    {
-                        string val = GetFieldValuesAsStrings(component.Fields[fieldname], localization).FirstOrDefault();
-                        if (val != null)
-                        {
-                            values.Add(fieldname, val);
-                        }
-                    }
+                    return new[] { localization.GetCmUri(((EntityModelData) fieldValues).Id) };
+                }
+                if (fieldValues is EntityModelData[])
+                {
+                    return ((EntityModelData[]) fieldValues).Select(emd => localization.GetCmUri(emd.Id));
                 }
             }
-            foreach (string fieldname in component.MetadataFields.Keys)
-            {
-                if (!values.ContainsKey(fieldname))
-                {
-                    string val = GetFieldValuesAsStrings(component.MetadataFields[fieldname], localization).FirstOrDefault();
-                    if (val != null)
-                    {
-                        values.Add(fieldname, val);
-                    }
-                }
-            }
-            return values;
+
+            // Use standard model mapping to map the field to a list of strings.
+            return (IEnumerable<string>) MapField(fieldValues, typeof(List<string>), null, mappingData);
         }
 
-        private static IEnumerable<string> GetFieldValuesAsStrings(IField field, Localization localization, bool resolveComponentLinks = false)
+        private static Common.Models.MvcData CreateMvcData(DataModel.MvcData data, string defaultControllerName)
         {
-            switch (field.FieldType)
+            if (data == null)
             {
-                case FieldType.Number:
-                    return field.NumericValues.Select(v => v.ToString(CultureInfo.InvariantCulture));
-
-                case FieldType.Date:
-                    return field.DateTimeValues.Select(v => v.ToString("s"));
-
-                case FieldType.ComponentLink:
-                    if (resolveComponentLinks)
-                    {
-                        return field.LinkedComponentValues.Select(v => SiteConfiguration.LinkResolver.ResolveLink(v.Id));
-                    }
-                    return field.LinkedComponentValues.Select(v => v.Id);
-
-                case FieldType.MultiMediaLink:
-                    if (resolveComponentLinks)
-                    {
-                        return field.LinkedComponentValues.Select(v => v.Multimedia.Url);
-                    }
-                    return field.LinkedComponentValues.Select(v => v.Id);
-
-                case FieldType.Keyword:
-                    return field.KeywordValues.Select(v => GetDisplayText(v));
-
-                case FieldType.Xhtml:
-                    return field.Values.Select(v => SiteConfiguration.RichTextProcessor.ProcessRichText(v, localization).ToString());
-
-                default:
-                    return field.Values;
+                return null;
             }
+            if (string.IsNullOrEmpty(data.ViewName))
+            {
+                throw new DxaException("No View Name specified in MVC Data.");
+            }
+
+            return new Common.Models.MvcData
+            {
+                ControllerName = data.ControllerName ?? defaultControllerName,
+                ControllerAreaName = data.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName(),
+                ActionName = data.ActionName ?? defaultControllerName,
+                ViewName = data.ViewName,
+                AreaName = data.AreaName ?? SiteConfiguration.GetDefaultModuleName(),
+                RouteValues = data.Parameters
+            };
         }
 
-
-        protected virtual string ProcessPageMetadata(IPage page, IDictionary<string, string> meta, Localization localization)
+        private static RegionModel CreateRegionModel(RegionModelData regionModelData, Localization localization)
         {
-            //First grab metadata from the page
-            if (page.MetadataFields != null)
-            {
-                foreach (IField field in page.MetadataFields.Values)
-                {
-                    ProcessMetadataField(field, meta, localization);
-                }
-            }
-            string description = meta.ContainsKey("description") ? meta["description"] : null;
-            string title = meta.ContainsKey("title") ? meta["title"] : null;
-            string image = meta.ContainsKey("image") ? meta["image"] : null;
+            Common.Models.MvcData mvcData = CreateMvcData(regionModelData.MvcData, "Region");
+            Type regionModelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
-            //If we don't have a title or description - go hunting for a title and/or description from the first component in the main region on the page
-            if (title == null || description == null)
+            RegionModel result = (RegionModel) regionModelType.CreateInstance(regionModelData.Name);
+
+            result.ExtensionData = regionModelData.ExtensionData;
+            result.HtmlClasses = regionModelData.HtmlClasses;
+            result.MvcData = mvcData;
+            result.XpmMetadata = regionModelData.XpmMetadata;
+
+            if (regionModelData.Regions != null)
             {
-                bool first = true;
-                foreach (IComponentPresentation cp in page.ComponentPresentations)
+                IEnumerable<RegionModel> nestedRegionModels = regionModelData.Regions.Select(data => CreateRegionModel(data, localization));
+                result.Regions.UnionWith(nestedRegionModels);
+                result.IsVolatile |= result.Regions.Any(region => region.IsVolatile);
+            }
+
+            if (regionModelData.Entities != null)
+            {
+                foreach (EntityModelData entityModelData in regionModelData.Entities)
                 {
-                    MvcData regionMvcData = GetRegionMvcData(cp);
-                    // determine title and description from first component in 'main' region
-                    if (first && regionMvcData.ViewName.Equals(RegionForPageTitleComponent))
+                    EntityModel entityModel;
+                    try
                     {
-                        first = false;
-                        IFieldSet metadata = cp.Component.MetadataFields;
-                        IFieldSet fields = cp.Component.Fields;
-                        if (metadata.ContainsKey(StandardMetadataXmlFieldName) && metadata[StandardMetadataXmlFieldName].EmbeddedValues.Count > 0)
-                        {
-                            IFieldSet standardMeta = metadata[StandardMetadataXmlFieldName].EmbeddedValues[0];
-                            if (title == null && standardMeta.ContainsKey(StandardMetadataTitleXmlFieldName))
-                            {
-                                title = standardMeta[StandardMetadataTitleXmlFieldName].Value;
-                            }
-                            if (description == null && standardMeta.ContainsKey(StandardMetadataDescriptionXmlFieldName))
-                            {
-                                description = standardMeta[StandardMetadataDescriptionXmlFieldName].Value;
-                            }
-                        }
-                        if (title == null && fields.ContainsKey(ComponentXmlFieldNameForPageTitle))
-                        {
-                            title = fields[ComponentXmlFieldNameForPageTitle].Value;
-                        }
-                        //Try to find an image
-                        if (image == null && fields.ContainsKey("image"))
-                        {
-                            image = fields["image"].LinkedComponentValues[0].Multimedia.Url;
-                        }
+                        entityModel = ModelBuilderPipeline.CreateEntityModel(entityModelData, null, localization);
+                        // indicate to region model that this region is potentially volatile if it contains a volatile entity
+                        result.IsVolatile |= entityModel.IsVolatile;
+                        entityModel.MvcData.RegionName = regionModelData.Name;
                     }
+                    catch (Exception ex)
+                    {
+                        // If there is a problem mapping an Entity, we replace it with an ExceptionEntity which holds the error details and carry on.
+                        Log.Error(ex);
+                        entityModel = new ExceptionEntity(ex);
+                    }
+                    result.Entities.Add(entityModel);
                 }
             }
+
+            return result;
+        }
+
+        private static string PostProcessPageTitle(PageModelData pageModelData, Localization localization)
+        {
+            if (pageModelData.MvcData?.ViewName == "IncludePage")
+            {
+                return pageModelData.Title;
+            }
+
             IDictionary coreResources = localization.GetResources("core");
             string titlePostfix = coreResources["core.pageTitleSeparator"].ToString() + coreResources["core.pageTitlePostfix"].ToString();
-            //if we still dont have a title, use the page title
-            if (title == null)
-            {
-                title = Regex.Replace(page.Title, @"^\d{3}\s", String.Empty);
-                // Index and Default are not a proper titles for an HTML page
-                if (title.ToLowerInvariant().Equals("index") || title.ToLowerInvariant().Equals("default"))
-                {
-                    title = coreResources["core.defaultPageTitle"].ToString();
-                }
-            }
-            meta.Add("twitter:card", "summary");
-            meta.Add("og:title", title);
-            // TODO: if the URL is really needed, it should be added higher up (e.g. in the View code):  meta.Add("og:url", WebRequestContext.RequestUrl);
-            // TODO: is this always article?
-            meta.Add("og:type", "article");
-            meta.Add("og:locale", localization.Culture);
-            if (description != null)
-            {
-                meta.Add("og:description", description);
-            }
-            if (image != null)
-            {
-                image = localization.GetBaseUrl() + image;
-                meta.Add("og:image", image);
-            }
-            if (!meta.ContainsKey("description"))
-            {
-                meta.Add("description", description ?? title);
-            }
-            return title + titlePostfix;
-        }
-
-        protected virtual void ProcessMetadataField(IField field, IDictionary<string, string> meta, Localization localization)
-        {
-            if (field.FieldType == FieldType.Embedded)
-            {
-                // Flatten embedded fields
-                if (field.EmbeddedValues!=null && field.EmbeddedValues.Count > 0)
-                {
-                    IFieldSet subfields = field.EmbeddedValues[0];
-                    foreach (IField subfield in subfields.Values)
-                    {
-                        ProcessMetadataField(subfield, meta, localization);
-                    }
-                }
-            }
-            else
-            {
-                meta[field.Name] = string.Join(", ", GetFieldValuesAsStrings(field, localization, resolveComponentLinks: true));
-            }
-        }
-                
-        private static void InitializeRegionMvcData(MvcData regionMvcData)
-        {
-            if (String.IsNullOrEmpty(regionMvcData.ControllerName))
-            {
-                regionMvcData.ControllerName = SiteConfiguration.GetRegionController();
-                regionMvcData.ControllerAreaName = SiteConfiguration.GetDefaultModuleName();
-            }
-            else if (String.IsNullOrEmpty(regionMvcData.ControllerAreaName))
-            {
-                regionMvcData.ControllerAreaName = regionMvcData.AreaName;
-            }
-            regionMvcData.ActionName = SiteConfiguration.GetRegionAction();
-        }
-
-        private static MvcData GetRegionMvcData(IComponentPresentation cp)
-        {
-            IComponentTemplate ct = cp.ComponentTemplate;
-
-            string regionViewName = null;
-            IField regionViewNameField;
-            if (ct.MetadataFields != null && ct.MetadataFields.TryGetValue("regionView", out regionViewNameField))
-            {
-                regionViewName = regionViewNameField.Value;
-            }
-            else
-            {
-                // Fallback if no CT metadata found: try to extract Region View name from CT title
-                if (ct.Title == null)
-                {
-                    // If a DCP has been published with DDT4 1.31 TBBs, it won't be read properly using the DD4T 2.0 ComponentPresentationFactory
-                    // resulting in almost all CT properties being null.
-                    throw new DxaException(
-                        string.Format("No Component Template data available for DCP '{0}/{1}'. Republish the DCP to ensure it uses the new DD4T 2.0 DCP format.",
-                            cp.Component.Id, cp.ComponentTemplate.Id)
-                        );
-                }
-                Match match = Regex.Match(ct.Title, @".*?\[(.+?)\]");
-                if (match.Success)
-                {
-                    regionViewName = match.Groups[1].Value;
-                }
-            }
-
-            if (String.IsNullOrEmpty(regionViewName))
-            {
-                regionViewName = "Main";
-            }
-
-            MvcData regionMvcData = new MvcData(regionViewName);
-            InitializeRegionMvcData(regionMvcData);
-
-            IField regionNameField;
-            if (ct.MetadataFields != null && ct.MetadataFields.TryGetValue("regionName", out regionNameField))
-            {
-                if (!String.IsNullOrEmpty(regionNameField.Value))
-                {
-                    regionMvcData.RegionName = regionNameField.Value;
-                }
-            }
-
-            return regionMvcData;
-        }
-
-        private static RegionModel GetRegionFromIncludePage(IPage page, Localization localization)
-        {
-            // Page Title can be a qualified View Name; we use the unqualified View Name as Region Name.
-            MvcData regionMvcData = new MvcData(page.Title);
-            InitializeRegionMvcData(regionMvcData);
-
-            RegionModel result = new RegionModel(regionMvcData.ViewName)
-            {
-                MvcData = regionMvcData
-            };
-
-            if (localization.IsXpmEnabled)
-            {
-                result.XpmMetadata = new Dictionary<string, object>
-                {
-                    {RegionModel.IncludedFromPageIdXpmMetadataKey, page.Id},
-                    {RegionModel.IncludedFromPageTitleXpmMetadataKey, page.Title},
-                    {RegionModel.IncludedFromPageFileNameXpmMetadataKey, page.Filename}
-                };
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Creates a Region Model of class <see cref="RegionModel"/> or a subclass associated with the given Region View.
-        /// </summary>
-        private static RegionModel CreateRegionModel(MvcData regionMvcData)
-        {
-            string regionName = regionMvcData.RegionName ?? regionMvcData.ViewName;
-
-            Type regionModelType = ModelTypeRegistry.GetViewModelType(regionMvcData);
-            RegionModel regionModel = (RegionModel) regionModelType.CreateInstance(regionName);
-            regionModel.MvcData = new MvcData(regionMvcData)
-            {
-                RegionName = null // Suppress RegionName in the final model.
-            };
-
-            return regionModel;
-        }
-
-        /// <summary>
-        /// Creates predefined Regions from Page Template metadata.
-        /// </summary>
-        private static void CreatePredefinedRegions(RegionModelSet regions, IPageTemplate pageTemplate)
-        {
-            IFieldSet ptMetadataFields = pageTemplate.MetadataFields;
-            IField regionsField;
-            if (ptMetadataFields == null || !ptMetadataFields.TryGetValue("regions", out regionsField))
-            {
-                Log.Debug("No Region metadata defined for Page Template '{0}'.", pageTemplate.Id);
-                return;
-            }
-
-            foreach (IFieldSet regionMetadataFields in regionsField.EmbeddedValues)
-            {
-                IField regionViewNameField;
-                if (!regionMetadataFields.TryGetValue("view", out regionViewNameField))
-                {
-                    Log.Warn("Region metadata without 'view' field encountered in metadata of Page Template '{0}'.", pageTemplate.Id);
-                    continue;
-                }
-
-                MvcData regionMvcData = new MvcData(regionViewNameField.Value);
-                InitializeRegionMvcData(regionMvcData);
-
-                IField regionNameField;
-                if (regionMetadataFields.TryGetValue("name", out regionNameField) && !String.IsNullOrEmpty(regionNameField.Value))
-                {
-                    regionMvcData.RegionName = regionNameField.Value;
-                }
-
-                RegionModel regionModel = CreateRegionModel(regionMvcData);
-                regions.Add(regionModel);
-            }
-        }
-
-
-        internal static string GetDxaIdentifierFromTcmUri(string tcmUri, string templateTcmUri = null)
-        {
-            // Return the Item (Reference) ID part of the TCM URI.
-            string result = tcmUri.Split('-')[1];
-            if (templateTcmUri != null)
-            {
-                result += "-" + templateTcmUri.Split('-')[1];
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Determine MVC data such as view, controller and area name from a Page
-        /// </summary>
-        /// <param name="page">The DD4T Page object</param>
-        /// <returns>MVC data</returns>
-        private static MvcData GetMvcData(IPage page)
-        {
-            IPageTemplate pt = page.PageTemplate;
-
-            string viewName;
-            IField viewNameField;
-            if (pt.MetadataFields != null && pt.MetadataFields.TryGetValue("view", out viewNameField))
-            {
-                viewName = viewNameField.Value;
-            }
-            else
-            {
-                // Fallback if no View name is defined in PT Metadata: get View name from PT Title.
-                viewName = pt.Title.RemoveSpaces();
-            }
-
-            return new MvcData(viewName)
-            {
-                ControllerName = SiteConfiguration.GetPageController(),
-                ControllerAreaName = SiteConfiguration.GetDefaultModuleName(),
-                ActionName = SiteConfiguration.GetPageAction()
-            };
-        }
-
-        /// <summary>
-        /// Determine MVC data such as view, controller and area name from a Component Presentation
-        /// </summary>
-        /// <param name="cp">The DD4T Component Presentation</param>
-        /// <returns>MVC data</returns>
-        private static MvcData GetMvcData(IComponentPresentation cp)
-        {
-            IComponentTemplate ct = cp.ComponentTemplate;
-
-            string viewName;
-            IField viewNameField;
-            if (ct.MetadataFields != null && ct.MetadataFields.TryGetValue("view", out viewNameField))
-            {
-                viewName = viewNameField.Value;
-            }
-            else
-            {
-                // Fallback if no View name defined in CT Metadata: extract View name from CT Title.
-                if (ct.Title == null)
-                {
-                    // If a DCP has been published with DDT4 1.31 TBBs, it won't be read properly using the DD4T 2.0 ComponentPresentationFactory
-                    // resulting in almost all CT properties being null.
-                    throw new DxaException(
-                        string.Format("No Component Template data available for DCP '{0}/{1}'. Republish the DCP to ensure it uses the new DD4T 2.0 DCP format.",
-                            cp.Component.Id, cp.ComponentTemplate.Id)
-                        );
-                }
-                viewName = Regex.Replace(ct.Title, @"\[.*\]|\s", string.Empty);
-            }
-
-            MvcData regionMvcData = GetRegionMvcData(cp);
-
-            MvcData mvcData = new MvcData(viewName)
-            {
-                RegionName = regionMvcData.RegionName ?? regionMvcData.ViewName,
-                RegionAreaName = regionMvcData.AreaName,
-                // Defaults:
-                ControllerName = SiteConfiguration.GetEntityController(),
-                ControllerAreaName = SiteConfiguration.GetDefaultModuleName(),
-                ActionName = SiteConfiguration.GetEntityAction()
-            };
-
-            if (ct.MetadataFields != null)
-            {
-                if (ct.MetadataFields.ContainsKey("controller"))
-                {
-                    string[] controllerNameParts = ct.MetadataFields["controller"].Value.Split(':');
-                    if (controllerNameParts.Length > 1)
-                    {
-                        mvcData.ControllerName = controllerNameParts[1];
-                        mvcData.ControllerAreaName = controllerNameParts[0];
-                    }
-                    else
-                    {
-                        mvcData.ControllerName = controllerNameParts[0];
-                    }
-                }
-                if (ct.MetadataFields.ContainsKey("action"))
-                {
-                    mvcData.ActionName = ct.MetadataFields["action"].Value;
-                }
-                if (ct.MetadataFields.ContainsKey("routeValues"))
-                {
-                    string[] routeValues = ct.MetadataFields["routeValues"].Value.Split(',');
-                    mvcData.RouteValues = new Dictionary<string, string>(routeValues.Length);
-                    foreach (string routeValue in routeValues)
-                    {
-                        string[] routeValueParts = routeValue.Trim().Split(':');
-                        if (routeValueParts.Length > 1 && !mvcData.RouteValues.ContainsKey(routeValueParts[0]))
-                        {
-                            mvcData.RouteValues.Add(routeValueParts[0], routeValueParts[1]);
-                        }
-                    }
-                }
-            }
-
-            return mvcData;
+            return pageModelData.Title + titlePostfix;
         }
     }
 }

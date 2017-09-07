@@ -10,7 +10,7 @@ namespace Sdl.Web.Tridion.Tests
     public class R2ContentProviderTest : ContentProviderTest
     {
         public R2ContentProviderTest()
-            : base(new R2Mapping.DefaultContentProviderR2(), () => TestFixture.ParentLocalization)
+            : base(new Mapping.DefaultContentProvider(), () => TestFixture.ParentLocalization)
         {
         }
 

@@ -2,12 +2,12 @@
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
 
-namespace Sdl.Web.Tridion.R2Mapping
+namespace Sdl.Web.Tridion.Mapping
 {
     /// <summary>
     /// Interface for Page Model Builders based on teh DXA R2 Data Model.
     /// </summary>
-    /// <seealso cref="ModelBuilderPipelineR2"/>
+    /// <seealso cref="ModelBuilderPipeline"/>
     public interface IPageModelBuilder
     {
         /// <summary>

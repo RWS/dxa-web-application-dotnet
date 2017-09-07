@@ -171,38 +171,7 @@
     <Reference Include="Sdl.Web.Context.OData.Client">
       <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\BaseProvider.cs">
-      <Link>Mapping\Provider\BaseProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ExtendedQueryParameters.cs">
-      <Link>Mapping\Provider\ExtendedQueryParameters.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ITridionQueryWrapper.cs">
-      <Link>Mapping\Provider\ITridionQueryWrapper.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\ProvidersCommonServices.cs">
-      <Link>Mapping\Provider\ProvidersCommonServices.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionBinaryProvider.cs">
-      <Link>Mapping\Provider\TridionBinaryProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionComponentPresentationProvider.cs">
-      <Link>Mapping\Provider\TridionComponentPresentationProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionComponentProvider.cs">
-      <Link>Mapping\Provider\TridionComponentProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionLinkProvider.cs">
-      <Link>Mapping\Provider\TridionLinkProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionPageProvider.cs">
-      <Link>Mapping\Provider\TridionPageProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\DD4T\DD4T.Providers.DxaModelService\TridionTaxonomyProvider.cs">
-      <Link>Mapping\Provider\TridionTaxonomyProvider.cs</Link>
-    </Compile>
     <Compile Include="Caching\CacheProvider.cs" />
-    <Compile Include="Caching\DD4TCacheAgentAdapter.cs" />
     <Compile Include="Caching\DefaultCacheProvider.cs" />
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
     <Compile Include="CdApiLocalizationResolver.cs" />
@@ -218,21 +187,12 @@
     <Compile Include="ContentManager\InvalidTcmUriException.cs" />
     <Compile Include="ContentManager\ItemTypes.cs" />
     <Compile Include="Context\AdfContextClaimsProvider.cs" />
-    <Compile Include="Caching\DD4TCacheProvider.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Linking\DefaultLinkResolver.cs" />
     <Compile Include="LocalizationResolver.cs" />
-    <Compile Include="Mapping\DD4TFactoryCache.cs" />
-    <Compile Include="Mapping\DD4TLoggerAdapter.cs" />
     <Compile Include="Mapping\DefaultModelBuilder.cs" />
-    <Compile Include="Mapping\DefaultContentProvider.cs" />
-    <Compile Include="Mapping\DefaultRichTextProcessor.cs" />
-    <Compile Include="Mapping\IModelBuilder.cs" />
     <Compile Include="Mapping\IRawDataProvider.cs" />
-    <Compile Include="Mapping\MappingData.cs" />
-    <Compile Include="Mapping\ModelBuilderPipeline.cs" />
-    <Compile Include="ModelService\ModelService.cs" />
-    <Compile Include="Mapping\PublicationResolver.cs" />
+    <Compile Include="ModelService\DefaultModelServiceProvider.cs" />
     <Compile Include="Navigation\DynamicNavigationProvider.cs" />
     <Compile Include="Navigation\ModelServiceImpl\DynamicNavigationProvider.cs" />
     <Compile Include="Navigation\CILImpl\DynamicNavigationProvider.cs" />
@@ -241,11 +201,10 @@
     <Compile Include="Query\BrokerQuery.cs" />
     <Compile Include="..\CommonAssemblyInfo.cs" />
     <Compile Include="ContentManager\TcmUri.cs" />
-    <Compile Include="R2Mapping\IEntityModelBuilder.cs" />
-    <Compile Include="R2Mapping\IPageModelBuilder.cs" />
-    <Compile Include="R2Mapping\ModelBuilderPipelineR2.cs" />
-    <Compile Include="R2Mapping\DefaultContentProviderR2.cs" />
-    <Compile Include="R2Mapping\DefaultModelBuilderR2.cs" />
+    <Compile Include="Mapping\IEntityModelBuilder.cs" />
+    <Compile Include="Mapping\IPageModelBuilder.cs" />
+    <Compile Include="Mapping\ModelBuilderPipeline.cs" />
+    <Compile Include="Mapping\DefaultContentProvider.cs" />
     <Compile Include="Statics\BinaryFileManager.cs" />
     <Compile Include="Statics\NamedLocker.cs" />
   </ItemGroup>

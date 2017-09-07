@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using System.Web.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Configuration
 {
@@ -45,6 +44,11 @@ namespace Sdl.Web.Common.Configuration
         public static ICacheProvider CacheProvider { get; private set; }
 
         /// <summary>
+        /// Gets the Model Service Provider.
+        /// </summary>
+        public static IModelServiceProvider ModelServiceProvider { get; private set; }
+
+        /// <summary>
         /// Gets the Content Provider used for obtaining the Page and Entity Models and Static Content.
         /// </summary>
         public static IContentProvider ContentProvider { get; private set; }
@@ -63,11 +67,6 @@ namespace Sdl.Web.Common.Configuration
         /// Gets the Link Resolver.
         /// </summary>
         public static ILinkResolver LinkResolver { get; private set; }
-
-        /// <summary>
-        /// Gets the Rich Text Processor.
-        /// </summary>
-        public static IRichTextProcessor RichTextProcessor { get; private set; }
 
         /// <summary>
         /// Gets the Conditional Entity Evaluator.
@@ -117,11 +116,11 @@ namespace Sdl.Web.Common.Configuration
                 }
 
                 CacheProvider = GetProvider<ICacheProvider>(dependencyResolver);
+                ModelServiceProvider = GetProvider<IModelServiceProvider>(dependencyResolver);
                 ContentProvider = GetProvider<IContentProvider>(dependencyResolver);
                 NavigationProvider = GetProvider<INavigationProvider>(dependencyResolver);
                 ContextClaimsProvider = GetProvider<IContextClaimsProvider>(dependencyResolver);
                 LinkResolver = GetProvider<ILinkResolver>(dependencyResolver);
-                RichTextProcessor = GetProvider<IRichTextProcessor>(dependencyResolver);
                 ConditionalEntityEvaluator = GetProvider<IConditionalEntityEvaluator>(dependencyResolver, isOptional: true);
                 MediaHelper = GetProvider<IMediaHelper>(dependencyResolver);
                 LocalizationResolver = GetProvider<ILocalizationResolver>(dependencyResolver);
@@ -138,7 +137,8 @@ namespace Sdl.Web.Common.Configuration
             {
                 if (!isOptional)
                 {
-                    throw new DxaException(String.Format("No implementation type configured for interface {0}. Check your Unity.config.", interfaceType.Name));
+                    throw new DxaException(
+                        $"No implementation type configured for interface {interfaceType.Name}. Check your Unity.config.");
                 }
                 Log.Info("No implementation type configured for optional interface {0}.", interfaceType.Name);
             }
@@ -150,47 +150,25 @@ namespace Sdl.Web.Common.Configuration
         }
         #endregion
 
+        public static string GetPageController() => "Page";
 
-        public static string GetPageController()
-        {
-            return "Page";
-        }
+        public static string GetPageAction() => "Page";
 
-        public static string GetPageAction()
-        {
-            return "Page";
-        }
+        public static string GetRegionController() => "Region";
 
-        public static string GetRegionController()
-        {
-            return "Region";
-        }
+        public static string GetRegionAction() => "Region";
 
-        public static string GetRegionAction()
-        {
-            return "Region";
-        }
+        public static string GetEntityController() => "Entity";
 
-        public static string GetEntityController()
-        {
-            return "Entity";
-        }
-
-        public static string GetEntityAction()
-        {
-            return "Entity";
-        }
+        public static string GetEntityAction() => "Entity";
 
         public static string GetDefaultModuleName()
         {
-            if (_defaultModuleName == null)
-            {
-                // Might come here multiple times in case of a race condition, but that doesn't matter.
-                string defaultModuleSetting = WebConfigurationManager.AppSettings["default-module"];
-                _defaultModuleName = string.IsNullOrEmpty(defaultModuleSetting) ? "Core" : defaultModuleSetting;
-                Log.Debug("Default Module Name: '{0}'", _defaultModuleName);
-            }
-
+            if (_defaultModuleName != null) return _defaultModuleName;
+            // Might come here multiple times in case of a race condition, but that doesn't matter.
+            string defaultModuleSetting = WebConfigurationManager.AppSettings["default-module"];
+            _defaultModuleName = string.IsNullOrEmpty(defaultModuleSetting) ? "Core" : defaultModuleSetting;
+            Log.Debug("Default Module Name: '{0}'", _defaultModuleName);
             return _defaultModuleName;
         }
 
@@ -199,13 +177,10 @@ namespace Sdl.Web.Common.Configuration
         /// </summary>
         /// <param name="path">The URL path</param>
         /// <returns>The 'real' path to the asset</returns>
-        public static String RemoveVersionFromPath(string path)
+        public static string RemoveVersionFromPath(string path) => Regex.Replace(path, SystemFolder + "/" + VersionRegex + "/", delegate
         {
-            return Regex.Replace(path, SystemFolder + "/" + VersionRegex + "/", delegate
-            {
-                return SystemFolder + "/";
-            });
-        }
+            return SystemFolder + "/";
+        });
 
         /// <summary>
         /// Ensure that a URL is using the path to the given localization
@@ -243,10 +218,7 @@ namespace Sdl.Web.Common.Configuration
         /// </summary>
         /// <param name="prefix">prefix for the GUID</param>
         /// <returns>Prefixed Unique Identifier</returns>
-        public static string GetUniqueId(string prefix)
-        {
-            return prefix + Guid.NewGuid().ToString("N");
-        }
+        public static string GetUniqueId(string prefix) => prefix + Guid.NewGuid().ToString("N");
 
         #region Thread Safe Settings Update Helper Methods
         public static bool CheckSettingsNeedRefresh(string type, Localization localization) // TODO: Move to class Localization

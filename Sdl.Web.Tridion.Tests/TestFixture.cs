@@ -5,10 +5,9 @@ using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Tridion.Linking;
-using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.Navigation;
 using Sdl.Web.Tridion.Caching;
-using Sdl.Web.Tridion.R2Mapping;
+using Sdl.Web.Tridion.Mapping;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -56,10 +55,9 @@ namespace Sdl.Web.Tridion.Tests
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
             { typeof(ICacheProvider), new DefaultCacheProvider() },
-            { typeof(IContentProvider), new DefaultContentProviderR2() },
+            { typeof(IContentProvider), new DefaultContentProvider() },
             { typeof(INavigationProvider), new StaticNavigationProvider() },
             { typeof(ILinkResolver), new DefaultLinkResolver() },
-            { typeof(IRichTextProcessor), new DefaultRichTextProcessor() },
             { typeof(IMediaHelper), new MockMediaHelper() },
             { typeof(ILocalizationResolver), new TestFixture() },
             { typeof(IContextClaimsProvider), new TestContextClaimsProvider() },

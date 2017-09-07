@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using Newtonsoft.Json;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
@@ -83,7 +82,7 @@ namespace Sdl.Web.Tridion.Navigation
 
                 if (contextSitemapItem.Items == null)
                 {
-                    throw new DxaException(string.Format("Context SitemapItem has no child items: {0}", contextSitemapItem));
+                    throw new DxaException($"Context SitemapItem has no child items: {contextSitemapItem}");
                 }
 
                 return new NavigationLinks
@@ -138,8 +137,7 @@ namespace Sdl.Web.Tridion.Navigation
                 if (rawDataProvider == null)
                 {
                     throw new DxaException(
-                        string.Format("The current Content Provider '{0}' does not implement interface '{1}' and hence cannot be used in combination with Navigation Provider '{2}'.",
-                            SiteConfiguration.ContentProvider.GetType().FullName, typeof(IRawDataProvider).FullName, GetType().FullName)
+                        $"The current Content Provider '{SiteConfiguration.ContentProvider.GetType().FullName}' does not implement interface '{typeof (IRawDataProvider).FullName}' and hence cannot be used in combination with Navigation Provider '{GetType().FullName}'."
                         );
                 }
 

@@ -19,7 +19,6 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
     /// </summary>
     public class DynamicNavigationProvider : INavigationProvider, IOnDemandNavigationProvider
     {
-        private readonly ModelService _modelService = new ModelService();
         private static readonly INavigationProvider FallbackNavigationProvider = new StaticNavigationProvider();
         private static readonly Regex SitemapItemIdRegex = new Regex(@"^t(?<taxonomyId>\d+)((-k(?<keywordId>\d+))|(-p(?<pageId>\d+)))?$", RegexOptions.Compiled);
         #region INavigationProvider members
@@ -38,7 +37,7 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
                     CacheRegions.DynamicNavigation,
                     () =>
                     {
-                        var navModel = _modelService.GetSitemapItem(localization) ??
+                        var navModel = SiteConfiguration.ModelServiceProvider.GetSitemapItem(localization) ??
                                        FallbackNavigationProvider.GetNavigationModel(localization);
                         RebuildParentRelationships(navModel.Items, navModel);
                         return navModel;
@@ -204,7 +203,7 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
                     {
                         try
                         {
-                            IEnumerable<SitemapItem> items = _modelService.GetChildSitemapItems(sitemapItemId, localization,
+                            IEnumerable<SitemapItem> items = SiteConfiguration.ModelServiceProvider.GetChildSitemapItems(sitemapItemId, localization,
                                 filter.IncludeAncestors,
                                 filter.DescendantLevels) ?? new SitemapItem[0];
                             items = items.OrderBy(i => i.OriginalTitle);

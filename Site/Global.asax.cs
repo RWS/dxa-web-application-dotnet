@@ -18,7 +18,7 @@ using Unity.Mvc5;
 using DD4T.DI.Unity;
 using System.Reflection;
 using System.Linq;
-using DD4T.Utils;
+using DD4T.DI.Unity.Exceptions;
 
 namespace Sdl.Web.Site
 {
@@ -184,6 +184,10 @@ namespace Sdl.Web.Site
             try
             {
                 container.UseDD4T();
+            }
+            catch (ProviderNotFoundException)
+            {
+                // we can ignore this as we use the Model Service by default
             }
             catch (Exception e)
             {
