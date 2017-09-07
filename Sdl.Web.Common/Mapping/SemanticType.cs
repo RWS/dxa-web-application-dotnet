@@ -1,6 +1,5 @@
 ﻿namespace Sdl.Web.Common.Mapping
 {
-
     /// <summary>
     /// Represents a Semantic Type.
     /// </summary>

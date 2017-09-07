@@ -1,5 +1,4 @@
-﻿
-namespace Sdl.Web.Common.Mapping
+﻿namespace Sdl.Web.Common.Mapping
 {
     public class SemanticVocabulary
     {

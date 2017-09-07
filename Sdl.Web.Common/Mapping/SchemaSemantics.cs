@@ -1,6 +1,4 @@
-﻿
-using System;
-using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Mapping
 {
@@ -75,10 +73,7 @@ namespace Sdl.Web.Common.Mapping
         /// Provides a string representation of the object.
         /// </summary>
         /// <returns>A string representation in format <c>Vocab/Prefix:Entity</c>.</returns>
-        public override string ToString()
-        {
-            return string.Format("{0}:{1}", Vocab ?? Prefix, Entity);
-        }
+        public override string ToString() => $"{Vocab ?? Prefix}:{Entity}";
 
         /// <summary>
         /// Determines whether the specified object is equal to the current <see cref="SchemaSemantics"/>.
