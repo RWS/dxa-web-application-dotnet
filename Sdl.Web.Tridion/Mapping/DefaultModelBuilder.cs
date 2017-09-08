@@ -711,14 +711,14 @@ namespace Sdl.Web.Tridion.Mapping
 
         private static string PostProcessPageTitle(PageModelData pageModelData, Localization localization)
         {
-            if (pageModelData.MvcData?.ViewName == "IncludePage")
-            {
-                return pageModelData.Title;
-            }
-
+            if (pageModelData.MvcData?.ViewName == "IncludePage") return pageModelData.Title;
             IDictionary coreResources = localization.GetResources("core");
-            string titlePostfix = coreResources["core.pageTitleSeparator"].ToString() + coreResources["core.pageTitlePostfix"].ToString();
-            return pageModelData.Title + titlePostfix;
+            string title = "defaultPageTitle".Equals(pageModelData.Title)
+                ? coreResources["core.defaultPageTitle"].ToString()
+                : pageModelData.Title;
+            string separator = coreResources["core.pageTitleSeparator"].ToString();
+            string suffix = coreResources["core.pageTitlePostfix"].ToString();
+            return $"{title}{separator}{suffix}";
         }
     }
 }
