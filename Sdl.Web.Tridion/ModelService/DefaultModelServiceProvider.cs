@@ -2,6 +2,7 @@
 using System.Web.Configuration;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
@@ -10,8 +11,8 @@ using Sdl.Web.ModelService;
 using Sdl.Web.ModelService.Request;
 
 namespace Sdl.Web.Tridion.ModelService
-{
-    public class ModelService
+{   
+    public class DefaultModelServiceProvider : IModelServiceProvider
     {
         private const string ModelServiceName = "DXA Model Service";
         private const int DefaultRetryCount = 4;
@@ -35,7 +36,7 @@ namespace Sdl.Web.Tridion.ModelService
         }
         #endregion
 
-        public ModelService()
+        public DefaultModelServiceProvider()
         {
             string uri = WebConfigurationManager.AppSettings["model-builder-service-uri"];
             int n;

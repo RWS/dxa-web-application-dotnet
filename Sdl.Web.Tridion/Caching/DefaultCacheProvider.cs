@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using System.Collections.Generic;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Common.Models;
 using Sdl.Web.Delivery.Caching;
 
 namespace Sdl.Web.Tridion.Caching
@@ -65,7 +62,7 @@ namespace Sdl.Web.Tridion.Caching
             if (!(cachedValue is T))
             {
                 throw new DxaException(
-                    string.Format("Cached value for key '{0}' in region '{1}' is of type {2} instead of {3}.", key, region, cachedValue.GetType().FullName, typeof(T).FullName)
+                    $"Cached value for key '{key}' in region '{region}' is of type {cachedValue.GetType().FullName} instead of {typeof (T).FullName}."
                     );
             }
 

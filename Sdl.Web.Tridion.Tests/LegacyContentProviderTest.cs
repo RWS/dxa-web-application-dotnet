@@ -1,8 +1,8 @@
-﻿using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Tests.Models;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Tridion.Mapping;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -10,7 +10,7 @@ namespace Sdl.Web.Tridion.Tests
     public class LegacyContentProviderTest : ContentProviderTest
     {
         public LegacyContentProviderTest()
-            : base(new Mapping.DefaultContentProvider(), () => TestFixture.LegacyParentLocalization)
+            : base(new DefaultContentProvider(), () => TestFixture.LegacyParentLocalization)
         {
         }
 

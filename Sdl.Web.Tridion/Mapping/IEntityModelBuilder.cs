@@ -3,12 +3,12 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
 
-namespace Sdl.Web.Tridion.R2Mapping
+namespace Sdl.Web.Tridion.Mapping
 {
     /// <summary>
     /// Interface for Entity Model Builders based on the DXA R2 Data Model.
     /// </summary>
-    /// <seealso cref="ModelBuilderPipelineR2"/>
+    /// <seealso cref="ModelBuilderPipeline"/>
     public interface IEntityModelBuilder
     {
         /// <summary>

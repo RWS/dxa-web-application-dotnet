@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Sdl.Web.Common.Extensions;
@@ -57,28 +56,12 @@ namespace Sdl.Web.Common.Mapping
         /// <summary>
         /// Is field a metadata field?
         /// </summary>
-        public bool IsMetadata
-        {
-            get
-            {
-                // metadata fields start their Path with /Metadata
-                return Path.StartsWith("/Metadata");
-            }
-        }
+        public bool IsMetadata => Path.StartsWith("/Metadata");
 
         /// <summary>
         /// Is field an embedded field?
         /// </summary>
-        public bool IsEmbedded
-        {
-            // TODO this could also be a linked field, does that matter?
-            get 
-            {
-                // path of an embedded field contains more than two forward slashes, 
-                // e.g. /Article/articleBody/subheading
-                return Path.HasNOrMoreOccurancesOfChar(3, '/');                
-            }
-        }
+        public bool IsEmbedded => Path.HasNOrMoreOccurancesOfChar(3, '/');
 
         /// <summary>
         /// Is field multivalued?
@@ -116,11 +99,7 @@ namespace Sdl.Web.Common.Mapping
         /// </summary>
         /// <param name="fieldSemantics">The semantics to check against</param>
         /// <returns><c>true</c> if this field has given semantics, <c>false</c> otherwise.</returns>
-        public bool HasSemantics(FieldSemantics fieldSemantics)
-        {
-            return Semantics.Any(s => s.Equals(fieldSemantics));
-        }
-
+        public bool HasSemantics(FieldSemantics fieldSemantics) => Semantics.Any(s => s.Equals(fieldSemantics));
 
         /// <summary>
         /// Find <see cref="SemanticSchemaField"/> with given semantics.
@@ -145,9 +124,6 @@ namespace Sdl.Web.Common.Mapping
         /// Provides a string representation of the object.
         /// </summary>
         /// <returns>A string representation containing the field Name and Path</returns>
-        public override string ToString()
-        {
-            return string.Format("{0} {1} ({2})", GetType().Name, Name, Path);
-        }
+        public override string ToString() => $"{GetType().Name} {Name} ({Path})";
     }
 }

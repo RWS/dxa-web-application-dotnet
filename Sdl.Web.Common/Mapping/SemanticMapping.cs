@@ -18,17 +18,13 @@ namespace Sdl.Web.Common.Mapping
         /// </summary>
         public const string DefaultVocabulary = "http://www.sdl.com/web/schemas/core";
 
-
         /// <summary>
         /// Gets a qualified (semantic) type name consisting of vocabulary ID and (local) type name.
         /// </summary>
         /// <param name="typeName">The (local) type name.</param>
         /// <param name="vocab">The vocabulary ID or <c>null</c> for the default/core vocabulary.</param>
         /// <returns>The qualified type name.</returns>
-        public static string GetQualifiedTypeName(string typeName, string vocab = null)
-        {
-            return string.Format("{0}:{1}", vocab ?? DefaultVocabulary, typeName);
-        }
+        public static string GetQualifiedTypeName(string typeName, string vocab = null) => $"{vocab ?? DefaultVocabulary}:{typeName}";
 
         /// <summary>
         /// Gets a qualified (semantic) type name consisting of vocabulary ID and (local) type name.
@@ -37,10 +33,7 @@ namespace Sdl.Web.Common.Mapping
         /// <param name="prefix">The vocabulary prefix.</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The qualified type name.</returns>
-        public static string GetQualifiedTypeName(string typeName, string prefix, Localization localization)
-        {
-            return GetQualifiedTypeName(typeName, GetVocabulary(prefix, localization));
-        }
+        public static string GetQualifiedTypeName(string typeName, string prefix, Localization localization) => GetQualifiedTypeName(typeName, GetVocabulary(prefix, localization));
 
         /// <summary>
         /// Gets semantic vocabulary by prefix.
@@ -48,10 +41,7 @@ namespace Sdl.Web.Common.Mapping
         /// <param name="prefix">The prefix</param>
         /// <param name="loc">The localization</param>
         /// <returns>Semantic vocabulary for the given prefix</returns>
-        public static string GetVocabulary(string prefix, Localization loc)
-        {
-            return loc.GetSemanticVocabulary(prefix).Vocab;
-        }
+        public static string GetVocabulary(string prefix, Localization loc) => loc.GetSemanticVocabulary(prefix).Vocab;
 
         /// <summary>
         /// Gets prefix for semantic vocabulary.
@@ -65,7 +55,7 @@ namespace Sdl.Web.Common.Mapping
             if (semanticVocabulary == null)
             {
                 throw new DxaException(
-                    string.Format("No vocabulary defined for '{0}' in Localization [{1}]. {2}", vocab, loc, Constants.CheckSettingsUpToDate)
+                    $"No vocabulary defined for '{vocab}' in Localization [{loc}]. {Constants.CheckSettingsUpToDate}"
                     );
             }
             return semanticVocabulary.Prefix;
@@ -77,9 +67,6 @@ namespace Sdl.Web.Common.Mapping
         /// <param name="id">The schema ID</param>
         /// <param name="loc">The localization</param>
         /// <returns>The semantic schema matching the id for the given module</returns>
-        public static SemanticSchema GetSchema(string id, Localization loc)
-        {
-            return loc.GetSemanticSchema(id);
-        }
+        public static SemanticSchema GetSchema(string id, Localization loc) => loc.GetSemanticSchema(id);
     }
 }

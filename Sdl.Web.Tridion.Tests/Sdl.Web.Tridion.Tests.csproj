@@ -69,7 +69,6 @@
     <Compile Include="CacheProviderTest.cs" />
     <Compile Include="CdApiLocalizationResolverTest.cs" />
     <Compile Include="ContextServiceClaimsProviderTest.cs" />
-    <Compile Include="DD4TCacheProviderTest.cs" />
     <Compile Include="DefaultCacheProviderTest.cs" />
     <Compile Include="DynamicNavigationProviderTest.cs" />
     <Compile Include="LocalizationTest.cs" />

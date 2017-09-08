@@ -35,9 +35,7 @@ namespace Sdl.Web.Common.Mapping
         /// </summary>
         public List<SchemaSemantics> Semantics { get; set; }
 
-
         public Localization Localization { get; set; }
-
 
         /// <summary>
         /// Initializes an existing instance.
@@ -63,10 +61,7 @@ namespace Sdl.Web.Common.Mapping
         /// Using <see cref="ILookup{TKey,TElement}"/> rather than a <see cref="Dictionary{TKey,TValue}"/> because it will allow for duplicate keys.
         /// </remarks>
         /// <returns>The Schema's semantic entity/types names grouped per semantic vocabulary</returns>
-        public ILookup<string, string> GetEntityNames()
-        {
-            return Semantics.ToLookup(ss => ss.Vocab, ss => ss.Entity);
-        }
+        public ILookup<string, string> GetEntityNames() => Semantics.ToLookup(ss => ss.Vocab, ss => ss.Entity);
 
         /// <summary>
         /// Find <see cref="SemanticSchemaField"/> with given semantics.
@@ -90,10 +85,7 @@ namespace Sdl.Web.Common.Mapping
         /// Gets semantic type names (qualified with Vocabulary ID) for the Schema.
         /// </summary>
         /// <returns>The semantic type names.</returns>
-        public string[] GetSemanticTypeNames()
-        {
-            return Semantics.Select(ss => ss.ToString()).ToArray();
-        }
+        public string[] GetSemanticTypeNames() => Semantics.Select(ss => ss.ToString()).ToArray();
 
         /// <summary>
         /// Determine a Model Type based on semantic mappings (and a given base model type).
@@ -133,13 +125,13 @@ namespace Sdl.Web.Common.Mapping
             string errorMessage;
             if (foundAmbiguousMappings == null)
             {
-                errorMessage = string.Format("No semantic mapping found between Schema {0} ({1}) and model type '{2}'",
-                    Id, String.Join(", ", semanticTypeNames), baseModelType.FullName);
+                errorMessage =
+                    $"No semantic mapping found between Schema {Id} ({String.Join(", ", semanticTypeNames)}) and model type '{baseModelType.FullName}'";
             }
             else
             {
-                errorMessage = string.Format("Ambiguous semantic mappings found between Schema {0} ({1}) and model type '{2}'. Found types: {3}",
-                    Id, String.Join(", ", semanticTypeNames), String.Join(", ", foundAmbiguousMappings.Select(t => t.FullName)), baseModelType.FullName);
+                errorMessage =
+                    $"Ambiguous semantic mappings found between Schema {Id} ({String.Join(", ", semanticTypeNames)}) and model type '{String.Join(", ", foundAmbiguousMappings.Select(t => t.FullName))}'. Found types: {baseModelType.FullName}";
             }
 
             if (baseModelType.IsAbstract)
@@ -171,9 +163,6 @@ namespace Sdl.Web.Common.Mapping
         /// Provides a string representation of the object.
         /// </summary>
         /// <returns>A string representation containing the Schema ID and Root Element name</returns>
-        public override string ToString()
-        {
-            return string.Format("{0} {1} ({2})", GetType().Name, Id, RootElement);
-        }
+        public override string ToString() => $"{GetType().Name} {Id} ({RootElement})";
     }
 }

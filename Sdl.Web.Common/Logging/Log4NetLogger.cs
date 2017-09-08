@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Web;
 using log4net;
 using log4net.Config;
 using log4net.Util;
@@ -88,26 +87,12 @@ namespace Sdl.Web.Common.Logging
             }
         }
 
-        public static void Configure()
-        {
-            XmlConfigurator.Configure();
-        }
+        public static void Configure() => XmlConfigurator.Configure();
 
-        public bool IsTracingEnabled
-        {
-            get
-            {
-                return _log.Logger.IsEnabledFor(log4net.Core.Level.Trace);
-            }
-        }
+        public bool IsTracingEnabled => _log.Logger.IsEnabledFor(log4net.Core.Level.Trace);
 
-        public bool IsDebugEnabled
-        {
-            get
-            {
-                return _log.IsDebugEnabled;
-            }
-        }
+        public bool IsDebugEnabled => _log.IsDebugEnabled;
+
         #endregion
     }
 }

@@ -309,14 +309,12 @@ namespace Sdl.Web.Common.Configuration
         public IDictionary GetResources(string sectionName = null)
         {
             // TODO PERF: use sectionName to JIT load resources 
-            if (_resources == null)
+            if (_resources != null) return _resources;
+            lock (_loadLock)
             {
-                lock (_loadLock)
+                if (_resources == null)
                 {
-                    if (_resources == null)
-                    {
-                        LoadResources();
-                    }
+                    LoadResources();
                 }
             }
             return _resources;
@@ -597,7 +595,7 @@ namespace Sdl.Web.Common.Configuration
                     Culture = GetConfigValue("core.culture");
                     Language = GetConfigValue("core.language");
                     string formats = GetConfigValue("core.dataFormats");
-                    DataFormats = formats == null ? new List<string>() : formats.Split(',').Select(f => f.Trim()).ToList();
+                    DataFormats = formats?.Split(',').Select(f => f.Trim()).ToList() ?? new List<string>();
                 }
             }
         }
@@ -647,12 +645,9 @@ namespace Sdl.Web.Common.Configuration
 
         public string GetBaseUrl()
         {
-            if (HttpContext.Current!=null)
-            {
-                Uri uri = HttpContext.Current.Request.Url;
-                return uri.GetLeftPart(UriPartial.Authority) + Path;
-            }
-            return null;
+            if (HttpContext.Current == null) return null;
+            Uri uri = HttpContext.Current.Request.Url;
+            return uri.GetLeftPart(UriPartial.Authority) + Path;
         }
 
         /// <summary>
@@ -660,10 +655,7 @@ namespace Sdl.Web.Common.Configuration
         /// </summary>
         /// <param name="urlPath">The URL path.</param>
         /// <returns><c>true</c> if the URL refers to a static content item.</returns>
-        public bool IsStaticContentUrl(string urlPath)
-        {
-            return _staticContentUrlRegex.IsMatch(urlPath);
-        }
+        public bool IsStaticContentUrl(string urlPath) => _staticContentUrlRegex.IsMatch(urlPath);
 
         #region Overrides
 

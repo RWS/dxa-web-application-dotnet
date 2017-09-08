@@ -1,6 +1,4 @@
-﻿
-using System;
-using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Mapping
 {
@@ -49,7 +47,7 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>A string representation in format <c>Vocab/Prefix:Entity:Property</c>.</returns>
         public override string ToString()
         {
-            return string.Format("{0}:{1}:{2}", Vocab ?? Prefix, Entity, Property);
+            return $"{Vocab ?? Prefix}:{Entity}:{Property}";
         }
 
         /// <summary>
@@ -71,9 +69,6 @@ namespace Sdl.Web.Common.Mapping
         /// <returns>
         /// A hash code for the current <see cref="FieldSemantics"/>.
         /// </returns>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode() ^ Property.GetHashCode();
-        }
+        public override int GetHashCode() => base.GetHashCode() ^ Property.GetHashCode();
     }
 }
