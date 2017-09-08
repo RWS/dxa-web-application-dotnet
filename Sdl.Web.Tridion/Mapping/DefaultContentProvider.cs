@@ -35,14 +35,41 @@ namespace Sdl.Web.Tridion.Mapping
         {
             using (new Tracer(urlPath, localization, addIncludes))
             {
-                PageModel pageModel = LoadPageModel(ref urlPath, addIncludes, localization);
+                PageModel result = null;
+                if (CacheRegions.IsViewModelCachingEnabled)
+                {
+                    PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                        $"{urlPath}:{addIncludes}", // Cache Page Models with and without includes separately
+                        CacheRegions.PageModel,
+                        () =>
+                        {
+                            PageModel pageModel = LoadPageModel(ref urlPath, addIncludes, localization);
+                            if (pageModel.NoCache)
+                            {
+                                result = pageModel;
+                                return null;
+                            }
+                            return pageModel;
+                        }
+                        );
+
+                    if (cachedPageModel != null)
+                    {
+                        // Don't return the cached Page Model itself, because we don't want dynamic logic to modify the cached state.
+                        result = (PageModel)cachedPageModel.DeepCopy();
+                    }
+                }
+                else
+                {
+                    result = LoadPageModel(ref urlPath, addIncludes, localization);
+                }
 
                 if (SiteConfiguration.ConditionalEntityEvaluator != null)
                 {
-                    pageModel.FilterConditionalEntities(localization);
+                    result.FilterConditionalEntities(localization);
                 }
 
-                return pageModel;
+                return result;
             }
         }
 
@@ -57,7 +84,24 @@ namespace Sdl.Web.Tridion.Mapping
         {
             using (new Tracer(id, localization))
             {
-                return LoadEntityModel(id, localization);
+                EntityModel result;
+                if (CacheRegions.IsViewModelCachingEnabled)
+                {
+                    EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                        $"{id}-{localization.Id}", // key
+                        CacheRegions.EntityModel,
+                        () => LoadEntityModel(id, localization)
+                        );
+
+                    // Don't return the cached Entity Model itself, because we don't want dynamic logic to modify the cached state.
+                    result = (EntityModel)cachedEntityModel.DeepCopy();
+                }
+                else
+                {
+                    result = LoadEntityModel(id, localization);
+                }
+
+                return result;
             }
         }
 
