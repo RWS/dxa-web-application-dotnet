@@ -191,6 +191,7 @@
     <Compile Include="Linking\DefaultLinkResolver.cs" />
     <Compile Include="LocalizationResolver.cs" />
     <Compile Include="Mapping\DefaultModelBuilder.cs" />
+    <Compile Include="Mapping\IModelBuilder.cs" />
     <Compile Include="Mapping\IRawDataProvider.cs" />
     <Compile Include="ModelService\DefaultModelServiceProvider.cs" />
     <Compile Include="Navigation\DynamicNavigationProvider.cs" />
