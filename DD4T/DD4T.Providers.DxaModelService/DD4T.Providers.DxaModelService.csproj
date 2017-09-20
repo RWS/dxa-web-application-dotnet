@@ -70,6 +70,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Microsoft.Data.Services.Client.5.8.2\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
     </Reference>
+    <Reference Include="Sdl.Web.Delivery.Caching, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Sdl.Web.Delivery.Caching.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -86,6 +90,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseProvider.cs" />
+    <Compile Include="Caching\DependencyMappings.cs" />
+    <Compile Include="Caching\DxaCacheAgent.cs" />
+    <Compile Include="Caching\DxaCacheAgentException.cs" />
     <Compile Include="ExtendedQueryParameters.cs" />
     <Compile Include="ITridionQueryWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
