@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Sdl.Web.Common;
-using Sdl.Web.Common.Logging;
-using Sdl.Web.Delivery.Caching;
+using System.Web.Mvc;
+using DD4T.ContentModel.Contracts.Caching;
+using DD4T.Utils.Caching;
 
 namespace Sdl.Web.Tridion.Caching
 {
@@ -10,7 +10,23 @@ namespace Sdl.Web.Tridion.Caching
     /// </summary>
     public class DefaultCacheProvider : CacheProvider
     {
-        private readonly ICacheProvider<object> _cilCacheProvider = CacheFactory<object>.CreateFromConfiguration();
+        private readonly CacheProvider _cacheProvider;
+
+        public DefaultCacheProvider()
+        {
+            // Try to resolve the ICacheAgent implementation to see if anyone has dropped in a DD4T implementation
+            // that we could use. Normally you would use our own Unity configuration for this to switch out the
+            // default cache provider but to provide a seamless transition for DD4T we also support this.
+            var cacheAgent = (ICacheAgent)DependencyResolver.Current.GetService(typeof(ICacheAgent));
+            if (cacheAgent == null || cacheAgent is DefaultCacheAgent)
+            {
+                _cacheProvider = new DxaCacheProvider();
+            }
+            else
+            {
+                _cacheProvider = new DD4TCacheProvider();
+            }
+        }
 
         #region ICacheProvider members
         /// <summary>
@@ -23,11 +39,7 @@ namespace Sdl.Web.Tridion.Caching
         /// <typeparam name="T">The type of the value to add.</typeparam>
         public override void Store<T>(string key, string region, T value, IEnumerable<string> dependencies = null)
         {      
-            _cilCacheProvider.Remove(key, region);  //TODO: remove when using latest UDP version since this is no longer needed
-            if (value != null)
-            {
-                _cilCacheProvider.Set(key, value, region);
-            }          
+            _cacheProvider.Store(key, region, value, dependencies);
         }
 
         /// <summary>
@@ -40,34 +52,7 @@ namespace Sdl.Web.Tridion.Caching
         /// <returns><c>true</c> if a cached value was found for the given key and cache region.</returns>
         public override bool TryGet<T>(string key, string region, out T value)
         {
-            object cachedValue = _cilCacheProvider.Get(key, region);
-            if (cachedValue == null)
-            {
-                // Maybe another thread is just adding a value for the key/region...
-                bool valueAdded = AwaitAddingValue(key, region);
-                if (valueAdded)
-                {
-                    // Another thread has just added a value for the key/region. Retry.
-                    cachedValue = _cilCacheProvider.Get(key, region);
-                }
-
-                if (cachedValue == null)
-                {
-                    Log.Debug("No value cached for key '{0}' in region '{1}'.", key, region);
-                    value = default(T);
-                    return false;
-                }
-            }
-
-            if (!(cachedValue is T))
-            {
-                throw new DxaException(
-                    $"Cached value for key '{key}' in region '{region}' is of type {cachedValue.GetType().FullName} instead of {typeof (T).FullName}."
-                    );
-            }
-
-            value = (T) cachedValue;
-            return true;
+            return _cacheProvider.TryGet(key, region, out value);
         }
 
         #endregion

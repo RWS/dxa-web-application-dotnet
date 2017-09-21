@@ -172,6 +172,8 @@
       <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
     <Compile Include="Caching\CacheProvider.cs" />
+    <Compile Include="Caching\DxaCacheProvider.cs" />
+    <Compile Include="Caching\DD4TCacheProvider.cs" />
     <Compile Include="Caching\DefaultCacheProvider.cs" />
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
     <Compile Include="CdApiLocalizationResolver.cs" />
