@@ -137,7 +137,7 @@ namespace Sdl.Web.Mvc.Statics
                         }
                         else
                         {
-                            if (localization.IsXpmEnabled)
+                            if (!localization.IsXpmEnabled)
                             {
                                 // Items with a versioned URL can be cached long-term, because the URL will change if needed.
                                 bool isVersionedUrl = context.Items.Contains(IsVersionedUrlContextItem);
