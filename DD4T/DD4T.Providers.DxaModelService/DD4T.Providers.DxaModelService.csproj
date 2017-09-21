@@ -70,9 +70,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Microsoft.Data.Services.Client.5.8.2\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Delivery.Caching, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Sdl.Web.Delivery.Caching">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Sdl.Web.Delivery.Caching.dll</HintPath>
+      <HintPath>..\..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Sdl.Web.Delivery.Caching.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -85,7 +85,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Tridion.ContentDelivery">
-      <HintPath>..\..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Tridion.ContentDelivery.dll</HintPath>
+      <HintPath>..\..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Tridion.ContentDelivery.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

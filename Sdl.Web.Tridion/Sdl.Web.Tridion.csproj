@@ -13,9 +13,9 @@
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SdlDxaDataModelPackageVersion>2.0.0-beta-201708301729</SdlDxaDataModelPackageVersion>
-    <SdlWebDeliveryPackageVersion>8.5.0</SdlWebDeliveryPackageVersion>
-    <SdlWebContextClientPackageVersion>8.5.0</SdlWebContextClientPackageVersion>
-    <SdlWebContextImagePackageVersion>8.5.0</SdlWebContextImagePackageVersion>
+    <SdlWebDeliveryPackageVersion>10.1.0</SdlWebDeliveryPackageVersion>
+    <SdlWebContextClientPackageVersion>10.1.0</SdlWebContextClientPackageVersion>
+    <SdlWebContextImagePackageVersion>10.1.0</SdlWebContextImagePackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -83,23 +83,23 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.Caching.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Delivery.Core, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Sdl.Web.Delivery.Core">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Delivery.DiscoveryService, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Sdl.Web.Delivery.DiscoveryService">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.DiscoveryService.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Delivery.OAuthClient, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Sdl.Web.Delivery.OAuthClient">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.OAuthClient.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Delivery.Service, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Sdl.Web.Delivery.Service">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.Service.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Delivery.ServicesCore, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Sdl.Web.Delivery.ServicesCore">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
     </Reference>
