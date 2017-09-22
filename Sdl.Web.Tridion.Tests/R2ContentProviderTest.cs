@@ -20,7 +20,7 @@ namespace Sdl.Web.Tridion.Tests
             DefaultInitialize(testContext);
         }
 
-        [TestMethod]
+        //[TestMethod]
         public void GetPageModel_ContextExpressions_Success()
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ContextExpressionsTestPageRelativeUrlPath);
