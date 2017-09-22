@@ -20,7 +20,7 @@ namespace Sdl.Web.Tridion.Tests
             DefaultInitialize(testContext);
         }
 
-        //[TestMethod]
+        [TestMethod]
         public void GetEntityModel_NoXpmMetadataOnLive_Success() // See TSI-1942
         {
             const string testEntityId = TestFixture.ArticleDcpEntityId;
@@ -35,7 +35,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(string.Empty, entityModel.GetXpmMarkup(testLocalization), "entityModel.GetXpmMarkup(testLocalization)");
         }
 
-        //[TestMethod]
+        [TestMethod]
         public void GetPageModel_NoXpmMetadataOnLive_Success() // See TSI-1942
         {
             Localization testLocalization = TestFixture.LegacyChildLocalization;
