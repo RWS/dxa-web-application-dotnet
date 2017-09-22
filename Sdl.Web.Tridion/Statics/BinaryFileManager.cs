@@ -102,9 +102,12 @@ namespace Sdl.Web.Tridion.Statics
                     {
                         if (localization.LastRefresh.CompareTo(lastPublishedDate) < 0)
                         {
-                            //File has been modified since last application start but we don't care
-                            Log.Debug("Binary with URL '{0}' is modified, but only since last application restart, so no action required", urlPath);
-                            return localFilePath;
+                            if (!localization.IsXpmEnabled)
+                            {
+                                //File has been modified since last application start but we don't care
+                                Log.Debug("Binary with URL '{0}' is modified, but only since last application restart, so no action required",urlPath);
+                                return localFilePath;
+                            }
                         }
                         FileInfo fi = new FileInfo(localFilePath);
                         if (fi.Length > 0)
