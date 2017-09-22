@@ -55,7 +55,7 @@ namespace Sdl.Web.Tridion.Mapping
                     {
                         ExtensionData = pageModelData.ExtensionData,
                         HtmlClasses = pageModelData.HtmlClasses,
-                        XpmMetadata = pageModelData.XpmMetadata,
+                        XpmMetadata = localization.IsXpmEnabled ? pageModelData.XpmMetadata : null,
                     };
                 }
                 else if (pageModelData.SchemaId == null)
@@ -64,7 +64,7 @@ namespace Sdl.Web.Tridion.Mapping
                     pageModel = (PageModel) modelType.CreateInstance(pageModelData.Id);
                     pageModel.ExtensionData = pageModelData.ExtensionData;
                     pageModel.HtmlClasses = pageModelData.HtmlClasses;
-                    pageModel.XpmMetadata = pageModelData.XpmMetadata;
+                    pageModel.XpmMetadata = localization.IsXpmEnabled ? pageModelData.XpmMetadata : null;
                 }
                 else
                 {
@@ -148,7 +148,7 @@ namespace Sdl.Web.Tridion.Mapping
 
             result.ExtensionData = viewModelData.ExtensionData;
             result.HtmlClasses = viewModelData.HtmlClasses;
-            result.XpmMetadata = viewModelData.XpmMetadata;
+            result.XpmMetadata = mappingData.Localization.IsXpmEnabled ? viewModelData.XpmMetadata : null;
 
             MediaItem mediaItem = result as MediaItem;
             if (mediaItem != null)
@@ -675,7 +675,7 @@ namespace Sdl.Web.Tridion.Mapping
             result.ExtensionData = regionModelData.ExtensionData;
             result.HtmlClasses = regionModelData.HtmlClasses;
             result.MvcData = mvcData;
-            result.XpmMetadata = regionModelData.XpmMetadata;
+            result.XpmMetadata = localization.IsXpmEnabled ? regionModelData.XpmMetadata : null;
 
             if (regionModelData.Regions != null)
             {
