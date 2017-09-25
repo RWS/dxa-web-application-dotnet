@@ -238,20 +238,20 @@
       <HintPath>..\packages\System.Xml.ReaderWriter.4.3.0\lib\net46\System.Xml.ReaderWriter.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Tridion.ContentDelivery, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Tridion.ContentDelivery.dll</HintPath>
+    <Reference Include="Tridion.ContentDelivery">
+      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Tridion.ContentDelivery.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Tridion.ContentDelivery.AmbientData, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Tridion.ContentDelivery.AmbientData.dll</HintPath>
+    <Reference Include="Tridion.ContentDelivery.AmbientData">
+      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Tridion.ContentDelivery.AmbientData.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Tridion.ContentDelivery.Preview, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Tridion.ContentDelivery.Preview.dll</HintPath>
+    <Reference Include="Tridion.ContentDelivery.Preview">
+      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Tridion.ContentDelivery.Preview.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Tridion.ContentDelivery.UGC, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Tridion.ContentDelivery.UGC.dll</HintPath>
+    <Reference Include="Tridion.ContentDelivery.UGC">
+      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Tridion.ContentDelivery.UGC.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

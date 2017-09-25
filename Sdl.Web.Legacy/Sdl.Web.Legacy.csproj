@@ -164,16 +164,16 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Tridion.ContentDelivery">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Tridion.ContentDelivery.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Tridion.ContentDelivery.dll</HintPath>
     </Reference>
     <Reference Include="Tridion.ContentDelivery.AmbientData">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Tridion.ContentDelivery.AmbientData.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Tridion.ContentDelivery.AmbientData.dll</HintPath>
     </Reference>
     <Reference Include="Tridion.ContentDelivery.Preview">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Tridion.ContentDelivery.Preview.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Tridion.ContentDelivery.Preview.dll</HintPath>
     </Reference>
     <Reference Include="Tridion.ContentDelivery.UGC">
-      <HintPath>..\packages\Sdl.Web.Delivery.8.5.0\lib\net452\Tridion.ContentDelivery.UGC.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Tridion.ContentDelivery.UGC.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
