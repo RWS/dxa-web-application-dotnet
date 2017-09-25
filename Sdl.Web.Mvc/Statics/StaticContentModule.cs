@@ -137,13 +137,19 @@ namespace Sdl.Web.Mvc.Statics
                         }
                         else
                         {
-                            // Items with a versioned URL can be cached long-term, because the URL will change if needed.
-                            bool isVersionedUrl = context.Items.Contains(IsVersionedUrlContextItem);
-                            TimeSpan maxAge = isVersionedUrl ? new TimeSpan(7, 0, 0, 0) : new TimeSpan(0, 1, 0, 0); // 1 Week or 1 Hour
+                            if (!localization.IsXpmEnabled)
+                            {
+                                // Items with a versioned URL can be cached long-term, because the URL will change if needed.
+                                bool isVersionedUrl = context.Items.Contains(IsVersionedUrlContextItem);
+
+                                TimeSpan maxAge = isVersionedUrl ? new TimeSpan(7, 0, 0, 0) : new TimeSpan(0, 1, 0, 0); // 1 Week or 1 Hour
+
+                                response.Cache.SetCacheability(HttpCacheability.Private); // Allow caching
+                                response.Cache.SetMaxAge(maxAge);
+                                response.Cache.SetExpires(DateTime.UtcNow.Add(maxAge));
+                            }
+
                             response.Cache.SetLastModified(lastModified); // Allows the browser to do an If-Modified-Since request next time
-                            response.Cache.SetCacheability(HttpCacheability.Public); // Allow caching
-                            response.Cache.SetMaxAge(maxAge);
-                            response.Cache.SetExpires(DateTime.UtcNow.Add(maxAge));
                             response.ContentType = staticContentItem.ContentType;
                             staticContentItem.GetContentStream().CopyTo(response.OutputStream);
                         }
