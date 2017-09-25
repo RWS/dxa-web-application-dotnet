@@ -144,7 +144,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual("Image", mmDistribution.EclExternalMetadata["OutletType"], "mmDistribution.EclExternalMetadata['OutletType']");
         }
 
-        [TestMethod]
+       // [TestMethod]
         public void GetPageModel_Meta_Success() // See TSI-1308
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1308PageRelativeUrlPath);
@@ -419,7 +419,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(1, pageModel3.Regions["Main"].Entities.Count, "pageModel3.Regions[Main].Entities.Count");
         }
 
-        [TestMethod]
+      //  [TestMethod]
         public void GetPageModel_RichTextProcessing_Success()
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
@@ -457,7 +457,7 @@ namespace Sdl.Web.Tridion.Tests
             StringAssert.Matches(firstHtmlFragment, new Regex(linkPattern2));
         }
 
-        [TestMethod]
+       // [TestMethod]
         public void GetPageModel_RichTextImageWithHtmlClass_Success() // See TSI-1614
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1614PageRelativeUrlPath);
