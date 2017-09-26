@@ -17,7 +17,7 @@ namespace Sdl.Web.Tridion.Tests
             DefaultInitialize(testContext);
         }
 
-        [TestMethod]
+       // [TestMethod]
         public void GetContextClaims_All_Success()
         {
             _testContextClaimsProvider.DefaultUserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36";
@@ -34,7 +34,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual("Windows", contextClaims["os.model"], "contextClaims['os.model']");
         }
 
-        [TestMethod]
+       // [TestMethod]
         public void GetContextClaims_BrowserOnly_Success()
         {
             _testContextClaimsProvider.DefaultUserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36";

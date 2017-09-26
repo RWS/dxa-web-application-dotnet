@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Tests.Models;
+using Sdl.Web.DataModel;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -31,13 +32,26 @@ namespace Sdl.Web.Tridion.Tests
             OutputJson(pageModel);
 
             RegionModel mainRegion = pageModel.Regions["Main"];
-            EntityModel[] entitiesWithExtensionData = mainRegion.Entities.Where(e => e.ExtensionData != null).ToArray();
-            EntityModel[] entitiesWithCxInclude = entitiesWithExtensionData.Where(e => e.ExtensionData.ContainsKey("CX.Include")).ToArray();
-            EntityModel[] entitiesWithCxExclude = entitiesWithExtensionData.Where(e => e.ExtensionData.ContainsKey("CX.Exclude")).ToArray();
+            EntityModel[] entitiesWithExtensionData =
+                mainRegion.Entities.Where(
+                    e => e.ExtensionData != null).ToArray();
+
+            int numIncludes = 0;
+            int numExcludes = 0;
+            foreach (ContentModelData contextExpressions in from entity 
+                    in entitiesWithExtensionData
+                    where entity.ExtensionData.ContainsKey("ContextExpressions")
+                    select (ContentModelData) entity.ExtensionData["ContextExpressions"])
+            {
+                if (contextExpressions.ContainsKey("Include"))
+                    numIncludes += ((string[]) contextExpressions["Include"]).Length;
+                if (contextExpressions.ContainsKey("Exclude"))
+                    numExcludes += ((string[]) contextExpressions["Exclude"]).Length;
+            }
 
             Assert.AreEqual(8, entitiesWithExtensionData.Length, "entitiesWithExtensionData.Length");
-            Assert.AreEqual(6, entitiesWithCxInclude.Length, "entitiesWithCxInclude.Length");
-            Assert.AreEqual(4, entitiesWithCxExclude.Length, "entitiesWithCxExclude.Length");
+            Assert.AreEqual(8, numIncludes, "numIncludes");
+            Assert.AreEqual(4, numExcludes, "numExcludes");
         }
 
         [TestMethod]
