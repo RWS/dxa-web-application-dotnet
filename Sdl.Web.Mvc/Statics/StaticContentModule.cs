@@ -128,30 +128,16 @@ namespace Sdl.Web.Mvc.Statics
                 {
                     using (StaticContentItem staticContentItem = SiteConfiguration.ContentProvider.GetStaticContentItem(urlPath, localization))
                     {
+                        // Items with a versioned URL can be cached long-term, because the URL will change if needed.
+                        bool isVersionedUrl = context.Items.Contains(IsVersionedUrlContextItem);
                         DateTime lastModified = staticContentItem.LastModified;
-                        if (lastModified <= ifModifiedSince.AddSeconds(1))
+                        var contentType = staticContentItem.ContentType;
+
+                       SetResponseProperties(new HttpResponseWrapper(response) , lastModified ,ifModifiedSince, contentType, localization ,isVersionedUrl);
+
+                        if (!response.SuppressContent)
                         {
-                            Log.Debug("Static content item last modified at {0} => Sending HTTP 304 (Not Modified).", lastModified);
-                            response.StatusCode = (int) HttpStatusCode.NotModified;
-                            response.SuppressContent = true;
-                        }
-                        else
-                        {
-                            if (!localization.IsXpmEnabled)
-                            {
-                                // Items with a versioned URL can be cached long-term, because the URL will change if needed.
-                                bool isVersionedUrl = context.Items.Contains(IsVersionedUrlContextItem);
-
-                                TimeSpan maxAge = isVersionedUrl ? new TimeSpan(7, 0, 0, 0) : new TimeSpan(0, 1, 0, 0); // 1 Week or 1 Hour
-
-                                response.Cache.SetCacheability(HttpCacheability.Private); // Allow caching
-                                response.Cache.SetMaxAge(maxAge);
-                                response.Cache.SetExpires(DateTime.UtcNow.Add(maxAge));
-                            }
-
-                            response.Cache.SetLastModified(lastModified); // Allows the browser to do an If-Modified-Since request next time
-                            response.ContentType = staticContentItem.ContentType;
-                            staticContentItem.GetContentStream().CopyTo(response.OutputStream);
+                              staticContentItem.GetContentStream().CopyTo(response.OutputStream);                    
                         }
                     }
                 }
@@ -170,6 +156,30 @@ namespace Sdl.Web.Mvc.Statics
                 application.CompleteRequest();
             }
 
+        }
+        public static void SetResponseProperties(HttpResponseBase response, DateTime lastModified, DateTime ifModifiedSince,string contentType, Localization localization, bool isVersionedUrl)
+        {
+          
+            if (lastModified <= ifModifiedSince.AddSeconds(1))
+            {
+                Log.Debug("Static content item last modified at {0} => Sending HTTP 304 (Not Modified).", lastModified);
+                response.StatusCode = (int)HttpStatusCode.NotModified;
+                response.SuppressContent = true;
+            }
+            else
+            {
+                if (!localization.IsXpmEnabled)
+                {
+                    TimeSpan maxAge = isVersionedUrl? new TimeSpan(7, 0, 0, 0): new TimeSpan(0, 1, 0, 0); // 1 Week or 1 Hour
+
+                    response.Cache.SetCacheability(HttpCacheability.Private); // Allow caching
+                    response.Cache.SetMaxAge(maxAge);
+                    response.Cache.SetExpires(DateTime.UtcNow.Add(maxAge));
+                }
+
+                response.Cache.SetLastModified(lastModified); // Allows the browser to do an If-Modified-Since request next time
+                response.ContentType = contentType;
+            }
         }
 
         private static void SendNotFoundResponse(string message, HttpResponse httpResponse)
