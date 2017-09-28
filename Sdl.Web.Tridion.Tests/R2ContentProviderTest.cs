@@ -44,9 +44,19 @@ namespace Sdl.Web.Tridion.Tests
                     select (ContentModelData) entity.ExtensionData["ContextExpressions"])
             {
                 if (contextExpressions.ContainsKey("Include"))
-                    numIncludes += ((string[]) contextExpressions["Include"]).Length;
+                {
+                    if (contextExpressions["Include"] is string)
+                        numIncludes++;
+                    if (contextExpressions["Include"] is string[])
+                        numIncludes += ((string[]) contextExpressions["Include"]).Length;
+                }
                 if (contextExpressions.ContainsKey("Exclude"))
-                    numExcludes += ((string[]) contextExpressions["Exclude"]).Length;
+                {
+                    if (contextExpressions["Exclude"] is string)
+                        numExcludes++;
+                    if (contextExpressions["Exclude"] is string[])
+                        numExcludes += ((string[])contextExpressions["Exclude"]).Length;
+                }
             }
 
             Assert.AreEqual(8, entitiesWithExtensionData.Length, "entitiesWithExtensionData.Length");
