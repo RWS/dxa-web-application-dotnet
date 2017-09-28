@@ -22,6 +22,7 @@ namespace Sdl.Web.Tridion.Context
     {
         private static readonly ODataContextEngine _contextEngineClient;
         private static readonly bool _usePublicationEvidence;
+        private readonly object _lock = new object();
 
         /// <summary>
         /// Class constructor
@@ -80,7 +81,8 @@ namespace Sdl.Web.Tridion.Context
 
                 string userAgent = null;
                 string contextCookieValue = null;
-                HttpContext httpContext = HttpContext.Current; // TODO: Not really nice to use HttpContext at this level.
+                HttpContext httpContext = HttpContext.Current;
+                // TODO: Not really nice to use HttpContext at this level.
                 if (httpContext != null)
                 {
                     userAgent = httpContext.Request.UserAgent;
@@ -101,18 +103,23 @@ namespace Sdl.Web.Tridion.Context
                     EvidenceBuilder evidenceBuilder = new EvidenceBuilder().With("user-agent", userAgent);
                     if (_usePublicationEvidence)
                     {
-                        evidenceBuilder.WithPublicationId(Convert.ToInt32(localization.Id)); // TODO: What about URI scheme?
+                        evidenceBuilder.WithPublicationId(Convert.ToInt32(localization.Id));
+                        // TODO: What about URI scheme?
                     }
                     if (!string.IsNullOrEmpty(contextCookieValue))
                     {
-                        evidenceBuilder.With("cookie", string.Format("context={0}", contextCookieValue));
+                        evidenceBuilder.With("cookie", $"context={contextCookieValue}");
                     }
                     IEvidence evidence = evidenceBuilder.Build();
-                    contextMap = _contextEngineClient.Resolve(evidence);
+                    lock (_lock)
+                    {
+                        contextMap = _contextEngineClient.Resolve(evidence);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    throw new DxaException("An error occurred while resolving evidence using the Context Service.", ex);
+                    throw new DxaException("An error occurred while resolving evidence using the Context Service.",
+                        ex);
                 }
 
                 IDictionary<string, object> result = new Dictionary<string, object>();
@@ -153,7 +160,7 @@ namespace Sdl.Web.Tridion.Context
             IAspect aspect = contextMap.Get(aspectName);
             foreach (string propertyName in aspect.KeySet)
             {
-                string claimName = string.Format("{0}.{1}", aspectName, propertyName);
+                string claimName = $"{aspectName}.{propertyName}";
                 object claimValue = aspect.Get(propertyName);
                 claims.Add(claimName, claimValue);
             }
