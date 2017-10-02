@@ -37,39 +37,18 @@ namespace Sdl.Web.Common.Logging
         public static bool IsTraceEnabled
             => Logger.IsTracingEnabled;
 
-        public static void Trace(string messageFormat, params object[] parameters)
-        {
-            Logger.Trace(messageFormat, parameters);
-        }
+        public static void Trace(string messageFormat, params object[] parameters) => Logger.Trace(messageFormat, parameters);
 
-        public static void Debug(string messageFormat, params object[] parameters)
-        {
-            Logger.Debug(messageFormat, parameters);
-        }
+        public static void Debug(string messageFormat, params object[] parameters) => Logger.Debug(messageFormat, parameters);
 
-        public static void Info(string messageFormat, params object[] parameters)
-        {
-            Logger.Info(messageFormat, parameters);
-        }
+        public static void Info(string messageFormat, params object[] parameters) => Logger.Info(messageFormat, parameters);
 
-        public static void Warn(string messageFormat, params object[] parameters)
-        {
-            Logger.Warn(messageFormat, parameters);
-        }
+        public static void Warn(string messageFormat, params object[] parameters) => Logger.Warn(messageFormat, parameters);
 
-        public static void Error(string messageFormat, params object[] parameters)
-        {
-            Logger.Error(messageFormat, parameters);
-        }
+        public static void Error(string messageFormat, params object[] parameters) => Logger.Error(messageFormat, parameters);
 
-        public static void Error(Exception ex, string messageFormat, params object[] parameters)
-        {
-            Logger.Error(ex, messageFormat, parameters);
-        }
+        public static void Error(Exception ex, string messageFormat, params object[] parameters) => Logger.Error(ex, messageFormat, parameters);
 
-        public static void Error(Exception ex)
-        {
-            Logger.Error(ex);
-        }
+        public static void Error(Exception ex) => Logger.Error(ex);
     }
 }

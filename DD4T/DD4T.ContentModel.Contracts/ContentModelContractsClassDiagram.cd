@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Interface Name="DD4T.ContentModel.ICategory" HideInheritanceLine="true">
+    <Position X="1.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAA=</HashCode>
+      <FileName>ICategory.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Keywords" />
+    </ShowAsCollectionAssociation>
+  </Interface>
+  <Interface Name="DD4T.ContentModel.IComponent" HideInheritanceLine="true">
+    <Position X="4.25" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAAAAAACAAAAEAAAAEAAAAIAAAAAAhAA=</HashCode>
+      <FileName>IComponent.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="ComponentType" />
+      <Property Name="Multimedia" />
+      <Property Name="Schema" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Categories" />
+      <Property Name="Fields" />
+      <Property Name="MetadataFields" />
+    </ShowAsCollectionAssociation>
+  </Interface>
+  <Interface Name="DD4T.ContentModel.IComponentPresentation">
+    <Position X="0.75" Y="7" Width="2" />
+    <AssociationLine Name="Component" Type="DD4T.ContentModel.IComponent" FixedFromPoint="true">
+      <Path>
+        <Point X="2.75" Y="7.491" />
+        <Point X="4.25" Y="7.491" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAAAAQAAAAAAAAIAAAAAAAABAAAAAAAA=</HashCode>
+      <FileName>IComponentPresentation.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Component" />
+      <Property Name="ComponentTemplate" />
+    </ShowAsAssociation>
+  </Interface>
+  <Interface Name="DD4T.ContentModel.IComponentTemplate" HideInheritanceLine="true">
+    <Position X="1" Y="11.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAIAAAAAABAA=</HashCode>
+      <FileName>IComponentTemplate.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="MetadataFields" />
+    </ShowAsCollectionAssociation>
+  </Interface>
+  <Interface Name="DD4T.ContentModel.IField">
+    <Position X="7.5" Y="6.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AgIAAABAAAAAAgAAAAAAAAQAACBAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>IField.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="FieldType" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="LinkedComponentValues" />
+    </ShowAsCollectionAssociation>
+  </Interface>
+  <Interface Name="DD4T.ContentModel.IKeyword" HideInheritanceLine="true">
+    <Position X="1.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIAAAAAAAAAAAAABAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IKeyword.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DD4T.ContentModel.IMultimedia">
+    <Position X="2.25" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAgAQAAAAAAEEAAAAAAAAACAEAAABAAAA=</HashCode>
+      <FileName>IMultimedia.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DD4T.ContentModel.IPage" HideInheritanceLine="true">
+    <Position X="4" Y="2.5" Width="2" />
+    <AssociationLine Name="ComponentPresentations" Type="DD4T.ContentModel.IComponentPresentation" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="4" Y="2.734" />
+        <Point X="1.062" Y="2.734" />
+        <Point X="1.062" Y="7" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-1.718" Y="0.121" Height="0.16" Width="1.63" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAQAAAAAAAAEAAAAEAAAAQAAAAAEAAE=</HashCode>
+      <FileName>IPage.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="PageTemplate" />
+      <Property Name="Schema" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Categories" />
+      <Property Name="ComponentPresentations" />
+      <Property Name="Metadata" />
+    </ShowAsCollectionAssociation>
+  </Interface>
+  <Interface Name="DD4T.ContentModel.IPageTemplate" HideInheritanceLine="true">
+    <Position X="10.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIEAAAAABAA=</HashCode>
+      <FileName>IPageTemplate.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="MetadataFields" />
+    </ShowAsCollectionAssociation>
+  </Interface>
+  <Interface Name="DD4T.ContentModel.ISchema" HideInheritanceLine="true">
+    <Position X="4.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>ISchema.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DD4T.ContentModel.IRepositoryLocal">
+    <Position X="13" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IRepositoryLocal.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="DD4T.ContentModel.ComponentType">
+    <Position X="4.75" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAACAAAAAAAAIAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Enums.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="DD4T.ContentModel.FieldType">
+    <Position X="8.5" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAACABAEAAAASAAAAAAQQBAAAACAAAAAA=</HashCode>
+      <FileName>Enums.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>

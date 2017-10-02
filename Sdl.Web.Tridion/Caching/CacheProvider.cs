@@ -37,7 +37,6 @@ namespace Sdl.Web.Tridion.Caching
         public virtual T GetOrAdd<T>(string key, string region, Func<T> addFunction, IEnumerable<string> dependencies = null)
         {
             T result;
-
             if (TryGet(key, region, out result))
             {
                 return result;
@@ -63,7 +62,6 @@ namespace Sdl.Web.Tridion.Caching
             {
                 // Obtain the actual value. This may be time-consuming (otherwise there would be no reason to cache).
                 result = addFunction();
-
                 Store(key, region, result, dependencies);
             }
             finally
@@ -95,7 +93,8 @@ namespace Sdl.Web.Tridion.Caching
                 Log.Warn("Waiting for adding of value for key '{0}' in cache region '{1}' for {2} seconds.", key, region, WaitForAddingTimeout / 1000);
                 if (!addingEvent.WaitOne(WaitForAddingTimeout))
                 {
-                    throw new DxaException(string.Format("Timeout waiting for adding of value for key '{0}' in cache region '{1}'.", key, region));
+                    throw new DxaException(
+                        $"Timeout waiting for adding of value for key '{key}' in cache region '{region}'.");
                 }
             }
             Log.Debug("Done awaiting.");
@@ -103,9 +102,6 @@ namespace Sdl.Web.Tridion.Caching
             return true;
         }
 
-        protected static string GetQualifiedKey(string key, string region)
-        {
-            return string.Format("{0}::{1}", region, key);
-        }
+        protected static string GetQualifiedKey(string key, string region) => $"{region}::{key}";
     }
 }

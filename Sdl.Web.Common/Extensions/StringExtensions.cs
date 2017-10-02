@@ -8,15 +8,9 @@ namespace Sdl.Web.Common.Extensions
         // Regex to identify a valid cm identifier, currently only working with tcm namespace
         private static readonly Regex CmUriRegEx = new Regex(@"^tcm:\d+-\d+(-\d+){0,2}$", RegexOptions.Compiled);
 
-        public static string RemoveSpaces(this string value)
-        {
-            return value.Replace(" ", string.Empty);
-        }
+        public static string RemoveSpaces(this string value) => value.Replace(" ", string.Empty);
 
-        public static string ToCombinePath(this string value, bool prefixWithSlash = false)
-        {
-            return (prefixWithSlash ? "\\" : "") + value.Replace('/', '\\').Trim('\\');
-        }
+        public static string ToCombinePath(this string value, bool prefixWithSlash = false) => (prefixWithSlash ? "\\" : "") + value.Replace('/', '\\').Trim('\\');
 
         public static bool HasNOrMoreOccurancesOfChar(this string str, int n, char c)
         {
@@ -31,10 +25,7 @@ namespace Sdl.Web.Common.Extensions
             return count >= n;
         }
 
-        public static string ToCamelCase(this string str)
-        {
-            return str.Substring(0, 1).ToLower() + str.Substring(1);
-        }
+        public static string ToCamelCase(this string str) => str.Substring(0, 1).ToLower() + str.Substring(1);
 
         /// <summary>
         /// Returns a new string in which all occurances of a specifid string are replaced with a new string
@@ -96,9 +87,6 @@ namespace Sdl.Web.Common.Extensions
         /// </summary>
         /// <param name="str">String to check</param>
         /// <returns>True if a valid CM identifier</returns>
-        public static bool IsCmIdentifier(this string str)
-        {
-            return CmUriRegEx.IsMatch(str);
-        }
+        public static bool IsCmIdentifier(this string str) => CmUriRegEx.IsMatch(str);
     }
 }

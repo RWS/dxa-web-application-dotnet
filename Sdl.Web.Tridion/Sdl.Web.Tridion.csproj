@@ -12,10 +12,10 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.0.0-beta-201707211209</SdlDxaDataModelPackageVersion>
-    <SdlWebDeliveryPackageVersion>8.5.0</SdlWebDeliveryPackageVersion>
-    <SdlWebContextClientPackageVersion>8.5.0</SdlWebContextClientPackageVersion>
-    <SdlWebContextImagePackageVersion>8.5.0</SdlWebContextImagePackageVersion>
+    <SdlDxaDataModelPackageVersion>2.0.0-beta-201708301729</SdlDxaDataModelPackageVersion>
+    <SdlWebDeliveryPackageVersion>10.1.0</SdlWebDeliveryPackageVersion>
+    <SdlWebContextClientPackageVersion>10.1.0</SdlWebContextClientPackageVersion>
+    <SdlWebContextImagePackageVersion>10.1.0</SdlWebContextImagePackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -45,30 +45,6 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DD4T.ContentModel">
-      <HintPath>..\packages\DD4T.Model.2.1.0\lib\net45\DD4T.ContentModel.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="DD4T.ContentModel.Contracts">
-      <HintPath>..\packages\DD4T.Model.2.1.0\lib\net45\DD4T.ContentModel.Contracts.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="DD4T.Core.Contracts">
-      <HintPath>..\packages\DD4T.Core.2.1.1.144-alpha\lib\net45\DD4T.Core.Contracts.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="DD4T.Factories">
-      <HintPath>..\packages\DD4T.Core.2.1.1.144-alpha\lib\net45\DD4T.Factories.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="DD4T.Serialization">
-      <HintPath>..\packages\DD4T.Model.2.1.0\lib\net45\DD4T.Serialization.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="DD4T.Utils">
-      <HintPath>..\packages\DD4T.Core.2.1.1.144-alpha\lib\net45\DD4T.Utils.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.Extensions.Caching.Abstractions">
       <HintPath>..\packages\Microsoft.Extensions.Caching.Abstractions.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Caching.Abstractions.dll</HintPath>
     </Reference>
@@ -87,9 +63,18 @@
     <Reference Include="Microsoft.Extensions.Primitives">
       <HintPath>..\packages\Microsoft.Extensions.Primitives.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Primitives.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Practices.Unity, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Configuration">
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.RegistrationByConvention">
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.RegistrationByConvention.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.DataModel">
       <HintPath>..\packages\Sdl.Dxa.DataModel.$(SdlDxaDataModelPackageVersion)\lib\net452\Sdl.Web.DataModel.dll</HintPath>
@@ -98,25 +83,28 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.Caching.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Delivery.Core, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Sdl.Web.Delivery.Core">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Delivery.DiscoveryService, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Sdl.Web.Delivery.DiscoveryService">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.DiscoveryService.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Delivery.OAuthClient, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Sdl.Web.Delivery.OAuthClient">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.OAuthClient.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Delivery.Service, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Sdl.Web.Delivery.Service">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.Service.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Delivery.ServicesCore, Version=8.5.0.1014, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
+    <Reference Include="Sdl.Web.Delivery.ServicesCore">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.Legacy.Model">
+      <HintPath>..\Sdl.Web.Legacy.Model\bin\$(Configuration)\Sdl.Web.Legacy.Model.dll</HintPath>
     </Reference>
     <Reference Include="StackExchange.Redis.StrongName">
       <HintPath>..\packages\StackExchange.Redis.StrongName.1.1.605\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>
@@ -127,6 +115,10 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.Data.Edm">
@@ -161,10 +153,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Spatial.6.15.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
     </Reference>
-    <Reference Include="DD4T.Providers.SDLWeb8.CIL">
-      <HintPath>..\packages\DD4T.Providers.SDLWeb8.CIL.2.1.0\lib\net45\DD4T.Providers.SDLWeb8.CIL.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Tridion.ContentDelivery">
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Tridion.ContentDelivery.dll</HintPath>
     </Reference>
@@ -184,10 +172,14 @@
       <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
     <Compile Include="Caching\CacheProvider.cs" />
-    <Compile Include="Caching\DD4TCacheAgentAdapter.cs" />
+    <Compile Include="Caching\DxaCacheProvider.cs" />
+    <Compile Include="Caching\DD4TCacheProvider.cs" />
     <Compile Include="Caching\DefaultCacheProvider.cs" />
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
     <Compile Include="CdApiLocalizationResolver.cs" />
+    <Reference Include="Unity.Mvc5">
+      <HintPath>..\packages\Unity.Mvc5.1.1\lib\net45\Unity.Mvc5.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CdConfigLocalizationResolver.cs" />
@@ -197,20 +189,13 @@
     <Compile Include="ContentManager\InvalidTcmUriException.cs" />
     <Compile Include="ContentManager\ItemTypes.cs" />
     <Compile Include="Context\AdfContextClaimsProvider.cs" />
-    <Compile Include="Caching\DD4TCacheProvider.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Linking\DefaultLinkResolver.cs" />
     <Compile Include="LocalizationResolver.cs" />
-    <Compile Include="Mapping\DD4TFactoryCache.cs" />
-    <Compile Include="Mapping\DD4TLoggerAdapter.cs" />
     <Compile Include="Mapping\DefaultModelBuilder.cs" />
-    <Compile Include="Mapping\DefaultContentProvider.cs" />
-    <Compile Include="Mapping\DefaultRichTextProcessor.cs" />
     <Compile Include="Mapping\IModelBuilder.cs" />
     <Compile Include="Mapping\IRawDataProvider.cs" />
-    <Compile Include="Mapping\MappingData.cs" />
-    <Compile Include="Mapping\ModelBuilderPipeline.cs" />
-    <Compile Include="Mapping\PublicationResolver.cs" />
+    <Compile Include="ModelService\DefaultModelServiceProvider.cs" />
     <Compile Include="Navigation\DynamicNavigationProvider.cs" />
     <Compile Include="Navigation\ModelServiceImpl\DynamicNavigationProvider.cs" />
     <Compile Include="Navigation\CILImpl\DynamicNavigationProvider.cs" />
@@ -219,12 +204,10 @@
     <Compile Include="Query\BrokerQuery.cs" />
     <Compile Include="..\CommonAssemblyInfo.cs" />
     <Compile Include="ContentManager\TcmUri.cs" />
-    <Compile Include="R2Mapping\IEntityModelBuilder.cs" />
-    <Compile Include="R2Mapping\IPageModelBuilder.cs" />
-    <Compile Include="R2Mapping\ModelBuilderPipelineR2.cs" />
-    <Compile Include="R2Mapping\DefaultContentProviderR2.cs" />
-    <Compile Include="R2Mapping\DefaultModelBuilderR2.cs" />
-    <Compile Include="R2Mapping\ModelServiceClient.cs" />
+    <Compile Include="Mapping\IEntityModelBuilder.cs" />
+    <Compile Include="Mapping\IPageModelBuilder.cs" />
+    <Compile Include="Mapping\ModelBuilderPipeline.cs" />
+    <Compile Include="Mapping\DefaultContentProvider.cs" />
     <Compile Include="Statics\BinaryFileManager.cs" />
     <Compile Include="Statics\NamedLocker.cs" />
   </ItemGroup>
@@ -232,6 +215,14 @@
     <ProjectReference Include="..\Sdl.Web.Common\Sdl.Web.Common.csproj">
       <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
       <Name>Sdl.Web.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sdl.Web.Legacy\Sdl.Web.Legacy.csproj">
+      <Project>{266cf812-c726-47ed-9f6e-2d6a5c1bcbb0}</Project>
+      <Name>Sdl.Web.Legacy</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sdl.Web.ModelService\Sdl.Web.ModelService.csproj">
+      <Project>{5a58a2b2-6c7e-4183-8eff-76d4282e5c66}</Project>
+      <Name>Sdl.Web.ModelService</Name>
     </ProjectReference>
     <ProjectReference Include="..\Sdl.Web.Mvc\Sdl.Web.Mvc.csproj">
       <Project>{923b2009-9a0b-4425-88a5-bf7af25c8f8b}</Project>

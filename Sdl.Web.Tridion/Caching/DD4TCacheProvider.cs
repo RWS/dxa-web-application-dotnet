@@ -3,16 +3,21 @@ using System.Linq;
 using DD4T.ContentModel.Contracts.Caching;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Tridion.Mapping;
+using System.Web.Mvc;
 
 namespace Sdl.Web.Tridion.Caching
 {
     /// <summary>
-    /// Cache Provider implementation based on DD4T Default Cache Agent.
+    /// Cache Provider implementation to forward requests to DD4T ICacheAgents
     /// </summary>
     public class DD4TCacheProvider : CacheProvider
     {
-        private readonly ICacheAgent _cacheAgent = DD4TFactoryCache.CreateDefaultCacheAgent();
+        private readonly ICacheAgent _cacheAgent;
+
+        public DD4TCacheProvider()
+        {
+            _cacheAgent = (ICacheAgent)DependencyResolver.Current.GetService(typeof(ICacheAgent));
+        }
 
         #region ICacheProvider members
         /// <summary>
@@ -25,7 +30,7 @@ namespace Sdl.Web.Tridion.Caching
         /// <typeparam name="T">The type of the value to add.</typeparam>
         public override void Store<T>(string key, string region, T value, IEnumerable<string> dependencies = null)
         {
-            List<string> dependsOnTcmUris = (dependencies == null) ? null : dependencies.ToList();
+            List<string> dependsOnTcmUris = dependencies?.ToList();
             string cacheAgentKey = GetQualifiedKey(key, region);
             lock (_cacheAgent)
             {
@@ -70,11 +75,11 @@ namespace Sdl.Web.Tridion.Caching
             if (!(cachedValue is T))
             {
                 throw new DxaException(
-                    string.Format("Cached value for key '{0}' in region '{1}' is of type {2} instead of {3}.", key, region, cachedValue.GetType().FullName, typeof(T).FullName)
+                    $"Cached value for key '{key}' in region '{region}' is of type {cachedValue.GetType().FullName} instead of {typeof (T).FullName}."
                     );
             }
 
-            value = (T) cachedValue;
+            value = (T)cachedValue;
             return true;
         }
 

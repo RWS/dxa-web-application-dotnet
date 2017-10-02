@@ -1,0 +1,94 @@
+﻿using DD4T.ContentModel.Contracts.Providers;
+using DD4T.ContentModel.Logging;
+using DD4T.Rest.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+
+namespace DD4T.Rest.WebApi.Controllers
+{
+     [RoutePrefix("api/page")]
+    public class PageController : ApiController
+    {
+        private readonly IPageProvider PageProvider;
+        private readonly ILogger Logger;
+
+        public PageController(IPageProvider pageProvider, ILogger logger)
+        {
+            if (pageProvider == null)
+                throw new ArgumentException("pageProvider");
+
+            if (logger == null)
+                throw new ArgumentException("logger");
+
+            PageProvider = pageProvider;
+            Logger = logger;
+        }
+
+        [HttpGet]
+        [Route("{action}/{publicationId:int}/{extension}/{*url}")]
+        public IHttpActionResult GetContentByUrl(int publicationId, string extension, string url)
+        {
+            Logger.Debug("GetContentByUrl publicationId={0}, Url={1}, extension={2}", publicationId, url, extension);
+            if (publicationId == null || publicationId == 0)
+                return BadRequest(Messages.EmptyPublicationId);
+
+            PageProvider.PublicationId = publicationId;
+            var content = PageProvider.GetContentByUrl(url.GetUrl(extension));
+
+            if (string.IsNullOrEmpty(content))
+                return NotFound();
+
+            return Ok<string>(content);
+        }
+
+        [HttpGet]
+        [Route("{action}/{publicationId:int}/{id:int}")]
+        public IHttpActionResult GetContentByUri(int publicationId, int id)
+        {
+            Logger.Debug("GetContentByUri publicationId={0}, Url={1}", publicationId, id);
+            if (publicationId == null || publicationId == 0)
+                return BadRequest(Messages.EmptyPublicationId);
+
+            PageProvider.PublicationId = publicationId;
+            var content = PageProvider.GetContentByUri(id.ToPageTcmUri(publicationId));
+ 
+            if (string.IsNullOrEmpty(content))
+                return NotFound();
+
+            return Ok<string>(content);
+        }
+
+        [HttpGet]
+        [Route("{action}/{publicationId:int}/{extension}/{*url}")]
+        public IHttpActionResult GetLastPublishedDateByUrl(int publicationId, string extension, string url)
+        {
+            Logger.Debug("GetLastPublishedDateByUrl publicationId={0}, Url={1}, Extension={2}", publicationId, url, extension);
+            if (publicationId == null || publicationId == 0)
+                return BadRequest(Messages.EmptyPublicationId);
+
+            PageProvider.PublicationId = publicationId;
+            var content = PageProvider.GetLastPublishedDateByUrl(url.GetUrl(extension));
+
+            return Ok<DateTime>(content);
+        }
+
+        [HttpGet]
+        [Route("{action}/{publicationId:int}/{id:int}")]
+        public IHttpActionResult GetLastPublishedDateByUri(int publicationId, int id)
+        {
+            Logger.Debug("GetLastPublishedDateByUri publicationId={0}, Url={1}", publicationId, id);
+            if (publicationId == null || publicationId == 0)
+                return BadRequest(Messages.EmptyPublicationId);
+
+            PageProvider.PublicationId = publicationId;
+            var content = PageProvider.GetLastPublishedDateByUri(id.ToPageTcmUri(publicationId));
+
+            return Ok<DateTime>(content);
+        }
+    }
+}

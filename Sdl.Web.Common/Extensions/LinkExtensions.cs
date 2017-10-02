@@ -1,5 +1,4 @@
-﻿using System;
-using Sdl.Web.Common.Models;
+﻿using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Extensions
 {
@@ -7,12 +6,12 @@ namespace Sdl.Web.Common.Extensions
     {
         public static bool IsValidLink(this Link link)
         {
-            return link != null && !String.IsNullOrEmpty(link.Url);
+            return !string.IsNullOrEmpty(link?.Url);
         }
 
         public static bool IsLinkWithText(this Link link)
         {
-            return link != null && !String.IsNullOrEmpty(link.Url) && !String.IsNullOrEmpty(link.LinkText);
+            return !string.IsNullOrEmpty(link?.Url) && !string.IsNullOrEmpty(link.LinkText);
         }
     }
 }

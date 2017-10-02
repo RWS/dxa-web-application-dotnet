@@ -9,17 +9,16 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
-using Sdl.Web.Tridion.R2Mapping;
 
 namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
 {
+    using ModelService;
     /// <summary>
     /// Navigation Provider implementation based on Taxonomies (Categories and Keywords)
     /// This implementation uses the model service to construct the sitemap items.
     /// </summary>
     public class DynamicNavigationProvider : INavigationProvider, IOnDemandNavigationProvider
     {
-        private readonly ModelServiceClient _modelService = new ModelServiceClient();
         private static readonly INavigationProvider FallbackNavigationProvider = new StaticNavigationProvider();
         private static readonly Regex SitemapItemIdRegex = new Regex(@"^t(?<taxonomyId>\d+)((-k(?<keywordId>\d+))|(-p(?<pageId>\d+)))?$", RegexOptions.Compiled);
         #region INavigationProvider members
@@ -38,7 +37,7 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
                     CacheRegions.DynamicNavigation,
                     () =>
                     {
-                        var navModel = _modelService.GetSitemapItem(localization) ??
+                        var navModel = SiteConfiguration.ModelServiceProvider.GetSitemapItem(localization) ??
                                        FallbackNavigationProvider.GetNavigationModel(localization);
                         RebuildParentRelationships(navModel.Items, navModel);
                         return navModel;
@@ -204,7 +203,7 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
                     {
                         try
                         {
-                            IEnumerable<SitemapItem> items = _modelService.GetChildSitemapItems(sitemapItemId, localization,
+                            IEnumerable<SitemapItem> items = SiteConfiguration.ModelServiceProvider.GetChildSitemapItems(sitemapItemId, localization,
                                 filter.IncludeAncestors,
                                 filter.DescendantLevels) ?? new SitemapItem[0];
                             items = items.OrderBy(i => i.OriginalTitle);
