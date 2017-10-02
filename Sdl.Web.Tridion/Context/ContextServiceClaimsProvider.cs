@@ -22,6 +22,7 @@ namespace Sdl.Web.Tridion.Context
     {
         private static readonly ODataContextEngine _contextEngineClient;
         private static readonly bool _usePublicationEvidence;
+        private readonly object _lock = new object();
 
         /// <summary>
         /// Class constructor
@@ -108,7 +109,10 @@ namespace Sdl.Web.Tridion.Context
                         evidenceBuilder.With("cookie", string.Format("context={0}", contextCookieValue));
                     }
                     IEvidence evidence = evidenceBuilder.Build();
-                    contextMap = _contextEngineClient.Resolve(evidence);
+                    lock (_lock)
+                    {
+                        contextMap = _contextEngineClient.Resolve(evidence);
+                    }
                 }
                 catch (Exception ex)
                 {
