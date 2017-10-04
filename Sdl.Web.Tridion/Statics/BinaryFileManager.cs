@@ -86,35 +86,33 @@ namespace Sdl.Web.Tridion.Statics
                 urlPath = StripDimensions(urlPath, out dimensions);
                 int publicationId = Convert.ToInt32(localization.LocalizationId);
 
-                DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
-                    urlPath,
-                    CacheRegions.BinaryPublishDate,
-                    () => GetBinaryLastPublishDate(urlPath, publicationId)
-                    );
-
-                if (lastPublishedDate != DateTime.MinValue)
+                if (File.Exists(localFilePath))
                 {
-                    if (File.Exists(localFilePath))
+                    DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
+                        urlPath,
+                        CacheRegions.BinaryPublishDate,
+                        () => GetBinaryLastPublishDate(urlPath, publicationId)
+                        );
+
+                    if (localization.LastRefresh.CompareTo(lastPublishedDate) < 0)
                     {
-                        if (localization.LastRefresh.CompareTo(lastPublishedDate) < 0)
+                        //File has been modified since last application start but we don't care
+                        Log.Debug(
+                            "Binary with URL '{0}' is modified, but only since last application restart, so no action required",
+                            urlPath);
+                        return localFilePath;
+                    }
+                    FileInfo fi = new FileInfo(localFilePath);
+                    if (fi.Length > 0)
+                    {
+                        DateTime fileModifiedDate = File.GetLastWriteTime(localFilePath);
+                        if (fileModifiedDate.CompareTo(lastPublishedDate) >= 0)
                         {
-                            //File has been modified since last application start but we don't care
-                            Log.Debug("Binary with URL '{0}' is modified, but only since last application restart, so no action required", urlPath);
+                            Log.Debug("Binary with URL '{0}' is still up to date, no action required", urlPath);
                             return localFilePath;
-                        }
-                        FileInfo fi = new FileInfo(localFilePath);
-                        if (fi.Length > 0)
-                        {
-                            DateTime fileModifiedDate = File.GetLastWriteTime(localFilePath);
-                            if (fileModifiedDate.CompareTo(lastPublishedDate) >= 0)
-                            {
-                                Log.Debug("Binary with URL '{0}' is still up to date, no action required", urlPath);
-                                return localFilePath;
-                            }
                         }
                     }
                 }
-
                 // Binary does not exist or cached binary is out-of-date
                 BinaryMeta binaryMeta = GetBinaryMeta(urlPath, publicationId);
                 if (binaryMeta == null)
