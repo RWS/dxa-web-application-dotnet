@@ -124,12 +124,7 @@ namespace Sdl.Web.Tridion.Statics
                 // Binary does not exist or cached binary is out-of-date
                 BinaryMeta binaryMeta = GetBinaryMeta(urlPath, publicationUri);
                 if (binaryMeta == null)
-                {
-                    // Binary does not exist in Tridion, it should be removed from the local file system too
-                    if (File.Exists(localFilePath))
-                    {
-                        CleanupLocalFile(localFilePath);
-                    }
+                {                   
                     throw new DxaItemNotFoundException(urlPath, localization.Id);
                 }
                 BinaryFactory binaryFactory = new BinaryFactory();
