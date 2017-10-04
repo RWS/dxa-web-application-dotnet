@@ -90,34 +90,33 @@ namespace Sdl.Web.Tridion.Statics
                 urlPath = StripDimensions(urlPath, out dimensions);
                 string publicationUri = localization.GetCmUri();
 
-                DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
-                    urlPath,
-                    CacheRegions.BinaryPublishDate,
-                    () => GetBinaryLastPublishDate(urlPath, publicationUri)
-                    );
-
-                if (lastPublishedDate != DateTime.MinValue)
+                if (File.Exists(localFilePath))
                 {
-                    if (File.Exists(localFilePath))
+                    DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
+                        urlPath,
+                        CacheRegions.BinaryPublishDate,
+                        () => GetBinaryLastPublishDate(urlPath, publicationUri)
+                        );
+
+                    if (localization.LastRefresh.CompareTo(lastPublishedDate) < 0)
                     {
-                        if (localization.LastRefresh.CompareTo(lastPublishedDate) < 0)
+                        if (!localization.IsXpmEnabled)
                         {
-                            if (!localization.IsXpmEnabled)
-                            {
-                                //File has been modified since last application start but we don't care
-                                Log.Debug("Binary with URL '{0}' is modified, but only since last application restart, so no action required",urlPath);
-                                return localFilePath;
-                            }
+                            //File has been modified since last application start but we don't care
+                            Log.Debug(
+                                "Binary with URL '{0}' is modified, but only since last application restart, so no action required",
+                                urlPath);
+                            return localFilePath;
                         }
-                        FileInfo fi = new FileInfo(localFilePath);
-                        if (fi.Length > 0)
+                    }
+                    FileInfo fi = new FileInfo(localFilePath);
+                    if (fi.Length > 0)
+                    {
+                        DateTime fileModifiedDate = File.GetLastWriteTime(localFilePath);
+                        if (fileModifiedDate.CompareTo(lastPublishedDate) >= 0)
                         {
-                            DateTime fileModifiedDate = File.GetLastWriteTime(localFilePath);
-                            if (fileModifiedDate.CompareTo(lastPublishedDate) >= 0)
-                            {
-                                Log.Debug("Binary with URL '{0}' is still up to date, no action required", urlPath);
-                                return localFilePath;
-                            }
+                            Log.Debug("Binary with URL '{0}' is still up to date, no action required", urlPath);
+                            return localFilePath;
                         }
                     }
                 }
