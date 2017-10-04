@@ -15,23 +15,23 @@ namespace Sdl.Web.Tridion.Tests
     {
         internal const string HomePageId = "640";
         internal const string ArticleDcpEntityId = "9712-9711";
-        internal const string ArticlePageUrlPath = "/autotest-parent/test_article_page.html";
-        internal const string ArticleChildPageUrlPath = "/autotest-child/test_article_page.html";
-        internal const string ArticleDynamicPageUrlPath = "/autotest-parent/test_article_dynamic.html";
-        internal const string MediaManagerTestPageUrlPath = "/autotest-parent/mm_test.html";
-        internal const string Tsi1278PageUrlPath = "/autotest-parent/tsi-1278_trådløst.html";
-        internal const string Tsi1278StaticContentItemUrlPath = "/autotest-parent/Images/trådløst_tcm1065-9791.jpg";
-        internal const string Tsi1614PageUrlPath = "/autotest-parent/tsi-1614.html";
-        internal const string Tsi1758PageUrlPath = "/autotest-parent/regression/tsi-1758.html";
-        internal const string Tsi1852PageUrlPath = "/autotest-parent/regression/tsi-1852.html";
-        internal const string Tsi1946PageUrlPath = "/autotest-parent/regression/tsi-1946.html";
-        internal const string Tsi811PageUrlPath = "/autotest-parent/regression/tsi-811";
-        internal const string Tsi1308PageUrlPath = "/autotest-parent/regression/tsi-1308";
-        internal const string Tsi1757PageUrlPath = "/autotest-child/regression/tsi-1757";
-        internal const string Tsi2225PageUrlPath = "/autotest-parent/regression/tsi-2225";
-        internal const string TaxonomyTestPage1UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1.html";
-        internal const string TaxonomyTestPage2UrlPath = "/autotest-parent/regression/taxonomy/nav-taxonomy-test-2.html";
-        internal const string TaxonomyIndexPageUrlPath = "/autotest-parent/regression/taxonomy";
+        internal const string ArticlePageUrlPath = "/autotest-parent-legacy/test_article_page.html";
+        internal const string ArticleChildPageUrlPath = "/autotest-child-legacy/test_article_page.html";
+        internal const string ArticleDynamicPageUrlPath = "/autotest-parent-legacy/test_article_dynamic.html";
+        internal const string MediaManagerTestPageUrlPath = "/autotest-parent-legacy/mm_test.html";
+        internal const string Tsi1278PageUrlPath = "/autotest-parent-legacy/tsi-1278_trådløst.html";
+        internal const string Tsi1278StaticContentItemUrlPath = "/autotest-parent-legacy/Images/trådløst_tcm1081-9791.jpg";
+        internal const string Tsi1614PageUrlPath = "/autotest-parent-legacy/tsi-1614.html";
+        internal const string Tsi1758PageUrlPath = "/autotest-parent-legacy/regression/tsi-1758.html";
+        internal const string Tsi1852PageUrlPath = "/autotest-parent-legacy/regression/tsi-1852.html";
+        internal const string Tsi1946PageUrlPath = "/autotest-parent-legacy/regression/tsi-1946.html";
+        internal const string Tsi811PageUrlPath = "/autotest-parent-legacy/regression/tsi-811";
+        internal const string Tsi1308PageUrlPath = "/autotest-parent-legacy/regression/tsi-1308";
+        internal const string Tsi1757PageUrlPath = "/autotest-child-legacy/regression/tsi-1757";
+        internal const string Tsi2225PageUrlPath = "/autotest-parent-legacy/regression/tsi-2225";
+        internal const string TaxonomyTestPage1UrlPath = "/autotest-parent-legacy/regression/taxonomy/nav-taxonomy-test-1.html";
+        internal const string TaxonomyTestPage2UrlPath = "/autotest-parent-legacy/regression/taxonomy/nav-taxonomy-test-2.html";
+        internal const string TaxonomyIndexPageUrlPath = "/autotest-parent-legacy/regression/taxonomy";
         internal const string NavigationTaxonomyTitle = "Test Taxonomy [Navigation]";
         internal const string TopLevelKeyword1Title = "Top-level Keyword 1";
         internal const string TopLevelKeyword2Title = "Top-level Keyword 2";
@@ -61,14 +61,14 @@ namespace Sdl.Web.Tridion.Tests
 
             _parentLocalization = new Localization
             {
-                LocalizationId = "1065",
-                Path = "/autotest-parent"
+                LocalizationId = "1081",
+                Path = "/autotest-parent-legacy"
             };
 
             _childLocalization = new Localization
             {
-                LocalizationId = "1078",
-                Path = "/autotest-child"
+                LocalizationId = "1083",
+                Path = "/autotest-child-legacy"
             };
 
             _testLocalizations = new[] { _parentLocalization, _childLocalization };

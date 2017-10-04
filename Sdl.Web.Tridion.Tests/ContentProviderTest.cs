@@ -202,8 +202,8 @@ namespace Sdl.Web.Tridion.Tests
             string firstHtmlFragment = content.Fragments.First().ToHtml();
             Assert.IsNotNull(firstHtmlFragment, "firstHtmlFragment");
             StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(not published\): Test Component"));
-            StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(published\): <a title=""TSI-1758 Test Component"" href=""/autotest-parent/regression/tsi-1758"">TSI-1758 Test Component</a>"));
-            StringAssert.Matches(firstHtmlFragment, new Regex(@"MMC link: <a title=""bulls-eye"" href=""/autotest-parent/Images/bulls-eye.*"">bulls-eye</a>"));
+            StringAssert.Matches(firstHtmlFragment, new Regex(@"Component link \(published\): <a title=""TSI-1758 Test Component"" href=""/autotest-parent-legacy/regression/tsi-1758"">TSI-1758 Test Component</a>"));
+            StringAssert.Matches(firstHtmlFragment, new Regex(@"MMC link: <a title=""bulls-eye"" href=""/autotest-parent-legacy/Images/bulls-eye.*"">bulls-eye</a>"));
         }
 
         [TestMethod]
@@ -465,10 +465,10 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(15, pageMeta.Count, "pageMeta.Count");
             Assert.AreEqual("This is single line text", pageMeta["singleLineText"], "pageMeta[singleLineText]");
             Assert.AreEqual("This is multi line text line 1\nAnd line 2\n", pageMeta["multiLineText"], "pageMeta[multiLineText]");
-            Assert.AreEqual("This is <strong>rich</strong> text with a <a title=\"Test Article\" href=\"/autotest-parent/test_article_dynamic\">Component Link</a>", pageMeta["richText"], "pageMeta[richText]");
+            Assert.AreEqual("This is <strong>rich</strong> text with a <a title=\"Test Article\" href=\"/autotest-parent-legacy/test_article_dynamic\">Component Link</a>", pageMeta["richText"], "pageMeta[richText]");
             Assert.AreEqual("News Article", pageMeta["keyword"], "pageMeta[keyword]");
-            Assert.AreEqual("/autotest-parent/test_article_dynamic", pageMeta["componentLink"], "pageMeta[componentLink]");
-            Assert.AreEqual("/autotest-parent/Images/company-news-placeholder_tcm1065-4480.png", pageMeta["mmComponentLink"], "pageMeta[mmComponentLink]");
+            Assert.AreEqual("/autotest-parent-legacy/test_article_dynamic", pageMeta["componentLink"], "pageMeta[componentLink]");
+            Assert.AreEqual("/autotest-parent-legacy/Images/company-news-placeholder_tcm1081-4480.png", pageMeta["mmComponentLink"], "pageMeta[mmComponentLink]");
             Assert.AreEqual("1970-12-16T12:34:56", pageMeta["date"], "pageMeta[date]");
             Assert.AreEqual("666.666", pageMeta["number"], "pageMeta[number]");
             Assert.AreEqual("Rick Pannekoek", pageMeta["author"], "pageMeta[author]");
@@ -511,7 +511,7 @@ namespace Sdl.Web.Tridion.Tests
 
             Common.Models.Configuration configEntity = pageModel.Regions["Nav"].Entities[0] as Common.Models.Configuration;
             Assert.IsNotNull(configEntity, "configEntity");
-            Assert.AreEqual("tcm:1065-9712", configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultCOntentLink']");
+            Assert.AreEqual("tcm:1081-9712", configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultCOntentLink']");
             Assert.AreEqual("pt,mx", configEntity.Settings["suppressLocalizations"], "configEntity.Settings['suppressLocalizations']");
         }
 

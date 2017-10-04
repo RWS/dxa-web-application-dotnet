@@ -106,16 +106,16 @@ namespace Sdl.Web.Tridion.Tests
             OutputJson(navLinks);
 
             Assert.AreEqual(1, navLinks.Items.Count, "navLinks.Items.Count");
-            AssertValidLink(navLinks.Items[0], "/autotest-parent/regression/taxonomy", TestFixture.TopLevelKeyword2Title, "Top-level Keyword 2 (concrete)", "navLinks.Items[0]");
+            AssertValidLink(navLinks.Items[0], "/autotest-parent-legacy/regression/taxonomy", TestFixture.TopLevelKeyword2Title, "Top-level Keyword 2 (concrete)", "navLinks.Items[0]");
         }
 
         private static void AssertExpectedLinks(IList<Link> links)
         {
             Assert.IsNotNull(links, "links");
             Assert.AreEqual(3, links.Count, "links.Count");
-            AssertValidLink(links[0], "/autotest-parent/regression/taxonomy/index", "Navigation Taxonomy Index Page", null, "links[0]");
-            AssertValidLink(links[1], "/autotest-parent/regression/taxonomy/nav-taxonomy-test-2", "Navigation Taxonomy Test Page 2", null, "links[1]");
-            AssertValidLink(links[2], "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1", "Navigation Taxonomy Test Page 1", null, "links[2]");
+            AssertValidLink(links[0], "/autotest-parent-legacy/regression/taxonomy/index", "Navigation Taxonomy Index Page", null, "links[0]");
+            AssertValidLink(links[1], "/autotest-parent-legacy/regression/taxonomy/nav-taxonomy-test-2", "Navigation Taxonomy Test Page 2", null, "links[1]");
+            AssertValidLink(links[2], "/autotest-parent-legacy/regression/taxonomy/nav-taxonomy-test-1", "Navigation Taxonomy Test Page 1", null, "links[2]");
         }
 
         [TestMethod]
@@ -194,7 +194,7 @@ namespace Sdl.Web.Tridion.Tests
             AssertValidLink(navLinks.Items[0], null, TestFixture.TopLevelKeyword1Title, "Top-level Keyword 1 (abstract)", "navLinks.Items[0]");
             AssertValidLink(navLinks.Items[1], null, "Keyword 1.1", "First child Keyword of Top-level Keyword 1", "navLinks.Items[1]");
             AssertValidLink(navLinks.Items[2], null, "Keyword 1.1.2", "Second child Keyword of Keyword 1.1", "navLinks.Items[2]");
-            AssertValidLink(navLinks.Items[3], "/autotest-parent/regression/taxonomy/nav-taxonomy-test-1", "Navigation Taxonomy Test Page 1", null, "navLinks.Items[3]");
+            AssertValidLink(navLinks.Items[3], "/autotest-parent-legacy/regression/taxonomy/nav-taxonomy-test-1", "Navigation Taxonomy Test Page 1", null, "navLinks.Items[3]");
         }
 
         [TestMethod]
