@@ -1,12 +1,9 @@
 ﻿using Sdl.Web.Common;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Tridion.Mapping;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Tridion.ContentDelivery.DynamicContent.Query;
-using Tridion.ContentDelivery.Meta;
 using Tridion.ContentDelivery.Taxonomies;
 
 namespace Sdl.Web.Tridion.Query

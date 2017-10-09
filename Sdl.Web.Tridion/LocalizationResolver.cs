@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
@@ -15,13 +14,7 @@ namespace Sdl.Web.Tridion
     {
         private readonly IDictionary<string, Localization> _knownLocalizations = new Dictionary<string, Localization>();
 
-        protected IDictionary<string, Localization> KnownLocalizations
-        {
-            get
-            {
-                return _knownLocalizations;
-            }
-        }
+        protected IDictionary<string, Localization> KnownLocalizations => _knownLocalizations;
 
         #region ILocalizationResolver Members
         /// <summary>
@@ -45,7 +38,7 @@ namespace Sdl.Web.Tridion
                 Localization result;
                 if (!_knownLocalizations.TryGetValue(localizationId, out result))
                 {
-                    throw new DxaUnknownLocalizationException(string.Format("No Localization found with ID '{0}'", localizationId));
+                    throw new DxaUnknownLocalizationException($"No Localization found with ID '{localizationId}'");
                 }
 
                 return result;
@@ -53,7 +46,6 @@ namespace Sdl.Web.Tridion
         }
 
         #endregion
-
 
         protected static bool MatchesBaseUrl(Uri url, Uri baseUrl)
         {

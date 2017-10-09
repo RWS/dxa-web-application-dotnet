@@ -526,6 +526,5 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             string keywordId = keywordUri.Split('-')[1];
             return $"t{taxonomyId}-k{keywordId}";
         }
-
     }
 }

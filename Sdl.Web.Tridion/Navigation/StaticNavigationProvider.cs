@@ -150,6 +150,5 @@ namespace Sdl.Web.Tridion.Navigation
             // TODO: test on Url instead?
             return (sitemapItem.Title == "Index") ? parentSitemapItem : sitemapItem;
         }
-
     }
 }

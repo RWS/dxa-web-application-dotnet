@@ -8,7 +8,6 @@ namespace Sdl.Web.Tridion.ContentManager
     /// Represents a native Tridion Content Manager URI which uniquely identifies a resource in the system.
     /// </summary>
     /// <remarks>The structure of a TCM URI is <c>PublicationID-ItemID[-ItemType][-vVersion]</c>.</remarks>
-    // TODO: this is a copy of class TcmUri from Tridion.Common (stripped to remove dependencies). We should just use Tridion.Common.
     [Serializable]
     public sealed class TcmUri : ICloneable
     {
@@ -148,13 +147,7 @@ namespace Sdl.Web.Tridion.ContentManager
         /// <value>
         /// A <see cref="TcmUri"/> instance that represents a URI <see langword="null"/> (tcm:0-0-0).
         /// </value>
-        public static TcmUri UriNull
-        {
-            get
-            {
-                return _uriNull;
-            }
-        }
+        public static TcmUri UriNull => _uriNull;
 
         /// <summary>
         /// Gets the Item ID of the item represented by this instance of <see cref="TcmUri"/>.
@@ -170,23 +163,14 @@ namespace Sdl.Web.Tridion.ContentManager
                 {
                     return (int) _itemId;
                 }
-                else
-                {
-                    return _idNull;
-                }
+                return _idNull;
             }
         }
 
         /// <summary>
         /// Gets the Item Type of the item represented by this instance of <see cref="TcmUri"/>.
         /// </summary>
-        public ItemType ItemType
-        {
-            get
-            {
-                return _itemType;
-            }
-        }
+        public ItemType ItemType => _itemType;
 
         /// <summary>
         /// Gets the Publication ID of the item represented by this instance of <see cref="TcmUri"/>.
@@ -194,13 +178,7 @@ namespace Sdl.Web.Tridion.ContentManager
         /// <value>
         /// Either a non-negative publication ID or <see cref="_idNull"/> when publication ID is not specified.
         /// </value>
-        public int PublicationId
-        {
-            get
-            {
-                return _publicationId == 0 ? _idNull : (int)_publicationId;
-            }
-        }
+        public int PublicationId => _publicationId == 0 ? _idNull : (int)_publicationId;
 
         /// <summary>
         /// Gets the version of the item represented by this instance of <see cref="TcmUri"/>.
@@ -216,10 +194,7 @@ namespace Sdl.Web.Tridion.ContentManager
                 {
                     return (int) _version;
                 }
-                else
-                {
-                    return _idNull;
-                }
+                return _idNull;
             }
         }
 
@@ -230,24 +205,13 @@ namespace Sdl.Web.Tridion.ContentManager
         /// The identifier of the context Repository.
         /// 0 if the context Repository Id is <see cref="_idNull"/>.
         /// </value>
-        public int ContextRepositoryId
-        {
-            get
-            {
-                return GetContextRepositoryId(true);
-            }
-        }
+        public int ContextRepositoryId => GetContextRepositoryId(true);
 
         /// <summary>
         /// Gets a value indicating whether it is the editable version.
         /// </summary>
-        public bool IsEditableVersion
-        {
-            get
-            {
-                return (_itemId == 0 && _itemType == 0 && _publicationId == 0) || _version == _editableVersion;
-            }
-        }
+        public bool IsEditableVersion 
+            => (_itemId == 0 && _itemType == 0 && _publicationId == 0) || _version == _editableVersion;
 
         /// <summary>
         /// Gets a value indicating whether it identifies a System Wide object.
@@ -297,37 +261,19 @@ namespace Sdl.Web.Tridion.ContentManager
         /// Gets a value indicating whether it contains a version.
         /// </summary>
         /// <returns><c>true</c> if it contains a version otherwise <c>false</c>.</returns>
-        public bool IsVersionless
-        {
-            get
-            {
-                return !_version.HasValue;
-            }
-        }
+        public bool IsVersionless => !_version.HasValue;
 
         /// <summary>
         /// Gets a value indicating whether it is the System Repository.
         /// </summary>
         /// <returns><c>true</c> if it is a System Repository otherwise <c>false</c>.</returns>
-        public bool IsSystemRepository
-        {
-            get
-            {
-                return _itemId == 0 && _publicationId == 0 && ((_itemType & SystemRepositoryUri.ItemType) == _itemType);
-            }
-        }
+        public bool IsSystemRepository => _itemId == 0 && _publicationId == 0 && ((_itemType & SystemRepositoryUri.ItemType) == _itemType);
 
         /// <summary>
         /// Gets a value indicating whether it is <see cref="TcmUri.UriNull"/>.
         /// </summary>
         /// <returns><c>true</c> if the <see cref="TcmUri"/> is <see cref="TcmUri.UriNull"/>, otherwise <c>false</c>.</returns>
-        public bool IsUriNull
-        {
-            get
-            {
-                return _itemId == 0 && _itemType == 0 && _publicationId == 0;
-            }
-        }
+        public bool IsUriNull => _itemId == 0 && _itemType == 0 && _publicationId == 0;
 
         /// <summary>
         /// Gets a value indicating the Repository.
@@ -344,17 +290,11 @@ namespace Sdl.Web.Tridion.ContentManager
             {
                 return (int)_itemId;
             }
-            else
+            if (_publicationId == 0)
             {
-                if (_publicationId == 0)
-                {
-                    return expectSystemRepository ? 0 : _idNull;
-                }
-                else
-                {
-                    return (int)_publicationId;
-                }
+                return expectSystemRepository ? 0 : _idNull;
             }
+            return (int)_publicationId;
         }
 
         /// <summary>
@@ -367,30 +307,21 @@ namespace Sdl.Web.Tridion.ContentManager
             {
                 return this;
             }
-            else
-            {
-                return _publicationId == 0 ? SystemRepositoryUri : new TcmUri((int)_publicationId, ItemType.Publication);
-            }
+            return _publicationId == 0 ? SystemRepositoryUri : new TcmUri((int)_publicationId, ItemType.Publication);
         }
 
         /// <summary>
         /// Gets a value indicating a <see cref="TcmUri"/> without a version.
         /// </summary>
         /// <returns>A <see cref="TcmUri"/> without a version</returns>
-        public TcmUri GetVersionlessUri()
-        {
-            return new TcmUri((int)_itemId, _itemType, (int)_publicationId);
-        }
+        public TcmUri GetVersionlessUri() => new TcmUri((int)_itemId, _itemType, (int)_publicationId);
 
         /// <summary>
         /// Gets a value indicating whether it is <c>null</c> or <see cref="TcmUri.UriNull"/>.
         /// </summary>
         /// <param name="id">The <see cref="TcmUri"/> to check.</param>
         /// <returns><c>true</c> if the <see cref="TcmUri"/> is <c>null</c> or <see cref="TcmUri.UriNull"/> otherwise <c>false</c>.</returns>
-        public static bool IsNullOrUriNull(TcmUri id)
-        {
-            return id == null || id.IsUriNull;
-        }
+        public static bool IsNullOrUriNull(TcmUri id) => id == null || id.IsUriNull;
 
         /// <summary>
         /// Returns whether the given value is valid for this type.
@@ -401,10 +332,7 @@ namespace Sdl.Web.Tridion.ContentManager
         /// can be parsed as a <see cref="TcmUri"/> instance, which has a structure of 
         /// <c>{PublicationID-ItemID}[-ItemType][-vVersion]</c>. Otherwise, the property is <see langword="false"/>.
         /// </remarks>
-        public static bool IsValid(string uri)
-        {
-            return uri != null && _tcmUriRegEx.IsMatch(uri);
-        }
+        public static bool IsValid(string uri) => uri != null && _tcmUriRegEx.IsMatch(uri);
 
         #endregion
         
@@ -462,10 +390,7 @@ namespace Sdl.Web.Tridion.ContentManager
 
                 return (this == anotherUri);
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
         /// <summary>
@@ -481,10 +406,7 @@ namespace Sdl.Web.Tridion.ContentManager
             {
                 return objA.Equals(objB);
             }
-            else
-            {
-                return (objB == null);
-            }
+            return (objB == null);
         }
 
         #endregion
@@ -523,10 +445,7 @@ namespace Sdl.Web.Tridion.ContentManager
             {
                 return source.ToString();
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
 
         /// <summary>
@@ -605,10 +524,7 @@ namespace Sdl.Web.Tridion.ContentManager
         /// </summary>
         /// <param name="obj">The object to check for being <see langword="null"/></param>
         /// <returns><c>obj==null</c></returns>
-        private static bool IsNull(object obj)
-        {
-            return obj == null;
-        }
+        private static bool IsNull(object obj) => obj == null;
 
         /// <summary>
         /// Converts a string that represents a TCM URI into an actual <see cref="TcmUri"/> type.

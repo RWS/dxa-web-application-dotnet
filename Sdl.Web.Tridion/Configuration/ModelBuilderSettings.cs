@@ -22,6 +22,5 @@ namespace Sdl.Web.Tridion.Configuration
                 this["type"] = value;
             }
         }
-
     }
 }

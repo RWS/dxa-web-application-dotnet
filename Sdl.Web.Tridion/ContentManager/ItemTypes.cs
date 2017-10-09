@@ -22,7 +22,6 @@ namespace Sdl.Web.Tridion.ContentManager
     /// Therefore, performing bitwise ORs or ANDs is dangerous; it can only be done for item types of
     /// the same "class" (repository-local, system-wide or workflow).
     /// </remarks>
-    // TODO: this is a copy of class TcmUri from Tridion.Common (slightly modified to remove dependencies). We should just use Tridion.Common.
     public enum ItemType
     {
 #pragma warning disable 1591 // Disable missing XML comment warning
