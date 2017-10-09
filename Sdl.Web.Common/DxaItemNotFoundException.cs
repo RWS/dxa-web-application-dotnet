@@ -21,7 +21,7 @@ namespace Sdl.Web.Common
         /// </summary>
         /// <param name="itemId">The identifier of the item which is not found.</param>
         public DxaItemNotFoundException(string itemId)
-            : base(string.Format("Item '{0}' not found", itemId))
+            : base($"Item '{itemId}' not found")
         {
             ItemId = itemId;
         }
@@ -32,10 +32,9 @@ namespace Sdl.Web.Common
         /// <param name="itemId">The identifier of the item which is not found.</param>
         /// <param name="localizationId">The context Localization Identifier.</param>
         public DxaItemNotFoundException(string itemId, string localizationId)
-            : base(string.Format("Item '{0}' not found for Localization '{1}'", itemId, localizationId))
+            : base($"Item '{itemId}' not found for Localization '{localizationId}'")
         {
             ItemId = itemId;
         }
-
     }
 }

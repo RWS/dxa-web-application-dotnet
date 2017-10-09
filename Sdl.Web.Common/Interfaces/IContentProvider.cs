@@ -1,5 +1,4 @@
-﻿using System;
-using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Interfaces

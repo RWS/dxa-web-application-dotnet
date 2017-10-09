@@ -131,21 +131,9 @@ namespace Sdl.Web.Common.Configuration
         public string CmUriScheme => "tcm";
 
         /// <summary>
-        /// Gets the Localization Identifier.
-        /// </summary>
-        /// <seealso cref="Id"/>
-        [Obsolete("Deprecated in DXA 2.0. Use Id property instead.")]
-        public string LocalizationId
-        {
-            get { return Id; }
-            set { Id = value; }
-        }
-
-        /// <summary>
         /// Gets the URL pattern (Regular Expression) used to determine if a URL represents a Static Content Item.
         /// </summary>
         public string StaticContentUrlPattern { get; private set; }
-
 
         /// <summary>
         /// Gets the root folder of the binaries cache for this Localization.
@@ -157,16 +145,6 @@ namespace Sdl.Web.Common.Configuration
         /// Gets (or sets) whether the Localization is XPM Enabled (a.k.a. a "Staging" environment).
         /// </summary>
         public bool IsXpmEnabled { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether the Localization represents a "Staging" environment.
-        /// </summary>
-        [Obsolete("Deprecated in DXA 2.0. Use IsXpmEnabled property instead.")]
-        public bool IsStaging
-        {
-            get { return IsXpmEnabled; }
-            set { IsXpmEnabled = value; }
-        }
 
         /// <summary>
         /// Gets whether the Localization has an HTML Design which is published from CM.

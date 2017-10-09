@@ -22,17 +22,11 @@ namespace Sdl.Web.Tridion.Tests
             OutputJson(testLocalization);
 
             Assert.IsNotNull(testLocalization.Id, "testLocalization.Id");
-#pragma warning disable 618
-            Assert.AreEqual(testLocalization.Id, testLocalization.LocalizationId, "testLocalization.LocalizationId");
-#pragma warning restore 618
             Assert.IsNotNull(testLocalization.Path, "testLocalization.Path");
             Assert.AreEqual("en-US", testLocalization.Culture, "testLocalization.Culture");
             Assert.IsNotNull(testLocalization.CultureInfo, "testLocalization.CultureInfo");
             Assert.AreEqual("AutoParentLang", testLocalization.Language, "testLocalization.Language");
             Assert.IsTrue(testLocalization.IsXpmEnabled, "testLocalization.IsXpmEnabled");
-#pragma warning disable 618
-            Assert.AreEqual(testLocalization.IsXpmEnabled, testLocalization.IsStaging, "testLocalization.IsStaging");
-#pragma warning restore 618
             Assert.IsTrue(testLocalization.IsHtmlDesignPublished, "testLocalization.IsHtmlDesignPublished");
             Assert.IsTrue(testLocalization.IsDefaultLocalization, "testLocalization.IsDefaultLocalization");
             StringAssert.Matches(testLocalization.Version, new Regex(@"^v\d+\.\d+$"));

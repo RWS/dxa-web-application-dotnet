@@ -1,5 +1,4 @@
-﻿
-namespace Sdl.Web.Common.Interfaces
+﻿namespace Sdl.Web.Common.Interfaces
 {
     public interface IMediaHelper
     {
