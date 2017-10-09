@@ -100,23 +100,20 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
         internal static MvcHtmlString RenderEntityAttributes(EntityModel entityModel)
         {
-            string markup = String.Empty;
+            string markup = string.Empty;
 
             IDictionary<string, string> prefixMappings;
             string[] semanticTypes = ModelTypeRegistry.GetSemanticTypes(entityModel.GetType(), out prefixMappings);
             if (semanticTypes.Any())
             {
-                markup = String.Format(
-                    "prefix=\"{0}\" typeof=\"{1}\"",
-                    String.Join(" ", prefixMappings.Select(pm => String.Format("{0}: {1}", pm.Key, pm.Value))), 
-                    String.Join(" ", semanticTypes)
-                    );
+                markup =
+                    $"prefix=\"{string.Join(" ", prefixMappings.Select(pm => $"{pm.Key}: {pm.Value}"))}\" typeof=\"{string.Join(" ", semanticTypes)}\"";
             }
 
             if (WebRequestContext.IsPreview)
             {
                 string xpmMarkupAttr = RenderXpmMarkupAttribute(entityModel);
-                if (String.IsNullOrEmpty(markup))
+                if (string.IsNullOrEmpty(markup))
                 {
                     markup = xpmMarkupAttr;
                 }
@@ -142,7 +139,7 @@ namespace Sdl.Web.Mvc.Html
             if (propertyInfo == null)
             {
                 throw new DxaException(
-                    String.Format("Entity Type '{0}' does not have a property named '{1}'.", entityModel.GetType().Name, propertyName)
+                    $"Entity Type '{entityModel.GetType().Name}' does not have a property named '{propertyName}'."
                     );
             }
             return RenderPropertyAttributes(entityModel, propertyInfo, index);
@@ -157,19 +154,19 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
         internal static MvcHtmlString RenderPropertyAttributes(EntityModel entityModel, MemberInfo propertyInfo, int index = 0)
         {
-            string markup = String.Empty;
+            string markup = string.Empty;
             string propertyName = propertyInfo.Name;
 
             string[] semanticPropertyNames = ModelTypeRegistry.GetSemanticPropertyNames(propertyInfo.DeclaringType, propertyName);
             if (semanticPropertyNames != null && semanticPropertyNames.Any())
             {
-                markup = String.Format("property=\"{0}\"", String.Join(" ", semanticPropertyNames));
+                markup = $"property=\"{string.Join(" ", semanticPropertyNames)}\"";
             }
 
             if (WebRequestContext.IsPreview)
             {
                 string xpmMarkupAttr = RenderXpmMarkupAttribute(entityModel, propertyName, index);
-                if (String.IsNullOrEmpty(markup))
+                if (string.IsNullOrEmpty(markup))
                 {
                     markup = xpmMarkupAttr;
                 }
@@ -190,7 +187,7 @@ namespace Sdl.Web.Mvc.Html
         internal static MvcHtmlString RenderRegionAttributes(RegionModel regionModel)
         {
             // TODO: "Region" is not a valid semantic type!
-            string markup = String.Format("typeof=\"{0}\" resource=\"{1}\"", "Region", regionModel.Name);
+            string markup = $"typeof=\"{"Region"}\" resource=\"{regionModel.Name}\"";
 
             if (WebRequestContext.IsPreview)
             {
@@ -199,7 +196,6 @@ namespace Sdl.Web.Mvc.Html
 
             return new MvcHtmlString(markup);
         }
-
 
         /// <summary>
         /// Renders a temporary HTML attribute containing the XPM markup for a given View Model or property.
@@ -212,9 +208,9 @@ namespace Sdl.Web.Mvc.Html
             {
                 // Region/Entity markup
                 xpmMarkup = viewModel.GetXpmMarkup(WebRequestContext.Localization);
-                if (String.IsNullOrEmpty(xpmMarkup))
+                if (string.IsNullOrEmpty(xpmMarkup))
                 {
-                    return String.Empty;
+                    return string.Empty;
                 }
             }
             else
@@ -224,19 +220,18 @@ namespace Sdl.Web.Mvc.Html
                 string xpath;
                 if (entityModel.XpmPropertyMetadata != null && entityModel.XpmPropertyMetadata.TryGetValue(propertyName, out xpath))
                 {
-                    string predicate = xpath.EndsWith("]") ? String.Empty : String.Format("[{0}]", index + 1);
-                    xpmMarkup = String.Format(XpmFieldMarkup, HttpUtility.HtmlAttributeEncode(xpath + predicate));
+                    string predicate = xpath.EndsWith("]") ? string.Empty : $"[{index + 1}]";
+                    xpmMarkup = string.Format(XpmFieldMarkup, HttpUtility.HtmlAttributeEncode(xpath + predicate));
                 }
                 else
                 {
-                    return String.Empty;
+                    return string.Empty;
                 }
             }
 
             // Instead of jamming the entire XPM markup in an HTML attribute, we only put in a reference to the XPM markup.
             string xpmMarkupRef = XpmMarkupMap.Current.AddXpmMarkup(xpmMarkup);
-
-            return String.Format("{0}=\"{1}\"", XpmMarkupHtmlAttrName, xpmMarkupRef);
+            return $"{XpmMarkupHtmlAttrName}=\"{xpmMarkupRef}\"";
         }
 
         /// <summary>
@@ -250,7 +245,7 @@ namespace Sdl.Web.Mvc.Html
             HtmlNode.ElementsFlags.Remove("option");
 
             HtmlDocument htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(String.Format("<html>{0}</html>", htmlFragment));
+            htmlDoc.LoadHtml($"<html>{htmlFragment}</html>");
             HtmlNode rootElement = htmlDoc.DocumentNode.FirstChild;
             HtmlNodeCollection elementsWithXpmMarkup = rootElement.SelectNodes(XpmMarkupXPath);
             if (elementsWithXpmMarkup != null)
@@ -261,7 +256,7 @@ namespace Sdl.Web.Mvc.Html
                     string xpmMarkupRef = ReadAndRemoveAttribute(elementWithXpmMarkup, XpmMarkupHtmlAttrName);
                     string xpmMarkup = xpmMarkupMap[xpmMarkupRef];
 
-                    if (String.IsNullOrEmpty(xpmMarkup))
+                    if (string.IsNullOrEmpty(xpmMarkup))
                     {
                         continue;
                     }
@@ -273,7 +268,6 @@ namespace Sdl.Web.Mvc.Html
             }
             return rootElement.InnerHtml;
         }
-
 
         private static string ReadAndRemoveAttribute(HtmlNode htmlElement, string attributeName)
         {

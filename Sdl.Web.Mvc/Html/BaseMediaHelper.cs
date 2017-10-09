@@ -229,6 +229,5 @@ namespace Sdl.Web.Mvc.Html
             url = url.Substring(0, url.LastIndexOf(".", StringComparison.Ordinal));
             return String.Format(ImageResizeUrlFormat, url, w, h, extension);
         }
-
     }
 }

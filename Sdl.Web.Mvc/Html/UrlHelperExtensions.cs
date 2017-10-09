@@ -1,10 +1,6 @@
-﻿using System;
-using System.Linq;
-using System.Web.Mvc;
-using Sdl.Web.Common;
+﻿using System.Web.Mvc;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
-using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Html

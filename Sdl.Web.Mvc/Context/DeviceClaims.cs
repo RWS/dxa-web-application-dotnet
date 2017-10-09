@@ -12,64 +12,28 @@
         /// Gets the name of the "aspect" which the strongly typed claims class represents.
         /// </summary>
         /// <returns>The name of the aspect.</returns>
-        protected internal override string GetAspectName()
-        {
-            return "device";
-        }
+        protected internal override string GetAspectName() => "device";
 
-        public int DisplayHeight
-        {
-            get { return GetClaimValue<int>("displayHeight"); }
-        }
+        public int DisplayHeight => GetClaimValue<int>("displayHeight");
 
-        public int DisplayWidth
-        {
-            get { return GetClaimValue<int>("displayWidth"); }
-        }
+        public int DisplayWidth => GetClaimValue<int>("displayWidth");
 
-        public bool IsMobile
-        {
-            get { return GetClaimValue<bool>("mobile"); }
-        }
+        public bool IsMobile => GetClaimValue<bool>("mobile");
 
-        public string Model
-        {
-            get { return GetClaimValue<string>("model"); }
-        }
+        public string Model => GetClaimValue<string>("model");
 
-        public int PixelDensity
-        {
-            get { return GetClaimValue<int>("pixelDensity"); }
-        }
+        public int PixelDensity => GetClaimValue<int>("pixelDensity");
 
-        public double PixelRatio
-        {
-            get { return GetClaimValue<double>("pixelRatio"); }
-        }
+        public double PixelRatio => GetClaimValue<double>("pixelRatio");
 
-        public bool IsRobot
-        {
-            get { return GetClaimValue<bool>("robot"); }
-        }
+        public bool IsRobot => GetClaimValue<bool>("robot");
 
-        public bool IsTablet
-        {
-            get { return GetClaimValue<bool>("tablet"); }
-        }
+        public bool IsTablet => GetClaimValue<bool>("tablet");
 
-        public string Variant
-        {
-            get { return GetClaimValue<string>("variant"); }
-        }
+        public string Variant => GetClaimValue<string>("variant");
 
-        public string Vendor
-        {
-            get { return GetClaimValue<string>("vendor"); }
-        }
+        public string Vendor => GetClaimValue<string>("vendor");
 
-        public string Version
-        {
-            get { return GetClaimValue<string>("version"); }
-        }
+        public string Version => GetClaimValue<string>("version");
     }
 }

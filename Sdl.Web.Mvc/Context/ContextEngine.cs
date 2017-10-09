@@ -59,7 +59,7 @@ namespace Sdl.Web.Mvc.Context
 
             if (claimValue is string)
             {
-                return string.Format("\"{0}\"", claimValue);
+                return $"\"{claimValue}\"";
             }
 
             if (claimValue is IEnumerable)
@@ -233,7 +233,7 @@ namespace Sdl.Web.Mvc.Context
             object claimValue;
             if (!_claims.TryGetValue(name, out claimValue))
             {
-                throw new DxaException(string.Format("Context Claim '{0}' not found.", name));
+                throw new DxaException($"Context Claim '{name}' not found.");
             }
 
             return ContextClaims.CastValue<T>(claimValue);

@@ -1,9 +1,7 @@
-﻿using System.Net;
-using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common.Configuration;
 using Sdl.Web.Mvc.Context;
 using System;
 using System.Web;
-using Sdl.Web.Common;
 using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Mvc.Configuration
@@ -13,7 +11,7 @@ namespace Sdl.Web.Mvc.Configuration
     /// </summary>
     public class WebRequestContext
     {
-        private const int _maxWidth = 1024;
+        private const int MaxWidth = 1024;
 
         /// <summary>
         /// The current request localization
@@ -51,7 +49,7 @@ namespace Sdl.Web.Mvc.Configuration
                 //Pixel Ratio can be non-integer value (if zoom is applied to browser) - so we use a min of 1, and otherwise round when calculating max width
                 double pixelRatio = ContextEngine.GetClaims<DeviceClaims>().PixelRatio;
                 int displayWidth = IsContextCookiePresent ? ContextEngine.GetClaims<BrowserClaims>().DisplayWidth : 1024;
-                return (int?)GetFromContextStore("MaxMediaWidth") ?? (int)AddToContextStore("MaxMediaWidth", Convert.ToInt32(Math.Max(1.0, pixelRatio) * Math.Min(displayWidth, _maxWidth)));
+                return (int?)GetFromContextStore("MaxMediaWidth") ?? (int)AddToContextStore("MaxMediaWidth", Convert.ToInt32(Math.Max(1.0, pixelRatio) * Math.Min(displayWidth, MaxWidth)));
             }
         }
 
@@ -204,6 +202,5 @@ namespace Sdl.Web.Mvc.Configuration
                 return (httpContext != null) && (httpContext.Request.Cookies["context"] != null);
             }
         }
-
     }
 }

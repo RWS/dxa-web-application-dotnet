@@ -12,98 +12,40 @@
         /// Gets the name of the "aspect" which the strongly typed claims class represents.
         /// </summary>
         /// <returns>The name of the aspect.</returns>
-        protected internal override string GetAspectName()
-        {
-            return "browser";
-        }
+        protected internal override string GetAspectName() => "browser";
 
-        public bool CookieSupport
-        {
-            get
-            {
-                // BUG: Returns false on desktop FF, IE, Safari
-                return GetClaimValue<bool>("cookieSupport");
-            }
-        }
+        public bool CookieSupport => GetClaimValue<bool>("cookieSupport");
 
-        public string CssVersion
-        {
-            get { return GetClaimValue<string>("cssVersion"); }
-        }
+        public string CssVersion => GetClaimValue<string>("cssVersion");
 
-        public int DisplayColorDepth
-        {
-            get { return GetClaimValue<int>("displayColorDepth"); }
-        }
+        public int DisplayColorDepth => GetClaimValue<int>("displayColorDepth");
 
-        public int DisplayHeight
-        {
-            get { return GetClaimValue<int>("displayHeight"); }
-        }
+        public int DisplayHeight => GetClaimValue<int>("displayHeight");
 
-        public int DisplayWidth 
-        { 
-            get { return GetClaimValue<int>("displayWidth"); }
-        }
+        public int DisplayWidth => GetClaimValue<int>("displayWidth");
 
-        public string[] ImageFormatSupport
-        {
-            get { return GetClaimValues<string>("imageFormatSupport"); }
-        }
+        public string[] ImageFormatSupport => GetClaimValues<string>("imageFormatSupport");
 
-        public string[] InputDevices
-        {
-            get { return GetClaimValues<string>("inputDevices"); }
-        }
+        public string[] InputDevices => GetClaimValues<string>("inputDevices");
 
-        public string[] InputModeSupport
-        {
-            get { return GetClaimValues<string>("inputModeSupport"); }
-        }
+        public string[] InputModeSupport => GetClaimValues<string>("inputModeSupport");
 
-        public string JsVersion
-        {
-            get { return GetClaimValue<string>("jsVersion"); }
-        }
+        public string JsVersion => GetClaimValue<string>("jsVersion");
 
-        public string[] MarkupSupport
-        {
-            get { return GetClaimValues<string>("markupSupport"); }
-        }
+        public string[] MarkupSupport => GetClaimValues<string>("markupSupport");
 
-        public string Model
-        {
-            get { return GetClaimValue<string>("model"); }
-        }
+        public string Model => GetClaimValue<string>("model");
 
-        public string PreferredHtmlContentType
-        {
-            get { return GetClaimValue<string>("preferredHtmlContentType"); }
-        }
+        public string PreferredHtmlContentType => GetClaimValue<string>("preferredHtmlContentType");
 
-        public string[] ScriptSupport
-        {
-            get { return GetClaimValues<string>("scriptSupport"); }
-        }
+        public string[] ScriptSupport => GetClaimValues<string>("scriptSupport");
 
-        public string[] StylesheetSupport
-        {
-            get { return GetClaimValues<string>("stylesheetSupport"); }
-        }
+        public string[] StylesheetSupport => GetClaimValues<string>("stylesheetSupport");
 
-        public string Variant
-        {
-            get { return GetClaimValue<string>("variant"); }
-        }
+        public string Variant => GetClaimValue<string>("variant");
 
-        public string Vendor
-        {
-            get { return GetClaimValue<string>("vendor"); }
-        }
+        public string Vendor => GetClaimValue<string>("vendor");
 
-        public string Version
-        {
-            get { return GetClaimValue<string>("version"); }
-        }
+        public string Version => GetClaimValue<string>("version");
     }
 }

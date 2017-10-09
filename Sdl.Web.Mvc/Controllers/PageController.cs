@@ -145,7 +145,6 @@ namespace Sdl.Web.Mvc.Controllers
             }
         }
         
-
         public ActionResult ServerError()
         {
             using (new Tracer())
@@ -207,6 +206,5 @@ namespace Sdl.Web.Mvc.Controllers
                 }
             }
         }
-
     }
 }

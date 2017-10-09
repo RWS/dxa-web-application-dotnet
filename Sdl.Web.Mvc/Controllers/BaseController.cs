@@ -6,7 +6,6 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Mvc.Html;
 
 namespace Sdl.Web.Mvc.Controllers
 {
@@ -25,14 +24,7 @@ namespace Sdl.Web.Mvc.Controllers
         /// </remarks>
         protected IContentProvider ContentProvider
         {
-            get
-            {
-                if (_contentProvider == null)
-                {
-                    _contentProvider = SiteConfiguration.ContentProvider;
-                }
-                return _contentProvider;
-            }
+            get { return _contentProvider ?? (_contentProvider = SiteConfiguration.ContentProvider); }
             set
             {
                 // To support (deprecated) Dependency Injection
