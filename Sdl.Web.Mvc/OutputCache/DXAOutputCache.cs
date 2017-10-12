@@ -167,7 +167,7 @@ namespace Sdl.Web.Mvc.OutputCache
         private static string CalcCacheKey(ActionExecutingContext ctx)
         {
             var sb = new StringBuilder();
-            sb.Append($"{ctx.ActionDescriptor.UniqueId}-{ctx.HttpContext.Request.QueryString}-{ctx.HttpContext.Request.UserAgent}");
+            sb.Append($"{ctx.ActionDescriptor.UniqueId}-{ctx.HttpContext.Request.Url}-{ctx.HttpContext.Request.UserAgent}");
             foreach (var p in ctx.ActionParameters.Where(p => p.Value != null))
             {
                 sb.Append($"{p.Key.GetHashCode()}:{p.Value.GetHashCode()}-");
