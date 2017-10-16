@@ -12,3 +12,4 @@ Site/Areas/
 *.vspx
 *.psess
 *.nupkg
+_ReSharper.Caches/
