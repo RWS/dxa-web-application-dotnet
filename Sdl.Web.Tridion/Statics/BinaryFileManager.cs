@@ -8,12 +8,13 @@ using System.Text.RegularExpressions;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Mvc.Html;
 using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.Meta;
 using Image = System.Drawing.Image; // TODO: Shouldn't use System.Drawing namespace in a web application.
 
 namespace Sdl.Web.Tridion.Statics
-{
+{   
     /// <summary>
     /// Ensures a Binary file is cached on the file-system from the Tridion Broker DB
     /// </summary>
@@ -152,7 +153,8 @@ namespace Sdl.Web.Tridion.Statics
                     byte[] buffer = binary;
                     if (dimensions != null && (dimensions.Width > 0 || dimensions.Height > 0))
                     {
-                        buffer = ResizeImage(buffer, dimensions, GetImageFormat(physicalPath));
+                        ImageFormat imgFormat = GetImageFormat(physicalPath);
+                        if(imgFormat != null) buffer = ResizeImage(buffer, dimensions, imgFormat);
                     }
 
                     lock (NamedLocker.GetLock(physicalPath))
@@ -283,6 +285,7 @@ namespace Sdl.Web.Tridion.Statics
 
         private static ImageFormat GetImageFormat(string path)
         {
+            if (string.IsNullOrEmpty(path)) return null;
             switch (Path.GetExtension(path).ToLower())
             {
                 case ".jpg":
@@ -290,10 +293,12 @@ namespace Sdl.Web.Tridion.Statics
                     return ImageFormat.Jpeg;
                 case ".gif":
                     return ImageFormat.Gif;
-                //case ".png":
-                // use png as default
-                default:
+                case ".png":
                     return ImageFormat.Png;
+                case ".bmp":
+                    return ImageFormat.Bmp;
+                default:
+                    return null;
             }
         }
 

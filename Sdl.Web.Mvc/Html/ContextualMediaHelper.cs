@@ -7,6 +7,7 @@ using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
 using Sdl.Web.Mvc.Configuration;
+using System.IO;
 
 namespace Sdl.Web.Mvc.Html
 {
@@ -52,7 +53,9 @@ namespace Sdl.Web.Mvc.Html
         }
        
         public override string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0)
-        {           
+        {
+            string extension = Path.GetExtension(url);
+            if (!IsSupported(extension)) return url;
             int width = GetResponsiveWidth(widthFactor, containerSize);
             //Round the width to the nearest set limit point - important as we do not want 
             //to swamp the cache with lots of different sized versions of the same image
@@ -66,7 +69,7 @@ namespace Sdl.Web.Mvc.Html
             }
 
             //Height is calculated from the aspect ratio (0 means preserve aspect ratio)
-            string height = (aspect == 0) ? String.Empty : ((int)Math.Ceiling(width / aspect)).ToString(CultureInfo.InvariantCulture);
+            string height = (aspect == 0) ? string.Empty : ((int)Math.Ceiling(width / aspect)).ToString(CultureInfo.InvariantCulture);
             
             //Build the URL
             url = SiteConfiguration.MakeFullUrl(url, WebRequestContext.Localization);
@@ -77,7 +80,7 @@ namespace Sdl.Web.Mvc.Html
             string prefix = url.StartsWith("https") ? "https/" : string.Empty;
             // should encode the url incase it contains special chars in a query string or something
             url = HttpUtility.UrlPathEncode(url.Substring(url.IndexOf("://", StringComparison.Ordinal) + 3));
-            return String.Format(ImageResizeUrlFormat, _cidBaseUrl, width, height, prefix, url);
+            return string.Format(ImageResizeUrlFormat, _cidBaseUrl, width, height, prefix, url);
         }
     }
 }
