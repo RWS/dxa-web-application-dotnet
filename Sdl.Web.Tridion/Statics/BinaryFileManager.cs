@@ -82,7 +82,7 @@ namespace Sdl.Web.Tridion.Statics
                 urlPath = StripDimensions(urlPath, out dimensions);
                 string publicationUri = localization.GetCmUri();
 
-                if (File.Exists(localFilePath))
+                if (!localization.IsXpmEnabled && File.Exists(localFilePath))
                 {
                     DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
                         urlPath,
@@ -92,14 +92,11 @@ namespace Sdl.Web.Tridion.Statics
 
                     if (localization.LastRefresh.CompareTo(lastPublishedDate) < 0)
                     {
-                        if (!localization.IsXpmEnabled)
-                        {
-                            //File has been modified since last application start but we don't care
-                            Log.Debug(
-                                "Binary with URL '{0}' is modified, but only since last application restart, so no action required",
-                                urlPath);
-                            return localFilePath;
-                        }
+                        //File has been modified since last application start but we don't care
+                        Log.Debug(
+                            "Binary with URL '{0}' is modified, but only since last application restart, so no action required",
+                            urlPath);
+                        return localFilePath;
                     }
                     FileInfo fi = new FileInfo(localFilePath);
                     if (fi.Length > 0)
