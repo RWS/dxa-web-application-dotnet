@@ -86,7 +86,7 @@ namespace Sdl.Web.Tridion.Statics
                 urlPath = StripDimensions(urlPath, out dimensions);
                 int publicationId = Convert.ToInt32(localization.LocalizationId);
 
-                if (File.Exists(localFilePath))
+                if (!localization.IsStaging && File.Exists(localFilePath))
                 {
                     DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
                         urlPath,
