@@ -103,7 +103,7 @@
     -->
     <Target Name="CreateDocs" Condition="'$(SHFBROOT)' != ''">
         <Message Importance="high" Text="Creating API documentation..."/>
-        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Documentation\Sdl.Web.Documentation.shfbproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true"/>
+        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Documentation\Sdl.Web.Documentation.shfbproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;Version=$(PackageVersion)" StopOnFirstFailure="true"/>
     </Target>
     <!-- ==================================================================================  -->
     <Target Name="DeployOutput">

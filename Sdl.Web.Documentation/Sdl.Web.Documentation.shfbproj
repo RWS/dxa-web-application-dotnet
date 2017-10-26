@@ -15,8 +15,9 @@
     <!-- SHFB properties -->
     <FrameworkVersion>.NET Framework 4.5.2</FrameworkVersion>
     <OutputPath>.\Help\</OutputPath>
-    <HtmlHelpName>Sdl.Web.Documentation</HtmlHelpName>
+    <HtmlHelpName>DxaApi</HtmlHelpName>
     <Language>en-US</Language>
+    <Version>1.0.0.0</Version>
     <TransformComponentArguments>
       <Argument Key="logoFile" Value="Help.png" xmlns="" />
       <Argument Key="logoHeight" Value="" xmlns="" />
@@ -33,25 +34,32 @@
     <KeepLogFile>True</KeepLogFile>
     <DisableCodeBlockComponent>False</DisableCodeBlockComponent>
     <CleanIntermediates>True</CleanIntermediates>
-    <HelpFileVersion>1.0.0.0</HelpFileVersion>
+    <HelpFileVersion>$(Version)</HelpFileVersion>
     <MaximumGroupParts>2</MaximumGroupParts>
-    <NamespaceGrouping>False</NamespaceGrouping>
+    <NamespaceGrouping>True</NamespaceGrouping>
     <SyntaxFilters>C#, ASP.NET</SyntaxFilters>
     <SdkLinkTarget>Blank</SdkLinkTarget>
     <RootNamespaceContainer>False</RootNamespaceContainer>
     <PresentationStyle>VS2013</PresentationStyle>
     <Preliminary>False</Preliminary>
     <NamingMethod>Guid</NamingMethod>
-    <HelpTitle>Dxa Documentation</HelpTitle>
+    <HelpTitle>DXA API Documentation</HelpTitle>
     <ContentPlacement>AboveNamespaces</ContentPlacement>
-    <MissingTags>Summary, Parameter, Returns, AutoDocumentCtors, Namespace, TypeParameter</MissingTags>
+    <MissingTags>AutoDocumentCtors</MissingTags>
     <DocumentationSources>
-      <DocumentationSource sourceFile="..\Sdl.Web.Common\Sdl.Web.Common.csproj" />
-      <DocumentationSource sourceFile="..\Sdl.Web.ModelService\Sdl.Web.ModelService.csproj" />
-      <DocumentationSource sourceFile="..\Sdl.Web.Mvc\Sdl.Web.Mvc.csproj" />
-      <DocumentationSource sourceFile="..\Sdl.Web.Tridion\Sdl.Web.Tridion.csproj" />
+      <DocumentationSource sourceFile="..\Sdl.Web.Common\bin\$(Configuration)\Sdl.Web.Common.dll" />
+      <DocumentationSource sourceFile="..\Sdl.Web.Common\bin\$(Configuration)\Sdl.Web.Common.xml" />
+      <DocumentationSource sourceFile="..\Sdl.Web.ModelService\bin\$(Configuration)\Sdl.Web.ModelService.dll" />
+      <DocumentationSource sourceFile="..\Sdl.Web.ModelService\bin\$(Configuration)\Sdl.Web.ModelService.xml" />
+      <DocumentationSource sourceFile="..\Sdl.Web.Mvc\bin\$(Configuration)\Sdl.Web.Mvc.dll" />
+      <DocumentationSource sourceFile="..\Sdl.Web.Mvc\bin\$(Configuration)\Sdl.Web.Mvc.xml" />
+      <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Web.Tridion.dll" />
+      <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Web.Tridion.xml" />
     </DocumentationSources>
     <VisibleItems>InheritedMembers, InheritedFrameworkMembers</VisibleItems>
+    <ProjectSummary>
+    </ProjectSummary>
+    <CopyrightText>Copyright &amp;#169%3b 2014-2017 SDL Group</CopyrightText>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
 			 the build.  The others are optional common platform types that may appear. -->

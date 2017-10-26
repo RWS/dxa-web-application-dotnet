@@ -37,6 +37,7 @@
     <WarningLevel>4</WarningLevel>
     <DebugSymbols>true</DebugSymbols>
     <NoWarn>1591,1574,1570,1572,1573</NoWarn>
+    <DocumentationFile>bin\Release\Sdl.Web.Tridion.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
