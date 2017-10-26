@@ -30,6 +30,7 @@
         <CallTarget Targets="PrepareBuild"/>
         <CallTarget Targets="RunBuild"/>
         <CallTarget Targets="Test"/>
+        <CallTarget Targets="CreateDocs"/>
         <CallTarget Targets="CreatePackages"/>
         <CallTarget Condition="'$(NuGetRepositoryUrl)' != ''" Targets="PublishPackages"/>
         <CallTarget Condition="'$(NuGetRepositoryUrl)' != ''" Targets="UpdatePackageRefs"/>
@@ -90,6 +91,19 @@
              is used in the nupkg filename. We could send this to a local symbol server but currently there are non
              available. -->
         <Exec Command="$(NuGet) push Sdl.Dxa.Framework.Web8.$(PackageVersion).symbols.nupkg -Source $(NugetSymbolServerUrl)" Condition="'$(PublishSymbols)' == 'true' AND '$(NugetSymbolServerUrl)' != ''" WorkingDirectory="$(DxaFrameworkPackageDirectory)"/>
+    </Target>
+    <!-- ==================================================================================  -->
+    <!-- Sandcastle Help File Builder (SHFB)
+         Notes:
+            1) Install sandcastle from: https://github.com/EWSoftware/SHFB/releases
+            2) Setup environment variables:
+                    set DXROOT=c:\<install location>\Sandcastle
+                    set SHFBROOT=c:\<install location>\Sandcastle Help File Builder
+                    set LANGUAGE="%SHFBROOT%\SandcastleBuilderGUI.exe"
+    -->
+    <Target Name="CreateDocs" Condition="'$(SHFBROOT)' != ''">
+        <Message Importance="high" Text="Creating API documentation..."/>
+        <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Documentation\Sdl.Web.Documentation.shfbproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true"/>
     </Target>
     <!-- ==================================================================================  -->
     <Target Name="DeployOutput">
