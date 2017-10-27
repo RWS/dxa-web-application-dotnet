@@ -101,7 +101,7 @@
                     set SHFBROOT=c:\<install location>\Sandcastle Help File Builder
                     set LANGUAGE="%SHFBROOT%\SandcastleBuilderGUI.exe"
     -->
-    <Target Name="CreateDocs" Condition="'$(SHFBROOT)' != ''">
+    <Target Name="CreateDocs">
         <Message Importance="high" Text="Creating API documentation..."/>
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Documentation\Sdl.Web.Documentation.shfbproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;Version=$(PackageVersion)" StopOnFirstFailure="true"/>
     </Target>
