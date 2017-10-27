@@ -11,7 +11,7 @@
     <!-- AssemblyName, Name, and RootNamespace are not used by SHFB but Visual Studio adds them anyway -->
     <AssemblyName>Sdl.Web.Documentation</AssemblyName>
     <RootNamespace>Sdl.Web.Documentation</RootNamespace>
-    <Name>Sdl.Web.Documentation</Name>
+    <Name>DxaApi</Name>
     <!-- SHFB properties -->
     <FrameworkVersion>.NET Framework 4.5.2</FrameworkVersion>
     <OutputPath>.\Help\</OutputPath>
@@ -29,7 +29,7 @@
     </TransformComponentArguments>
     <SaveComponentCacheCapacity>0</SaveComponentCacheCapacity>
     <BuildAssemblerVerbosity>OnlyErrors</BuildAssemblerVerbosity>
-    <HelpFileFormat>HtmlHelp1, Website</HelpFileFormat>
+    <HelpFileFormat>HtmlHelp1</HelpFileFormat>
     <IndentHtml>False</IndentHtml>
     <KeepLogFile>False</KeepLogFile>
     <DisableCodeBlockComponent>False</DisableCodeBlockComponent>
