@@ -190,6 +190,9 @@ namespace Sdl.Web.Mvc.Configuration
         protected static ScreenWidth CalculateScreenWidth()
         {
             int width = IsContextCookiePresent ? ContextEngine.GetClaims<BrowserClaims>().DisplayWidth : 1024;
+            // zero width is not valid and probably means the context engine was not correctly initialized so
+            // again default to 1024
+            if (width == 0) width = 1024;
             if (width < SiteConfiguration.MediaHelper.SmallScreenBreakpoint)
             {
                 return ScreenWidth.ExtraSmall;
