@@ -77,15 +77,20 @@ namespace Sdl.Web.Tridion.Mapping
         {        
             using (new Tracer(urlPath, localization, addIncludes))
             {
-                if (urlPath == null)
+                if (urlPath != null)
+                {
+                    if (!urlPath.StartsWith("/"))
+                    {
+                        urlPath = "/" + urlPath;
+                    }
+
+                    urlPath = HttpUtility.UrlDecode(urlPath);
+                }
+                else
                 {
                     urlPath = "/";
                 }
-                else if (!urlPath.StartsWith("/"))
-                {
-                    urlPath = "/" + urlPath;
-                }
-
+              
                 IPage page = GetPage(urlPath, localization);
                 if (page == null && !urlPath.EndsWith("/"))
                 {
