@@ -60,23 +60,7 @@ namespace Sdl.Web.Common.Models
             {
                 return string.Empty;
             }
-
-            string cmsUrl;
-            object cmsUrlValue;
-            if (XpmMetadata.TryGetValue("CmsUrl", out cmsUrlValue))
-            {
-                cmsUrl = (string) cmsUrlValue;
-            }
-            else
-            {
-                cmsUrl = localization.GetConfigValue("core.cmsurl");
-            }
-            if (cmsUrl.EndsWith("/"))
-            {
-                // remove trailing slash from cmsUrl if present
-                cmsUrl = cmsUrl.Remove(cmsUrl.Length - 1);
-            }
-
+            string cmsUrl = (localization.GetConfigValue("core.cmsurl") ?? string.Empty).TrimEnd('/');
             return string.Format(
                 _xpmPageSettingsMarkup,
                 XpmMetadata["PageID"],
