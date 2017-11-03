@@ -81,14 +81,18 @@ namespace Sdl.Web.Mvc.Controllers
         {
             using (new Tracer(itemId, localizationId, defaultItemId, defaultPath))
             {
-                string url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}-64", localizationId, itemId));
-                if (url == null && defaultItemId != null)
+                string url = null;
+                if (!string.IsNullOrEmpty(itemId))
                 {
-                    url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}", localizationId, defaultItemId));
+                    url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}-64", localizationId, itemId));
+                    if (url == null && defaultItemId != null)
+                    {
+                        url = SiteConfiguration.LinkResolver.ResolveLink(string.Format("tcm:{0}-{1}", localizationId, defaultItemId));
+                    }                  
                 }
                 if (url == null)
                 {
-                    url = String.IsNullOrEmpty(defaultPath) ? "/" : defaultPath;
+                    url = string.IsNullOrEmpty(defaultPath) ? "/" : defaultPath;
                 }
                 return Redirect(url);
             }
