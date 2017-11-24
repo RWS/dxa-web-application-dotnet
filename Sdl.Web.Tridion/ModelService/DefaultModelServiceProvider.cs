@@ -12,6 +12,10 @@ using Sdl.Web.ModelService.Request;
 
 namespace Sdl.Web.Tridion.ModelService
 {   
+    /// <summary>
+    /// Model Service Provider uses the DXA model service to request page, entity and navigation data objects
+    /// that are used to build data model objects using the data model builder pipeline.
+    /// </summary>
     public class DefaultModelServiceProvider : IModelServiceProvider
     {
         private const string ModelServiceName = "DXA Model Service";
@@ -53,6 +57,9 @@ namespace Sdl.Web.Tridion.ModelService
             Log.Debug($"{ModelServiceName} found at URL '{_modelServiceClient.ModelServiceBaseUri}'");            
         }
 
+        /// <summary>
+        /// Get page model data object.
+        /// </summary>
         public PageModelData GetPageModelData(string urlPath, Localization localization, bool addIncludes)
         {
             try
@@ -82,6 +89,9 @@ namespace Sdl.Web.Tridion.ModelService
             }
         }
 
+        /// <summary>
+        /// Get entity model data object.
+        /// </summary>
         public EntityModelData GetEntityModelData(string entityId, Localization localization)
         {
             try
@@ -110,6 +120,9 @@ namespace Sdl.Web.Tridion.ModelService
             }
         }
 
+        /// <summary>
+        /// Get site map item.
+        /// </summary>
         public TaxonomyNode GetSitemapItem(Localization localization)
         {
             try
@@ -133,6 +146,9 @@ namespace Sdl.Web.Tridion.ModelService
             }
         }
 
+        /// <summary>
+        /// Get child site map items.
+        /// </summary>
         public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, Localization localization,
             bool includeAncestors, int descendantLevels)
         {

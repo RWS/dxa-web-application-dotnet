@@ -4,6 +4,10 @@ using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Logging
 {
+    /// <summary>
+    /// Log class used by framework to generate log information. This class will use whatever ILogger implementation
+    /// is provided through unity and default to using the Log4Net implementation if no logger is configured.
+    /// </summary>
     public static class Log
     {
         private static ILogger _logger;
@@ -19,11 +23,7 @@ namespace Sdl.Web.Common.Logging
                 }
 
                 // No Logger configured/initialized yet
-                if (_logger == null)
-                {
-                    _logger = new Log4NetLogger();
-                }
-                return _logger;
+                return _logger ?? (_logger = new Log4NetLogger());
             }
             set
             {
@@ -31,11 +31,9 @@ namespace Sdl.Web.Common.Logging
             }
         }
 
-        public static bool IsDebugEnabled
-            => Logger.IsDebugEnabled;
+        public static bool IsDebugEnabled => Logger.IsDebugEnabled;
 
-        public static bool IsTraceEnabled
-            => Logger.IsTracingEnabled;
+        public static bool IsTraceEnabled => Logger.IsTracingEnabled;
 
         public static void Trace(string messageFormat, params object[] parameters) => Logger.Trace(messageFormat, parameters);
 

@@ -4,7 +4,9 @@ using System.Web.Configuration;
 namespace Sdl.Web.Common
 {
     /// <summary>
-    /// Constants for the names of Cache Regions used by the DXA Framework.
+    /// Constants for the names of Cache Regions used by the DXA Framework. Cache regions allow caching of
+    /// specific items to be grouped under a particular cache region. Cache regions can then be configured
+    /// to use different caches.
     /// </summary>
     public static class CacheRegions
     {
@@ -21,6 +23,14 @@ namespace Sdl.Web.Common
         public const string ModelService = "ModelService";
         public const string RenderedOutput = "RenderedOutput";
 
+        /// <summary>
+        /// Returns true if view model caching is enabled in the web applications configuration.
+        /// <example>
+        /// <appSettings>
+        ///      <add key="viewModel-caching" value="true"/>
+        /// </appSettings>
+        /// </example>
+        /// </summary>
         public static bool IsViewModelCachingEnabled { get; private set; }
 
         static CacheRegions()

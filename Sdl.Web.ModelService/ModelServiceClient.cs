@@ -88,11 +88,17 @@ namespace Sdl.Web.ModelService
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         };
 
+        /// <summary>
+        /// Perform Model Service request
+        /// </summary>
         public ModelServiceResponse<string> PerformRequest(IModelServiceRequest request)
         {
             return PerformRequest<string>(request);
         }
 
+        /// <summary>
+        /// Perform Model Service request
+        /// </summary>
         public ModelServiceResponse<T> PerformRequest<T>(IModelServiceRequest request)
         {
             Uri requestUri = request.BuildRequestUri(this);

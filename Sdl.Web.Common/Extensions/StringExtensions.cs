@@ -8,10 +8,19 @@ namespace Sdl.Web.Common.Extensions
         // Regex to identify a valid cm identifier, currently only working with tcm namespace
         private static readonly Regex CmUriRegEx = new Regex(@"^tcm:\d+-\d+(-\d+){0,2}$", RegexOptions.Compiled);
 
+        /// <summary>
+        /// Remove spaces from string.
+        /// </summary>
         public static string RemoveSpaces(this string value) => value.Replace(" ", string.Empty);
 
+        /// <summary>
+        /// Converts string to path friendly string.
+        /// </summary>
         public static string ToCombinePath(this string value, bool prefixWithSlash = false) => (prefixWithSlash ? "\\" : "") + value.Replace('/', '\\').Trim('\\');
 
+        /// <summary>
+        /// Returns true if a string contains N or more characters 'c'.
+        /// </summary>
         public static bool HasNOrMoreOccurancesOfChar(this string str, int n, char c)
         {
             int count = 0;
@@ -25,6 +34,9 @@ namespace Sdl.Web.Common.Extensions
             return count >= n;
         }
 
+        /// <summary>
+        /// Returns a string converted to camel case.
+        /// </summary>
         public static string ToCamelCase(this string str) => str.Substring(0, 1).ToLower() + str.Substring(1);
 
         /// <summary>

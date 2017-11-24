@@ -60,6 +60,14 @@
     <ProjectSummary>
     </ProjectSummary>
     <CopyrightText>Copyright &amp;#169%3b 2014-2017 SDL Group</CopyrightText>
+    <ApiFilter>
+      <Filter entryType="Namespace" fullName="Sdl.Web.Common" isExposed="True">
+  <Filter entryType="Class" fullName="Sdl.Web.Common.Constants" filterName="Constants" isExposed="False" />
+</Filter>
+<Filter entryType="Namespace" fullName="Sdl.Web.Common.Extensions" isExposed="False" />
+<Filter entryType="Namespace" fullName="Sdl.Web.Common.Mapping" isExposed="True">
+  <Filter entryType="Class" fullName="Sdl.Web.Common.Mapping.BaseModelBuilder" filterName="BaseModelBuilder" isExposed="False" />
+</Filter></ApiFilter>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
 			 the build.  The others are optional common platform types that may appear. -->
