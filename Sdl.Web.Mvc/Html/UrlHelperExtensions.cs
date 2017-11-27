@@ -35,7 +35,7 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="widthFactor"></param>
         /// <param name="containerSize"></param>
         /// <returns>The responsive image URL.</returns>
-        /// <remarks>This is a thin wrapper around <see cref="IMediaHelper.GetResponsiveImageUrl"/> intended to make view code simpler.</remarks>
+        /// <remarks>This is a thin wrapper around <see cref="Sdl.Web.Common.Interfaces.IMediaHelper.GetResponsiveImageUrl"/> intended to make view code simpler.</remarks>
         public static string ResponsiveImage(this UrlHelper urlHelper, string sourceImageUrl, double aspect, string widthFactor, int containerSize = 0)
         {
             return SiteConfiguration.MediaHelper.GetResponsiveImageUrl(sourceImageUrl, aspect, widthFactor, containerSize);

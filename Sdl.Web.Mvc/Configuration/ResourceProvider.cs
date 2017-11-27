@@ -6,7 +6,7 @@ using System.Web.Compilation;
 namespace Sdl.Web.Mvc.Configuration
 {
     /// <summary>
-    /// ASP.NET Resource Provider which obtains the resources from the current <see cref="Localization"/>.
+    /// ASP.NET Resource Provider which obtains the resources from the current <see cref="Sdl.Web.Common.Configuration.Localization"/>.
     /// </summary>
     public class ResourceProvider : IResourceProvider
     {
