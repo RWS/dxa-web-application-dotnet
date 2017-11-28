@@ -6,7 +6,6 @@ using Sdl.Web.Common.Configuration;
 namespace Sdl.Web.Mvc.OutputCache
 {
     /// <summary>
-    /// DxaOutputCacheProvider
     /// Output cache provider that will make use of Dxa cache provider.
     /// </summary>
     public class DxaOutputCacheProvider : OutputCacheProvider

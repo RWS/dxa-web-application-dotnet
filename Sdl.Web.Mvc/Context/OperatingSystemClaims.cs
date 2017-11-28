@@ -12,29 +12,14 @@
         /// Gets the name of the "aspect" which the strongly typed claims class represents.
         /// </summary>
         /// <returns>The name of the aspect.</returns>
-        protected internal override string GetAspectName()
-        {
-            return "os";
-        }
+        protected internal override string GetAspectName() => "os";
 
-        public string Model
-        {
-            get { return GetClaimValue<string>("model"); }
-        }
+        public string Model => GetClaimValue<string>("model");
 
-        public string Variant
-        {
-            get { return GetClaimValue<string>("variant"); }
-        }
+        public string Variant => GetClaimValue<string>("variant");
 
-        public string Vendor
-        {
-            get { return GetClaimValue<string>("vendor"); }
-        }
+        public string Vendor => GetClaimValue<string>("vendor");
 
-        public string Version
-        {
-            get { return GetClaimValue<string>("version"); }
-        }
+        public string Version => GetClaimValue<string>("version");
     }
 }

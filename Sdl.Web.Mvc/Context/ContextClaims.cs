@@ -37,10 +37,7 @@ namespace Sdl.Web.Mvc.Context
         /// </summary>
         /// <param name="properyName">The name of the property.</param>
         /// <returns>The (qualified) claim name in format aspectName.propertyName.</returns>
-        protected string GetClaimName(string properyName)
-        {
-            return string.Format("{0}.{1}", GetAspectName(), properyName);
-        }
+        protected string GetClaimName(string properyName) => $"{GetAspectName()}.{properyName}";
 
         /// <summary>
         /// Get a typed value of a claim with a given property name.

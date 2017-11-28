@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common.Configuration;
 using System;
 
 namespace Sdl.Web.Common.Models.Navigation

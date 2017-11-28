@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.0.0-beta-201708301729</SdlDxaDataModelPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.0.0-beta-201711211302</SdlDxaDataModelPackageVersion>
     <SdlWebDeliveryPackageVersion>10.1.0</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>10.1.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>10.1.0</SdlWebContextImagePackageVersion>
@@ -26,6 +26,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>1591,1574,1570,1572,1573</NoWarn>
+    <DocumentationFile>bin\Debug\Sdl.Web.Tridion.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <DebugType>pdbonly</DebugType>
@@ -36,6 +37,7 @@
     <WarningLevel>4</WarningLevel>
     <DebugSymbols>true</DebugSymbols>
     <NoWarn>1591,1574,1570,1572,1573</NoWarn>
+    <DocumentationFile>bin\Release\Sdl.Web.Tridion.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>

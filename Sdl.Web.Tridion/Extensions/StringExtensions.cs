@@ -10,12 +10,12 @@ namespace Sdl.Web.Tridion.Extensions
             // replace invalid characters with empty strings
             try
             {
-                return Regex.Replace(value, regex, String.Empty, RegexOptions.None, TimeSpan.FromSeconds(1));
+                return Regex.Replace(value, regex, string.Empty, RegexOptions.None, TimeSpan.FromSeconds(1));
             }
             // if we timeout when replacing invalid characters, we should return Empty
             catch (RegexMatchTimeoutException)
             {
-                return String.Empty;
+                return string.Empty;
             }
         }
     }

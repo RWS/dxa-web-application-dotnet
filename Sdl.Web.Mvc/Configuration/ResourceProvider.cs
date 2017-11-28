@@ -1,31 +1,22 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Globalization;
 using System.Resources;
 using System.Web.Compilation;
-using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Mvc.Configuration
 {
     /// <summary>
-    /// ASP.NET Resource Provider which obtains the resources from the current <see cref="Localization"/>.
+    /// ASP.NET Resource Provider which obtains the resources from the current <see cref="Sdl.Web.Common.Configuration.Localization"/>.
     /// </summary>
     public class ResourceProvider : IResourceProvider
     {
         #region IResourceProvider members
 
-        public object GetObject(string resourceKey, CultureInfo culture)
-        {
-            return WebRequestContext.Localization.GetResources(resourceKey)[resourceKey];
-        }
+        public object GetObject(string resourceKey, CultureInfo culture) 
+            => WebRequestContext.Localization.GetResources(resourceKey)[resourceKey];
 
-        public IResourceReader ResourceReader
-        {
-            get
-            {
-                return new ResourceReader(WebRequestContext.Localization.GetResources());
-            }
-        }
+        public IResourceReader ResourceReader 
+            => new ResourceReader(WebRequestContext.Localization.GetResources());
 
         #endregion
     }
@@ -41,10 +32,7 @@ namespace Sdl.Web.Mvc.Configuration
 
         #region IResourceReader members
 
-        public IDictionaryEnumerator GetEnumerator()
-        {
-            return _resources.GetEnumerator();
-        }
+        public IDictionaryEnumerator GetEnumerator() => _resources.GetEnumerator();
 
         public void Close()
         {
@@ -56,9 +44,6 @@ namespace Sdl.Web.Mvc.Configuration
         }
         #endregion
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _resources.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => _resources.GetEnumerator();
     }
 }

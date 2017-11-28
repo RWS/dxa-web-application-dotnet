@@ -50,7 +50,7 @@ namespace Sdl.Web.Common.Models
         public IDictionary<string, object> ExtensionData { get; set; }
 
         /// <summary>
-        ///  Sets an extension data key/value pair.
+        /// Sets an extension data key/value pair.
         /// </summary>
         /// <remarks>
         /// This convenience method ensures the <see cref="ExtensionData"/> dictionary is initialized before setting the key/value pair.

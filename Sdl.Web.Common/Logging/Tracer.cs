@@ -7,7 +7,6 @@ using System.Xml;
 
 namespace Sdl.Web.Common.Logging
 {
-    // TODO: this is a copy of class Tracer from Tridion.Logging (slightly modified to remove dependencies). We should just use Tridion.Logging (and deprecate ILogger.Trace ?)
     /// <summary>
     /// Used for tracing method entry/exit calls.
     /// </summary>

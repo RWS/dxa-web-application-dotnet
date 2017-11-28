@@ -18,6 +18,5 @@ namespace Sdl.Web.Mvc.Controllers
             RegionModel model = (EnrichModel(region) as RegionModel) ?? region;
             return View(model.MvcData.ViewName, model);
         }
-
     }
 }

@@ -5,23 +5,21 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Web;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Mvc.Html;
 using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.Meta;
 using Image = System.Drawing.Image; // TODO: Shouldn't use System.Drawing namespace in a web application.
 
 namespace Sdl.Web.Tridion.Statics
-{
+{   
     /// <summary>
     /// Ensures a Binary file is cached on the file-system from the Tridion Broker DB
     /// </summary>
     public class BinaryFileManager
     {
-        private static readonly BinaryFileManager _instance = new BinaryFileManager();
-
         #region Inner classes
         internal class Dimensions
         {
@@ -37,7 +35,7 @@ namespace Sdl.Web.Tridion.Statics
             /// </returns>
             public override string ToString()
             {
-                return string.Format("(W={0}, H={1}, NoStretch={2})", Width, Height, NoStretch);
+                return $"(W={Width}, H={Height}, NoStretch={NoStretch})";
             }
         }
         #endregion
@@ -45,13 +43,7 @@ namespace Sdl.Web.Tridion.Statics
         /// <summary>
         /// Gets the singleton BinaryFileManager instance.
         /// </summary>
-        internal static BinaryFileManager Instance
-        {
-            get
-            {
-                return _instance;
-            }
-        }
+        internal static BinaryFileManager Instance { get; } = new BinaryFileManager();
 
         private static int GetPublicationId(string publicationUri)
             => Convert.ToInt32(publicationUri.Split('-')[1]); // TODO: what about CM URI scheme?
@@ -90,34 +82,30 @@ namespace Sdl.Web.Tridion.Statics
                 urlPath = StripDimensions(urlPath, out dimensions);
                 string publicationUri = localization.GetCmUri();
 
-                DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
-                    urlPath,
-                    CacheRegions.BinaryPublishDate,
-                    () => GetBinaryLastPublishDate(urlPath, publicationUri)
-                    );
-
-                if (lastPublishedDate != DateTime.MinValue)
+                if (!localization.IsXpmEnabled && File.Exists(localFilePath))
                 {
-                    if (File.Exists(localFilePath))
+                    DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
+                        urlPath,
+                        CacheRegions.BinaryPublishDate,
+                        () => GetBinaryLastPublishDate(urlPath, publicationUri)
+                        );
+
+                    if (localization.LastRefresh.CompareTo(lastPublishedDate) < 0)
                     {
-                        if (localization.LastRefresh.CompareTo(lastPublishedDate) < 0)
+                        //File has been modified since last application start but we don't care
+                        Log.Debug(
+                            "Binary with URL '{0}' is modified, but only since last application restart, so no action required",
+                            urlPath);
+                        return localFilePath;
+                    }
+                    FileInfo fi = new FileInfo(localFilePath);
+                    if (fi.Length > 0)
+                    {
+                        DateTime fileModifiedDate = File.GetLastWriteTime(localFilePath);
+                        if (fileModifiedDate.CompareTo(lastPublishedDate) >= 0)
                         {
-                            if (!localization.IsXpmEnabled)
-                            {
-                                //File has been modified since last application start but we don't care
-                                Log.Debug("Binary with URL '{0}' is modified, but only since last application restart, so no action required",urlPath);
-                                return localFilePath;
-                            }
-                        }
-                        FileInfo fi = new FileInfo(localFilePath);
-                        if (fi.Length > 0)
-                        {
-                            DateTime fileModifiedDate = File.GetLastWriteTime(localFilePath);
-                            if (fileModifiedDate.CompareTo(lastPublishedDate) >= 0)
-                            {
-                                Log.Debug("Binary with URL '{0}' is still up to date, no action required", urlPath);
-                                return localFilePath;
-                            }
+                            Log.Debug("Binary with URL '{0}' is still up to date, no action required", urlPath);
+                            return localFilePath;
                         }
                     }
                 }
@@ -125,12 +113,7 @@ namespace Sdl.Web.Tridion.Statics
                 // Binary does not exist or cached binary is out-of-date
                 BinaryMeta binaryMeta = GetBinaryMeta(urlPath, publicationUri);
                 if (binaryMeta == null)
-                {
-                    // Binary does not exist in Tridion, it should be removed from the local file system too
-                    if (File.Exists(localFilePath))
-                    {
-                        CleanupLocalFile(localFilePath);
-                    }
+                {                   
                     throw new DxaItemNotFoundException(urlPath, localization.Id);
                 }
                 BinaryFactory binaryFactory = new BinaryFactory();
@@ -167,7 +150,8 @@ namespace Sdl.Web.Tridion.Statics
                     byte[] buffer = binary;
                     if (dimensions != null && (dimensions.Width > 0 || dimensions.Height > 0))
                     {
-                        buffer = ResizeImage(buffer, dimensions, GetImageFormat(physicalPath));
+                        ImageFormat imgFormat = GetImageFormat(physicalPath);
+                        if(imgFormat != null) buffer = ResizeImage(buffer, dimensions, imgFormat);
                     }
 
                     lock (NamedLocker.GetLock(physicalPath))
@@ -298,6 +282,7 @@ namespace Sdl.Web.Tridion.Statics
 
         private static ImageFormat GetImageFormat(string path)
         {
+            if (string.IsNullOrEmpty(path)) return null;
             switch (Path.GetExtension(path).ToLower())
             {
                 case ".jpg":
@@ -305,10 +290,12 @@ namespace Sdl.Web.Tridion.Statics
                     return ImageFormat.Jpeg;
                 case ".gif":
                     return ImageFormat.Gif;
-                //case ".png":
-                // use png as default
-                default:
+                case ".png":
                     return ImageFormat.Png;
+                case ".bmp":
+                    return ImageFormat.Bmp;
+                default:
+                    return null;
             }
         }
 
@@ -320,16 +307,16 @@ namespace Sdl.Web.Tridion.Statics
             {
                 Match match = re.Match(path);
                 string dim = match.Groups[2].ToString();
-                if (!String.IsNullOrEmpty(dim))
+                if (!string.IsNullOrEmpty(dim))
                 {
                     dimensions.Width = Convert.ToInt32(dim);
                 }
                 dim = match.Groups[4].ToString();
-                if (!String.IsNullOrEmpty(dim))
+                if (!string.IsNullOrEmpty(dim))
                 {
                     dimensions.Height = Convert.ToInt32(dim);
                 }
-                if(!String.IsNullOrEmpty(match.Groups[5].ToString()))
+                if(!string.IsNullOrEmpty(match.Groups[5].ToString()))
                 {
                     dimensions.NoStretch = true;
                 }
@@ -341,6 +328,5 @@ namespace Sdl.Web.Tridion.Statics
             path = path.Replace(" ", "%20");
             return path;
         }
-
     }
 }

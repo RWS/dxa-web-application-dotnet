@@ -39,8 +39,7 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile>bin\Debug\Sdl.Web.Mvc.XML</DocumentationFile>
     <NoWarn>1591,1574,1570,1572,1573</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">

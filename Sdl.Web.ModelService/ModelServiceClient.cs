@@ -88,11 +88,17 @@ namespace Sdl.Web.ModelService
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         };
 
+        /// <summary>
+        /// Perform Model Service request
+        /// </summary>
         public ModelServiceResponse<string> PerformRequest(IModelServiceRequest request)
         {
             return PerformRequest<string>(request);
         }
 
+        /// <summary>
+        /// Perform Model Service request
+        /// </summary>
         public ModelServiceResponse<T> PerformRequest<T>(IModelServiceRequest request)
         {
             Uri requestUri = request.BuildRequestUri(this);
@@ -152,8 +158,11 @@ namespace Sdl.Web.ModelService
         private string PerformRequest(Uri requestUri)
         {
             HttpWebRequest request = (HttpWebRequest) WebRequest.Create(requestUri);
+            request.Method = WebRequestMethods.Http.Get;
             request.Timeout = Timeout;
             request.ContentType = "application/json; charset=utf-8";
+            request.UserAgent = "Microsoft ADO.NET Data Services";
+
             // handle OAuth if available/required
             if (_tokenProvider != null)
             {

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using Sdl.Web.Mvc.Context;
 
 namespace Sdl.Web.Mvc.Html
-{
+{  
     /// <summary>
     /// Media helpers are used to write out image/video URLs and to set responsive design features (screensize breakpoints etc.)
     /// </summary>
@@ -32,7 +32,7 @@ namespace Sdl.Web.Mvc.Html
             ShowVideoPlaceholders = true;
 
             ImageResizeUrlFormat = "{0}{1}{2}_n{3}";
-        }
+        }     
 
         /// <summary>
         /// The grid size used (also set in LESS: @grid-columns: 12)
@@ -137,7 +137,7 @@ namespace Sdl.Web.Mvc.Html
             //For absolute fill factors, we should have a number
             if (!widthFactor.EndsWith("%"))
             {
-                if (!Double.TryParse(widthFactor, out width))
+                if (!double.TryParse(widthFactor, out width))
                 {
                     Log.Warn("Invalid width factor (\"{0}\") when resizing image, defaulting to {1}", widthFactor, DefaultMediaFill);
                     //Change the fill factor to the default (100%)
@@ -152,13 +152,13 @@ namespace Sdl.Web.Mvc.Html
             if (widthFactor.EndsWith("%"))
             {
                 int fillFactor;
-                if (!Int32.TryParse(widthFactor.Substring(0, widthFactor.Length - 1), out fillFactor))
+                if (!int.TryParse(widthFactor.Substring(0, widthFactor.Length - 1), out fillFactor))
                 {
                     Log.Warn("Invalid width factor (\"{0}\") when resizing image, defaulting to {1}", widthFactor, DefaultMediaFill);
                 }
                 if (fillFactor == 0)
                 {
-                    fillFactor = Int32.Parse(DefaultMediaFill.Substring(0, DefaultMediaFill.Length - 1));
+                    fillFactor = int.Parse(DefaultMediaFill.Substring(0, DefaultMediaFill.Length - 1));
                 }
                 //TODO make the screen width behaviour configurable?
                 switch (WebRequestContext.ScreenWidth)
@@ -197,6 +197,29 @@ namespace Sdl.Web.Mvc.Html
         }
 
         /// <summary>
+        /// Returns true if format defined by extension is supported.
+        /// </summary>
+        /// <param name="extension">File Extension of media file.</param>
+        /// <returns></returns>
+        public virtual bool IsSupported(string extension)
+        {
+            if (string.IsNullOrEmpty(extension)) return false;
+            switch (extension.TrimStart('.').ToLower())
+            {
+                case "jpg":
+                case "jpeg":
+                    return true;
+                case "gif":
+                    return true;
+                case "bmp":
+                    return true;
+                case "png":
+                    return true;
+            }
+            return false;
+        }
+       
+        /// <summary>
         /// Get a responsive image URL
         /// </summary>
         /// <param name="url">Normal URL of the image</param>
@@ -206,6 +229,8 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>A responsive image URL based on the passed parameters and client browser width and pixel ratio</returns>
         public virtual string GetResponsiveImageUrl(string url, double aspect, string widthFactor, int containerSize = 0)
         {
+            string extension = Path.GetExtension(url);
+            if (!IsSupported(extension)) return url;
             string h = null;
             int width = GetResponsiveWidth(widthFactor, containerSize);
             //Round the width to the nearest set limit point - important as we do not want 
@@ -218,17 +243,15 @@ namespace Sdl.Web.Mvc.Html
                     break;
                 }
             }
-            string w = String.Format("_w{0}", width);
+            string w = $"_w{width}";
             //Height is calculated from the aspect ratio (0 means preserve aspect ratio)
             if (aspect != 0)
             {
-                h = String.Format("_h{0}", (int)Math.Ceiling(width / aspect));
+                h = $"_h{(int) Math.Ceiling(width/aspect)}";
             }
-            //Build the URL
-            string extension = Path.GetExtension(url);
+            //Build the URL           
             url = url.Substring(0, url.LastIndexOf(".", StringComparison.Ordinal));
-            return String.Format(ImageResizeUrlFormat, url, w, h, extension);
+            return string.Format(ImageResizeUrlFormat, url, w, h, extension);
         }
-
     }
 }

@@ -5,6 +5,9 @@ using Sdl.Web.Delivery.Caching;
 
 namespace Sdl.Web.Tridion.Caching
 {
+    /// <summary>
+    /// DXA Cache Provider
+    /// </summary>
     public class DxaCacheProvider : CacheProvider
     {
         private readonly ICacheProvider<object> _cilCacheProvider = CacheFactory<object>.CreateFromConfiguration();

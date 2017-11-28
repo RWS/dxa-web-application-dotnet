@@ -16,8 +16,6 @@ using Sdl.Web.Mvc.Html;
 namespace Sdl.Web.Mvc.OutputCache
 {
     /// <summary>
-    /// DXAOutputCacheAttribute
-    /// 
     /// Allows view rendering output caching using the Dxa caching mechanism. Any Entity Models that should not be cached
     /// on the page can be annotated with the [DxaNoOutputCache] attribute.
     /// </summary>
@@ -167,7 +165,7 @@ namespace Sdl.Web.Mvc.OutputCache
         private static string CalcCacheKey(ActionExecutingContext ctx)
         {
             var sb = new StringBuilder();
-            sb.Append($"{ctx.ActionDescriptor.UniqueId}-{ctx.HttpContext.Request.QueryString}-{ctx.HttpContext.Request.UserAgent}");
+            sb.Append($"{ctx.ActionDescriptor.UniqueId}-{ctx.HttpContext.Request.Url}-{ctx.HttpContext.Request.UserAgent}");
             foreach (var p in ctx.ActionParameters.Where(p => p.Value != null))
             {
                 sb.Append($"{p.Key.GetHashCode()}:{p.Value.GetHashCode()}-");

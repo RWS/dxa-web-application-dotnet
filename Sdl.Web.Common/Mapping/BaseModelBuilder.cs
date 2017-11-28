@@ -10,7 +10,6 @@ namespace Sdl.Web.Common.Mapping
         private static readonly Dictionary<Type, Dictionary<string, List<SemanticProperty>>> _semanticPropertiesCache = 
             new Dictionary<Type, Dictionary<string, List<SemanticProperty>>>();
 
-
         protected virtual Dictionary<string, KeyValuePair<string, string>> GetEntityDataFromType(Type type)
         {            
             Dictionary<string, KeyValuePair<string, string>> res = new Dictionary<string, KeyValuePair<string, string>>();

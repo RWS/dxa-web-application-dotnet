@@ -56,7 +56,7 @@ namespace Sdl.Web.Mvc.Configuration
         /// <param name="controllerName">The Controller name. If not specified (or <c>null</c>), the Controller name is inferred from the <see cref="modelType"/>: either "Entity", "Region" or "Page".</param>
         protected void RegisterViewModel(string viewName, Type modelType, string controllerName = null)
         {
-            if (String.IsNullOrEmpty(controllerName))
+            if (string.IsNullOrEmpty(controllerName))
             {
                 if (typeof(EntityModel).IsAssignableFrom(modelType))
                 {

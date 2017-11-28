@@ -6,8 +6,7 @@ namespace Sdl.Web.Common.Interfaces
     /// Interface for Link Resolver extension point.
     /// </summary>
     public interface ILinkResolver
-    {
-        
+    {        
         /// <summary>
         /// Resolves a link URI (TCM URI or site URL) to a normalized site URL.
         /// </summary>

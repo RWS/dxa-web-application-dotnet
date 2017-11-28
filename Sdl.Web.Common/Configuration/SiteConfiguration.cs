@@ -181,17 +181,7 @@ namespace Sdl.Web.Common.Configuration
         {
             return SystemFolder + "/";
         });
-
-        /// <summary>
-        /// Ensure that a URL is using the path to the given localization
-        /// </summary>
-        /// <param name="url">The URL to localize</param>
-        /// <param name="localization">The localization to use</param>
-        /// <returns>A localized URL</returns>
-        [Obsolete("Deprecated in DXA 2.0. Use Localization.GetAbsoluteUrlPath instead.")]
-        public static string LocalizeUrl(string url, Localization localization)
-            => localization.GetAbsoluteUrlPath(url);
-
+     
         /// <summary>
         /// Take a partial URL (so not including protocol, domain, port) and make it full by
         /// Adding the protocol, domain, port etc. from the given localization
@@ -203,15 +193,7 @@ namespace Sdl.Web.Common.Configuration
                 url = url.Substring(loc.Path.Length);
             }
             return url.StartsWith("http") ? url : loc.GetBaseUrl() + url;
-        }
-
-        [Obsolete("Deprecated in DXA 2.0. Use Localization.BinaryCacheFolder instead.")]
-        public static string GetLocalStaticsFolder(string localizationId)
-            => LocalizationResolver.GetLocalization(localizationId).BinaryCacheFolder;
-
-        [Obsolete("Deprecated in DXA 2.0. Use Localization.BinaryCacheFolder instead.")]
-        public static string GetLocalStaticsUrl(string localizationId)
-            => LocalizationResolver.GetLocalization(localizationId).BinaryCacheFolder.Replace("\\","/");
+        }   
 
         /// <summary>
         /// Generic a GUID

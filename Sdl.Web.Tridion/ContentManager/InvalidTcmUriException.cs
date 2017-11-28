@@ -13,7 +13,6 @@ namespace Sdl.Web.Tridion.ContentManager
     /// <item> while deserializing an invalid <see cref="String"/> representation of <see cref="TcmUri "/> to <see cref="TcmUri "/>. </item>
     /// </list>
     /// </remarks>
-    // TODO: this is a copy of class InvalidTcmUriException from Tridion.Common (slightly modified to remove dependencies). We should just use Tridion.Common.
     public class InvalidTcmUriException : DxaException
     {
         /// <summary>

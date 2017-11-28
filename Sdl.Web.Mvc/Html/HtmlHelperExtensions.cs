@@ -87,7 +87,7 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The formatted resource value, or key name if none found</returns>
         public static string FormatResource(this HtmlHelper htmlHelper, string resourceName, params object[] parameters)
         {
-            return String.Format(htmlHelper.Resource(resourceName), parameters);
+            return string.Format(htmlHelper.Resource(resourceName), parameters);
         }        
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The formatted resource value, or key name if none found</returns>
         public static object FormatResource(this HttpContextBase httpContext, string resourceName, params object[] parameters)
         {
-            return String.Format((string)httpContext.Resource(resourceName), parameters);
+            return string.Format((string)httpContext.Resource(resourceName), parameters);
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Sdl.Web.Mvc.Html
                 len = len / 1024;
             }
 
-            return string.Format("{0} {1}", Math.Ceiling(len), sizes[order]);
+            return $"{Math.Ceiling(len)} {sizes[order]}";
         }
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace Sdl.Web.Mvc.Html
             {
                 if (mvcData == null)
                 {
-                    throw new DxaException(string.Format("Unable to render Entity Model [{0}], because it has no MVC data.", entity));
+                    throw new DxaException($"Unable to render Entity Model [{entity}], because it has no MVC data.");
                 }
 
                 string actionName = mvcData.ActionName ?? SiteConfiguration.GetEntityAction();
@@ -543,7 +543,7 @@ namespace Sdl.Web.Mvc.Html
             if (memberExpression == null)
             {
                 throw new DxaException(
-                    string.Format("Unexpected expression provided to DxaPropertyMarkup: {0}. Expecting a lambda which evaluates to an Entity Model property.", propertyExpression.Body.GetType().Name)
+                    $"Unexpected expression provided to DxaPropertyMarkup: {propertyExpression.Body.GetType().Name}. Expecting a lambda which evaluates to an Entity Model property."
                     );
             }
 
@@ -566,7 +566,7 @@ namespace Sdl.Web.Mvc.Html
             if (entityModel == null)
             {
                 throw new DxaException(
-                    string.Format("Unexpected type used in DxaPropertyMarkup expression: {0}. Expecting a lambda which evaluates to an Entity Model property.", subject)
+                    $"Unexpected type used in DxaPropertyMarkup expression: {subject}. Expecting a lambda which evaluates to an Entity Model property."
                     );
             }
 

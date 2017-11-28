@@ -304,7 +304,7 @@ namespace Sdl.Web.Tridion.Mapping
 
             return fieldValue;
         }
-
+       
         private static object MapField(object fieldValues, Type modelPropertyType, SemanticSchemaField semanticSchemaField, MappingData mappingData)
         {
             Type sourceType = fieldValues.GetType();
@@ -321,6 +321,12 @@ namespace Sdl.Web.Tridion.Mapping
             Type bareTargetType = modelPropertyType.GetUnderlyingNullableType() ?? targetType;
 
             IList mappedValues = targetType.CreateGenericList();
+            
+            if (typeof (EntityModel).IsAssignableFrom(targetType) && sourceType != typeof (EntityModelData) &&
+                (sourceType == typeof (string) && string.IsNullOrEmpty((string) fieldValues)))
+            {
+                return isListProperty ? mappedValues : null;
+            }
 
             switch (sourceType.Name)
             {
@@ -419,12 +425,7 @@ namespace Sdl.Web.Tridion.Mapping
                     throw new DxaException($"Unexpected field type: '{sourceType.Name}'.");
             }
 
-            if (isListProperty)
-            {
-                return mappedValues;
-            }
-
-            return (mappedValues.Count == 0) ? null : mappedValues[0];
+            return isListProperty ? mappedValues : ((mappedValues.Count == 0) ? null : mappedValues[0]);
         }
 
         private static object MapString(string stringValue, Type targetType)

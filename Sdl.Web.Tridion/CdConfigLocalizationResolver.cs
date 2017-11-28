@@ -72,7 +72,7 @@ namespace Sdl.Web.Tridion
                 }
                 catch (Exception)
                 {
-                    throw new DxaUnknownLocalizationException(string.Format("No matching Localization found for URL '{0}'", url));
+                    throw new DxaUnknownLocalizationException($"No matching Localization found for URL '{url}'");
                 }
 
                 result.EnsureInitialized();
