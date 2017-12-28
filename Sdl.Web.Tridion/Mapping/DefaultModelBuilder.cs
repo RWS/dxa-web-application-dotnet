@@ -152,7 +152,7 @@ namespace Sdl.Web.Tridion.Mapping
                     ModelType = modelType,
                     PropertyValidation = new Validation
                     {
-                        MainSchema = SemanticMapping.GetSchema(entityModelData.SchemaId, localization),
+                        MainSchema = semanticSchema,
                         InheritedSchemas = GetInheritedSemanticSchemas(entityModelData, localization)
                     },
                     Fields = entityModelData.Content,
@@ -238,7 +238,6 @@ namespace Sdl.Web.Tridion.Mapping
                 List<SemanticProperty> semanticProperties = propertySemantics.Value;
 
                 bool isFieldMapped = false;
-                bool isFieldFromMainSchema = false;
                 string fieldXPath = null;
                 foreach (SemanticProperty semanticProperty in semanticProperties)
                 {
@@ -273,7 +272,7 @@ namespace Sdl.Web.Tridion.Mapping
                         semanticProperty.PropertyName,
                         null);
                     SemanticSchemaField semanticSchemaField = (mappingData.EmbeddedSemanticSchemaField == null) ?
-                        ValidateField(validation, fieldSemantics, out isFieldFromMainSchema) :
+                        ValidateField(validation, fieldSemantics) :
                         mappingData.EmbeddedSemanticSchemaField.FindFieldBySemantics(fieldSemantics);
                     if (semanticSchemaField == null)
                     {
@@ -282,7 +281,7 @@ namespace Sdl.Web.Tridion.Mapping
                     }
 
                     // Matching Semantic Schema Field found
-                    fieldXPath = semanticSchemaField.GetXPath(mappingData.ContextXPath);
+                    fieldXPath = IsFieldFromMainSchema(validation, fieldSemantics) ? semanticSchemaField.GetXPath(mappingData.ContextXPath) : null;
 
                     ContentModelData fields = semanticSchemaField.IsMetadata ? mappingData.MetadataFields : mappingData.Fields;
                     object fieldValue = FindFieldValue(semanticSchemaField, fields, mappingData.EmbedLevel);
@@ -307,7 +306,7 @@ namespace Sdl.Web.Tridion.Mapping
                     break;
                 }
 
-                if (fieldXPath != null && isFieldFromMainSchema)
+                if (fieldXPath != null)
                 {
                     xpmPropertyMetadata.Add(modelProperty.Name, fieldXPath);
                 }
@@ -332,10 +331,9 @@ namespace Sdl.Web.Tridion.Mapping
             return validation.MainSchema?.FindFieldBySemantics(fieldSemantics) != null;
         }
 
-        private static SemanticSchemaField ValidateField(Validation validation, FieldSemantics fieldSemantics, out bool isFieldFromMainSchema)
+        private static SemanticSchemaField ValidateField(Validation validation, FieldSemantics fieldSemantics)
         {
             SemanticSchemaField field = validation.MainSchema.FindFieldBySemantics(fieldSemantics);
-            isFieldFromMainSchema = true;
             if (field == null)
             {
                 foreach (SemanticSchema semanticSchema in validation.InheritedSchemas)
@@ -343,7 +341,6 @@ namespace Sdl.Web.Tridion.Mapping
                     field = semanticSchema.FindFieldBySemantics(fieldSemantics);
                     if (field != null)
                     {
-                        isFieldFromMainSchema = false;
                         break;
                     }
                 }
