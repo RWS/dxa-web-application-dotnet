@@ -6,12 +6,13 @@ using System.Linq;
 using System.Reflection;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Common.Extensions;
 using Sdl.Web.DataModel;
 using Sdl.Web.Tridion.ContentManager;
+using MvcData = Sdl.Web.Common.Models.MvcData;
 
 namespace Sdl.Web.Tridion.Mapping
 {
@@ -20,12 +21,18 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class DefaultModelBuilder : IPageModelBuilder, IEntityModelBuilder
     {
+        private class Validation
+        {
+            public SemanticSchema MainSchema { get; set; }
+            public List<SemanticSchema> InheritedSchemas { set; get;  }
+        }
+
         private class MappingData
         {
             public string ModelId { get; set; }
             public Type ModelType { get; set; }
-            public SemanticSchema SemanticSchema { get; set; }
             public SemanticSchemaField EmbeddedSemanticSchemaField { get; set; }
+            public Validation PropertyValidation { get; set; }
             public int EmbedLevel { get; set; }
             public ViewModelData SourceViewModel { get; set; }
             public ContentModelData Fields { get; set; }
@@ -45,7 +52,7 @@ namespace Sdl.Web.Tridion.Mapping
         {
             using (new Tracer(pageModel, pageModelData, includePageRegions, localization))
             {
-                Common.Models.MvcData mvcData = CreateMvcData(pageModelData.MvcData, "Page");
+                MvcData mvcData = CreateMvcData(pageModelData.MvcData, "Page");
                 Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
                 if (modelType == typeof(PageModel))
@@ -74,7 +81,11 @@ namespace Sdl.Web.Tridion.Mapping
                         SourceViewModel = pageModelData,
                         ModelId = pageModelData.Id,
                         ModelType = modelType,
-                        SemanticSchema = SemanticMapping.GetSchema(pageModelData.SchemaId, localization),
+                        PropertyValidation = new Validation
+                        {
+                            MainSchema = SemanticMapping.GetSchema(pageModelData.SchemaId, localization),
+                            InheritedSchemas = GetInheritedSemanticSchemas(pageModelData, localization)
+                        },
                         MetadataFields = pageModelData.Metadata,
                         Localization = localization
                     };
@@ -94,6 +105,28 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
+        private static List<SemanticSchema> GetInheritedSemanticSchemas(ViewModelData pageModelData, Localization localization)
+        {
+            List<SemanticSchema> schemas = new List<SemanticSchema>();
+            if (pageModelData.ExtensionData != null && pageModelData.ExtensionData.ContainsKey("Schemas"))
+            {
+                if (pageModelData.ExtensionData["Schemas"] is string[] inheritedSchemas)
+                {
+                    foreach (string inheritedSchemaId in inheritedSchemas)
+                    {
+                        SemanticSchema schema = SemanticMapping.GetSchema(inheritedSchemaId, localization);
+                        if (schema == null)
+                        {
+                            continue;
+                        }
+                        schemas.Add(schema);
+                    }
+                }
+            }
+
+            return schemas;
+        }
+
         /// <summary>
         /// Builds a strongly typed Entity Model based on a given DXA R2 Data Model.
         /// </summary>
@@ -105,7 +138,7 @@ namespace Sdl.Web.Tridion.Mapping
         {
             using (new Tracer(entityModel, entityModelData, baseModelType, localization))
             {
-                Common.Models.MvcData mvcData = CreateMvcData(entityModelData.MvcData, "Entity");
+                MvcData mvcData = CreateMvcData(entityModelData.MvcData, "Entity");
                 SemanticSchema semanticSchema = SemanticMapping.GetSchema(entityModelData.SchemaId, localization);
 
                 Type modelType = (baseModelType == null) ?
@@ -116,7 +149,11 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     SourceViewModel = entityModelData,
                     ModelType = modelType,
-                    SemanticSchema = semanticSchema,
+                    PropertyValidation = new Validation
+                    {
+                        MainSchema = SemanticMapping.GetSchema(entityModelData.SchemaId, localization),
+                        InheritedSchemas = GetInheritedSemanticSchemas(entityModelData, localization)
+                    },
                     Fields = entityModelData.Content,
                     MetadataFields = entityModelData.Metadata,
                     Localization = localization
@@ -199,16 +236,18 @@ namespace Sdl.Web.Tridion.Mapping
                 List<SemanticProperty> semanticProperties = propertySemantics.Value;
 
                 bool isFieldMapped = false;
-                string fieldXPath = null;
                 foreach (SemanticProperty semanticProperty in semanticProperties)
                 {
+                    Validation validation = mappingData.PropertyValidation;
                     if (semanticProperty.PropertyName == SemanticProperty.AllFields)
                     {
                         modelProperty.SetValue(viewModel, GetAllFieldsAsDictionary(mappingData));
                         isFieldMapped = true;
                         break;
                     }
-                    if ((semanticProperty.PropertyName == SemanticProperty.Self) && mappingData.SemanticSchema.HasSemanticType(semanticProperty.SemanticType))
+
+
+                    if ((semanticProperty.PropertyName == SemanticProperty.Self) && validation.MainSchema.HasSemanticType(semanticProperty.SemanticType))
                     {
                         try
                         {
@@ -230,7 +269,7 @@ namespace Sdl.Web.Tridion.Mapping
                         semanticProperty.PropertyName,
                         null);
                     SemanticSchemaField semanticSchemaField = (mappingData.EmbeddedSemanticSchemaField == null) ?
-                        mappingData.SemanticSchema.FindFieldBySemantics(fieldSemantics) :
+                        ValidateField(validation, fieldSemantics) :
                         mappingData.EmbeddedSemanticSchemaField.FindFieldBySemantics(fieldSemantics);
                     if (semanticSchemaField == null)
                     {
@@ -239,7 +278,18 @@ namespace Sdl.Web.Tridion.Mapping
                     }
 
                     // Matching Semantic Schema Field found
-                    fieldXPath = semanticSchemaField.GetXPath(mappingData.ContextXPath);
+                    var fieldXPath = semanticSchemaField.GetXPath(mappingData.ContextXPath);
+                    if (fieldXPath != null && IsFieldFromMainSchema(validation, fieldSemantics))
+                    {
+                        xpmPropertyMetadata.Add(modelProperty.Name, fieldXPath);
+                    }
+                    else if (!isFieldMapped && Log.IsDebugEnabled)
+                    {
+                        string formattedSemanticProperties = string.Join(", ", semanticProperties.Select(sp => sp.ToString()));
+                        Log.Debug(
+                            $"Property {modelType.Name}.{modelProperty.Name} cannot be mapped to a CM field of {validation.MainSchema}. Semantic properties: {formattedSemanticProperties}.");
+                    }
+
                     ContentModelData fields = semanticSchemaField.IsMetadata ? mappingData.MetadataFields : mappingData.Fields;
                     object fieldValue = FindFieldValue(semanticSchemaField, fields, mappingData.EmbedLevel);
                     if (fieldValue == null)
@@ -263,16 +313,6 @@ namespace Sdl.Web.Tridion.Mapping
                     break;
                 }
 
-                if (fieldXPath != null)
-                {
-                    xpmPropertyMetadata.Add(modelProperty.Name, fieldXPath);
-                }
-                else if (!isFieldMapped && Log.IsDebugEnabled)
-                {
-                    string formattedSemanticProperties = string.Join(", ", semanticProperties.Select(sp => sp.ToString()));
-                    Log.Debug(
-                        $"Property {modelType.Name}.{modelProperty.Name} cannot be mapped to a CM field of {mappingData.SemanticSchema}. Semantic properties: {formattedSemanticProperties}.");
-                }
             }
 
             EntityModel entityModel = viewModel as EntityModel;
@@ -280,6 +320,29 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 entityModel.XpmPropertyMetadata = xpmPropertyMetadata;
             }
+        }
+
+        private static bool IsFieldFromMainSchema(Validation validation, FieldSemantics fieldSemantics)
+        {
+            return validation.MainSchema?.FindFieldBySemantics(fieldSemantics) != null;
+        }
+
+        private static SemanticSchemaField ValidateField(Validation validation, FieldSemantics fieldSemantics)
+        {
+            SemanticSchemaField field = validation.MainSchema.FindFieldBySemantics(fieldSemantics);
+            if (field == null)
+            {
+                foreach (SemanticSchema semanticSchema in validation.InheritedSchemas)
+                {
+                    field = semanticSchema.FindFieldBySemantics(fieldSemantics);
+                    if (field != null)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return field;
         }
 
         private static object FindFieldValue(SemanticSchemaField semanticSchemaField, ContentModelData fields, int embedLevel)
@@ -499,7 +562,11 @@ namespace Sdl.Web.Tridion.Mapping
                     {
                         SourceViewModel = keywordModelData,
                         ModelType = targetType,
-                        SemanticSchema = SemanticMapping.GetSchema(keywordModelData.SchemaId, localization),
+                        PropertyValidation = new Validation
+                        {
+                            MainSchema = SemanticMapping.GetSchema(keywordModelData.SchemaId, localization),
+                            InheritedSchemas = GetInheritedSemanticSchemas(keywordModelData as ViewModelData, localization)
+                        },
                         MetadataFields = keywordModelData.Metadata,
                         Localization = localization
                     };
@@ -588,7 +655,7 @@ namespace Sdl.Web.Tridion.Mapping
             MappingData embeddedMappingData = new MappingData
             {
                 ModelType = targetType,
-                SemanticSchema = mappingData.SemanticSchema,
+                PropertyValidation = mappingData.PropertyValidation,
                 EmbeddedSemanticSchemaField = semanticSchemaField,
                 EmbedLevel = mappingData.EmbedLevel + 1,
                 SourceViewModel = mappingData.SourceViewModel,
@@ -644,7 +711,7 @@ namespace Sdl.Web.Tridion.Mapping
             return (IEnumerable<string>) MapField(fieldValues, typeof(List<string>), null, mappingData);
         }
 
-        private static Common.Models.MvcData CreateMvcData(DataModel.MvcData data, string defaultControllerName)
+        private static MvcData CreateMvcData(DataModel.MvcData data, string defaultControllerName)
         {
             if (data == null)
             {
@@ -655,7 +722,7 @@ namespace Sdl.Web.Tridion.Mapping
                 throw new DxaException("No View Name specified in MVC Data.");
             }
 
-            return new Common.Models.MvcData
+            return new MvcData
             {
                 ControllerName = data.ControllerName ?? defaultControllerName,
                 ControllerAreaName = data.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName(),
@@ -668,7 +735,7 @@ namespace Sdl.Web.Tridion.Mapping
 
         private static RegionModel CreateRegionModel(RegionModelData regionModelData, Localization localization)
         {
-            Common.Models.MvcData mvcData = CreateMvcData(regionModelData.MvcData, "Region");
+            MvcData mvcData = CreateMvcData(regionModelData.MvcData, "Region");
             Type regionModelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
             RegionModel result = (RegionModel) regionModelType.CreateInstance(regionModelData.Name);
