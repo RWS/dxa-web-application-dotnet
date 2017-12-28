@@ -110,9 +110,10 @@ namespace Sdl.Web.Tridion.Mapping
             List<SemanticSchema> schemas = new List<SemanticSchema>();
             if (pageModelData.ExtensionData != null && pageModelData.ExtensionData.ContainsKey("Schemas"))
             {
-                if (pageModelData.ExtensionData["Schemas"] is string[] inheritedSchemas)
+                string[] ids = pageModelData.ExtensionData["Schemas"] as string[];
+                if (ids != null && ids.Length > 0)
                 {
-                    foreach (string inheritedSchemaId in inheritedSchemas)
+                    foreach (string inheritedSchemaId in ids)
                     {
                         SemanticSchema schema = SemanticMapping.GetSchema(inheritedSchemaId, localization);
                         if (schema == null)
