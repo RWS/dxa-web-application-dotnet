@@ -333,7 +333,7 @@ namespace Sdl.Web.Tridion.Mapping
 
         private static SemanticSchemaField ValidateField(Validation validation, FieldSemantics fieldSemantics)
         {
-            Log.Debug($"Field {fieldSemantics} is validated over the inherited {validation.MainSchema}.");
+            Log.Debug($"Field {fieldSemantics} is validated over the main {validation.MainSchema}.");
             SemanticSchemaField field = validation.MainSchema.FindFieldBySemantics(fieldSemantics);
             if (field == null)
             {
