@@ -1,7 +1,8 @@
 ﻿using DD4T.ContentModel;
-using DD4T.ViewModels.Attributes;
 using DD4T.Core.Contracts.ViewModels;
 using DD4T.ViewModels;
+using DD4T.ViewModels.Attributes;
+using DD4T.ViewModels.Exceptions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,9 +24,12 @@ namespace DD4T.ViewModels.Reflection
     public class DefaultViewModelResolver : IViewModelResolver
     {
         private Dictionary<Type, IList<IModelProperty>> modelProperties = new Dictionary<Type, IList<IModelProperty>>();
+
         //private Dictionary<Type, ViewModelAttribute> viewModelAttributes = new Dictionary<Type, ViewModelAttribute>();
         private Dictionary<Type, IModelAttribute> modelAttributes = new Dictionary<Type, IModelAttribute>();
+
         private readonly IReflectionHelper helper;
+
         public DefaultViewModelResolver(IReflectionHelper helper)
         {
             if (helper == null) throw new ArgumentNullException("helper");
@@ -33,6 +37,7 @@ namespace DD4T.ViewModels.Reflection
         }
 
         #region IViewModelResolver
+
         public IList<IModelProperty> GetModelProperties(Type type)
         {
             IList<IModelProperty> result;
@@ -55,6 +60,7 @@ namespace DD4T.ViewModels.Reflection
             }
             return result;
         }
+
         public T GetCustomAttribute<T>(Type type) where T : IModelAttribute
         {
             IModelAttribute result;
@@ -64,13 +70,17 @@ namespace DD4T.ViewModels.Reflection
                 {
                     if (!modelAttributes.TryGetValue(type, out result))
                     {
-                        result = type.GetCustomAttributes(typeof(T), true).FirstOrDefault() as IModelAttribute;
+                        result = type.GetCustomAttributes(typeof(IModelAttribute), true).FirstOrDefault() as IModelAttribute;
                         modelAttributes.Add(type, result);
                     }
                 }
             }
-            return (T)result;
+            if (result is T)
+                return (T)result;
+
+            return default(T);
         }
+
         /// <summary>
         /// This implementation requires the View Model Type to have a public parameterless constructor
         /// </summary>
@@ -81,16 +91,22 @@ namespace DD4T.ViewModels.Reflection
         {
             //Use explicit cast or "as" cast? Using as will result in null return value if the Type passed in doesn't implement IViewModel
             //Using explicit cast (IViewModel) will result in InvalidCastException if Type doesn't implement IViewModel
+            if (type.IsInterface)
+                throw new InvalidViewModelTypeException(type);
+
             return (IViewModel)helper.CreateInstance(type);
         }
+
         public object ResolveInstance(Type type)
         {
             return helper.CreateInstance(type);
         }
+
         public T ResolveInstance<T>(params object[] ctorArgs)
         {
             return (T)ResolveInstance(typeof(T));
         }
+
         public IModelProperty GetModelProperty(PropertyInfo propertyInfo)
         {
             IModelProperty result = null;
@@ -168,8 +184,7 @@ namespace DD4T.ViewModels.Reflection
 
         public IReflectionHelper ReflectionHelper { get { return helper; } }
 
-
-        #endregion
+        #endregion IViewModelResolver
 
         #region Private methods
 
@@ -201,23 +216,23 @@ namespace DD4T.ViewModels.Reflection
             return result;
         }
 
-        #endregion
-
-
-
+        #endregion Private methods
     }
 
     public class ReflectionOptimizer : IReflectionHelper
     {
         private Dictionary<Type, List<IModelProperty>> modelProperties = new Dictionary<Type, List<IModelProperty>>();
         private Dictionary<Type, Func<object>> constructors = new Dictionary<Type, Func<object>>();
+
         //private Dictionary<Type, ViewModelAttribute> viewModelAttributes = new Dictionary<Type, ViewModelAttribute>();
         private Dictionary<Type, IModelAttribute> modelAttributes = new Dictionary<Type, IModelAttribute>();
+
         private Dictionary<Type, Dictionary<string, Action<object, object>>> twoArgMethods =
             new Dictionary<Type, Dictionary<string, Action<object, object>>>();
 
-
-        public ReflectionOptimizer() { }
+        public ReflectionOptimizer()
+        {
+        }
 
         public object CreateInstance(Type objectType) //TODO: Change this method to return the delegate and let the caller cache it as necessary
         {
@@ -234,7 +249,7 @@ namespace DD4T.ViewModels.Reflection
                         // Get the default constructor of the plugin type
                         ConstructorInfo ctor = objectType.GetConstructor(new Type[0]);
 
-                        // Generate the intermediate language.       
+                        // Generate the intermediate language.
                         ILGenerator ilgen = dynamicMethod.GetILGenerator();
                         ilgen.Emit(OpCodes.Newobj, ctor);
                         ilgen.Emit(OpCodes.Ret);
@@ -266,6 +281,7 @@ namespace DD4T.ViewModels.Reflection
                     "See inner exception for more details", objectType.FullName), e);
             }
         }
+
         public T CreateInstance<T>() where T : class, new()
         {
             return CreateInstance(typeof(T)) as T;
@@ -285,6 +301,7 @@ namespace DD4T.ViewModels.Reflection
                                 Expression.Convert(argument, propertyInfo.PropertyType));
             return Expression.Lambda<Action<object, object>>(setterCall, instance, argument).Compile();
         }
+
         public Func<object, object> BuildGetter(PropertyInfo propertyInfo)
         {
             //Equivalent to:
@@ -299,6 +316,7 @@ namespace DD4T.ViewModels.Reflection
                             typeof(object));
             return Expression.Lambda<Func<object, object>>(getterCall, obj).Compile();
         }
+
         public PropertyInfo GetPropertyInfo<TSource, TProperty>(Expression<Func<TSource, TProperty>> propertyLambda)
         {
             //Type type = typeof(TSource);
@@ -325,6 +343,7 @@ namespace DD4T.ViewModels.Reflection
 
             return propInfo;
         }
+
         public PropertyInfo GetPropertyInfo<TSource, TProperty>(TSource source, Expression<Func<TSource, TProperty>> propertyLambda)
         {
             return GetPropertyInfo<TSource, TProperty>(propertyLambda);
@@ -334,6 +353,7 @@ namespace DD4T.ViewModels.Reflection
         {
             return BuildAddMethod(typeof(TCollection));
         }
+
         public Action<object, object> BuildAddMethod(Type collectionType)
         {
             //Depends on caller to cache results
@@ -413,5 +433,4 @@ namespace DD4T.ViewModels.Reflection
             return Expression.Lambda<Func<IEnumerable, Array>>(toArray, param).Compile();
         }
     }
-
 }

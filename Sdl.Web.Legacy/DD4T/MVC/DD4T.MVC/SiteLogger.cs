@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics;
-using DD4T.ContentModel.Contracts.Logging;
-
 //using Microsoft.Practices.EnterpriseLibrary.Logging;
 
 namespace DD4T.Utils
 {
     public enum TraceMode { Start, Finish, None }
+
+    public enum LoggingCategory { General, Controller, View, Model, Search, Integration, Performance }
 
     public static class Logger
     {
