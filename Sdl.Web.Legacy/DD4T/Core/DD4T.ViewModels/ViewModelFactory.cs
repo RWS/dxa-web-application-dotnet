@@ -71,7 +71,6 @@ namespace DD4T.ViewModels
             }
         }
 
-
         public IViewModelResolver ModelResolver { get { return _resolver; } }
         public ILinkResolver LinkResolver { get { return _linkResolver; } }
         public IRichTextResolver RichTextResolver { get { return _richtTextResolver; } }
@@ -129,12 +128,12 @@ namespace DD4T.ViewModels
             LoadViewModels(assemblies);
         }
 
-        public Type FindViewModelByAttribute<T>(IModel data, Type[] typesToSearch = null) where T : IModelAttribute
+        public virtual Type FindViewModelByAttribute<T>(IModel data, Type[] typesToSearch = null) where T : IModelAttribute
         {
             _logger.Debug($"called FindViewModelByAttribute with typesToSearch {typesToSearch}");
             //Anyway to speed this up? Better than just a straight up loop?
             typesToSearch = typesToSearch ?? viewModels.Where(x => x.Key is T).Select(x => x.Value).ToArray();
-            _logger.Debug($"using typesToSearch {String.Join(",",typesToSearch.Select(t => t.FullName))}");
+            _logger.Debug($"using typesToSearch {String.Join(",", typesToSearch.Select(t => t.FullName))}");
             foreach (var type in typesToSearch)
             {
                 T modelAttr = _resolver.GetCustomAttribute<T>(type);
@@ -157,11 +156,11 @@ namespace DD4T.ViewModels
                 }
             }
             ViewModelTypeNotFoundException e = new ViewModelTypeNotFoundException(data);
-            _logger.Warning($"Could not find a valid ViewModel for item {e.Identifier}");
+            _logger.Warning($"Could not find a valid ViewModel for item {e.Message}");
             throw e;
         }
 
-        public void SetPropertyValue(object model, IModel data, IModelProperty property)
+        public virtual void SetPropertyValue(object model, IModel data, IModelProperty property)
         {
             if (property == null) throw new ArgumentNullException("property");
             if (model != null && data != null && property.PropertyAttribute != null)
@@ -183,23 +182,23 @@ namespace DD4T.ViewModels
             }
         }
 
-        public void SetPropertyValue(IViewModel model, IModelProperty property)
+        public virtual void SetPropertyValue(IViewModel model, IModelProperty property)
         {
             SetPropertyValue(model, model.ModelData, property);
         }
 
-        public void SetPropertyValue<TModel, TProperty>(TModel model, Expression<Func<TModel, TProperty>> propertyLambda) where TModel : IViewModel
+        public virtual void SetPropertyValue<TModel, TProperty>(TModel model, Expression<Func<TModel, TProperty>> propertyLambda) where TModel : IViewModel
         {
             var property = _resolver.GetModelProperty(model, propertyLambda);
             SetPropertyValue(model, property);
         }
 
-        public IViewModel BuildViewModel(IModel modelData, IContextModel contextModel = null)
+        public virtual IViewModel BuildViewModel(IModel modelData, IContextModel contextModel = null)
         {
             return BuildViewModelByAttribute<IModelAttribute>(modelData, contextModel);
         }
 
-        public IViewModel BuildViewModelByAttribute<T>(IModel modelData, IContextModel contextModel = null) where T : IModelAttribute
+        public virtual IViewModel BuildViewModelByAttribute<T>(IModel modelData, IContextModel contextModel = null) where T : IModelAttribute
         {
             IViewModel result = null;
             Type type = FindViewModelByAttribute<T>(modelData);
@@ -211,7 +210,8 @@ namespace DD4T.ViewModels
             }
             return result;
         }
-        public IViewModel BuildViewModel(Type type, IModel modelData, IContextModel contextModel = null)
+
+        public virtual IViewModel BuildViewModel(Type type, IModel modelData, IContextModel contextModel = null)
         {
             IViewModel viewModel = null;
             viewModel = _resolver.ResolveModel(type, modelData);
@@ -220,9 +220,7 @@ namespace DD4T.ViewModels
             return viewModel;
         }
 
-
-
-        public T BuildViewModel<T>(IModel modelData) where T : IViewModel
+        public virtual T BuildViewModel<T>(IModel modelData) where T : IViewModel
         {
             return (T)BuildViewModel(typeof(T), modelData);
         }
@@ -247,6 +245,7 @@ namespace DD4T.ViewModels
             }
             return model;
         }
+
         #region Private methods
 
         // See http://stackoverflow.com/questions/4277692/getentryassembly-for-web-applications
@@ -266,6 +265,7 @@ namespace DD4T.ViewModels
 
             return type == null ? null : type.Assembly;
         }
+
         private void ProcessViewModel(IViewModel viewModel, Type type, IContextModel contextModel)
         {
             //PropertyInfo[] props = type.GetProperties();
@@ -278,7 +278,7 @@ namespace DD4T.ViewModels
                 if (propAttribute != null) // this property is an IPropertyAttribute
                 {
                     IEnumerable values;
-                    //ILinkablePropertyAttribute is implemented, we have to pass context data to property. 
+                    //ILinkablePropertyAttribute is implemented, we have to pass context data to property.
                     if (propAttribute is ILinkablePropertyAttribute)
                         values = ((ILinkablePropertyAttribute)propAttribute).GetPropertyValues(viewModel.ModelData, prop, this, contextModel); //delegate work to the Property Attribute object itself. Allows for custom attribute types to easily be added
                     else
@@ -316,29 +316,43 @@ namespace DD4T.ViewModels
             else if (prop.IsCollection)
             {
                 var tempValues = (IEnumerable)_resolver.ResolveInstance(prop.PropertyType);
-                foreach (var val in values)
+                Type elementType;
+                if (_resolver.ReflectionHelper.IsGenericCollection(prop.PropertyType, out elementType))
                 {
-                    prop.AddToCollection(tempValues, val);
+                    foreach (var val in values)
+                    {
+                        if (elementType.IsAssignableFrom(val.GetType()))
+                        {
+                            prop.AddToCollection(tempValues, val);
+                        }
+                    }
                 }
+
                 result = tempValues;
             }
             else //it's a single value, just return the first one (should really only be one thing)
             {
-                result = values.Cast<object>().FirstOrDefault();
+                foreach (var val in values)
+                {
+                    if (val == null)
+                        continue;
+
+                    if (prop.PropertyType.IsAssignableFrom(val.GetType()))
+                    {
+                        result = val;
+                        break;
+                    }
+                }
             }
             return result;
         }
+
         private string[] GetViewModelKey(IModel model)
         {
             string key = _keyProvider.GetViewModelKey(model);
             return String.IsNullOrEmpty(key) ? null : new string[] { key };
         }
-        #endregion
 
-
-
-
-
-
+        #endregion Private methods
     }
 }

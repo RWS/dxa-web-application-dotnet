@@ -51,12 +51,12 @@ namespace DD4T.Mvc.ViewModels.XPM
         private IFieldSet resolveFields(IModel model, bool isMetadata)
         {
             IFieldSet fields = null;
-            if(model is IComponentPresentation)
+            if (model is IComponentPresentation)
             {
                 var cp = model as IComponentPresentation;
-                fields =  isMetadata ? cp.Component.MetadataFields : cp.Component.Fields;
+                fields = isMetadata ? cp.Component.MetadataFields : cp.Component.Fields;
             }
-            else if(model is IEmbeddedFields)
+            else if (model is IEmbeddedFields)
             {
                 var emb = model as IEmbeddedFields;
                 fields = emb.Fields;
@@ -234,7 +234,7 @@ namespace DD4T.Mvc.ViewModels.XPM
         private IModelProperty GetModelProperty<TProp>(Expression<Func<TModel, TProp>> propertyLambda)
         {
             PropertyInfo property = reflectionHelper.GetPropertyInfo(propertyLambda);
-            return GetModelProperty(model.GetType(), property); 
+            return GetModelProperty(model.GetType(), property);
         }
         private HtmlString SiteEditable<TProp>(IViewModel model, IFieldSet fields, IModelProperty fieldProp, int index)
         {

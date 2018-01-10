@@ -23,31 +23,23 @@ namespace DD4T.Utils.Resolver
         /// </summary>
         private const string XlinkNamespaceUri = "http://www.w3.org/1999/xlink";
 
-
-        //private readonly ILinkFactory _linkFactory;
         private readonly ILogger _logger;
+
         private readonly IDD4TConfiguration _configuration;
         private readonly ILinkResolver _linkResolver;
-        //private readonly IBinaryFactory _binaryFactory;
-            
 
         public DefaultRichTextResolver(ILinkResolver linkResolver, ILogger logger, IDD4TConfiguration configuration)
         {
-            //binaryFactory.ThrowIfNull(nameof(binaryFactory));
-            //linkFactory.ThrowIfNull(nameof(linkFactory));
             Contract.ThrowIfNull(linkResolver, nameof(linkResolver));
             Contract.ThrowIfNull(logger, nameof(logger));
             Contract.ThrowIfNull(configuration, nameof(configuration));
 
-            //_binaryFactory = binaryFactory;
-            //_linkFactory = linkFactory;
             _linkResolver = linkResolver;
             _logger = logger;
             _configuration = configuration;
         }
 
-
-        public object Resolve(string input, string pageUri = null)
+        public virtual object Resolve(string input, string pageUri = null)
         {
             XmlDocument doc = new XmlDocument();
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);

@@ -102,6 +102,10 @@ namespace DD4T.Mvc.Html
                 {
                     return new MvcHtmlString("<!-- RenderComponentPresentations can only be used if the model is an instance of IPage or if there is a Page property in the viewbag with type IPage -->");
                 }
+                if (page == null)
+                {
+                    return new MvcHtmlString("<!-- RenderComponentPresentations can only be used if the model is an instance of IPage or if there is a Page property in the viewbag with type IPage -->");
+                }
             }
 
             if (renderer == null)

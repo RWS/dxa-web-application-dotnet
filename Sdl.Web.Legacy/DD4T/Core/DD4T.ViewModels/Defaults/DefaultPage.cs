@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DD4T.ViewModels.Defaults
 {
-    [PageViewModel]
+    //[PageViewModel]
     public class DefaultPage : ViewModelBase
     {
         [PageTitle]
@@ -17,6 +17,5 @@ namespace DD4T.ViewModels.Defaults
 
         [ComponentPresentations]
         public List<IRenderableViewModel> Items { get; set; }
-
     }
 }

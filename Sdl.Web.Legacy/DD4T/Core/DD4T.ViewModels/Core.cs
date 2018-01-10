@@ -8,6 +8,7 @@ using DD4T.ViewModels.Attributes;
 using System.Web;
 using DD4T.ViewModels.Exceptions;
 using DD4T.ViewModels.Reflection;
+using System.Web.Configuration;
 using System.Linq.Expressions;
 using DD4T.ViewModels.Binding;
 using System.Collections;

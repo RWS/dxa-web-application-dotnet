@@ -10,7 +10,7 @@ namespace DD4T.Serialization
     public class JSONSerializerService : BaseSerializerService
     {
 
-
+        private object _lock = new object();
         private JsonSerializer _serializer = null;
         public JsonSerializer Serializer
         {
@@ -18,12 +18,18 @@ namespace DD4T.Serialization
             {
                 if (_serializer == null)
                 {
-                    _serializer = new JsonSerializer
+                    lock (_lock)
                     {
-                        NullValueHandling = NullValueHandling.Ignore
-                    };
-                    _serializer.Converters.Add(new FieldConverter());
-                    _serializer.Converters.Add(new FieldSetConverter());
+                        if (_serializer == null)
+                        {
+                            _serializer = new JsonSerializer
+                            {
+                                NullValueHandling = NullValueHandling.Ignore
+                            };
+                            _serializer.Converters.Add(new FieldConverter());
+                            _serializer.Converters.Add(new FieldSetConverter());
+                        }
+                    }
                 }
 
                 return _serializer;
