@@ -19,7 +19,10 @@
             <reference file="Sdl.Web.ModelService.dll" />
         </references>
         <dependencies>
+            <dependency id="Sdl.Web.Delivery" version="10.1.0" />
             <dependency id="Newtonsoft.Json" version="10.0.0" />
+            <dependency id="DD4T.Core" version="2.2.2" />
+            <dependency id="DD4T.Model" version="2.2.2" />
         </dependencies>
     </metadata>
     <files>

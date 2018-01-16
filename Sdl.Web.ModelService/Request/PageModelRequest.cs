@@ -44,10 +44,7 @@ namespace Sdl.Web.ModelService.Request
         private static string GetCanonicalUrlPath(string urlPath)
         {
             string result = urlPath ?? IndexPageUrlSuffix;
-            if (!result.StartsWith("/"))
-            {
-                result = "/" + result;
-            }
+            result = result.TrimStart('/');
             if (result.EndsWith("/"))
             {
                 result += DefaultExtensionLessPageName;
