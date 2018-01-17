@@ -84,6 +84,7 @@ namespace DD4T.Providers.DxaModelService
         public string GetContentByUrl(string url)
         {
             LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUrl({0})", LoggingCategory.Performance, url);
+            string content = null;
             PageModelRequest req = new PageModelRequest
             {
                 PublicationId = PublicationId,
@@ -94,12 +95,13 @@ namespace DD4T.Providers.DxaModelService
             };
             try
             {
-                return ModelServiceClient.PerformRequest(req).Response;
+                content = ModelServiceClient.PerformRequest(req).Response;
             }
             catch
             {
             }
-            return null;
+            LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUrl({0}) returns {1}", LoggingCategory.Performance, url, content);
+            return content;
         }
 
         /// <summary>
@@ -110,6 +112,7 @@ namespace DD4T.Providers.DxaModelService
         public string GetContentByUri(string tcmUri)
         {
             LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUri({0})", LoggingCategory.Performance, tcmUri);
+            string content = null;
             TcmUri tcm = new TcmUri(tcmUri);
             PageMetaFactory metaFactory = GetPageMetaFactory(tcm.PublicationId);            
             PageModelRequest req = new PageModelRequest
@@ -122,12 +125,13 @@ namespace DD4T.Providers.DxaModelService
             };
             try
             {
-                return ModelServiceClient.PerformRequest(req).Response;
+                content = ModelServiceClient.PerformRequest(req).Response;
             }
             catch
             {
             }
-            return null;
+            LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUrl({0}) returns {1}", LoggingCategory.Performance, tcmUri, content);
+            return content;
         }
 
         public DateTime GetLastPublishedDateByUrl(string url)
