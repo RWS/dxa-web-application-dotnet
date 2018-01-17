@@ -109,9 +109,25 @@ namespace DD4T.Providers.DxaModelService
         /// <returns>String with page xml or empty string if no page was found</returns>
         public string GetContentByUri(string tcmUri)
         {
+            LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUri({0})", LoggingCategory.Performance, tcmUri);
             TcmUri tcm = new TcmUri(tcmUri);
-            PageMetaFactory metaFactory = GetPageMetaFactory(tcm.PublicationId);
-            return GetContentByUrl(metaFactory.GetMeta(tcm.ItemId).UrlPath);
+            PageMetaFactory metaFactory = GetPageMetaFactory(tcm.PublicationId);            
+            PageModelRequest req = new PageModelRequest
+            {
+                PublicationId = tcm.PublicationId,
+                ContentType = ContentType.RAW,
+                DataModelType = DataModelType.DD4T,
+                PageInclusion = PageInclusion.INCLUDE,
+                Path = metaFactory.GetMeta(tcm.ItemId).UrlPath
+            };
+            try
+            {
+                return ModelServiceClient.PerformRequest(req).Response;
+            }
+            catch
+            {
+            }
+            return null;
         }
 
         public DateTime GetLastPublishedDateByUrl(string url)
