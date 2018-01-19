@@ -100,7 +100,7 @@ namespace DD4T.Providers.DxaModelService
             catch
             {
             }
-            LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUrl({0}) returns {1}", LoggingCategory.Performance, url, content);
+          //  LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUrl({0}) returns {1}", LoggingCategory.Performance, url, content);
             return content;
         }
 
@@ -130,7 +130,7 @@ namespace DD4T.Providers.DxaModelService
             catch
             {
             }
-            LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUrl({0}) returns {1}", LoggingCategory.Performance, tcmUri, content);
+          //  LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUrl({0}) returns {1}", LoggingCategory.Performance, tcmUri, content);
             return content;
         }
 
