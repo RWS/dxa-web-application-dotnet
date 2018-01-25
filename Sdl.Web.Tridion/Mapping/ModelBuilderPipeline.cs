@@ -7,6 +7,7 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Extensions;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.DataModel;
 using Sdl.Web.Tridion.Configuration;
 using Sdl.Web.Common.Utils;
@@ -33,6 +34,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// </summary>
         static ModelBuilderPipeline()
         {
+            Log.Debug($"Constructing ModelBuilderPipeline");
             using (new Tracer())
             {
                 IList<IPageModelBuilder> pageModelBuilders = new List<IPageModelBuilder>();
@@ -52,6 +54,12 @@ namespace Sdl.Web.Tridion.Mapping
                             object modelBuilder = modelBuilderType.CreateInstance();
                             IPageModelBuilder pageModelBuilder = modelBuilder as IPageModelBuilder;
                             IEntityModelBuilder entityModelBuilder = modelBuilder as IEntityModelBuilder;
+                            IDataModelExtension modelExtension = modelBuilder as IDataModelExtension;
+                            if (modelExtension != null)
+                            {
+                                Log.Info($"Using Data Model Extension Type '{modelBuilderType.FullName}'");
+                                SiteConfiguration.ModelServiceProvider.AddDataModelExtension(modelExtension);
+                            }
                             if ((pageModelBuilder == null) && (entityModelBuilder == null))
                             {
                                 Log.Warn($"Configured Model Builder Type '{modelBuilderType.FullName}' does not implement IPageModelBuilder nor IEntityModelBuilder; skipping.");
@@ -100,6 +108,11 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
+        public static void Init()
+        {            
+            // force static construction
+            Log.Info($"Initializing ModelBuilderPipeline.");            
+        }
 
         /// <summary>
         /// Creates a Strongly Typed Page Model for a given DXA R2 Data Model.
