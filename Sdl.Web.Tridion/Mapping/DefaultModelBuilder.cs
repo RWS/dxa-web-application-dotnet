@@ -7,9 +7,11 @@ using System.Reflection;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Models;
+using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.DataModel;
 using Sdl.Web.Tridion.ContentManager;
 using MvcData = Sdl.Web.Common.Models.MvcData;
@@ -19,7 +21,7 @@ namespace Sdl.Web.Tridion.Mapping
     /// <summary>
     /// Default Page and Entity Model Builder implementation (based on DXA R2 Data Model).
     /// </summary>
-    public class DefaultModelBuilder : IPageModelBuilder, IEntityModelBuilder
+    public class DefaultModelBuilder : IPageModelBuilder, IEntityModelBuilder, IDataModelExtension
     {
         private class Validation
         {
@@ -39,6 +41,21 @@ namespace Sdl.Web.Tridion.Mapping
             public ContentModelData MetadataFields { get; set; }
             public string ContextXPath { get; set; }
             public Localization Localization { get; set; }
+        }
+
+        public Type ResolveDataModelType(string assemblyName, string typeName)
+        {
+            // perform type remapping as the type names returned from model-service do not match so we
+            // remap here to correctly deserialize.
+            switch (typeName)
+            {
+                case "TaxonomyNodeModelData":
+                    return typeof(TaxonomyNode);
+                case "SitemapItemModelData":
+                    return typeof(SitemapItem);
+            }
+            // check for any extensions
+            return Type.GetType($"Sdl.Web.DataModel.Extension.{typeName}");
         }
 
         /// <summary>
@@ -799,6 +816,6 @@ namespace Sdl.Web.Tridion.Mapping
             string separator = coreResources["core.pageTitleSeparator"].ToString();
             string suffix = coreResources["core.pageTitlePostfix"].ToString();
             return $"{title}{separator}{suffix}";
-        }
+        }      
     }
 }

@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.0.0-beta-201711211302</SdlDxaDataModelPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.0.0-beta-201801261424</SdlDxaDataModelPackageVersion>
     <SdlWebDeliveryPackageVersion>10.1.0</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>10.1.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>10.1.0</SdlWebContextImagePackageVersion>
@@ -191,6 +191,15 @@
     <Compile Include="ContentManager\InvalidTcmUriException.cs" />
     <Compile Include="ContentManager\ItemTypes.cs" />
     <Compile Include="Context\AdfContextClaimsProvider.cs" />
+    <Compile Include="DataModelExtensions\TargetGroups\Condition.cs" />
+    <Compile Include="DataModelExtensions\TargetGroups\ConditionOperator.cs" />
+    <Compile Include="DataModelExtensions\TargetGroups\CustomerCharacteristicCondition.cs" />
+    <Compile Include="DataModelExtensions\TargetGroups\ICondition.cs" />
+    <Compile Include="DataModelExtensions\TargetGroups\ITargetGroup.cs" />
+    <Compile Include="DataModelExtensions\TargetGroups\ITargetGroupCondition.cs" />
+    <Compile Include="DataModelExtensions\TargetGroups\KeywordCondition.cs" />
+    <Compile Include="DataModelExtensions\TargetGroups\TargetGroup.cs" />
+    <Compile Include="DataModelExtensions\TargetGroups\TargetGroupCondition.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Linking\DefaultLinkResolver.cs" />
     <Compile Include="LocalizationResolver.cs" />

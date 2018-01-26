@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Web.Configuration;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
@@ -9,6 +10,7 @@ using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.DataModel;
 using Sdl.Web.ModelService;
 using Sdl.Web.ModelService.Request;
+using Sdl.Web.Tridion.Mapping;
 
 namespace Sdl.Web.Tridion.ModelService
 {   
@@ -22,19 +24,25 @@ namespace Sdl.Web.Tridion.ModelService
         private const int DefaultRetryCount = 4;
         private const int DefaultTimeout = 10000;
         private readonly ModelServiceClient _modelServiceClient;
+        private readonly Binder _binder;
 
         #region Binder
         private class Binder : DataModelBinder
         {
+            private readonly List<IDataModelExtension> _dataModelExtensions = new List<IDataModelExtension>();
+
+            public void AddDataModelExtension(IDataModelExtension extension)
+            {
+                _dataModelExtensions.Add(extension);
+            }          
+
             public override Type BindToType(string assemblyName, string typeName)
             {
-                switch (typeName)
+                foreach (var extension in _dataModelExtensions)
                 {
-                    case "TaxonomyNodeModelData":
-                        return typeof(TaxonomyNode);
-                    case "SitemapItemModelData":
-                        return typeof(SitemapItem);
-                }
+                    Type type = extension.ResolveDataModelType(assemblyName, typeName);
+                    if (type != null) return type;
+                }              
                 return base.BindToType(assemblyName, typeName);
             }
         }
@@ -42,7 +50,7 @@ namespace Sdl.Web.Tridion.ModelService
 
         public DefaultModelServiceProvider()
         {
-            string uri = WebConfigurationManager.AppSettings["model-builder-service-uri"];
+            string uri = WebConfigurationManager.AppSettings["model-builder-service-uri"];          
             int n;
             int retryCount = int.TryParse(
                 WebConfigurationManager.AppSettings["model-builder-service-retries"], out n)
@@ -54,8 +62,27 @@ namespace Sdl.Web.Tridion.ModelService
                 ? n
                 : DefaultTimeout;
             _modelServiceClient = new ModelServiceClient(uri, retryCount, timeout);
-            Log.Debug($"{ModelServiceName} found at URL '{_modelServiceClient.ModelServiceBaseUri}'");            
+            _binder = new Binder();
+            Log.Debug($"{ModelServiceName} found at URL '{_modelServiceClient.ModelServiceBaseUri}'"); 
         }
+
+        public DefaultModelServiceProvider(List<IDataModelExtension> extensions)
+            : this()
+        {
+            foreach (var ext in extensions)
+            {
+                _binder.AddDataModelExtension(ext);
+            }
+        }
+
+        /// <summary>
+        /// Adds a new data model extension to handle deserialization.
+        /// </summary>
+        /// <param name="extension">Extension.</param>      
+        public void AddDataModelExtension(IDataModelExtension extension)
+        {
+            _binder.AddDataModelExtension(extension);
+        }      
 
         /// <summary>
         /// Get page model data object.
@@ -70,7 +97,7 @@ namespace Sdl.Web.Tridion.ModelService
                     CmUriScheme = localization.CmUriScheme,
                     PublicationId = int.Parse(localization.Id),
                     PageInclusion = addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                    Binder = new Binder()
+                    Binder = _binder
                 };
 
                 ModelServiceResponse<PageModelData> response = _modelServiceClient.PerformRequest<PageModelData>(request);
@@ -101,7 +128,7 @@ namespace Sdl.Web.Tridion.ModelService
                     EntityId = entityId,
                     CmUriScheme = localization.CmUriScheme,
                     PublicationId = int.Parse(localization.Id),
-                    Binder = new Binder()                    
+                    Binder = _binder                 
                 };
 
                 ModelServiceResponse<EntityModelData> response = _modelServiceClient.PerformRequest<EntityModelData>(request);
@@ -130,7 +157,7 @@ namespace Sdl.Web.Tridion.ModelService
                 SitemapItemModelRequest request = new SitemapItemModelRequest
                 {
                     PublicationId = int.Parse(localization.Id),
-                    Binder = new Binder()
+                    Binder = _binder
                 };
                 return _modelServiceClient.PerformRequest<TaxonomyNode>(request).Response;
             }
@@ -160,7 +187,7 @@ namespace Sdl.Web.Tridion.ModelService
                     ParentSitemapItemId = parentSitemapItemId,
                     IncludeAncestors = includeAncestors,
                     DescendantLevels = descendantLevels,
-                    Binder = new Binder()
+                    Binder = _binder
                 };
                 return _modelServiceClient.PerformRequest<SitemapItem[]>(request).Response;
             }

@@ -23,6 +23,11 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class DefaultContentProvider : IContentProvider, IRawDataProvider
     {
+        public DefaultContentProvider()
+        {
+            ModelBuilderPipeline.Init();
+        }
+
         /// <summary>
         /// Gets a Page Model for a given URL path.
         /// </summary>
