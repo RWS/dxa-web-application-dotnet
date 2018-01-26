@@ -64,16 +64,7 @@ namespace Sdl.Web.Tridion.ModelService
             _modelServiceClient = new ModelServiceClient(uri, retryCount, timeout);
             _binder = new Binder();
             Log.Debug($"{ModelServiceName} found at URL '{_modelServiceClient.ModelServiceBaseUri}'"); 
-        }
-
-        public DefaultModelServiceProvider(List<IDataModelExtension> extensions)
-            : this()
-        {
-            foreach (var ext in extensions)
-            {
-                _binder.AddDataModelExtension(ext);
-            }
-        }
+        }    
 
         /// <summary>
         /// Adds a new data model extension to handle deserialization.

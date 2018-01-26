@@ -76,7 +76,7 @@ namespace Sdl.Web.Tridion.Tests
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
             { typeof(ICacheProvider), new DefaultCacheProvider() },
-            { typeof(IModelServiceProvider), new DefaultModelServiceProvider( new List<IDataModelExtension> {new TestDataModelExtensions()}) },
+            { typeof(IModelServiceProvider), new DefaultModelServiceProvider() },
             { typeof(IContentProvider), new DefaultContentProvider() },
             { typeof(INavigationProvider), new StaticNavigationProvider() },
             { typeof(ILinkResolver), new DefaultLinkResolver() },
@@ -160,6 +160,12 @@ namespace Sdl.Web.Tridion.Tests
 
         internal static void InitializeProviders()
         {
+            object modelServiceProvider;
+            if (_testProviders.TryGetValue(typeof(IModelServiceProvider), out modelServiceProvider))
+            {
+                ((DefaultModelServiceProvider)modelServiceProvider).AddDataModelExtension(new TestDataModelExtensions());
+            }
+
             SiteConfiguration.InitializeProviders(interfaceType =>
             {
                 object provider;
