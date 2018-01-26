@@ -58,7 +58,7 @@ namespace Sdl.Web.Tridion.Mapping
                             if (modelExtension != null)
                             {
                                 Log.Info($"Using Data Model Extension Type '{modelBuilderType.FullName}'");
-                                SiteConfiguration.ModelServiceProvider.AddDataModelExtension(modelExtension);
+                                SiteConfiguration.ModelServiceProvider?.AddDataModelExtension(modelExtension);
                             }
                             if ((pageModelBuilder == null) && (entityModelBuilder == null))
                             {
