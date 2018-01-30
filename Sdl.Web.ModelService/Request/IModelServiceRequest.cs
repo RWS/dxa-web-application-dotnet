@@ -5,8 +5,9 @@ namespace Sdl.Web.ModelService.Request
 {
     public enum ContentType
     {
+        IGNORE,
         RAW, // RAW will perform no conversion and return what is in the Broker
-        MODEL
+        MODEL,
     }
 
     public enum DataModelType

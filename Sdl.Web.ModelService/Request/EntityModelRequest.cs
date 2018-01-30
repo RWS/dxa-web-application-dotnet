@@ -43,7 +43,7 @@ namespace Sdl.Web.ModelService.Request
 
         public string CmUriScheme { get; set; } = "tcm";
 
-        public ContentType ContentType { get; set; } = ContentType.MODEL;    
+        public ContentType ContentType { get; set; } = ContentType.IGNORE;    
 
         public DataModelType DataModelType { get; set; } = DataModelType.R2;
 
@@ -53,12 +53,15 @@ namespace Sdl.Web.ModelService.Request
 
         public Uri BuildRequestUri(ModelServiceClient modelService)
         {
-            return UriCreator.FromUri(modelService.ModelServiceBaseUri)
+            var builder = UriCreator.FromUri(modelService.ModelServiceBaseUri)
                    .WithPath($"EntityModel/{CmUriScheme}/{PublicationId}/{EntityId}")
                    .WithQueryParam("modelType", DataModelType)
-                   .WithQueryParam("dcpType", DcpType)
-                   .WithQueryParam("raw", ContentType == ContentType.RAW)
-                   .Build();
+                   .WithQueryParam("dcpType", DcpType);
+            if (ContentType != ContentType.IGNORE)
+            {
+                builder.WithQueryParam("raw", ContentType == ContentType.RAW);
+            }                                            
+            return builder.Build();
         }      
     }
 }

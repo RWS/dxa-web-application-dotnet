@@ -88,7 +88,6 @@ namespace DD4T.Providers.DxaModelService
             PageModelRequest req = new PageModelRequest
             {
                 PublicationId = PublicationId,
-                ContentType = ContentType.RAW,
                 DataModelType = DataModelType.DD4T,
                 PageInclusion = PageInclusion.INCLUDE,
                 Path = url
@@ -118,7 +117,6 @@ namespace DD4T.Providers.DxaModelService
             PageModelRequest req = new PageModelRequest
             {
                 PublicationId = tcm.PublicationId,
-                ContentType = ContentType.RAW,
                 DataModelType = DataModelType.DD4T,
                 PageInclusion = PageInclusion.INCLUDE,
                 Path = metaFactory.GetMeta(tcm.ItemId).UrlPath
