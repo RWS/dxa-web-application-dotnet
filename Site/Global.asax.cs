@@ -15,10 +15,6 @@ using Sdl.Web.Mvc.Context;
 using Sdl.Web.Mvc.Formats;
 using Sdl.Web.Mvc.Html;
 using Unity.Mvc5;
-using DD4T.DI.Unity;
-using System.Reflection;
-using System.Linq;
-using DD4T.DI.Unity.Exceptions;
 
 namespace Sdl.Web.Site
 {
