@@ -47,6 +47,19 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DD4T.ContentModel">
+      <HintPath>..\packages\DD4T.Core.2.2.7\lib\net45\DD4T.ContentModel.dll</HintPath>
+    </Reference>
+    <Reference Include="DD4T.ContentModel.Contracts, Version=2.2.2.0, Culture=neutral, PublicKeyToken=4450e3c7f68bf872, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\DD4T.Core.2.2.7\lib\net45\DD4T.ContentModel.Contracts.dll</HintPath>
+    </Reference>
+    <Reference Include="DD4T.Core.Contracts">
+      <HintPath>..\packages\DD4T.Core.2.2.7\lib\net45\DD4T.Core.Contracts.dll</HintPath>
+    </Reference>
+    <Reference Include="DD4T.Utils">
+      <HintPath>..\packages\DD4T.Core.2.2.7\lib\net45\DD4T.Utils.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Extensions.Caching.Abstractions">
       <HintPath>..\packages\Microsoft.Extensions.Caching.Abstractions.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Caching.Abstractions.dll</HintPath>
     </Reference>
@@ -104,9 +117,6 @@
     <Reference Include="Sdl.Web.Delivery.ServicesCore">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
-    </Reference>
-    <Reference Include="Sdl.Web.Legacy.Model">
-      <HintPath>..\Sdl.Web.Legacy.Model\bin\$(Configuration)\Sdl.Web.Legacy.Model.dll</HintPath>
     </Reference>
     <Reference Include="StackExchange.Redis.StrongName">
       <HintPath>..\packages\StackExchange.Redis.StrongName.1.1.605\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>
@@ -226,10 +236,6 @@
     <ProjectReference Include="..\Sdl.Web.Common\Sdl.Web.Common.csproj">
       <Project>{21c08f9a-24c2-481a-95c3-a255be9771a7}</Project>
       <Name>Sdl.Web.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Sdl.Web.Legacy\Sdl.Web.Legacy.csproj">
-      <Project>{266cf812-c726-47ed-9f6e-2d6a5c1bcbb0}</Project>
-      <Name>Sdl.Web.Legacy</Name>
     </ProjectReference>
     <ProjectReference Include="..\Sdl.Web.ModelService\Sdl.Web.ModelService.csproj">
       <Project>{5a58a2b2-6c7e-4183-8eff-76d4282e5c66}</Project>
