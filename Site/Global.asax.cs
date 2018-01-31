@@ -161,18 +161,6 @@ namespace Sdl.Web.Site
         {
             IUnityContainer container = BuildUnityContainer();                              
             DependencyResolver.SetResolver(new UnityDependencyResolver(container));
-            try
-            {
-                container.UseDD4T();
-            }
-            catch (ProviderNotFoundException)
-            {
-                // we can ignore this as we use the Model Service by default
-            }
-            catch (Exception e)
-            {
-                Log.Debug("Problem initializing DD4T dependency injection.", e);
-            }
             return container;
         }
       
