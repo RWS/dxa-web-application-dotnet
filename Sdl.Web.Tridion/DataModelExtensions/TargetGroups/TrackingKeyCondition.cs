@@ -1,8 +1,8 @@
 ﻿namespace Sdl.Web.DataModel.Extension
 {
-    public class KeywordCondition : Condition
+    public class TrackingKeyCondition : Condition
     {
-        public KeywordModelData KeywordModelData { get; set; }
+        public string TrackingKeyTitle { get; set; }
         public ConditionOperator Operator { get; set; }
         public object Value { get; set; }
     }
