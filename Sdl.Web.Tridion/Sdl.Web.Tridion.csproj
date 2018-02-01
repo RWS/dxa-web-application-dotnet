@@ -207,7 +207,7 @@
     <Compile Include="DataModelExtensions\TargetGroups\ICondition.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\ITargetGroup.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\ITargetGroupCondition.cs" />
-    <Compile Include="DataModelExtensions\TargetGroups\KeywordCondition.cs" />
+    <Compile Include="DataModelExtensions\TargetGroups\TrackingKeyCondition.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\TargetGroup.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\TargetGroupCondition.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
