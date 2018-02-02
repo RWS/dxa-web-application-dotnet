@@ -204,9 +204,6 @@
     <Compile Include="DataModelExtensions\TargetGroups\Condition.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\ConditionOperator.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\CustomerCharacteristicCondition.cs" />
-    <Compile Include="DataModelExtensions\TargetGroups\ICondition.cs" />
-    <Compile Include="DataModelExtensions\TargetGroups\ITargetGroup.cs" />
-    <Compile Include="DataModelExtensions\TargetGroups\ITargetGroupCondition.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\TrackingKeyCondition.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\TargetGroup.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\TargetGroupCondition.cs" />

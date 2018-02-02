@@ -2,7 +2,7 @@
 
 namespace Sdl.Web.DataModel.Extension
 {
-    public class TargetGroup : ITargetGroup
+    public class TargetGroup
     {
         public string Id { get; set; }
 
@@ -10,6 +10,6 @@ namespace Sdl.Web.DataModel.Extension
 
         public string Description { get; set; }
         
-        public IList<ICondition> Conditions { get; set; }
+        public IList<Condition> Conditions { get; set; }
     }
 }
