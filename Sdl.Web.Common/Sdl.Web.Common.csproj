@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.0.0-beta-201801261424</SdlDxaDataModelPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.0.0</SdlDxaDataModelPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -150,7 +150,9 @@
   <ItemGroup>
     <None Include="Interfaces\ExtensionPoints.cd" />
     <None Include="Models\ViewModels.cd" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
