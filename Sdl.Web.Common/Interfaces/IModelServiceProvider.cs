@@ -10,6 +10,8 @@ namespace Sdl.Web.Common.Interfaces
     /// </summary>
     public interface IModelServiceProvider
     {
+        void AddDataModelExtension(IDataModelExtension extension);
+
         /// <summary>
         /// Returns the Page Model Data for a given path.
         /// </summary>

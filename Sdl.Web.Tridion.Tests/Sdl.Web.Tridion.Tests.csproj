@@ -58,7 +58,7 @@
     </Reference>
     <Reference Include="Sdl.Web.DataModel, Version=2.0.0.8, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Sdl.Dxa.DataModel.2.0.0-beta-201711211302\lib\net452\Sdl.Web.DataModel.dll</HintPath>
+      <HintPath>..\packages\Sdl.Dxa.DataModel.2.0.0\lib\net452\Sdl.Web.DataModel.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Delivery.Core">
       <SpecificVersion>False</SpecificVersion>

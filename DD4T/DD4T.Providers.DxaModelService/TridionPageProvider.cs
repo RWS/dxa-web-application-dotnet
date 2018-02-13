@@ -84,22 +84,23 @@ namespace DD4T.Providers.DxaModelService
         public string GetContentByUrl(string url)
         {
             LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUrl({0})", LoggingCategory.Performance, url);
+            string content = null;
             PageModelRequest req = new PageModelRequest
             {
                 PublicationId = PublicationId,
-                ContentType = ContentType.RAW,
                 DataModelType = DataModelType.DD4T,
                 PageInclusion = PageInclusion.INCLUDE,
                 Path = url
             };
             try
             {
-                return ModelServiceClient.PerformRequest(req).Response;
+                content = ModelServiceClient.PerformRequest(req).Response;
             }
             catch
             {
             }
-            return null;
+          //  LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUrl({0}) returns {1}", LoggingCategory.Performance, url, content);
+            return content;
         }
 
         /// <summary>
@@ -109,9 +110,26 @@ namespace DD4T.Providers.DxaModelService
         /// <returns>String with page xml or empty string if no page was found</returns>
         public string GetContentByUri(string tcmUri)
         {
+            LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUri({0})", LoggingCategory.Performance, tcmUri);
+            string content = null;
             TcmUri tcm = new TcmUri(tcmUri);
-            PageMetaFactory metaFactory = GetPageMetaFactory(tcm.PublicationId);
-            return GetContentByUrl(metaFactory.GetMeta(tcm.ItemId).UrlPath);
+            PageMetaFactory metaFactory = GetPageMetaFactory(tcm.PublicationId);            
+            PageModelRequest req = new PageModelRequest
+            {
+                PublicationId = tcm.PublicationId,
+                DataModelType = DataModelType.DD4T,
+                PageInclusion = PageInclusion.INCLUDE,
+                Path = metaFactory.GetMeta(tcm.ItemId).UrlPath
+            };
+            try
+            {
+                content = ModelServiceClient.PerformRequest(req).Response;
+            }
+            catch
+            {
+            }
+          //  LoggerService.Debug(">>DD4T.Providers.DxaModelService::GetContentByUrl({0}) returns {1}", LoggingCategory.Performance, tcmUri, content);
+            return content;
         }
 
         public DateTime GetLastPublishedDateByUrl(string url)

@@ -38,7 +38,6 @@ namespace DD4T.Providers.DxaModelService
             EntityModelRequest request = new EntityModelRequest
             {
                 PublicationId = PublicationId,
-                ContentType = ContentType.RAW,
                 DataModelType = DataModelType.DD4T,
                 DcpType = DcpType.HIGHEST_PRIORITY,
                 ComponentId = tcmUri.ItemId

@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.0.0-beta-201711211302</SdlDxaDataModelPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.0.0</SdlDxaDataModelPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -93,6 +93,7 @@
     <Compile Include="Interfaces\ICacheProvider.cs" />
     <Compile Include="Interfaces\IConditionalEntityEvaluator.cs" />
     <Compile Include="Interfaces\IContextClaimsProvider.cs" />
+    <Compile Include="Interfaces\IDataModelExtension.cs" />
     <Compile Include="Interfaces\ILinkResolver.cs" />
     <Compile Include="Interfaces\ILocalizationResolver.cs" />
     <Compile Include="Interfaces\IModelServiceProvider.cs" />
@@ -149,7 +150,9 @@
   <ItemGroup>
     <None Include="Interfaces\ExtensionPoints.cd" />
     <None Include="Models\ViewModels.cd" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -38,19 +38,28 @@ namespace Sdl.Web.Common.Mapping
                 xpathBuilder.Append(pathSegment);
             }
             string xpath = xpathBuilder.ToString();
+            if (string.IsNullOrEmpty(contextXPath)) return xpath;
 
-            if (string.IsNullOrEmpty(contextXPath))
+            // merge our xpath with predicates from contextXPath ( [<predicate] )
+            string[] parts1 = contextXPath.Split('/');
+            string[] parts2 = xpath.Split('/');
+            string merged = "";
+            for (int i = 0; i < parts2.Length; i++)
             {
-                return xpath;
+                if (i > 0) merged += "/";                
+                if (i < parts1.Length)
+                {
+                    if (parts2[i] == parts1[i].Split('[')[0])
+                    {
+                        merged += parts1[i];
+                    }
+                }
+                else
+                {
+                    merged += parts2[i];
+                }
             }
-
-            string contextXPathWithoutPredicate = contextXPath.Split('[')[0];
-            if (!xpath.StartsWith(contextXPathWithoutPredicate))
-            {
-                // This should not happen, but if it happens, we just stick with the original XPath.
-                Log.Warn("Semantic field's XPath ('{0}') does not match context XPath '{1}'.", xpath, contextXPath);
-            }
-            return xpath.Replace(contextXPathWithoutPredicate, contextXPath);
+            return merged;
         }
 
         /// <summary>

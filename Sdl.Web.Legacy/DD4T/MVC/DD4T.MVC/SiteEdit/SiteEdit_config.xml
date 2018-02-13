@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<siteEdit enabled="true" style="SiteEdit2012" tridionHostUrl="http://dev.cms.sdl.com">
-  <contextPublications>
-    <contextPublication id="29" pagePublication="1" componentPublication="2" publishPublication="3"/>
-    <contextPublication id="0" pagePublication="4" componentPublication="6" publishPublication="2"/>
-  </contextPublications>
-</siteEdit>

@@ -4,6 +4,8 @@ using System.Linq;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Models;
+using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Navigation;
 using Sdl.Web.Tridion.Caching;
@@ -12,6 +14,24 @@ using Sdl.Web.Tridion.ModelService;
 
 namespace Sdl.Web.Tridion.Tests
 {
+    internal class TestDataModelExtensions : IDataModelExtension
+    {
+        public Type ResolveDataModelType(string assemblyName, string typeName)
+        {
+            // perform type remapping as the type names returned from model-service do not match so we
+            // remap here to correctly deserialize.
+            switch (typeName)
+            {
+                case "TaxonomyNodeModelData":
+                    return typeof(TaxonomyNode);
+                case "SitemapItemModelData":
+                    return typeof(SitemapItem);
+            }
+            // check for any extensions
+            return Type.GetType($"Sdl.Web.DataModel.Extension.{typeName}");
+        }
+    }
+
     internal class TestFixture : ILocalizationResolver
     {
         internal const string HomePageId = "640";
@@ -140,6 +160,12 @@ namespace Sdl.Web.Tridion.Tests
 
         internal static void InitializeProviders()
         {
+            object modelServiceProvider;
+            if (_testProviders.TryGetValue(typeof(IModelServiceProvider), out modelServiceProvider))
+            {
+                ((DefaultModelServiceProvider)modelServiceProvider).AddDataModelExtension(new TestDataModelExtensions());
+            }
+
             SiteConfiguration.InitializeProviders(interfaceType =>
             {
                 object provider;

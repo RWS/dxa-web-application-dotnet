@@ -23,7 +23,7 @@ namespace Sdl.Web.ModelService.Request
 
         public string ItemId { get; set; }
 
-        public ContentType ContentType { get; set; } = ContentType.MODEL;  
+        public ContentType ContentType { get; set; } = ContentType.IGNORE;  
 
         public DataModelType DataModelType { get; set; } = DataModelType.R2;
 
@@ -33,21 +33,21 @@ namespace Sdl.Web.ModelService.Request
 
         public Uri BuildRequestUri(ModelServiceClient modelService)
         {
-            return UriCreator.FromUri(modelService.ModelServiceBaseUri)
+            var builder = UriCreator.FromUri(modelService.ModelServiceBaseUri)
                     .WithPath($"PageModel/{CmUriScheme}/{PublicationId}/{GetCanonicalUrlPath(Path)}")
                     .WithQueryParam("includes", PageInclusion)
-                    .WithQueryParam("modelType", DataModelType)
-                    .WithQueryParam("raw", ContentType == ContentType.RAW)
-                    .Build();
+                    .WithQueryParam("modelType", DataModelType);
+            if (ContentType != ContentType.IGNORE)
+            {
+                builder.WithQueryParam("raw", ContentType == ContentType.RAW);
+            }            
+            return builder.Build();
         }
 
         private static string GetCanonicalUrlPath(string urlPath)
         {
             string result = urlPath ?? IndexPageUrlSuffix;
-            if (!result.StartsWith("/"))
-            {
-                result = "/" + result;
-            }
+            result = result.TrimStart('/');
             if (result.EndsWith("/"))
             {
                 result += DefaultExtensionLessPageName;
