@@ -22,7 +22,7 @@ namespace Sdl.Web.Tridion.ModelService
     {
         private const string ModelServiceName = "DXA Model Service";
         private const int DefaultRetryCount = 4;
-        private const int DefaultTimeout = 10000;
+        private const int DefaultTimeout = 60000;
         private readonly ModelServiceClient _modelServiceClient;
         private readonly Binder _binder;
 
