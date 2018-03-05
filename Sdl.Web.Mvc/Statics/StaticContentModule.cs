@@ -6,7 +6,6 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Common.Utils;
 using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Mvc.Statics
@@ -111,8 +110,6 @@ namespace Sdl.Web.Mvc.Statics
             HttpRequest request = context.Request;
             HttpResponse response = context.Response;
             string urlPath = request.Url.AbsolutePath;
-            urlPath = WebUtility.UrlDecode(urlPath); // decode any partial encodings here so we dont double encode
-            urlPath = UrlEncoding.UrlPathEncode(urlPath);
 
             DateTime ifModifiedSince = Convert.ToDateTime(request.Headers["If-Modified-Since"]);
 
