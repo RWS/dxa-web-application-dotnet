@@ -46,6 +46,11 @@ namespace Sdl.Web.Mvc.Statics
             string url = request.Url.AbsolutePath;           
             using (new Tracer(sender, e, url))
             {
+                // If DXA fails to initialize due to no TTM mapping then we can still identify if DXA is running by going to /system/health
+                if (url.EndsWith("/system/health"))
+                {
+                    SendHealthCheckResponse(response);
+                }
                 // Attempt to determine Localization
                 Localization localization = null;
                 try
@@ -188,6 +193,15 @@ namespace Sdl.Web.Mvc.Statics
             httpResponse.StatusCode = (int)HttpStatusCode.NotFound;
             httpResponse.ContentType = "text/plain";
             httpResponse.Write(message);
+            httpResponse.End(); // This terminates the HTTP processing pipeline
+        }
+
+        private static void SendHealthCheckResponse(HttpResponse httpResponse)
+        {
+            Log.Warn("{0}. Sending HTTP 200 (OK) response.");
+            httpResponse.StatusCode = (int)HttpStatusCode.OK;
+            httpResponse.ContentType = "text/plain";
+            httpResponse.Write("DXA Health Check OK.");
             httpResponse.End(); // This terminates the HTTP processing pipeline
         }
     }
