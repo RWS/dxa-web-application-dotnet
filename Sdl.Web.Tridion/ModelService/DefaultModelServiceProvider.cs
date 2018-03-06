@@ -63,7 +63,6 @@ namespace Sdl.Web.Tridion.ModelService
                 : DefaultTimeout;
             _modelServiceClient = new ModelServiceClient(uri, retryCount, timeout);
             _binder = new Binder();
-            Log.Debug($"{ModelServiceName} found at URL '{_modelServiceClient.ModelServiceBaseUri}'"); 
         }    
 
         /// <summary>
