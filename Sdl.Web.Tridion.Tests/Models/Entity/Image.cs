@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Xml;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Tridion.Tests.Models
@@ -57,7 +58,7 @@ namespace Sdl.Web.Tridion.Tests.Models
         /// <remarks>
         /// This makes it possible possible to render "embedded" Image Models using the Html.DxaEntity method.
         /// </remarks>
-        public override MvcData GetDefaultView(Localization localization)
+        public override MvcData GetDefaultView(ILocalization localization)
         {
             return new MvcData("Core:Image");
         }

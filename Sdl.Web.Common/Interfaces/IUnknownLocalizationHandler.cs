@@ -1,5 +1,4 @@
 ﻿using System.Web;
-using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Interfaces
 {
@@ -20,7 +19,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="response">The HTTP Response. In order to return a different HTTP Response than the default, 
         /// the response headers and body should be set and <see cref="HttpResponse.End"/> should be called to terminate the HTTP processing pipeline.
         /// </param>
-        /// <returns>May return a <see cref="Localization"/> instance if the handler manages to resolve the Localization. If <c>null</c> is returned, default error handling will be applied.</returns>
-        Localization HandleUnknownLocalization(DxaUnknownLocalizationException exception, HttpRequest request, HttpResponse response);
+        /// <returns>May return a <see cref="ILocalization"/> instance if the handler manages to resolve the Localization. If <c>null</c> is returned, default error handling will be applied.</returns>
+        ILocalization HandleUnknownLocalization(DxaUnknownLocalizationException exception, HttpRequest request, HttpResponse response);
     }
 }

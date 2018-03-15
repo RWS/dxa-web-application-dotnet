@@ -1,6 +1,7 @@
 ﻿using System;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Tridion.ContentDelivery.DynamicContent;
 
@@ -28,12 +29,12 @@ namespace Sdl.Web.Tridion
 
         #region ILocalizationResolver Members
         /// <summary>
-        /// Resolves a matching <see cref="Localization"/> for a given URL.
+        /// Resolves a matching <see cref="ILocalization"/> for a given URL.
         /// </summary>
         /// <param name="url">The URL to resolve.</param>
-        /// <returns>A <see cref="Localization"/> instance which base URL matches that of the given URL.</returns>
+        /// <returns>A <see cref="ILocalization"/> instance which base URL matches that of the given URL.</returns>
         /// <exception cref="DxaUnknownLocalizationException">If no matching Localization can be found.</exception>
-        public override Localization ResolveLocalization(Uri url)
+        public override ILocalization ResolveLocalization(Uri url)
         {
             using (new Tracer(url))
             {
@@ -70,7 +71,7 @@ namespace Sdl.Web.Tridion
                     throw new DxaUnknownLocalizationException($"No matching Localization found for URL '{urlLeftPart}'");
                 }
 
-                Localization result;
+                ILocalization result;
                 lock (KnownLocalizations)
                 {
                     string localizationId = mapping.PublicationId.ToString();
@@ -96,11 +97,11 @@ namespace Sdl.Web.Tridion
             }
         }
 
-        public override Localization GetLocalization(string localizationId)
+        public override ILocalization GetLocalization(string localizationId)
         {
             using (new Tracer(localizationId))
             {
-                Localization result;
+                ILocalization result;
                 if (!KnownLocalizations.TryGetValue(localizationId, out result))
                 {
                     // No localization found so lets return a partially constructed one and fully resolve it later.

@@ -2,6 +2,7 @@
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Tests.Models;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Tridion.Mapping;
 
 namespace Sdl.Web.Tridion.Tests
@@ -24,7 +25,7 @@ namespace Sdl.Web.Tridion.Tests
         public void GetEntityModel_NoXpmMetadataOnLive_Success() // See TSI-1942
         {
             const string testEntityId = TestFixture.ArticleDcpEntityId;
-            Localization testLocalization = TestFixture.LegacyChildLocalization;
+            ILocalization testLocalization = TestFixture.LegacyChildLocalization;
 
             EntityModel entityModel = TestContentProvider.GetEntityModel(testEntityId, testLocalization);
 
@@ -38,7 +39,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetPageModel_NoXpmMetadataOnLive_Success() // See TSI-1942
         {
-            Localization testLocalization = TestFixture.LegacyChildLocalization;
+            ILocalization testLocalization = TestFixture.LegacyChildLocalization;
             string testPageUrlPath =  testLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
 
             PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: true);

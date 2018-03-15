@@ -13,11 +13,11 @@ using Sdl.Web.Common.Mapping;
 using Sdl.Web.DataModel.Configuration;
 
 namespace Sdl.Web.Common.Configuration
-{
+{  
     /// <summary>
     /// Represents a "Localization" - a Site or variant (e.g. language).
     /// </summary>
-    public class Localization
+    public class Localization : ILocalization
     {
         private string _path;
         private string _culture;
@@ -120,7 +120,7 @@ namespace Sdl.Web.Common.Configuration
         /// Is used for display purposes and doesn't have to conform to any standard.
         /// </remarks>
         /// <seealso cref="Culture"/>
-        public string Language { get; private set; }
+        public string Language { get; set; }
 
         /// <summary>
         /// Gets the URI scheme used for CM URIs.
@@ -155,7 +155,7 @@ namespace Sdl.Web.Common.Configuration
         /// Gets whether the Localization is the default one in the set of "Site Localizations"
         /// </summary>
         /// <seealso cref="SiteLocalizations"/>
-        public bool IsDefaultLocalization { get; private set; }
+        public bool IsDefaultLocalization { get; set; }
 
         /// <summary>
         /// Gets the version of the HTML Design.
@@ -177,15 +177,15 @@ namespace Sdl.Web.Common.Configuration
         /// <remarks>
         /// A typical use case is a multi-language site consisting of separate Localizations for each language.
         /// </remarks>
-        public List<Localization> SiteLocalizations { get; private set; }
+        public List<ILocalization> SiteLocalizations { get; private set; }
 
         /// <summary>
-        /// Gets the date/time at which this <see cref="Localization"/> was last (re-)loaded.
+        /// Gets the date/time at which this <see cref="ILocalization"/> was last (re-)loaded.
         /// </summary>
         public DateTime LastRefresh { get; private set; }
 
         /// <summary>
-        /// Ensures that the <see cref="Localization"/> is initialized.
+        /// Ensures that the <see cref="ILocalization"/> is initialized.
         /// </summary>
         public void EnsureInitialized()
         {
@@ -210,7 +210,7 @@ namespace Sdl.Web.Common.Configuration
         }
 
         /// <summary>
-        /// Forces a refresh/reload of the <see cref="Localization"/> and its associated configuration.
+        /// Forces a refresh/reload of the <see cref="ILocalization"/> and its associated configuration.
         /// </summary>
         public void Refresh(bool allSiteLocalizations = false)
         {
@@ -219,7 +219,7 @@ namespace Sdl.Web.Common.Configuration
                 if (allSiteLocalizations)
                 {
                     // Refresh all Site Localizations (variants)
-                    foreach (Localization localization in SiteLocalizations)
+                    foreach (ILocalization localization in SiteLocalizations)
                     {
                         try
                         {
@@ -537,12 +537,12 @@ namespace Sdl.Web.Common.Configuration
                     if (localizationData.SiteLocalizations != null)
                     {
                         ILocalizationResolver localizationResolver = SiteConfiguration.LocalizationResolver;
-                        SiteLocalizations = new List<Localization>();
+                        SiteLocalizations = new List<ILocalization>();
                         foreach (SiteLocalizationData siteLocalizationData in localizationData.SiteLocalizations)
                         {
                             try
                             {
-                                Localization siteLocalization = localizationResolver.GetLocalization(siteLocalizationData.Id);
+                                ILocalization siteLocalization = localizationResolver.GetLocalization(siteLocalizationData.Id);
                                 if (siteLocalization.LastRefresh == DateTime.MinValue)
                                 {
                                     // Localization is not fully initialized yet; partially initialize it using the Site Localization Data.

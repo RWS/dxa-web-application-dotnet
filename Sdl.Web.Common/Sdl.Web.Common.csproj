@@ -95,6 +95,7 @@
     <Compile Include="Interfaces\IContextClaimsProvider.cs" />
     <Compile Include="Interfaces\IDataModelExtension.cs" />
     <Compile Include="Interfaces\ILinkResolver.cs" />
+    <Compile Include="Interfaces\ILocalization.cs" />
     <Compile Include="Interfaces\ILocalizationResolver.cs" />
     <Compile Include="Interfaces\IModelServiceProvider.cs" />
     <Compile Include="Interfaces\INavigationProvider.cs" />

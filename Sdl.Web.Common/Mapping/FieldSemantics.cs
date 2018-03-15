@@ -1,4 +1,4 @@
-﻿using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Mapping
 {
@@ -34,7 +34,7 @@ namespace Sdl.Web.Common.Mapping
         /// <param name="entity">Entity name</param>
         /// <param name="property">Semantic property name</param>
         /// <param name="localization">The context Localization (used to determine the semantic Vocabulary URI from <paramref name="vocabOrPrefix"/>).</param>
-        public FieldSemantics(string vocabOrPrefix, string entity, string property, Localization localization)
+        public FieldSemantics(string vocabOrPrefix, string entity, string property, ILocalization localization)
             : base(vocabOrPrefix, entity, localization)
         {
             Property = property;
@@ -45,10 +45,7 @@ namespace Sdl.Web.Common.Mapping
         /// Provides a string representation of the object.
         /// </summary>
         /// <returns>A string representation in format <c>Vocab/Prefix:Entity:Property</c>.</returns>
-        public override string ToString()
-        {
-            return $"{Vocab ?? Prefix}:{Entity}:{Property}";
-        }
+        public override string ToString() => $"{Vocab ?? Prefix}:{Entity}:{Property}";
 
         /// <summary>
         /// Determines whether the specified object is equal to the current <see cref="FieldSemantics"/>.

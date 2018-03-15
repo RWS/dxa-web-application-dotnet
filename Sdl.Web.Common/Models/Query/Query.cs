@@ -1,10 +1,10 @@
-﻿using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Models
 {
     public abstract class Query
     {
-        public Localization Localization { get; set; }
+        public ILocalization Localization { get; set; }
         public int MaxResults { get; set; }
         public int Start { get; set; }
         public int PageSize { get; set; }

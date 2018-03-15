@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ServiceModel.Syndication;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Tridion.Tests.Models
 {
@@ -79,9 +80,9 @@ namespace Sdl.Web.Tridion.Tests.Models
         /// <summary>
         /// Extracts syndication feed items.
         /// </summary>
-        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>A single syndication feed item containing information extracted from this <see cref="Teaser"/>.</returns>
-        public IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(Localization localization)
+        public IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(ILocalization localization)
         {
             Link link = Link;
             if (link == null && Media != null)

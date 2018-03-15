@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Tridion.Tests.Models
@@ -18,7 +19,7 @@ namespace Sdl.Web.Tridion.Tests.Models
         public Link EmbedField1 { get; set; }
         public Tsi1758TestEmbedded2Entity EmbedField2 { get; set; }
 
-        public override MvcData GetDefaultView(Localization localization)
+        public override MvcData GetDefaultView(ILocalization localization)
         {
             return new MvcData("Test:TSI1758TestEmbedded");
         }
@@ -30,7 +31,7 @@ namespace Sdl.Web.Tridion.Tests.Models
         public string TextField { get; set; }
         public Link EmbedField2 { get; set; }
 
-        public override MvcData GetDefaultView(Localization localization)
+        public override MvcData GetDefaultView(ILocalization localization)
         {
             return new MvcData("Test:TSI1758TestEmbedded2");
         }

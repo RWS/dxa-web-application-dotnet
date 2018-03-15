@@ -67,11 +67,11 @@ namespace Sdl.Web.Tridion.Tests
         internal const string Tsi2287PageRelativeUrlPath = "system/include/header";
         internal const string Tsi2316PageRelativeUrlPath = "regression/tsi-2316";
 
-        private static readonly IEnumerable<Localization> _testLocalizations;
-        private static readonly Localization _parentLocalization;
-        private static readonly Localization _childLocalization;
-        private static readonly Localization _legacyParentLocalization;
-        private static readonly Localization _legacyChildLocalization;
+        private static readonly IEnumerable<ILocalization> _testLocalizations;
+        private static readonly ILocalization _parentLocalization;
+        private static readonly ILocalization _childLocalization;
+        private static readonly ILocalization _legacyParentLocalization;
+        private static readonly ILocalization _legacyChildLocalization;
 
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
@@ -119,7 +119,7 @@ namespace Sdl.Web.Tridion.Tests
             TestRegistration.RegisterViewModels();
         }
 
-        internal static Localization ParentLocalization
+        internal static ILocalization ParentLocalization
         {
             get
             {
@@ -128,7 +128,7 @@ namespace Sdl.Web.Tridion.Tests
             }
         }
 
-        internal static Localization ChildLocalization
+        internal static ILocalization ChildLocalization
         {
             get
             {
@@ -137,7 +137,7 @@ namespace Sdl.Web.Tridion.Tests
             }
         }
 
-        internal static Localization LegacyParentLocalization
+        internal static ILocalization LegacyParentLocalization
         {
             get
             {
@@ -146,7 +146,7 @@ namespace Sdl.Web.Tridion.Tests
             }
         }
 
-        internal static Localization LegacyChildLocalization
+        internal static ILocalization LegacyChildLocalization
         {
             get
             {
@@ -175,14 +175,14 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         #region ILocalizationResolver members
-        public Localization ResolveLocalization(Uri url)
+        public ILocalization ResolveLocalization(Uri url)
         {
             throw new NotImplementedException();
         }
 
-        public Localization GetLocalization(string localizationId)
+        public ILocalization GetLocalization(string localizationId)
         {
-            Localization result = _testLocalizations.FirstOrDefault(loc => loc.Id == localizationId);
+            ILocalization result = _testLocalizations.FirstOrDefault(loc => loc.Id == localizationId);
             if (result == null)
             {
                 throw new DxaUnknownLocalizationException("Unknown Localization ID: " + localizationId);

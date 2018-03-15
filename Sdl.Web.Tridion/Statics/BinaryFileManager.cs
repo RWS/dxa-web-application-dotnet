@@ -7,8 +7,8 @@ using System.Net;
 using System.Text.RegularExpressions;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Mvc.Html;
 using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.Meta;
 using Image = System.Drawing.Image; // TODO: Shouldn't use System.Drawing namespace in a web application.
@@ -72,7 +72,7 @@ namespace Sdl.Web.Tridion.Statics
         /// <param name="urlPath">The URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The path to the local file.</returns>
-        internal string GetCachedFile(string urlPath, Localization localization)
+        internal string GetCachedFile(string urlPath, ILocalization localization)
         {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string localFilePath = $"{baseDir}/{localization.BinaryCacheFolder}/{urlPath}";

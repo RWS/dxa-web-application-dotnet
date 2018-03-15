@@ -3,6 +3,7 @@ using System.ServiceModel.Syndication;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Models;
 using System;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Tridion.Tests.Models
 {
@@ -50,7 +51,7 @@ namespace Sdl.Web.Tridion.Tests.Models
         /// <remarks>
         /// This makes it possible possible to render "embedded" Download Models using the Html.DxaEntity method.
         /// </remarks>
-        public override MvcData GetDefaultView(Localization localization)
+        public override MvcData GetDefaultView(ILocalization localization)
         {
             return new MvcData("Core:Download");
         }
@@ -59,9 +60,9 @@ namespace Sdl.Web.Tridion.Tests.Models
         /// <summary>
         /// Extracts syndication feed items.
         /// </summary>
-        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>A single syndication feed item containing information extracted from this <see cref="Teaser"/>.</returns>
-        public IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(Localization localization)
+        public IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(ILocalization localization)
         {
             Link downloadLink = new Link {Url = Url}; 
             return new[] { CreateSyndicationItem(FileName, Description, downloadLink, null, localization) };

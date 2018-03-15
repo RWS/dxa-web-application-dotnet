@@ -2,8 +2,7 @@
 using System.Linq;
 using System.Text;
 using Sdl.Web.Common.Extensions;
-using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Mapping
 {
@@ -91,7 +90,7 @@ namespace Sdl.Web.Common.Mapping
         /// Initializes an existing instance.
         /// </summary>
         /// <param name="localization"></param>
-        public void Initialize(Localization localization)
+        public void Initialize(ILocalization localization)
         {
             foreach (FieldSemantics fieldSemantics in Semantics)
             {

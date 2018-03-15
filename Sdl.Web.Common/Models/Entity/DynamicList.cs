@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
-using Sdl.Web.Common.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel.Syndication;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Models
 {
@@ -27,7 +27,7 @@ namespace Sdl.Web.Common.Models
         [SemanticProperty(IgnoreMapping = true)]
         public List<EntityModel> QueryResults { get; set; }
 
-        public abstract Query GetQuery(Localization localization);
+        public abstract Query GetQuery(ILocalization localization);
 
         [JsonIgnore]
         [SemanticProperty(IgnoreMapping = true)]
@@ -37,9 +37,9 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Extracts syndication feed items.
         /// </summary>
-        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>The extracted syndication feed items; a concatentation of syndication feed items provided by <see cref="QueryResults"/> (if any).</returns>
-        public virtual IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(Localization localization)
+        public virtual IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(ILocalization localization)
         {
             return ConcatenateSyndicationFeedItems(QueryResults.OfType<ISyndicationFeedItemProvider>(), localization);
         }
