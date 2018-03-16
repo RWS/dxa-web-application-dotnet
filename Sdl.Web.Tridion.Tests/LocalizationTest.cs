@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -17,7 +18,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void Load_Success()
         {
-            Localization testLocalization = TestFixture.ParentLocalization;
+            ILocalization testLocalization = TestFixture.ParentLocalization;
 
             OutputJson(testLocalization);
 
@@ -36,7 +37,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(2, testLocalization.SiteLocalizations.Count, "testLocalization.SiteLocalizations.Count");
             Assert.AreNotEqual(DateTime.MinValue, testLocalization.LastRefresh, "testLocalization.LastRefresh");
 
-            foreach (Localization siteLocalization in testLocalization.SiteLocalizations)
+            foreach (ILocalization siteLocalization in testLocalization.SiteLocalizations)
             {
                 // Check that Site Localizations are "pre-initialized".
                 Assert.IsNotNull(siteLocalization.Id, "siteLocalization.Id");

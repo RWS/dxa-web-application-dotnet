@@ -1,4 +1,4 @@
-﻿using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Mapping
 {
@@ -43,7 +43,7 @@ namespace Sdl.Web.Common.Mapping
         /// <param name="vocabOrPrefix">Vocabulary prefix</param>
         /// <param name="entity">Entity name</param>
         /// <param name="localization">The context Localization (used to determine <see cref="Vocab"/> from <param name="vocabOrPrefix"></param>).</param>
-        public SchemaSemantics(string vocabOrPrefix, string entity, Localization localization)
+        public SchemaSemantics(string vocabOrPrefix, string entity, ILocalization localization)
         {
             Entity = entity;
 
@@ -64,7 +64,7 @@ namespace Sdl.Web.Common.Mapping
         /// Initializes an existing instance: determines the <see cref="Vocab"/> property.
         /// </summary>
         /// <param name="localization">The context Localization.</param>
-        public void Initialize(Localization localization)
+        public void Initialize(ILocalization localization)
         {
             Vocab = localization.GetSemanticVocabulary(Prefix).Vocab;
         }

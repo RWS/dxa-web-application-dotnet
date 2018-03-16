@@ -52,7 +52,7 @@ namespace Sdl.Web.Mvc.Statics
                     SendHealthCheckResponse(response);
                 }
                 // Attempt to determine Localization
-                Localization localization = null;
+                ILocalization localization = null;
                 try
                 {
                     localization = WebRequestContext.Localization;
@@ -120,7 +120,7 @@ namespace Sdl.Web.Mvc.Statics
 
             using (new Tracer(sender, eventArgs, urlPath, ifModifiedSince))
             {
-                Localization localization = WebRequestContext.Localization;
+                ILocalization localization = WebRequestContext.Localization;
                 string staticsRootUrl = localization.BinaryCacheFolder.Replace("\\", "/");
                 urlPath = urlPath.StartsWith("/" + staticsRootUrl) ? urlPath.Substring(staticsRootUrl.Length + 1) : urlPath;
                 if (!localization.IsStaticContentUrl(urlPath))
@@ -162,7 +162,7 @@ namespace Sdl.Web.Mvc.Statics
             }
 
         }
-        public static void SetResponseProperties(HttpResponseBase response, DateTime lastModified, DateTime ifModifiedSince,string contentType, Localization localization, bool isVersionedUrl)
+        public static void SetResponseProperties(HttpResponseBase response, DateTime lastModified, DateTime ifModifiedSince,string contentType, ILocalization localization, bool isVersionedUrl)
         {
           
             if (lastModified <= ifModifiedSince.AddSeconds(1))

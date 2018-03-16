@@ -40,7 +40,7 @@ namespace Sdl.Web.Tridion.Mapping
             public ContentModelData Fields { get; set; }
             public ContentModelData MetadataFields { get; set; }
             public string ContextXPath { get; set; }
-            public Localization Localization { get; set; }
+            public ILocalization Localization { get; set; }
         }
 
         public Type ResolveDataModelType(string assemblyName, string typeName)
@@ -64,8 +64,8 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="pageModel">The strongly typed Page Model to build. Is <c>null</c> for the first Page Model Builder in the pipeline.</param>
         /// <param name="pageModelData">The DXA R2 Data Model.</param>
         /// <param name="includePageRegions">Indicates whether Include Page Regions should be included.</param>
-        /// <param name="localization">The context <see cref="Localization"/>.</param>
-        public void BuildPageModel(ref PageModel pageModel, PageModelData pageModelData, bool includePageRegions, Localization localization)
+        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
+        public void BuildPageModel(ref PageModel pageModel, PageModelData pageModelData, bool includePageRegions, ILocalization localization)
         {
             using (new Tracer(pageModel, pageModelData, includePageRegions, localization))
             {
@@ -122,7 +122,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        private static List<SemanticSchema> GetInheritedSemanticSchemas(ViewModelData pageModelData, Localization localization)
+        private static List<SemanticSchema> GetInheritedSemanticSchemas(ViewModelData pageModelData, ILocalization localization)
         {
             List<SemanticSchema> schemas = new List<SemanticSchema>();
             if (pageModelData.ExtensionData != null && pageModelData.ExtensionData.ContainsKey("Schemas"))
@@ -151,8 +151,8 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="entityModel">The strongly typed Entity Model to build. Is <c>null</c> for the first Entity Model Builder in the pipeline.</param>
         /// <param name="entityModelData">The DXA R2 Data Model.</param>
         /// <param name="baseModelType">The base type for the Entity Model to build.</param>
-        /// <param name="localization">The context <see cref="Localization"/>.</param>
-        public void BuildEntityModel(ref EntityModel entityModel, EntityModelData entityModelData, Type baseModelType, Localization localization)
+        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
+        public void BuildEntityModel(ref EntityModel entityModel, EntityModelData entityModelData, Type baseModelType, ILocalization localization)
         {
             using (new Tracer(entityModel, entityModelData, baseModelType, localization))
             {
@@ -549,7 +549,7 @@ namespace Sdl.Web.Tridion.Mapping
             return Convert.ChangeType(stringValue, targetType, CultureInfo.InvariantCulture.NumberFormat);
         }
 
-        private static object MapComponentLink(EntityModelData entityModelData, Type targetType, Localization localization)
+        private static object MapComponentLink(EntityModelData entityModelData, Type targetType, ILocalization localization)
         {
             if (targetType == typeof(Link))
             {
@@ -573,7 +573,7 @@ namespace Sdl.Web.Tridion.Mapping
             return ModelBuilderPipeline.CreateEntityModel(entityModelData, targetType, localization);
         }
 
-        private static object MapKeyword(KeywordModelData keywordModelData, Type targetType, Localization localization)
+        private static object MapKeyword(KeywordModelData keywordModelData, Type targetType, ILocalization localization)
         {
             if (typeof(KeywordModel).IsAssignableFrom(targetType))
             {
@@ -634,7 +634,7 @@ namespace Sdl.Web.Tridion.Mapping
         private static string GetKeywordDisplayText(KeywordModelData keywordModelData)
             => string.IsNullOrEmpty(keywordModelData.Description) ? keywordModelData.Title : keywordModelData.Description;
 
-        private static string GetLinkUrl(EntityModelData entityModelData, Localization localization)
+        private static string GetLinkUrl(EntityModelData entityModelData, ILocalization localization)
         {
             if (entityModelData.LinkUrl != null)
             {
@@ -646,7 +646,7 @@ namespace Sdl.Web.Tridion.Mapping
             return SiteConfiguration.LinkResolver.ResolveLink(componentUri);
         }
 
-        private static object MapRichText(RichTextData richTextData, Type targetType, Localization localization)
+        private static object MapRichText(RichTextData richTextData, Type targetType, ILocalization localization)
         {
             IList<IRichTextFragment> fragments = new List<IRichTextFragment>();
             foreach (object fragment in richTextData.Fragments)
@@ -725,7 +725,7 @@ namespace Sdl.Web.Tridion.Mapping
             if (!resolveComponentLinks)
             {
                 // Handle Component Links here, because standard model mapping will resolve them.
-                Localization localization = mappingData.Localization;
+                ILocalization localization = mappingData.Localization;
                 if (fieldValues is EntityModelData)
                 {
                     return new[] { localization.GetCmUri(((EntityModelData) fieldValues).Id) };
@@ -762,7 +762,7 @@ namespace Sdl.Web.Tridion.Mapping
             };
         }
 
-        private static RegionModel CreateRegionModel(RegionModelData regionModelData, Localization localization)
+        private static RegionModel CreateRegionModel(RegionModelData regionModelData, ILocalization localization)
         {
             MvcData mvcData = CreateMvcData(regionModelData.MvcData, "Region");
             Type regionModelType = ModelTypeRegistry.GetViewModelType(mvcData);
@@ -806,7 +806,7 @@ namespace Sdl.Web.Tridion.Mapping
             return result;
         }
 
-        private static string PostProcessPageTitle(PageModelData pageModelData, Localization localization)
+        private static string PostProcessPageTitle(PageModelData pageModelData, ILocalization localization)
         {
             if (pageModelData.MvcData?.ViewName == "IncludePage") return pageModelData.Title;
             IDictionary coreResources = localization.GetResources("core");

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Models
 {
@@ -68,9 +69,9 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Creates a <see cref="Link"/> out of this <see cref="SitemapItem"/>.
         /// </summary>
-        /// <param name="localization">The context <see cref="Localization"/></param>
+        /// <param name="localization">The context <see cref="ILocalization"/></param>
         /// <returns>The <see cref="Link"/> Entity Model.</returns>
-        public virtual Link CreateLink(Localization localization)
+        public virtual Link CreateLink(ILocalization localization)
         {
             return new Link
             {

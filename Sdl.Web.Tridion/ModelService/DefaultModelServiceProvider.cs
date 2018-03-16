@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Web.Configuration;
 using Sdl.Web.Common;
-using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -10,7 +9,6 @@ using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.DataModel;
 using Sdl.Web.ModelService;
 using Sdl.Web.ModelService.Request;
-using Sdl.Web.Tridion.Mapping;
 
 namespace Sdl.Web.Tridion.ModelService
 {   
@@ -77,7 +75,7 @@ namespace Sdl.Web.Tridion.ModelService
         /// <summary>
         /// Get page model data object.
         /// </summary>
-        public PageModelData GetPageModelData(string urlPath, Localization localization, bool addIncludes)
+        public PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes)
         {
             try
             {
@@ -109,7 +107,7 @@ namespace Sdl.Web.Tridion.ModelService
         /// <summary>
         /// Get entity model data object.
         /// </summary>
-        public EntityModelData GetEntityModelData(string entityId, Localization localization)
+        public EntityModelData GetEntityModelData(string entityId, ILocalization localization)
         {
             try
             {
@@ -140,7 +138,7 @@ namespace Sdl.Web.Tridion.ModelService
         /// <summary>
         /// Get site map item.
         /// </summary>
-        public TaxonomyNode GetSitemapItem(Localization localization)
+        public TaxonomyNode GetSitemapItem(ILocalization localization)
         {
             try
             {
@@ -166,7 +164,7 @@ namespace Sdl.Web.Tridion.ModelService
         /// <summary>
         /// Get child site map items.
         /// </summary>
-        public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, Localization localization,
+        public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, ILocalization localization,
             bool includeAncestors, int descendantLevels)
         {
             try

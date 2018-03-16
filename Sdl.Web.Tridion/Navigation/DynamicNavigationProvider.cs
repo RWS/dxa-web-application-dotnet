@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
@@ -24,7 +23,7 @@ namespace Sdl.Web.Tridion.Navigation
         /// </summary>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Model (Sitemap root Item).</returns>
-        public SitemapItem GetNavigationModel(Localization localization) 
+        public SitemapItem GetNavigationModel(ILocalization localization) 
             => NavigationProvider.GetNavigationModel(localization);
 
         /// <summary>
@@ -33,7 +32,7 @@ namespace Sdl.Web.Tridion.Navigation
         /// <param name="requestUrlPath">The request URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Links.</returns>
-        public NavigationLinks GetTopNavigationLinks(string requestUrlPath, Localization localization) 
+        public NavigationLinks GetTopNavigationLinks(string requestUrlPath, ILocalization localization) 
             => NavigationProvider.GetTopNavigationLinks(requestUrlPath, localization);
 
         /// <summary>
@@ -42,7 +41,7 @@ namespace Sdl.Web.Tridion.Navigation
         /// <param name="requestUrlPath">The request URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Links.</returns>
-        public NavigationLinks GetContextNavigationLinks(string requestUrlPath, Localization localization) 
+        public NavigationLinks GetContextNavigationLinks(string requestUrlPath, ILocalization localization) 
             => NavigationProvider.GetContextNavigationLinks(requestUrlPath, localization);
 
         /// <summary>
@@ -51,7 +50,7 @@ namespace Sdl.Web.Tridion.Navigation
         /// <param name="requestUrlPath">The request URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Links.</returns>
-        public NavigationLinks GetBreadcrumbNavigationLinks(string requestUrlPath, Localization localization) 
+        public NavigationLinks GetBreadcrumbNavigationLinks(string requestUrlPath, ILocalization localization) 
             => NavigationProvider.GetBreadcrumbNavigationLinks(requestUrlPath, localization);
 
         #endregion
@@ -62,9 +61,9 @@ namespace Sdl.Web.Tridion.Navigation
         /// </summary>
         /// <param name="sitemapItemId">The context <see cref="SitemapItem"/> identifier. Can be <c>null</c>.</param>
         /// <param name="filter">The <see cref="NavigationFilter"/> used to specify which information to put in the subtree.</param>
-        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>A set of Sitemap Items representing the requested subtree.</returns>
-        public IEnumerable<SitemapItem> GetNavigationSubtree(string sitemapItemId, NavigationFilter filter, Localization localization) 
+        public IEnumerable<SitemapItem> GetNavigationSubtree(string sitemapItemId, NavigationFilter filter, ILocalization localization) 
             => ((IOnDemandNavigationProvider)NavigationProvider).GetNavigationSubtree(sitemapItemId, filter, localization);
 
         #endregion     

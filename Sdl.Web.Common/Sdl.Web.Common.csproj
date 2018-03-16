@@ -77,6 +77,8 @@
   <ItemGroup>
     <Compile Include="CacheRegions.cs" />
     <Compile Include="Configuration\ComponentType.cs" />
+    <Compile Include="Configuration\LocalizationResources.cs" />
+    <Compile Include="Configuration\LocalizationMappingsManager.cs" />
     <Compile Include="Configuration\ScreenWidth.cs" />
     <Compile Include="Configuration\SiteConfiguration.cs" />
     <Compile Include="Configuration\Localization.cs" />
@@ -95,7 +97,10 @@
     <Compile Include="Interfaces\IContextClaimsProvider.cs" />
     <Compile Include="Interfaces\IDataModelExtension.cs" />
     <Compile Include="Interfaces\ILinkResolver.cs" />
+    <Compile Include="Interfaces\ILocalization.cs" />
+    <Compile Include="Interfaces\ILocalizationMappingsManager.cs" />
     <Compile Include="Interfaces\ILocalizationResolver.cs" />
+    <Compile Include="Interfaces\ILocalizationResources.cs" />
     <Compile Include="Interfaces\IModelServiceProvider.cs" />
     <Compile Include="Interfaces\INavigationProvider.cs" />
     <Compile Include="Interfaces\IOnDemandNavigationProvider.cs" />

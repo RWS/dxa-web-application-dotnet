@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Interfaces
 {
@@ -14,7 +13,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="aspectName">The aspect name. If <c>null</c> all context claims are returned.</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>A dictionary with the claim names in format aspectName.propertyName as keys.</returns>
-        IDictionary<string, object> GetContextClaims(string aspectName, Localization localization);
+        IDictionary<string, object> GetContextClaims(string aspectName, ILocalization localization);
 
         /// <summary>
         /// Gets the device family (an aggregated device claim determined from other context claims).

@@ -15,12 +15,12 @@ namespace Sdl.Web.Tridion.Tests
     [TestClass]
     public abstract class ContentProviderTest : TestClass
     {
-        private readonly Func<Localization> _testLocalizationInitializer;
-        private Localization _testLocalization;
+        private readonly Func<ILocalization> _testLocalizationInitializer;
+        private ILocalization _testLocalization;
 
         protected IContentProvider TestContentProvider { get; }
 
-        protected Localization TestLocalization
+        protected ILocalization TestLocalization
         {
             get
             {
@@ -32,7 +32,7 @@ namespace Sdl.Web.Tridion.Tests
             }
         }
 
-        protected ContentProviderTest(IContentProvider contentProvider, Func<Localization> testLocalizationInitializer)
+        protected ContentProviderTest(IContentProvider contentProvider, Func<ILocalization> testLocalizationInitializer)
         {
             TestContentProvider = contentProvider;
             _testLocalizationInitializer = testLocalizationInitializer;

@@ -1,5 +1,5 @@
-﻿using Sdl.Web.Common.Configuration;
-using System;
+﻿using System;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Models.Navigation
 {
@@ -18,9 +18,9 @@ namespace Sdl.Web.Common.Models.Navigation
         /// <summary>
         /// Creates a <see cref="Link"/> out of this <see cref="SitemapItem"/>.
         /// </summary>
-        /// <param name="localization">The context <see cref="Localization"/></param>
+        /// <param name="localization">The context <see cref="ILocalization"/></param>
         /// <returns>The <see cref="Link"/> Entity Model.</returns>
-        public override Link CreateLink(Localization localization)
+        public override Link CreateLink(ILocalization localization)
         {
             Link result = base.CreateLink(localization);
             result.AlternateText = Description;
