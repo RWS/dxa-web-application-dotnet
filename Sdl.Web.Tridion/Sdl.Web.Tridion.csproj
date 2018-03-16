@@ -187,6 +187,7 @@
     <Compile Include="Caching\DxaCacheProvider.cs" />
     <Compile Include="Caching\DD4TCacheProvider.cs" />
     <Compile Include="Caching\DefaultCacheProvider.cs" />
+    <Compile Include="ContentManager\CmUri.cs" />
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
     <Compile Include="CdApiLocalizationResolver.cs" />
     <Reference Include="Unity.Mvc5">

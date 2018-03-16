@@ -201,7 +201,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <summary>
         /// Gets a CM identifier (URI) for this Localization
         /// </summary>
-        /// <returns>the CM URI.</returns>
+        /// <returns>The CM URI.</returns>
         string GetCmUri();
 
         /// <summary>
@@ -212,6 +212,10 @@ namespace Sdl.Web.Common.Interfaces
         /// <returns>The CM URI.</returns>
         string GetCmUri(string modelId, int itemType = 16);
 
+        /// <summary>
+        /// Gets the base URI for this localization
+        /// </summary>
+        /// <returns>The Base URI.</returns>
         string GetBaseUrl();
 
         /// <summary>
@@ -228,5 +232,14 @@ namespace Sdl.Web.Common.Interfaces
         /// A string that represents the current object.
         /// </returns>
         string ToString();
+
+        /// <summary>
+        /// Loads and deserializes static content items used by this localization. Used to load resources/configuration/schema 
+        /// when initializing the localization.
+        /// </summary>
+        /// <typeparam name="T">Type of object to deserialize</typeparam>
+        /// <param name="relativeUrl">Relative Url of resource to load</param>
+        /// <param name="deserializedObject">Deserialized object</param>
+        void LoadStaticContentItem<T>(string relativeUrl, ref T deserializedObject);
     }
 }
