@@ -37,7 +37,7 @@ namespace Sdl.Web.ModelService.Request
         {
             var builder = UriCreator.FromUri(modelService.ModelServiceBaseUri);
             builder = builder.WithPath(PageId.HasValue ? 
-                $"PageModel/{CmUriScheme}/{PublicationId}/{PageId.Value}" :
+                $"PageModel/{CmUriScheme}/{PublicationId}-{PageId.Value}" :
                 $"PageModel/{CmUriScheme}/{PublicationId}/{GetCanonicalUrlPath(Path)}");
 
             builder.WithQueryParam("includes", PageInclusion).WithQueryParam("modelType", DataModelType);
