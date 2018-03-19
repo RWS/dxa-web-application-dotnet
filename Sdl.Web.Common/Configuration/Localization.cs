@@ -215,7 +215,7 @@ namespace Sdl.Web.Common.Configuration
         /// </summary>
         /// <returns>the CM URI.</returns>
         public virtual string GetCmUri()
-            => $"{CmUriScheme}:0-{Id}-1";
+            => $"{CmUriScheme}:0-{Id ?? "0"}-1";
 
         /// <summary>
         /// Gets the base URI for this localization
@@ -378,7 +378,9 @@ namespace Sdl.Web.Common.Configuration
                         return;
                     }
 
-                    string urlPath = (relativeUrl.StartsWith("/")) ? Path + relativeUrl : $"{Path}/{SiteConfiguration.SystemFolder}/{relativeUrl}";
+                    string urlPath = (relativeUrl.StartsWith("/"))
+                        ? Path + relativeUrl
+                        : $"{Path}/{SiteConfiguration.SystemFolder}/{relativeUrl}";
                     string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(urlPath, this).GetText();
                     deserializedObject = JsonConvert.DeserializeObject<T>(jsonData);
                 }
@@ -423,51 +425,59 @@ namespace Sdl.Web.Common.Configuration
                     Version = versionData.Version;
 
                     LocalizationData localizationData = null;
-                    LoadStaticContentItem("config/_all.json", ref localizationData);
-
-                    IsDefaultLocalization = localizationData.IsDefaultLocalization;
-                    IsXpmEnabled = localizationData.IsXpmEnabled;
-
-                    if (localizationData.MediaRoot != null)
+                    try
                     {
-                        string mediaRoot = localizationData.MediaRoot;
-                        if (!mediaRoot.StartsWith("/"))
-                        {
-                            // SDL Web 8 context-relative URL
-                            mediaRoot = $"{Path}/{mediaRoot}";
-                        }
-                        if (!mediaRoot.EndsWith("/"))
-                        {
-                            mediaRoot += "/";
-                        }
-                        mediaPatterns.Add($"^{mediaRoot}.*");
-                    }
+                        LoadStaticContentItem("config/_all.json", ref localizationData);
 
-                    if (localizationData.SiteLocalizations != null)
-                    {
-                        ILocalizationResolver localizationResolver = SiteConfiguration.LocalizationResolver;
-                        SiteLocalizations = new List<ILocalization>();
-                        foreach (SiteLocalizationData siteLocalizationData in localizationData.SiteLocalizations)
+                        IsDefaultLocalization = localizationData.IsDefaultLocalization;
+                        IsXpmEnabled = localizationData.IsXpmEnabled;
+
+                        if (localizationData.MediaRoot != null)
                         {
-                            try
+                            string mediaRoot = localizationData.MediaRoot;
+                            if (!mediaRoot.StartsWith("/"))
                             {
-                                ILocalization siteLocalization = localizationResolver.GetLocalization(siteLocalizationData.Id);
-                                if (siteLocalization.LastRefresh == DateTime.MinValue)
+                                // SDL Web 8 context-relative URL
+                                mediaRoot = $"{Path}/{mediaRoot}";
+                            }
+                            if (!mediaRoot.EndsWith("/"))
+                            {
+                                mediaRoot += "/";
+                            }
+                            mediaPatterns.Add($"^{mediaRoot}.*");
+                        }
+
+                        if (localizationData.SiteLocalizations != null)
+                        {
+                            ILocalizationResolver localizationResolver = SiteConfiguration.LocalizationResolver;
+                            SiteLocalizations = new List<ILocalization>();
+                            foreach (SiteLocalizationData siteLocalizationData in localizationData.SiteLocalizations)
+                            {
+                                try
                                 {
-                                    // Localization is not fully initialized yet; partially initialize it using the Site Localization Data.
-                                    siteLocalization.Id = siteLocalizationData.Id;
-                                    siteLocalization.Path = siteLocalizationData.Path;
-                                    siteLocalization.IsDefaultLocalization = siteLocalizationData.IsMaster;
-                                    siteLocalization.Language = siteLocalizationData.Language;
+                                    ILocalization siteLocalization = localizationResolver.GetLocalization(siteLocalizationData.Id);
+                                    if (siteLocalization.LastRefresh == DateTime.MinValue)
+                                    {
+                                        // Localization is not fully initialized yet; partially initialize it using the Site Localization Data.
+                                        siteLocalization.Id = siteLocalizationData.Id;
+                                        siteLocalization.Path = siteLocalizationData.Path;
+                                        siteLocalization.IsDefaultLocalization = siteLocalizationData.IsMaster;
+                                        siteLocalization.Language = siteLocalizationData.Language;
+                                    }
+                                    SiteLocalizations.Add(siteLocalization);
                                 }
-                                SiteLocalizations.Add(siteLocalization);
-                            }
-                            catch (DxaUnknownLocalizationException)
-                            {
-                                Log.Error("Unknown localization ID '{0}' specified in SiteLocalizations for Localization [{1}].", siteLocalizationData.Id, this);
+                                catch (DxaUnknownLocalizationException)
+                                {
+                                    Log.Error("Unknown localization ID '{0}' specified in SiteLocalizations for Localization [{1}].", siteLocalizationData.Id, this);
+                                }
                             }
                         }
                     }
+                    catch (DxaItemNotFoundException)
+                    {
+                        Log.Warn("HTML design is not published nor does file 'config/_all.json' exist on disk.");
+                    }
+                                   
 
                     if (IsHtmlDesignPublished)
                     {
@@ -479,10 +489,17 @@ namespace Sdl.Web.Common.Configuration
                     StaticContentUrlPattern = String.Join("|", mediaPatterns);
                     _staticContentUrlRegex = new Regex(StaticContentUrlPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-                    Culture = GetConfigValue("core.culture");
-                    Language = GetConfigValue("core.language");
-                    string formats = GetConfigValue("core.dataFormats");
-                    DataFormats = formats?.Split(',').Select(f => f.Trim()).ToList() ?? new List<string>();
+                    try
+                    {
+                        Culture = GetConfigValue("core.culture");
+                        Language = GetConfigValue("core.language");
+                        string formats = GetConfigValue("core.dataFormats");
+                        DataFormats = formats?.Split(',').Select(f => f.Trim()).ToList() ?? new List<string>();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Warn(e.Message);
+                    }                  
                 }
             }
         }
