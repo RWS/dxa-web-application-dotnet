@@ -104,6 +104,35 @@ namespace Sdl.Web.Tridion.ModelService
             }
         }
 
+        public PageModelData GetPageModelData(int publicationId, int pageId, ILocalization localization, bool addIncludes)
+        {
+            try
+            {
+                PageModelRequest request = new PageModelRequest
+                {
+                    CmUriScheme = localization.CmUriScheme,
+                    PublicationId = publicationId,
+                    PageId = pageId,
+                    PageInclusion = addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
+                    Binder = _binder
+                };
+
+                ModelServiceResponse<PageModelData> response = _modelServiceClient.PerformRequest<PageModelData>(request);
+                if (response.Response != null) response.Response.SerializationHashCode = response.Hashcode;
+                return response.Response;
+            }
+            catch (ModelServiceException e)
+            {
+                Log.Error("{0} returned an unexpected response for URL '{1}':\n{2} ", ModelServiceName, _modelServiceClient.ModelServiceBaseUri,
+                   e.Message);
+                throw new DxaException($"{ModelServiceName} returned an unexpected response.", e);
+            }
+            catch (ItemNotFoundException)
+            {
+                return null;
+            }
+        }
+
         /// <summary>
         /// Get entity model data object.
         /// </summary>

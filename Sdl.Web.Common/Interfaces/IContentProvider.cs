@@ -31,6 +31,17 @@ namespace Sdl.Web.Common.Interfaces
         PageModel GetPageModel(string urlPath, ILocalization localization, bool addIncludes = true);
 
         /// <summary>
+        /// Gets a Page Model for a given Publication Id and Page Id.
+        /// </summary>
+        /// <param name="publicationId">Publication Id</param>
+        /// <param name="pageId">Page Id</param>
+        /// <param name="localization">The context Localization.</param>
+        /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
+        /// <returns>The Page Model.</returns>
+        /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given Id.</exception>
+        PageModel GetPageModel(int publicationId, int pageId, ILocalization localization, bool addIncludes = true);
+
+        /// <summary>
         /// Gets an Entity Model for a given Entity Identifier.
         /// </summary>
         /// <param name="id">The Entity Identifier. Must be in format {ComponentID}-{TemplateID}.</param>
