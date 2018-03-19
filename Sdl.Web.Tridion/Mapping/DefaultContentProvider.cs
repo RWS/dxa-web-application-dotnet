@@ -79,6 +79,57 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
         /// <summary>
+        /// Gets a Page Model for a given Publication Id and Page Id.
+        /// </summary>
+        /// <param name="publicationId">Publication Id</param>
+        /// <param name="pageId">Page Id</param>
+        /// <param name="localization">The context Localization.</param>
+        /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
+        /// <returns>The Page Model.</returns>
+        /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given Id.</exception>
+        public PageModel GetPageModel(int publicationId, int pageId, ILocalization localization, bool addIncludes = true)
+        {
+            using (new Tracer(publicationId, pageId, localization, addIncludes))
+            {
+                PageModel result = null;
+                if (CacheRegions.IsViewModelCachingEnabled)
+                {
+                    PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                        $"{publicationId}-{pageId}:{addIncludes}", // Cache Page Models with and without includes separately
+                        CacheRegions.PageModel,
+                        () =>
+                        {
+                            PageModel pageModel = LoadPageModel(publicationId, pageId, addIncludes, localization);
+                            if (pageModel.NoCache)
+                            {
+                                result = pageModel;
+                                return null;
+                            }
+                            return pageModel;
+                        }
+                        );
+
+                    if (cachedPageModel != null)
+                    {
+                        // Don't return the cached Page Model itself, because we don't want dynamic logic to modify the cached state.
+                        result = (PageModel)cachedPageModel.DeepCopy();
+                    }
+                }
+                else
+                {
+                    result = LoadPageModel(publicationId, pageId, addIncludes, localization);
+                }
+
+                if (SiteConfiguration.ConditionalEntityEvaluator != null)
+                {
+                    result.FilterConditionalEntities(localization);
+                }
+
+                return result;
+            }
+        }
+
+        /// <summary>
         /// Gets an Entity Model for a given Entity Identifier.
         /// </summary>
         /// <param name="id">The Entity Identifier. Must be in format {ComponentID}-{TemplateID}.</param>
@@ -128,7 +179,27 @@ namespace Sdl.Web.Tridion.Mapping
 
                 return ModelBuilderPipeline.CreatePageModel(pageModelData, addIncludes, localization);
             }
-        }       
+        }
+
+        private PageModel LoadPageModel(int publicationId, int pageId, bool addIncludes, ILocalization localization)
+        {
+            using (new Tracer(publicationId, pageId, addIncludes, localization))
+            {
+                PageModelData pageModelData = SiteConfiguration.ModelServiceProvider.GetPageModelData(publicationId, pageId, localization, addIncludes);
+
+                if (pageModelData == null)
+                {
+                    throw new DxaItemNotFoundException($"Page not found for publication id {publicationId} and page id {pageId}");
+                }
+
+                if (pageModelData.MvcData == null)
+                {
+                    throw new DxaException($"Data Model for Page '{pageModelData.Title}' ({pageModelData.Id}) contains no MVC data. Ensure that the Page is published using the DXA R2 TBBs.");
+                }
+
+                return ModelBuilderPipeline.CreatePageModel(pageModelData, addIncludes, localization);
+            }
+        }
 
         private EntityModel LoadEntityModel(string id, ILocalization localization)
         {

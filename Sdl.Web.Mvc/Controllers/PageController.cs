@@ -79,6 +79,67 @@ namespace Sdl.Web.Mvc.Controllers
         }
 
         /// <summary>
+        /// Given a page Id and publication Id, load the corresponding Page Model, Map it to the View Model and render it. 
+        /// Can return XML or JSON if specifically requested on the URL query string (e.g. ?format=xml). 
+        /// </summary>
+        /// <param name="pageUrl">The page URL path (unescaped).</param>
+        /// <returns>Rendered Page View Model</returns>
+        [DxaOutputCache]
+        [FormatData] // must come first in execution order before output cache      
+        public virtual ActionResult PageById(int publicationId, int pageId)
+        {
+            // The pageUrl parameter provided by ASP.NET MVC is relative to the Web App, but we need a server-relative (i.e. absolute) URL path.
+            string absoluteUrlPath = Request.Url.AbsolutePath;
+
+            using (new Tracer(publicationId, pageId, absoluteUrlPath))
+            {
+                try
+                {
+                    bool addIncludes = true;
+                    object addIncludesViewData;
+                    if (ViewData.TryGetValue(DxaViewDataItems.AddIncludes, out addIncludesViewData))
+                    {
+                        addIncludes = (bool)addIncludesViewData;
+                    }
+
+                    PageModel pageModel;
+                    try
+                    {
+                        pageModel = ContentProvider.GetPageModel(publicationId, pageId, WebRequestContext.Localization, addIncludes);
+                    }
+                    catch (DxaItemNotFoundException ex)
+                    {
+                        Log.Info(ex.Message);
+                        return NotFound();
+                    }
+
+                    PageModelWithHttpResponseData pageModelWithHttpResponseData = pageModel as PageModelWithHttpResponseData;
+                    pageModelWithHttpResponseData?.SetHttpResponseData(System.Web.HttpContext.Current.Response);
+
+                    SetupViewData(pageModel);
+                    PageModel model = (EnrichModel(pageModel) as PageModel) ?? pageModel;
+
+                    WebRequestContext.PageModel = model;
+
+                    MvcData mvcData = model.MvcData;
+                    if (mvcData == null)
+                    {
+                        throw new DxaException($"Page Model [{model}] has no MVC data.");
+                    }
+
+                    Log.Debug("Page Request for URL path '{0}' maps to Model [{1}] with View '{2}'", absoluteUrlPath, model, mvcData.ViewName);
+
+                    return View(mvcData.ViewName, model);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex);
+                    return ServerError();
+                }
+            }
+        }
+
+        /// <summary>
         /// Resolve a item ID into a url and redirect to that URL
         /// </summary>
         /// <param name="itemId">The ID of the Page to resolve.</param>

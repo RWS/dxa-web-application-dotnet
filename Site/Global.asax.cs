@@ -43,87 +43,88 @@ namespace Sdl.Web.Site
             }
 
             routes.MapMvcAttributeRoutes();
-            
+
             // XPM blank page
             routes.MapRoute(
                 "Core_Blank",
                 "se_blank.html",
-                new { controller = "Page", action = "Blank" }
-            ).DataTokens.Add("area","Core");
+                new {controller = "Page", action = "Blank"}
+                ).DataTokens.Add("area", "Core");
 
             // Navigation JSON
             routes.MapRoute(
                 "Core_Navigation",
                 "navigation.json",
-                new { controller = "Navigation", action = "SiteMapJson" }
-            ).DataTokens.Add("area", "Core");
+                new {controller = "Navigation", action = "SiteMapJson"}
+                ).DataTokens.Add("area", "Core");
             routes.MapRoute(
                 "Core_Navigation_loc",
                 "{localization}/navigation.json",
-                new { controller = "Navigation", action = "SiteMapJson" }
-            ).DataTokens.Add("area", "Core");
+                new {controller = "Navigation", action = "SiteMapJson"}
+                ).DataTokens.Add("area", "Core");
 
             // Google Site Map
             routes.MapRoute(
                 "Core_Sitemap",
                 "sitemap.xml",
-                new { controller = "Navigation", action = "SiteMapXml" }
-            ).DataTokens.Add("area", "Core");
+                new {controller = "Navigation", action = "SiteMapXml"}
+                ).DataTokens.Add("area", "Core");
             routes.MapRoute(
                 "Core_Sitemap_Loc",
                 "{localization}/sitemap.xml",
-                new { controller = "Navigation", action = "SiteMapXml" }
-            ).DataTokens.Add("area", "Core");
+                new {controller = "Navigation", action = "SiteMapXml"}
+                ).DataTokens.Add("area", "Core");
 
             // Navigation subtree
             routes.MapRoute(
                 "NavSubtree",
                 "api/navigation/subtree/{sitemapItemId}",
-                new { controller = "Navigation", action = "GetNavigationSubtree", sitemapItemId = UrlParameter.Optional }
+                new {controller = "Navigation", action = "GetNavigationSubtree", sitemapItemId = UrlParameter.Optional}
                 );
             routes.MapRoute(
-                "NavSubtree_Loc", 
-                "{localization}/api/navigation/subtree/{sitemapItemId}", 
-                new { controller = "Navigation", action = "GetNavigationSubtree", sitemapItemId = UrlParameter.Optional }
+                "NavSubtree_Loc",
+                "{localization}/api/navigation/subtree/{sitemapItemId}",
+                new {controller = "Navigation", action = "GetNavigationSubtree", sitemapItemId = UrlParameter.Optional}
                 );
 
             // For resolving ids to urls
             routes.MapRoute(
-               "Core_Resolve",
-               "resolve/{*itemId}",
-               new { controller = "Page", action = "Resolve" },
-               new { itemId = @"^(.*)?$" }
-            ).DataTokens.Add("area", "Core");
+                "Core_Resolve",
+                "resolve/{*itemId}",
+                new {controller = "Page", action = "Resolve"},
+                new {itemId = @"^(.*)?$"}
+                ).DataTokens.Add("area", "Core");
             routes.MapRoute(
-               "Core_Resolve_Loc",
-               "{localization}/resolve/{*itemId}",
-               new { controller = "Page", action = "Resolve" },
-               new { itemId = @"^(.*)?$" }
-            ).DataTokens.Add("area", "Core");
+                "Core_Resolve_Loc",
+                "{localization}/resolve/{*itemId}",
+                new {controller = "Page", action = "Resolve"},
+                new {itemId = @"^(.*)?$"}
+                ).DataTokens.Add("area", "Core");
 
             // Admin actions
             string enable = WebConfigurationManager.AppSettings["admin.refresh.enabled"];
             if (!String.IsNullOrEmpty(enable) && enable.Equals("true", StringComparison.InvariantCultureIgnoreCase))
             {
                 routes.MapRoute(
-                   "Core_Admin",
-                   "admin/{action}",
-                   new { controller = "Admin", action = "Refresh" }
-                );
+                    "Core_Admin",
+                    "admin/{action}",
+                    new {controller = "Admin", action = "Refresh"}
+                    );
                 routes.MapRoute(
-                   "Core_Admin_Loc",
-                   "{localization}/admin/{action}",
-                   new { controller = "Admin", action = "Refresh" }
-                );
+                    "Core_Admin_Loc",
+                    "{localization}/admin/{action}",
+                    new {controller = "Admin", action = "Refresh"}
+                    );
             }
 
-            // Tridion Page Route
+            // Tridion Page Route         
             routes.MapRoute(
-               "Core_Page",
-               "{*pageUrl}",
-               new { controller = "Page", action = "Page" },
-               new { pageId = @"^(.*)?$" }
-            ).DataTokens.Add("area", "Core");
+                "Core_Page",
+                "{*pageUrl}",
+                new {controller = "Page", action = "Page"},
+                new {pageId = @"^(.*)?$"}
+                ).DataTokens.Add("area", "Core");
+
         }
 
         protected void Application_Start()
