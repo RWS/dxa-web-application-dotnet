@@ -79,27 +79,26 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
         /// <summary>
-        /// Gets a Page Model for a given Publication Id and Page Id.
+        /// Gets a Page Model for a given Page Id.
         /// </summary>
-        /// <param name="publicationId">Publication Id</param>
         /// <param name="pageId">Page Id</param>
         /// <param name="localization">The context Localization.</param>
         /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
         /// <returns>The Page Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given Id.</exception>
-        public PageModel GetPageModel(int publicationId, int pageId, ILocalization localization, bool addIncludes = true)
+        public PageModel GetPageModel(int pageId, ILocalization localization, bool addIncludes = true)
         {
-            using (new Tracer(publicationId, pageId, localization, addIncludes))
+            using (new Tracer(localization.Id, pageId, localization, addIncludes))
             {
                 PageModel result = null;
                 if (CacheRegions.IsViewModelCachingEnabled)
                 {
                     PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                        $"{publicationId}-{pageId}:{addIncludes}", // Cache Page Models with and without includes separately
+                        $"{localization.Id}-{pageId}:{addIncludes}", // Cache Page Models with and without includes separately
                         CacheRegions.PageModel,
                         () =>
                         {
-                            PageModel pageModel = LoadPageModel(publicationId, pageId, addIncludes, localization);
+                            PageModel pageModel = LoadPageModel(pageId, addIncludes, localization);
                             if (pageModel.NoCache)
                             {
                                 result = pageModel;
@@ -117,7 +116,7 @@ namespace Sdl.Web.Tridion.Mapping
                 }
                 else
                 {
-                    result = LoadPageModel(publicationId, pageId, addIncludes, localization);
+                    result = LoadPageModel(pageId, addIncludes, localization);
                 }
 
                 if (SiteConfiguration.ConditionalEntityEvaluator != null)
@@ -128,7 +127,7 @@ namespace Sdl.Web.Tridion.Mapping
                 return result;
             }
         }
-
+     
         /// <summary>
         /// Gets an Entity Model for a given Entity Identifier.
         /// </summary>
@@ -181,15 +180,15 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        private PageModel LoadPageModel(int publicationId, int pageId, bool addIncludes, ILocalization localization)
+        private PageModel LoadPageModel(int pageId, bool addIncludes, ILocalization localization)
         {
-            using (new Tracer(publicationId, pageId, addIncludes, localization))
+            using (new Tracer(pageId, addIncludes, localization))
             {
-                PageModelData pageModelData = SiteConfiguration.ModelServiceProvider.GetPageModelData(publicationId, pageId, localization, addIncludes);
+                PageModelData pageModelData = SiteConfiguration.ModelServiceProvider.GetPageModelData(pageId, localization, addIncludes);
 
                 if (pageModelData == null)
                 {
-                    throw new DxaItemNotFoundException($"Page not found for publication id {publicationId} and page id {pageId}");
+                    throw new DxaItemNotFoundException($"Page not found for publication id {localization.Id} and page id {pageId}");
                 }
 
                 if (pageModelData.MvcData == null)
@@ -235,6 +234,27 @@ namespace Sdl.Web.Tridion.Mapping
             using (new Tracer(urlPath, localization))
             {
                 string localFilePath = BinaryFileManager.Instance.GetCachedFile(urlPath, localization);
+
+                return new StaticContentItem(
+                    new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan),
+                    MimeMapping.GetMimeMapping(localFilePath),
+                    File.GetLastWriteTime(localFilePath),
+                    Encoding.UTF8
+                    );
+            }
+        }
+
+        /// <summary>
+        /// Gets a Static Content Item for a given Id.
+        /// </summary>
+        /// <param name="binaryId">The Id of the binary.</param>
+        /// <param name="localization">The context Localization.</param>
+        /// <returns>The Static Content Item.</returns>
+        public StaticContentItem GetStaticContentItem(int binaryId, ILocalization localization)
+        {
+            using (new Tracer(binaryId, localization))
+            {
+                string localFilePath = BinaryFileManager.Instance.GetCachedFile(binaryId, localization);
 
                 return new StaticContentItem(
                     new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan),

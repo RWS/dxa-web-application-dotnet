@@ -48,6 +48,12 @@ namespace Sdl.Web.Tridion.Statics
         private static int GetPublicationId(string publicationUri)
             => Convert.ToInt32(publicationUri.Split('-')[1]); // TODO: what about CM URI scheme?
 
+        private static BinaryMeta GetBinaryMeta(int binaryId, ILocalization localization)
+        {
+            BinaryMetaFactory binaryMetaFactory = new BinaryMetaFactory();
+            return binaryMetaFactory.GetMeta($"{localization.CmUriScheme}:{localization.Id}-{binaryId}");
+        }
+
         private static BinaryMeta GetBinaryMeta(string urlPath, string publicationUri)
         {
             BinaryMetaFactory binaryMetaFactory = new BinaryMetaFactory();
@@ -64,6 +70,50 @@ namespace Sdl.Web.Tridion.Statics
             ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(publicationUri);
             IComponentMeta componentMeta = componentMetaFactory.GetMeta(binaryMeta.Id);
             return componentMeta.LastPublicationDate;
+        }
+
+        private static DateTime GetBinaryLastPublishDate(int binaryId, ILocalization localization)
+        {
+            BinaryMeta binaryMeta = GetBinaryMeta(binaryId, localization);
+            if (binaryMeta == null || !binaryMeta.IsComponent)
+            {
+                return DateTime.MinValue;
+            }
+            ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(int.Parse(localization.Id));
+            IComponentMeta componentMeta = componentMetaFactory.GetMeta(binaryMeta.Id);
+            return componentMeta.LastPublicationDate;
+        }
+
+        private static bool IsCached(Func<DateTime> getLastPublishedDate, string localFilePath,
+            ILocalization localization)
+        {
+            DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
+                localFilePath,
+                CacheRegions.BinaryPublishDate,
+                getLastPublishedDate
+                );
+
+            if (localization.LastRefresh.CompareTo(lastPublishedDate) < 0)
+            {
+                //File has been modified since last application start but we don't care
+                Log.Debug(
+                    "Binary at path '{0}' is modified, but only since last application restart, so no action required",
+                    localFilePath);
+                return true;
+            }
+
+            FileInfo fi = new FileInfo(localFilePath);
+            if (fi.Length > 0)
+            {
+                DateTime fileModifiedDate = File.GetLastWriteTime(localFilePath);
+                if (fileModifiedDate.CompareTo(lastPublishedDate) >= 0)
+                {
+                    Log.Debug("Binary at path '{0}' is still up to date, no action required", localFilePath);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -84,30 +134,10 @@ namespace Sdl.Web.Tridion.Statics
 
                 if (!localization.IsXpmEnabled && File.Exists(localFilePath))
                 {
-                    DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
-                        urlPath,
-                        CacheRegions.BinaryPublishDate,
-                        () => GetBinaryLastPublishDate(urlPath, publicationUri)
-                        );
-
-                    if (localization.LastRefresh.CompareTo(lastPublishedDate) < 0)
+                    if (IsCached(() => GetBinaryLastPublishDate(urlPath, publicationUri), localFilePath, localization))
                     {
-                        //File has been modified since last application start but we don't care
-                        Log.Debug(
-                            "Binary with URL '{0}' is modified, but only since last application restart, so no action required",
-                            urlPath);
                         return localFilePath;
-                    }
-                    FileInfo fi = new FileInfo(localFilePath);
-                    if (fi.Length > 0)
-                    {
-                        DateTime fileModifiedDate = File.GetLastWriteTime(localFilePath);
-                        if (fileModifiedDate.CompareTo(lastPublishedDate) >= 0)
-                        {
-                            Log.Debug("Binary with URL '{0}' is still up to date, no action required", urlPath);
-                            return localFilePath;
-                        }
-                    }
+                    }                 
                 }
 
                 // Binary does not exist or cached binary is out-of-date
@@ -125,17 +155,67 @@ namespace Sdl.Web.Tridion.Statics
         }
 
         /// <summary>
+        /// Gets the cached local file for a given binary Id.
+        /// </summary>
+        /// <param name="binaryId">The binary Id.</param>
+        /// <param name="localization">The Localization.</param>
+        /// <returns>The path to the local file.</returns>
+        internal string GetCachedFile(int binaryId, ILocalization localization)
+        {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string localFilePath = $"{baseDir}/{localization.BinaryCacheFolder}";
+            using (new Tracer(binaryId, localization, localFilePath))
+            {
+                string publicationUri = localization.GetCmUri();
+
+                if (!localization.IsXpmEnabled)
+                {
+                    try
+                    {
+                        string[] files = Directory.GetFiles(localFilePath, $"{binaryId}_*",
+                            SearchOption.TopDirectoryOnly);
+                        if (files.Length > 0)
+                        {
+                            localFilePath = files[0];
+                            if (IsCached(() => GetBinaryLastPublishDate(binaryId, localization), localFilePath,
+                                localization))
+                            {
+                                return localFilePath;
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Our binary cache folder probably doesn't exist. 
+                    }
+                }
+
+                // Binary does not exist or cached binary is out-of-date
+                BinaryMeta binaryMeta = GetBinaryMeta(binaryId, localization);
+                if (binaryMeta == null)
+                {
+                    throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
+                }
+                BinaryFactory binaryFactory = new BinaryFactory();
+                BinaryData binaryData = binaryFactory.GetBinary(GetPublicationId(publicationUri), binaryMeta.Id, binaryMeta.VariantId);
+                string ext = Path.GetExtension(binaryMeta.Path) ?? "";
+                localFilePath = $"{localFilePath}/{localization.Id}-{binaryId}.{ext}";
+                WriteBinaryToFile(binaryData.Bytes, localFilePath, null);
+                return localFilePath;
+            }
+        }
+
+        /// <summary>
         /// Perform actual write of binary content to file
         /// </summary>
         /// <param name="binary">The binary to store</param>
         /// <param name="physicalPath">String the file path to write to</param>
         /// <param name="dimensions">Dimensions of file</param>
         /// <returns>True is binary was written to disk, false otherwise</returns>
-        private static bool WriteBinaryToFile(byte[] binary, String physicalPath, Dimensions dimensions)
+        private static void WriteBinaryToFile(byte[] binary, string physicalPath, Dimensions dimensions)
         {
             using (new Tracer(binary, physicalPath, dimensions))
-            {
-                bool result = true;
+            {                
                 try
                 {
                     if (!File.Exists(physicalPath))
@@ -165,11 +245,8 @@ namespace Sdl.Web.Tridion.Statics
                 catch (IOException)
                 {
                     // file probabaly accessed by a different thread in a different process, locking failed
-                    Log.Warn("Cannot write to {0}. This can happen sporadically, let the next thread handle this.", physicalPath);
-                    result = false;
+                    Log.Warn("Cannot write to {0}. This can happen sporadically, let the next thread handle this.", physicalPath);                  
                 }
-
-                return result;
             }
         }
 

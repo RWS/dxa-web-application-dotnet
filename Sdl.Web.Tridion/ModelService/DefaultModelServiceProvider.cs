@@ -103,17 +103,17 @@ namespace Sdl.Web.Tridion.ModelService
                 return null;
             }
         }
-
-        public PageModelData GetPageModelData(int publicationId, int pageId, ILocalization localization, bool addIncludes)
+    
+        public PageModelData GetPageModelData(int pageId, ILocalization localization, bool addIncludes)
         {
             try
             {
                 PageModelRequest request = new PageModelRequest
                 {
                     CmUriScheme = localization.CmUriScheme,
-                    PublicationId = publicationId,
+                    PublicationId = int.Parse(localization.Id),
                     PageId = pageId,
-                    PageInclusion = addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
+                    PageInclusion = addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,                    
                     Binder = _binder
                 };
 

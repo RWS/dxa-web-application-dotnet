@@ -21,14 +21,13 @@ namespace Sdl.Web.Common.Interfaces
         PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes);
 
         /// <summary>
-        /// Returns the Page Model Data for a given publication and page Id.
+        /// Returns the Page Model Data for a given page Id.
         /// </summary>
-        /// <param name="publicationId">Publication Id.</param>
         /// <param name="pageId">Page Id.</param>
         /// <param name="localization">The context Localization.</param>
         /// <param name="addIncludes">Add include pages.</param>
         /// <returns>Page Model Data</returns>
-        PageModelData GetPageModelData(int publicationId, int pageId, ILocalization localization, bool addIncludes);
+        PageModelData GetPageModelData(int pageId, ILocalization localization, bool addIncludes);
 
         /// <summary>
         /// Gets the Entity Model Data given an entity id of the format {ComponentID}-{TemplateID}
