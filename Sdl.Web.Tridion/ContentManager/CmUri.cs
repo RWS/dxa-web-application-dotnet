@@ -5,6 +5,9 @@ using Sdl.Web.Delivery.Core;
 
 namespace Sdl.Web.Tridion.ContentManager
 {
+    /// <summary>
+    /// Handles CmUris (that can be of any namespace such as tcm or ish)
+    /// </summary>
     [Serializable]
     public class CmUri
     {
@@ -18,6 +21,15 @@ namespace Sdl.Web.Tridion.ContentManager
             ItemId = itemId;
             ItemType = itemType;
             Version = version;
+        }
+
+        public CmUri(string uriNamespace, int publicationId, int itemId, ItemType itemType)
+        {
+            Namespace = uriNamespace;
+            PublicationId = publicationId;
+            ItemId = itemId;
+            ItemType = itemType;
+            Version = -1;
         }
 
         public CmUri(string uri)
@@ -34,23 +46,17 @@ namespace Sdl.Web.Tridion.ContentManager
             : this(uri.Namespace, uri.PublicationId, uri.ItemId, uri.ItemType, uri.Version)
         { }
 
-        public static CmUri Create(string namespaceId, int publicationId, int itemId, ItemType itemType, int version)
-        {
-            return new CmUri(namespaceId, publicationId, itemId, itemType, version);
-        }
+        public static CmUri Create(string namespaceId, int publicationId, int itemId, ItemType itemType, int version) 
+            => new CmUri(namespaceId, publicationId, itemId, itemType, version);
+
+        public static CmUri Create(string namespaceId, int publicationId, int itemId, ItemType itemType)
+            => new CmUri(namespaceId, publicationId, itemId, itemType);
 
         public string Namespace { get; set; }
         public int ItemId { get; set; }
         public ItemType ItemType { get; set; }
         public int PublicationId { get; set; }
         public int Version { get; set; }
-
-        // cheat for serialization remap
-        public int PubId
-        {
-            get { return PublicationId; }
-            set { PublicationId = value; }
-        }
 
         [JsonIgnore]
         public bool IsNullUri => ItemId == 0 && ItemType == 0 && PublicationId == 0;
@@ -59,10 +65,7 @@ namespace Sdl.Web.Tridion.ContentManager
         {
             cmUri = null;
             if (string.IsNullOrEmpty(uri)) return false;
-            string ns = null;
-            ItemType itemType = 0;
-            int itemId = -1;
-            int publicationId = -1;
+            string ns;
             int version = -1;
             try
             {
@@ -72,8 +75,9 @@ namespace Sdl.Web.Tridion.ContentManager
                     return false;
                 }
                 ns = match.Groups["namespace"].Value;
-                publicationId = int.Parse(match.Groups["pubId"].Value);
-                itemId = int.Parse(match.Groups["itemId"].Value);
+                var publicationId = int.Parse(match.Groups["pubId"].Value);
+                var itemId = int.Parse(match.Groups["itemId"].Value);
+                ItemType itemType;
                 if (match.Groups["itemType"].Captures.Count > 0)
                 {
                     itemType = (ItemType)Enum.Parse(typeof(ItemType), match.Groups["itemType"].Value);
@@ -150,21 +154,15 @@ namespace Sdl.Web.Tridion.ContentManager
             return uri;
         }
 
-        public override string ToString() => $"{Namespace}:{PublicationId}-{ItemId}-{ItemType}";
+        public override string ToString() => $"{Namespace}:{PublicationId}-{ItemId}-{(int)ItemType}";
 
-        public override int GetHashCode()
-        {
-            return ToString().GetHashCode();
-        }
+        public override int GetHashCode() => ToString().GetHashCode();
 
         protected static bool IsNull(object o) => o == null;
 
         public override bool Equals(object obj) => this == (obj as CmUri);
 
-        public new static bool Equals(object objA, object objB)
-        {
-            return !IsNull(objA) ? objA.Equals(objB) : IsNull(objB);
-        }
+        public new static bool Equals(object objA, object objB) => !IsNull(objA) ? objA.Equals(objB) : IsNull(objB);
 
         public static bool operator ==(CmUri objA, string objB)
         {
@@ -186,7 +184,7 @@ namespace Sdl.Web.Tridion.ContentManager
                      objA.PublicationId == objB.PublicationId && objA.Version == objB.Version && objA.Namespace == objB.Namespace;
         }
 
-        public static implicit operator string(CmUri uri) => uri != null ? uri.ToString() : null;
+        public static implicit operator string(CmUri uri) => uri?.ToString();
 
         public static bool operator !=(CmUri objA, string objB)
         {
