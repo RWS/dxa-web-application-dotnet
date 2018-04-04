@@ -810,12 +810,27 @@ namespace Sdl.Web.Tridion.Mapping
         {
             if (pageModelData.MvcData?.ViewName == "IncludePage") return pageModelData.Title;
             IDictionary coreResources = localization.GetResources("core");
-            string title = "defaultPageTitle".Equals(pageModelData.Title)
-                ? coreResources["core.defaultPageTitle"].ToString()
-                : pageModelData.Title;
-            string separator = coreResources["core.pageTitleSeparator"].ToString();
-            string suffix = coreResources["core.pageTitlePostfix"].ToString();
+
+            string title = pageModelData.Title;
+            if (coreResources.Contains("core.defaultPageTitle"))
+            {
+                title = "defaultPageTitle".Equals(pageModelData.Title)
+                    ? coreResources["core.defaultPageTitle"].ToString()
+                    : pageModelData.Title;
+            }
+            string separator = string.Empty;
+            if (coreResources.Contains("core.pageTitleSeparator"))
+            {
+                separator = coreResources["core.pageTitleSeparator"].ToString();
+            }
+
+            string suffix = string.Empty;
+            if (coreResources.Contains(""))
+            {
+                coreResources["core.pageTitlePostfix"].ToString();
+            }
+
             return $"{title}{separator}{suffix}";
-        }      
+        }
     }
 }
