@@ -88,24 +88,37 @@ namespace Sdl.Web.Common.Configuration
         {
             using (new Tracer(this))
             {
-                BootstrapData resourcesData = null;
-                _localization.LoadStaticContentItem("resources/_all.json", ref resourcesData);
-
-                var newResources = new Hashtable();
-                foreach (string staticContentItemUrl in resourcesData.Files)
+                try
                 {
-                    string type = staticContentItemUrl.Substring(staticContentItemUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
-                    type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
-                    string resourcesJson = SiteConfiguration.ContentProvider.GetStaticContentItem(staticContentItemUrl, _localization).GetText();
-                    IDictionary<string, object> resources = JsonConvert.DeserializeObject<Dictionary<string, object>>(resourcesJson);
-                    foreach (KeyValuePair<string, object> resource in resources)
-                    {
-                        //we ensure resource key uniqueness by adding the type (which comes from the filename)
-                        newResources.Add($"{type}.{resource.Key}", resource.Value);
-                    }
-                }
+                    BootstrapData resourcesData = null;
+                    _localization.LoadStaticContentItem("resources/_all.json", ref resourcesData);
 
-                _resources = newResources;
+                    var newResources = new Hashtable();
+                    foreach (string staticContentItemUrl in resourcesData.Files)
+                    {
+                        string type =
+                            staticContentItemUrl.Substring(
+                                staticContentItemUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                        type = type.Substring(0, type.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
+                        string resourcesJson =
+                            SiteConfiguration.ContentProvider.GetStaticContentItem(staticContentItemUrl, _localization)
+                                .GetText();
+                        IDictionary<string, object> resources =
+                            JsonConvert.DeserializeObject<Dictionary<string, object>>(resourcesJson);
+                        foreach (KeyValuePair<string, object> resource in resources)
+                        {
+                            //we ensure resource key uniqueness by adding the type (which comes from the filename)
+                            newResources.Add($"{type}.{resource.Key}", resource.Value);
+                        }
+                    }
+
+                    _resources = newResources;
+                }
+                catch (Exception)
+                {
+                    Log.Warn("Failed to open 'resources/_all.json'");
+                    _resources = new Dictionary<string, object>();
+                }
             }
         }
 

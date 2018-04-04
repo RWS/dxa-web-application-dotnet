@@ -19,14 +19,12 @@ namespace Sdl.Web.Common.Configuration
     /// </summary>
     public class Localization : ILocalization
     {
-        private string _path;
-        private string _culture;
-        private Regex _staticContentUrlRegex;
-      
-        private readonly ILocalizationResources _resourceManager;
-        private readonly ILocalizationMappingsManager _mappingsManager;
-
-        private readonly object _loadLock = new object();
+        protected string _path;
+        protected string _culture;
+        protected Regex _staticContentUrlRegex;
+        protected readonly ILocalizationResources _resourceManager;
+        protected readonly ILocalizationMappingsManager _mappingsManager;
+        protected readonly object _loadLock = new object();
 
         public Localization()
         {
