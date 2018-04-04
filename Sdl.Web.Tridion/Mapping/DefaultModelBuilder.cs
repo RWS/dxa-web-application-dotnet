@@ -825,9 +825,9 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             string suffix = string.Empty;
-            if (coreResources.Contains(""))
+            if (coreResources.Contains("core.pageTitlePostfix"))
             {
-                coreResources["core.pageTitlePostfix"].ToString();
+                suffix = coreResources["core.pageTitlePostfix"].ToString();
             }
 
             return $"{title}{separator}{suffix}";
