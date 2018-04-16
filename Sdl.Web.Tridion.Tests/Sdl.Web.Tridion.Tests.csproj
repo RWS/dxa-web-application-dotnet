@@ -19,6 +19,8 @@
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <TargetFrameworkProfile />
+    <DxaDataModelVersion>2.0.0</DxaDataModelVersion>
+    <SdlDeliveryVersion>11.0.0-beta-201804142151</SdlDeliveryVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -58,15 +60,15 @@
     </Reference>
     <Reference Include="Sdl.Web.DataModel, Version=2.0.0.8, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Sdl.Dxa.DataModel.2.0.0\lib\net452\Sdl.Web.DataModel.dll</HintPath>
+      <HintPath>..\packages\Sdl.Dxa.DataModel.$(DxaDataModelVersion)\lib\net452\Sdl.Web.DataModel.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Delivery.Core">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Sdl.Web.Delivery.Core.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlDeliveryVersion)\lib\net452\Sdl.Web.Delivery.Core.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Delivery.Model">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Sdl.Web.Delivery.Model.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlDeliveryVersion)\lib\net452\Sdl.Web.Delivery.Model.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ServiceModel" />
