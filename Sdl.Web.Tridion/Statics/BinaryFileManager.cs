@@ -199,7 +199,7 @@ namespace Sdl.Web.Tridion.Statics
                 BinaryFactory binaryFactory = new BinaryFactory();
                 BinaryData binaryData = binaryFactory.GetBinary(GetPublicationId(publicationUri), binaryMeta.Id, binaryMeta.VariantId);
                 string ext = Path.GetExtension(binaryMeta.Path) ?? "";
-                localFilePath = $"{localFilePath}/{localization.Id}-{binaryId}.{ext}";
+                localFilePath = $"{localFilePath}/{localization.Id}-{binaryId}{ext}";
                 WriteBinaryToFile(binaryData.Bytes, localFilePath, null);
                 return localFilePath;
             }
