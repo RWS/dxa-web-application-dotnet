@@ -11,7 +11,7 @@
     <AssemblyName>Sdl.Web.ModelService</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SdlWebDeliveryPackageVersion>11.0.0-beta-201804161522</SdlWebDeliveryPackageVersion>
+    <SdlWebDeliveryPackageVersion>11.0.0-beta-201804191206</SdlWebDeliveryPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
