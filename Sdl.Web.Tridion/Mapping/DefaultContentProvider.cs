@@ -36,7 +36,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
         /// <returns>The Page Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given URL.</exception>
-        public PageModel GetPageModel(string urlPath, ILocalization localization, bool addIncludes = true)
+        public virtual PageModel GetPageModel(string urlPath, ILocalization localization, bool addIncludes = true)
         {
             using (new Tracer(urlPath, localization, addIncludes))
             {
@@ -86,7 +86,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
         /// <returns>The Page Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given Id.</exception>
-        public PageModel GetPageModel(int pageId, ILocalization localization, bool addIncludes = true)
+        public virtual PageModel GetPageModel(int pageId, ILocalization localization, bool addIncludes = true)
         {
             using (new Tracer(localization.Id, pageId, localization, addIncludes))
             {
@@ -135,7 +135,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="localization">The context Localization.</param>
         /// <returns>The Entity Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Entity Model exists for the given URL.</exception>
-        public EntityModel GetEntityModel(string id, ILocalization localization)
+        public virtual EntityModel GetEntityModel(string id, ILocalization localization)
         {
             using (new Tracer(id, localization))
             {
@@ -160,7 +160,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        private PageModel LoadPageModel(ref string urlPath, bool addIncludes, ILocalization localization)
+        protected virtual PageModel LoadPageModel(ref string urlPath, bool addIncludes, ILocalization localization)
         {
             using (new Tracer(urlPath, addIncludes, localization))
             {
@@ -180,7 +180,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        private PageModel LoadPageModel(int pageId, bool addIncludes, ILocalization localization)
+        protected virtual PageModel LoadPageModel(int pageId, bool addIncludes, ILocalization localization)
         {
             using (new Tracer(pageId, addIncludes, localization))
             {
@@ -200,7 +200,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        private EntityModel LoadEntityModel(string id, ILocalization localization)
+        protected virtual EntityModel LoadEntityModel(string id, ILocalization localization)
         {
             using (new Tracer(id, localization))
             {
@@ -229,7 +229,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="urlPath">The URL path (unescaped).</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The Static Content Item.</returns>
-        public StaticContentItem GetStaticContentItem(string urlPath, ILocalization localization)
+        public virtual StaticContentItem GetStaticContentItem(string urlPath, ILocalization localization)
         {
             using (new Tracer(urlPath, localization))
             {
@@ -250,7 +250,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="binaryId">The Id of the binary.</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The Static Content Item.</returns>
-        public StaticContentItem GetStaticContentItem(int binaryId, ILocalization localization)
+        public virtual StaticContentItem GetStaticContentItem(int binaryId, ILocalization localization)
         {
             using (new Tracer(binaryId, localization))
             {
@@ -270,7 +270,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// </summary>
         /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
         /// <param name="localization">The context Localization.</param>
-        public void PopulateDynamicList(DynamicList dynamicList, ILocalization localization)
+        public virtual void PopulateDynamicList(DynamicList dynamicList, ILocalization localization)
         {
             using (new Tracer(dynamicList, localization))
             {
@@ -297,7 +297,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        private EntityModelData CreateEntityModelData(IComponentMeta componentMeta)
+        protected virtual EntityModelData CreateEntityModelData(IComponentMeta componentMeta)
         {
             ContentModelData standardMeta = new ContentModelData();
             foreach (DictionaryEntry entry in componentMeta.CustomMeta.NameValues)
