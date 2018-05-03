@@ -125,13 +125,21 @@ namespace Sdl.Web.Tridion.Statics
         internal string GetCachedFile(string urlPath, ILocalization localization)
         {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string localFilePath = $"{baseDir}/{localization.BinaryCacheFolder}/{urlPath}";
+            string localFilePath = $"{baseDir}/{urlPath}";
+            if (File.Exists(localFilePath))
+            {
+                // If our resource exists on the filesystem we can assume static content that is
+                // manually added to web application.
+                return localFilePath;
+            }
+            // Attempt cache location with fallback to retrieval from CIL. Note we don't check cache
+            // when running under XPM
+            localFilePath = $"{baseDir}/{localization.BinaryCacheFolder}/{urlPath}";
             using (new Tracer(urlPath, localization, localFilePath))
             {
                 Dimensions dimensions;
                 urlPath = StripDimensions(urlPath, out dimensions);
-                string publicationUri = localization.GetCmUri();
-
+                string publicationUri = localization.GetCmUri();                
                 if (!localization.IsXpmEnabled && File.Exists(localFilePath))
                 {
                     if (IsCached(() => GetBinaryLastPublishDate(urlPath, publicationUri), localFilePath, localization))
