@@ -268,7 +268,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
                 }
 
                 // Ensure that children are ordered correctly
-                taxonomyNode.Items = children.OrderBy(i => i.OriginalTitle).ToList();
+                taxonomyNode.Items = SortTaxonomyNodes(children);
             }
         }
 
@@ -366,7 +366,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
 
             // Ensure that merged child items are ordered correctly
-            subtreeToMergeInto.Items = mergedChildItems.OrderBy(i => i.OriginalTitle).ToList();
+            subtreeToMergeInto.Items = SortTaxonomyNodes(mergedChildItems);
         }
 
         protected string GetNavigationTaxonomyUri(ILocalization localization)
@@ -410,6 +410,9 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
+        protected virtual List<SitemapItem> SortTaxonomyNodes(IList<SitemapItem> taxonomyNodes)
+            => taxonomyNodes.OrderBy(i => i.OriginalTitle).ToList();
+
         protected virtual TaxonomyNode CreateTaxonomyNode(Keyword keyword, int expandLevels, NavigationFilter filter, ILocalization localization)
         {
             if (keyword == null)
@@ -446,7 +449,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
                     }
                 }
 
-                childItems = childItems.OrderBy(i => i.OriginalTitle).ToList();
+                childItems = SortTaxonomyNodes(childItems);
             }
 
             string sequencePrefix;
