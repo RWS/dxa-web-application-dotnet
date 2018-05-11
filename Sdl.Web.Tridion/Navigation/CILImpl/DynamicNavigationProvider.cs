@@ -242,7 +242,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             pageId = sitemapItemIdMatch.Groups["pageId"].Value;
         }
 
-        protected void AddDescendants(TaxonomyNode taxonomyNode, NavigationFilter filter, ILocalization localization)
+        protected virtual void AddDescendants(TaxonomyNode taxonomyNode, NavigationFilter filter, ILocalization localization)
         {
             using (new Tracer(taxonomyNode, filter, localization))
             {
@@ -272,7 +272,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
-        protected IEnumerable<SitemapItem> ExpandTaxonomyRoots(NavigationFilter filter, ILocalization localization)
+        protected virtual IEnumerable<SitemapItem> ExpandTaxonomyRoots(NavigationFilter filter, ILocalization localization)
         {
             using (new Tracer(filter, localization))
             {
@@ -287,7 +287,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
-        protected IEnumerable<SitemapItem> ExpandDescendants(string keywordUri, string taxonomyUri, NavigationFilter filter, ILocalization localization)
+        protected virtual IEnumerable<SitemapItem> ExpandDescendants(string keywordUri, string taxonomyUri, NavigationFilter filter, ILocalization localization)
         {
             using (new Tracer(keywordUri, taxonomyUri, filter, localization))
             {
@@ -305,7 +305,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
-        protected TaxonomyNode ExpandAncestorsForKeyword(string keywordUri, string taxonomyUri, NavigationFilter filter, ILocalization localization)
+        protected virtual TaxonomyNode ExpandAncestorsForKeyword(string keywordUri, string taxonomyUri, NavigationFilter filter, ILocalization localization)
         {
             using (new Tracer(keywordUri, taxonomyUri, filter, localization))
             {
@@ -322,7 +322,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
-        protected TaxonomyNode ExpandAncestorsForPage(string pageUri, string taxonomyUri, NavigationFilter filter, ILocalization localization)
+        protected virtual TaxonomyNode ExpandAncestorsForPage(string pageUri, string taxonomyUri, NavigationFilter filter, ILocalization localization)
         {
             using (new Tracer(pageUri, taxonomyUri, filter, localization))
             {
@@ -349,7 +349,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
-        protected void MergeSubtrees(SitemapItem subtreeRoot, SitemapItem subtreeToMergeInto)
+        protected virtual void MergeSubtrees(SitemapItem subtreeRoot, SitemapItem subtreeToMergeInto)
         {
             List<SitemapItem> mergedChildItems = subtreeToMergeInto.Items;
             foreach (SitemapItem childNode in subtreeRoot.Items)
@@ -369,7 +369,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             subtreeToMergeInto.Items = SortTaxonomyNodes(mergedChildItems);
         }
 
-        protected string GetNavigationTaxonomyUri(ILocalization localization)
+        protected virtual string GetNavigationTaxonomyUri(ILocalization localization)
         {
             return SiteConfiguration.CacheProvider.GetOrAdd(
                 localization.Id, // key
@@ -378,7 +378,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
                 );
         }
 
-        protected string ResolveNavigationTaxonomyUri(ILocalization localization)
+        protected virtual string ResolveNavigationTaxonomyUri(ILocalization localization)
         {
             using (new Tracer(localization))
             {
@@ -398,7 +398,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
-        protected SitemapItem BuildNavigationModel(string navTaxonomyUri, ILocalization localization)
+        protected virtual SitemapItem BuildNavigationModel(string navTaxonomyUri, ILocalization localization)
         {
             using (new Tracer(navTaxonomyUri, localization))
             {
@@ -480,7 +480,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             return result;
         }
 
-        protected SitemapItem[] ExpandClassifiedPages(Keyword keyword, string taxonomyId, ILocalization localization)
+        protected virtual SitemapItem[] ExpandClassifiedPages(Keyword keyword, string taxonomyId, ILocalization localization)
         {
             using (new Tracer(keyword.KeywordUri, taxonomyId, localization))
             {
