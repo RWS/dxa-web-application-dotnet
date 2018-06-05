@@ -11,7 +11,7 @@
         <CdTestDeployFolder>\\saintjohn01.ams.dev\C$\inetpub\wwwroot\GitVersion</CdTestDeployFolder>
         <NuGetRepositoryUrl/>
         <NugetSymbolServerUrl/>
-        <NuGet>&quot;$(ProjectDirectory)\_tools\NuGet.exe&quot;</NuGet>
+        <NuGet>NuGet.exe</NuGet>
         <NuGetPackageDirectory>$(ProjectDirectory)\_NuGet</NuGetPackageDirectory>
         <DxaFrameworkPackageDirectory>$(NuGetPackageDirectory)\Sdl.Dxa.Framework</DxaFrameworkPackageDirectory>
         <VersionMajor>$(Version.Split('.')[0])</VersionMajor>
