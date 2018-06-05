@@ -23,6 +23,7 @@
         <!--Tools-->
         <MsTestExe Condition="'$(MsTestExe)'=='' And Exists('$(MSBuildProgramFiles32)\Microsoft Visual Studio 14.0\Common7\IDE\MSTest.exe')">$(MSBuildProgramFiles32)\Microsoft Visual Studio 14.0\Common7\IDE\MSTest.exe</MsTestExe>
         <MsTestExe Condition="'$(MsTestExe)'=='' And Exists('$(MSBuildProgramFiles32)\Microsoft Visual Studio 12.0\Common7\IDE\MSTest.exe')">$(MSBuildProgramFiles32)\Microsoft Visual Studio 12.0\Common7\IDE\MSTest.exe</MsTestExe>
+        <MsTestExe Condition="'$(MsTestExe)'=='' And Exists('$(MSBuildProgramFiles32)\Microsoft Visual Studio\2017\TestAgent\Common7\IDE\MSTest.exe')">$(MSBuildProgramFiles32)\Microsoft Visual Studio\2017\TestAgent\Common7\IDE\MSTest.exe</MsTestExe>
     </PropertyGroup>
     <!-- ==================================================================================  -->
     <Target Name="Build">
