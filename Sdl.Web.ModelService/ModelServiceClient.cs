@@ -11,6 +11,7 @@ using Sdl.Web.Delivery.DiscoveryService.Tridion.WebDelivery.Platform;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore;
 using System.Threading.Tasks;
 using Sdl.Web.Delivery.Core;
+using Sdl.Web.Delivery.ServicesCore.ClaimStore.Cookie;
 using Sdl.Web.ModelService.Request;
 
 namespace Sdl.Web.ModelService
@@ -232,6 +233,28 @@ namespace Sdl.Web.ModelService
                 if ((cookies != null) && cookies.ContainsKey(PreviewSessionTokenCookie))
                 {
                     SetCookie(request, PreviewSessionTokenCookie, cookies[PreviewSessionTokenCookie]);
+                }             
+
+                var forwardedClaimValues = AmbientDataContext.ForwardedClaims;
+                if (forwardedClaimValues != null && forwardedClaimValues.Count > 0)
+                {
+                    Dictionary<Uri, object> forwardedClaims =
+                        forwardedClaimValues.Select(claim => new Uri(claim, UriKind.RelativeOrAbsolute))
+                            .Distinct()
+                            .Where(uri => claimStore.Contains(uri) && claimStore.Get<object>(uri) != null)
+                            .ToDictionary(uri => uri, uri => claimStore.Get<object>(uri));
+
+                    if (forwardedClaims.Count > 0)
+                    {
+                        ClaimCookieSerializer serializer = new ClaimCookieSerializer(AmbientDataContext.ForwardedClaimsCookieName);
+                        List<ClaimsCookie> claimsCookies = serializer.SerializeClaims(forwardedClaims);
+                        foreach (ClaimsCookie claimsCookie in claimsCookies)
+                        {
+                            byte[] cookieValue = claimsCookie.Value;
+                            Cookie cookie = new Cookie(claimsCookie.Name, new System.Text.ASCIIEncoding().GetString(cookieValue));                        
+                            SetCookie(request, cookie);
+                        }
+                    }
                 }
             }
 
@@ -269,6 +292,12 @@ namespace Sdl.Web.ModelService
         {
             // Quick-and-dirty way: just directly set the "Cookie" HTTP header
             httpWebRequest.Headers.Add("Cookie", $"{name}={value}");
+        }
+
+        private static void SetCookie(HttpWebRequest httpWebRequest, Cookie cookie)
+        {
+            // Quick-and-dirty way: just directly set the "Cookie" HTTP header
+            httpWebRequest.Headers.Add("Cookie", $"{cookie}");
         }
 
         private static string GetResponseBody(WebResponse webResponse)
