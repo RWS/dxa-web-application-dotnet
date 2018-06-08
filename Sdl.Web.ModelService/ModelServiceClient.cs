@@ -235,6 +235,7 @@ namespace Sdl.Web.ModelService
                     SetCookie(request, PreviewSessionTokenCookie, cookies[PreviewSessionTokenCookie]);
                 }             
 
+                // Forward all claims on to model-service
                 var forwardedClaimValues = AmbientDataContext.ForwardedClaims;
                 if (forwardedClaimValues != null && forwardedClaimValues.Count > 0)
                 {
@@ -252,9 +253,16 @@ namespace Sdl.Web.ModelService
                         {
                             byte[] cookieValue = claimsCookie.Value;
                             Cookie cookie = new Cookie(claimsCookie.Name, new System.Text.ASCIIEncoding().GetString(cookieValue));                        
-                            SetCookie(request, cookie);
+                            SetCookie(request, cookie.Name, cookie.Value);
                         }
                     }
+                }
+
+                // To support the TridionDocs module (should not require this when model-service is PCA plugin)
+                var conditions = claimStore.Get<string>(new Uri("taf:ish:userconditions"));
+                if (conditions != null)
+                {
+                    SetCookie(request, "taf.ish.userconditions", Base64.Encode(conditions));
                 }
             }
 
@@ -291,13 +299,10 @@ namespace Sdl.Web.ModelService
         private static void SetCookie(HttpWebRequest httpWebRequest, string name, string value)
         {
             // Quick-and-dirty way: just directly set the "Cookie" HTTP header
-            httpWebRequest.Headers.Add("Cookie", $"{name}={value}");
-        }
-
-        private static void SetCookie(HttpWebRequest httpWebRequest, Cookie cookie)
-        {
-            // Quick-and-dirty way: just directly set the "Cookie" HTTP header
-            httpWebRequest.Headers.Add("Cookie", $"{cookie}");
+            string headerValue = httpWebRequest.Headers["Cookie"] ?? "";
+            if (headerValue.Length > 0) headerValue += ";";
+            headerValue += $"{name}={value}";
+            httpWebRequest.Headers.Add("Cookie", headerValue);
         }
 
         private static string GetResponseBody(WebResponse webResponse)
