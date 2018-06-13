@@ -314,10 +314,10 @@ namespace Sdl.Web.Common.Models
                     switch (attribute.PropertyName)
                     {
                         case SemanticProperty.AllFields:
-                            if (!typeof(IDictionary<string, string>).IsAssignableFrom(propertyInfo.PropertyType))
+                            if (!typeof(IDictionary<string, string>).IsAssignableFrom(propertyInfo.PropertyType) && !typeof(IDictionary<string, KeywordModel>).IsAssignableFrom(propertyInfo.PropertyType))
                             {
-                                throw new DxaException(
-                                    $"Invalid semantics for property {modelType.Name}.{propertyInfo.Name}. Properties with [SemanticProperty(\"_all\")] annotation must be of type Dictionary<string, string>."
+                                    throw new DxaException(
+                                    $"Invalid semantics for property {modelType.Name}.{propertyInfo.Name}. Properties with [SemanticProperty(\"_all\")] annotation must be of type Dictionary<string, string> or Dictionary<string, KeywordModel>."
                                     );
                             }
                             break;

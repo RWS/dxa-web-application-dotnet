@@ -26,7 +26,7 @@ namespace Sdl.Web.Tridion.Mapping
         protected class Validation
         {
             public SemanticSchema MainSchema { get; set; }
-            public List<SemanticSchema> InheritedSchemas { set; get;  }
+            public List<SemanticSchema> InheritedSchemas { set; get; }
         }
 
         protected class MappingData
@@ -85,7 +85,7 @@ namespace Sdl.Web.Tridion.Mapping
                 else if (pageModelData.SchemaId == null)
                 {
                     // Custom Page Model, but no custom metadata.
-                    pageModel = (PageModel) modelType.CreateInstance(pageModelData.Id);
+                    pageModel = (PageModel)modelType.CreateInstance(pageModelData.Id);
                     pageModel.ExtensionData = pageModelData.ExtensionData;
                     pageModel.HtmlClasses = pageModelData.HtmlClasses;
                     pageModel.XpmMetadata = localization.IsXpmEnabled ? pageModelData.XpmMetadata : null;
@@ -106,7 +106,7 @@ namespace Sdl.Web.Tridion.Mapping
                         MetadataFields = pageModelData.Metadata,
                         Localization = localization
                     };
-                    pageModel = (PageModel) CreateViewModel(mappingData);
+                    pageModel = (PageModel)CreateViewModel(mappingData);
                 }
 
                 pageModel.MvcData = mvcData;
@@ -177,7 +177,7 @@ namespace Sdl.Web.Tridion.Mapping
                     Localization = localization
                 };
 
-                entityModel = (EntityModel) CreateViewModel(mappingData);
+                entityModel = (EntityModel)CreateViewModel(mappingData);
 
                 entityModel.Id = entityModelData.Id;
                 entityModel.MvcData = mvcData ?? entityModel.GetDefaultView(localization);
@@ -193,12 +193,12 @@ namespace Sdl.Web.Tridion.Mapping
             if (string.IsNullOrEmpty(mappingData.ModelId))
             {
                 // Use parameterless constructor
-                result = (ViewModel) mappingData.ModelType.CreateInstance();
+                result = (ViewModel)mappingData.ModelType.CreateInstance();
             }
             else
             {
                 // Pass model Identifier in constructor.
-                result = (ViewModel) mappingData.ModelType.CreateInstance(mappingData.ModelId);
+                result = (ViewModel)mappingData.ModelType.CreateInstance(mappingData.ModelId);
             }
 
             result.ExtensionData = viewModelData.ExtensionData;
@@ -258,10 +258,19 @@ namespace Sdl.Web.Tridion.Mapping
                 string fieldXPath = null;
                 foreach (SemanticProperty semanticProperty in semanticProperties)
                 {
-                    
+
                     if (semanticProperty.PropertyName == SemanticProperty.AllFields)
                     {
-                        modelProperty.SetValue(viewModel, GetAllFieldsAsDictionary(mappingData));
+                        if (typeof(IDictionary<string, string>).IsAssignableFrom(modelProperty.PropertyType))
+                        {
+                            modelProperty.SetValue(viewModel, GetAllFieldsAsDictionary<string>(mappingData));
+                        }
+
+                        else if (typeof(IDictionary<string, KeywordModel>).IsAssignableFrom(modelProperty.PropertyType))
+                        {
+                            modelProperty.SetValue(viewModel, GetAllFieldsAsDictionary<KeywordModel>(mappingData) as IDictionary<string, KeywordModel>);
+                        }
+
                         isFieldMapped = true;
                         break;
                     }
@@ -271,7 +280,7 @@ namespace Sdl.Web.Tridion.Mapping
                     {
                         try
                         {
-                            object mappedSelf = MapComponentLink((EntityModelData) mappingData.SourceViewModel, modelProperty.PropertyType, mappingData.Localization);
+                            object mappedSelf = MapComponentLink((EntityModelData)mappingData.SourceViewModel, modelProperty.PropertyType, mappingData.Localization);
                             modelProperty.SetValue(viewModel, mappedSelf);
                             isFieldMapped = true;
                             break;
@@ -343,7 +352,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        protected virtual bool IsFieldFromMainSchema(Validation validation, FieldSemantics fieldSemantics) 
+        protected virtual bool IsFieldFromMainSchema(Validation validation, FieldSemantics fieldSemantics)
             => validation.MainSchema?.FindFieldBySemantics(fieldSemantics) != null;
 
         protected virtual SemanticSchemaField ValidateField(Validation validation, FieldSemantics fieldSemantics)
@@ -384,7 +393,7 @@ namespace Sdl.Web.Tridion.Mapping
                 }
                 if (fieldValue is ContentModelData[])
                 {
-                    fields = ((ContentModelData[]) fieldValue)[0];
+                    fields = ((ContentModelData[])fieldValue)[0];
                 }
                 else
                 {
@@ -394,7 +403,7 @@ namespace Sdl.Web.Tridion.Mapping
 
             return fieldValue;
         }
-       
+
         protected virtual object MapField(object fieldValues, Type modelPropertyType, SemanticSchemaField semanticSchemaField, MappingData mappingData)
         {
             Type sourceType = fieldValues.GetType();
@@ -411,9 +420,9 @@ namespace Sdl.Web.Tridion.Mapping
             Type bareTargetType = modelPropertyType.GetUnderlyingNullableType() ?? targetType;
 
             IList mappedValues = targetType.CreateGenericList();
-            
-            if (typeof (EntityModel).IsAssignableFrom(targetType) && sourceType != typeof (EntityModelData) &&
-                (sourceType == typeof (string) && string.IsNullOrEmpty((string) fieldValues)))
+
+            if (typeof(EntityModel).IsAssignableFrom(targetType) && sourceType != typeof(EntityModelData) &&
+                (sourceType == typeof(string) && string.IsNullOrEmpty((string)fieldValues)))
             {
                 return isListProperty ? mappedValues : null;
             }
@@ -423,14 +432,14 @@ namespace Sdl.Web.Tridion.Mapping
                 case "String":
                     if (isArray)
                     {
-                        foreach (string fieldValue in (string[]) fieldValues)
+                        foreach (string fieldValue in (string[])fieldValues)
                         {
                             mappedValues.Add(MapString(fieldValue, bareTargetType));
                         }
                     }
                     else
                     {
-                        mappedValues.Add(MapString((string) fieldValues, bareTargetType));
+                        mappedValues.Add(MapString((string)fieldValues, bareTargetType));
                     }
                     break;
 
@@ -439,7 +448,7 @@ namespace Sdl.Web.Tridion.Mapping
                 case "Double":
                     if (isArray)
                     {
-                        foreach (object fieldValue in (Array) fieldValues)
+                        foreach (object fieldValue in (Array)fieldValues)
                         {
                             mappedValues.Add(Convert.ChangeType(fieldValue, bareTargetType));
                         }
@@ -453,14 +462,14 @@ namespace Sdl.Web.Tridion.Mapping
                 case "RichTextData":
                     if (isArray)
                     {
-                        foreach (RichTextData fieldValue in (RichTextData[]) fieldValues)
+                        foreach (RichTextData fieldValue in (RichTextData[])fieldValues)
                         {
                             mappedValues.Add(MapRichText(fieldValue, targetType, mappingData.Localization));
                         }
                     }
                     else
                     {
-                        mappedValues.Add(MapRichText((RichTextData) fieldValues, targetType, mappingData.Localization));
+                        mappedValues.Add(MapRichText((RichTextData)fieldValues, targetType, mappingData.Localization));
                     }
                     break;
 
@@ -469,7 +478,7 @@ namespace Sdl.Web.Tridion.Mapping
                     if (isArray)
                     {
                         int index = 1;
-                        foreach (ContentModelData embeddedFields in (ContentModelData[]) fieldValues)
+                        foreach (ContentModelData embeddedFields in (ContentModelData[])fieldValues)
                         {
                             string indexedFieldXPath = $"{fieldXPath}[{index++}]";
                             mappedValues.Add(MapEmbeddedFields(embeddedFields, targetType, semanticSchemaField, indexedFieldXPath, mappingData));
@@ -478,35 +487,35 @@ namespace Sdl.Web.Tridion.Mapping
                     else
                     {
                         string indexedFieldXPath = $"{fieldXPath}[1]";
-                        mappedValues.Add(MapEmbeddedFields((ContentModelData) fieldValues, targetType, semanticSchemaField, indexedFieldXPath, mappingData));
+                        mappedValues.Add(MapEmbeddedFields((ContentModelData)fieldValues, targetType, semanticSchemaField, indexedFieldXPath, mappingData));
                     }
                     break;
 
                 case "EntityModelData":
                     if (isArray)
                     {
-                        foreach (EntityModelData entityModelData in (EntityModelData[]) fieldValues)
+                        foreach (EntityModelData entityModelData in (EntityModelData[])fieldValues)
                         {
                             mappedValues.Add(MapComponentLink(entityModelData, targetType, mappingData.Localization));
                         }
                     }
                     else
                     {
-                        mappedValues.Add(MapComponentLink((EntityModelData) fieldValues, targetType, mappingData.Localization));
+                        mappedValues.Add(MapComponentLink((EntityModelData)fieldValues, targetType, mappingData.Localization));
                     }
                     break;
 
                 case "KeywordModelData":
                     if (isArray)
                     {
-                        foreach (KeywordModelData keywordModelData in (KeywordModelData[]) fieldValues)
+                        foreach (KeywordModelData keywordModelData in (KeywordModelData[])fieldValues)
                         {
                             mappedValues.Add(MapKeyword(keywordModelData, targetType, mappingData.Localization));
                         }
                     }
                     else
                     {
-                        mappedValues.Add(MapKeyword((KeywordModelData) fieldValues, targetType, mappingData.Localization));
+                        mappedValues.Add(MapKeyword((KeywordModelData)fieldValues, targetType, mappingData.Localization));
                     }
                     break;
 
@@ -539,10 +548,10 @@ namespace Sdl.Web.Tridion.Mapping
                 };
             }
 
-            if (!string.IsNullOrEmpty(stringValue) && targetType == typeof (int) && stringValue.Contains("."))
+            if (!string.IsNullOrEmpty(stringValue) && targetType == typeof(int) && stringValue.Contains("."))
             {
                 // Simple cast from floating point to int
-                return (int) (double)Convert.ChangeType(stringValue, typeof (double), CultureInfo.InvariantCulture.NumberFormat);
+                return (int)(double)Convert.ChangeType(stringValue, typeof(double), CultureInfo.InvariantCulture.NumberFormat);
             }
             return Convert.ChangeType(stringValue, targetType, CultureInfo.InvariantCulture.NumberFormat);
         }
@@ -598,7 +607,7 @@ namespace Sdl.Web.Tridion.Mapping
                         Localization = localization
                     };
 
-                    result = (KeywordModel) CreateViewModel(keywordMappingData);
+                    result = (KeywordModel)CreateViewModel(keywordMappingData);
                 }
 
                 result.Id = keywordModelData.Id;
@@ -616,7 +625,7 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     DisplayText = GetKeywordDisplayText(keywordModelData),
                     Key = keywordModelData.Key,
-                    TagCategory = localization.GetCmUri(keywordModelData.TaxonomyId, (int) ItemType.Category)
+                    TagCategory = localization.GetCmUri(keywordModelData.TaxonomyId, (int)ItemType.Category)
                 };
             }
 
@@ -653,7 +662,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (htmlFragment == null)
                 {
                     // Embedded Entity Model (for Media Items)
-                    MediaItem mediaItem = (MediaItem) ModelBuilderPipeline.CreateEntityModel((EntityModelData) fragment, typeof(MediaItem), localization);
+                    MediaItem mediaItem = (MediaItem)ModelBuilderPipeline.CreateEntityModel((EntityModelData)fragment, typeof(MediaItem), localization);
                     mediaItem.IsEmbedded = true;
                     if (mediaItem.MvcData == null)
                     {
@@ -694,9 +703,9 @@ namespace Sdl.Web.Tridion.Mapping
             return CreateViewModel(embeddedMappingData);
         }
 
-        protected virtual IDictionary<string, string> GetAllFieldsAsDictionary(MappingData mappingData)
+        protected virtual IDictionary<string, T> GetAllFieldsAsDictionary<T>(MappingData mappingData)
         {
-            IDictionary<string, string> result = new Dictionary<string, string>();
+            IDictionary<string, T> result = new Dictionary<string, T>();
             if (mappingData.Fields != null)
             {
                 foreach (KeyValuePair<string, object> field in mappingData.Fields)
@@ -705,20 +714,31 @@ namespace Sdl.Web.Tridion.Mapping
                     {
                         throw new NotImplementedException("'settings' field handling"); // TODO
                     }
-                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData,  resolveComponentLinks: false).FirstOrDefault();
+
+                    if (typeof(T) == typeof(KeywordModel)) 
+                    {
+                        if (field.Value is KeywordModelData)
+                        {
+                            result[field.Key] = GetFieldValues<T>(field.Value, mappingData, resolveComponentLinks: false).FirstOrDefault();
+                        }
+                    }
+                    else
+                    {
+                        result[field.Key] = GetFieldValues<T>(field.Value, mappingData, resolveComponentLinks: false).FirstOrDefault();
+                    }
                 }
             }
-            if (mappingData.MetadataFields != null)
+            if (mappingData.MetadataFields != null && typeof(T) == typeof(string))
             {
                 foreach (KeyValuePair<string, object> field in mappingData.MetadataFields)
                 {
-                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData, resolveComponentLinks: false).FirstOrDefault();
+                    result[field.Key] = GetFieldValues<T>(field.Value, mappingData, resolveComponentLinks: false).FirstOrDefault();
                 }
             }
             return result;
         }
 
-        protected virtual IEnumerable<string> GetFieldValuesAsStrings(object fieldValues, MappingData mappingData, bool resolveComponentLinks)
+        protected virtual IEnumerable<T> GetFieldValues<T>(object fieldValues, MappingData mappingData, bool resolveComponentLinks)
         {
             if (!resolveComponentLinks)
             {
@@ -726,16 +746,16 @@ namespace Sdl.Web.Tridion.Mapping
                 ILocalization localization = mappingData.Localization;
                 if (fieldValues is EntityModelData)
                 {
-                    return new[] { localization.GetCmUri(((EntityModelData) fieldValues).Id) };
+                    return (new[] { localization.GetCmUri(((EntityModelData)fieldValues).Id) }) as IEnumerable<T>;
                 }
                 if (fieldValues is EntityModelData[])
                 {
-                    return ((EntityModelData[]) fieldValues).Select(emd => localization.GetCmUri(emd.Id));
+                    return ((EntityModelData[])fieldValues).Select(emd => localization.GetCmUri(emd.Id)) as IEnumerable<T>;
                 }
             }
 
-            // Use standard model mapping to map the field to a list of strings.
-            return (IEnumerable<string>) MapField(fieldValues, typeof(List<string>), null, mappingData);
+            // Use standard model mapping to map the field to a list of T.
+            return MapField(fieldValues, typeof(List<T>), null, mappingData) as IEnumerable<T>;
         }
 
         protected virtual MvcData CreateMvcData(DataModel.MvcData data, string defaultControllerName)
@@ -765,7 +785,7 @@ namespace Sdl.Web.Tridion.Mapping
             MvcData mvcData = CreateMvcData(regionModelData.MvcData, "Region");
             Type regionModelType = ModelTypeRegistry.GetViewModelType(mvcData);
 
-            RegionModel result = (RegionModel) regionModelType.CreateInstance(regionModelData.Name);
+            RegionModel result = (RegionModel)regionModelType.CreateInstance(regionModelData.Name);
 
             result.ExtensionData = regionModelData.ExtensionData;
             result.HtmlClasses = regionModelData.HtmlClasses;
