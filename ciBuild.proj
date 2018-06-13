@@ -11,7 +11,7 @@
         <CdTestDeployFolder>\\saintjohn01.ams.dev\C$\inetpub\wwwroot\GitVersion</CdTestDeployFolder>
         <NuGetRepositoryUrl/>
         <NugetSymbolServerUrl/>
-        <NuGet>&quot;$(ProjectDirectory)\_tools\NuGet.exe&quot;</NuGet>
+        <NuGet>NuGet.exe</NuGet>
         <NuGetPackageDirectory>$(ProjectDirectory)\_NuGet</NuGetPackageDirectory>
         <DxaFrameworkPackageDirectory>$(NuGetPackageDirectory)\Sdl.Dxa.Framework</DxaFrameworkPackageDirectory>
         <VersionMajor>$(Version.Split('.')[0])</VersionMajor>
@@ -23,6 +23,7 @@
         <!--Tools-->
         <MsTestExe Condition="'$(MsTestExe)'=='' And Exists('$(MSBuildProgramFiles32)\Microsoft Visual Studio 14.0\Common7\IDE\MSTest.exe')">$(MSBuildProgramFiles32)\Microsoft Visual Studio 14.0\Common7\IDE\MSTest.exe</MsTestExe>
         <MsTestExe Condition="'$(MsTestExe)'=='' And Exists('$(MSBuildProgramFiles32)\Microsoft Visual Studio 12.0\Common7\IDE\MSTest.exe')">$(MSBuildProgramFiles32)\Microsoft Visual Studio 12.0\Common7\IDE\MSTest.exe</MsTestExe>
+        <MsTestExe Condition="'$(MsTestExe)'=='' And Exists('$(MSBuildProgramFiles32)\Microsoft Visual Studio\2017\TestAgent\Common7\IDE\MSTest.exe')">$(MSBuildProgramFiles32)\Microsoft Visual Studio\2017\TestAgent\Common7\IDE\MSTest.exe</MsTestExe>
     </PropertyGroup>
     <!-- ==================================================================================  -->
     <Target Name="Build">
@@ -41,7 +42,7 @@
         <Message Text="Clearing NuGet cache..."/>
         <Exec Command="$(NuGet) locals all -Clear"/>
         <Message Text="Restoring NuGet packages..."/>
-        <Exec Command="_tools\RestorePackages DxaFramework.sln" WorkingDirectory="$(ProjectDirectory)"/>
+        <Exec Command="$(NuGet) restore DxaFramework.sln" WorkingDirectory="$(ProjectDirectory)" />
         <Exec Command="$(NuGet) restore DD4T\DD4T.Providers.DxaModelService\DD4T.Providers.DxaModelService.csproj -PackagesDirectory packages " WorkingDirectory="$(ProjectDirectory)"/>
         <ItemGroup>
             <AssemblyInfo Include="[assembly: AssemblyVersion(&quot;$(VersionMajor).$(VersionMinor).$(VersionPatch).0&quot;)]"/>
