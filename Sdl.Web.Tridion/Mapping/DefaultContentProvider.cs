@@ -32,11 +32,11 @@ namespace Sdl.Web.Tridion.Mapping
         /// Gets a Page Model for a given URL path.
         /// </summary>
         /// <param name="urlPath">The URL path (unescaped).</param>
-        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
         /// <returns>The Page Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given URL.</exception>
-        public PageModel GetPageModel(string urlPath, Localization localization, bool addIncludes = true)
+        public virtual PageModel GetPageModel(string urlPath, ILocalization localization, bool addIncludes = true)
         {
             using (new Tracer(urlPath, localization, addIncludes))
             {
@@ -79,13 +79,63 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
         /// <summary>
+        /// Gets a Page Model for a given Page Id.
+        /// </summary>
+        /// <param name="pageId">Page Id</param>
+        /// <param name="localization">The context Localization.</param>
+        /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
+        /// <returns>The Page Model.</returns>
+        /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given Id.</exception>
+        public virtual PageModel GetPageModel(int pageId, ILocalization localization, bool addIncludes = true)
+        {
+            using (new Tracer(localization.Id, pageId, localization, addIncludes))
+            {
+                PageModel result = null;
+                if (CacheRegions.IsViewModelCachingEnabled)
+                {
+                    PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
+                        $"{localization.Id}-{pageId}:{addIncludes}", // Cache Page Models with and without includes separately
+                        CacheRegions.PageModel,
+                        () =>
+                        {
+                            PageModel pageModel = LoadPageModel(pageId, addIncludes, localization);
+                            if (pageModel.NoCache)
+                            {
+                                result = pageModel;
+                                return null;
+                            }
+                            return pageModel;
+                        }
+                        );
+
+                    if (cachedPageModel != null)
+                    {
+                        // Don't return the cached Page Model itself, because we don't want dynamic logic to modify the cached state.
+                        result = (PageModel)cachedPageModel.DeepCopy();
+                    }
+                }
+                else
+                {
+                    result = LoadPageModel(pageId, addIncludes, localization);
+                }
+
+                if (SiteConfiguration.ConditionalEntityEvaluator != null)
+                {
+                    result.FilterConditionalEntities(localization);
+                }
+
+                return result;
+            }
+        }
+     
+        /// <summary>
         /// Gets an Entity Model for a given Entity Identifier.
         /// </summary>
         /// <param name="id">The Entity Identifier. Must be in format {ComponentID}-{TemplateID}.</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The Entity Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Entity Model exists for the given URL.</exception>
-        public EntityModel GetEntityModel(string id, Localization localization)
+        public virtual EntityModel GetEntityModel(string id, ILocalization localization)
         {
             using (new Tracer(id, localization))
             {
@@ -110,7 +160,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        private PageModel LoadPageModel(ref string urlPath, bool addIncludes, Localization localization)
+        protected virtual PageModel LoadPageModel(ref string urlPath, bool addIncludes, ILocalization localization)
         {
             using (new Tracer(urlPath, addIncludes, localization))
             {
@@ -128,9 +178,29 @@ namespace Sdl.Web.Tridion.Mapping
 
                 return ModelBuilderPipeline.CreatePageModel(pageModelData, addIncludes, localization);
             }
-        }       
+        }
 
-        private EntityModel LoadEntityModel(string id, Localization localization)
+        protected virtual PageModel LoadPageModel(int pageId, bool addIncludes, ILocalization localization)
+        {
+            using (new Tracer(pageId, addIncludes, localization))
+            {
+                PageModelData pageModelData = SiteConfiguration.ModelServiceProvider.GetPageModelData(pageId, localization, addIncludes);
+
+                if (pageModelData == null)
+                {
+                    throw new DxaItemNotFoundException($"Page not found for publication id {localization.Id} and page id {pageId}");
+                }
+
+                if (pageModelData.MvcData == null)
+                {
+                    throw new DxaException($"Data Model for Page '{pageModelData.Title}' ({pageModelData.Id}) contains no MVC data. Ensure that the Page is published using the DXA R2 TBBs.");
+                }
+
+                return ModelBuilderPipeline.CreatePageModel(pageModelData, addIncludes, localization);
+            }
+        }
+
+        protected virtual EntityModel LoadEntityModel(string id, ILocalization localization)
         {
             using (new Tracer(id, localization))
             {
@@ -159,7 +229,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="urlPath">The URL path (unescaped).</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The Static Content Item.</returns>
-        public StaticContentItem GetStaticContentItem(string urlPath, Localization localization)
+        public virtual StaticContentItem GetStaticContentItem(string urlPath, ILocalization localization)
         {
             using (new Tracer(urlPath, localization))
             {
@@ -175,11 +245,32 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
         /// <summary>
+        /// Gets a Static Content Item for a given Id.
+        /// </summary>
+        /// <param name="binaryId">The Id of the binary.</param>
+        /// <param name="localization">The context Localization.</param>
+        /// <returns>The Static Content Item.</returns>
+        public virtual StaticContentItem GetStaticContentItem(int binaryId, ILocalization localization)
+        {
+            using (new Tracer(binaryId, localization))
+            {
+                string localFilePath = BinaryFileManager.Instance.GetCachedFile(binaryId, localization);
+
+                return new StaticContentItem(
+                    new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan),
+                    MimeMapping.GetMimeMapping(localFilePath),
+                    File.GetLastWriteTime(localFilePath),
+                    Encoding.UTF8
+                    );
+            }
+        }
+
+        /// <summary>
         /// Populates a Dynamic List by executing the query it specifies.
         /// </summary>
         /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
         /// <param name="localization">The context Localization.</param>
-        public void PopulateDynamicList(DynamicList dynamicList, Localization localization)
+        public virtual void PopulateDynamicList(DynamicList dynamicList, ILocalization localization)
         {
             using (new Tracer(dynamicList, localization))
             {
@@ -206,7 +297,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        private EntityModelData CreateEntityModelData(IComponentMeta componentMeta)
+        protected virtual EntityModelData CreateEntityModelData(IComponentMeta componentMeta)
         {
             ContentModelData standardMeta = new ContentModelData();
             foreach (DictionaryEntry entry in componentMeta.CustomMeta.NameValues)
@@ -233,7 +324,7 @@ namespace Sdl.Web.Tridion.Mapping
             };
         }
 
-        string IRawDataProvider.GetPageContent(string urlPath, Localization localization)
+        string IRawDataProvider.GetPageContent(string urlPath, ILocalization localization)
         {
             // TODO: let the DXA Model Service provide raw Page Content too (?)
             using (new Tracer(urlPath, localization))

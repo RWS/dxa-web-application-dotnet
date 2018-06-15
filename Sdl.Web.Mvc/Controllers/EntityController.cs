@@ -76,20 +76,20 @@ namespace Sdl.Web.Mvc.Controllers
 
                 string formFieldValue = Request.Form[formField];
 
-                ValidationAttribute validationAttr = modelProperty.GetCustomAttribute<ValidationAttribute>();
-                if (validationAttr != null)
+                var validationAttributes = modelProperty.GetCustomAttributes<ValidationAttribute>();
+                try
                 {
-                    try
+                    foreach (var validationAttr in validationAttributes)
                     {
                         validationAttr.Validate(formFieldValue, formField);
                     }
-                    catch (ValidationException ex)
-                    {
-                        string validationMessage = ResolveValidationMessage(ex.Message, model);
-                        Log.Debug("Validation of property '{0}' failed: {1}", formField, validationMessage);
-                        ModelState.AddModelError(formField, validationMessage);
-                        continue;
-                    }
+                }
+                catch (ValidationException ex)
+                {
+                    string validationMessage = ResolveValidationMessage(ex.Message, model);
+                    Log.Debug("Validation of property '{0}' failed: {1}", formField, validationMessage);
+                    ModelState.AddModelError(formField, validationMessage);
+                    continue;
                 }
 
                 try

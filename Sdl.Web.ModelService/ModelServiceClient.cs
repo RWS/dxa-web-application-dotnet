@@ -11,6 +11,7 @@ using Sdl.Web.Delivery.DiscoveryService.Tridion.WebDelivery.Platform;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore;
 using System.Threading.Tasks;
 using Sdl.Web.Delivery.Core;
+using Sdl.Web.Delivery.ServicesCore.ClaimStore.Cookie;
 using Sdl.Web.ModelService.Request;
 
 namespace Sdl.Web.ModelService
@@ -20,14 +21,20 @@ namespace Sdl.Web.ModelService
     /// </summary>
     public class ModelServiceClient
     {
-        #region Fields    
-
+        #region Fields
+        // if something goes wrong when getting the model-service endpoint we just default to this so the
+        // dxa web application continues to run up and initialize but you clearly spot something is wrong! 
+        // Although the model building pipeline will fail it will not prevent dxa from initializing and the 
+        // the next request will attempt to get the model-service endpoint again. Initial loading of dxa is
+        // time consuming and most of the work done is not dependent on a model-service so we don't waste this
+        // work.
+        private static readonly Uri DefaultModelServiceUri = new Uri("http://dxa.model.service.uri.missing");
         private const string ModelServiceName = "DXA Model Service";
         private const string ModelServiceExtensionPropertyName = "dxa-model-service";
         private const string PreviewSessionTokenHeader = "x-preview-session-token";
         private const string PreviewSessionTokenCookie = "preview-session-token";
         private readonly IOAuthTokenProvider _tokenProvider;
-
+        private Uri _modelServiceUri;
         #endregion
 
         #region ModelServiceError
@@ -57,13 +64,30 @@ namespace Sdl.Web.ModelService
 
         public ModelServiceClient()
         {
-            ModelServiceBaseUri = GetModelServiceUri(null); // force discovery service lookup
+            try
+            {
+                ModelServiceBaseUri = GetModelServiceUri(null); // force discovery service lookup
+            }
+            catch (Exception)
+            {
+                // something went wrong with discovery lookup of model-service. we could continue
+                // trying each time the model-service is requested
+                ModelServiceBaseUri = null;
+                throw;
+            }            
             _tokenProvider = DiscoveryServiceProvider.DefaultTokenProvider;
         }
 
         public ModelServiceClient(string modelServiceUri)
         {
-            ModelServiceBaseUri = GetModelServiceUri(modelServiceUri);
+            try
+            {
+                ModelServiceBaseUri = GetModelServiceUri(modelServiceUri);
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Error initializing ModelServiceClient.", e);
+            }
             _tokenProvider = DiscoveryServiceProvider.DefaultTokenProvider;
         }
 
@@ -74,7 +98,29 @@ namespace Sdl.Web.ModelService
             Timeout = timeout;
         }
 
-        public Uri ModelServiceBaseUri { private set; get; }
+        public Uri ModelServiceBaseUri
+        {
+            private set { _modelServiceUri = value; }
+            get
+            {
+                if (_modelServiceUri != null) return _modelServiceUri;
+                try
+                {
+                    // Attempt to get model-service endpoint. May fail for a number of reasons:
+                    // 1. discovery-service not running
+                    // 2. content-service capability/extension property for model-service not configured
+                    // 3. uri configured on extension property is malformed.
+                    _modelServiceUri = GetModelServiceUri(null);
+                }
+                catch (Exception e)
+                {                   
+                    // Log failure when getting the model-service endpoint.
+                    Logger.Error("Failed to get model-service endpoint from discovery-service.", e);
+                }
+                // Return either the endpoint (if we have one) or our default.
+                return _modelServiceUri ?? DefaultModelServiceUri;
+            }
+        }
 
         public int Timeout { get; set; } = 10000;
 
@@ -187,6 +233,36 @@ namespace Sdl.Web.ModelService
                 if ((cookies != null) && cookies.ContainsKey(PreviewSessionTokenCookie))
                 {
                     SetCookie(request, PreviewSessionTokenCookie, cookies[PreviewSessionTokenCookie]);
+                }             
+
+                // Forward all claims on to model-service
+                var forwardedClaimValues = AmbientDataContext.ForwardedClaims;
+                if (forwardedClaimValues != null && forwardedClaimValues.Count > 0)
+                {
+                    Dictionary<Uri, object> forwardedClaims =
+                        forwardedClaimValues.Select(claim => new Uri(claim, UriKind.RelativeOrAbsolute))
+                            .Distinct()
+                            .Where(uri => claimStore.Contains(uri) && claimStore.Get<object>(uri) != null)
+                            .ToDictionary(uri => uri, uri => claimStore.Get<object>(uri));
+
+                    if (forwardedClaims.Count > 0)
+                    {
+                        ClaimCookieSerializer serializer = new ClaimCookieSerializer(AmbientDataContext.ForwardedClaimsCookieName);
+                        List<ClaimsCookie> claimsCookies = serializer.SerializeClaims(forwardedClaims);
+                        foreach (ClaimsCookie claimsCookie in claimsCookies)
+                        {
+                            byte[] cookieValue = claimsCookie.Value;
+                            Cookie cookie = new Cookie(claimsCookie.Name, new System.Text.ASCIIEncoding().GetString(cookieValue));                        
+                            SetCookie(request, cookie.Name, cookie.Value);
+                        }
+                    }
+                }
+
+                // To support the TridionDocs module (should not require this when model-service is PCA plugin)
+                var conditions = claimStore.Get<string>(new Uri("taf:ish:userconditions"));
+                if (conditions != null)
+                {
+                    SetCookie(request, "taf.ish.userconditions", Base64.Encode(conditions));
                 }
             }
 
@@ -223,7 +299,10 @@ namespace Sdl.Web.ModelService
         private static void SetCookie(HttpWebRequest httpWebRequest, string name, string value)
         {
             // Quick-and-dirty way: just directly set the "Cookie" HTTP header
-            httpWebRequest.Headers.Add("Cookie", $"{name}={value}");
+            string headerValue = httpWebRequest.Headers["Cookie"] ?? "";
+            if (headerValue.Length > 0) headerValue += ";";
+            headerValue += $"{name}={value}";
+            httpWebRequest.Headers.Add("Cookie", headerValue);
         }
 
         private static string GetResponseBody(WebResponse webResponse)
@@ -268,6 +347,7 @@ namespace Sdl.Web.ModelService
             {
                 throw new ModelServiceException($"{ModelServiceName} is using an invalid uri '{uri}'.");
             }
+            Logger.Debug($"{ModelServiceName} found at URL '{baseUri}'.");
             return baseUri;
         }
     }

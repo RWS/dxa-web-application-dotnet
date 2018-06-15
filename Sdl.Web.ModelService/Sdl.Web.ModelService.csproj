@@ -11,6 +11,7 @@
     <AssemblyName>Sdl.Web.ModelService</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <SdlWebDeliveryPackageVersion>11.0.0-beta-201805161005</SdlWebDeliveryPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -47,17 +48,20 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Sdl.Web.Delivery.ContentService">
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.ContentService.dll</HintPath>
+    </Reference>
     <Reference Include="Sdl.Web.Delivery.Core">
-      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Sdl.Web.Delivery.Core.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.Core.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Delivery.DiscoveryService">
-      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Sdl.Web.Delivery.DiscoveryService.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.DiscoveryService.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Delivery.Service">
-      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Sdl.Web.Delivery.Service.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.Service.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Delivery.ServicesCore">
-      <HintPath>..\packages\Sdl.Web.Delivery.10.1.0\lib\net452\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

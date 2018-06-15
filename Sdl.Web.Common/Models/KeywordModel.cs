@@ -1,5 +1,5 @@
-﻿using Sdl.Web.Common.Configuration;
-using System;
+﻿using System;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Models
 {
@@ -57,7 +57,7 @@ namespace Sdl.Web.Common.Models
         public override string ToString()
             => $"{GetType().Name}: {Id}";
 
-        public override string GetXpmMarkup(Localization localization)
+        public override string GetXpmMarkup(ILocalization localization)
             => string.Empty;
 
         #endregion

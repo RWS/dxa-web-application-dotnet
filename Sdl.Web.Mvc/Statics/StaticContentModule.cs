@@ -43,12 +43,16 @@ namespace Sdl.Web.Mvc.Statics
             HttpContext context = application.Context;
             HttpRequest request = context.Request;
             HttpResponse response = context.Response;
-            string url = request.Url.AbsolutePath;
-
+            string url = request.Url.AbsolutePath;           
             using (new Tracer(sender, e, url))
             {
+                // If DXA fails to initialize due to no TTM mapping then we can still identify if DXA is running by going to /system/health
+                if (url.EndsWith("/system/health"))
+                {
+                    SendHealthCheckResponse(response);
+                }
                 // Attempt to determine Localization
-                Localization localization = null;
+                ILocalization localization = null;
                 try
                 {
                     localization = WebRequestContext.Localization;
@@ -111,11 +115,12 @@ namespace Sdl.Web.Mvc.Statics
             HttpRequest request = context.Request;
             HttpResponse response = context.Response;
             string urlPath = request.Url.AbsolutePath;
+
             DateTime ifModifiedSince = Convert.ToDateTime(request.Headers["If-Modified-Since"]);
 
             using (new Tracer(sender, eventArgs, urlPath, ifModifiedSince))
             {
-                Localization localization = WebRequestContext.Localization;
+                ILocalization localization = WebRequestContext.Localization;
                 string staticsRootUrl = localization.BinaryCacheFolder.Replace("\\", "/");
                 urlPath = urlPath.StartsWith("/" + staticsRootUrl) ? urlPath.Substring(staticsRootUrl.Length + 1) : urlPath;
                 if (!localization.IsStaticContentUrl(urlPath))
@@ -157,7 +162,7 @@ namespace Sdl.Web.Mvc.Statics
             }
 
         }
-        public static void SetResponseProperties(HttpResponseBase response, DateTime lastModified, DateTime ifModifiedSince,string contentType, Localization localization, bool isVersionedUrl)
+        public static void SetResponseProperties(HttpResponseBase response, DateTime lastModified, DateTime ifModifiedSince,string contentType, ILocalization localization, bool isVersionedUrl)
         {
           
             if (lastModified <= ifModifiedSince.AddSeconds(1))
@@ -188,6 +193,15 @@ namespace Sdl.Web.Mvc.Statics
             httpResponse.StatusCode = (int)HttpStatusCode.NotFound;
             httpResponse.ContentType = "text/plain";
             httpResponse.Write(message);
+            httpResponse.End(); // This terminates the HTTP processing pipeline
+        }
+
+        private static void SendHealthCheckResponse(HttpResponse httpResponse)
+        {
+            Log.Warn("{0}. Sending HTTP 200 (OK) response.");
+            httpResponse.StatusCode = (int)HttpStatusCode.OK;
+            httpResponse.ContentType = "text/plain";
+            httpResponse.Write("DXA Health Check OK.");
             httpResponse.End(); // This terminates the HTTP processing pipeline
         }
     }

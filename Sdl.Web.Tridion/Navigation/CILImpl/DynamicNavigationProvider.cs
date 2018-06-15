@@ -34,7 +34,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
         /// </summary>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Model (Sitemap root Item).</returns>
-        public SitemapItem GetNavigationModel(Localization localization)
+        public virtual SitemapItem GetNavigationModel(ILocalization localization)
         {
             using (new Tracer(localization))
             {
@@ -60,7 +60,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
         /// <param name="requestUrlPath">The request URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Links.</returns>
-        public NavigationLinks GetTopNavigationLinks(string requestUrlPath, Localization localization)
+        public virtual NavigationLinks GetTopNavigationLinks(string requestUrlPath, ILocalization localization)
         {
             using (new Tracer(requestUrlPath, localization))
             {
@@ -84,7 +84,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
         /// <param name="requestUrlPath">The request URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Links.</returns>
-        public NavigationLinks GetContextNavigationLinks(string requestUrlPath, Localization localization)
+        public virtual NavigationLinks GetContextNavigationLinks(string requestUrlPath, ILocalization localization)
         {
             using (new Tracer(requestUrlPath, localization))
             {
@@ -120,7 +120,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
         /// <param name="requestUrlPath">The request URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Links.</returns>
-        public NavigationLinks GetBreadcrumbNavigationLinks(string requestUrlPath, Localization localization)
+        public virtual NavigationLinks GetBreadcrumbNavigationLinks(string requestUrlPath, ILocalization localization)
         {
             using (new Tracer(requestUrlPath, localization))
             {
@@ -171,9 +171,9 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
         /// </summary>
         /// <param name="sitemapItemId">The context <see cref="SitemapItem"/> identifier. Can be <c>null</c>.</param>
         /// <param name="filter">The <see cref="NavigationFilter"/> used to specify which information to put in the subtree.</param>
-        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>A set of Sitemap Items representing the requested subtree.</returns>
-        public IEnumerable<SitemapItem> GetNavigationSubtree(string sitemapItemId, NavigationFilter filter, Localization localization)
+        public virtual IEnumerable<SitemapItem> GetNavigationSubtree(string sitemapItemId, NavigationFilter filter, ILocalization localization)
         {
             using (new Tracer(sitemapItemId, filter, localization))
             {
@@ -224,7 +224,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
         }
         #endregion
 
-        private static bool IsHome(SitemapItem sitemapItem, Localization localization)
+        private static bool IsHome(SitemapItem sitemapItem, ILocalization localization)
         {
             string homePath = string.IsNullOrEmpty(localization.Path) ? "/" : localization.Path;
             return (sitemapItem?.Url != null) && sitemapItem.Url.Equals(homePath, StringComparison.InvariantCultureIgnoreCase);
@@ -242,7 +242,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             pageId = sitemapItemIdMatch.Groups["pageId"].Value;
         }
 
-        private static void AddDescendants(TaxonomyNode taxonomyNode, NavigationFilter filter, Localization localization)
+        protected virtual void AddDescendants(TaxonomyNode taxonomyNode, NavigationFilter filter, ILocalization localization)
         {
             using (new Tracer(taxonomyNode, filter, localization))
             {
@@ -268,11 +268,11 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
                 }
 
                 // Ensure that children are ordered correctly
-                taxonomyNode.Items = children.OrderBy(i => i.OriginalTitle).ToList();
+                taxonomyNode.Items = SortTaxonomyNodes(children);
             }
         }
 
-        private static IEnumerable<SitemapItem> ExpandTaxonomyRoots(NavigationFilter filter, Localization localization)
+        protected virtual IEnumerable<SitemapItem> ExpandTaxonomyRoots(NavigationFilter filter, ILocalization localization)
         {
             using (new Tracer(filter, localization))
             {
@@ -287,7 +287,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
-        private static IEnumerable<SitemapItem> ExpandDescendants(string keywordUri, string taxonomyUri, NavigationFilter filter, Localization localization)
+        protected virtual IEnumerable<SitemapItem> ExpandDescendants(string keywordUri, string taxonomyUri, NavigationFilter filter, ILocalization localization)
         {
             using (new Tracer(keywordUri, taxonomyUri, filter, localization))
             {
@@ -305,7 +305,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
-        private static TaxonomyNode ExpandAncestorsForKeyword(string keywordUri, string taxonomyUri, NavigationFilter filter, Localization localization)
+        protected virtual TaxonomyNode ExpandAncestorsForKeyword(string keywordUri, string taxonomyUri, NavigationFilter filter, ILocalization localization)
         {
             using (new Tracer(keywordUri, taxonomyUri, filter, localization))
             {
@@ -322,7 +322,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
-        private static TaxonomyNode ExpandAncestorsForPage(string pageUri, string taxonomyUri, NavigationFilter filter, Localization localization)
+        protected virtual TaxonomyNode ExpandAncestorsForPage(string pageUri, string taxonomyUri, NavigationFilter filter, ILocalization localization)
         {
             using (new Tracer(pageUri, taxonomyUri, filter, localization))
             {
@@ -349,7 +349,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
-        private static void MergeSubtrees(SitemapItem subtreeRoot, SitemapItem subtreeToMergeInto)
+        protected virtual void MergeSubtrees(SitemapItem subtreeRoot, SitemapItem subtreeToMergeInto)
         {
             List<SitemapItem> mergedChildItems = subtreeToMergeInto.Items;
             foreach (SitemapItem childNode in subtreeRoot.Items)
@@ -366,10 +366,10 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
 
             // Ensure that merged child items are ordered correctly
-            subtreeToMergeInto.Items = mergedChildItems.OrderBy(i => i.OriginalTitle).ToList();
+            subtreeToMergeInto.Items = SortTaxonomyNodes(mergedChildItems);
         }
 
-        private static string GetNavigationTaxonomyUri(Localization localization)
+        protected virtual string GetNavigationTaxonomyUri(ILocalization localization)
         {
             return SiteConfiguration.CacheProvider.GetOrAdd(
                 localization.Id, // key
@@ -378,7 +378,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
                 );
         }
 
-        private static string ResolveNavigationTaxonomyUri(Localization localization)
+        protected virtual string ResolveNavigationTaxonomyUri(ILocalization localization)
         {
             using (new Tracer(localization))
             {
@@ -398,7 +398,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
-        private static SitemapItem BuildNavigationModel(string navTaxonomyUri, Localization localization)
+        protected virtual SitemapItem BuildNavigationModel(string navTaxonomyUri, ILocalization localization)
         {
             using (new Tracer(navTaxonomyUri, localization))
             {
@@ -410,7 +410,10 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
-        private static TaxonomyNode CreateTaxonomyNode(Keyword keyword, int expandLevels, NavigationFilter filter, Localization localization)
+        protected virtual List<SitemapItem> SortTaxonomyNodes(IList<SitemapItem> taxonomyNodes)
+            => taxonomyNodes.OrderBy(i => i.OriginalTitle).ToList();
+
+        protected virtual TaxonomyNode CreateTaxonomyNode(Keyword keyword, int expandLevels, NavigationFilter filter, ILocalization localization)
         {
             if (keyword == null)
             {
@@ -446,7 +449,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
                     }
                 }
 
-                childItems = childItems.OrderBy(i => i.OriginalTitle).ToList();
+                childItems = SortTaxonomyNodes(childItems);
             }
 
             string sequencePrefix;
@@ -477,7 +480,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             return result;
         }
 
-        private static SitemapItem[] ExpandClassifiedPages(Keyword keyword, string taxonomyId, Localization localization)
+        protected virtual SitemapItem[] ExpandClassifiedPages(Keyword keyword, string taxonomyId, ILocalization localization)
         {
             using (new Tracer(keyword.KeywordUri, taxonomyId, localization))
             {
@@ -489,7 +492,7 @@ namespace Sdl.Web.Tridion.Navigation.CILImpl
             }
         }
 
-        private static SitemapItem CreateSitemapItem(IPageMeta pageMeta, string taxonomyId)
+        protected virtual SitemapItem CreateSitemapItem(IPageMeta pageMeta, string taxonomyId)
         {
             string sequencePrefix;
 

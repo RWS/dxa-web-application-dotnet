@@ -21,6 +21,8 @@ namespace Sdl.Web.ModelService.Request
 
         public string Path { get; set; }
 
+        public int? PageId { get; set; }
+
         public string ItemId { get; set; }
 
         public ContentType ContentType { get; set; } = ContentType.IGNORE;  
@@ -33,10 +35,12 @@ namespace Sdl.Web.ModelService.Request
 
         public Uri BuildRequestUri(ModelServiceClient modelService)
         {
-            var builder = UriCreator.FromUri(modelService.ModelServiceBaseUri)
-                    .WithPath($"PageModel/{CmUriScheme}/{PublicationId}/{GetCanonicalUrlPath(Path)}")
-                    .WithQueryParam("includes", PageInclusion)
-                    .WithQueryParam("modelType", DataModelType);
+            var builder = UriCreator.FromUri(modelService.ModelServiceBaseUri);
+            builder = builder.WithPath(PageId.HasValue ? 
+                $"PageModel/{CmUriScheme}/{PublicationId}-{PageId.Value}" :
+                $"PageModel/{CmUriScheme}/{PublicationId}/{GetCanonicalUrlPath(Path)}");
+
+            builder.WithQueryParam("includes", PageInclusion).WithQueryParam("modelType", DataModelType);
             if (ContentType != ContentType.IGNORE)
             {
                 builder.WithQueryParam("raw", ContentType == ContentType.RAW);

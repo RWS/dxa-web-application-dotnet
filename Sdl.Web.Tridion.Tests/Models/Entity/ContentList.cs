@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Tridion.Tests.Models
 {
@@ -27,7 +28,7 @@ namespace Sdl.Web.Tridion.Tests.Models
             }
         }
 
-        public override Sdl.Web.Common.Models.Query GetQuery(Localization localization)
+        public override Sdl.Web.Common.Models.Query GetQuery(ILocalization localization)
         {
             return new SimpleBrokerQuery
             {
@@ -40,7 +41,7 @@ namespace Sdl.Web.Tridion.Tests.Models
             };
         }
 
-        protected int MapSchema(string schemaKey, Localization localization)
+        protected int MapSchema(string schemaKey, ILocalization localization)
         {
             string[] schemaKeyParts = schemaKey.Split('.');
             string moduleName = schemaKeyParts.Length > 1 ? schemaKeyParts[0] : SiteConfiguration.CoreModuleName;

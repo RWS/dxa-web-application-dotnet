@@ -3,6 +3,7 @@ using System.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Mvc.Statics;
 
 

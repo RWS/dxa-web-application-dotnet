@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.0.0</SdlDxaDataModelPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.1.0-beta-201804241437</SdlDxaDataModelPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -77,6 +77,8 @@
   <ItemGroup>
     <Compile Include="CacheRegions.cs" />
     <Compile Include="Configuration\ComponentType.cs" />
+    <Compile Include="Configuration\LocalizationResources.cs" />
+    <Compile Include="Configuration\LocalizationMappingsManager.cs" />
     <Compile Include="Configuration\ScreenWidth.cs" />
     <Compile Include="Configuration\SiteConfiguration.cs" />
     <Compile Include="Configuration\Localization.cs" />
@@ -95,7 +97,10 @@
     <Compile Include="Interfaces\IContextClaimsProvider.cs" />
     <Compile Include="Interfaces\IDataModelExtension.cs" />
     <Compile Include="Interfaces\ILinkResolver.cs" />
+    <Compile Include="Interfaces\ILocalization.cs" />
+    <Compile Include="Interfaces\ILocalizationMappingsManager.cs" />
     <Compile Include="Interfaces\ILocalizationResolver.cs" />
+    <Compile Include="Interfaces\ILocalizationResources.cs" />
     <Compile Include="Interfaces\IModelServiceProvider.cs" />
     <Compile Include="Interfaces\INavigationProvider.cs" />
     <Compile Include="Interfaces\IOnDemandNavigationProvider.cs" />
@@ -146,6 +151,7 @@
     <Compile Include="Models\Query\Query.cs" />
     <Compile Include="Models\Query\SimpleBrokerQuery.cs" />
     <Compile Include="Utils\Hash.cs" />
+    <Compile Include="Utils\UrlEncoding.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Interfaces\ExtensionPoints.cd" />

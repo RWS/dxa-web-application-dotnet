@@ -1,4 +1,4 @@
-﻿using Sdl.Web.Common.Configuration;
+﻿using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Tridion.Mapping
 {
@@ -7,6 +7,6 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public interface IRawDataProvider
     {
-        string GetPageContent(string urlPath, Localization localization);
+        string GetPageContent(string urlPath, ILocalization localization);
     }
 }

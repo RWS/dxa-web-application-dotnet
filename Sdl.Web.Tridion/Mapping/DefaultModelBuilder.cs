@@ -23,13 +23,13 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class DefaultModelBuilder : IPageModelBuilder, IEntityModelBuilder, IDataModelExtension
     {
-        private class Validation
+        protected class Validation
         {
             public SemanticSchema MainSchema { get; set; }
             public List<SemanticSchema> InheritedSchemas { set; get;  }
         }
 
-        private class MappingData
+        protected class MappingData
         {
             public string ModelId { get; set; }
             public Type ModelType { get; set; }
@@ -40,10 +40,10 @@ namespace Sdl.Web.Tridion.Mapping
             public ContentModelData Fields { get; set; }
             public ContentModelData MetadataFields { get; set; }
             public string ContextXPath { get; set; }
-            public Localization Localization { get; set; }
+            public ILocalization Localization { get; set; }
         }
 
-        public Type ResolveDataModelType(string assemblyName, string typeName)
+        public virtual Type ResolveDataModelType(string assemblyName, string typeName)
         {
             // perform type remapping as the type names returned from model-service do not match so we
             // remap here to correctly deserialize.
@@ -64,8 +64,8 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="pageModel">The strongly typed Page Model to build. Is <c>null</c> for the first Page Model Builder in the pipeline.</param>
         /// <param name="pageModelData">The DXA R2 Data Model.</param>
         /// <param name="includePageRegions">Indicates whether Include Page Regions should be included.</param>
-        /// <param name="localization">The context <see cref="Localization"/>.</param>
-        public void BuildPageModel(ref PageModel pageModel, PageModelData pageModelData, bool includePageRegions, Localization localization)
+        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
+        public virtual void BuildPageModel(ref PageModel pageModel, PageModelData pageModelData, bool includePageRegions, ILocalization localization)
         {
             using (new Tracer(pageModel, pageModelData, includePageRegions, localization))
             {
@@ -122,7 +122,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        private static List<SemanticSchema> GetInheritedSemanticSchemas(ViewModelData pageModelData, Localization localization)
+        protected virtual List<SemanticSchema> GetInheritedSemanticSchemas(ViewModelData pageModelData, ILocalization localization)
         {
             List<SemanticSchema> schemas = new List<SemanticSchema>();
             if (pageModelData.ExtensionData != null && pageModelData.ExtensionData.ContainsKey("Schemas"))
@@ -151,8 +151,8 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="entityModel">The strongly typed Entity Model to build. Is <c>null</c> for the first Entity Model Builder in the pipeline.</param>
         /// <param name="entityModelData">The DXA R2 Data Model.</param>
         /// <param name="baseModelType">The base type for the Entity Model to build.</param>
-        /// <param name="localization">The context <see cref="Localization"/>.</param>
-        public void BuildEntityModel(ref EntityModel entityModel, EntityModelData entityModelData, Type baseModelType, Localization localization)
+        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
+        public virtual void BuildEntityModel(ref EntityModel entityModel, EntityModelData entityModelData, Type baseModelType, ILocalization localization)
         {
             using (new Tracer(entityModel, entityModelData, baseModelType, localization))
             {
@@ -184,7 +184,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        private static ViewModel CreateViewModel(MappingData mappingData)
+        protected virtual ViewModel CreateViewModel(MappingData mappingData)
         {
             ViewModelData viewModelData = mappingData.SourceViewModel;
             EntityModelData entityModelData = viewModelData as EntityModelData;
@@ -242,7 +242,7 @@ namespace Sdl.Web.Tridion.Mapping
             return result;
         }
 
-        private static void MapSemanticProperties(ViewModel viewModel, MappingData mappingData)
+        protected virtual void MapSemanticProperties(ViewModel viewModel, MappingData mappingData)
         {
             Type modelType = viewModel.GetType();
             IDictionary<string, List<SemanticProperty>> propertySemanticsMap = ModelTypeRegistry.GetPropertySemantics(modelType);
@@ -343,12 +343,10 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        private static bool IsFieldFromMainSchema(Validation validation, FieldSemantics fieldSemantics)
-        {
-            return validation.MainSchema?.FindFieldBySemantics(fieldSemantics) != null;
-        }
+        protected virtual bool IsFieldFromMainSchema(Validation validation, FieldSemantics fieldSemantics) 
+            => validation.MainSchema?.FindFieldBySemantics(fieldSemantics) != null;
 
-        private static SemanticSchemaField ValidateField(Validation validation, FieldSemantics fieldSemantics)
+        protected virtual SemanticSchemaField ValidateField(Validation validation, FieldSemantics fieldSemantics)
         {
             Log.Debug($"Field {fieldSemantics} is validated over the main {validation.MainSchema}.");
             SemanticSchemaField field = validation.MainSchema.FindFieldBySemantics(fieldSemantics);
@@ -374,7 +372,7 @@ namespace Sdl.Web.Tridion.Mapping
             return field;
         }
 
-        private static object FindFieldValue(SemanticSchemaField semanticSchemaField, ContentModelData fields, int embedLevel)
+        protected virtual object FindFieldValue(SemanticSchemaField semanticSchemaField, ContentModelData fields, int embedLevel)
         {
             string[] pathSegments = semanticSchemaField.Path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
             object fieldValue = null;
@@ -397,7 +395,7 @@ namespace Sdl.Web.Tridion.Mapping
             return fieldValue;
         }
        
-        private static object MapField(object fieldValues, Type modelPropertyType, SemanticSchemaField semanticSchemaField, MappingData mappingData)
+        protected virtual object MapField(object fieldValues, Type modelPropertyType, SemanticSchemaField semanticSchemaField, MappingData mappingData)
         {
             Type sourceType = fieldValues.GetType();
             bool isArray = sourceType.IsArray;
@@ -520,7 +518,7 @@ namespace Sdl.Web.Tridion.Mapping
             return isListProperty ? mappedValues : ((mappedValues.Count == 0) ? null : mappedValues[0]);
         }
 
-        private static object MapString(string stringValue, Type targetType)
+        protected virtual object MapString(string stringValue, Type targetType)
         {
             if (targetType == typeof(RichText))
             {
@@ -549,7 +547,7 @@ namespace Sdl.Web.Tridion.Mapping
             return Convert.ChangeType(stringValue, targetType, CultureInfo.InvariantCulture.NumberFormat);
         }
 
-        private static object MapComponentLink(EntityModelData entityModelData, Type targetType, Localization localization)
+        protected virtual object MapComponentLink(EntityModelData entityModelData, Type targetType, ILocalization localization)
         {
             if (targetType == typeof(Link))
             {
@@ -573,7 +571,7 @@ namespace Sdl.Web.Tridion.Mapping
             return ModelBuilderPipeline.CreateEntityModel(entityModelData, targetType, localization);
         }
 
-        private static object MapKeyword(KeywordModelData keywordModelData, Type targetType, Localization localization)
+        protected virtual object MapKeyword(KeywordModelData keywordModelData, Type targetType, ILocalization localization)
         {
             if (typeof(KeywordModel).IsAssignableFrom(targetType))
             {
@@ -631,10 +629,10 @@ namespace Sdl.Web.Tridion.Mapping
             return GetKeywordDisplayText(keywordModelData);
         }
 
-        private static string GetKeywordDisplayText(KeywordModelData keywordModelData)
+        protected virtual string GetKeywordDisplayText(KeywordModelData keywordModelData)
             => string.IsNullOrEmpty(keywordModelData.Description) ? keywordModelData.Title : keywordModelData.Description;
 
-        private static string GetLinkUrl(EntityModelData entityModelData, Localization localization)
+        protected virtual string GetLinkUrl(EntityModelData entityModelData, ILocalization localization)
         {
             if (entityModelData.LinkUrl != null)
             {
@@ -646,7 +644,7 @@ namespace Sdl.Web.Tridion.Mapping
             return SiteConfiguration.LinkResolver.ResolveLink(componentUri);
         }
 
-        private static object MapRichText(RichTextData richTextData, Type targetType, Localization localization)
+        protected virtual object MapRichText(RichTextData richTextData, Type targetType, ILocalization localization)
         {
             IList<IRichTextFragment> fragments = new List<IRichTextFragment>();
             foreach (object fragment in richTextData.Fragments)
@@ -679,7 +677,7 @@ namespace Sdl.Web.Tridion.Mapping
             return richText.ToString();
         }
 
-        private static object MapEmbeddedFields(ContentModelData embeddedFields, Type targetType, SemanticSchemaField semanticSchemaField, string contextXPath, MappingData mappingData)
+        protected virtual object MapEmbeddedFields(ContentModelData embeddedFields, Type targetType, SemanticSchemaField semanticSchemaField, string contextXPath, MappingData mappingData)
         {
             MappingData embeddedMappingData = new MappingData
             {
@@ -696,7 +694,7 @@ namespace Sdl.Web.Tridion.Mapping
             return CreateViewModel(embeddedMappingData);
         }
 
-        private static IDictionary<string, string> GetAllFieldsAsDictionary(MappingData mappingData)
+        protected virtual IDictionary<string, string> GetAllFieldsAsDictionary(MappingData mappingData)
         {
             IDictionary<string, string> result = new Dictionary<string, string>();
             if (mappingData.Fields != null)
@@ -720,12 +718,12 @@ namespace Sdl.Web.Tridion.Mapping
             return result;
         }
 
-        private static IEnumerable<string> GetFieldValuesAsStrings(object fieldValues, MappingData mappingData, bool resolveComponentLinks)
+        protected virtual IEnumerable<string> GetFieldValuesAsStrings(object fieldValues, MappingData mappingData, bool resolveComponentLinks)
         {
             if (!resolveComponentLinks)
             {
                 // Handle Component Links here, because standard model mapping will resolve them.
-                Localization localization = mappingData.Localization;
+                ILocalization localization = mappingData.Localization;
                 if (fieldValues is EntityModelData)
                 {
                     return new[] { localization.GetCmUri(((EntityModelData) fieldValues).Id) };
@@ -740,7 +738,7 @@ namespace Sdl.Web.Tridion.Mapping
             return (IEnumerable<string>) MapField(fieldValues, typeof(List<string>), null, mappingData);
         }
 
-        private static MvcData CreateMvcData(DataModel.MvcData data, string defaultControllerName)
+        protected virtual MvcData CreateMvcData(DataModel.MvcData data, string defaultControllerName)
         {
             if (data == null)
             {
@@ -762,7 +760,7 @@ namespace Sdl.Web.Tridion.Mapping
             };
         }
 
-        private static RegionModel CreateRegionModel(RegionModelData regionModelData, Localization localization)
+        protected virtual RegionModel CreateRegionModel(RegionModelData regionModelData, ILocalization localization)
         {
             MvcData mvcData = CreateMvcData(regionModelData.MvcData, "Region");
             Type regionModelType = ModelTypeRegistry.GetViewModelType(mvcData);
@@ -806,16 +804,31 @@ namespace Sdl.Web.Tridion.Mapping
             return result;
         }
 
-        private static string PostProcessPageTitle(PageModelData pageModelData, Localization localization)
+        protected virtual string PostProcessPageTitle(PageModelData pageModelData, ILocalization localization)
         {
             if (pageModelData.MvcData?.ViewName == "IncludePage") return pageModelData.Title;
             IDictionary coreResources = localization.GetResources("core");
-            string title = "defaultPageTitle".Equals(pageModelData.Title)
-                ? coreResources["core.defaultPageTitle"].ToString()
-                : pageModelData.Title;
-            string separator = coreResources["core.pageTitleSeparator"].ToString();
-            string suffix = coreResources["core.pageTitlePostfix"].ToString();
+
+            string title = pageModelData.Title;
+            if (coreResources.Contains("core.defaultPageTitle"))
+            {
+                title = "defaultPageTitle".Equals(pageModelData.Title)
+                    ? coreResources["core.defaultPageTitle"].ToString()
+                    : pageModelData.Title;
+            }
+            string separator = string.Empty;
+            if (coreResources.Contains("core.pageTitleSeparator"))
+            {
+                separator = coreResources["core.pageTitleSeparator"].ToString();
+            }
+
+            string suffix = string.Empty;
+            if (coreResources.Contains("core.pageTitlePostfix"))
+            {
+                suffix = coreResources["core.pageTitlePostfix"].ToString();
+            }
+
             return $"{title}{separator}{suffix}";
-        }      
+        }
     }
 }

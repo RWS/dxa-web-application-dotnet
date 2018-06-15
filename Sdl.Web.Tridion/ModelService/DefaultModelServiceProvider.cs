@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Web.Configuration;
 using Sdl.Web.Common;
-using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -10,7 +9,6 @@ using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.DataModel;
 using Sdl.Web.ModelService;
 using Sdl.Web.ModelService.Request;
-using Sdl.Web.Tridion.Mapping;
 
 namespace Sdl.Web.Tridion.ModelService
 {   
@@ -22,7 +20,7 @@ namespace Sdl.Web.Tridion.ModelService
     {
         private const string ModelServiceName = "DXA Model Service";
         private const int DefaultRetryCount = 4;
-        private const int DefaultTimeout = 10000;
+        private const int DefaultTimeout = 60000;
         private readonly ModelServiceClient _modelServiceClient;
         private readonly Binder _binder;
 
@@ -63,7 +61,6 @@ namespace Sdl.Web.Tridion.ModelService
                 : DefaultTimeout;
             _modelServiceClient = new ModelServiceClient(uri, retryCount, timeout);
             _binder = new Binder();
-            Log.Debug($"{ModelServiceName} found at URL '{_modelServiceClient.ModelServiceBaseUri}'"); 
         }    
 
         /// <summary>
@@ -78,7 +75,7 @@ namespace Sdl.Web.Tridion.ModelService
         /// <summary>
         /// Get page model data object.
         /// </summary>
-        public PageModelData GetPageModelData(string urlPath, Localization localization, bool addIncludes)
+        public PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes)
         {
             try
             {
@@ -106,11 +103,40 @@ namespace Sdl.Web.Tridion.ModelService
                 return null;
             }
         }
+    
+        public PageModelData GetPageModelData(int pageId, ILocalization localization, bool addIncludes)
+        {
+            try
+            {
+                PageModelRequest request = new PageModelRequest
+                {
+                    CmUriScheme = localization.CmUriScheme,
+                    PublicationId = int.Parse(localization.Id),
+                    PageId = pageId,
+                    PageInclusion = addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,                    
+                    Binder = _binder
+                };
+
+                ModelServiceResponse<PageModelData> response = _modelServiceClient.PerformRequest<PageModelData>(request);
+                if (response.Response != null) response.Response.SerializationHashCode = response.Hashcode;
+                return response.Response;
+            }
+            catch (ModelServiceException e)
+            {
+                Log.Error("{0} returned an unexpected response for URL '{1}':\n{2} ", ModelServiceName, _modelServiceClient.ModelServiceBaseUri,
+                   e.Message);
+                throw new DxaException($"{ModelServiceName} returned an unexpected response.", e);
+            }
+            catch (ItemNotFoundException)
+            {
+                return null;
+            }
+        }
 
         /// <summary>
         /// Get entity model data object.
         /// </summary>
-        public EntityModelData GetEntityModelData(string entityId, Localization localization)
+        public EntityModelData GetEntityModelData(string entityId, ILocalization localization)
         {
             try
             {
@@ -141,7 +167,7 @@ namespace Sdl.Web.Tridion.ModelService
         /// <summary>
         /// Get site map item.
         /// </summary>
-        public TaxonomyNode GetSitemapItem(Localization localization)
+        public TaxonomyNode GetSitemapItem(ILocalization localization)
         {
             try
             {
@@ -167,7 +193,7 @@ namespace Sdl.Web.Tridion.ModelService
         /// <summary>
         /// Get child site map items.
         /// </summary>
-        public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, Localization localization,
+        public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, ILocalization localization,
             bool includeAncestors, int descendantLevels)
         {
             try

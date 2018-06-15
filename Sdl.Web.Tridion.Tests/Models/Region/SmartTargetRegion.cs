@@ -1,5 +1,6 @@
 ﻿using System;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Tridion.Tests.Models
@@ -49,7 +50,7 @@ namespace Sdl.Web.Tridion.Tests.Models
         /// </summary>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The XPM markup.</returns>
-        public override string GetXpmMarkup(Localization localization)
+        public override string GetXpmMarkup(ILocalization localization)
         {
             return String.Format("<!-- Start Promotion Region: {{ \"RegionID\": \"{0}\"}} -->", Name);
         }

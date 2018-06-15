@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Mapping
 {
@@ -33,7 +33,7 @@ namespace Sdl.Web.Common.Mapping
         /// <param name="prefix">The vocabulary prefix.</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The qualified type name.</returns>
-        public static string GetQualifiedTypeName(string typeName, string prefix, Localization localization) => GetQualifiedTypeName(typeName, GetVocabulary(prefix, localization));
+        public static string GetQualifiedTypeName(string typeName, string prefix, ILocalization localization) => GetQualifiedTypeName(typeName, GetVocabulary(prefix, localization));
 
         /// <summary>
         /// Gets semantic vocabulary by prefix.
@@ -41,7 +41,7 @@ namespace Sdl.Web.Common.Mapping
         /// <param name="prefix">The prefix</param>
         /// <param name="loc">The localization</param>
         /// <returns>Semantic vocabulary for the given prefix</returns>
-        public static string GetVocabulary(string prefix, Localization loc) => loc.GetSemanticVocabulary(prefix).Vocab;
+        public static string GetVocabulary(string prefix, ILocalization loc) => loc.GetSemanticVocabulary(prefix).Vocab;
 
         /// <summary>
         /// Gets prefix for semantic vocabulary.
@@ -49,7 +49,7 @@ namespace Sdl.Web.Common.Mapping
         /// <param name="vocab">Vocabulary name</param>
         /// <param name="loc">The localization</param>
         /// <returns>Prefix for this semantic vocabulary</returns>
-        public static string GetPrefix(string vocab, Localization loc)
+        public static string GetPrefix(string vocab, ILocalization loc)
         {
             SemanticVocabulary semanticVocabulary = loc.GetSemanticVocabularies().FirstOrDefault(sv => sv.Vocab == vocab);
             if (semanticVocabulary == null)
@@ -67,6 +67,6 @@ namespace Sdl.Web.Common.Mapping
         /// <param name="id">The schema ID</param>
         /// <param name="loc">The localization</param>
         /// <returns>The semantic schema matching the id for the given module</returns>
-        public static SemanticSchema GetSchema(string id, Localization loc) => loc.GetSemanticSchema(id);
+        public static SemanticSchema GetSchema(string id, ILocalization loc) => loc.GetSemanticSchema(id);
     }
 }

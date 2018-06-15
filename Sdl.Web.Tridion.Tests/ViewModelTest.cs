@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Tests.Models;
 
@@ -79,7 +80,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void ExtractSyndicationFeedItems_Teasers_Success()
         {
-            Localization testLocalization = TestFixture.ParentLocalization;
+            ILocalization testLocalization = TestFixture.ParentLocalization;
             Teaser testTeaser1 = new Teaser
             {
                 Headline = "Test Teaser 1",
@@ -126,7 +127,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void ExtractSyndicationFeedItems_None_Success()
         {
-            Localization testLocalization = TestFixture.ParentLocalization;
+            ILocalization testLocalization = TestFixture.ParentLocalization;
             PageModel testPageModel = new PageModel("666");
             OutputJson(testPageModel);
 

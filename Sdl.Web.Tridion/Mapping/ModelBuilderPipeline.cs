@@ -119,10 +119,10 @@ namespace Sdl.Web.Tridion.Mapping
         /// </summary>
         /// <param name="pageModelData">The DXA R2 Data Model.</param>
         /// <param name="includePageRegions">Indicates whether Include Page Regions should be included.</param>
-        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>The Strongly Typed Page Model (an instance of class <see cref="PageModel"/> or a subclass).</returns>
         public static PageModel CreatePageModel(PageModelData pageModelData, bool includePageRegions,
-            Localization localization)
+            ILocalization localization)
         {
             using (new Tracer(pageModelData, localization))
             {
@@ -177,9 +177,9 @@ namespace Sdl.Web.Tridion.Mapping
         /// </summary>
         /// <param name="entityModelData">The DXA R2 Data Model.</param>
         /// <param name="baseModelType">The base type for the Entity Model to build.</param>
-        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>The strongly typed Entity Model. Will be of type <paramref name="baseModelType"/> or a subclass.</returns>
-        public static EntityModel CreateEntityModel(EntityModelData entityModelData, Type baseModelType, Localization localization)
+        public static EntityModel CreateEntityModel(EntityModelData entityModelData, Type baseModelType, ILocalization localization)
         {                        
             using (new Tracer(entityModelData, localization))
             {
@@ -220,7 +220,7 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
         internal static PageModel CreatePageModelInternal(PageModelData pageModelData, bool includePageRegions,
-          Localization localization)
+          ILocalization localization)
         {
             PageModel pageModel = null;
             foreach (IPageModelBuilder pageModelBuilder in _pageModelBuilders)
@@ -235,7 +235,7 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
         internal static EntityModel CreateEntityModelInternal(EntityModelData entityModelData, Type baseModelType,
-            Localization localization)
+            ILocalization localization)
         {
             EntityModel entityModel = null;
             foreach (IEntityModelBuilder entityModelBuilder in _entityModelBuilders)

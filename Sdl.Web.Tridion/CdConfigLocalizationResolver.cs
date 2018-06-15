@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Tridion
@@ -14,7 +15,7 @@ namespace Sdl.Web.Tridion
     /// </summary>
     public class CdConfigLocalizationResolver : LocalizationResolver
     {
-        private readonly IList<KeyValuePair<Uri, Localization>> _urlToLocalizationMapping = new List<KeyValuePair<Uri, Localization>>();
+        private readonly IList<KeyValuePair<Uri, ILocalization>> _urlToLocalizationMapping = new List<KeyValuePair<Uri, ILocalization>>();
 
         /// <summary>
         /// Initializes a new <see cref="CdConfigLocalizationResolver"/> instance.
@@ -38,7 +39,7 @@ namespace Sdl.Web.Tridion
                     foreach (XElement hostElement in publicationElement.Elements("Host"))
                     {
                         Uri baseUrl = GetBaseUrl(hostElement);
-                        Localization localization;
+                        ILocalization localization;
                         if (!KnownLocalizations.TryGetValue(publicationId, out localization))
                         {
                             localization = new Localization
@@ -48,7 +49,7 @@ namespace Sdl.Web.Tridion
                             };
                             KnownLocalizations.Add(publicationId, localization);
                         }
-                        _urlToLocalizationMapping.Add(new KeyValuePair<Uri, Localization>(baseUrl, localization));
+                        _urlToLocalizationMapping.Add(new KeyValuePair<Uri, ILocalization>(baseUrl, localization));
                     }
                 }
             }
@@ -56,16 +57,16 @@ namespace Sdl.Web.Tridion
 
         #region ILocalizationResolver Members
         /// <summary>
-        /// Resolves a matching <see cref="Localization"/> for a given URL.
+        /// Resolves a matching <see cref="ILocalization"/> for a given URL.
         /// </summary>
         /// <param name="url">The URL to resolve.</param>
-        /// <returns>A <see cref="Localization"/> instance which base URL matches that of the given URL.</returns>
+        /// <returns>A <see cref="ILocalization"/> instance which base URL matches that of the given URL.</returns>
         /// <exception cref="DxaUnknownLocalizationException">If no matching Localization can be found.</exception>
-        public override Localization ResolveLocalization(Uri url)
+        public override ILocalization ResolveLocalization(Uri url)
         {
             using (new Tracer(url))
             {
-                Localization result;
+                ILocalization result;
                 try
                 {
                     result = _urlToLocalizationMapping.First(mapping => MatchesBaseUrl(url, mapping.Key)).Value;

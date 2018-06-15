@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Web;
 using System.Web.Configuration;
 using Sdl.Web.Common;
-using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Context.Api;
@@ -69,7 +68,7 @@ namespace Sdl.Web.Tridion.Context
         /// <param name="aspectName">The aspect name. If <c>null</c> all context claims are returned.</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>A dictionary with the claim names in format aspectName.propertyName as keys.</returns>
-        public IDictionary<string, object> GetContextClaims(string aspectName, Localization localization)
+        public IDictionary<string, object> GetContextClaims(string aspectName, ILocalization localization)
         {
             using (new Tracer(aspectName))
             {

@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.ServiceModel.Syndication;
 using Newtonsoft.Json;
-using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using System;
 using System.Globalization;
 using System.Linq;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Models
 {
@@ -83,7 +83,7 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The XPM markup.</returns>
-        public override string GetXpmMarkup(Localization localization)
+        public override string GetXpmMarkup(ILocalization localization)
         {
             if (XpmMetadata == null)
             {
@@ -113,9 +113,9 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// Extracts syndication feed items.
         /// </summary>
-        /// <param name="localization">The context <see cref="Localization"/>.</param>
+        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>The extracted syndication feed items; a concatentation of syndication feed items provided by <see cref="Regions"/> (if any).</returns>
-        public virtual IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(Localization localization)
+        public virtual IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(ILocalization localization)
         {
             return ConcatenateSyndicationFeedItems(Regions, localization);
         }
@@ -125,7 +125,7 @@ namespace Sdl.Web.Common.Models
         /// Filters (i.e. removes) conditional Entities which don't meet the conditions.
         /// </summary>
         /// <param name="localization">The context Localization.</param>
-        public void FilterConditionalEntities(Localization localization)
+        public void FilterConditionalEntities(ILocalization localization)
         {
             using (new Tracer(localization, this))
             {

@@ -1,5 +1,4 @@
-﻿using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Models;
+﻿using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Interfaces
 {
@@ -14,6 +13,6 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="entity">The Entity Model to be evaluated.</param>
         /// <param name="localization">The context Localization</param>
         /// <returns><c>true</c> if the Entity should be included.</returns>
-        bool IncludeEntity(EntityModel entity, Localization localization);
+        bool IncludeEntity(EntityModel entity, ILocalization localization);
     }
 }

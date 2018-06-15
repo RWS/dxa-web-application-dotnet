@@ -12,8 +12,8 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.0.0</SdlDxaDataModelPackageVersion>
-    <SdlWebDeliveryPackageVersion>10.1.0</SdlWebDeliveryPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.1.0-beta-201804241437</SdlDxaDataModelPackageVersion>
+    <SdlWebDeliveryPackageVersion>11.0.0-beta-201805161005</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>10.1.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>10.1.0</SdlWebContextImagePackageVersion>
   </PropertyGroup>
@@ -187,6 +187,7 @@
     <Compile Include="Caching\DxaCacheProvider.cs" />
     <Compile Include="Caching\DD4TCacheProvider.cs" />
     <Compile Include="Caching\DefaultCacheProvider.cs" />
+    <Compile Include="ContentManager\CmUri.cs" />
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
     <Compile Include="CdApiLocalizationResolver.cs" />
     <Reference Include="Unity.Mvc5">
