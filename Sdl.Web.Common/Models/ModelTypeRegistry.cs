@@ -313,11 +313,13 @@ namespace Sdl.Web.Common.Models
                     // check for known property names
                     switch (attribute.PropertyName)
                     {
+                        // To do : we need to make this more generic to collect all fields of a given type (e.g. [SemtanticProperty("_all", typeof(Keyword)])
                         case SemanticProperty.AllFields:
-                            if (!typeof(IDictionary<string, string>).IsAssignableFrom(propertyInfo.PropertyType))
+                            if (!typeof(IDictionary<string, string>).IsAssignableFrom(propertyInfo.PropertyType) 
+                                && !typeof(IDictionary<string, KeywordModel>).IsAssignableFrom(propertyInfo.PropertyType))
                             {
-                                throw new DxaException(
-                                    $"Invalid semantics for property {modelType.Name}.{propertyInfo.Name}. Properties with [SemanticProperty(\"_all\")] annotation must be of type Dictionary<string, string>."
+                                    throw new DxaException(
+                                    $"Invalid semantics for property {modelType.Name}.{propertyInfo.Name}. Properties with [SemanticProperty(\"_all\")] annotation must be of type Dictionary<string, string> or Dictionary<string, KeywordModel>."
                                     );
                             }
                             break;
