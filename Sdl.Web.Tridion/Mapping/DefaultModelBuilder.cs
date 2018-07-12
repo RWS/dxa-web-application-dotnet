@@ -791,6 +791,7 @@ namespace Sdl.Web.Tridion.Mapping
             result.HtmlClasses = regionModelData.HtmlClasses;
             result.MvcData = mvcData;
             result.XpmMetadata = localization.IsXpmEnabled ? regionModelData.XpmMetadata : null;
+            result.SchemaId = regionModelData.SchemaId;
 
             if (regionModelData.Regions != null)
             {

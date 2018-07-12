@@ -39,6 +39,11 @@ namespace Sdl.Web.Common.Models
         public string Name { get; private set; }
 
         /// <summary>
+        /// Gets or set the Id of Schema that representing a structure definition for this Region.
+        /// </summary>
+        public string SchemaId { get; set; }
+
+        /// <summary>
         /// Gets the Entities that the Region contains.
         /// </summary>
         public IList<EntityModel> Entities { get; private set; } = new List<EntityModel>();
@@ -92,7 +97,7 @@ namespace Sdl.Web.Common.Models
         /// <returns>The XPM markup.</returns>
         public override string GetXpmMarkup(ILocalization localization)
         {
-            XpmRegion xpmRegion =  localization.GetXpmRegionConfiguration(Name);
+            XpmRegion xpmRegion =  localization.GetXpmRegionConfiguration(SchemaId ?? Name);
             if (xpmRegion == null)
             {
                 return string.Empty;
