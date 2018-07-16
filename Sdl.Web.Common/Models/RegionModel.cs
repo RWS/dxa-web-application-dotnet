@@ -14,7 +14,7 @@ namespace Sdl.Web.Common.Models
     [Serializable]
     public class RegionModel : ViewModel, ISyndicationFeedItemProvider
     {
-        private const string XpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], minOccurs: {2}}} -->";
+        private const string XpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], minOccurs: {2}, maxOccurs: {3}}} -->";
         private const string XpmComponentTypeMarkup = "{{schema: \"{0}\", template: \"{1}\"}}";
 
         /// <summary>
@@ -102,14 +102,14 @@ namespace Sdl.Web.Common.Models
             {
                 return string.Empty;
             }
-
-            // TODO: obtain MinOccurs & MaxOccurs from regions.json
+            int minOccurs = xpmRegion.OccurrenceConstraint?.MinOccurs ?? 0;
+            int maxOccurs = xpmRegion.OccurrenceConstraint?.MaxOccurs ?? -1;
             return string.Format(
                 XpmRegionMarkup, 
                 Name, 
                 string.Join(", ", xpmRegion.ComponentTypes.Select(ct => string.Format(XpmComponentTypeMarkup, ct.Schema, ct.Template))), 
-                0);
-
+                minOccurs,
+                maxOccurs);
         }
 
         /// <summary>

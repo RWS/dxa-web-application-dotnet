@@ -16,5 +16,10 @@ namespace Sdl.Web.Common.Configuration
         /// Allowed Component Types.
         /// </summary>
         public List<ComponentType> ComponentTypes { get; set; }
+
+        /// <summary>
+        /// An occurrence constraint for Component Presentation(s) in Region Schema.
+        /// </summary>
+        public OccurrenceConstraint OccurrenceConstraint { get; set; }
     }
 }
