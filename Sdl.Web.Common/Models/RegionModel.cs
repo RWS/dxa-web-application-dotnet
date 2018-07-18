@@ -14,7 +14,9 @@ namespace Sdl.Web.Common.Models
     [Serializable]
     public class RegionModel : ViewModel, ISyndicationFeedItemProvider
     {
-        private const string XpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], minOccurs: {2}, maxOccurs: {3}}} -->";
+        private const string XpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], {2}}} -->";
+        private const string occurenceConstraintMarkupUnlimited = "minOccurs: {0}";
+        private const string occurenceConstraintMarkup = "minOccurs: {0}, maxOccurs: {1}";
         private const string XpmComponentTypeMarkup = "{{schema: \"{0}\", template: \"{1}\"}}";
 
         /// <summary>
@@ -102,14 +104,19 @@ namespace Sdl.Web.Common.Models
             {
                 return string.Empty;
             }
+
             int minOccurs = xpmRegion.OccurrenceConstraint?.MinOccurs ?? 0;
             int maxOccurs = xpmRegion.OccurrenceConstraint?.MaxOccurs ?? -1;
+            string occurrenceConstraint = "";
+            occurrenceConstraint = maxOccurs == -1
+                ? string.Format(occurenceConstraintMarkupUnlimited, minOccurs)
+                : string.Format(occurenceConstraintMarkup, minOccurs, maxOccurs);
+
             return string.Format(
                 XpmRegionMarkup, 
                 Name, 
-                string.Join(", ", xpmRegion.ComponentTypes.Select(ct => string.Format(XpmComponentTypeMarkup, ct.Schema, ct.Template))), 
-                minOccurs,
-                maxOccurs);
+                string.Join(", ", xpmRegion.ComponentTypes.Select(ct => string.Format(XpmComponentTypeMarkup, ct.Schema, ct.Template))),
+                occurrenceConstraint);
         }
 
         /// <summary>
