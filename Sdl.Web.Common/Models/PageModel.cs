@@ -91,10 +91,6 @@ namespace Sdl.Web.Common.Models
         /// <returns>The XPM markup.</returns>
         public override string GetXpmMarkup(ILocalization localization)
         {
-            if (XpmMetadata == null)
-            {
-                return String.Empty;
-            }
             string occurrenceConstraint = DefaultOccurrenceMarkup;
             string typeConstraint = DefaultTypeMarkup;
             if (XpmMetadata.ContainsKey("PageSchemaID"))
@@ -112,6 +108,10 @@ namespace Sdl.Web.Common.Models
                         xpmRegion.ComponentTypes.Select(
                             ct => string.Format(XpmComponentTypeMarkup, ct.Schema, ct.Template)));
                 }
+            }
+            if (XpmMetadata == null)
+            {
+                return String.Empty;
             }
             string cmsUrl = (localization.GetConfigValue("core.cmsurl") ?? String.Empty).TrimEnd('/');
             string result =  String.Format(
