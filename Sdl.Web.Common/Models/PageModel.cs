@@ -5,7 +5,6 @@ using Sdl.Web.Common.Logging;
 using System;
 using System.Globalization;
 using System.Linq;
-using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Models
@@ -16,14 +15,9 @@ namespace Sdl.Web.Common.Models
     [Serializable]
     public class PageModel : ViewModel, ISyndicationFeedItemProvider
     {
-        private const string XpmPageSettingsMarkup = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\", allowedComponentTypes: [{4}], {5}}} -->";
+        private const string XpmPageSettingsMarkup = "<!-- Page Settings: {{\"PageID\":\"{0}\",\"PageModified\":\"{1}\",\"PageTemplateID\":\"{2}\",\"PageTemplateModified\":\"{3}\"}} -->";
         private const string XpmPageScript = "<script type=\"text/javascript\" language=\"javascript\" defer=\"defer\" src=\"{0}/WebUI/Editors/SiteEdit/Views/Bootstrap/Bootstrap.aspx?mode=js\" id=\"tridion.siteedit\"></script>";
         private const string XpmDateTimeFormat = "yyyy-MM-ddTHH:mm:ss";
-        private const string OccurenceConstraintMarkupUnlimited = "minOccurs: {0}";
-        private const string OccurenceConstraintMarkup = "minOccurs: {0}, maxOccurs: {1}";
-        private const string XpmComponentTypeMarkup = "{{schema: \"{0}\", template: \"{1}\"}}";
-        private const string DefaultTypeMarkup = "{schema: \"*\", template: \"*\"}";
-        private const string DefaultOccurrenceMarkup = "minOccurs: 0";
 
         /// <summary>
         /// Gets the Page Regions.
@@ -73,7 +67,7 @@ namespace Sdl.Web.Common.Models
         /// <param name="id">The identifier of the Page.</param>
         public PageModel(string id)
         {
-            if (String.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id))
             {
                 throw new DxaException("Page Model must have a non-empty identifier.");
             }
@@ -91,39 +85,18 @@ namespace Sdl.Web.Common.Models
         /// <returns>The XPM markup.</returns>
         public override string GetXpmMarkup(ILocalization localization)
         {
-            string occurrenceConstraint = DefaultOccurrenceMarkup;
-            string typeConstraint = DefaultTypeMarkup;
-            if (XpmMetadata.ContainsKey("PageSchemaID"))
-            {
-                string pageSchemaId = (string)XpmMetadata["PageSchemaID"];
-                XpmRegion xpmRegion = localization.GetXpmRegionConfiguration(pageSchemaId);
-                if (xpmRegion != null)
-                {
-                    int minOccurs = xpmRegion.OccurrenceConstraint?.MinOccurs ?? 0;
-                    int maxOccurs = xpmRegion.OccurrenceConstraint?.MaxOccurs ?? -1;
-                    occurrenceConstraint = maxOccurs == -1
-                        ? string.Format(OccurenceConstraintMarkupUnlimited, minOccurs)
-                        : string.Format(OccurenceConstraintMarkup, minOccurs, maxOccurs);
-                    typeConstraint = string.Join(", ",
-                        xpmRegion.ComponentTypes.Select(
-                            ct => string.Format(XpmComponentTypeMarkup, ct.Schema, ct.Template)));
-                }
-            }
             if (XpmMetadata == null)
             {
-                return String.Empty;
+                return string.Empty;
             }
-            string cmsUrl = (localization.GetConfigValue("core.cmsurl") ?? String.Empty).TrimEnd('/');
-            string result =  String.Format(
+            string cmsUrl = (localization.GetConfigValue("core.cmsurl") ?? string.Empty).TrimEnd('/');
+            return string.Format(
                 XpmPageSettingsMarkup,
                 XpmMetadata["PageID"],
-                GetDateTimeStr(XpmMetadata["PageModified"]),
+                GetDateTimeStr(XpmMetadata["PageModified"]),             
                 XpmMetadata["PageTemplateID"],
-                GetDateTimeStr(XpmMetadata["PageTemplateModified"]),
-                typeConstraint,
-                occurrenceConstraint)
-                + String.Format(XpmPageScript, cmsUrl);
-            return result;
+                GetDateTimeStr(XpmMetadata["PageTemplateModified"])) +
+                string.Format(XpmPageScript, cmsUrl);
         }
 
         private static string GetDateTimeStr(object datetime)
