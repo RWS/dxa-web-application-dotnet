@@ -793,6 +793,28 @@ namespace Sdl.Web.Tridion.Mapping
             result.XpmMetadata = localization.IsXpmEnabled ? regionModelData.XpmMetadata : null;
             result.SchemaId = regionModelData.SchemaId;
 
+            if (!string.IsNullOrEmpty(regionModelData.SchemaId))
+            {
+                SemanticSchema semanticSchema = SemanticMapping.GetSchema(regionModelData.SchemaId, localization);
+
+                Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
+
+                MappingData mappingData = new MappingData
+                {
+                    SourceViewModel = regionModelData,
+                    ModelType = modelType,
+                    PropertyValidation = new Validation
+                    {
+                        MainSchema = semanticSchema,
+                        InheritedSchemas = GetInheritedSemanticSchemas(regionModelData, localization)
+                    },
+                    Fields = null,
+                    MetadataFields = regionModelData.Metadata,
+                    Localization = localization
+                };
+                MapSemanticProperties(result, mappingData);
+            }
+
             if (regionModelData.Regions != null)
             {
                 IEnumerable<RegionModel> nestedRegionModels = regionModelData.Regions.Select(data => CreateRegionModel(data, localization));
