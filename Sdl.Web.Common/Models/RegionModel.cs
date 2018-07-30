@@ -14,7 +14,7 @@ namespace Sdl.Web.Common.Models
     [Serializable]
     public class RegionModel : ViewModel, ISyndicationFeedItemProvider
     {
-        private const string XpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], {2}}} -->";
+        private const string XpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\",{1} allowedComponentTypes: [{2}], {3}}} -->";
         private const string occurenceConstraintMarkupUnlimited = "minOccurs: {0}";
         private const string occurenceConstraintMarkup = "minOccurs: {0}, maxOccurs: {1}";
         private const string XpmComponentTypeMarkup = "{{schema: \"{0}\", template: \"{1}\"}}";
@@ -59,7 +59,7 @@ namespace Sdl.Web.Common.Models
 
         public RegionModel()
         {
-            
+
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         /// <param name="name">The name of the Region.</param>
         /// <param name="qualifiedViewName">The qualified name of the View to use to render the Region. Format: format AreaName:ControllerName:ViewName.</param>
-        public RegionModel(string name, string qualifiedViewName) 
+        public RegionModel(string name, string qualifiedViewName)
             : this(name)
         {
             MvcData = new MvcData(qualifiedViewName)
@@ -112,9 +112,20 @@ namespace Sdl.Web.Common.Models
                 ? string.Format(occurenceConstraintMarkupUnlimited, minOccurs)
                 : string.Format(occurenceConstraintMarkup, minOccurs, maxOccurs);
 
+            object pathToRegion = string.Empty;
+            if (XpmMetadata != null)
+            {
+                XpmMetadata.TryGetValue("FullyQualifiedName", out pathToRegion);
+                if (pathToRegion != null)
+                {
+                    pathToRegion = $" path: \"{pathToRegion}\",";
+                }
+            }
+
             return string.Format(
-                XpmRegionMarkup, 
-                Name, 
+                XpmRegionMarkup,
+                Name,
+                pathToRegion,
                 string.Join(", ", xpmRegion.ComponentTypes.Select(ct => string.Format(XpmComponentTypeMarkup, ct.Schema, ct.Template))),
                 occurrenceConstraint);
         }
