@@ -60,6 +60,7 @@
     <Reference Include="DD4T.Utils">
       <HintPath>..\packages\DD4T.Core.2.2.7\lib\net45\DD4T.Utils.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Extensions.Caching.Abstractions">
       <HintPath>..\packages\Microsoft.Extensions.Caching.Abstractions.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Caching.Abstractions.dll</HintPath>
     </Reference>
@@ -117,6 +118,10 @@
     <Reference Include="Sdl.Web.Delivery.ServicesCore">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.PublicContentApi, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Sdl.Web.PublicContentApi.2.1.0-beta-201808031528\lib\net452\Sdl.Web.PublicContentApi.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="StackExchange.Redis.StrongName">
       <HintPath>..\packages\StackExchange.Redis.StrongName.1.1.605\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>
@@ -189,13 +194,15 @@
     <Compile Include="Caching\DefaultCacheProvider.cs" />
     <Compile Include="ContentManager\CmUri.cs" />
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
-    <Compile Include="CdApiLocalizationResolver.cs" />
+    <Compile Include="PCAClient\OAuth.cs" />
+    <Compile Include="PCAClient\PCAClientException.cs" />
+    <Compile Include="Resolvers\CdApiLocalizationResolver.cs" />
     <Reference Include="Unity.Mvc5">
       <HintPath>..\packages\Unity.Mvc5.1.1\lib\net45\Unity.Mvc5.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CdConfigLocalizationResolver.cs" />
+    <Compile Include="Resolvers\CdConfigLocalizationResolver.cs" />
     <Compile Include="Configuration\ModelBuilderCollection.cs" />
     <Compile Include="Configuration\ModelBuilderPipelineConfiguration.cs" />
     <Compile Include="Configuration\ModelBuilderSettings.cs" />
@@ -210,15 +217,18 @@
     <Compile Include="DataModelExtensions\TargetGroups\TargetGroupCondition.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Linking\DefaultLinkResolver.cs" />
-    <Compile Include="LocalizationResolver.cs" />
+    <Compile Include="Resolvers\LocalizationResolver.cs" />
     <Compile Include="Mapping\DefaultModelBuilder.cs" />
     <Compile Include="Mapping\IModelBuilder.cs" />
     <Compile Include="Mapping\IRawDataProvider.cs" />
+    <Compile Include="ModelService\Binder.cs" />
     <Compile Include="ModelService\DefaultModelServiceProvider.cs" />
+    <Compile Include="ModelService\GraphQLModelServiceProvider.cs" />
     <Compile Include="Navigation\DynamicNavigationProvider.cs" />
     <Compile Include="Navigation\ModelServiceImpl\DynamicNavigationProvider.cs" />
     <Compile Include="Navigation\CILImpl\DynamicNavigationProvider.cs" />
     <Compile Include="Navigation\StaticNavigationProvider.cs" />
+    <Compile Include="PCAClient\PCAClientFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query\BrokerQuery.cs" />
     <Compile Include="..\CommonAssemblyInfo.cs" />
@@ -245,6 +255,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
