@@ -101,6 +101,7 @@
     <Compile Include="Interfaces\ILocalizationMappingsManager.cs" />
     <Compile Include="Interfaces\ILocalizationResolver.cs" />
     <Compile Include="Interfaces\ILocalizationResources.cs" />
+    <Compile Include="Interfaces\IModelService.cs" />
     <Compile Include="Interfaces\IModelServiceProvider.cs" />
     <Compile Include="Interfaces\INavigationProvider.cs" />
     <Compile Include="Interfaces\IOnDemandNavigationProvider.cs" />
