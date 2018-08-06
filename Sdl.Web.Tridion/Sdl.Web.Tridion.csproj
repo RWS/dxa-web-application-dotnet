@@ -194,16 +194,16 @@
     <Compile Include="Caching\DefaultCacheProvider.cs" />
     <Compile Include="ContentManager\CmUri.cs" />
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
-    <Compile Include="Linking\GraphQLLinkResolver.cs" />
+    <Compile Include="Resolvers\Linking\GraphQLLinkResolver.cs" />
     <Compile Include="PCAClient\OAuth.cs" />
     <Compile Include="PCAClient\PCAClientException.cs" />
-    <Compile Include="Resolvers\CdApiLocalizationResolver.cs" />
+    <Compile Include="Resolvers\Localization\CdApiLocalizationResolver.cs" />
     <Reference Include="Unity.Mvc5">
       <HintPath>..\packages\Unity.Mvc5.1.1\lib\net45\Unity.Mvc5.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Resolvers\CdConfigLocalizationResolver.cs" />
+    <Compile Include="Resolvers\Localization\CdConfigLocalizationResolver.cs" />
     <Compile Include="Configuration\ModelBuilderCollection.cs" />
     <Compile Include="Configuration\ModelBuilderPipelineConfiguration.cs" />
     <Compile Include="Configuration\ModelBuilderSettings.cs" />
@@ -217,8 +217,9 @@
     <Compile Include="DataModelExtensions\TargetGroups\TargetGroup.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\TargetGroupCondition.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Linking\DefaultLinkResolver.cs" />
-    <Compile Include="Resolvers\LocalizationResolver.cs" />
+    <Compile Include="Resolvers\Linking\DefaultLinkResolver.cs" />
+    <Compile Include="Resolvers\Localization\GraphQLLocalizationResolver.cs" />
+    <Compile Include="Resolvers\Localization\LocalizationResolver.cs" />
     <Compile Include="Mapping\DefaultModelBuilder.cs" />
     <Compile Include="Mapping\IModelBuilder.cs" />
     <Compile Include="Mapping\IRawDataProvider.cs" />
