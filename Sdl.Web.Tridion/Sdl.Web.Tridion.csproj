@@ -120,7 +120,7 @@
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.PublicContentApi, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.PublicContentApi.2.1.0-beta-201808060958\lib\net452\Sdl.Web.PublicContentApi.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.PublicContentApi.2.1.0-beta-201808061037\lib\net452\Sdl.Web.PublicContentApi.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="StackExchange.Redis.StrongName">
@@ -194,6 +194,7 @@
     <Compile Include="Caching\DefaultCacheProvider.cs" />
     <Compile Include="ContentManager\CmUri.cs" />
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
+    <Compile Include="Linking\GraphQLLinkResolver.cs" />
     <Compile Include="PCAClient\OAuth.cs" />
     <Compile Include="PCAClient\PCAClientException.cs" />
     <Compile Include="Resolvers\CdApiLocalizationResolver.cs" />

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
@@ -132,28 +133,22 @@ namespace Sdl.Web.Tridion.ModelService
             };
             return JsonConvert.DeserializeObject<T>(json.ToString(), settings);
         }
-
-        private const string DefaultExtensionLessPageName = "index";
-        private const string DefaultExtension = ".html";
-        private const string IndexPageUrlSuffix = "/" + DefaultExtensionLessPageName;
+    
         private static string GetCanonicalUrlPath(string urlPath)
         {
-            string result = urlPath ?? IndexPageUrlSuffix;
+            if (string.IsNullOrEmpty(urlPath) || urlPath.Equals("/"))
+                return Constants.IndexPageUrlSuffix + Constants.DefaultExtension;
+          
+            if (urlPath.EndsWith("/"))
+                return Constants.DefaultExtensionLessPageName + Constants.DefaultExtension;
 
-            result = result.TrimStart('/');
+            if (urlPath.EndsWith(Constants.DefaultExtension))
+                return urlPath;
 
-            if (string.IsNullOrEmpty(result))
-                return IndexPageUrlSuffix + DefaultExtension;
+            if (urlPath.LastIndexOf(".", StringComparison.Ordinal) > 0)
+                return urlPath;
 
-            if (result.EndsWith("/"))
-            {
-                result += DefaultExtensionLessPageName;
-            }
-            else if (result.EndsWith(DefaultExtension))
-            {
-                result = result.Substring(0, result.Length - DefaultExtension.Length);
-            }
-            return result;
+            return urlPath + Constants.DefaultExtension;
         }
     }
 }
