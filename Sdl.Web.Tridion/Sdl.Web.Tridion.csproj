@@ -119,9 +119,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
     </Reference>
+    <Reference Include="Sdl.Web.GraphQLClient">
+      <HintPath>..\..\dxa-pca-client\net\src\Sdl.Web.PublicContentApi\bin\Debug\Sdl.Web.GraphQLClient.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.HttpClient">
+      <HintPath>..\..\dxa-pca-client\net\src\Sdl.Web.PublicContentApi\bin\Debug\Sdl.Web.HttpClient.dll</HintPath>
+    </Reference>
     <Reference Include="Sdl.Web.PublicContentApi, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.PublicContentApi.2.1.0-beta-201808061037\lib\net452\Sdl.Web.PublicContentApi.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\dxa-pca-client\net\src\Sdl.Web.PublicContentApi\bin\Debug\Sdl.Web.PublicContentApi.dll</HintPath>
     </Reference>
     <Reference Include="StackExchange.Redis.StrongName">
       <HintPath>..\packages\StackExchange.Redis.StrongName.1.1.605\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>
@@ -188,6 +194,8 @@
     <Reference Include="Sdl.Web.Context.OData.Client">
       <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
+    <Compile Include="Providers\Binary\CILBinaryProvider.cs" />
+    <Compile Include="Providers\Binary\GraphQLBinaryProvider.cs" />
     <Compile Include="Providers\Caching\CacheProvider.cs" />
     <Compile Include="Providers\Caching\DxaCacheProvider.cs" />
     <Compile Include="Providers\Caching\DD4TCacheProvider.cs" />

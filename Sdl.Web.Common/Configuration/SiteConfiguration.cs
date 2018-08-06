@@ -44,6 +44,11 @@ namespace Sdl.Web.Common.Configuration
         public static ICacheProvider CacheProvider { get; private set; }
 
         /// <summary>
+        /// Gets the Binary Provider.
+        /// </summary>
+        public static IBinaryProvider BinaryProvider { get; private set; }
+
+        /// <summary>
         /// Gets the Model Service Provider.
         /// </summary>
         public static IModelServiceProvider ModelServiceProvider { get; private set; }
@@ -116,6 +121,7 @@ namespace Sdl.Web.Common.Configuration
                 }
 
                 CacheProvider = GetProvider<ICacheProvider>(dependencyResolver);
+                BinaryProvider = GetProvider<IBinaryProvider>(dependencyResolver, isOptional: true);
                 ModelServiceProvider = GetProvider<IModelServiceProvider>(dependencyResolver);
                 ContentProvider = GetProvider<IContentProvider>(dependencyResolver);
                 NavigationProvider = GetProvider<INavigationProvider>(dependencyResolver);
