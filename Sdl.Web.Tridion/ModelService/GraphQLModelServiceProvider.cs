@@ -6,6 +6,7 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.DataModel;
 using Sdl.Web.PublicContentApi.ContentModel;
+using Sdl.Web.PublicContentApi.Exceptions;
 using Sdl.Web.PublicContentApi.ModelServicePlugin;
 using Sdl.Web.Tridion.PCAClient;
 
@@ -25,75 +26,99 @@ namespace Sdl.Web.Tridion.ModelService
             _binder.AddDataModelExtension(extension);
         }
 
-        protected PublicContentApi.PublicContentApi Client => PCAClientFactory.Instance.CreateClient(); 
+        protected PublicContentApi.PublicContentApi Client => PCAClientFactory.Instance.CreateClient();
 
         public EntityModelData GetEntityModelData(string entityId, ILocalization localization)
-        {          
-            var json = Client.GetEntityModelData(ContentNamespace.Sites, int.Parse(localization.Id), int.Parse(entityId),
-                ContentType.MODEL, DataModelType.R2, DcpType.DEFAULT,
-                false, null);
-            return LoadModel<EntityModelData>(json);
+        {
+            try
+            {
+                var json = Client.GetEntityModelData(ContentNamespace.Sites, int.Parse(localization.Id),
+                    int.Parse(entityId),
+                    ContentType.MODEL, DataModelType.R2, DcpType.DEFAULT,
+                    false, null);
+                return LoadModel<EntityModelData>(json);
+            }
+            catch (PcaException)
+            {
+                return null;
+            }
         }
 
         public PageModelData GetPageModelData(int pageId, ILocalization localization, bool addIncludes)
-        {           
-            var json = Client.GetPageModelData(ContentNamespace.Sites, int.Parse(localization.Id), pageId,
-                ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                false, null);
-            return LoadModel<PageModelData>(json);
+        {
+            try
+            {
+                var json = Client.GetPageModelData(ContentNamespace.Sites, int.Parse(localization.Id), pageId,
+                    ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
+                    false, null);
+                return LoadModel<PageModelData>(json);
+            }
+            catch (PcaException)
+            {
+                return null;
+            }
         }
 
         public PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes)
-        {          
-            var json = Client.GetPageModelData(ContentNamespace.Sites, int.Parse(localization.Id), 
-                GetCanonicalUrlPath(urlPath), 
-                ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                false, null);
-            return LoadModel<PageModelData>(json);
+        {
+            try
+            {
+                var json = Client.GetPageModelData(ContentNamespace.Sites, int.Parse(localization.Id),
+                    GetCanonicalUrlPath(urlPath),
+                    ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
+                    false, null);
+                return LoadModel<PageModelData>(json);
+            }
+            catch (PcaException)
+            {
+                return null;
+            }
         }
 
         public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, ILocalization localization, bool includeAncestors, int descendantLevels)
         {
-           return new SitemapItem[] {};
+            try
+            {
+                var sitmapItems = Client.GetSitemapSubtree(ContentNamespace.Sites,
+                    int.Parse(localization.Id), parentSitemapItemId, descendantLevels, null);
+                if (sitmapItems != null && sitmapItems.Items != null)
+                {
+                    return Convert<List<ISitemapItem>, SitemapItem[]>(sitmapItems.Items);
+                }
+            }
+            catch (PcaException)
+            {
+                
+            }
+            return new SitemapItem[] {};
         }
 
         public TaxonomyNode GetSitemapItem(ILocalization localization)
         {
-            var taxonomy = Client.GetSitemap(ContentNamespace.Sites, int.Parse(localization.Id), 10, null);
-            TaxonomyNode node = Convert(null, taxonomy);
-            return node;
+            try
+            {
+                return Convert<TaxonomySitemapItem, TaxonomyNode>(
+                    Client.GetSitemap(ContentNamespace.Sites, int.Parse(localization.Id), 10, null));
+            }
+            catch (PcaException)
+            {
+                return null;
+            }
         }
 
-        public TaxonomyNode Convert(TaxonomyNode parent, ISitemapItem item)
+        protected TOut Convert<TIn, TOut>(TIn item)
         {
-            TaxonomyNode node = new TaxonomyNode
+            if (item == null)
+                return default(TOut);
+
+            JsonSerializerSettings settings = new JsonSerializerSettings()
             {
-                Type = item.Type,
-                Id = item.Id,               
-                OriginalTitle = item.OriginalTitle,
-                Parent = parent,
-                Title = item.Title,
-                PublishedDate = DateTime.Parse(item.PublishedDate),
-                Url = item.Url,
-                Visible = item.Visible.Value,                
+                TypeNameHandling = TypeNameHandling.Auto,
+                NullValueHandling = NullValueHandling.Ignore,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
-
-
-            if (!(item is TaxonomySitemapItem)) return node;
-            TaxonomySitemapItem sitemapItem = (TaxonomySitemapItem)item;
-                
-            node.ClassifiedItemsCount = sitemapItem.ClassifiedItemsCount.Value;
-            node.Description = sitemapItem.Description;
-            node.HasChildNodes = sitemapItem.HasChildNodes.Value;
-            node.IsAbstract = sitemapItem.Abstract.Value;
-            node.Key = sitemapItem.Key;
-            if (!node.HasChildNodes) return node;
-            node.Items = new List<SitemapItem>();
-            foreach (var child in sitemapItem.Items)
-            {
-                node.Items.Add(Convert(node, child));
-            }
-            return node;
+            return JsonConvert.DeserializeObject<TOut>(
+                JsonConvert.SerializeObject(item, settings), settings);
         }
 
         protected T LoadModel<T>(dynamic json)
