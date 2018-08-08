@@ -1,43 +1,36 @@
-﻿using Sdl.Web.Common;
-using Sdl.Web.Common.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sdl.Web.Common;
+using Sdl.Web.Common.Models;
 using Tridion.ContentDelivery.DynamicContent.Query;
 using Tridion.ContentDelivery.Taxonomies;
 
-namespace Sdl.Web.Tridion.Query
+namespace Sdl.Web.Tridion.Providers.Query
 {
-    internal class BrokerQuery
+    public class BrokerQueryProvider : Common.Interfaces.IQueryProvider
     {
-        private readonly SimpleBrokerQuery _queryParameters;
+        public Dictionary<string, List<string>> KeywordFilters { get; set; }
+        public bool HasMore { get; set; }
 
-        internal Dictionary<string, List<string>> KeywordFilters { get; set; }
-        internal bool HasMore { get; set; }
-
-        internal BrokerQuery(SimpleBrokerQuery queryParameters)
+        public IEnumerable<string> ExecuteQuery(SimpleBrokerQuery queryParams)
         {
-            _queryParameters = queryParameters;
-        }
-
-        internal IEnumerable<string> ExecuteQuery()
-        {
-            Criteria criteria = BuildCriteria();
+            Criteria criteria = BuildCriteria(queryParams);
             global::Tridion.ContentDelivery.DynamicContent.Query.Query query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(criteria);
-            if (!string.IsNullOrEmpty(_queryParameters.Sort) && _queryParameters.Sort.ToLower() != "none")
+            if (!string.IsNullOrEmpty(queryParams.Sort) && queryParams.Sort.ToLower() != "none")
             {
-                query.AddSorting(GetSortParameter());
+                query.AddSorting(GetSortParameter(queryParams));
             }
-            if (_queryParameters.MaxResults > 0)
+            if (queryParams.MaxResults > 0)
             {
-                query.SetResultFilter(new LimitFilter(_queryParameters.MaxResults));
+                query.SetResultFilter(new LimitFilter(queryParams.MaxResults));
             }
 
-            int pageSize = _queryParameters.PageSize;
+            int pageSize = queryParams.PageSize;
             if (pageSize > 0)
             {
                 //We set the page size to one more than what we need, to see if there are more pages to come...
-                query.SetResultFilter(new PagingFilter(_queryParameters.Start, pageSize + 1));
+                query.SetResultFilter(new PagingFilter(queryParams.Start, pageSize + 1));
             }
             try
             {
@@ -64,15 +57,7 @@ namespace Sdl.Web.Tridion.Query
         public void SetKeywordFilters(List<String> keywordUris)
         {
             TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
-            List<Keyword> keywords = new List<Keyword>();
-            foreach (string kwUri in keywordUris)
-            {
-                Keyword kw = taxonomyFactory.GetTaxonomyKeyword(kwUri);
-                if (kw != null)
-                {
-                    keywords.Add(kw);
-                }
-            }
+            List<Keyword> keywords = keywordUris.Select(kwUri => taxonomyFactory.GetTaxonomyKeyword(kwUri)).Where(kw => kw != null).ToList();
             SetKeywordFilters(keywords);
         }
 
@@ -110,54 +95,39 @@ namespace Sdl.Web.Tridion.Query
         /// <returns></returns>
         public static List<Keyword> LoadKeywords(List<string> keywordUris)
         {
-            List<Keyword> res = new List<Keyword>();
             TaxonomyFactory taxonomyFactory = new TaxonomyFactory();
-            foreach (string uri in keywordUris)
-            {
-                Keyword kw = taxonomyFactory.GetTaxonomyKeyword(uri);
-                if (kw != null)
-                {
-                    res.Add(kw);
-                }
-            }
-            return res;
+            return keywordUris.Select(uri => taxonomyFactory.GetTaxonomyKeyword(uri)).Where(kw => kw != null).ToList();
         }
 
-        private Criteria BuildCriteria()
+        private Criteria BuildCriteria(SimpleBrokerQuery queryParams)
         {
             List<Criteria> children = new List<Criteria> { new ItemTypeCriteria(16) };
-            if (_queryParameters.SchemaId > 0)
+            if (queryParams.SchemaId > 0)
             {
-                children.Add(new ItemSchemaCriteria(_queryParameters.SchemaId));
+                children.Add(new ItemSchemaCriteria(queryParams.SchemaId));
             }
-            if (_queryParameters.PublicationId > 0)
+            if (queryParams.PublicationId > 0)
             {
-                children.Add(new PublicationCriteria(_queryParameters.PublicationId));
+                children.Add(new PublicationCriteria(queryParams.PublicationId));
             }
             if (KeywordFilters != null)
             {
-                foreach (string taxonomy in KeywordFilters.Keys)
-                {
-                    foreach (string keyword in KeywordFilters[taxonomy])
-                    {
-                        children.Add(new TaxonomyKeywordCriteria(taxonomy, keyword, true));
-                    }
-                }
+                children.AddRange((from taxonomy in KeywordFilters.Keys from keyword in KeywordFilters[taxonomy] select new TaxonomyKeywordCriteria(taxonomy, keyword, true)).Cast<Criteria>());
             }
             return new AndCriteria(children.ToArray());
         }
 
-        private SortParameter GetSortParameter()
+        private SortParameter GetSortParameter(SimpleBrokerQuery queryParams)
         {
-            SortDirection dir = _queryParameters.Sort.ToLower().EndsWith("asc") ? SortParameter.Ascending : SortParameter.Descending;
-            return new SortParameter(GetSortColumn(), dir);
+            SortDirection dir = queryParams.Sort.ToLower().EndsWith("asc") ? SortParameter.Ascending : SortParameter.Descending;
+            return new SortParameter(GetSortColumn(queryParams), dir);
         }
 
-        private SortColumn GetSortColumn()
+        private SortColumn GetSortColumn(SimpleBrokerQuery queryParams)
         {
             //TODO add more options if required
-            int pos = _queryParameters.Sort.Trim().IndexOf(" ", StringComparison.Ordinal);
-            string sort = pos > 0 ? _queryParameters.Sort.Trim().Substring(0, pos) : _queryParameters.Sort.Trim();
+            int pos = queryParams.Sort.Trim().IndexOf(" ", StringComparison.Ordinal);
+            string sort = pos > 0 ? queryParams.Sort.Trim().Substring(0, pos) : queryParams.Sort.Trim();
             switch (sort.ToLower())
             {
                 case "title":
@@ -166,7 +136,7 @@ namespace Sdl.Web.Tridion.Query
                     return SortParameter.ItemLastPublishedDate;
                 default:
                     //Default is to assume that its a custom metadata date field;
-                    return new CustomMetaKeyColumn(_queryParameters.Sort, MetadataType.DATE);
+                    return new CustomMetaKeyColumn(queryParams.Sort, MetadataType.DATE);
             }
         }
     }

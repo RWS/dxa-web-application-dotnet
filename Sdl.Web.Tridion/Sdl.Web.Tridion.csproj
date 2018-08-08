@@ -13,6 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SdlDxaDataModelPackageVersion>2.1.0-beta-201804241437</SdlDxaDataModelPackageVersion>
+    <SdlPCAPackageVersion>2.1.0-beta-201808081048</SdlPCAPackageVersion>
     <SdlWebDeliveryPackageVersion>11.0.0-beta-201805161005</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>10.1.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>10.1.0</SdlWebContextImagePackageVersion>
@@ -60,6 +61,7 @@
     <Reference Include="DD4T.Utils">
       <HintPath>..\packages\DD4T.Core.2.2.7\lib\net45\DD4T.Utils.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Extensions.Caching.Abstractions">
       <HintPath>..\packages\Microsoft.Extensions.Caching.Abstractions.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Caching.Abstractions.dll</HintPath>
     </Reference>
@@ -117,6 +119,10 @@
     <Reference Include="Sdl.Web.Delivery.ServicesCore">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.PublicContentApi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Sdl.Web.PublicContentApi.$(SdlPCAPackageVersion)\lib\net452\Sdl.Web.PublicContentApi.dll</HintPath>
     </Reference>
     <Reference Include="StackExchange.Redis.StrongName">
       <HintPath>..\packages\StackExchange.Redis.StrongName.1.1.605\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>
@@ -183,25 +189,34 @@
     <Reference Include="Sdl.Web.Context.OData.Client">
       <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
-    <Compile Include="Caching\CacheProvider.cs" />
-    <Compile Include="Caching\DxaCacheProvider.cs" />
-    <Compile Include="Caching\DD4TCacheProvider.cs" />
-    <Compile Include="Caching\DefaultCacheProvider.cs" />
+    <Compile Include="Providers\Binary\CILBinaryProvider.cs" />
+    <Compile Include="Providers\Binary\GraphQLBinaryProvider.cs" />
+    <Compile Include="Providers\Caching\CacheProvider.cs" />
+    <Compile Include="Providers\Caching\DxaCacheProvider.cs" />
+    <Compile Include="Providers\Caching\DD4TCacheProvider.cs" />
+    <Compile Include="Providers\Caching\DefaultCacheProvider.cs" />
     <Compile Include="ContentManager\CmUri.cs" />
-    <Compile Include="Context\ContextServiceClaimsProvider.cs" />
-    <Compile Include="CdApiLocalizationResolver.cs" />
+    <Compile Include="Providers\Context\ContextServiceClaimsProvider.cs" />
+    <Compile Include="Providers\GraphQLContentProvider.cs" />
+    <Compile Include="Providers\ModelService\ModelService.cs" />
+    <Compile Include="Providers\Query\BrokerQueryProvider.cs" />
+    <Compile Include="Providers\Query\GraphQLQueryProvider.cs" />
+    <Compile Include="Resolvers\Linking\GraphQLLinkResolver.cs" />
+    <Compile Include="PCAClient\OAuth.cs" />
+    <Compile Include="PCAClient\PCAClientException.cs" />
+    <Compile Include="Resolvers\Localization\CdApiLocalizationResolver.cs" />
     <Reference Include="Unity.Mvc5">
       <HintPath>..\packages\Unity.Mvc5.1.1\lib\net45\Unity.Mvc5.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CdConfigLocalizationResolver.cs" />
+    <Compile Include="Resolvers\Localization\CdConfigLocalizationResolver.cs" />
     <Compile Include="Configuration\ModelBuilderCollection.cs" />
     <Compile Include="Configuration\ModelBuilderPipelineConfiguration.cs" />
     <Compile Include="Configuration\ModelBuilderSettings.cs" />
     <Compile Include="ContentManager\InvalidTcmUriException.cs" />
     <Compile Include="ContentManager\ItemTypes.cs" />
-    <Compile Include="Context\AdfContextClaimsProvider.cs" />
+    <Compile Include="Providers\Context\AdfContextClaimsProvider.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\Condition.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\ConditionOperator.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\CustomerCharacteristicCondition.cs" />
@@ -209,24 +224,27 @@
     <Compile Include="DataModelExtensions\TargetGroups\TargetGroup.cs" />
     <Compile Include="DataModelExtensions\TargetGroups\TargetGroupCondition.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Linking\DefaultLinkResolver.cs" />
-    <Compile Include="LocalizationResolver.cs" />
+    <Compile Include="Resolvers\Linking\DefaultLinkResolver.cs" />
+    <Compile Include="Resolvers\Localization\GraphQLLocalizationResolver.cs" />
+    <Compile Include="Resolvers\Localization\LocalizationResolver.cs" />
     <Compile Include="Mapping\DefaultModelBuilder.cs" />
     <Compile Include="Mapping\IModelBuilder.cs" />
     <Compile Include="Mapping\IRawDataProvider.cs" />
-    <Compile Include="ModelService\DefaultModelServiceProvider.cs" />
-    <Compile Include="Navigation\DynamicNavigationProvider.cs" />
-    <Compile Include="Navigation\ModelServiceImpl\DynamicNavigationProvider.cs" />
-    <Compile Include="Navigation\CILImpl\DynamicNavigationProvider.cs" />
-    <Compile Include="Navigation\StaticNavigationProvider.cs" />
+    <Compile Include="Providers\ModelService\Binder.cs" />
+    <Compile Include="Providers\ModelService\DefaultModelServiceProvider.cs" />
+    <Compile Include="Providers\ModelService\GraphQLModelServiceProvider.cs" />
+    <Compile Include="Providers\Navigation\DynamicNavigationProvider.cs" />
+    <Compile Include="Providers\Navigation\ModelServiceImpl\DynamicNavigationProvider.cs" />
+    <Compile Include="Providers\Navigation\CILImpl\DynamicNavigationProvider.cs" />
+    <Compile Include="Providers\Navigation\StaticNavigationProvider.cs" />
+    <Compile Include="PCAClient\PCAClientFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Query\BrokerQuery.cs" />
     <Compile Include="..\CommonAssemblyInfo.cs" />
     <Compile Include="ContentManager\TcmUri.cs" />
     <Compile Include="Mapping\IEntityModelBuilder.cs" />
     <Compile Include="Mapping\IPageModelBuilder.cs" />
     <Compile Include="Mapping\ModelBuilderPipeline.cs" />
-    <Compile Include="Mapping\DefaultContentProvider.cs" />
+    <Compile Include="Providers\DefaultContentProvider.cs" />
     <Compile Include="Statics\BinaryFileManager.cs" />
     <Compile Include="Statics\NamedLocker.cs" />
   </ItemGroup>

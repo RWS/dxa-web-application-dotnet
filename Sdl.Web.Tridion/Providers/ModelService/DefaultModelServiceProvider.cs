@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Web.Configuration;
+﻿using System.Web.Configuration;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
@@ -23,29 +21,7 @@ namespace Sdl.Web.Tridion.ModelService
         private const int DefaultTimeout = 60000;
         private readonly ModelServiceClient _modelServiceClient;
         private readonly Binder _binder;
-
-        #region Binder
-        private class Binder : DataModelBinder
-        {
-            private readonly List<IDataModelExtension> _dataModelExtensions = new List<IDataModelExtension>();
-
-            public void AddDataModelExtension(IDataModelExtension extension)
-            {
-                _dataModelExtensions.Add(extension);
-            }          
-
-            public override Type BindToType(string assemblyName, string typeName)
-            {
-                foreach (var extension in _dataModelExtensions)
-                {
-                    Type type = extension.ResolveDataModelType(assemblyName, typeName);
-                    if (type != null) return type;
-                }              
-                return base.BindToType(assemblyName, typeName);
-            }
-        }
-        #endregion
-
+       
         public DefaultModelServiceProvider()
         {
             string uri = WebConfigurationManager.AppSettings["model-builder-service-uri"];          
@@ -70,7 +46,7 @@ namespace Sdl.Web.Tridion.ModelService
         public void AddDataModelExtension(IDataModelExtension extension)
         {
             _binder.AddDataModelExtension(extension);
-        }      
+        }
 
         /// <summary>
         /// Get page model data object.
@@ -78,7 +54,7 @@ namespace Sdl.Web.Tridion.ModelService
         public PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes)
         {
             try
-            {
+            {                                           
                 PageModelRequest request = new PageModelRequest
                 {
                     Path = urlPath,
