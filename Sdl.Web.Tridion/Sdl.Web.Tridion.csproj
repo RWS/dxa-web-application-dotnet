@@ -205,6 +205,8 @@
     <Compile Include="Providers\GraphQLContentProvider.cs" />
     <Compile Include="Providers\ModelService\ModelService.cs" />
     <Compile Include="Providers\Navigation\PCAImpl\DynamicNavigationProvider.cs" />
+    <Compile Include="Providers\Query\BrokerQueryProvider.cs" />
+    <Compile Include="Providers\Query\GraphQLQueryProvider.cs" />
     <Compile Include="Resolvers\Linking\GraphQLLinkResolver.cs" />
     <Compile Include="PCAClient\OAuth.cs" />
     <Compile Include="PCAClient\PCAClientException.cs" />
@@ -243,7 +245,6 @@
     <Compile Include="Providers\Navigation\StaticNavigationProvider.cs" />
     <Compile Include="PCAClient\PCAClientFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Query\BrokerQuery.cs" />
     <Compile Include="..\CommonAssemblyInfo.cs" />
     <Compile Include="ContentManager\TcmUri.cs" />
     <Compile Include="Mapping\IEntityModelBuilder.cs" />

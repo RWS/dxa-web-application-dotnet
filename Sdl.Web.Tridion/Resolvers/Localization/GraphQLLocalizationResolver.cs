@@ -4,6 +4,7 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.PublicContentApi.ContentModel;
+using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.PCAClient;
 
 namespace Sdl.Web.Tridion
@@ -31,9 +32,8 @@ namespace Sdl.Web.Tridion
                     urlLeftPart = urlLeftPart.Substring(0, espaceIndex);
                 }
 
-                PublicationMapping mapping = null;
-                    // NOTE: we're not using UrlToLocalizationMapping here, because we may match too eagerly on a base URL when there is a matching mapping with a more specific URL.
-                    mapping = PCAClientFactory.Instance.CreateClient().GetPublicationMapping(
+                // NOTE: we're not using UrlToLocalizationMapping here, because we may match too eagerly on a base URL when there is a matching mapping with a more specific URL.
+                PublicationMapping mapping = PCAClientFactory.Instance.CreateClient().GetPublicationMapping(
                         ContentNamespace.Sites,
                         urlLeftPart);
 

@@ -106,6 +106,7 @@
     <Compile Include="Interfaces\IModelServiceProvider.cs" />
     <Compile Include="Interfaces\INavigationProvider.cs" />
     <Compile Include="Interfaces\IOnDemandNavigationProvider.cs" />
+    <Compile Include="Interfaces\IQueryProvider.cs" />
     <Compile Include="Interfaces\IRichTextProcessor.cs" />
     <Compile Include="Interfaces\IUnknownLocalizationHandler.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />

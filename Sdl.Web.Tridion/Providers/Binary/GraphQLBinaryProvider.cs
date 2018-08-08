@@ -4,36 +4,40 @@ using Sdl.Web.GraphQLClient;
 using Sdl.Web.PublicContentApi.ContentModel;
 using Sdl.Web.Tridion.PCAClient;
 using Sdl.Web.HttpClient.Request;
+using Sdl.Web.PublicContentApi.Utils;
 
 namespace Sdl.Web.Tridion.Providers.Binary
 {
     public class GraphQLBinaryProvider : IBinaryProvider
     {
+        protected ContentNamespace GetNamespace(ILocalization localization)
+           => CmUri.NamespaceIdentiferToId(localization.CmUriScheme);
+
         public DateTime GetBinaryLastPublishedDate(ILocalization localization, string urlPath)
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(ContentNamespace.Sites, int.Parse(localization.Id), urlPath, null);
+            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), urlPath, null);
             return DateTime.ParseExact(binary.InitialPublishDate, "MM/dd/yyyy HH:mm:ss", null);
         }
 
         public DateTime GetBinaryLastPublishedDate(ILocalization localization, int binaryId)
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(ContentNamespace.Sites, int.Parse(localization.Id), binaryId, null);
+            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), binaryId, null);
             return DateTime.ParseExact(binary.InitialPublishDate, "MM/dd/yyyy HH:mm:ss", null);
         }
 
         public byte[] GetBinary(ILocalization localization, int binaryId, out string binaryPath)
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(ContentNamespace.Sites, int.Parse(localization.Id), binaryId, null);
+            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), binaryId, null);
             return GetBinaryData(client, binary, out binaryPath);
         }
 
         public byte[] GetBinary(ILocalization localization, string urlPath, out string binaryPath)
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(ContentNamespace.Sites, int.Parse(localization.Id), urlPath, null);
+            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), urlPath, null);
             return GetBinaryData(client, binary, out binaryPath);
         }
 

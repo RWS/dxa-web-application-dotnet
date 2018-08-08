@@ -9,6 +9,7 @@ using Sdl.Web.DataModel;
 using Sdl.Web.PublicContentApi.ContentModel;
 using Sdl.Web.PublicContentApi.Exceptions;
 using Sdl.Web.PublicContentApi.ModelServicePlugin;
+using Sdl.Web.PublicContentApi.Utils;
 using Sdl.Web.Tridion.PCAClient;
 
 namespace Sdl.Web.Tridion.ModelService
@@ -29,11 +30,14 @@ namespace Sdl.Web.Tridion.ModelService
 
         protected PublicContentApi.PublicContentApi Client => PCAClientFactory.Instance.CreateClient();
 
+        protected ContentNamespace GetNamespace(ILocalization localization)
+            => CmUri.NamespaceIdentiferToId(localization.CmUriScheme);
+
         public EntityModelData GetEntityModelData(string entityId, ILocalization localization)
         {
             try
             {
-                var json = Client.GetEntityModelData(ContentNamespace.Sites, int.Parse(localization.Id),
+                var json = Client.GetEntityModelData(GetNamespace(localization), int.Parse(localization.Id),
                     int.Parse(entityId),
                     ContentType.MODEL, DataModelType.R2, DcpType.DEFAULT,
                     false, null);
@@ -49,7 +53,7 @@ namespace Sdl.Web.Tridion.ModelService
         {
             try
             {
-                var json = Client.GetPageModelData(ContentNamespace.Sites, int.Parse(localization.Id), pageId,
+                var json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id), pageId,
                     ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
                     false, null);
                 return LoadModel<PageModelData>(json);
@@ -64,7 +68,7 @@ namespace Sdl.Web.Tridion.ModelService
         {
             try
             {
-                var json = Client.GetPageModelData(ContentNamespace.Sites, int.Parse(localization.Id),
+                var json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
                     GetCanonicalUrlPath(urlPath),
                     ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
                     false, null);
@@ -80,7 +84,7 @@ namespace Sdl.Web.Tridion.ModelService
         {
             try
             {
-                var sitmapItems = Client.GetSitemapSubtree(ContentNamespace.Sites,
+                var sitmapItems = Client.GetSitemapSubtree(GetNamespace(localization),
                     int.Parse(localization.Id), parentSitemapItemId, descendantLevels, null);
                 if (sitmapItems != null && sitmapItems.Items != null)
                 {
@@ -99,7 +103,7 @@ namespace Sdl.Web.Tridion.ModelService
             try
             {
                 return Convert<TaxonomySitemapItem, TaxonomyNode>(
-                    Client.GetSitemap(ContentNamespace.Sites, int.Parse(localization.Id), 10, null));
+                    Client.GetSitemap(GetNamespace(localization), int.Parse(localization.Id), 10, null));
             }
             catch (PcaException)
             {
@@ -148,7 +152,7 @@ namespace Sdl.Web.Tridion.ModelService
             if (urlPath.LastIndexOf(".", StringComparison.Ordinal) > 0)
                 return urlPath;
 
-            return urlPath + Constants.DefaultExtension;
+            return urlPath + Constants.IndexPageUrlSuffix + Constants.DefaultExtension;
         }
     }
 }

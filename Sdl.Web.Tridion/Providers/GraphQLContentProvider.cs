@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
-using Sdl.Web.Tridion.Query;
+using Sdl.Web.Tridion.Providers.Query;
 using Sdl.Web.Tridion.Statics;
 using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.DynamicContent.Query;
@@ -22,6 +23,54 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class GraphQLContentProvider : IContentProvider, IRawDataProvider
     {
+        #region Cursor
+        internal class CursorMap : Dictionary<int, string>
+        {
+            private const string SessionKey = "dxa_cursors";
+          
+            private static CursorMap GetCursorMap(string id)
+            {              
+                var cursors = (Dictionary<string, CursorMap>)HttpContext.Current.Session[SessionKey] ?? new Dictionary<string, CursorMap>();
+                if (!cursors.ContainsKey(id))
+                {
+                    cursors.Add(id, new CursorMap());                  
+                }
+                HttpContext.Current.Session[SessionKey] = cursors;
+                return cursors[id];
+            }
+          
+            public static string GetCursor(string id, ref int start)
+            {
+                if (start == 0) return null;
+
+                CursorMap cursorMap = GetCursorMap(id);
+                
+                if(cursorMap.ContainsKey(start)) return cursorMap[start];
+
+                if (cursorMap.Count == 0)
+                {
+                    start = 0;
+                    return null;
+                }
+
+                int min = 0;
+                foreach (var x in cursorMap.Keys)
+                {
+                    if (x >= min && x < start)
+                        min = x;
+                }
+                start = min;
+                return start == 0 ? null : cursorMap[start];
+            }
+
+            public static void SetCursor(string id, int start, string cursor)
+            {
+                var cursorMap = GetCursorMap(id);
+                cursorMap[start] = cursor;
+            }
+        }
+        #endregion
+
         private readonly IModelService _modelService;
 
         public GraphQLContentProvider()
@@ -112,15 +161,20 @@ namespace Sdl.Web.Tridion.Mapping
         public virtual void PopulateDynamicList(DynamicList dynamicList, ILocalization localization)
         {
             using (new Tracer(dynamicList, localization))
-            {
+            {              
                 SimpleBrokerQuery simpleBrokerQuery = dynamicList.GetQuery(localization) as SimpleBrokerQuery;
                 if (simpleBrokerQuery == null)
                 {
                     throw new DxaException($"Unexpected result from {dynamicList.GetType().Name}.GetQuery: {dynamicList.GetQuery(localization)}");
                 }
-
-                BrokerQuery brokerQuery = new BrokerQuery(simpleBrokerQuery);
-                string[] componentUris = brokerQuery.ExecuteQuery().ToArray();
+            
+                int start = simpleBrokerQuery.Start;
+                simpleBrokerQuery.Cursor = CursorMap.GetCursor(dynamicList.Id, ref start);
+                simpleBrokerQuery.Start = start;
+                dynamicList.Start = start;
+            
+                var brokerQuery = new GraphQLQueryProvider();
+                string[] componentUris = brokerQuery.ExecuteQuery(simpleBrokerQuery).ToArray();
                 Log.Debug($"Broker Query returned {componentUris.Length} results. HasMore={brokerQuery.HasMore}");
 
                 if (componentUris.Length > 0)
@@ -133,6 +187,12 @@ namespace Sdl.Web.Tridion.Mapping
                 }
 
                 dynamicList.HasMore = brokerQuery.HasMore;
+
+                if (brokerQuery.HasMore)
+                {
+                    CursorMap.SetCursor(dynamicList.Id, simpleBrokerQuery.Start + simpleBrokerQuery.PageSize,
+                        brokerQuery.Cursor);
+                }
             }
         }
 

@@ -9,7 +9,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
-using Sdl.Web.Tridion.Query;
+using Sdl.Web.Tridion.Providers.Query;
 using Sdl.Web.Tridion.Statics;
 using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.DynamicContent.Query;
@@ -119,8 +119,8 @@ namespace Sdl.Web.Tridion.Mapping
                     throw new DxaException($"Unexpected result from {dynamicList.GetType().Name}.GetQuery: {dynamicList.GetQuery(localization)}");
                 }
 
-                BrokerQuery brokerQuery = new BrokerQuery(simpleBrokerQuery);
-                string[] componentUris = brokerQuery.ExecuteQuery().ToArray();
+                Common.Interfaces.IQueryProvider brokerQuery = new BrokerQueryProvider();
+                string[] componentUris = brokerQuery.ExecuteQuery(simpleBrokerQuery).ToArray();
                 Log.Debug($"Broker Query returned {componentUris.Length} results. HasMore={brokerQuery.HasMore}");
 
                 if (componentUris.Length > 0)
