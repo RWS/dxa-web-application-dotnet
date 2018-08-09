@@ -4,7 +4,6 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.PublicContentApi.ContentModel;
-using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.PCAClient;
 
 namespace Sdl.Web.Tridion
