@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
@@ -17,6 +16,7 @@ namespace Sdl.Web.Tridion.ModelService
     public class GraphQLModelServiceProvider : IModelServiceProvider
     {
         private readonly Binder _binder;
+        private const int DescendantDepth = 10;
 
         public GraphQLModelServiceProvider()
         {
@@ -104,15 +104,34 @@ namespace Sdl.Web.Tridion.ModelService
         {
             try
             {
-                var result = Convert(
-                    Client.GetSitemap(GetNamespace(localization), int.Parse(localization.Id), 10, null));
+                var client = Client;
+                var ns = GetNamespace(localization);
+                var publicationId = int.Parse(localization.Id);
+                var root = client.GetSitemap(ns, publicationId, DescendantDepth, null);
+                ExpandSitemap(client, ns, publicationId, root);
+                var result = Convert(root);
                 return result as TaxonomyNode;
             }
             catch (PcaException)
             {
                 return null;
             }
-        }      
+        }
+
+        protected void ExpandSitemap(IModelServicePluginApi client, ContentNamespace ns, int publicationId,
+          TaxonomySitemapItem root)
+        {
+            if (root?.HasChildNodes == null || !root.HasChildNodes.Value) return;
+            if (root.Items == null)
+            {
+                var subtree = client.GetSitemapSubtree(ContentNamespace.Sites, 8, root.Id, 10, false, null);
+                root.Items = subtree.Items;
+            }
+            foreach (var x in root.Items)
+            {
+                ExpandSitemap(client, ns, publicationId, x as TaxonomySitemapItem);
+            }
+        }
 
         protected SitemapItem Convert(ISitemapItem item)
         {
