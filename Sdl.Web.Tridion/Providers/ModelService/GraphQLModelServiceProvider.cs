@@ -84,11 +84,13 @@ namespace Sdl.Web.Tridion.ModelService
         {
             try
             {
+                if (descendantLevels == 0)
+                    return new SitemapItem[] {};
                 var sitmapItems = Client.GetSitemapSubtree(GetNamespace(localization),
-                    int.Parse(localization.Id), parentSitemapItemId, descendantLevels, null);
-                if (sitmapItems != null && sitmapItems.Items != null)
-                {
-                    return Convert<List<ISitemapItem>, SitemapItem[]>(sitmapItems.Items);
+                    int.Parse(localization.Id), parentSitemapItemId, descendantLevels, true, null);
+                if (sitmapItems?.Items != null)
+                {                    
+                    return Convert(sitmapItems).Items.ToArray();
                 }
             }
             catch (PcaException)
@@ -102,28 +104,58 @@ namespace Sdl.Web.Tridion.ModelService
         {
             try
             {
-                return Convert<TaxonomySitemapItem, TaxonomyNode>(
+                var result = Convert(
                     Client.GetSitemap(GetNamespace(localization), int.Parse(localization.Id), 10, null));
+                return result as TaxonomyNode;
             }
             catch (PcaException)
             {
                 return null;
             }
-        }
+        }      
 
-        protected TOut Convert<TIn, TOut>(TIn item)
+        protected SitemapItem Convert(ISitemapItem item)
         {
-            if (item == null)
-                return default(TOut);
+            if (item == null) return null;
 
-            JsonSerializerSettings settings = new JsonSerializerSettings()
+            SitemapItem result = null;
+
+            if (item is TaxonomySitemapItem)
             {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            };
-            return JsonConvert.DeserializeObject<TOut>(
-                JsonConvert.SerializeObject(item, settings), settings);
+                result = new TaxonomyNode();
+            }
+            else if (item is PageSitemapItem)
+            {
+                result = new SitemapItem();
+            }
+
+            result.Type = item.Type;
+            result.Title = item.Title;
+            result.Id = item.Id;
+            result.OriginalTitle = item.OriginalTitle;
+            result.Visible = item.Visible.Value;
+            if (item.PublishedDate != null)
+            {
+                result.PublishedDate = DateTime.ParseExact(item.PublishedDate, "MM/dd/yyyy HH:mm:ss", null);
+            }
+            result.Url = item.Url;
+
+            if (!(item is TaxonomySitemapItem)) return result;
+            TaxonomySitemapItem tsi = (TaxonomySitemapItem)item;
+            TaxonomyNode node = (TaxonomyNode)result;
+            node.Key = tsi.Key;
+            node.ClassifiedItemsCount = tsi.ClassifiedItemsCount ?? 0;
+            node.Description = tsi.Description;
+            node.HasChildNodes = tsi.HasChildNodes.HasValue && tsi.HasChildNodes.Value;
+            node.IsAbstract = tsi.Abstract.HasValue && tsi.Abstract.Value;
+            if (tsi.Items == null || tsi.Items.Count <= 0)
+                return result;
+            foreach (var x in tsi.Items)
+            {
+                result.Items.Add(Convert(x));
+            }
+
+            return result;
         }
 
         protected T LoadModel<T>(dynamic json)
