@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Web.Configuration;
 using Newtonsoft.Json;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
@@ -16,11 +17,16 @@ namespace Sdl.Web.Tridion.ModelService
     public class GraphQLModelServiceProvider : IModelServiceProvider
     {
         private readonly Binder _binder;
-        private const int DescendantDepth = 10;
+        private const int DefaultDescendantDepth = 10;
+        private readonly int _descendantDepth;
 
         public GraphQLModelServiceProvider()
         {
-             _binder = new Binder();
+            _binder = new Binder();
+            _descendantDepth = int.TryParse(
+                WebConfigurationManager.AppSettings["sitemap-default-descendant-depth"], out _descendantDepth)
+                ? _descendantDepth
+                : DefaultDescendantDepth;
         }
 
         public void AddDataModelExtension(IDataModelExtension extension)
@@ -107,7 +113,7 @@ namespace Sdl.Web.Tridion.ModelService
                 var client = Client;
                 var ns = GetNamespace(localization);
                 var publicationId = int.Parse(localization.Id);
-                var root = client.GetSitemap(ns, publicationId, DescendantDepth, null);
+                var root = client.GetSitemap(ns, publicationId, _descendantDepth, null);
                 ExpandSitemap(client, ns, publicationId, root);
                 var result = Convert(root);
                 return result as TaxonomyNode;
