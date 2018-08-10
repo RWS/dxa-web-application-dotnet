@@ -49,7 +49,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
             binaryPath = variant.Path;
             return client.HttpClient.Execute<byte[]>(new HttpClientRequest
             {
-                AbsoluteUri = variant.DownloadUrl.Replace("dxadevweb85.ams.dev", "localhost")
+                AbsoluteUri = variant.DownloadUrl
             }).ResponseData;
         }
     }
