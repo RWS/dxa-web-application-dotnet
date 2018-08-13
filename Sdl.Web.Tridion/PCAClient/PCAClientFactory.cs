@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Configuration;
-using Sdl.Web.Delivery.Core;
+using Sdl.Web.Common.Logging;
 using Sdl.Web.Delivery.DiscoveryService;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore;
 using Sdl.Web.HttpClient.Auth;
@@ -45,7 +45,7 @@ namespace Sdl.Web.Tridion.PCAClient
             }
 
             _oauth = new OAuth(DiscoveryServiceProvider.DefaultTokenProvider);
-            Logger.Debug($"PCAClient found at URL '{_endpoint}'.");
+            Log.Debug($"PCAClient found at URL '{_endpoint}'.");
         }
 
         /// <summary>
@@ -54,8 +54,8 @@ namespace Sdl.Web.Tridion.PCAClient
         /// <returns>Public Content Api Client</returns>
         public PublicContentApi.PublicContentApi CreateClient()
         {
-            var graphQL = new GraphQLClient.GraphQLClient(_endpoint, _oauth);
-            var client = new PublicContentApi.PublicContentApi(graphQL);
+            var graphQL = new GraphQLClient.GraphQLClient(_endpoint, new Logger(), _oauth);
+            var client = new PublicContentApi.PublicContentApi(graphQL, new Logger());
 
             // add context data to client
             IClaimStore claimStore = AmbientDataContext.CurrentClaimStore;
