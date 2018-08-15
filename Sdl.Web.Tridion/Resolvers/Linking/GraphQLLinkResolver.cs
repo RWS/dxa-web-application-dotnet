@@ -1,6 +1,7 @@
 ﻿using System;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.PublicContentApi;
 using Sdl.Web.PublicContentApi.Utils;
 using Sdl.Web.Tridion.PCAClient;
 
@@ -24,13 +25,22 @@ namespace Sdl.Web.Tridion.Linking
         {
             if (sourceUri == null) return null;
 
-            string url;
+            string url = null;
             if (sourceUri.IsCmUri())
             {
-                var cmUri = new CmUri(sourceUri);
                 var client = PCAClientFactory.Instance.CreateClient();
-                url = client.ResolveLink(cmUri, resolveToBinary);
-                if (url != null) url = new Uri(url).AbsolutePath;
+                var cmUri = new CmUri(sourceUri);
+                switch (cmUri.ItemType)
+                {
+                    case ItemType.Component:
+                        url = resolveToBinary ? 
+                            client.ResolveBinaryLink(cmUri.Namespace, cmUri.PublicationId, cmUri.ItemId, null) : 
+                            client.ResolveComponentLink(cmUri.Namespace, cmUri.PublicationId, cmUri.ItemId, null, null);
+                        break;
+                    case ItemType.Page:
+                        url = client.ResolvePageLink(cmUri.Namespace, cmUri.PublicationId, cmUri.ItemId);
+                        break;
+                }              
             }
             else
             {
