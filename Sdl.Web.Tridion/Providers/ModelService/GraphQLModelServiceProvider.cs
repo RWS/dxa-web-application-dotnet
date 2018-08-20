@@ -75,14 +75,19 @@ namespace Sdl.Web.Tridion.ModelService
             try
             {
                 var json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
-                    GetCanonicalUrlPath(urlPath),
+                    GetCanonicalUrlPath(urlPath, false),
                     ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
                     false, null);
                 return LoadModel<PageModelData>(json);
             }
             catch (PcaException)
             {
-                return null;
+                // try index page
+                var json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
+                  GetCanonicalUrlPath(urlPath, true),
+                  ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
+                  false, null);
+                return LoadModel<PageModelData>(json);
             }
         }
 
@@ -91,19 +96,19 @@ namespace Sdl.Web.Tridion.ModelService
             try
             {
                 if (descendantLevels == 0)
-                    return new SitemapItem[] {};
+                    return new SitemapItem[] { };
                 var sitmapItems = Client.GetSitemapSubtree(GetNamespace(localization),
                     int.Parse(localization.Id), parentSitemapItemId, descendantLevels, true, null);
                 if (sitmapItems?.Items != null)
-                {                    
+                {
                     return Convert(sitmapItems).Items.ToArray();
                 }
             }
             catch (PcaException)
             {
-                
+
             }
-            return new SitemapItem[] {};
+            return new SitemapItem[] { };
         }
 
         public TaxonomyNode GetSitemapItem(ILocalization localization)
@@ -194,12 +199,12 @@ namespace Sdl.Web.Tridion.ModelService
             };
             return JsonConvert.DeserializeObject<T>(json.ToString(), settings);
         }
-    
-        private static string GetCanonicalUrlPath(string urlPath)
+
+        private static string GetCanonicalUrlPath(string urlPath, bool tryIndexPage)
         {
             if (string.IsNullOrEmpty(urlPath) || urlPath.Equals("/"))
                 return Constants.IndexPageUrlSuffix + Constants.DefaultExtension;
-          
+
             if (urlPath.EndsWith("/"))
                 return Constants.DefaultExtensionLessPageName + Constants.DefaultExtension;
 
@@ -209,7 +214,9 @@ namespace Sdl.Web.Tridion.ModelService
             if (urlPath.LastIndexOf(".", StringComparison.Ordinal) > 0)
                 return urlPath;
 
-            return urlPath + Constants.IndexPageUrlSuffix + Constants.DefaultExtension;
+            return tryIndexPage
+                ? urlPath + "/" + Constants.DefaultExtensionLessPageName + Constants.DefaultExtension
+                : urlPath + Constants.DefaultExtension;
         }
     }
 }

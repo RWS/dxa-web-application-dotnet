@@ -25,10 +25,10 @@ namespace Sdl.Web.Tridion.PCAClient
             new Lazy<PCAClientFactory>(() => new PCAClientFactory());
 
         public static PCAClientFactory Instance => lazy.Value;
-
+        
         private PCAClientFactory()
         {
-            string uri = WebConfigurationManager.AppSettings["pcaclient-service-uri"];
+            string uri = WebConfigurationManager.AppSettings["pca-service-uri"];
             if (string.IsNullOrEmpty(uri))
             {
                 IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
