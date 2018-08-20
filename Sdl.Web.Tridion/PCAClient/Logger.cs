@@ -4,6 +4,10 @@ using Sdl.Web.Core;
 
 namespace Sdl.Web.Tridion.PCAClient
 {
+    /// <summary>
+    /// Log implementation used by the PCA client just forwards on logging to be handled by the DXA
+    /// log implementation that can be switched through Unity if required.
+    /// </summary>
     public class Logger : ILogger
     {
         protected string Reformat(string msg)

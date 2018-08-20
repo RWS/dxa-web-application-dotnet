@@ -114,7 +114,11 @@ namespace Sdl.Web.Tridion.Statics
                 }
 
                 string path;
-                WriteBinaryToFile(provider.GetBinary(localization, urlPath, out path), localFilePath, dimensions);
+                var binary = provider.GetBinary(localization, urlPath, out path);
+                if (binary != null)
+                {
+                    WriteBinaryToFile(binary, localFilePath, dimensions);
+                }
                 return localFilePath;
             }
         }

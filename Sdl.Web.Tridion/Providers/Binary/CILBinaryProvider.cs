@@ -6,6 +6,9 @@ using Tridion.ContentDelivery.Meta;
 
 namespace Sdl.Web.Tridion.Providers.Binary
 {
+    /// <summary>
+    /// Binary Provider
+    /// </summary>
     public class CILBinaryProvider : IBinaryProvider
     {
         public DateTime GetBinaryLastPublishedDate(ILocalization localization, string urlPath)

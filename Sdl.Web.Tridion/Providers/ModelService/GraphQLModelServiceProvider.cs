@@ -72,18 +72,33 @@ namespace Sdl.Web.Tridion.ModelService
 
         public PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes)
         {
+            dynamic json;
             try
             {
-                var json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
-                    GetCanonicalUrlPath(urlPath),
+                // TODO: This could be fixed by sending two graphQL queries in a single go. Need to
+                // wait for PCA client fix for this however
+                json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
+                    GetCanonicalUrlPath(urlPath, false),
                     ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
                     false, null);
-                return LoadModel<PageModelData>(json);
             }
             catch (PcaException)
             {
-                return null;
+                try
+                {
+                    // try index page
+                    json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
+                        GetCanonicalUrlPath(urlPath, true),
+                        ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
+                        false, null);
+                }
+                catch (PcaException)
+                {
+                    // no page found here, client will handle the details
+                    return null;
+                }
             }
+            return LoadModel<PageModelData>(json);
         }
 
         public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, ILocalization localization, bool includeAncestors, int descendantLevels)
@@ -91,19 +106,19 @@ namespace Sdl.Web.Tridion.ModelService
             try
             {
                 if (descendantLevels == 0)
-                    return new SitemapItem[] {};
+                    return new SitemapItem[] { };
                 var sitmapItems = Client.GetSitemapSubtree(GetNamespace(localization),
                     int.Parse(localization.Id), parentSitemapItemId, descendantLevels, true, null);
                 if (sitmapItems?.Items != null)
-                {                    
+                {
                     return Convert(sitmapItems).Items.ToArray();
                 }
             }
             catch (PcaException)
             {
-                
+
             }
-            return new SitemapItem[] {};
+            return new SitemapItem[] { };
         }
 
         public TaxonomyNode GetSitemapItem(ILocalization localization)
@@ -185,6 +200,7 @@ namespace Sdl.Web.Tridion.ModelService
 
         protected T LoadModel<T>(dynamic json)
         {
+            if (json == null) return default(T);
             JsonSerializerSettings settings = new JsonSerializerSettings()
             {
                 TypeNameHandling = TypeNameHandling.Auto,
@@ -194,12 +210,12 @@ namespace Sdl.Web.Tridion.ModelService
             };
             return JsonConvert.DeserializeObject<T>(json.ToString(), settings);
         }
-    
-        private static string GetCanonicalUrlPath(string urlPath)
+
+        private static string GetCanonicalUrlPath(string urlPath, bool tryIndexPage)
         {
             if (string.IsNullOrEmpty(urlPath) || urlPath.Equals("/"))
                 return Constants.IndexPageUrlSuffix + Constants.DefaultExtension;
-          
+
             if (urlPath.EndsWith("/"))
                 return Constants.DefaultExtensionLessPageName + Constants.DefaultExtension;
 
@@ -209,7 +225,9 @@ namespace Sdl.Web.Tridion.ModelService
             if (urlPath.LastIndexOf(".", StringComparison.Ordinal) > 0)
                 return urlPath;
 
-            return urlPath + Constants.IndexPageUrlSuffix + Constants.DefaultExtension;
+            return tryIndexPage
+                ? urlPath + "/" + Constants.DefaultExtensionLessPageName + Constants.DefaultExtension
+                : urlPath + Constants.DefaultExtension;
         }
     }
 }
