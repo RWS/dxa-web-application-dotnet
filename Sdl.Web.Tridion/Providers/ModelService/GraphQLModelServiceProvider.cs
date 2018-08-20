@@ -72,23 +72,33 @@ namespace Sdl.Web.Tridion.ModelService
 
         public PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes)
         {
+            dynamic json;
             try
             {
-                var json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
+                // TODO: This could be fixed by sending two graphQL queries in a single go. Need to
+                // wait for PCA client fix for this however
+                json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
                     GetCanonicalUrlPath(urlPath, false),
                     ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
                     false, null);
-                return LoadModel<PageModelData>(json);
             }
             catch (PcaException)
             {
-                // try index page
-                var json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
-                  GetCanonicalUrlPath(urlPath, true),
-                  ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                  false, null);
-                return LoadModel<PageModelData>(json);
+                try
+                {
+                    // try index page
+                    json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
+                        GetCanonicalUrlPath(urlPath, true),
+                        ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
+                        false, null);
+                }
+                catch (PcaException)
+                {
+                    // no page found here, client will handle the details
+                    return null;
+                }
             }
+            return LoadModel<PageModelData>(json);
         }
 
         public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, ILocalization localization, bool includeAncestors, int descendantLevels)
@@ -190,6 +200,7 @@ namespace Sdl.Web.Tridion.ModelService
 
         protected T LoadModel<T>(dynamic json)
         {
+            if (json == null) return default(T);
             JsonSerializerSettings settings = new JsonSerializerSettings()
             {
                 TypeNameHandling = TypeNameHandling.Auto,
