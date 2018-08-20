@@ -5,8 +5,8 @@ namespace Sdl.Web.Common.Extensions
 {
     public static class StringExtensions
     {
-        // Regex to identify a valid cm identifier, currently only working with tcm namespace
-        private static readonly Regex CmUriRegEx = new Regex(@"^tcm:\d+-\d+(-\d+){0,2}$", RegexOptions.Compiled);
+        // Regex to identify a valid cm identifier
+        private static readonly Regex CmUriRegEx = new Regex(@"^(tcm|ish):\d+-\d+(-\d+){0,2}$", RegexOptions.Compiled);
 
         /// <summary>
         /// Remove spaces from string.

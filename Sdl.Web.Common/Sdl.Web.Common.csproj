@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -93,6 +93,7 @@
     <Compile Include="Extensions\LinkExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Interfaces\IBinaryProvider.cs" />
     <Compile Include="Interfaces\ICacheProvider.cs" />
     <Compile Include="Interfaces\IConditionalEntityEvaluator.cs" />
     <Compile Include="Interfaces\IContextClaimsProvider.cs" />
@@ -102,9 +103,11 @@
     <Compile Include="Interfaces\ILocalizationMappingsManager.cs" />
     <Compile Include="Interfaces\ILocalizationResolver.cs" />
     <Compile Include="Interfaces\ILocalizationResources.cs" />
+    <Compile Include="Interfaces\IModelService.cs" />
     <Compile Include="Interfaces\IModelServiceProvider.cs" />
     <Compile Include="Interfaces\INavigationProvider.cs" />
     <Compile Include="Interfaces\IOnDemandNavigationProvider.cs" />
+    <Compile Include="Interfaces\IQueryProvider.cs" />
     <Compile Include="Interfaces\IRichTextProcessor.cs" />
     <Compile Include="Interfaces\IUnknownLocalizationHandler.cs" />
     <Compile Include="Logging\Log4NetLogger.cs" />

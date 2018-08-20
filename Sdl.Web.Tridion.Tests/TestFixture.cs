@@ -87,9 +87,8 @@ namespace Sdl.Web.Tridion.Tests
         };
 
         static TestFixture()
-        {
-            // TODO: Retrieve Localization Info from CM (?)
-
+        {           
+            /* dxadevwev85.ams.dev
             _parentLocalization = new Localization
             {
                 Id = "1065",
@@ -111,6 +110,32 @@ namespace Sdl.Web.Tridion.Tests
             _legacyChildLocalization = new Localization
             {
                 Id = "1083",
+                Path = "/autotest-child-legacy"
+            };
+            */
+
+            // http://cm.dev.dxa.sdldev.net
+            _parentLocalization = new Localization
+            {
+                Id = "6",
+                Path = "/autotest-parent"
+            };
+
+            _childLocalization = new Localization
+            {
+                Id = "7",
+                Path = "/autotest-child"
+            };
+
+            _legacyParentLocalization = new Localization
+            {
+                Id = "8",
+                Path = "/autotest-parent-legacy"
+            };
+
+            _legacyChildLocalization = new Localization
+            {
+                Id = "9",
                 Path = "/autotest-child-legacy"
             };
 

@@ -9,8 +9,7 @@ using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Tridion.ContentDelivery.DynamicContent;
-using Tridion.ContentDelivery.Meta;
+using Sdl.Web.Tridion.Providers.Binary;
 using Image = System.Drawing.Image; // TODO: Shouldn't use System.Drawing namespace in a web application.
 
 namespace Sdl.Web.Tridion.Statics
@@ -45,44 +44,9 @@ namespace Sdl.Web.Tridion.Statics
         /// </summary>
         internal static BinaryFileManager Instance { get; } = new BinaryFileManager();
 
-        private static int GetPublicationId(string publicationUri)
-            => Convert.ToInt32(publicationUri.Split('-')[1]); // TODO: what about CM URI scheme?
-
-        private static BinaryMeta GetBinaryMeta(int binaryId, ILocalization localization)
-        {
-            BinaryMetaFactory binaryMetaFactory = new BinaryMetaFactory();
-            return binaryMetaFactory.GetMeta($"{localization.CmUriScheme}:{localization.Id}-{binaryId}");
-        }
-
-        private static BinaryMeta GetBinaryMeta(string urlPath, string publicationUri)
-        {
-            BinaryMetaFactory binaryMetaFactory = new BinaryMetaFactory();
-            return binaryMetaFactory.GetMetaByUrl(GetPublicationId(publicationUri), urlPath);
-        }
-
-        private static DateTime GetBinaryLastPublishDate(string urlPath, string publicationUri)
-        {
-            BinaryMeta binaryMeta = GetBinaryMeta(urlPath, publicationUri);
-            if (binaryMeta == null || !binaryMeta.IsComponent)
-            {
-                return DateTime.MinValue;
-            }
-            ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(publicationUri);
-            IComponentMeta componentMeta = componentMetaFactory.GetMeta(binaryMeta.Id);
-            return componentMeta.LastPublicationDate;
-        }
-
-        private static DateTime GetBinaryLastPublishDate(int binaryId, ILocalization localization)
-        {
-            BinaryMeta binaryMeta = GetBinaryMeta(binaryId, localization);
-            if (binaryMeta == null || !binaryMeta.IsComponent)
-            {
-                return DateTime.MinValue;
-            }
-            ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(int.Parse(localization.Id));
-            IComponentMeta componentMeta = componentMetaFactory.GetMeta(binaryMeta.Id);
-            return componentMeta.LastPublicationDate;
-        }
+        private static IBinaryProvider Provider 
+            // Default to CIL binary provider if no implementation specified
+            => SiteConfiguration.BinaryProvider ?? new CILBinaryProvider();
 
         private static bool IsCached(Func<DateTime> getLastPublishedDate, string localFilePath,
             ILocalization localization)
@@ -124,6 +88,8 @@ namespace Sdl.Web.Tridion.Statics
         /// <returns>The path to the local file.</returns>
         internal string GetCachedFile(string urlPath, ILocalization localization)
         {
+            IBinaryProvider provider = Provider;
+
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string localFilePath = $"{baseDir}/{urlPath}";
             if (File.Exists(localFilePath))
@@ -138,26 +104,17 @@ namespace Sdl.Web.Tridion.Statics
             using (new Tracer(urlPath, localization, localFilePath))
             {
                 Dimensions dimensions;
-                urlPath = StripDimensions(urlPath, out dimensions);
-                string publicationUri = localization.GetCmUri();                
+                urlPath = StripDimensions(urlPath, out dimensions);                    
                 if (!localization.IsXpmEnabled && File.Exists(localFilePath))
                 {
-                    if (IsCached(() => GetBinaryLastPublishDate(urlPath, publicationUri), localFilePath, localization))
+                    if (IsCached(() => provider.GetBinaryLastPublishedDate(localization, urlPath), localFilePath, localization))
                     {
                         return localFilePath;
                     }                 
                 }
 
-                // Binary does not exist or cached binary is out-of-date
-                BinaryMeta binaryMeta = GetBinaryMeta(urlPath, publicationUri);
-                if (binaryMeta == null)
-                {                   
-                    throw new DxaItemNotFoundException(urlPath, localization.Id);
-                }
-                BinaryFactory binaryFactory = new BinaryFactory();
-                BinaryData binaryData = binaryFactory.GetBinary(GetPublicationId(publicationUri), binaryMeta.Id, binaryMeta.VariantId);
-
-                WriteBinaryToFile(binaryData.Bytes, localFilePath, dimensions);
+                string path;
+                WriteBinaryToFile(provider.GetBinary(localization, urlPath, out path), localFilePath, dimensions);
                 return localFilePath;
             }
         }
@@ -170,12 +127,12 @@ namespace Sdl.Web.Tridion.Statics
         /// <returns>The path to the local file.</returns>
         internal string GetCachedFile(int binaryId, ILocalization localization)
         {
+            IBinaryProvider provider = Provider;
+
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string localFilePath = $"{baseDir}/{localization.BinaryCacheFolder}";
             using (new Tracer(binaryId, localization, localFilePath))
             {
-                string publicationUri = localization.GetCmUri();
-
                 if (!localization.IsXpmEnabled)
                 {
                     try
@@ -185,7 +142,7 @@ namespace Sdl.Web.Tridion.Statics
                         if (files.Length > 0)
                         {
                             localFilePath = files[0];
-                            if (IsCached(() => GetBinaryLastPublishDate(binaryId, localization), localFilePath,
+                            if (IsCached(() => provider.GetBinaryLastPublishedDate(localization, binaryId), localFilePath,
                                 localization))
                             {
                                 return localFilePath;
@@ -198,17 +155,11 @@ namespace Sdl.Web.Tridion.Statics
                     }
                 }
 
-                // Binary does not exist or cached binary is out-of-date
-                BinaryMeta binaryMeta = GetBinaryMeta(binaryId, localization);
-                if (binaryMeta == null)
-                {
-                    throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
-                }
-                BinaryFactory binaryFactory = new BinaryFactory();
-                BinaryData binaryData = binaryFactory.GetBinary(GetPublicationId(publicationUri), binaryMeta.Id, binaryMeta.VariantId);
-                string ext = Path.GetExtension(binaryMeta.Path) ?? "";
+                string path;
+                byte[] data = provider.GetBinary(localization, binaryId, out path);
+                string ext = Path.GetExtension(path) ?? "";
                 localFilePath = $"{localFilePath}/{localization.Id}-{binaryId}{ext}";
-                WriteBinaryToFile(binaryData.Bytes, localFilePath, null);
+                WriteBinaryToFile(data, localFilePath, null);
                 return localFilePath;
             }
         }
