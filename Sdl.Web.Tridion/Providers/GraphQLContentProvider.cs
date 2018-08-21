@@ -174,15 +174,19 @@ namespace Sdl.Web.Tridion.Mapping
                 dynamicList.Start = start;
             
                 var brokerQuery = new GraphQLQueryProvider();
-                string[] componentUris = brokerQuery.ExecuteQuery(simpleBrokerQuery).ToArray();
-                Log.Debug($"Broker Query returned {componentUris.Length} results. HasMore={brokerQuery.HasMore}");
 
-                if (componentUris.Length > 0)
+                var components = brokerQuery.ExecuteQueryItems(simpleBrokerQuery).ToList();
+                Log.Debug($"Broker Query returned {components.Count} results. HasMore={brokerQuery.HasMore}");
+
+                if (components.Count > 0)
                 {
                     Type resultType = dynamicList.ResultType;
-                    ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(localization.GetCmUri());
-                    dynamicList.QueryResults = componentUris
-                        .Select(c => ModelBuilderPipeline.CreateEntityModel(CreateEntityModelData(componentMetaFactory.GetMeta(c)), resultType, localization))
+                    dynamicList.QueryResults = components
+                        .Select(
+                            c =>
+                                ModelBuilderPipeline.CreateEntityModel(
+                                    CreateEntityModelData((PublicContentApi.ContentModel.Component) c), resultType,
+                                    localization))
                         .ToList();
                 }
 
@@ -196,29 +200,30 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        protected virtual EntityModelData CreateEntityModelData(IComponentMeta componentMeta)
+        protected virtual EntityModelData CreateEntityModelData(PublicContentApi.ContentModel.Component component)
         {
             ContentModelData standardMeta = new ContentModelData();
-            foreach (DictionaryEntry entry in componentMeta.CustomMeta.NameValues)
+            foreach (var meta in component.CustomMetas.Edges)
             {
-                standardMeta.Add(entry.Key.ToString(), ((NameValuePair)entry.Value).Value);
+                standardMeta.Add(meta.Node.Key, meta.Node.Value);
             }
 
             // The semantic mapping requires that some metadata fields exist. This may not be the case so we map some component meta properties onto them
             // if they don't exist.
             if (!standardMeta.ContainsKey("dateCreated"))
             {
-                standardMeta.Add("dateCreated", componentMeta.LastPublicationDate);
+                standardMeta.Add("dateCreated", component.LastPublishDate);
             }
+            const string dateTimeFormat = "MM/dd/yyyy HH:mm:ss";
+            standardMeta["dateCreated"] = DateTime.ParseExact((string)standardMeta["dateCreated"], dateTimeFormat, null);
             if (!standardMeta.ContainsKey("name"))
             {
-                standardMeta.Add("name", componentMeta.Title);
-            }
-
+                standardMeta.Add("name", component.Title);
+            }            
             return new EntityModelData
-            {
-                Id = componentMeta.Id.ToString(),
-                SchemaId = componentMeta.SchemaId.ToString(),
+            {               
+                Id = component.ItemId.ToString(),
+                SchemaId = component.SchemaId.ToString(),
                 Metadata = new ContentModelData { { "standardMeta", standardMeta } }
             };
         }
