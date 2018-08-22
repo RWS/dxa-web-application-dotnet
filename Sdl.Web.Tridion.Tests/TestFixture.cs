@@ -76,10 +76,10 @@ namespace Sdl.Web.Tridion.Tests
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
             { typeof(ICacheProvider), new DefaultCacheProvider() },
-            { typeof(IModelServiceProvider), new DefaultModelServiceProvider() },
-            { typeof(IContentProvider), new DefaultContentProvider() },
+            { typeof(IModelServiceProvider), new GraphQLModelServiceProvider() },
+            { typeof(IContentProvider), new GraphQLContentProvider() },
             { typeof(INavigationProvider), new StaticNavigationProvider() },
-            { typeof(ILinkResolver), new DefaultLinkResolver() },
+            { typeof(ILinkResolver), new GraphQLLinkResolver() },
             { typeof(IMediaHelper), new MockMediaHelper() },
             { typeof(ILocalizationResolver), new TestFixture() },
             { typeof(IContextClaimsProvider), new TestContextClaimsProvider() },
@@ -88,7 +88,7 @@ namespace Sdl.Web.Tridion.Tests
 
         static TestFixture()
         {           
-            /* dxadevwev85.ams.dev
+            /* dxadevwev85.ams.dev*/
             _parentLocalization = new Localization
             {
                 Id = "1065",
@@ -112,9 +112,10 @@ namespace Sdl.Web.Tridion.Tests
                 Id = "1083",
                 Path = "/autotest-child-legacy"
             };
-            */
+            
 
             // http://cm.dev.dxa.sdldev.net
+            /*
             _parentLocalization = new Localization
             {
                 Id = "6",
@@ -138,7 +139,7 @@ namespace Sdl.Web.Tridion.Tests
                 Id = "9",
                 Path = "/autotest-child-legacy"
             };
-
+            */
             _testLocalizations = new[] { _parentLocalization, _childLocalization, _legacyParentLocalization, _legacyChildLocalization };
 
             TestRegistration.RegisterViewModels();
@@ -188,7 +189,7 @@ namespace Sdl.Web.Tridion.Tests
             object modelServiceProvider;
             if (_testProviders.TryGetValue(typeof(IModelServiceProvider), out modelServiceProvider))
             {
-                ((DefaultModelServiceProvider)modelServiceProvider).AddDataModelExtension(new TestDataModelExtensions());
+                ((IModelServiceProvider)modelServiceProvider).AddDataModelExtension(new TestDataModelExtensions());
             }
 
             SiteConfiguration.InitializeProviders(interfaceType =>

@@ -29,7 +29,9 @@ namespace Sdl.Web.Tridion.Mapping
             private const string SessionKey = "dxa_cursors";
           
             private static CursorMap GetCursorMap(string id)
-            {              
+            {            
+                if(HttpContext.Current == null)  
+                    return new CursorMap();
                 var cursors = (Dictionary<string, CursorMap>)HttpContext.Current.Session[SessionKey] ?? new Dictionary<string, CursorMap>();
                 if (!cursors.ContainsKey(id))
                 {

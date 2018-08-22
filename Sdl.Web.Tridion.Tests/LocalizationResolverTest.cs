@@ -8,11 +8,11 @@ using Sdl.Web.Common.Interfaces;
 namespace Sdl.Web.Tridion.Tests
 {
     [TestClass]
-    public class CdApiLocalizationResolverTest : TestClass
+    public class LocalizationResolverTest : TestClass
     {
         private const string TestBaseUrl = "http://localhost:8882";
 
-        private static readonly ILocalizationResolver _testLocalizationResolver = new CdApiLocalizationResolver();
+        private static readonly ILocalizationResolver _testLocalizationResolver = new GraphQLLocalizationResolver();
 
         [ClassInitialize]
         public static void Initialize(TestContext testContext)

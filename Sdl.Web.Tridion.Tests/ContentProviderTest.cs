@@ -629,6 +629,7 @@ namespace Sdl.Web.Tridion.Tests
 
             Assert.IsNotNull(pageModel, "pageModel");
             ContentList<Teaser> testContentList = pageModel.Regions["Main"].Entities[0] as ContentList<Teaser>;
+            testContentList.PageSize = -1;
             Assert.IsNotNull(testContentList, "testContentList");
             Assert.IsNotNull(testContentList.ItemListElements, "testContentList.ItemListElements");
             Assert.AreEqual(0, testContentList.ItemListElements.Count, "testContentList.ItemListElements is not empty before PopulateDynamicList");
