@@ -258,10 +258,19 @@ namespace Sdl.Web.Tridion.Mapping
                 string fieldXPath = null;
                 foreach (SemanticProperty semanticProperty in semanticProperties)
                 {
-                    
+                    // To do : we need to make this more generic to collect all fields of a given type (e.g. [SemtanticProperty("_all", typeof(Keyword)])
                     if (semanticProperty.PropertyName == SemanticProperty.AllFields)
                     {
-                        modelProperty.SetValue(viewModel, GetAllFieldsAsDictionary(mappingData));
+                        if (typeof(IDictionary<string, string>).IsAssignableFrom(modelProperty.PropertyType))
+                        {
+                            modelProperty.SetValue(viewModel, GetAllFieldsAsDictionary<string>(mappingData));
+                        }
+
+                        else if (typeof(IDictionary<string, KeywordModel>).IsAssignableFrom(modelProperty.PropertyType))
+                        {
+                            modelProperty.SetValue(viewModel, GetAllFieldsAsDictionary<KeywordModel>(mappingData) as IDictionary<string, KeywordModel>);
+                        }
+
                         isFieldMapped = true;
                         break;
                     }
@@ -343,7 +352,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        protected virtual bool IsFieldFromMainSchema(Validation validation, FieldSemantics fieldSemantics) 
+        protected virtual bool IsFieldFromMainSchema(Validation validation, FieldSemantics fieldSemantics)
             => validation.MainSchema?.FindFieldBySemantics(fieldSemantics) != null;
 
         protected virtual SemanticSchemaField ValidateField(Validation validation, FieldSemantics fieldSemantics)
@@ -394,7 +403,7 @@ namespace Sdl.Web.Tridion.Mapping
 
             return fieldValue;
         }
-       
+
         protected virtual object MapField(object fieldValues, Type modelPropertyType, SemanticSchemaField semanticSchemaField, MappingData mappingData)
         {
             Type sourceType = fieldValues.GetType();
@@ -411,7 +420,7 @@ namespace Sdl.Web.Tridion.Mapping
             Type bareTargetType = modelPropertyType.GetUnderlyingNullableType() ?? targetType;
 
             IList mappedValues = targetType.CreateGenericList();
-            
+
             if (typeof (EntityModel).IsAssignableFrom(targetType) && sourceType != typeof (EntityModelData) &&
                 (sourceType == typeof (string) && string.IsNullOrEmpty((string) fieldValues)))
             {
@@ -694,9 +703,9 @@ namespace Sdl.Web.Tridion.Mapping
             return CreateViewModel(embeddedMappingData);
         }
 
-        protected virtual IDictionary<string, string> GetAllFieldsAsDictionary(MappingData mappingData)
+        protected virtual IDictionary<string, T> GetAllFieldsAsDictionary<T>(MappingData mappingData)
         {
-            IDictionary<string, string> result = new Dictionary<string, string>();
+            IDictionary<string, T> result = new Dictionary<string, T>();
             if (mappingData.Fields != null)
             {
                 foreach (KeyValuePair<string, object> field in mappingData.Fields)
@@ -705,20 +714,31 @@ namespace Sdl.Web.Tridion.Mapping
                     {
                         throw new NotImplementedException("'settings' field handling"); // TODO
                     }
-                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData,  resolveComponentLinks: false).FirstOrDefault();
+
+                    if (typeof(T) == typeof(KeywordModel)) 
+                    {
+                        if (field.Value is KeywordModelData)
+                        {
+                            result[field.Key] = GetFieldValues<T>(field.Value, mappingData, resolveComponentLinks: false).FirstOrDefault();
+                        }
+                    }
+                    else
+                    {
+                        result[field.Key] = GetFieldValues<T>(field.Value, mappingData, resolveComponentLinks: false).FirstOrDefault();
+                    }
                 }
             }
-            if (mappingData.MetadataFields != null)
+            if (mappingData.MetadataFields != null && typeof(T) == typeof(string))
             {
                 foreach (KeyValuePair<string, object> field in mappingData.MetadataFields)
                 {
-                    result[field.Key] = GetFieldValuesAsStrings(field.Value, mappingData, resolveComponentLinks: false).FirstOrDefault();
+                    result[field.Key] = GetFieldValues<T>(field.Value, mappingData, resolveComponentLinks: false).FirstOrDefault();
                 }
             }
             return result;
         }
 
-        protected virtual IEnumerable<string> GetFieldValuesAsStrings(object fieldValues, MappingData mappingData, bool resolveComponentLinks)
+        protected virtual IEnumerable<T> GetFieldValues<T>(object fieldValues, MappingData mappingData, bool resolveComponentLinks)
         {
             if (!resolveComponentLinks)
             {
@@ -726,16 +746,16 @@ namespace Sdl.Web.Tridion.Mapping
                 ILocalization localization = mappingData.Localization;
                 if (fieldValues is EntityModelData)
                 {
-                    return new[] { localization.GetCmUri(((EntityModelData) fieldValues).Id) };
+                    return (new[] { localization.GetCmUri(((EntityModelData) fieldValues).Id) }) as IEnumerable<T>;
                 }
                 if (fieldValues is EntityModelData[])
                 {
-                    return ((EntityModelData[]) fieldValues).Select(emd => localization.GetCmUri(emd.Id));
+                    return ((EntityModelData[]) fieldValues).Select(emd => localization.GetCmUri(emd.Id)) as IEnumerable<T>;
                 }
             }
 
-            // Use standard model mapping to map the field to a list of strings.
-            return (IEnumerable<string>) MapField(fieldValues, typeof(List<string>), null, mappingData);
+            // Use standard model mapping to map the field to a list of T.
+            return MapField(fieldValues, typeof(List<T>), null, mappingData) as IEnumerable<T>;
         }
 
         protected virtual MvcData CreateMvcData(DataModel.MvcData data, string defaultControllerName)

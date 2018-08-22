@@ -89,7 +89,7 @@ namespace Sdl.Web.Mvc.Statics
                 // Prevent direct access to BinaryData folder
                 if (url.StartsWith("/" + SiteConfiguration.StaticsFolder + "/"))
                 {
-                    SendNotFoundResponse(string.Format("Attempt to directly access the static content cache through URL '{0}'", url), response);
+                    SendNotFoundResponse($"Attempt to directly access the static content cache through URL '{url}'", response);
                 }
 
                 // Rewrite versioned URLs
