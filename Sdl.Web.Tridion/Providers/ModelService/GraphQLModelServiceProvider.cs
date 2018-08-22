@@ -6,9 +6,9 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.DataModel;
+using Sdl.Web.PublicContentApi;
 using Sdl.Web.PublicContentApi.ContentModel;
 using Sdl.Web.PublicContentApi.Exceptions;
-using Sdl.Web.PublicContentApi.ModelServicePlugin;
 using Sdl.Web.PublicContentApi.Utils;
 using Sdl.Web.Tridion.PCAClient;
 
@@ -44,7 +44,7 @@ namespace Sdl.Web.Tridion.ModelService
             try
             {
                 var json = Client.GetEntityModelData(GetNamespace(localization), int.Parse(localization.Id),
-                    int.Parse(entityId),
+                    int.Parse(entityId), 0, // todo: fix this
                     ContentType.MODEL, DataModelType.R2, DcpType.DEFAULT,
                     false, null);
                 return LoadModel<EntityModelData>(json);
@@ -139,7 +139,7 @@ namespace Sdl.Web.Tridion.ModelService
             }
         }
 
-        protected void ExpandSitemap(IModelServicePluginApi client, ContentNamespace ns, int publicationId,
+        protected void ExpandSitemap(IPublicContentApi client, ContentNamespace ns, int publicationId,
           TaxonomySitemapItem root)
         {
             if (root?.HasChildNodes == null || !root.HasChildNodes.Value) return;
