@@ -22,7 +22,7 @@ namespace Sdl.Web.Mvc.Context
     {
         private const string DeviceFamiliesFileName = "device-families.xml";
 
-        private readonly IDictionary<string, object> _claims;
+        private readonly IDictionary<string, object> _claims = new Dictionary<string, object>();
         private readonly IDictionary<Type, ContextClaims> _stronglyTypedClaims = new Dictionary<Type, ContextClaims>();
         private string _deviceFamily;
         private static XDocument _deviceFamiliesDoc;
@@ -37,6 +37,7 @@ namespace Sdl.Web.Mvc.Context
             {
                 // For now, we get all context claims (for all aspects) in one go:
                 IContextClaimsProvider contextClaimsProvider = SiteConfiguration.ContextClaimsProvider;
+                if (contextClaimsProvider == null) return;
                 _claims = contextClaimsProvider.GetContextClaims(null, WebRequestContext.Localization);
 
                 if (Log.Logger.IsDebugEnabled)
@@ -143,31 +144,27 @@ namespace Sdl.Web.Mvc.Context
         {
             get
             {
-                if (_deviceFamily != null)
+                if (_deviceFamily != null) return _deviceFamily;
+                var provider = SiteConfiguration.ContextClaimsProvider;
+                if (provider == null) return _deviceFamily;
+                _deviceFamily = provider.GetDeviceFamily();
+                if (_deviceFamily != null) return _deviceFamily;
+                if (_deviceFamiliesDoc == null)
                 {
-                    return _deviceFamily;
+                    Log.Warn("Device Families file '{0}' was not loaded properly; using defaults.", DeviceFamiliesFileName);
+
+                    // Defaults
+                    DeviceClaims device = GetClaims<DeviceClaims>();
+                    if (!device.IsMobile && !device.IsTablet) _deviceFamily = "desktop";
+                    if (device.IsTablet) _deviceFamily = "tablet";
+                    if (device.IsMobile && !device.IsTablet)
+                    {
+                        _deviceFamily = device.DisplayWidth > 319 ? "smartphone" : "featurephone";
+                    }
                 }
-
-                _deviceFamily = SiteConfiguration.ContextClaimsProvider.GetDeviceFamily();
-                if (_deviceFamily == null)
+                else
                 {
-                    if (_deviceFamiliesDoc == null)
-                    {
-                        Log.Warn("Device Families file '{0}' was not loaded properly; using defaults.", DeviceFamiliesFileName);
-
-                        // Defaults
-                        DeviceClaims device = GetClaims<DeviceClaims>();
-                        if (!device.IsMobile && !device.IsTablet) _deviceFamily = "desktop";
-                        if (device.IsTablet) _deviceFamily = "tablet";
-                        if (device.IsMobile && !device.IsTablet)
-                        {
-                            _deviceFamily = device.DisplayWidth > 319 ? "smartphone" : "featurephone";
-                        }
-                    }
-                    else
-                    {
-                        _deviceFamily = DetermineDeviceFamily();
-                    }
+                    _deviceFamily = DetermineDeviceFamily();
                 }
                 return _deviceFamily;
             }
