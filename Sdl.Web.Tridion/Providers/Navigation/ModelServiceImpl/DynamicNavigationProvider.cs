@@ -40,6 +40,7 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
                         var navModel = SiteConfiguration.ModelServiceProvider.GetSitemapItem(localization) ??
                                        FallbackNavigationProvider.GetNavigationModel(localization);
                         RebuildParentRelationships(navModel.Items, navModel);
+                        navModel.Items = navModel.Items.OrderBy(i => i.OriginalTitle).ToList();
                         return navModel;
                     }
                     );

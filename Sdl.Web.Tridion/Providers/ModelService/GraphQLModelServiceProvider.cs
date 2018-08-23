@@ -46,8 +46,15 @@ namespace Sdl.Web.Tridion.ModelService
         {            
             try
             {
+                if (string.IsNullOrEmpty(entityId))
+                    return null;
+
+                // entityId is of form componentId-templateId
+                string[] ids = entityId.Split('-');
+                if (ids.Length != 2) return null;
+
                 var json = Client.GetEntityModelData(GetNamespace(localization), int.Parse(localization.Id),
-                    int.Parse(entityId), 0, // todo: fix this
+                    int.Parse(ids[0]), int.Parse(ids[1]),
                     ContentType.MODEL, DataModelType.R2, DcpType.DEFAULT,
                     false, null);
                 return LoadModel<EntityModelData>(json);
@@ -88,9 +95,9 @@ namespace Sdl.Web.Tridion.ModelService
 
         public PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes)
         {
-            dynamic json;
             const string msg =
-                "PCA client returned an unexpected response when retrieving page model data for page url {0}.";
+               "PCA client returned an unexpected response when retrieving page model data for page url {0}.";
+            dynamic json;           
             try
             {
                 // TODO: This could be fixed by sending two graphQL queries in a single go. Need to
@@ -142,6 +149,11 @@ namespace Sdl.Web.Tridion.ModelService
                 if (parentSitemapItemId == null)
                 {
                     var root = GetSitemapItem(localization, 1);
+                    if (descendantLevels == 1)
+                    {                       
+                        return new SitemapItem[] {root};
+                    }
+
                     if (!includeAncestors)
                     {
                         parentSitemapItemId = root.Id;
@@ -152,7 +164,7 @@ namespace Sdl.Web.Tridion.ModelService
                     int.Parse(localization.Id), parentSitemapItemId, descendantLevels, includeAncestors, null);
                 if (sitmapItems?.Items != null)
                 {
-                    return Convert(sitmapItems).Items.ToArray();
+                    return Convert(sitmapItems.Items);
                 }
             }
             catch (GraphQLClientException e)
@@ -231,6 +243,18 @@ namespace Sdl.Web.Tridion.ModelService
             {
                 ExpandSitemap(client, ns, publicationId, x as TaxonomySitemapItem);
             }
+        }
+
+        protected SitemapItem[] Convert(List<ISitemapItem> items)
+        {
+            if(items == null)
+                return new SitemapItem[] {};
+            SitemapItem[] converted = new SitemapItem[items.Count];
+            for (int i = 0; i < items.Count; i++)
+            {
+                converted[i] = Convert(items[i]);
+            }
+            return converted;
         }
 
         protected SitemapItem Convert(ISitemapItem item)

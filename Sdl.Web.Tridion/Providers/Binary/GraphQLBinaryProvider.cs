@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Web.Configuration;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
@@ -56,6 +55,8 @@ namespace Sdl.Web.Tridion.Providers.Binary
         protected virtual byte[] GetBinaryData(IGraphQLClient client, BinaryComponent binaryComponent, out string binaryPath)
         {
             binaryPath = null;
+            if (binaryComponent == null) return null;
+          
             if (binaryComponent?.Variants == null)
             {
                 Log.Error("Unable to get binary data for CmUri: " + binaryComponent.CmUri());
