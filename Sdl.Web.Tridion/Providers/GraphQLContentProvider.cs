@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,7 +13,6 @@ using Sdl.Web.Tridion.Providers.Query;
 using Sdl.Web.Tridion.Statics;
 using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.DynamicContent.Query;
-using Tridion.ContentDelivery.Meta;
 
 namespace Sdl.Web.Tridion.Mapping
 {
@@ -23,54 +21,68 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class GraphQLContentProvider : IContentProvider, IRawDataProvider
     {
-        #region Cursor
-        internal class CursorMap : Dictionary<int, string>
+        #region Cursor Indexing
+        internal class CursorIndexer
         {
-            private const string SessionKey = "dxa_cursors";
-          
-            private static CursorMap GetCursorMap(string id)
-            {            
-                if(HttpContext.Current == null)  
-                    return new CursorMap();
-                var cursors = (Dictionary<string, CursorMap>)HttpContext.Current.Session[SessionKey] ?? new Dictionary<string, CursorMap>();
-                if (!cursors.ContainsKey(id))
-                {
-                    cursors.Add(id, new CursorMap());                  
-                }
-                HttpContext.Current.Session[SessionKey] = cursors;
-                return cursors[id];
-            }
-          
-            public static string GetCursor(string id, ref int start)
+            private const string SessionKey = "dxa_indexer";
+
+            private readonly Dictionary<int, string> _cursors = new Dictionary<int, string>();
+
+            public static CursorIndexer GetCursorIndexer(string id)
             {
-                if (start == 0) return null;
-
-                CursorMap cursorMap = GetCursorMap(id);
-                
-                if(cursorMap.ContainsKey(start)) return cursorMap[start];
-
-                if (cursorMap.Count == 0)
+                if (HttpContext.Current == null)
+                    return new CursorIndexer(); // empty dummy
+                var indexer = (Dictionary<string, CursorIndexer>)HttpContext.Current.Session[SessionKey] ?? new Dictionary<string, CursorIndexer>();
+                if (!indexer.ContainsKey(id))
                 {
-                    start = 0;
-                    return null;
+                    indexer.Add(id, new CursorIndexer());
                 }
-
-                int min = 0;
-                foreach (var x in cursorMap.Keys)
-                {
-                    if (x >= min && x < start)
-                        min = x;
-                }
-                start = min;
-                return start == 0 ? null : cursorMap[start];
+                HttpContext.Current.Session[SessionKey] = indexer;
+                return indexer[id];
             }
 
-            public static void SetCursor(string id, int start, string cursor)
+            public int StartIndex { get; private set; }
+
+            public string this[int index]
             {
-                var cursorMap = GetCursorMap(id);
-                cursorMap[start] = cursor;
+                get
+                {
+                    if (index == 0)
+                    {
+                        StartIndex = 0;
+                        return null;
+                    }
+                    if (_cursors.Count == 0)
+                    {
+                        StartIndex = 0;
+                        return null;
+                    }
+                    if (_cursors.ContainsKey(index))
+                    {
+                        StartIndex = index;
+                        return _cursors[index];
+                    }
+                    int min = 0;
+                    foreach (var x in _cursors.Keys)
+                    {
+                        if (x >= min && x < index) min = x;
+                    }
+                    StartIndex = min;
+                    return StartIndex == 0 ? null : _cursors[StartIndex];
+                }
+                set
+                {
+                    if (_cursors.ContainsKey(index))
+                    {
+                        _cursors[index] = value;
+                    }
+                    else
+                    {
+                        _cursors.Add(index, value);
+                    }
+                }
             }
-        }
+        }       
         #endregion
 
         private readonly IModelService _modelService;
@@ -169,11 +181,17 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     throw new DxaException($"Unexpected result from {dynamicList.GetType().Name}.GetQuery: {dynamicList.GetQuery(localization)}");
                 }
-            
+
+                // get our cursor indexer for this list
+                var cursors = CursorIndexer.GetCursorIndexer(dynamicList.Id);
+
+                // given our start index into the paged list we need to translate that to a cursor
                 int start = simpleBrokerQuery.Start;
-                simpleBrokerQuery.Cursor = CursorMap.GetCursor(dynamicList.Id, ref start);
-                simpleBrokerQuery.Start = start;
-                dynamicList.Start = start;
+                simpleBrokerQuery.Cursor = cursors[start];
+
+                // the cursor retrieved may of came from a different start index so we update start
+                simpleBrokerQuery.Start = cursors.StartIndex;
+                dynamicList.Start = cursors.StartIndex;
             
                 var brokerQuery = new GraphQLQueryProvider();
 
@@ -196,8 +214,8 @@ namespace Sdl.Web.Tridion.Mapping
 
                 if (brokerQuery.HasMore)
                 {
-                    CursorMap.SetCursor(dynamicList.Id, simpleBrokerQuery.Start + simpleBrokerQuery.PageSize,
-                        brokerQuery.Cursor);
+                    // update cursor
+                    cursors[simpleBrokerQuery.Start + simpleBrokerQuery.PageSize] = brokerQuery.Cursor;
                 }
             }
         }

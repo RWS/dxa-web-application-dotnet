@@ -11,6 +11,7 @@ using Sdl.Web.Tridion.Navigation;
 using Sdl.Web.Tridion.Caching;
 using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.ModelService;
+using Sdl.Web.Tridion.Providers.Binary;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -83,7 +84,8 @@ namespace Sdl.Web.Tridion.Tests
             { typeof(IMediaHelper), new MockMediaHelper() },
             { typeof(ILocalizationResolver), new TestFixture() },
             { typeof(IContextClaimsProvider), new TestContextClaimsProvider() },
-            { typeof(IConditionalEntityEvaluator), new MockConditionalEntityEvaluator() }
+            { typeof(IConditionalEntityEvaluator), new MockConditionalEntityEvaluator() },
+            { typeof(IBinaryProvider), new GraphQLBinaryProvider() }
         };
 
         static TestFixture()
