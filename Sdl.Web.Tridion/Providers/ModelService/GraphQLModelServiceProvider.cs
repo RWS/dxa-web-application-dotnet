@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Web.Configuration;
 using Newtonsoft.Json;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.DataModel;
+using Sdl.Web.GraphQLClient.Exceptions;
 using Sdl.Web.PublicContentApi;
 using Sdl.Web.PublicContentApi.ContentModel;
 using Sdl.Web.PublicContentApi.Exceptions;
@@ -40,14 +43,27 @@ namespace Sdl.Web.Tridion.ModelService
             => CmUri.NamespaceIdentiferToId(localization.CmUriScheme);
 
         public EntityModelData GetEntityModelData(string entityId, ILocalization localization)
-        {
+        {            
             try
             {
+                if (string.IsNullOrEmpty(entityId))
+                    return null;
+
+                // entityId is of form componentId-templateId
+                string[] ids = entityId.Split('-');
+                if (ids.Length != 2) return null;
+
                 var json = Client.GetEntityModelData(GetNamespace(localization), int.Parse(localization.Id),
-                    int.Parse(entityId), 0, // todo: fix this
+                    int.Parse(ids[0]), int.Parse(ids[1]),
                     ContentType.MODEL, DataModelType.R2, DcpType.DEFAULT,
                     false, null);
                 return LoadModel<EntityModelData>(json);
+            }
+            catch (GraphQLClientException e)
+            {
+                const string msg = "PCA client returned an unexpected response when retrieving enity model data for id {0}.";
+                Log.Error(msg, entityId, e.Message);
+                throw new DxaException(string.Format(msg, entityId), e);
             }
             catch (PcaException)
             {
@@ -64,6 +80,13 @@ namespace Sdl.Web.Tridion.ModelService
                     false, null);
                 return LoadModel<PageModelData>(json);
             }
+            catch (GraphQLClientException e)
+            {
+                const string msg =
+                    "PCA client returned an unexpected response when retrieving page model data for page id {0}.";
+                Log.Error(msg, pageId, e.Message);
+                throw new DxaException(string.Format(msg, pageId), e);
+            }
             catch (PcaException)
             {
                 return null;
@@ -72,15 +95,22 @@ namespace Sdl.Web.Tridion.ModelService
 
         public PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes)
         {
-            dynamic json;
+            const string msg =
+               "PCA client returned an unexpected response when retrieving page model data for page url {0}.";
+            dynamic json;           
             try
             {
                 // TODO: This could be fixed by sending two graphQL queries in a single go. Need to
                 // wait for PCA client fix for this however
                 json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
-                    GetCanonicalUrlPath(urlPath, false),
+                    GetCanonicalUrlPath(urlPath, true),
                     ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
                     false, null);
+            }
+            catch (GraphQLClientException e)
+            {
+                Log.Error(msg, urlPath, e.Message);
+                throw new DxaException(string.Format(msg, urlPath), e);
             }
             catch (PcaException)
             {
@@ -88,9 +118,14 @@ namespace Sdl.Web.Tridion.ModelService
                 {
                     // try index page
                     json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
-                        GetCanonicalUrlPath(urlPath, true),
+                        GetCanonicalUrlPath(urlPath, false),
                         ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
                         false, null);
+                }
+                catch (GraphQLClientException e)
+                {
+                    Log.Error(msg, urlPath, e.Message);
+                    throw new DxaException(string.Format(msg, urlPath), e);
                 }
                 catch (PcaException)
                 {
@@ -107,12 +142,36 @@ namespace Sdl.Web.Tridion.ModelService
             {
                 if (descendantLevels == 0)
                     return new SitemapItem[] { };
+
+                if (parentSitemapItemId == null && descendantLevels < 0)
+                    return new SitemapItem[] {GetSitemapItem(localization)};
+
+                if (parentSitemapItemId == null)
+                {
+                    var root = GetSitemapItem(localization, 1);
+                    if (descendantLevels == 1)
+                    {                       
+                        return new SitemapItem[] {root};
+                    }
+
+                    if (!includeAncestors)
+                    {
+                        parentSitemapItemId = root.Id;
+                    }
+                }
+
                 var sitmapItems = Client.GetSitemapSubtree(GetNamespace(localization),
-                    int.Parse(localization.Id), parentSitemapItemId, descendantLevels, true, null);
+                    int.Parse(localization.Id), parentSitemapItemId, descendantLevels, includeAncestors, null);
                 if (sitmapItems?.Items != null)
                 {
-                    return Convert(sitmapItems).Items.ToArray();
+                    return Convert(sitmapItems.Items);
                 }
+            }
+            catch (GraphQLClientException e)
+            {
+                const string msg = "PCA client returned an unexpected response when retrieving child sitemap items for sitemap id {0}.";
+                Log.Error(msg, parentSitemapItemId, e.Message);
+                throw new DxaException(string.Format(msg, parentSitemapItemId), e);
             }
             catch (PcaException)
             {
@@ -133,6 +192,38 @@ namespace Sdl.Web.Tridion.ModelService
                 var result = Convert(root);
                 return result as TaxonomyNode;
             }
+            catch (GraphQLClientException e)
+            {
+                const string msg = "PCA client returned an unexpected response when retrieving sitemap items for sitemap.";
+                Log.Error(msg, e.Message);
+                throw new DxaException(msg, e);
+            }
+            catch (PcaException)
+            {
+                return null;
+            }
+        }
+
+        protected TaxonomyNode GetSitemapItem(ILocalization localization, int descendantDepth)
+        {
+            try
+            {
+                if (descendantDepth == 0) return null;
+                if (descendantDepth < 0) return GetSitemapItem(localization);
+                var client = Client;
+                var ns = GetNamespace(localization);
+                var publicationId = int.Parse(localization.Id);
+                var root = client.GetSitemap(ns, publicationId, descendantDepth, null);
+                var result = Convert(root);
+                return result as TaxonomyNode;
+            }
+            catch (GraphQLClientException e)
+            {
+                const string msg =
+                    "PCA client returned an unexpected response when retrieving sitemap items for sitemap.";
+                Log.Error(msg, e.Message);
+                throw new DxaException(msg, e);
+            }
             catch (PcaException)
             {
                 return null;
@@ -152,6 +243,18 @@ namespace Sdl.Web.Tridion.ModelService
             {
                 ExpandSitemap(client, ns, publicationId, x as TaxonomySitemapItem);
             }
+        }
+
+        protected SitemapItem[] Convert(List<ISitemapItem> items)
+        {
+            if(items == null)
+                return new SitemapItem[] {};
+            SitemapItem[] converted = new SitemapItem[items.Count];
+            for (int i = 0; i < items.Count; i++)
+            {
+                converted[i] = Convert(items[i]);
+            }
+            return converted;
         }
 
         protected SitemapItem Convert(ISitemapItem item)
@@ -213,11 +316,8 @@ namespace Sdl.Web.Tridion.ModelService
 
         private static string GetCanonicalUrlPath(string urlPath, bool tryIndexPage)
         {
-            if (string.IsNullOrEmpty(urlPath) || urlPath.Equals("/"))
-                return Constants.IndexPageUrlSuffix + Constants.DefaultExtension;
-
-            if (urlPath.EndsWith("/"))
-                return Constants.DefaultExtensionLessPageName + Constants.DefaultExtension;
+            if (urlPath == null)
+                return "/" + Constants.DefaultExtensionLessPageName + Constants.DefaultExtension;
 
             if (urlPath.EndsWith(Constants.DefaultExtension))
                 return urlPath;
@@ -225,9 +325,17 @@ namespace Sdl.Web.Tridion.ModelService
             if (urlPath.LastIndexOf(".", StringComparison.Ordinal) > 0)
                 return urlPath;
 
+            if (!urlPath.StartsWith("/"))
+                urlPath = "/" + urlPath;
+
+            urlPath = urlPath.TrimEnd('/');
+
+            if (string.IsNullOrEmpty(urlPath))
+                return "/" + Constants.DefaultExtensionLessPageName + Constants.DefaultExtension;
+
             return tryIndexPage
-                ? urlPath + "/" + Constants.DefaultExtensionLessPageName + Constants.DefaultExtension
-                : urlPath + Constants.DefaultExtension;
+               ? urlPath + "/" + Constants.DefaultExtensionLessPageName + Constants.DefaultExtension
+               : urlPath + Constants.DefaultExtension;         
         }
     }
 }

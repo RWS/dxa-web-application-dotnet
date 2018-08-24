@@ -91,7 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CacheProviderTest.cs" />
-    <Compile Include="CdApiLocalizationResolverTest.cs" />
+    <Compile Include="LocalizationResolverTest.cs" />
     <Compile Include="ContextServiceClaimsProviderTest.cs" />
     <Compile Include="DefaultCacheProviderTest.cs" />
     <Compile Include="DynamicNavigationProviderTest.cs" />

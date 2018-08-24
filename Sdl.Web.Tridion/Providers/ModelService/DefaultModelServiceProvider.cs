@@ -24,15 +24,15 @@ namespace Sdl.Web.Tridion.ModelService
        
         public DefaultModelServiceProvider()
         {
-            string uri = WebConfigurationManager.AppSettings["model-builder-service-uri"];          
+            string uri = WebConfigurationManager.AppSettings["model-service-uri"];          
             int n;
             int retryCount = int.TryParse(
-                WebConfigurationManager.AppSettings["model-builder-service-retries"], out n)
+                WebConfigurationManager.AppSettings["model-service-retries"], out n)
                 ? n
                 : DefaultRetryCount;
 
             int timeout = int.TryParse(
-                WebConfigurationManager.AppSettings["model-builder-service-timeout"], out n)
+                WebConfigurationManager.AppSettings["model-service-timeout"], out n)
                 ? n
                 : DefaultTimeout;
             _modelServiceClient = new ModelServiceClient(uri, retryCount, timeout);
