@@ -47,7 +47,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetPageModel_ImplicitIndexPage_Success()
         {
-            string testPageUrlPath =  TestLocalization.Path; // Implicitly address the home page (index.html)
+            string testPageUrlPath = TestLocalization.Path; // Implicitly address the home page (index.html)
             string testPageUrlPath2 = TestLocalization.Path.Substring(1); // URL path not starting with slash
             string testPageUrlPath3 = TestLocalization.Path + "/"; // URL path ending with slash
 
@@ -144,7 +144,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual("Image", mmDistribution.EclExternalMetadata["OutletType"], "mmDistribution.EclExternalMetadata['OutletType']");
         }
 
-       // [TestMethod]
+        // [TestMethod]
         public void GetPageModel_Meta_Success() // See TSI-1308
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1308PageRelativeUrlPath);
@@ -205,7 +205,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetPageModel_XpmMetadataOnStaging_Success()
         {
-            string testPageUrlPath =  TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
 
             PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: true);
 
@@ -325,7 +325,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi811PageRelativeUrlPath);
 
-            Tsi811PageModel pageModel = (Tsi811PageModel) TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+            Tsi811PageModel pageModel = (Tsi811PageModel)TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
 
             Assert.IsNotNull(pageModel, "pageModel");
             OutputJson(pageModel);
@@ -361,7 +361,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(pageModel, "pageModel");
             OutputJson(pageModel);
 
-            Tsi2316TestEntity testEntity = (Tsi2316TestEntity) pageModel.Regions["Main"].Entities[0];
+            Tsi2316TestEntity testEntity = (Tsi2316TestEntity)pageModel.Regions["Main"].Entities[0];
 
             AssertValidKeywordModel(testEntity.NotPublishedKeyword, "Facebook", string.Empty, "facebook", "testEntity.NotPublishedKeyword");
             AssertValidKeywordModel(testEntity.PublishedKeyword, "TSI-2316 Test Keyword", "Published Keyword with metadata", "TSI-2316", "testEntity.NotPublishedKeyword");
@@ -395,7 +395,7 @@ namespace Sdl.Web.Tridion.Tests
             PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
             Assert.IsNotNull(pageModel, "pageModel");
             Assert.AreEqual(1, pageModel.Regions["Main"].Entities.Count, "pageModel.Regions[Main].Entities.Count");
-            Article testArticle = (Article) pageModel.Regions["Main"].Entities[0];
+            Article testArticle = (Article)pageModel.Regions["Main"].Entities[0];
 
             try
             {
@@ -419,7 +419,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(1, pageModel3.Regions["Main"].Entities.Count, "pageModel3.Regions[Main].Entities.Count");
         }
 
-      //  [TestMethod]
+        //  [TestMethod]
         public void GetPageModel_RichTextProcessing_Success()
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
@@ -457,7 +457,7 @@ namespace Sdl.Web.Tridion.Tests
             StringAssert.Matches(firstHtmlFragment, new Regex(linkPattern2));
         }
 
-       // [TestMethod]
+        // [TestMethod]
         public void GetPageModel_RichTextImageWithHtmlClass_Success() // See TSI-1614
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1614PageRelativeUrlPath);
@@ -484,7 +484,7 @@ namespace Sdl.Web.Tridion.Tests
 
             Common.Models.Configuration configEntity = pageModel.Regions["Nav"].Entities[0] as Common.Models.Configuration;
             Assert.IsNotNull(configEntity, "configEntity");
-            string rawCompLink = TestLocalization.GetCmUri("9712");
+            string rawCompLink = TestLocalization.GetCmUri("462"); // 9712 on dxadevweb85.ams.dev
             Assert.AreEqual(rawCompLink, configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultContentLink']");
             Assert.AreEqual("pt,mx", configEntity.Settings["suppressLocalizations"], "configEntity.Settings['suppressLocalizations']");
         }
@@ -499,10 +499,10 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(pageModel, "pageModel");
             OutputJson(pageModel);
 
-            SmartTargetRegion example1Region = (SmartTargetRegion) pageModel.Regions["Example1"];
+            SmartTargetRegion example1Region = (SmartTargetRegion)pageModel.Regions["Example1"];
             Assert.IsNotNull(example1Region, "example1Region");
 
-            SmartTargetRegion example2Region = (SmartTargetRegion) pageModel.Regions["Example2"];
+            SmartTargetRegion example2Region = (SmartTargetRegion)pageModel.Regions["Example2"];
             Assert.IsNotNull(example2Region, "example2Region");
         }
 
@@ -615,7 +615,7 @@ namespace Sdl.Web.Tridion.Tests
                 Assert.IsNotNull(testStaticContentItem, "testStaticContentItem");
                 Assert.AreEqual("image/jpeg", testStaticContentItem.ContentType, "testStaticContentItem.ContentType");
                 Stream contentStream = testStaticContentItem.GetContentStream();
-                Assert.IsNotNull(contentStream,"contentStream");
+                Assert.IsNotNull(contentStream, "contentStream");
                 Assert.AreEqual(192129, contentStream.Length, "contentStream.Length");
             }
         }
