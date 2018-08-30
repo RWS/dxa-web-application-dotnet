@@ -371,7 +371,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(666.666, publishedKeyword.NumberField, "publishedKeyword.NumberField");
             Assert.AreEqual(new DateTime(1970, 12, 16, 12, 34, 56), publishedKeyword.DateField, "publishedKeyword.DateField");
             Assert.IsNotNull(publishedKeyword.CompLinkField, "publishedKeyword.CompLinkField");
-            Assert.AreEqual("9712", publishedKeyword.CompLinkField.Id, "publishedKeyword.CompLinkField.Id");
+            Assert.AreEqual("462", publishedKeyword.CompLinkField.Id, "publishedKeyword.CompLinkField.Id");
             Assert.IsNotNull(publishedKeyword.KeywordField, "publishedKeyword.KeywordField");
             Assert.AreEqual("Keyword 1.1", publishedKeyword.KeywordField.Title, "publishedKeyword.KeywordField");
         }
