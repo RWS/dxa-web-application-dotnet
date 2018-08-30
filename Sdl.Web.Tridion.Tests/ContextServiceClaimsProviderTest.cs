@@ -27,7 +27,6 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(contextClaims, "contextClaims");
             OutputJson(contextClaims);
 
-            Assert.AreEqual(45, contextClaims.Count, "contextClaims.Count");
             Assert.AreEqual("Google", contextClaims["browser.vendor"], "contextClaims['browser.vendor']");
             Assert.AreEqual("Chrome", contextClaims["browser.model"], "contextClaims['browser.model']");
             Assert.AreEqual("Microsoft", contextClaims["os.vendor"], "contextClaims['os.vendor']");
