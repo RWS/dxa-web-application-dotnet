@@ -168,9 +168,37 @@ namespace Sdl.Web.Tridion.ModelService
                     if (parentSitemapItemId == null && descendantLevels > 0)
                         descendantLevels--;
 
-                    var tree = Client.GetSitemapSubtree(ns, pubId, parentSitemapItemId, descendantLevels,
-                        includeAncestors, null);
-                    return tree.Cast<ISitemapItem>().ToList();                  
+                    if (parentSitemapItemId == null)
+                    {
+                        // requesting from root so just return descendants from root
+                        var tree = Client.GetSitemapSubtree(ns, pubId, parentSitemapItemId, descendantLevels,
+                            includeAncestors, null);
+                        return tree.Cast<ISitemapItem>().ToList();
+                    }
+
+                    if (includeAncestors)
+                    {
+                        // we are looking for a particular item, we need to request the entire
+                        // subtree first
+                        var subtree = GetEntireTree(ns, pubId, parentSitemapItemId, true);
+
+                        // now we prune descendants from our deseried node
+                        ISitemapItem node = FindNode(subtree, parentSitemapItemId);
+                        Prune(node, 0, descendantLevels);
+
+                        return subtree;
+                    }
+                    else
+                    {
+                        var tree = Client.GetSitemapSubtree(ns, pubId, parentSitemapItemId, descendantLevels, false, null);
+
+                        List<ISitemapItem> items = new List<ISitemapItem>();
+                        foreach (TaxonomySitemapItem x in tree.Where(x => x.Items != null))
+                        {
+                            items.AddRange(x.Items);
+                        }
+                        return items;
+                    }
                 }
             }
             catch (GraphQLClientException e)
@@ -185,7 +213,43 @@ namespace Sdl.Web.Tridion.ModelService
 
             }
             return new List<ISitemapItem>();
-        }      
+        }
+
+        protected void Prune(ISitemapItem root, int currentLevel, int descendantLevels)
+        {
+            var item = root as TaxonomySitemapItem;
+            TaxonomySitemapItem tNode = item;
+            if (tNode?.Items == null || tNode.Items.Count <= 0) return;
+
+            if (currentLevel < descendantLevels)
+            {                               
+                foreach (var n in tNode.Items)
+                {
+                    Prune(n, currentLevel+1, descendantLevels);
+                }
+            }
+            else
+            {
+                tNode.Items.Clear();
+            }
+        }
+
+        protected ISitemapItem FindNode(List<ISitemapItem> root, string parentSitemapId)
+        {
+            foreach (var node in root)
+            {
+                if (node.Id == parentSitemapId)
+                    return node;
+
+                var item = node as TaxonomySitemapItem;
+                TaxonomySitemapItem tNode = item;
+                if (tNode?.Items == null || tNode.Items.Count <= 0) continue;
+                var found = FindNode(tNode.Items, parentSitemapId);
+                if (found != null)
+                    return found;
+            }
+            return null;
+        }
 
         protected List<ISitemapItem> GetEntireTree(ContentNamespace ns, int pubId, string parentSitemapId, bool includeAncestors)
         {
