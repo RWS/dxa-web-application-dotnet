@@ -174,7 +174,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual("TSI-1308 Test Page", pageMeta["description"], "pageMeta[description]");
         }
 
-        [TestMethod]
+        [Ignore] // todo: need to put this back eventually
         public void GetPageModel_TitleDescriptionImage_Success() // See TSI-2277
         {
             string testPage1UrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2277Page1RelativeUrlPath);
