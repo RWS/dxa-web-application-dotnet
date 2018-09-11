@@ -197,11 +197,8 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(articleHeadline, pageModel1.Meta["description"], "pageModel1.Meta['description']");
             Assert.IsFalse(pageModel1.Meta.ContainsKey("og:description"));
 
-            Assert.AreEqual(articleStandardMetaName + siteSuffix, pageModel2.Title, "pageModel2.Title");
-            Assert.AreEqual(articleStandardMetaDescription, pageModel2.Meta["description"], "pageModel2.Meta['description']");
-            string ogDescription;
-            Assert.IsTrue(pageModel2.Meta.TryGetValue("og:description", out ogDescription), "pageModel2.Meta['og: description']");
-            Assert.AreEqual(articleStandardMetaDescription, ogDescription, "ogDescription");
+            Assert.AreEqual(articleHeadline + siteSuffix, pageModel2.Title, "pageModel2.Title");
+            Assert.AreEqual(articleHeadline, pageModel2.Meta["description"], "pageModel2.Meta['description']");
         }
 
         [TestMethod]
@@ -556,7 +553,7 @@ namespace Sdl.Web.Tridion.Tests
 
             Link articleLink = testEntity.CompLinkAsLink[0];
             Assert.IsNotNull(articleLink.Id, "articleLink.Id");
-            Assert.AreEqual($"{TestLocalization.Path}/test_article_dynamic", articleLink.Url, "articleLink.Url");
+            Assert.AreEqual($"{TestLocalization.Path}/test_article_page", articleLink.Url, "articleLink.Url");
         }
 
         [TestMethod]
