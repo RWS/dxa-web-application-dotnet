@@ -79,6 +79,8 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetPageModel_WithIncludes_Success()
         {
+            // make sure you publish the settings for 401 AutoTest Parent + 500 AutoTest Parent (Legacy) to
+            // staging environment.
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
 
             PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: true);
@@ -371,7 +373,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(666.666, publishedKeyword.NumberField, "publishedKeyword.NumberField");
             Assert.AreEqual(new DateTime(1970, 12, 16, 12, 34, 56), publishedKeyword.DateField, "publishedKeyword.DateField");
             Assert.IsNotNull(publishedKeyword.CompLinkField, "publishedKeyword.CompLinkField");
-            Assert.AreEqual("462", publishedKeyword.CompLinkField.Id, "publishedKeyword.CompLinkField.Id");
+            Assert.AreEqual(TestFixture.ArticleDcpEntityId.Split('-')[0], publishedKeyword.CompLinkField.Id, "publishedKeyword.CompLinkField.Id");
             Assert.IsNotNull(publishedKeyword.KeywordField, "publishedKeyword.KeywordField");
             Assert.AreEqual("Keyword 1.1", publishedKeyword.KeywordField.Title, "publishedKeyword.KeywordField");
         }
@@ -457,7 +459,7 @@ namespace Sdl.Web.Tridion.Tests
             StringAssert.Matches(firstHtmlFragment, new Regex(linkPattern2));
         }
 
-        // [TestMethod]
+        [Ignore]
         public void GetPageModel_RichTextImageWithHtmlClass_Success() // See TSI-1614
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1614PageRelativeUrlPath);
@@ -484,7 +486,7 @@ namespace Sdl.Web.Tridion.Tests
 
             Common.Models.Configuration configEntity = pageModel.Regions["Nav"].Entities[0] as Common.Models.Configuration;
             Assert.IsNotNull(configEntity, "configEntity");
-            string rawCompLink = TestLocalization.GetCmUri("462"); // 9712 on dxadevweb85.ams.dev
+            string rawCompLink = TestLocalization.GetCmUri(TestFixture.ArticleDcpEntityId.Split('-')[0]); // 9712 on dxadevweb85.ams.dev
             Assert.AreEqual(rawCompLink, configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultContentLink']");
             Assert.AreEqual("pt,mx", configEntity.Settings["suppressLocalizations"], "configEntity.Settings['suppressLocalizations']");
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Web.Configuration;
 using Newtonsoft.Json;
 using Sdl.Web.Common;
@@ -138,12 +137,34 @@ namespace Sdl.Web.Tridion.ModelService
             return LoadModel<PageModelData>(json);
         }
 
-        public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, ILocalization localization, bool includeAncestors, int descendantLevels)
+        public TaxonomyNode GetSitemapItem(ILocalization localization)
         {
-            return
-                Convert(GetChildSitemapItemsInternal(parentSitemapItemId, localization, includeAncestors,
-                    descendantLevels));
+            try
+            {
+                var client = Client;
+                var ns = GetNamespace(localization);
+                var publicationId = int.Parse(localization.Id);
+                var root = client.GetSitemap(ns, publicationId, 1, null);
+                if (root == null) return null;
+                string parent = root.Id ?? root.Items[0].Id.Split('-')[0];
+                var tree = GetChildSitemapItemsInternal(parent, localization, true, -1);
+                return (TaxonomyNode)Convert(tree[0]);
+            }
+            catch (GraphQLClientException e)
+            {
+                const string msg = "PCA client returned an unexpected response when retrieving sitemap items for sitemap.";
+                Log.Error(msg, e.Message);
+                throw new DxaException(msg, e);
+            }
+            catch (PcaException)
+            {
+                return null;
+            }
         }
+
+        public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, ILocalization localization, bool includeAncestors, int descendantLevels) 
+            => Convert(GetChildSitemapItemsInternal(parentSitemapItemId, localization, includeAncestors,
+            descendantLevels));
 
         protected List<ISitemapItem> GetChildSitemapItemsInternal(string parentSitemapItemId, ILocalization localization, bool includeAncestors, int descendantLevels)
         {
@@ -156,6 +177,7 @@ namespace Sdl.Web.Tridion.ModelService
                 {
                     var tree = GetEntireTree(ns, pubId, parentSitemapItemId, includeAncestors);
                     if (parentSitemapItemId == null) return tree;
+                    if (parentSitemapItemId.Split('-').Length == 1) return tree;
                     List<ISitemapItem> items = new List<ISitemapItem>();
                     foreach (TaxonomySitemapItem x in tree.OfType<TaxonomySitemapItem>())
                     {
@@ -215,7 +237,8 @@ namespace Sdl.Web.Tridion.ModelService
             return new List<ISitemapItem>();
         }
 
-        protected void Prune(ISitemapItem root, int currentLevel, int descendantLevels)
+        #region Helpers
+        protected virtual void Prune(ISitemapItem root, int currentLevel, int descendantLevels)
         {
             var item = root as TaxonomySitemapItem;
             TaxonomySitemapItem tNode = item;
@@ -234,7 +257,7 @@ namespace Sdl.Web.Tridion.ModelService
             }
         }
 
-        protected ISitemapItem FindNode(List<ISitemapItem> root, string parentSitemapId)
+        protected virtual ISitemapItem FindNode(List<ISitemapItem> root, string parentSitemapId)
         {
             foreach (var node in root)
             {
@@ -251,7 +274,7 @@ namespace Sdl.Web.Tridion.ModelService
             return null;
         }
 
-        protected List<ISitemapItem> GetEntireTree(ContentNamespace ns, int pubId, string parentSitemapId, bool includeAncestors)
+        protected virtual List<ISitemapItem> GetEntireTree(ContentNamespace ns, int pubId, string parentSitemapId, bool includeAncestors)
         {
             var rootsItems = Client.GetSitemapSubtree(ns, pubId, parentSitemapId, _descendantDepth, includeAncestors, null);
             List<ISitemapItem> roots = rootsItems.Cast<ISitemapItem>().ToList();
@@ -282,7 +305,7 @@ namespace Sdl.Web.Tridion.ModelService
             return roots;
         }
 
-        protected List<ISitemapItem> GetLeafNodes(ISitemapItem rootNode)
+        protected virtual List<ISitemapItem> GetLeafNodes(ISitemapItem rootNode)
         {
             List<ISitemapItem> leafNodes = new List<ISitemapItem>();
 
@@ -315,36 +338,9 @@ namespace Sdl.Web.Tridion.ModelService
 
             return leafNodes;
         }
+        #endregion
 
-        public TaxonomyNode GetSitemapItem(ILocalization localization)
-        {
-            try
-            {
-                var client = Client;
-                var ns = GetNamespace(localization);
-                var publicationId = int.Parse(localization.Id);
-                var root = client.GetSitemap(ns, publicationId, 1, null);
-                if (root != null)
-                {
-                    var tree = GetChildSitemapItemsInternal(root.Id, localization, true, -1);
-                    return Convert(tree[0]) as TaxonomyNode;
-                }
-                return null;
-            }
-            catch (GraphQLClientException e)
-            {
-                const string msg = "PCA client returned an unexpected response when retrieving sitemap items for sitemap.";
-                Log.Error(msg, e.Message);
-                throw new DxaException(msg, e);
-            }
-            catch (PcaException)
-            {
-                return null;
-            }
-        }
-
-    
-
+        #region Conversion
         protected SitemapItem[] Convert(List<TaxonomySitemapItem> items)
         {
             if (items == null)
@@ -412,6 +408,7 @@ namespace Sdl.Web.Tridion.ModelService
 
             return result;
         }
+        #endregion
 
         protected T LoadModel<T>(dynamic json)
         {
