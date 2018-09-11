@@ -185,7 +185,7 @@ namespace Sdl.Web.Tridion.Tests
 
             Assert.IsNotNull(pageModel1, "pageModel1");
             OutputJson(pageModel1);
-            Assert.IsNotNull(pageModel2, "pageModel1");
+            Assert.IsNotNull(pageModel2, "pageModel2");
             OutputJson(pageModel2);
 
             const string articleHeadline = "Article headline";
@@ -194,11 +194,10 @@ namespace Sdl.Web.Tridion.Tests
             const string siteSuffix = " | My Site";
 
             Assert.AreEqual(articleHeadline + siteSuffix, pageModel1.Title, "pageModel1.Title");
-            Assert.AreEqual(articleHeadline, pageModel1.Meta["description"], "pageModel1.Meta['description']");
-            Assert.IsFalse(pageModel1.Meta.ContainsKey("og:description"));
+            Assert.AreEqual(articleHeadline, pageModel1.Meta["description"], "pageModel1.Meta['description']");         
 
-            Assert.AreEqual(articleHeadline + siteSuffix, pageModel2.Title, "pageModel2.Title");
-            Assert.AreEqual(articleHeadline, pageModel2.Meta["description"], "pageModel2.Meta['description']");
+            Assert.AreEqual(articleStandardMetaName + siteSuffix, pageModel2.Title, "pageModel2.Title");
+            Assert.AreEqual(articleStandardMetaDescription, pageModel2.Meta["description"], "pageModel2.Meta['description']");
         }
 
         [TestMethod]
