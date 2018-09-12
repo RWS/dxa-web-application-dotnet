@@ -70,8 +70,7 @@ namespace Sdl.Web.Tridion.PCAClient
                  claimStore?.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
             if (cookies != null && cookies.ContainsKey(PreviewSessionTokenCookie))
             {
-                // todo:
-                //client.HttpClient.Cookies.Add(cookies[PreviewSessionTokenCookie]);
+                client.HttpClient.Headers[PreviewSessionTokenHeader] = cookies[PreviewSessionTokenCookie];              
             }
 
             // Forward all claims
