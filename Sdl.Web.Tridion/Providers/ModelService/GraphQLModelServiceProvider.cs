@@ -57,7 +57,7 @@ namespace Sdl.Web.Tridion.ModelService
                 var json = Client.GetEntityModelData(GetNamespace(localization), int.Parse(localization.Id),
                     int.Parse(ids[0]), int.Parse(ids[1]),
                     ContentType.MODEL, DataModelType.R2, DcpType.DEFAULT,
-                    false, null);
+                    true, null);
                 return LoadModel<EntityModelData>(json);
             }
             catch (GraphQLClientException e)
@@ -78,7 +78,7 @@ namespace Sdl.Web.Tridion.ModelService
             {
                 var json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id), pageId,
                     ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                    false, null);
+                    true, null);
                 return LoadModel<PageModelData>(json);
             }
             catch (GraphQLClientException e)
@@ -106,7 +106,7 @@ namespace Sdl.Web.Tridion.ModelService
                 json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
                     GetCanonicalUrlPath(urlPath, true),
                     ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                    false, null);
+                    true, null);
             }
             catch (GraphQLClientException e)
             {
@@ -121,7 +121,7 @@ namespace Sdl.Web.Tridion.ModelService
                     json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
                         GetCanonicalUrlPath(urlPath, false),
                         ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                        false, null);
+                        true, null);
                 }
                 catch (GraphQLClientException e)
                 {

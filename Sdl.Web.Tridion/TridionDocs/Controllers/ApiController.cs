@@ -9,7 +9,9 @@ using Sdl.Web.Mvc.Formats;
 using Sdl.Web.PublicContentApi.ContentModel;
 using Sdl.Web.Tridion.TridionDocs.Localization;
 using Sdl.Web.Tridion.TridionDocs.Navigation;
+using Sdl.Web.Tridion.TridionDocs.Providers;
 using Tridion.ContentDelivery.AmbientData;
+using Tridion.ContentDelivery.DynamicContent.Query;
 
 namespace Sdl.Web.Tridion.TridionDocs.Controllers
 {
@@ -21,6 +23,33 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
         private static readonly string PageLogicalRefObjectId = "ishlogicalref.object.id";
 
         protected virtual ILocalization CreateDocsLocalization(int publicationId) => new DocsLocalization {Id = publicationId.ToString()};
+
+        [Route("~/api/publications")]
+        [HttpGet]
+        public virtual ActionResult Publications()
+        {
+            try
+            {
+                return Json(new PublicationProvider().PublicationList);
+            }
+            catch (Exception ex)
+            {
+                return ServerError(ex);
+            }
+        }
+
+        [Route("~/api/conditions/{publicationId:int}")]
+        public virtual ActionResult Conditions(int publicationId)
+        {
+            try
+            {
+                return Json(new ConditionProvider().GetConditions(publicationId));                
+            }
+            catch (Exception ex)
+            {
+                return ServerError(ex);
+            }
+        }
 
         [Route("~/api/page/{publicationId:int}/{pageId:int}")]
         [HttpGet]
@@ -128,9 +157,69 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
             }
         }
 
+
+        [Route("~/api/sitemap.xml")]
+        public virtual ActionResult SitemapXml()
+        {
+            // Use the common SiteMapXml view for rendering out the xml of all the sitemap items.
+            ///return View("SiteMapXml", DDWebAppReactNavigationProvider.SiteMap);
+            return new EmptyResult();
+        }
+
         [Route("~/api/toc/{publicationId}/{sitemapItemId}")]
         public virtual ActionResult Toc(string publicationId, string sitemapItemId) => ServerError(null, 400);
 
+        [Route("~/api/pageIdByReference/{publicationId:int}/{ishFieldValue}")]
+        public virtual ActionResult TopicIdInTargetPublication(int publicationId, string ishFieldValue)
+        {
+            try
+            {               
+                if (!string.IsNullOrEmpty(ishFieldValue))
+                {
+                    throw new DxaItemNotFoundException(
+                        "Unable to use empty 'ishlogicalref.object.id' value as a search criteria.");
+                }
+                //return Json(GetPageIdByIshLogicalReference(publicationId, ishFieldValue));
+                return new EmptyResult();
+
+            }
+            catch (Exception ex)
+            {
+                return ServerError(ex);
+            }
+        }
+        /*
+        public IItem GetPageIdByIshLogicalReference(int publicationId, string ishLogicalRefValue)
+        {
+            try
+            {
+                Criteria dateCriteria = new ItemLastPublishedDateCriteria(DefaultPublishData, Criteria.GreaterThanOrEqual);
+                CustomMetaKeyCriteria metaKeyCriteria = new CustomMetaKeyCriteria(RefFieldName);
+                Criteria refCriteria = new CustomMetaValueCriteria(metaKeyCriteria, ishLogicalRefValue);
+                Criteria pubCriteria = new PublicationCriteria(publicationId);
+                Criteria itemType = new ItemTypeCriteria((int)ItemType.Page);
+                Criteria composite = new AndCriteria(new[] { dateCriteria, refCriteria, itemType, pubCriteria });
+
+                global::Tridion.ContentDelivery.DynamicContent.Query.Query query = new global::Tridion.ContentDelivery.DynamicContent.Query.Query(composite);
+                IItem[] items = query.ExecuteEntityQuery();
+                if (items == null || items.Length == 0)
+                {
+                    return new ItemImpl();
+                }
+
+                if (items.Length > 1)
+                {
+                    throw new ApiException($"Too many page Ids found in publication with logical ref value {ishLogicalRefValue}");
+                }
+
+                return items[0];
+            }
+            catch (Exception)
+            {
+                throw new DxaItemNotFoundException($"Page reference by ishlogicalref.object.id = {ishLogicalRefValue} not found in publication {publicationId}.");
+            }
+        }
+        */
         public ActionResult ServerError(Exception ex, int statusCode = 404)
         {
             Response.StatusCode = statusCode;
@@ -151,13 +240,13 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
             {
                 if (TocNaventriesMeta.Equals(x.Node.Key))
                 {
-                    pageModel.Meta.Add(TocNaventriesMeta, x.Node.Key);
+                    pageModel.Meta.Add(TocNaventriesMeta, x.Node.Value);
                 }
                 if (PageConditionsUsedMeta.Equals(x.Node.Key))
                 {
                     pageModel.Meta.Add(PageLogicalRefObjectId, x.Node.Value);
                 }
-                if (PageLogicalRefObjectId.Equals(x.Node.Key))
+                if (PageLogicalRefObjectId.Equals(x.Node.Key) && !pageModel.Meta.ContainsKey(PageLogicalRefObjectId))
                 {
                     pageModel.Meta.Add(PageLogicalRefObjectId, x.Node.Value);
                 }
