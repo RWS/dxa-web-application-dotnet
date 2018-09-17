@@ -188,7 +188,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
                 return ServerError(ex);
             }
         }
-        /*
+        /* TODO: convert to PCA ItemQuery
         public IItem GetPageIdByIshLogicalReference(int publicationId, string ishLogicalRefValue)
         {
             try

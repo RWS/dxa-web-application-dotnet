@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Sdl.Web.Common;
-using Tridion.ContentDelivery.Meta;
+using Sdl.Web.PublicContentApi.ContentModel;
+using Sdl.Web.Tridion.PCAClient;
 
 namespace Sdl.Web.Tridion.TridionDocs.Providers
 {
@@ -47,15 +45,15 @@ namespace Sdl.Web.Tridion.TridionDocs.Providers
         {
             try
             {
-                PublicationMetaFactory factory = new PublicationMetaFactory();
-                PublicationMeta meta = factory.GetMeta(publicationId);
-                if (meta?.CustomMeta == null)
-                {
+                var client = PCAClientFactory.Instance.CreateClient();
+                var publication = client.GetPublication(ContentNamespace.Docs, publicationId, null, $"requiredMeta:{metadataName}");
+                if(publication.CustomMetas == null || publication.CustomMetas.Edges.Count == 0)
+                { 
                     throw new DxaItemNotFoundException(
                         $"Metadata '{metadataName}' is not found for publication {publicationId}.");
                 }
 
-                object metadata = meta.CustomMeta.GetFirstValue(metadataName);
+                object metadata = publication.CustomMetas.Edges[0].Node.Value;
                 string metadataString = metadata != null ? (string)metadata : "{}";
                 return metadataString;
             }

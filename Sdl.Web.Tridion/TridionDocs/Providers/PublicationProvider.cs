@@ -45,7 +45,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Providers
             }
         }
 
-        public bool IsPublicationOnline(PublicContentApi.ContentModel.Publication publication)
+        public bool IsPublicationOnline(Publication publication)
         {
             var customMeta = publication.CustomMetas;
             if (customMeta == null) return false;
@@ -79,7 +79,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Providers
             }
         }
 
-        private Model.Publication BuildPublicationFrom(PublicContentApi.ContentModel.Publication publication)
+        private Model.Publication BuildPublicationFrom(Publication publication)
         {
             Model.Publication result = new Model.Publication
             {

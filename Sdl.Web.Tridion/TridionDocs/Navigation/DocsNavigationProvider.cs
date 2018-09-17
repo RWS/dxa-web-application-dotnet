@@ -11,6 +11,10 @@ using Sdl.Web.PublicContentApi.Utils;
 
 namespace Sdl.Web.Tridion.TridionDocs.Navigation
 {
+    /// <summary>
+    /// Navigation Provider for Docs
+    /// TODO: This should be using the PCA client version and not the CIL
+    /// </summary>
     public class DocsNavigationProvider : Tridion.Navigation.CILImpl.DynamicNavigationProvider
     {
         private static readonly Regex RegEx = new Regex("^(?:\\w)(\\d+)(?:-\\w)(\\d+)", RegexOptions.Compiled);
