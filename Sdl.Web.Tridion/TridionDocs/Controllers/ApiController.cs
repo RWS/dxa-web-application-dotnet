@@ -38,6 +38,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
         }
 
         [Route("~/api/conditions/{publicationId:int}")]
+        [HttpGet]
         public virtual ActionResult Conditions(int publicationId)
         {
             try
@@ -137,6 +138,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
         public virtual ActionResult Binary(string publicationId, string binaryId) => ServerError(null, 400);
 
         [Route("~/api/toc/{publicationId:int}")]
+        [HttpGet]
         public virtual ActionResult RootToc(int publicationId, string conditions = "")
         {
             try
@@ -156,6 +158,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
         }
 
         [Route("~/api/toc/{publicationId:int}/{sitemapItemId}")]
+        [HttpGet]
         public virtual ActionResult Toc(int publicationId, string sitemapItemId, string conditions = "",
             bool includeAncestors = false)
         {
@@ -176,8 +179,8 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
             }
         }
 
-
         [Route("~/api/sitemap.xml")]
+        [HttpGet]
         public virtual ActionResult SitemapXml()
         {
             // Use the common SiteMapXml view for rendering out the xml of all the sitemap items.
@@ -186,9 +189,11 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
         }
 
         [Route("~/api/toc/{publicationId}/{sitemapItemId}")]
+        [HttpGet]
         public virtual ActionResult Toc(string publicationId, string sitemapItemId) => ServerError(null, 400);
 
         [Route("~/api/pageIdByReference/{publicationId:int}/{ishFieldValue}")]
+        [HttpGet]
         public virtual ActionResult TopicIdInTargetPublication(int publicationId, string ishFieldValue)
         {
             try
@@ -245,18 +250,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
             if (ex == null) return new EmptyResult();
             if (ex.InnerException != null) ex = ex.InnerException;
             return Content("{ \"Message\": \"" + ex.Message + "\" }", "application/json");
-        }
-
-        /*
-        private ContentResult JsonResult(object result)
-        {
-            return new ContentResult
-            {
-                ContentType = "application/json",
-                Content = JsonConvert.SerializeObject(result, new IsoDateTimeConverter() { DateTimeFormat = "yyyy-MM-ddThh:mm:ssZ" }),
-                ContentEncoding = Encoding.UTF8
-            };
-        }*/
+        }       
 
         protected virtual ViewModel EnrichModel(ViewModel model, int publicationId)
         {
