@@ -54,6 +54,7 @@
     <Compile Include="TridionDocs\Navigation\DocsNavigationProvider.cs" />
     <Compile Include="TridionDocs\Navigation\TocProvider.cs" />
     <Compile Include="TridionDocs\Providers\ConditionProvider.cs" />
+    <Compile Include="TridionDocs\Providers\DocsContentProvider.cs" />
     <Compile Include="TridionDocs\Providers\PublicationProvider.cs" />
     <Reference Include="DD4T.ContentModel">
       <HintPath>..\packages\DD4T.Core.2.2.7\lib\net45\DD4T.ContentModel.dll</HintPath>
