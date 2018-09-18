@@ -6,6 +6,8 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Delivery.DiscoveryService;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore;
 using Sdl.Web.HttpClient.Auth;
+using Sdl.Web.IQQuery.API;
+using Sdl.Web.IQQuery.Client;
 using Sdl.Web.PublicContentApi.ContentModel;
 
 namespace Sdl.Web.Tridion.PCAClient
@@ -17,6 +19,8 @@ namespace Sdl.Web.Tridion.PCAClient
     public sealed class PCAClientFactory
     {
         private readonly Uri _endpoint;
+        private readonly Uri _iqEndpoint;
+
         private readonly IAuthentication _oauth;
         private const string PreviewSessionTokenHeader = "x-preview-session-token";
         private const string PreviewSessionTokenCookie = "preview-session-token";
@@ -44,9 +48,32 @@ namespace Sdl.Web.Tridion.PCAClient
                 throw new PCAClientException("Unable to retrieve endpoint for Public Content Api");
             }
 
+            uri = WebConfigurationManager.AppSettings["iq-service-uri"];
+            if (string.IsNullOrEmpty(uri))
+            {
+                IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
+                _iqEndpoint = discoveryService.IQServiceUri;
+            }
+            else
+            {
+                _iqEndpoint = new Uri(uri);
+            }
+
             _oauth = new OAuth(DiscoveryServiceProvider.DefaultTokenProvider);
             Log.Debug($"PCAClient found at URL '{_endpoint}'.");
+            Log.Info(_iqEndpoint == null
+                ? "Unable to retrieve endpoint for IQ Search Service."
+                : $"IQSearch found at URL '{_iqEndpoint}'.");
         }
+
+        /// <summary>
+        /// Returns a fully constructed IQ Search client
+        /// </summary>
+        /// <typeparam name="TSearchResultSet">Type used for result set</typeparam>
+        /// <typeparam name="TSearchResult">Type ised for result</typeparam>
+        /// <returns></returns>
+        public IQSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>()
+            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IQSearchClient<TSearchResultSet, TSearchResult>(_iqEndpoint, _oauth);
 
         /// <summary>
         /// Return a fully constructed Public Content Api client

@@ -32,6 +32,12 @@ namespace Sdl.Web.Common.Configuration
             _mappingsManager = new LocalizationMappingsManager(this);
         }
 
+        public Localization(ILocalizationResources resources, ILocalizationMappingsManager mappings)
+        {
+            _resourceManager = resources;
+            _mappingsManager = mappings;
+        }
+
         #region Nested classes
         /// <summary>
         /// Represents the (JSON) data for versioning as stored in /version.json.
@@ -277,6 +283,21 @@ namespace Sdl.Web.Common.Configuration
         /// <param name="sectionName">Optional name of the section for which to get resource. If not specified (or <c>null</c>), all resources are obtained.</param>
         public virtual IDictionary GetResources(string sectionName = null)
             => _resourceManager.GetResources(sectionName);
+
+        /// <summary>
+        /// Manually set the semantic schemas instead of loading them automatically
+        /// </summary>
+        /// <param name="schemas">Schemas to use</param>
+        /// <param name="vocab">Vocabularies to use</param>
+        public void SetSemanticSchemas(List<SemanticSchema> schemas, List<SemanticVocabulary> vocab)
+            => _mappingsManager.SetSemanticSchemas(schemas, vocab);
+
+        /// <summary>
+        /// Adds a predefined schema
+        /// </summary>
+        /// <param name="schema">Schema</param>
+        public void AddPredefinedSchema(SemanticSchema schema)
+            => _mappingsManager.AddPredefinedSchema(schema);
 
         /// <summary>
         /// Gets Semantic Schema for a given schema identifier.
