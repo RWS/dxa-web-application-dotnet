@@ -4,6 +4,7 @@ using System.Linq;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
+using Newtonsoft.Json;
 
 namespace Sdl.Web.Common.Configuration
 {  
@@ -32,7 +33,7 @@ namespace Sdl.Web.Common.Configuration
 
 
         public LocalizationMappingsManager(ILocalization localization)
-        {
+        {           
             _localization = localization;
         }
 
@@ -44,7 +45,7 @@ namespace Sdl.Web.Common.Configuration
             _semanticSchemas = null;
             _semanticVocabularies = null;
             _xpmRegionConfiguration = null;
-        }
+        }      
 
         /// <summary>
         /// Gets Semantic Schema for a given schema identifier.
@@ -73,6 +74,35 @@ namespace Sdl.Web.Common.Configuration
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Manually set the semantic schemas instead of loading them automatically
+        /// </summary>
+        /// <param name="schemas">Schemas to use</param>
+        /// <param name="vocab">Vocabularies to use</param>
+        public void SetSemanticSchemas(List<SemanticSchema> schemas, List<SemanticVocabulary> vocab)
+        {
+            _semanticVocabularies = vocab.ToArray();
+            _semanticVocabularyMap = _semanticVocabularies.ToDictionary(sv => sv.Prefix);
+            _semanticSchemas = schemas.ToArray();
+            _semanticSchemaMap = _semanticSchemas.ToDictionary(ss => ss.Id.ToString(CultureInfo.InvariantCulture));
+            foreach (var schema in schemas)
+            {
+                schema.Initialize(_localization);
+            }
+        }
+
+        /// <summary>
+        /// Adds a predefined schema
+        /// </summary>
+        /// <param name="schema">Schema</param>
+        public void AddPredefinedSchema(SemanticSchema schema)
+        {
+            var existing = GetSemanticSchema(schema.Id.ToString());
+            if (existing != null) return;
+            List<SemanticSchema> newSchemas = new List<SemanticSchema>(_semanticSchemas) {schema};
+            schema.Initialize(_localization);
         }
 
         /// <summary>

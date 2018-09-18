@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Web.Mvc;
 using Sdl.Web.Common;
-using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Controllers;
 using Sdl.Web.Mvc.Formats;
 using Sdl.Web.PublicContentApi.ContentModel;
-using Sdl.Web.Tridion.TridionDocs.Localization;
 using Sdl.Web.Tridion.TridionDocs.Navigation;
 using Sdl.Web.Tridion.TridionDocs.Providers;
 using Tridion.ContentDelivery.AmbientData;
@@ -15,14 +13,15 @@ using Tridion.ContentDelivery.DynamicContent.Query;
 
 namespace Sdl.Web.Tridion.TridionDocs.Controllers
 {
+    /// <summary>
+    /// Api Controller for Docs content
+    /// </summary>
     public class ApiController : BaseController
     {
         private static readonly Uri UserConditionsUri = new Uri("taf:ish:userconditions");
         private static readonly string TocNaventriesMeta = "tocnaventries.generated.value";
         private static readonly string PageConditionsUsedMeta = "conditionsused.generated.value";
-        private static readonly string PageLogicalRefObjectId = "ishlogicalref.object.id";
-
-        protected virtual ILocalization CreateDocsLocalization(int publicationId) => new DocsLocalization {Id = publicationId.ToString()};
+        private static readonly string PageLogicalRefObjectId = "ishlogicalref.object.id";      
 
         [Route("~/api/publications")]
         [HttpGet]
@@ -57,7 +56,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
         {
             try
             {
-                var model = EnrichModel(ContentProvider.GetPageModel(pageId, CreateDocsLocalization(publicationId)), publicationId);
+                var model = EnrichModel(DocsContentProvider.GetPageModel(publicationId, pageId), publicationId);
                 return Json(model);
             }
             catch (Exception ex)
@@ -67,10 +66,31 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
             }
         }
 
+        [Route("~/api/topic/{publicationId:int}/{componentId:int}/{templateId:int}")]
+        [HttpGet]
+        public virtual ActionResult Topic(int publicationId, int componentId, int templateId)
+        {
+            try
+            {
+                var model = EnrichModel(DocsContentProvider.GetEntityModel(publicationId, $"{componentId}-{templateId}"), publicationId);
+                return Json(model);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+                return ServerError(new DxaItemNotFoundException($"Entity not found: [{publicationId}] {componentId}-{templateId}"));
+            }
+        }
+       
+        [Route("~/api/topic/{publicationId}/{componentId}/{templateId}")]
+        [HttpGet]
+        public virtual ActionResult Topic(string publicationId, string componentId, string templateId) 
+            => ServerError(new DxaItemNotFoundException($"Entity not found: [{publicationId}] {componentId}-{templateId}"), 400);
+
         [Route("~/api/page/{publicationId}/{pageId}")]
         [HttpGet]
-        public virtual ActionResult Page(string publicationId, string pageId) 
-            => ServerError(new DxaItemNotFoundException($"Page not found: [{publicationId}] {pageId}/index.html"), 400);
+        public virtual ActionResult Page(string publicationId, string pageId)
+           => ServerError(new DxaItemNotFoundException($"Page not found: [{publicationId}] {pageId}/index.html"), 400);
 
         [Route("~/api/page/{publicationId:int}/{pageId:int}/{*content}")]
         [HttpPost]
@@ -83,7 +103,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
                 {
                     AmbientDataContext.CurrentClaimStore.Put(UserConditionsUri, conditions);
                 }
-                ViewModel model = EnrichModel(ContentProvider.GetPageModel(pageId, CreateDocsLocalization(publicationId)), publicationId);
+                ViewModel model = EnrichModel(DocsContentProvider.GetPageModel(publicationId, pageId), publicationId);
                 return Json(model);
             }
             catch (Exception ex)
@@ -101,8 +121,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
         {
             try
             {
-                StaticContentItem content = ContentProvider.GetStaticContentItem(binaryId,
-                    CreateDocsLocalization(publicationId));
+                StaticContentItem content = DocsContentProvider.GetStaticContentItem(publicationId, binaryId);
                 return new FileStreamResult(content.GetContentStream(), content.ContentType);
             }
             catch (Exception ex)
@@ -122,7 +141,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
         {
             try
             {
-                var localization = CreateDocsLocalization(publicationId);
+                var localization = DocsContentProvider.CreateDocsLocalization(publicationId);
                 if (!string.IsNullOrEmpty(conditions))
                 {
                     AmbientDataContext.CurrentClaimStore.Put(UserConditionsUri, conditions);
@@ -142,7 +161,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
         {
             try
             {
-                var localization = CreateDocsLocalization(publicationId);
+                var localization = DocsContentProvider.CreateDocsLocalization(publicationId);
                 if (!string.IsNullOrEmpty(conditions))
                 {
                     AmbientDataContext.CurrentClaimStore.Put(UserConditionsUri, conditions);
@@ -227,6 +246,17 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
             if (ex.InnerException != null) ex = ex.InnerException;
             return Content("{ \"Message\": \"" + ex.Message + "\" }", "application/json");
         }
+
+        /*
+        private ContentResult JsonResult(object result)
+        {
+            return new ContentResult
+            {
+                ContentType = "application/json",
+                Content = JsonConvert.SerializeObject(result, new IsoDateTimeConverter() { DateTimeFormat = "yyyy-MM-ddThh:mm:ssZ" }),
+                ContentEncoding = Encoding.UTF8
+            };
+        }*/
 
         protected virtual ViewModel EnrichModel(ViewModel model, int publicationId)
         {
