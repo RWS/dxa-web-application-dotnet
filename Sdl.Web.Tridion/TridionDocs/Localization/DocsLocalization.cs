@@ -15,49 +15,55 @@ namespace Sdl.Web.Tridion.TridionDocs.Localization
     {
         public DocsLocalization()
         {
+            const string topic = "Topic";
+            const string topicBody = "topicBody";
+            const string topicTitle = "topicTitle";
+            const string prefixS = "s";
+            const string prefixTri = "tri";
+
             // Predefined Topic schema that always has an ID of 1 (deployer adds this)
             SemanticSchema schema = new SemanticSchema
             {
                 Id = 1,
-                RootElement = "Topic",
+                RootElement = topic,
                 Fields = new List<SemanticSchemaField>
                 {
                     new SemanticSchemaField
                     {
-                        Name = "topicBody",
-                        Path = "/Topic/topicBody",
+                        Name = $"{topicBody}",
+                        Path = $"/{topic}/{topicBody}",
                         IsMultiValue = false,
                         Semantics = new List<FieldSemantics>
                         {
-                            new FieldSemantics {Prefix = "tri", Entity = "Topic", Property = "topicBody"},
-                            new FieldSemantics {Prefix = "s", Entity = "Topic", Property = "topicBody"},
+                            new FieldSemantics {Prefix = $"{prefixTri}", Entity = $"{topic}", Property = $"{topicBody}"},
+                            new FieldSemantics {Prefix = $"{prefixS}", Entity = $"{topic}", Property = $"{topicBody}"},
                         },
                         Fields = new List<SemanticSchemaField>()
                     },
                     new SemanticSchemaField
                     {
-                        Name = "topicTitle",
-                        Path = "/Topic/topicTitle",
+                        Name = $"{topicTitle}",
+                        Path = $"/{topic}/{topicTitle}",
                         IsMultiValue = false,
                         Semantics = new List<FieldSemantics>
                         {
-                            new FieldSemantics {Prefix = "tri", Entity = "Topic", Property = "topicTitle"},
-                            new FieldSemantics {Prefix = "s", Entity = "Topic", Property = "topicTitle"},
+                            new FieldSemantics {Prefix = $"{prefixTri}", Entity = $"{topic}", Property = $"{topicTitle}"},
+                            new FieldSemantics {Prefix = $"{prefixS}", Entity = $"{topic}", Property = $"{topicTitle}"},
                         },
                         Fields = new List<SemanticSchemaField>()
                     }
                 },
                 Semantics = new List<SchemaSemantics>
                 {
-                    new FieldSemantics {Prefix = "tri", Entity = "Topic"},
-                    new FieldSemantics {Prefix = "s", Entity = "Topic"},
+                    new FieldSemantics {Prefix = $"{prefixTri}", Entity = $"{topic}"},
+                    new FieldSemantics {Prefix = $"{prefixS}", Entity = $"{topic}"},
                 }
             };
 
             List<SemanticVocabulary> vocabs = new List<SemanticVocabulary>
             {
-                new SemanticVocabulary { Prefix = "tri", Vocab = "http://www.sdl.com/web/schemas/core" },
-                new SemanticVocabulary { Prefix = "s", Vocab = "http://schema.org/" },
+                new SemanticVocabulary { Prefix = $"{prefixTri}", Vocab = "http://www.sdl.com/web/schemas/core" },
+                new SemanticVocabulary { Prefix = $"{prefixS}", Vocab = "http://schema.org/" },
             };
 
             SetSemanticSchemas(new List<SemanticSchema> {schema}, vocabs);
