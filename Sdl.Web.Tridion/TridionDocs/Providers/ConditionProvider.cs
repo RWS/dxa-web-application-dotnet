@@ -46,7 +46,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Providers
             try
             {
                 var client = PCAClientFactory.Instance.CreateClient();
-                var publication = client.GetPublication(ContentNamespace.Docs, publicationId, null, $"requiredMeta:{metadataName}");
+                var publication = client.GetPublication(ContentNamespace.Docs, publicationId, $"requiredMeta:{metadataName}", null);
                 if(publication.CustomMetas == null || publication.CustomMetas.Edges.Count == 0)
                 { 
                     throw new DxaItemNotFoundException(
