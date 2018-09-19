@@ -257,8 +257,8 @@ namespace Sdl.Web.Tridion.TridionDocs.Controllers
             PageModel pageModel = model as PageModel;
             if (pageModel == null) return model;
             var client = PCAClient.PCAClientFactory.Instance.CreateClient();
-            var page = client.GetPage(ContentNamespace.Docs, publicationId, int.Parse(pageModel.Id), null,
-                $"requiredMeta:{TocNaventriesMeta},{PageConditionsUsedMeta},{PageLogicalRefObjectId}");
+            var page = client.GetPage(ContentNamespace.Docs, publicationId, int.Parse(pageModel.Id),
+                $"requiredMeta:{TocNaventriesMeta},{PageConditionsUsedMeta},{PageLogicalRefObjectId}", null);
             if (page?.CustomMetas == null) return model;
             foreach (var x in page.CustomMetas.Edges)
             {

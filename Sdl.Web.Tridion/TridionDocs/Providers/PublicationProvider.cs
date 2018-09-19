@@ -35,7 +35,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Providers
                 try
                 {
                     var client = PCAClientFactory.Instance.CreateClient();
-                    var publications = client.GetPublications(ContentNamespace.Docs, new Pagination(), null, null, CustomMetaFilter);
+                    var publications = client.GetPublications(ContentNamespace.Docs, new Pagination(), null, CustomMetaFilter, null);
                     return (from x in publications.Edges where IsPublicationOnline(x.Node) select BuildPublicationFrom(x.Node)).ToList();
                 }
                 catch (Exception e)
@@ -65,7 +65,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Providers
             bool isOffline = false;
             try
             {
-                var publication = client.GetPublication(ContentNamespace.Docs, publicationId, null, $"requiredMeta:{PublicationOnlineStatusMeta}");
+                var publication = client.GetPublication(ContentNamespace.Docs, publicationId, $"requiredMeta:{PublicationOnlineStatusMeta}", null);
                 isOffline = publication.CustomMetas == null || publication.CustomMetas.Edges.Count == 0 ||
                             !PublicationOnlineValue.Equals(publication.CustomMetas.Edges[0].Node.Value);
             }
