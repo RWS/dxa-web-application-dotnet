@@ -11,6 +11,7 @@ using Sdl.Web.Tridion.Navigation;
 using Sdl.Web.Tridion.Caching;
 using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.ModelService;
+using Sdl.Web.Tridion.Providers.Binary;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -34,8 +35,10 @@ namespace Sdl.Web.Tridion.Tests
 
     internal class TestFixture : ILocalizationResolver
     {
-        internal const string HomePageId = "640";
-        internal const string ArticleDcpEntityId = "9712-9711";
+        //internal const string HomePageId = "640"; // dxadevweb85.ams.dev
+        internal const string HomePageId = "277";
+        //internal const string ArticleDcpEntityId = "9712-9711";
+        internal const string ArticleDcpEntityId = "460-642";
         internal const string NavigationTaxonomyTitle = "Test Taxonomy [Navigation]";
         internal const string TopLevelKeyword1Title = "Top-level Keyword 1";
         internal const string TopLevelKeyword2Title = "Top-level Keyword 2";
@@ -53,7 +56,8 @@ namespace Sdl.Web.Tridion.Tests
         internal const string TaxonomyIndexPageRelativeUrlPath = "regression/taxonomy";
         internal const string Tsi811PageRelativeUrlPath = "regression/tsi-811";
         internal const string Tsi1278PageRelativeUrlPath = "tsi-1278_trådløst.html";
-        internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-9791.jpg";
+        //internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-9791.jpg";
+        internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-508.jpg";
         internal const string Tsi1308PageRelativeUrlPath = "regression/tsi-1308";
         internal const string Tsi1757PageRelativeUrlPath = "regression/tsi-1757";
         internal const string Tsi1614PageRelativeUrlPath = "tsi-1614.html";
@@ -76,19 +80,20 @@ namespace Sdl.Web.Tridion.Tests
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
             { typeof(ICacheProvider), new DefaultCacheProvider() },
-            { typeof(IModelServiceProvider), new DefaultModelServiceProvider() },
-            { typeof(IContentProvider), new DefaultContentProvider() },
+            { typeof(IModelServiceProvider), new GraphQLModelServiceProvider() },
+            { typeof(IContentProvider), new GraphQLContentProvider() },
             { typeof(INavigationProvider), new StaticNavigationProvider() },
-            { typeof(ILinkResolver), new DefaultLinkResolver() },
+            { typeof(ILinkResolver), new GraphQLLinkResolver() },
             { typeof(IMediaHelper), new MockMediaHelper() },
             { typeof(ILocalizationResolver), new TestFixture() },
             { typeof(IContextClaimsProvider), new TestContextClaimsProvider() },
-            { typeof(IConditionalEntityEvaluator), new MockConditionalEntityEvaluator() }
+            { typeof(IConditionalEntityEvaluator), new MockConditionalEntityEvaluator() },
+            { typeof(IBinaryProvider), new GraphQLBinaryProvider() }
         };
 
         static TestFixture()
-        {           
-            /* dxadevwev85.ams.dev
+        {
+            /* dxadevwev85.ams.dev 
             _parentLocalization = new Localization
             {
                 Id = "1065",
@@ -112,9 +117,9 @@ namespace Sdl.Web.Tridion.Tests
                 Id = "1083",
                 Path = "/autotest-child-legacy"
             };
-            */
+          */
 
-            // http://cm.dev.dxa.sdldev.net
+            /* http://cm.dev.dxa.sdldev.net */
             _parentLocalization = new Localization
             {
                 Id = "6",
@@ -138,7 +143,7 @@ namespace Sdl.Web.Tridion.Tests
                 Id = "9",
                 Path = "/autotest-child-legacy"
             };
-
+           
             _testLocalizations = new[] { _parentLocalization, _childLocalization, _legacyParentLocalization, _legacyChildLocalization };
 
             TestRegistration.RegisterViewModels();
@@ -188,7 +193,7 @@ namespace Sdl.Web.Tridion.Tests
             object modelServiceProvider;
             if (_testProviders.TryGetValue(typeof(IModelServiceProvider), out modelServiceProvider))
             {
-                ((DefaultModelServiceProvider)modelServiceProvider).AddDataModelExtension(new TestDataModelExtensions());
+                ((IModelServiceProvider)modelServiceProvider).AddDataModelExtension(new TestDataModelExtensions());
             }
 
             SiteConfiguration.InitializeProviders(interfaceType =>

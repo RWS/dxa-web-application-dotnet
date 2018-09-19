@@ -113,8 +113,11 @@ namespace Sdl.Web.Tridion.Statics
                     }                 
                 }
 
-                string path;
-                WriteBinaryToFile(provider.GetBinary(localization, urlPath, out path), localFilePath, dimensions);
+                var binary = provider.GetBinary(localization, urlPath);
+                if (binary != null)
+                {
+                    WriteBinaryToFile(binary.Item1, localFilePath, dimensions);
+                }
                 return localFilePath;
             }
         }
@@ -155,11 +158,10 @@ namespace Sdl.Web.Tridion.Statics
                     }
                 }
 
-                string path;
-                byte[] data = provider.GetBinary(localization, binaryId, out path);
-                string ext = Path.GetExtension(path) ?? "";
+                var data = provider.GetBinary(localization, binaryId);
+                string ext = Path.GetExtension(data.Item2) ?? "";
                 localFilePath = $"{localFilePath}/{localization.Id}-{binaryId}{ext}";
-                WriteBinaryToFile(data, localFilePath, null);
+                WriteBinaryToFile(data.Item1, localFilePath, null);
                 return localFilePath;
             }
         }

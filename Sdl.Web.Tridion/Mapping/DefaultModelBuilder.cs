@@ -119,7 +119,7 @@ namespace Sdl.Web.Tridion.Mapping
                     pageModel.Regions.UnionWith(regions.Select(data => CreateRegionModel(data, localization)));
                     pageModel.IsVolatile |= pageModel.Regions.Any(region => region.IsVolatile);
                 }
-            }
+            }      
         }
 
         protected virtual List<SemanticSchema> GetInheritedSemanticSchemas(ViewModelData pageModelData, ILocalization localization)
@@ -156,7 +156,7 @@ namespace Sdl.Web.Tridion.Mapping
         {
             using (new Tracer(entityModel, entityModelData, baseModelType, localization))
             {
-                MvcData mvcData = CreateMvcData(entityModelData.MvcData, "Entity");
+                MvcData mvcData = CreateMvcData(entityModelData.MvcData, "Entity");                
                 SemanticSchema semanticSchema = SemanticMapping.GetSchema(entityModelData.SchemaId, localization);
 
                 Type modelType = (baseModelType == null) ?
@@ -769,13 +769,16 @@ namespace Sdl.Web.Tridion.Mapping
                 throw new DxaException("No View Name specified in MVC Data.");
             }
 
+            string defaultModuleName = SiteConfiguration.GetDefaultModuleName();
+            string areaName = data.AreaName ?? defaultModuleName;
             return new MvcData
             {
                 ControllerName = data.ControllerName ?? defaultControllerName,
                 ControllerAreaName = data.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName(),
                 ActionName = data.ActionName ?? defaultControllerName,
                 ViewName = data.ViewName,
-                AreaName = data.AreaName ?? SiteConfiguration.GetDefaultModuleName(),
+                // remap "Ish" area onto our default module name here so Docs content can be rendered
+                AreaName = areaName.Equals("Ish") ? defaultModuleName : areaName,
                 RouteValues = data.Parameters
             };
         }

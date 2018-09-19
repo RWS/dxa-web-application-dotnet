@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,7 +13,6 @@ using Sdl.Web.Tridion.Providers.Query;
 using Sdl.Web.Tridion.Statics;
 using Tridion.ContentDelivery.DynamicContent;
 using Tridion.ContentDelivery.DynamicContent.Query;
-using Tridion.ContentDelivery.Meta;
 
 namespace Sdl.Web.Tridion.Mapping
 {
@@ -23,52 +21,68 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class GraphQLContentProvider : IContentProvider, IRawDataProvider
     {
-        #region Cursor
-        internal class CursorMap : Dictionary<int, string>
+        #region Cursor Indexing
+        internal class CursorIndexer
         {
-            private const string SessionKey = "dxa_cursors";
-          
-            private static CursorMap GetCursorMap(string id)
-            {              
-                var cursors = (Dictionary<string, CursorMap>)HttpContext.Current.Session[SessionKey] ?? new Dictionary<string, CursorMap>();
-                if (!cursors.ContainsKey(id))
-                {
-                    cursors.Add(id, new CursorMap());                  
-                }
-                HttpContext.Current.Session[SessionKey] = cursors;
-                return cursors[id];
-            }
-          
-            public static string GetCursor(string id, ref int start)
+            private const string SessionKey = "dxa_indexer";
+
+            private readonly Dictionary<int, string> _cursors = new Dictionary<int, string>();
+
+            public static CursorIndexer GetCursorIndexer(string id)
             {
-                if (start == 0) return null;
-
-                CursorMap cursorMap = GetCursorMap(id);
-                
-                if(cursorMap.ContainsKey(start)) return cursorMap[start];
-
-                if (cursorMap.Count == 0)
+                if (HttpContext.Current == null)
+                    return new CursorIndexer(); // empty dummy
+                var indexer = (Dictionary<string, CursorIndexer>)HttpContext.Current.Session[SessionKey] ?? new Dictionary<string, CursorIndexer>();
+                if (!indexer.ContainsKey(id))
                 {
-                    start = 0;
-                    return null;
+                    indexer.Add(id, new CursorIndexer());
                 }
-
-                int min = 0;
-                foreach (var x in cursorMap.Keys)
-                {
-                    if (x >= min && x < start)
-                        min = x;
-                }
-                start = min;
-                return start == 0 ? null : cursorMap[start];
+                HttpContext.Current.Session[SessionKey] = indexer;
+                return indexer[id];
             }
 
-            public static void SetCursor(string id, int start, string cursor)
+            public int StartIndex { get; private set; }
+
+            public string this[int index]
             {
-                var cursorMap = GetCursorMap(id);
-                cursorMap[start] = cursor;
+                get
+                {
+                    if (index == 0)
+                    {
+                        StartIndex = 0;
+                        return null;
+                    }
+                    if (_cursors.Count == 0)
+                    {
+                        StartIndex = 0;
+                        return null;
+                    }
+                    if (_cursors.ContainsKey(index))
+                    {
+                        StartIndex = index;
+                        return _cursors[index];
+                    }
+                    int min = 0;
+                    foreach (var x in _cursors.Keys)
+                    {
+                        if (x >= min && x < index) min = x;
+                    }
+                    StartIndex = min;
+                    return StartIndex == 0 ? null : _cursors[StartIndex];
+                }
+                set
+                {
+                    if (_cursors.ContainsKey(index))
+                    {
+                        _cursors[index] = value;
+                    }
+                    else
+                    {
+                        _cursors.Add(index, value);
+                    }
+                }
             }
-        }
+        }       
         #endregion
 
         private readonly IModelService _modelService;
@@ -167,22 +181,32 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     throw new DxaException($"Unexpected result from {dynamicList.GetType().Name}.GetQuery: {dynamicList.GetQuery(localization)}");
                 }
-            
+
+                // get our cursor indexer for this list
+                var cursors = CursorIndexer.GetCursorIndexer(dynamicList.Id);
+
+                // given our start index into the paged list we need to translate that to a cursor
                 int start = simpleBrokerQuery.Start;
-                simpleBrokerQuery.Cursor = CursorMap.GetCursor(dynamicList.Id, ref start);
-                simpleBrokerQuery.Start = start;
-                dynamicList.Start = start;
+                simpleBrokerQuery.Cursor = cursors[start];
+
+                // the cursor retrieved may of came from a different start index so we update start
+                simpleBrokerQuery.Start = cursors.StartIndex;
+                dynamicList.Start = cursors.StartIndex;
             
                 var brokerQuery = new GraphQLQueryProvider();
-                string[] componentUris = brokerQuery.ExecuteQuery(simpleBrokerQuery).ToArray();
-                Log.Debug($"Broker Query returned {componentUris.Length} results. HasMore={brokerQuery.HasMore}");
 
-                if (componentUris.Length > 0)
+                var components = brokerQuery.ExecuteQueryItems(simpleBrokerQuery).ToList();
+                Log.Debug($"Broker Query returned {components.Count} results. HasMore={brokerQuery.HasMore}");
+
+                if (components.Count > 0)
                 {
                     Type resultType = dynamicList.ResultType;
-                    ComponentMetaFactory componentMetaFactory = new ComponentMetaFactory(localization.GetCmUri());
-                    dynamicList.QueryResults = componentUris
-                        .Select(c => ModelBuilderPipeline.CreateEntityModel(CreateEntityModelData(componentMetaFactory.GetMeta(c)), resultType, localization))
+                    dynamicList.QueryResults = components
+                        .Select(
+                            c =>
+                                ModelBuilderPipeline.CreateEntityModel(
+                                    CreateEntityModelData((PublicContentApi.ContentModel.Component) c), resultType,
+                                    localization))
                         .ToList();
                 }
 
@@ -190,35 +214,36 @@ namespace Sdl.Web.Tridion.Mapping
 
                 if (brokerQuery.HasMore)
                 {
-                    CursorMap.SetCursor(dynamicList.Id, simpleBrokerQuery.Start + simpleBrokerQuery.PageSize,
-                        brokerQuery.Cursor);
+                    // update cursor
+                    cursors[simpleBrokerQuery.Start + simpleBrokerQuery.PageSize] = brokerQuery.Cursor;
                 }
             }
         }
 
-        protected virtual EntityModelData CreateEntityModelData(IComponentMeta componentMeta)
+        protected virtual EntityModelData CreateEntityModelData(PublicContentApi.ContentModel.Component component)
         {
             ContentModelData standardMeta = new ContentModelData();
-            foreach (DictionaryEntry entry in componentMeta.CustomMeta.NameValues)
+            foreach (var meta in component.CustomMetas.Edges)
             {
-                standardMeta.Add(entry.Key.ToString(), ((NameValuePair)entry.Value).Value);
+                standardMeta.Add(meta.Node.Key, meta.Node.Value);
             }
 
             // The semantic mapping requires that some metadata fields exist. This may not be the case so we map some component meta properties onto them
             // if they don't exist.
             if (!standardMeta.ContainsKey("dateCreated"))
             {
-                standardMeta.Add("dateCreated", componentMeta.LastPublicationDate);
+                standardMeta.Add("dateCreated", component.LastPublishDate);
             }
+            const string dateTimeFormat = "MM/dd/yyyy HH:mm:ss";
+            standardMeta["dateCreated"] = DateTime.ParseExact((string)standardMeta["dateCreated"], dateTimeFormat, null);
             if (!standardMeta.ContainsKey("name"))
             {
-                standardMeta.Add("name", componentMeta.Title);
-            }
-
+                standardMeta.Add("name", component.Title);
+            }            
             return new EntityModelData
-            {
-                Id = componentMeta.Id.ToString(),
-                SchemaId = componentMeta.SchemaId.ToString(),
+            {               
+                Id = component.ItemId.ToString(),
+                SchemaId = component.SchemaId.ToString(),
                 Metadata = new ContentModelData { { "standardMeta", standardMeta } }
             };
         }

@@ -4,6 +4,7 @@ using Sdl.Web.PublicContentApi.ContentModel;
 using Sdl.Web.PublicContentApi.Utils;
 using Sdl.Web.Tridion.PCAClient;
 using System;
+using System.Linq;
 
 namespace Sdl.Web.Tridion.Providers.Query
 {   
@@ -31,6 +32,24 @@ namespace Sdl.Web.Tridion.Providers.Query
             {
                 resultList.Add(results.Edges[i].Node.CmUri());
             }
+            Cursor = n > 0 ? results.Edges[n - 1].Cursor : null;
+            return resultList;
+        }
+
+        public IEnumerable<IItem> ExecuteQueryItems(SimpleBrokerQuery queryParams)
+        {
+            InputItemFilter filter = BuildFilter(queryParams);
+            InputSortParam sort = BuildSort(queryParams);
+            var client = PCAClientFactory.Instance.CreateClient();
+            var results = client.ExecuteItemQuery(filter, sort, new Pagination
+            {
+                First = queryParams.PageSize + 1,
+                After = queryParams.Cursor
+            }, null, null, false);
+
+            HasMore = results.Edges.Count > queryParams.PageSize;
+            int n = HasMore ? queryParams.PageSize : results.Edges.Count;
+            var resultList = results.Edges.Select(edge => edge.Node).ToList();
             Cursor = n > 0 ? results.Edges[n - 1].Cursor : null;
             return resultList;
         }

@@ -12,7 +12,7 @@ namespace Sdl.Web.Tridion.Tests
     public class R2ContentProviderTest : ContentProviderTest
     {
         public R2ContentProviderTest()
-            : base(new Mapping.DefaultContentProvider(), () => TestFixture.ParentLocalization)
+            : base(new Mapping.GraphQLContentProvider(), () => TestFixture.ParentLocalization)
         {
         }
 
@@ -65,7 +65,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(4, numExcludes, "numExcludes");
         }
 
-        [TestMethod]
+        [Ignore]  // retroFit requires publishing with a change to TBB parameter.
         public void GetPageModel_RetrofitMapping_Success() // See TSI-1757
         {
             ILocalization testLocalization = TestFixture.ChildLocalization;

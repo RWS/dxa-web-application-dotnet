@@ -12,6 +12,19 @@ namespace Sdl.Web.Common.Interfaces
         void Reload();
 
         /// <summary>
+        /// Manually set the semantic schemas instead of loading them automatically
+        /// </summary>
+        /// <param name="schemas">Schemas to use</param>
+        /// <param name="vocab">Vocabularies to use</param>
+        void SetSemanticSchemas(List<SemanticSchema> schemas, List<SemanticVocabulary> vocab);
+
+        /// <summary>
+        /// Add predefined schema.
+        /// </summary>
+        /// <param name="schema">Schema</param>
+        void AddPredefinedSchema(SemanticSchema schema);
+
+        /// <summary>
         /// Gets Semantic Schema for a given schema identifier.
         /// </summary>
         /// <param name="schemaId">The schema identifier.</param>

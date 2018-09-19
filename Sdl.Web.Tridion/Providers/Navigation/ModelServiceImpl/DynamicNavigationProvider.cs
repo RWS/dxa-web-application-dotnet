@@ -40,6 +40,7 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
                         var navModel = SiteConfiguration.ModelServiceProvider.GetSitemapItem(localization) ??
                                        FallbackNavigationProvider.GetNavigationModel(localization);
                         RebuildParentRelationships(navModel.Items, navModel);
+                        navModel.Items = navModel.Items.OrderBy(i => i.OriginalTitle).ToList();
                         return navModel;
                     }
                     );
@@ -206,7 +207,7 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
                             IEnumerable<SitemapItem> items = SiteConfiguration.ModelServiceProvider.GetChildSitemapItems(sitemapItemId, localization,
                                 filter.IncludeAncestors,
                                 filter.DescendantLevels) ?? new SitemapItem[0];
-                            items = items.OrderBy(i => i.OriginalTitle);
+                            items = items.OrderBy(i => i.Id);
                             RebuildParentRelationships(items, null);
                             return items;
                         }

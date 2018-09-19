@@ -13,7 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SdlDxaDataModelPackageVersion>2.1.0-beta-201804241437</SdlDxaDataModelPackageVersion>
-    <SdlPCAPackageVersion>2.1.0-beta-201808151328</SdlPCAPackageVersion>
+    <SdlPCAPackageVersion>2.1.0-beta-201809171903</SdlPCAPackageVersion>
     <SdlWebDeliveryPackageVersion>11.0.0-beta-201805161005</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>10.1.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>10.1.0</SdlWebContextImagePackageVersion>
@@ -48,6 +48,14 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="TridionDocs\Controllers\ApiController.cs" />
+    <Compile Include="TridionDocs\Localization\DocsLocalization.cs" />
+    <Compile Include="TridionDocs\Model\Publication.cs" />
+    <Compile Include="TridionDocs\Navigation\DocsNavigationProvider.cs" />
+    <Compile Include="TridionDocs\Navigation\TocProvider.cs" />
+    <Compile Include="TridionDocs\Providers\ConditionProvider.cs" />
+    <Compile Include="TridionDocs\Providers\DocsContentProvider.cs" />
+    <Compile Include="TridionDocs\Providers\PublicationProvider.cs" />
     <Reference Include="DD4T.ContentModel">
       <HintPath>..\packages\DD4T.Core.2.2.7\lib\net45\DD4T.ContentModel.dll</HintPath>
     </Reference>
@@ -120,7 +128,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net452\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.PublicContentApi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Sdl.Web.PublicContentApi, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.PublicContentApi.$(SdlPCAPackageVersion)\lib\net452\Sdl.Web.PublicContentApi.dll</HintPath>
     </Reference>
