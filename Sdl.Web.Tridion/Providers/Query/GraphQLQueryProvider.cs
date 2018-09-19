@@ -58,7 +58,7 @@ namespace Sdl.Web.Tridion.Providers.Query
         {
             InputItemFilter filter = new InputItemFilter
             {
-                ItemTypes = new List<ItemType> {ItemType.COMPONENT},
+                ItemTypes = new List<FilterItemType> {FilterItemType.COMPONENT},
             };
             if (queryParams.SchemaId > 0)
             {
