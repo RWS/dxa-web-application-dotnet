@@ -23,7 +23,7 @@ namespace Sdl.Web.Tridion.Providers.Query
             {
                 First = queryParams.PageSize + 1,
                 After = queryParams.Cursor
-            }, null, null, false);
+            }, null, false, false, null);
 
             HasMore = results.Edges.Count > queryParams.PageSize;
             int n = HasMore ? queryParams.PageSize : results.Edges.Count;
@@ -45,7 +45,7 @@ namespace Sdl.Web.Tridion.Providers.Query
             {
                 First = queryParams.PageSize + 1,
                 After = queryParams.Cursor
-            }, null, null, false);
+            }, null, false, false, null);
 
             HasMore = results.Edges.Count > queryParams.PageSize;
             int n = HasMore ? queryParams.PageSize : results.Edges.Count;
@@ -58,7 +58,7 @@ namespace Sdl.Web.Tridion.Providers.Query
         {
             InputItemFilter filter = new InputItemFilter
             {
-                ItemTypes = new List<ItemType> {ItemType.COMPONENT},
+                ItemTypes = new List<FilterItemType> {FilterItemType.COMPONENT},
             };
             if (queryParams.SchemaId > 0)
             {

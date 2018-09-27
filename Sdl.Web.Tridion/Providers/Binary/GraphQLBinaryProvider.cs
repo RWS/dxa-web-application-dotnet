@@ -25,35 +25,35 @@ namespace Sdl.Web.Tridion.Providers.Binary
         public DateTime GetBinaryLastPublishedDate(ILocalization localization, string urlPath)
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), urlPath, null);
+            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), urlPath, null, null);
             return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
         }
 
         public async Task<DateTime> GetBinaryLastPublishedDateAsync(ILocalization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = await client.GetBinaryComponentAsync(GetNamespace(localization), int.Parse(localization.Id), urlPath, null, cancellationToken);
+            var binary = await client.GetBinaryComponentAsync(GetNamespace(localization), int.Parse(localization.Id), urlPath, null, null, cancellationToken);
             return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
         }
 
         public DateTime GetBinaryLastPublishedDate(ILocalization localization, int binaryId)
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), binaryId, null);
+            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), binaryId, null, null);
             return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
         }
 
         public async Task<DateTime> GetBinaryLastPublishedDateAsync(ILocalization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = await client.GetBinaryComponentAsync(GetNamespace(localization), int.Parse(localization.Id), binaryId, null, cancellationToken);
+            var binary = await client.GetBinaryComponentAsync(GetNamespace(localization), int.Parse(localization.Id), binaryId, null, null, cancellationToken);
             return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
         }
 
         public Tuple<byte[],string> GetBinary(ILocalization localization, int binaryId)
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), binaryId, null);
+            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), binaryId, null, null);
             var data = GetBinaryData(client, binary);
             if (data == null) throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
             return data;
@@ -62,7 +62,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
         public async Task<Tuple<byte[], string>> GetBinaryAsync(ILocalization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = await client.GetBinaryComponentAsync(GetNamespace(localization), int.Parse(localization.Id), binaryId, null, cancellationToken);
+            var binary = await client.GetBinaryComponentAsync(GetNamespace(localization), int.Parse(localization.Id), binaryId, null, null, cancellationToken);
             var data = await GetBinaryDataAsync(client, binary, cancellationToken);
             if (data == null) throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
             return data;
@@ -71,7 +71,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
         public Tuple<byte[],string> GetBinary(ILocalization localization, string urlPath)
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), urlPath, null);
+            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), urlPath, null, null);
             var data = GetBinaryData(client, binary);
             if(data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
             return data;
@@ -80,7 +80,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
         public async Task<Tuple<byte[], string>> GetBinaryAsync(ILocalization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = await client.GetBinaryComponentAsync(GetNamespace(localization), int.Parse(localization.Id), urlPath, null, cancellationToken);
+            var binary = await client.GetBinaryComponentAsync(GetNamespace(localization), int.Parse(localization.Id), urlPath, null, null, cancellationToken);
             var data = await GetBinaryDataAsync(client, binary, cancellationToken);
             if (data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
             return data;
