@@ -13,16 +13,10 @@ namespace Sdl.Web.Tridion
 {
     public class GraphQLMashupLocalizationResolver : GraphQLLocalizationResolver
     {
-        private static readonly Regex[] DocsPatterns = {
-            new Regex(@"^(?<pubId>\d+)", RegexOptions.Compiled),
-            new Regex(@"^(?<pubId>\d+)/(?<itemId>\d+)", RegexOptions.Compiled),
-            new Regex(@"^binary/(?<pubId>\d+)/(?<itemId>\d+)", RegexOptions.Compiled),
-            new Regex(@"^api/binary/(?<pubId>\d+)/(?<itemId>\d+)", RegexOptions.Compiled),
-            new Regex(@"^api/page/(?<pubId>\d+)/(?<pageId>\d+)", RegexOptions.Compiled),
-            new Regex(@"^api/topic/(?<pubId>\d+)/(?<componentId>\d+)/(?<templateId>\d+)", RegexOptions.Compiled),
-            new Regex(@"^api/toc/(?<pubId>\d+)", RegexOptions.Compiled),
-            new Regex(@"^api/pageIdByReference/(?<pubId>\d+)", RegexOptions.Compiled),
-        };
+        private static readonly Regex DocsPattern =
+            new Regex(
+                @"(^(?<pubId>\d+))|(^(?<pubId>\d+)/(?<itemId>\d+))|(^binary/(?<pubId>\d+)/(?<itemId>\d+))|(^api/binary/(?<pubId>\d+)/(?<itemId>\d+))|(^api/page/(?<pubId>\d+)/(?<pageId>\d+))|(^api/topic/(?<pubId>\d+)/(?<componentId>\d+)/(?<templateId>\d+))|(^api/toc/(?<pubId>\d+))|(^api/pageIdByReference/(?<pubId>\d+))",
+                RegexOptions.Compiled);
 
         /// <summary>
         /// Resolves a matching <see cref="ILocalization"/> for a given URL.
@@ -36,18 +30,11 @@ namespace Sdl.Web.Tridion
             {
                 // Attempt to determine if we are looking at Docs content
                 string urlPath = url.GetComponents(UriComponents.Path, UriFormat.Unescaped);
-                if (!string.IsNullOrEmpty(urlPath))
-                {
-                    foreach (Regex t in DocsPatterns)
-                    {
-                        var match = t.Match(urlPath);
-                        if (!match.Success) continue;
-                        var localization = new DocsLocalization {Id = match.Groups["pubId"].Value};
-                        return localization;
-                    }
-                }
-
-                return base.ResolveLocalization(url);
+                if (string.IsNullOrEmpty(urlPath)) return base.ResolveLocalization(url);
+                var match = DocsPattern.Match(urlPath);
+                if (!match.Success) return base.ResolveLocalization(url);
+                var localization = new DocsLocalization {Id = match.Groups["pubId"].Value};
+                return localization;
             }
         }
 
@@ -74,12 +61,7 @@ namespace Sdl.Web.Tridion
                     // Attempt to resolve it from Docs
                     var client = PCAClientFactory.Instance.CreateClient();
                     var publication = client.GetPublication(ContentNamespace.Docs, int.Parse(localizationId), null, null);
-                    if (publication != null)
-                    {
-                        return new DocsLocalization {Id = publication.Id};
-                    }
-
-                    return base.GetLocalization(localizationId);
+                    return publication != null ? new DocsLocalization {Id = publication.PublicationId.ToString()} : base.GetLocalization(localizationId);
                 }
 
                 return result;
