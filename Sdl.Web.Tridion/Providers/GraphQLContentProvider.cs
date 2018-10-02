@@ -4,15 +4,17 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
+using Newtonsoft.Json;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
+using Sdl.Web.PublicContentApi;
+using Sdl.Web.PublicContentApi.Utils;
+using Sdl.Web.Tridion.PCAClient;
 using Sdl.Web.Tridion.Providers.Query;
 using Sdl.Web.Tridion.Statics;
-using Tridion.ContentDelivery.DynamicContent;
-using Tridion.ContentDelivery.DynamicContent.Query;
 
 namespace Sdl.Web.Tridion.Mapping
 {
@@ -250,36 +252,24 @@ namespace Sdl.Web.Tridion.Mapping
 
         string IRawDataProvider.GetPageContent(string urlPath, ILocalization localization)
         {
-            // TODO: let the DXA Model Service provide raw Page Content too (?)
             using (new Tracer(urlPath, localization))
             {
                 if (!urlPath.EndsWith(Constants.DefaultExtension) && !urlPath.EndsWith(".json"))
                 {
                     urlPath += Constants.DefaultExtension;
                 }
-                string escapedUrlPath = Uri.EscapeUriString(urlPath);
-                global::Tridion.ContentDelivery.DynamicContent.Query.Query brokerQuery = new global::Tridion.ContentDelivery.DynamicContent.Query.Query
-                {
-                    Criteria = CriteriaFactory.And(new Criteria[]
-                    {
-                        new PageURLCriteria(escapedUrlPath),
-                        new PublicationCriteria(Convert.ToInt32(localization.Id)),
-                        new ItemTypeCriteria(64)
-                    })
-                };
 
-                string[] pageUris = brokerQuery.ExecuteQuery();
-                if (pageUris.Length == 0)
+                var client = PCAClientFactory.Instance.CreateClient();
+                try
                 {
-                    return null;
+                    var page = client.GetPage(CmUri.NamespaceIdentiferToId(localization.CmUriScheme),
+                        int.Parse(localization.Id), urlPath, null, ContentIncludeMode.IncludeAndRender, null);
+                    return JsonConvert.SerializeObject(page.RawContent.Data);
                 }
-                if (pageUris.Length > 1)
+                catch (Exception)
                 {
-                    throw new DxaException($"Broker Query for Page URL path '{urlPath}' in Publication '{localization.Id}' returned {pageUris.Length} results.");
-                }
-
-                PageContentAssembler pageContentAssembler = new PageContentAssembler();
-                return pageContentAssembler.GetContent(pageUris[0]);
+                    throw new DxaException($"Page URL path '{urlPath}' in Publication '{localization.Id}' returned no data.");
+                }               
             }
         }
     }
