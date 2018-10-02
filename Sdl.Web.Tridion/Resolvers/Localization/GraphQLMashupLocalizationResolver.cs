@@ -11,13 +11,16 @@ using Sdl.Web.Tridion.TridionDocs.Localization;
 
 namespace Sdl.Web.Tridion
 {
+    /// <summary>
+    /// Localization Resolver to match against both Docs and Sites urls.
+    /// </summary>
     public class GraphQLMashupLocalizationResolver : GraphQLLocalizationResolver
     {
         private static readonly Regex DocsPattern =
             new Regex(
                 @"(^(?<pubId>\d+))|(^(?<pubId>\d+)/(?<itemId>\d+))|(^binary/(?<pubId>\d+)/(?<itemId>\d+))|(^api/binary/(?<pubId>\d+)/(?<itemId>\d+))|(^api/page/(?<pubId>\d+)/(?<pageId>\d+))|(^api/topic/(?<pubId>\d+)/(?<componentId>\d+)/(?<templateId>\d+))|(^api/toc/(?<pubId>\d+))|(^api/pageIdByReference/(?<pubId>\d+))",
                 RegexOptions.Compiled);
-
+     
         /// <summary>
         /// Resolves a matching <see cref="ILocalization"/> for a given URL.
         /// </summary>
@@ -28,16 +31,10 @@ namespace Sdl.Web.Tridion
         {
             using (new Tracer(url))
             {
-                // Attempt to determine if we are looking at Docs content
-                string urlPath = url.GetComponents(UriComponents.Path, UriFormat.Unescaped);
-                if (string.IsNullOrEmpty(urlPath)) return base.ResolveLocalization(url);
-                var match = DocsPattern.Match(urlPath);
-                if (!match.Success) return base.ResolveLocalization(url);
-                var localization = new DocsLocalization {Id = match.Groups["pubId"].Value};
-                return localization;
+                return ResolveDocsLocalization(url) ?? base.ResolveLocalization(url);
             }
         }
-
+      
         public override ILocalization GetLocalization(string localizationId)
         {
             using (new Tracer(localizationId))
@@ -66,6 +63,14 @@ namespace Sdl.Web.Tridion
 
                 return result;
             }
+        }      
+
+        protected virtual ILocalization ResolveDocsLocalization(Uri url)
+        {
+            var urlPath = url.GetComponents(UriComponents.Path, UriFormat.Unescaped);
+            if (string.IsNullOrEmpty(urlPath)) return null;
+            var match = DocsPattern.Match(urlPath);
+            return !match.Success ? null : new DocsLocalization { Id = match.Groups["pubId"].Value };
         }
     }
 }

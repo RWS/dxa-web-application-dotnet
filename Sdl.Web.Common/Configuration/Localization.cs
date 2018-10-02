@@ -74,7 +74,7 @@ namespace Sdl.Web.Common.Configuration
             }
             set
             {
-                string canonicalPath = (value != null) && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value;
+                var canonicalPath = (value != null) && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value;
                 _path = canonicalPath;
             }
         }
@@ -143,8 +143,7 @@ namespace Sdl.Web.Common.Configuration
         /// <summary>
         /// Gets the root folder of the binaries cache for this Localization.
         /// </summary>
-        public virtual string BinaryCacheFolder
-            => $"{SiteConfiguration.StaticsFolder}\\{Id}";
+        public virtual string BinaryCacheFolder => $"{SiteConfiguration.StaticsFolder}\\{CmUriScheme}-{Id}";
 
         /// <summary>
         /// Gets (or sets) whether the Localization is XPM Enabled (a.k.a. a "Staging" environment).
@@ -218,8 +217,7 @@ namespace Sdl.Web.Common.Configuration
         /// Gets a CM identifier (URI) for this Localization
         /// </summary>
         /// <returns>the CM URI.</returns>
-        public virtual string GetCmUri()
-            => $"{CmUriScheme}:0-{Id ?? "0"}-1";
+        public virtual string GetCmUri() => $"{CmUriScheme}:0-{Id ?? "0"}-1";
 
         /// <summary>
         /// Gets the base URI for this localization
@@ -228,7 +226,7 @@ namespace Sdl.Web.Common.Configuration
         public virtual string GetBaseUrl()
         {
             if (HttpContext.Current == null) return null;
-            Uri uri = HttpContext.Current.Request.Url;
+            var uri = HttpContext.Current.Request.Url;
             return uri.GetLeftPart(UriPartial.Authority) + Path;
         }
 
