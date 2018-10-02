@@ -22,14 +22,21 @@ namespace Sdl.Web.Tridion.Context
         {
             using (new Tracer(aspectName))
             {
+                IDictionary<string, object> result = new Dictionary<string, object>();
+                var claimStore = AmbientDataContext.CurrentClaimStore;
+                if (claimStore == null)
+                {
+                    Log.Warn("Claimstore is not currently available. Check your AmbientFrameworkModule is configured in your Web.Config");
+                    return result;
+                }
+
                 string claimNamePrefix = ContextClaimPrefix;
                 if (!string.IsNullOrEmpty(aspectName))
                 {
                     claimNamePrefix += aspectName + ":";
                 }
-
-                IDictionary<string, object> result = new Dictionary<string, object>();
-                foreach (KeyValuePair<Uri, object> claim in AmbientDataContext.CurrentClaimStore.GetAll())
+                
+                foreach (KeyValuePair<Uri, object> claim in claimStore.GetAll())
                 {
                     string claimName = claim.Key.ToString();
                     if (!claimName.StartsWith(claimNamePrefix))
