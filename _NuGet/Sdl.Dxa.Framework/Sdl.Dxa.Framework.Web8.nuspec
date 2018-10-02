@@ -25,7 +25,7 @@
             <dependency id="Sdl.Web.Delivery" version="10.1.0" />
             <dependency id="Sdl.Web.Context.Image" version="10.1.0" />
             <dependency id="Sdl.Web.Context.Client" version="10.1.0" />
-            <dependency id="Sdl.Web.PublicContentApi" version="2.1.0-beta-201809271022" />
+            <dependency id="Sdl.Web.PublicContentApi" version="2.1.0-beta-201810021523" />
         </dependencies>
     </metadata>
     <files>

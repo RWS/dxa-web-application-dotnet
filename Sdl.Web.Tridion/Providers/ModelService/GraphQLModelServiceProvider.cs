@@ -57,7 +57,7 @@ namespace Sdl.Web.Tridion.ModelService
                 var json = Client.GetEntityModelData(GetNamespace(localization), int.Parse(localization.Id),
                     int.Parse(ids[0]), int.Parse(ids[1]),
                     ContentType.MODEL, DataModelType.R2, DcpType.DEFAULT,
-                    true, null);
+                    ContentIncludeMode.IncludeAndRender, null);
                 return LoadModel<EntityModelData>(json);
             }
             catch (GraphQLClientException e)
@@ -78,7 +78,7 @@ namespace Sdl.Web.Tridion.ModelService
             {
                 var json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id), pageId,
                     ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                    true, null);
+                    ContentIncludeMode.IncludeAndRender, null);
                 return LoadModel<PageModelData>(json);
             }
             catch (GraphQLClientException e)
@@ -106,7 +106,7 @@ namespace Sdl.Web.Tridion.ModelService
                 json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
                     GetCanonicalUrlPath(urlPath, true),
                     ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                    true, null);
+                    ContentIncludeMode.IncludeAndRender, null);
             }
             catch (GraphQLClientException e)
             {
@@ -121,7 +121,7 @@ namespace Sdl.Web.Tridion.ModelService
                     json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
                         GetCanonicalUrlPath(urlPath, false),
                         ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                        true, null);
+                        ContentIncludeMode.IncludeAndRender, null);
                 }
                 catch (GraphQLClientException e)
                 {
@@ -144,11 +144,8 @@ namespace Sdl.Web.Tridion.ModelService
                 var client = Client;
                 var ns = GetNamespace(localization);
                 var publicationId = int.Parse(localization.Id);
-                var root = client.GetSitemap(ns, publicationId, 1, null);
-                if (root == null) return null;
-                string parent = root.Id ?? root.Items[0].Id.Split('-')[0];
-                var tree = GetChildSitemapItemsInternal(parent, localization, true, -1);
-                return (TaxonomyNode)Convert(tree[0]);
+                var root = client.GetSitemap(ns, publicationId, -1, null);                      
+                return (TaxonomyNode)Convert(root);
             }
             catch (GraphQLClientException e)
             {
@@ -340,7 +337,7 @@ namespace Sdl.Web.Tridion.ModelService
         }
         #endregion
 
-        #region Conversion
+        #region Conversion       
         protected SitemapItem[] Convert(List<TaxonomySitemapItem> items)
         {
             if (items == null)
