@@ -48,8 +48,8 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Resolvers\Localization\GraphQLMashupLocalizationResolver.cs" />
     <Compile Include="TridionDocs\Localization\DocsLocalization.cs" />
-    <Compile Include="TridionDocs\Providers\DocsContentProvider.cs" />
     <Reference Include="DD4T.ContentModel">
       <HintPath>..\packages\DD4T.Core.2.2.7\lib\net45\DD4T.ContentModel.dll</HintPath>
     </Reference>
