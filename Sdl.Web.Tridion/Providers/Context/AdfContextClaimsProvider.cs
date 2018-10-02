@@ -26,7 +26,7 @@ namespace Sdl.Web.Tridion.Context
                 var claimStore = AmbientDataContext.CurrentClaimStore;
                 if (claimStore == null)
                 {
-                    Log.Warn("Claimstore is not currently available. Check your AmbientFrameworkModule is configured in your Web.Config");
+                    Log.Warn("Claimstore is not available. Check the AmbientFrameworkModule is configured in Web.Config");
                     return result;
                 }
 
@@ -55,10 +55,7 @@ namespace Sdl.Web.Tridion.Context
         /// Gets the device family (an aggregated device claim determined from other context claims).
         /// </summary>
         /// <returns>A string representing the device family.</returns>
-        public string GetDeviceFamily()
-        {
-            return null;
-        }
+        public string GetDeviceFamily() => null;
 
         #endregion
     }
