@@ -149,7 +149,8 @@ namespace Sdl.Web.Tridion.Tests
             // map path of publications to Ids
             var client = PCAClientFactory.Instance.CreateClient();
             var publications = client.GetPublications(ContentNamespace.Sites, null, null, null, null);
-            Assert.AreNotEqual(0, publications.Edges.Count, "No publications returned from content service. Check you have published all the relevant publications.");
+            Assert.AreNotEqual(0, publications.Edges.Count,
+                "No publications returned from content service. Check you have published all the relevant publications.");
             var publicationsLut = new Dictionary<string, string>();
             foreach (var x in publications.Edges.Where(x => !publicationsLut.ContainsKey(x.Node.PublicationUrl)))
             {
@@ -163,11 +164,13 @@ namespace Sdl.Web.Tridion.Tests
                 // Grab homepage id since this is used in some unit tests
                 int pubId = int.Parse(x.Id);
                 string path = $"{x.Path}/index.html";
-                HomePageId = client.GetPage(
+                var page = client.GetPage(
                     ContentNamespace.Sites, pubId, path, null,
-                    ContentIncludeMode.Exclude, null).ItemId.ToString();
+                    ContentIncludeMode.Exclude, null);
+                if (page == null)
+                    Assert.Fail("Unable to find /autotest-parent homepage Id");
+                HomePageId = page.ItemId.ToString();
             }
-
             TestRegistration.RegisterViewModels();
         }
 
