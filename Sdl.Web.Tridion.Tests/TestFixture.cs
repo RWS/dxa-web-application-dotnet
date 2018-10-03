@@ -6,6 +6,7 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
+using Sdl.Web.PublicContentApi;
 using Sdl.Web.PublicContentApi.ContentModel;
 using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Navigation;
@@ -37,10 +38,8 @@ namespace Sdl.Web.Tridion.Tests
 
     internal class TestFixture : ILocalizationResolver
     {
-        //internal const string HomePageId = "640"; // dxadevweb85.ams.dev
-        internal const string HomePageId = "277";
-        //internal const string ArticleDcpEntityId = "9712-9711";
-        internal const string ArticleDcpEntityId = "460-642";
+        internal static readonly string HomePageId = "277"; // /autotest-parent homepage Id
+        internal const string ArticleDcpEntityId = "9712-9711";        
         internal const string NavigationTaxonomyTitle = "Test Taxonomy [Navigation]";
         internal const string TopLevelKeyword1Title = "Top-level Keyword 1";
         internal const string TopLevelKeyword2Title = "Top-level Keyword 2";
@@ -149,11 +148,21 @@ namespace Sdl.Web.Tridion.Tests
             // map path of publications to Ids
             var client = PCAClientFactory.Instance.CreateClient();
             var publications = client.GetPublications(ContentNamespace.Sites, null, null, null, null);
-            var publicationsLut = publications.Edges.ToDictionary(x => x.Node.PublicationUrl,
-                x => x.Node.PublicationId.ToString());
+            var publicationsLut = new Dictionary<string, string>();
+            foreach (var x in publications.Edges.Where(x => !publicationsLut.ContainsKey(x.Node.PublicationUrl)))
+            {
+                publicationsLut.Add(x.Node.PublicationUrl, x.Node.PublicationId.ToString());
+            }
             foreach (var x in _testLocalizations)
             {
                 x.Id = publicationsLut[x.Path];
+                if (x.Path != "/autotest-parent") continue;
+                // Grab homepage id since this is used in some unit tests
+                int pubId = int.Parse(x.Id);
+                string path = $"{x.Path}/index.html";
+                HomePageId = client.GetPage(
+                    ContentNamespace.Sites, pubId, path, null,
+                    ContentIncludeMode.Exclude, null).ItemId.ToString();
             }
 
             TestRegistration.RegisterViewModels();
