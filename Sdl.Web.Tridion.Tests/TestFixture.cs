@@ -6,11 +6,13 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
+using Sdl.Web.PublicContentApi.ContentModel;
 using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Navigation;
 using Sdl.Web.Tridion.Caching;
 using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.ModelService;
+using Sdl.Web.Tridion.PCAClient;
 using Sdl.Web.Tridion.Providers.Binary;
 
 namespace Sdl.Web.Tridion.Tests
@@ -116,35 +118,43 @@ namespace Sdl.Web.Tridion.Tests
             {
                 Id = "1083",
                 Path = "/autotest-child-legacy"
-            };
-          */
+            }; */
 
-            /* http://cm.dev.dxa.sdldev.net */
             _parentLocalization = new Localization
             {
-                Id = "6",
                 Path = "/autotest-parent"
             };
 
             _childLocalization = new Localization
             {
-                Id = "7",
                 Path = "/autotest-child"
             };
 
             _legacyParentLocalization = new Localization
             {
-                Id = "8",
                 Path = "/autotest-parent-legacy"
             };
 
             _legacyChildLocalization = new Localization
             {
-                Id = "9",
                 Path = "/autotest-child-legacy"
             };
-           
-            _testLocalizations = new[] { _parentLocalization, _childLocalization, _legacyParentLocalization, _legacyChildLocalization };
+
+            _testLocalizations = new[]
+            {
+                _parentLocalization, _childLocalization, _legacyParentLocalization,
+                _legacyChildLocalization
+            };
+
+            // map path of publications to Ids
+            var client = PCAClientFactory.Instance.CreateClient();
+            var publications = client.GetPublications(ContentNamespace.Sites, null, null, null, null);
+            var publicationsLut = publications.Edges.ToDictionary(x => x.Node.PublicationUrl,
+                x => x.Node.PublicationId.ToString());
+            foreach (var x in _testLocalizations)
+            {
+                x.Id = publicationsLut[x.Path];
+            }
 
             TestRegistration.RegisterViewModels();
         }
