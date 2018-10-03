@@ -29,41 +29,59 @@ namespace Sdl.Web.Tridion.PCAClient
             new Lazy<PCAClientFactory>(() => new PCAClientFactory());
 
         public static PCAClientFactory Instance => lazy.Value;
-        
+
         private PCAClientFactory()
         {
-            string uri = WebConfigurationManager.AppSettings["pca-service-uri"];
-            if (string.IsNullOrEmpty(uri))
+            try
             {
-                IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
-                _endpoint = new Uri(discoveryService.ContentServiceUri.AbsoluteUri.Replace("content.svc",
-                    "udp/content"));
-            }
-            else
-            {
-                _endpoint = new Uri(uri);
-            }
-            if (_endpoint == null)
-            {
-                throw new PCAClientException("Unable to retrieve endpoint for Public Content Api");
-            }
+                string uri = WebConfigurationManager.AppSettings["pca-service-uri"];
+                if (string.IsNullOrEmpty(uri))
+                {
+                    IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
+                    Uri contentServiceUri = discoveryService.ContentServiceUri;
+                    if (contentServiceUri == null)
+                    {
+                        Log.Error("Unable to retrieve content-service endpoint from discovery-service.");
+                    }
+                    else
+                    {
+                        Log.Info($"Content-service endpoint located at {contentServiceUri}");
+                        _endpoint = new Uri(contentServiceUri.AbsoluteUri.Replace("content.svc",
+                            "udp/content"));
+                    }
+                }
+                else
+                {
+                    _endpoint = new Uri(uri);
+                }
+                if (_endpoint == null)
+                {
+                    throw new PCAClientException("Unable to retrieve endpoint for Public Content Api");
+                }
 
-            uri = WebConfigurationManager.AppSettings["iq-service-uri"];
-            if (string.IsNullOrEmpty(uri))
-            {
-                IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
-                _iqEndpoint = discoveryService.IQServiceUri;
-            }
-            else
-            {
-                _iqEndpoint = new Uri(uri);
-            }
+                uri = WebConfigurationManager.AppSettings["iq-service-uri"];
+                if (string.IsNullOrEmpty(uri))
+                {
+                    IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
+                    _iqEndpoint = discoveryService.IQServiceUri;
+                }
+                else
+                {
+                    _iqEndpoint = new Uri(uri);
+                }
 
-            _oauth = new OAuth(DiscoveryServiceProvider.DefaultTokenProvider);
-            Log.Debug($"PCAClient found at URL '{_endpoint}'.");
-            Log.Info(_iqEndpoint == null
-                ? "Unable to retrieve endpoint for IQ Search Service."
-                : $"IQSearch found at URL '{_iqEndpoint}'.");
+                _oauth = new OAuth(DiscoveryServiceProvider.DefaultTokenProvider);
+                Log.Debug($"PCAClient found at URL '{_endpoint}'.");
+                Log.Info(_iqEndpoint == null
+                    ? "Unable to retrieve endpoint for IQ Search Service."
+                    : $"IQSearch found at URL '{_iqEndpoint}'.");
+            }
+            catch (Exception ex)
+            {
+                const string error = "Failed to initialize PCA client. Check the UDP services are running.";
+                Log.Error(ex, error);
+                throw;
+            }
         }
 
         /// <summary>
@@ -86,6 +104,11 @@ namespace Sdl.Web.Tridion.PCAClient
 
             // add context data to client
             IClaimStore claimStore = AmbientDataContext.CurrentClaimStore;
+            if (claimStore == null)
+            {
+                Log.Warn("No claimstore found so unable to populate claims for PCA.");
+            }
+            
             Dictionary<string, string[]> headers =
                 claimStore?.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
             if (headers != null && headers.ContainsKey(PreviewSessionTokenHeader))
