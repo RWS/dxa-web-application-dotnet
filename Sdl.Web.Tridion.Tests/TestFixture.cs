@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
@@ -148,6 +149,7 @@ namespace Sdl.Web.Tridion.Tests
             // map path of publications to Ids
             var client = PCAClientFactory.Instance.CreateClient();
             var publications = client.GetPublications(ContentNamespace.Sites, null, null, null, null);
+            Assert.AreNotEqual(0, publications.Edges.Count, "No publications returned from content service. Check you have published all the relevant publications.");
             var publicationsLut = new Dictionary<string, string>();
             foreach (var x in publications.Edges.Where(x => !publicationsLut.ContainsKey(x.Node.PublicationUrl)))
             {
@@ -155,6 +157,7 @@ namespace Sdl.Web.Tridion.Tests
             }
             foreach (var x in _testLocalizations)
             {
+                if (!publicationsLut.ContainsKey(x.Path)) continue;
                 x.Id = publicationsLut[x.Path];
                 if (x.Path != "/autotest-parent") continue;
                 // Grab homepage id since this is used in some unit tests
