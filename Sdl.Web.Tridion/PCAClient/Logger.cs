@@ -1,6 +1,6 @@
 ﻿using System;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Core;
+using Sdl.Web.PublicContentApi.Core;
 
 namespace Sdl.Web.Tridion.PCAClient
 {
