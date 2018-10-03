@@ -21,6 +21,7 @@ namespace Sdl.Web.Tridion.Tests
             DefaultInitialize(testContext);
         }
 
+        [Ignore]
         [TestMethod]
         public void GetEntityModel_NoXpmMetadataOnLive_Success() // See TSI-1942
         {
