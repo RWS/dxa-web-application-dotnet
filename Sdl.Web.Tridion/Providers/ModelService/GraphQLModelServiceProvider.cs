@@ -144,8 +144,11 @@ namespace Sdl.Web.Tridion.ModelService
                 var client = Client;
                 var ns = GetNamespace(localization);
                 var publicationId = int.Parse(localization.Id);
-                var root = client.GetSitemap(ns, publicationId, -1, null);                      
-                return (TaxonomyNode)Convert(root);
+                var root = client.GetSitemap(ns, publicationId, 1, null);
+                if (root == null) return null;
+                string parent = root.Id ?? root.Items[0].Id.Split('-')[0];
+                var tree = GetChildSitemapItemsInternal(parent, localization, true, -1);
+                return (TaxonomyNode)Convert(tree[0]);
             }
             catch (GraphQLClientException e)
             {
