@@ -4,6 +4,7 @@ using System;
 using System.Web;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Mvc.Configuration
 {
@@ -32,8 +33,28 @@ namespace Sdl.Web.Mvc.Configuration
         /// <summary>
         /// The Tridion Context Engine
         /// </summary>
-        public static ContextEngine ContextEngine 
-            => (ContextEngine)GetFromContextStore("ContextEngine") ?? (ContextEngine)AddToContextStore("ContextEngine", new ContextEngine());
+        public static ContextEngine ContextEngine
+        {
+            get
+            {
+                ContextEngine result = (ContextEngine)GetFromContextStore("ContextEngine");
+                if (result == null)
+                {
+                    try
+                    {
+                        result = new ContextEngine();
+                        AddToContextStore("ContextEngine", result);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex);
+                        throw;
+                    }
+                }
+
+                return result;
+            }
+        }
 
         /// <summary>
         /// The maximum width for media objects for this requests display width

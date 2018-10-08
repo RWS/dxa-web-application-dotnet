@@ -20,6 +20,7 @@
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <TargetFrameworkProfile />
     <DxaDataModelVersion>2.1.0-beta-201804241437</DxaDataModelVersion>
+    <SdlPCAPackageVersion>2.1.0-beta-201810041027</SdlPCAPackageVersion>
     <SdlDeliveryVersion>11.0.0</SdlDeliveryVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -69,6 +70,10 @@
     <Reference Include="Sdl.Web.Delivery.Model">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlDeliveryVersion)\lib\net452\Sdl.Web.Delivery.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="Sdl.Web.PublicContentApi, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Sdl.Web.PublicContentApi.$(SdlPCAPackageVersion)\lib\net452\Sdl.Web.PublicContentApi.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ServiceModel" />

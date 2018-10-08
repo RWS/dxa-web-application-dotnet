@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
+using Sdl.Web.PublicContentApi;
+using Sdl.Web.PublicContentApi.ContentModel;
 using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Navigation;
 using Sdl.Web.Tridion.Caching;
 using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.ModelService;
+using Sdl.Web.Tridion.PCAClient;
 using Sdl.Web.Tridion.Providers.Binary;
 
 namespace Sdl.Web.Tridion.Tests
@@ -35,10 +39,8 @@ namespace Sdl.Web.Tridion.Tests
 
     internal class TestFixture : ILocalizationResolver
     {
-        //internal const string HomePageId = "640"; // dxadevweb85.ams.dev
-        internal const string HomePageId = "277";
-        //internal const string ArticleDcpEntityId = "9712-9711";
-        internal const string ArticleDcpEntityId = "460-642";
+        internal static readonly string HomePageId = "277"; // /autotest-parent homepage Id
+        internal const string ArticleDcpEntityId = "9712-9711";        
         internal const string NavigationTaxonomyTitle = "Test Taxonomy [Navigation]";
         internal const string TopLevelKeyword1Title = "Top-level Keyword 1";
         internal const string TopLevelKeyword2Title = "Top-level Keyword 2";
@@ -116,36 +118,59 @@ namespace Sdl.Web.Tridion.Tests
             {
                 Id = "1083",
                 Path = "/autotest-child-legacy"
-            };
-          */
+            }; */
 
-            /* http://cm.dev.dxa.sdldev.net */
             _parentLocalization = new Localization
             {
-                Id = "6",
                 Path = "/autotest-parent"
             };
 
             _childLocalization = new Localization
             {
-                Id = "7",
                 Path = "/autotest-child"
             };
 
             _legacyParentLocalization = new Localization
             {
-                Id = "8",
                 Path = "/autotest-parent-legacy"
             };
 
             _legacyChildLocalization = new Localization
             {
-                Id = "9",
                 Path = "/autotest-child-legacy"
             };
-           
-            _testLocalizations = new[] { _parentLocalization, _childLocalization, _legacyParentLocalization, _legacyChildLocalization };
 
+            _testLocalizations = new[]
+            {
+                _parentLocalization, _childLocalization, _legacyParentLocalization,
+                _legacyChildLocalization
+            };
+
+            // map path of publications to Ids
+            var client = PCAClientFactory.Instance.CreateClient();
+            var publications = client.GetPublications(ContentNamespace.Sites, null, null, null, null);
+            Assert.AreNotEqual(0, publications.Edges.Count,
+                "No publications returned from content service. Check you have published all the relevant publications.");
+            var publicationsLut = new Dictionary<string, string>();
+            foreach (var x in publications.Edges.Where(x => !publicationsLut.ContainsKey(x.Node.PublicationUrl)))
+            {
+                publicationsLut.Add(x.Node.PublicationUrl, x.Node.PublicationId.ToString());
+            }
+            foreach (var x in _testLocalizations)
+            {
+                if (!publicationsLut.ContainsKey(x.Path)) continue;
+                x.Id = publicationsLut[x.Path];
+                if (x.Path != "/autotest-parent") continue;
+                // Grab homepage id since this is used in some unit tests
+                int pubId = int.Parse(x.Id);
+                string path = $"{x.Path}/index.html";
+                var page = client.GetPage(
+                    ContentNamespace.Sites, pubId, path, null,
+                    ContentIncludeMode.Exclude, null);
+                if (page == null)
+                    Assert.Fail("Unable to find /autotest-parent homepage Id");
+                HomePageId = page.ItemId.ToString();
+            }
             TestRegistration.RegisterViewModels();
         }
 

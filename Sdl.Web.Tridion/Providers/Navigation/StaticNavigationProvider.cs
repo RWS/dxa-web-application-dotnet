@@ -141,7 +141,8 @@ namespace Sdl.Web.Tridion.Navigation
                         );
                 }
 
-                return JsonConvert.DeserializeObject<SitemapItem>(rawDataProvider.GetPageContent(navigationJsonUrlPath, localization));
+                string json = rawDataProvider.GetPageContent(navigationJsonUrlPath, localization);
+                return JsonConvert.DeserializeObject<SitemapItem>(json);
             }
         }
 

@@ -5,6 +5,7 @@ using Sdl.Web.PublicContentApi.Utils;
 using Sdl.Web.Tridion.PCAClient;
 using System;
 using System.Linq;
+using Sdl.Web.PublicContentApi;
 
 namespace Sdl.Web.Tridion.Providers.Query
 {   
@@ -23,7 +24,7 @@ namespace Sdl.Web.Tridion.Providers.Query
             {
                 First = queryParams.PageSize + 1,
                 After = queryParams.Cursor
-            }, null, false, false, null);
+            }, null, ContentIncludeMode.Exclude, false, null);
 
             HasMore = results.Edges.Count > queryParams.PageSize;
             int n = HasMore ? queryParams.PageSize : results.Edges.Count;
@@ -45,7 +46,7 @@ namespace Sdl.Web.Tridion.Providers.Query
             {
                 First = queryParams.PageSize + 1,
                 After = queryParams.Cursor
-            }, null, false, false, null);
+            }, null, ContentIncludeMode.Exclude, false, null);
 
             HasMore = results.Edges.Count > queryParams.PageSize;
             int n = HasMore ? queryParams.PageSize : results.Edges.Count;
