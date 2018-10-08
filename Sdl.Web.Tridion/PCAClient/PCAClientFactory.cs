@@ -47,7 +47,7 @@ namespace Sdl.Web.Tridion.PCAClient
                     {
                         Log.Info($"Content-service endpoint located at {contentServiceUri}");
                         _endpoint = new Uri(contentServiceUri.AbsoluteUri.Replace("content.svc",
-                            "udp/content"));
+                            "cd/api"));
                     }
                 }
                 else
