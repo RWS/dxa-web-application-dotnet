@@ -20,6 +20,7 @@ namespace Sdl.Web.Tridion.PCAClient
     {
         private readonly Uri _endpoint;
         private readonly Uri _iqEndpoint;
+        private readonly string _iqSearchIndex;
 
         private readonly IAuthentication _oauth;
         private const string PreviewSessionTokenHeader = "x-preview-session-token";
@@ -60,6 +61,7 @@ namespace Sdl.Web.Tridion.PCAClient
                 }
 
                 uri = WebConfigurationManager.AppSettings["iq-service-uri"];
+                _iqSearchIndex = WebConfigurationManager.AppSettings["iq-search-index"];
                 if (string.IsNullOrEmpty(uri))
                 {
                     IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
@@ -75,6 +77,15 @@ namespace Sdl.Web.Tridion.PCAClient
                 Log.Info(_iqEndpoint == null
                     ? "Unable to retrieve endpoint for IQ Search Service."
                     : $"IQSearch found at URL '{_iqEndpoint}'.");
+                if (!string.IsNullOrEmpty(_iqSearchIndex))
+                {
+                    Log.Info($"IQ Search Index = {_iqSearchIndex}");
+                }
+                else
+                {
+                    Log.Warn(
+                        "No IQ Search Index configured, using default udp-index. Please add the appSetting iq-search-index and set to your search index name.");
+                }
             }
             catch (Exception ex)
             {
@@ -89,9 +100,30 @@ namespace Sdl.Web.Tridion.PCAClient
         /// </summary>
         /// <typeparam name="TSearchResultSet">Type used for result set</typeparam>
         /// <typeparam name="TSearchResult">Type ised for result</typeparam>
-        /// <returns></returns>
+        /// <returns>IQ Search Client</returns>
         public IQSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>()
-            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IQSearchClient<TSearchResultSet, TSearchResult>(_iqEndpoint, _oauth);
+            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IQSearchClient<TSearchResultSet, TSearchResult>(_iqEndpoint, _oauth, _iqSearchIndex);
+
+        /// <summary>
+        /// Returns a fully constructed IQ Search client
+        /// </summary>
+        /// <typeparam name="TSearchResultSet">Type used for result set</typeparam>
+        /// <typeparam name="TSearchResult">Type ised for result</typeparam>
+        /// <param name="searchIndex">Search Index</param>
+        /// <returns>IQ Search Client</returns>
+        public IQSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>(string searchIndex)
+            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IQSearchClient<TSearchResultSet, TSearchResult>(_iqEndpoint, _oauth, searchIndex);
+
+        /// <summary>
+        /// Returns a fully constructed IQ Search client
+        /// </summary>
+        /// <typeparam name="TSearchResultSet">Type used for result set</typeparam>
+        /// <typeparam name="TSearchResult">Type ised for result</typeparam>
+        /// <param name="endpoint">IQ Search endpoint</param>
+        /// <param name="searchIndex">Search Index</param>
+        /// <returns></returns>
+        public IQSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>(Uri endpoint, string searchIndex)
+            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IQSearchClient<TSearchResultSet, TSearchResult>(endpoint, _oauth, searchIndex);
 
         /// <summary>
         /// Return a fully constructed Public Content Api client
