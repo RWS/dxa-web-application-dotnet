@@ -77,10 +77,7 @@ namespace Sdl.Web.Tridion.TridionDocs.Localization
 
         protected override void Load()
         {
-            using (new Tracer(this))
-            {
-                LastRefresh = DateTime.Now;
-            }
+            LastRefresh = DateTime.Now;
         }
 
         public override IDictionary GetResources(string sectionName = null)

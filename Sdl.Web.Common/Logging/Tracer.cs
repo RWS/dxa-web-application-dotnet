@@ -259,15 +259,18 @@ namespace Sdl.Web.Common.Logging
             }
 
             // Limit the result (only when there is a result limit defined)
-            int length = result.Length;
-            if (length > resultLimit && resultLimit != -1)
+            if (result != null)
             {
-                result = result.Substring(0, resultLimit);
-                result += "…";
-
-                if (result.StartsWith("\"") && !result.EndsWith("\""))
+                int length = result.Length;
+                if (length > resultLimit && resultLimit != -1)
                 {
-                    result += "\"";
+                    result = result.Substring(0, resultLimit);
+                    result += "…";
+
+                    if (result.StartsWith("\"") && !result.EndsWith("\""))
+                    {
+                        result += "\"";
+                    }
                 }
             }
             return result;
