@@ -32,6 +32,12 @@ namespace Sdl.Web.Common.Configuration
             _mappingsManager = new LocalizationMappingsManager(this);
         }
 
+        public Localization(ILocalizationResources resources, ILocalizationMappingsManager mappings)
+        {
+            _resourceManager = resources;
+            _mappingsManager = mappings;
+        }
+
         #region Nested classes
         /// <summary>
         /// Represents the (JSON) data for versioning as stored in /version.json.
@@ -68,7 +74,7 @@ namespace Sdl.Web.Common.Configuration
             }
             set
             {
-                string canonicalPath = (value != null) && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value;
+                var canonicalPath = (value != null) && value.EndsWith("/") ? value.Substring(0, value.Length - 1) : value;
                 _path = canonicalPath;
             }
         }
@@ -137,8 +143,7 @@ namespace Sdl.Web.Common.Configuration
         /// <summary>
         /// Gets the root folder of the binaries cache for this Localization.
         /// </summary>
-        public virtual string BinaryCacheFolder
-            => $"{SiteConfiguration.StaticsFolder}\\{Id}";
+        public virtual string BinaryCacheFolder => $"{SiteConfiguration.StaticsFolder}\\{CmUriScheme}-{Id}";
 
         /// <summary>
         /// Gets (or sets) whether the Localization is XPM Enabled (a.k.a. a "Staging" environment).
@@ -212,8 +217,7 @@ namespace Sdl.Web.Common.Configuration
         /// Gets a CM identifier (URI) for this Localization
         /// </summary>
         /// <returns>the CM URI.</returns>
-        public virtual string GetCmUri()
-            => $"{CmUriScheme}:0-{Id ?? "0"}-1";
+        public virtual string GetCmUri() => $"{CmUriScheme}:0-{Id ?? "0"}-1";
 
         /// <summary>
         /// Gets the base URI for this localization
@@ -222,7 +226,7 @@ namespace Sdl.Web.Common.Configuration
         public virtual string GetBaseUrl()
         {
             if (HttpContext.Current == null) return null;
-            Uri uri = HttpContext.Current.Request.Url;
+            var uri = HttpContext.Current.Request.Url;
             return uri.GetLeftPart(UriPartial.Authority) + Path;
         }
 
@@ -277,6 +281,21 @@ namespace Sdl.Web.Common.Configuration
         /// <param name="sectionName">Optional name of the section for which to get resource. If not specified (or <c>null</c>), all resources are obtained.</param>
         public virtual IDictionary GetResources(string sectionName = null)
             => _resourceManager.GetResources(sectionName);
+
+        /// <summary>
+        /// Manually set the semantic schemas instead of loading them automatically
+        /// </summary>
+        /// <param name="schemas">Schemas to use</param>
+        /// <param name="vocab">Vocabularies to use</param>
+        public void SetSemanticSchemas(List<SemanticSchema> schemas, List<SemanticVocabulary> vocab)
+            => _mappingsManager.SetSemanticSchemas(schemas, vocab);
+
+        /// <summary>
+        /// Adds a predefined schema
+        /// </summary>
+        /// <param name="schema">Schema</param>
+        public void AddPredefinedSchema(SemanticSchema schema)
+            => _mappingsManager.AddPredefinedSchema(schema);
 
         /// <summary>
         /// Gets Semantic Schema for a given schema identifier.

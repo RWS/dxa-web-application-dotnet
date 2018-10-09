@@ -11,7 +11,7 @@ namespace Sdl.Web.Tridion.Tests
     public class LegacyContentProviderTest : ContentProviderTest
     {
         public LegacyContentProviderTest()
-            : base(new DefaultContentProvider(), () => TestFixture.LegacyParentLocalization)
+            : base(new GraphQLContentProvider(), () => TestFixture.LegacyParentLocalization)
         {
         }
 
@@ -21,6 +21,7 @@ namespace Sdl.Web.Tridion.Tests
             DefaultInitialize(testContext);
         }
 
+        [Ignore]
         [TestMethod]
         public void GetEntityModel_NoXpmMetadataOnLive_Success() // See TSI-1942
         {

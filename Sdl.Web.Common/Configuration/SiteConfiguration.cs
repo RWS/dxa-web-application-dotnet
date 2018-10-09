@@ -125,7 +125,7 @@ namespace Sdl.Web.Common.Configuration
                 ModelServiceProvider = GetProvider<IModelServiceProvider>(dependencyResolver);
                 ContentProvider = GetProvider<IContentProvider>(dependencyResolver);
                 NavigationProvider = GetProvider<INavigationProvider>(dependencyResolver);
-                ContextClaimsProvider = GetProvider<IContextClaimsProvider>(dependencyResolver);
+                ContextClaimsProvider = GetProvider<IContextClaimsProvider>(dependencyResolver, isOptional: true);
                 LinkResolver = GetProvider<ILinkResolver>(dependencyResolver);
                 ConditionalEntityEvaluator = GetProvider<IConditionalEntityEvaluator>(dependencyResolver, isOptional: true);
                 MediaHelper = GetProvider<IMediaHelper>(dependencyResolver);

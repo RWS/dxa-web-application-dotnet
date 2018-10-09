@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Tridion.ContentDelivery.DynamicContent;
@@ -23,6 +25,11 @@ namespace Sdl.Web.Tridion.Providers.Binary
             return componentMeta.LastPublicationDate;
         }
 
+        public async Task<DateTime> GetBinaryLastPublishedDateAsync(ILocalization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            throw new NotImplementedException();
+        }
+
         public DateTime GetBinaryLastPublishedDate(ILocalization localization, int binaryId)
         {
             BinaryMeta binaryMeta = GetBinaryMeta(localization, binaryId);
@@ -35,7 +42,12 @@ namespace Sdl.Web.Tridion.Providers.Binary
             return componentMeta.LastPublicationDate;
         }
 
-        public byte[] GetBinary(ILocalization localization, string urlPath, out string binaryPath)
+        public Task<DateTime> GetBinaryLastPublishedDateAsync(ILocalization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            throw new NotImplementedException();
+        }
+
+        public Tuple<byte[],string> GetBinary(ILocalization localization, string urlPath)
         {
             // Binary does not exist or cached binary is out-of-date
             BinaryMeta binaryMeta = GetBinaryMeta(localization, urlPath);
@@ -43,23 +55,31 @@ namespace Sdl.Web.Tridion.Providers.Binary
             {
                 throw new DxaItemNotFoundException(urlPath, localization.Id);
             }
-            binaryPath = binaryMeta.Path;
             BinaryFactory binaryFactory = new BinaryFactory();
             BinaryData binaryData = binaryFactory.GetBinary(int.Parse(localization.Id), binaryMeta.Id, binaryMeta.VariantId);
-            return binaryData.Bytes;
+            return new Tuple<byte[], string>(binaryData.Bytes, binaryMeta.Path);
         }
 
-        public byte[] GetBinary(ILocalization localization, int binaryId, out string binaryPath)
+        public Tuple<byte[],string> GetBinary(ILocalization localization, int binaryId)
         {
             BinaryMeta binaryMeta = GetBinaryMeta(localization, binaryId);
             if (binaryMeta == null)
             {
                 throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
             }
-            binaryPath = binaryMeta.Path;
             BinaryFactory binaryFactory = new BinaryFactory();
             BinaryData binaryData = binaryFactory.GetBinary(int.Parse(localization.Id), binaryMeta.Id, binaryMeta.VariantId);
-            return binaryData.Bytes;
+            return new Tuple<byte[], string>(binaryData.Bytes, binaryMeta.Path);
+        }
+
+        public Task<Tuple<byte[], string>> GetBinaryAsync(ILocalization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Tuple<byte[], string>> GetBinaryAsync(ILocalization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            throw new NotImplementedException();
         }
 
         private static BinaryMeta GetBinaryMeta(ILocalization localization, int binaryId)

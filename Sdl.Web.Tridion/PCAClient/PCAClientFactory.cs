@@ -6,6 +6,8 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Delivery.DiscoveryService;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore;
 using Sdl.Web.HttpClient.Auth;
+using Sdl.Web.IQQuery.API;
+using Sdl.Web.IQQuery.Client;
 using Sdl.Web.PublicContentApi.ContentModel;
 
 namespace Sdl.Web.Tridion.PCAClient
@@ -17,6 +19,8 @@ namespace Sdl.Web.Tridion.PCAClient
     public sealed class PCAClientFactory
     {
         private readonly Uri _endpoint;
+        private readonly Uri _iqEndpoint;
+
         private readonly IAuthentication _oauth;
         private const string PreviewSessionTokenHeader = "x-preview-session-token";
         private const string PreviewSessionTokenCookie = "preview-session-token";
@@ -25,28 +29,69 @@ namespace Sdl.Web.Tridion.PCAClient
             new Lazy<PCAClientFactory>(() => new PCAClientFactory());
 
         public static PCAClientFactory Instance => lazy.Value;
-        
+
         private PCAClientFactory()
         {
-            string uri = WebConfigurationManager.AppSettings["pca-service-uri"];
-            if (string.IsNullOrEmpty(uri))
+            try
             {
-                IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
-                _endpoint = new Uri(discoveryService.ContentServiceUri.AbsoluteUri.Replace("content.svc",
-                    "udp/content"));
-            }
-            else
-            {
-                _endpoint = new Uri(uri);
-            }
-            if (_endpoint == null)
-            {
-                throw new PCAClientException("Unable to retrieve endpoint for Public Content Api");
-            }
+                string uri = WebConfigurationManager.AppSettings["pca-service-uri"];
+                if (string.IsNullOrEmpty(uri))
+                {
+                    IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
+                    Uri contentServiceUri = discoveryService.ContentServiceUri;
+                    if (contentServiceUri == null)
+                    {
+                        Log.Error("Unable to retrieve content-service endpoint from discovery-service.");
+                    }
+                    else
+                    {
+                        Log.Info($"Content-service endpoint located at {contentServiceUri}");
+                        _endpoint = new Uri(contentServiceUri.AbsoluteUri.Replace("content.svc",
+                            "cd/api"));
+                    }
+                }
+                else
+                {
+                    _endpoint = new Uri(uri);
+                }
+                if (_endpoint == null)
+                {
+                    throw new PCAClientException("Unable to retrieve endpoint for Public Content Api");
+                }
 
-            _oauth = new OAuth(DiscoveryServiceProvider.DefaultTokenProvider);
-            Log.Debug($"PCAClient found at URL '{_endpoint}'.");
+                uri = WebConfigurationManager.AppSettings["iq-service-uri"];
+                if (string.IsNullOrEmpty(uri))
+                {
+                    IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
+                    _iqEndpoint = discoveryService.IQServiceUri;
+                }
+                else
+                {
+                    _iqEndpoint = new Uri(uri);
+                }
+
+                _oauth = new OAuth(DiscoveryServiceProvider.DefaultTokenProvider);
+                Log.Debug($"PCAClient found at URL '{_endpoint}'.");
+                Log.Info(_iqEndpoint == null
+                    ? "Unable to retrieve endpoint for IQ Search Service."
+                    : $"IQSearch found at URL '{_iqEndpoint}'.");
+            }
+            catch (Exception ex)
+            {
+                const string error = "Failed to initialize PCA client. Check the UDP services are running.";
+                Log.Error(ex, error);
+                throw;
+            }
         }
+
+        /// <summary>
+        /// Returns a fully constructed IQ Search client
+        /// </summary>
+        /// <typeparam name="TSearchResultSet">Type used for result set</typeparam>
+        /// <typeparam name="TSearchResult">Type ised for result</typeparam>
+        /// <returns></returns>
+        public IQSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>()
+            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IQSearchClient<TSearchResultSet, TSearchResult>(_iqEndpoint, _oauth);
 
         /// <summary>
         /// Return a fully constructed Public Content Api client
@@ -59,6 +104,11 @@ namespace Sdl.Web.Tridion.PCAClient
 
             // add context data to client
             IClaimStore claimStore = AmbientDataContext.CurrentClaimStore;
+            if (claimStore == null)
+            {
+                Log.Warn("No claimstore found so unable to populate claims for PCA.");
+            }
+            
             Dictionary<string, string[]> headers =
                 claimStore?.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
             if (headers != null && headers.ContainsKey(PreviewSessionTokenHeader))
@@ -70,8 +120,7 @@ namespace Sdl.Web.Tridion.PCAClient
                  claimStore?.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
             if (cookies != null && cookies.ContainsKey(PreviewSessionTokenCookie))
             {
-                // todo:
-                //client.HttpClient.Cookies.Add(cookies[PreviewSessionTokenCookie]);
+                client.HttpClient.Headers[PreviewSessionTokenHeader] = cookies[PreviewSessionTokenCookie];              
             }
 
             // Forward all claims

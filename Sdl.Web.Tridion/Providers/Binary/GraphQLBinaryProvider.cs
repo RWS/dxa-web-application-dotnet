@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Web.Configuration;
+using System.Threading;
+using System.Threading.Tasks;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
@@ -24,58 +25,127 @@ namespace Sdl.Web.Tridion.Providers.Binary
         public DateTime GetBinaryLastPublishedDate(ILocalization localization, string urlPath)
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), urlPath, null);
+            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), urlPath, null, null);
+            return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+        }
+
+        public async Task<DateTime> GetBinaryLastPublishedDateAsync(ILocalization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var client = PCAClientFactory.Instance.CreateClient();
+            var binary = await client.GetBinaryComponentAsync(GetNamespace(localization), int.Parse(localization.Id), urlPath, null, null, cancellationToken);
             return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
         }
 
         public DateTime GetBinaryLastPublishedDate(ILocalization localization, int binaryId)
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), binaryId, null);
+            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), binaryId, null, null);
             return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
         }
 
-        public byte[] GetBinary(ILocalization localization, int binaryId, out string binaryPath)
+        public async Task<DateTime> GetBinaryLastPublishedDateAsync(ILocalization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), binaryId, null);
-            var data = GetBinaryData(client, binary, out binaryPath);
+            var binary = await client.GetBinaryComponentAsync(GetNamespace(localization), int.Parse(localization.Id), binaryId, null, null, cancellationToken);
+            return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+        }
+
+        public Tuple<byte[],string> GetBinary(ILocalization localization, int binaryId)
+        {
+            var client = PCAClientFactory.Instance.CreateClient();
+            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), binaryId, null, null);
+            var data = GetBinaryData(client, binary);
             if (data == null) throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
             return data;
         }
 
-        public byte[] GetBinary(ILocalization localization, string urlPath, out string binaryPath)
+        public async Task<Tuple<byte[], string>> GetBinaryAsync(ILocalization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
         {
             var client = PCAClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), urlPath, null);
-            var data = GetBinaryData(client, binary, out binaryPath);
+            var binary = await client.GetBinaryComponentAsync(GetNamespace(localization), int.Parse(localization.Id), binaryId, null, null, cancellationToken);
+            var data = await GetBinaryDataAsync(client, binary, cancellationToken);
+            if (data == null) throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
+            return data;
+        }             
+
+        public Tuple<byte[],string> GetBinary(ILocalization localization, string urlPath)
+        {
+            var client = PCAClientFactory.Instance.CreateClient();
+            var binary = client.GetBinaryComponent(GetNamespace(localization), int.Parse(localization.Id), urlPath, null, null);
+            var data = GetBinaryData(client, binary);
             if(data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
             return data;
         }
 
-        protected virtual byte[] GetBinaryData(IGraphQLClient client, BinaryComponent binaryComponent, out string binaryPath)
+        public async Task<Tuple<byte[], string>> GetBinaryAsync(ILocalization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
         {
-            binaryPath = null;
+            var client = PCAClientFactory.Instance.CreateClient();
+            var binary = await client.GetBinaryComponentAsync(GetNamespace(localization), int.Parse(localization.Id), urlPath, null, null, cancellationToken);
+            var data = await GetBinaryDataAsync(client, binary, cancellationToken);
+            if (data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
+            return data;
+        }
+
+        protected virtual Tuple<byte[],string> GetBinaryData(IGraphQLClient client, BinaryComponent binaryComponent)
+        {
+            if (binaryComponent == null) return null;
+          
             if (binaryComponent?.Variants == null)
             {
-                Log.Error("Unable to get binary data for CmUri: " + binaryComponent.CmUri());
+                Log.Error("Unable to get binary data for CmUri (Variants null): " + binaryComponent.CmUri());
                 return null;
             }
-            var variant = binaryComponent.Variants.Edges[0].Node;
-            binaryPath = variant.Path;
             try
             {
+                if (binaryComponent.Variants.Edges == null || binaryComponent.Variants.Edges.Count == 0)
+                {
+                    Log.Error("Empty variants returned by GraphQL query for binary compeont: " + binaryComponent.CmUri());
+                    return null;
+                }
+                var variant = binaryComponent.Variants.Edges[0].Node;
+                if (string.IsNullOrEmpty(variant.DownloadUrl))
+                {
+                    Log.Error("Binary variant download Url is missing for binary compeont: " + binaryComponent.CmUri());
+                    return null;
+                }
                 Log.Debug("Attempting to get binary at : " + variant.DownloadUrl);
-                return client.HttpClient.Execute<byte[]>(new HttpClientRequest
+                return new Tuple<byte[], string>(client.HttpClient.Execute<byte[]>(new HttpClientRequest
                 {
                     AbsoluteUri = variant.DownloadUrl
-                }).ResponseData;
+                }).ResponseData, variant.Path);
             }
             catch(Exception ex)
             {
                 Log.Error(ex, "Unable to get binary data for CmUri: " + binaryComponent.CmUri());
                 return null;
             }          
-        }     
+        }
+
+        protected virtual async Task<Tuple<byte[], string>> GetBinaryDataAsync(IGraphQLClient client, BinaryComponent binaryComponent, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (binaryComponent == null) return null;
+
+            if (binaryComponent?.Variants == null)
+            {
+                Log.Error("Unable to get binary data for CmUri: " + binaryComponent.CmUri());
+                return null;
+            }
+            var variant = binaryComponent.Variants.Edges[0].Node;
+            try
+            {
+                Log.Debug("Attempting to get binary at : " + variant.DownloadUrl);
+                var data = await client.HttpClient.ExecuteAsync<byte[]>(new HttpClientRequest
+                {
+                    AbsoluteUri = variant.DownloadUrl
+                }, cancellationToken);
+
+                return new Tuple<byte[], string>(data.ResponseData, variant.Path);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Unable to get binary data for CmUri: " + binaryComponent.CmUri());
+                return null;
+            }
+        }
     }
 }

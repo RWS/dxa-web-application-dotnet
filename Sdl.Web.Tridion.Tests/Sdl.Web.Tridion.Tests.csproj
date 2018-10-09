@@ -20,7 +20,8 @@
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <TargetFrameworkProfile />
     <DxaDataModelVersion>2.1.0-beta-201804241437</DxaDataModelVersion>
-    <SdlDeliveryVersion>11.0.0-beta-201805161005</SdlDeliveryVersion>
+    <SdlPCAPackageVersion>2.1.0-beta-201810041027</SdlPCAPackageVersion>
+    <SdlDeliveryVersion>11.0.0</SdlDeliveryVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -70,6 +71,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlDeliveryVersion)\lib\net452\Sdl.Web.Delivery.Model.dll</HintPath>
     </Reference>
+    <Reference Include="Sdl.Web.PublicContentApi, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Sdl.Web.PublicContentApi.$(SdlPCAPackageVersion)\lib\net452\Sdl.Web.PublicContentApi.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
@@ -91,7 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CacheProviderTest.cs" />
-    <Compile Include="CdApiLocalizationResolverTest.cs" />
+    <Compile Include="LocalizationResolverTest.cs" />
     <Compile Include="ContextServiceClaimsProviderTest.cs" />
     <Compile Include="DefaultCacheProviderTest.cs" />
     <Compile Include="DynamicNavigationProviderTest.cs" />

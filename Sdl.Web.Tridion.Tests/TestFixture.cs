@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
+using Sdl.Web.PublicContentApi;
+using Sdl.Web.PublicContentApi.ContentModel;
 using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Navigation;
 using Sdl.Web.Tridion.Caching;
 using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.ModelService;
+using Sdl.Web.Tridion.PCAClient;
+using Sdl.Web.Tridion.Providers.Binary;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -34,8 +39,8 @@ namespace Sdl.Web.Tridion.Tests
 
     internal class TestFixture : ILocalizationResolver
     {
-        internal const string HomePageId = "640";
-        internal const string ArticleDcpEntityId = "9712-9711";
+        internal static readonly string HomePageId = "277"; // /autotest-parent homepage Id
+        internal const string ArticleDcpEntityId = "9712-9711";        
         internal const string NavigationTaxonomyTitle = "Test Taxonomy [Navigation]";
         internal const string TopLevelKeyword1Title = "Top-level Keyword 1";
         internal const string TopLevelKeyword2Title = "Top-level Keyword 2";
@@ -53,7 +58,8 @@ namespace Sdl.Web.Tridion.Tests
         internal const string TaxonomyIndexPageRelativeUrlPath = "regression/taxonomy";
         internal const string Tsi811PageRelativeUrlPath = "regression/tsi-811";
         internal const string Tsi1278PageRelativeUrlPath = "tsi-1278_trådløst.html";
-        internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-9791.jpg";
+        //internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-9791.jpg";
+        internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-508.jpg";
         internal const string Tsi1308PageRelativeUrlPath = "regression/tsi-1308";
         internal const string Tsi1757PageRelativeUrlPath = "regression/tsi-1757";
         internal const string Tsi1614PageRelativeUrlPath = "tsi-1614.html";
@@ -76,19 +82,20 @@ namespace Sdl.Web.Tridion.Tests
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
             { typeof(ICacheProvider), new DefaultCacheProvider() },
-            { typeof(IModelServiceProvider), new DefaultModelServiceProvider() },
-            { typeof(IContentProvider), new DefaultContentProvider() },
+            { typeof(IModelServiceProvider), new GraphQLModelServiceProvider() },
+            { typeof(IContentProvider), new GraphQLContentProvider() },
             { typeof(INavigationProvider), new StaticNavigationProvider() },
-            { typeof(ILinkResolver), new DefaultLinkResolver() },
+            { typeof(ILinkResolver), new GraphQLLinkResolver() },
             { typeof(IMediaHelper), new MockMediaHelper() },
             { typeof(ILocalizationResolver), new TestFixture() },
             { typeof(IContextClaimsProvider), new TestContextClaimsProvider() },
-            { typeof(IConditionalEntityEvaluator), new MockConditionalEntityEvaluator() }
+            { typeof(IConditionalEntityEvaluator), new MockConditionalEntityEvaluator() },
+            { typeof(IBinaryProvider), new GraphQLBinaryProvider() }
         };
 
         static TestFixture()
-        {           
-            /* dxadevwev85.ams.dev
+        {
+            /* dxadevwev85.ams.dev 
             _parentLocalization = new Localization
             {
                 Id = "1065",
@@ -111,36 +118,59 @@ namespace Sdl.Web.Tridion.Tests
             {
                 Id = "1083",
                 Path = "/autotest-child-legacy"
-            };
-            */
+            }; */
 
-            // http://cm.dev.dxa.sdldev.net
             _parentLocalization = new Localization
             {
-                Id = "6",
                 Path = "/autotest-parent"
             };
 
             _childLocalization = new Localization
             {
-                Id = "7",
                 Path = "/autotest-child"
             };
 
             _legacyParentLocalization = new Localization
             {
-                Id = "8",
                 Path = "/autotest-parent-legacy"
             };
 
             _legacyChildLocalization = new Localization
             {
-                Id = "9",
                 Path = "/autotest-child-legacy"
             };
 
-            _testLocalizations = new[] { _parentLocalization, _childLocalization, _legacyParentLocalization, _legacyChildLocalization };
+            _testLocalizations = new[]
+            {
+                _parentLocalization, _childLocalization, _legacyParentLocalization,
+                _legacyChildLocalization
+            };
 
+            // map path of publications to Ids
+            var client = PCAClientFactory.Instance.CreateClient();
+            var publications = client.GetPublications(ContentNamespace.Sites, null, null, null, null);
+            Assert.AreNotEqual(0, publications.Edges.Count,
+                "No publications returned from content service. Check you have published all the relevant publications.");
+            var publicationsLut = new Dictionary<string, string>();
+            foreach (var x in publications.Edges.Where(x => !publicationsLut.ContainsKey(x.Node.PublicationUrl)))
+            {
+                publicationsLut.Add(x.Node.PublicationUrl, x.Node.PublicationId.ToString());
+            }
+            foreach (var x in _testLocalizations)
+            {
+                if (!publicationsLut.ContainsKey(x.Path)) continue;
+                x.Id = publicationsLut[x.Path];
+                if (x.Path != "/autotest-parent") continue;
+                // Grab homepage id since this is used in some unit tests
+                int pubId = int.Parse(x.Id);
+                string path = $"{x.Path}/index.html";
+                var page = client.GetPage(
+                    ContentNamespace.Sites, pubId, path, null,
+                    ContentIncludeMode.Exclude, null);
+                if (page == null)
+                    Assert.Fail("Unable to find /autotest-parent homepage Id");
+                HomePageId = page.ItemId.ToString();
+            }
             TestRegistration.RegisterViewModels();
         }
 
@@ -188,7 +218,7 @@ namespace Sdl.Web.Tridion.Tests
             object modelServiceProvider;
             if (_testProviders.TryGetValue(typeof(IModelServiceProvider), out modelServiceProvider))
             {
-                ((DefaultModelServiceProvider)modelServiceProvider).AddDataModelExtension(new TestDataModelExtensions());
+                ((IModelServiceProvider)modelServiceProvider).AddDataModelExtension(new TestDataModelExtensions());
             }
 
             SiteConfiguration.InitializeProviders(interfaceType =>

@@ -50,6 +50,7 @@ namespace Sdl.Web.Tridion.Context
                     // ODataContextEngine construction can fail for several reasons, because it immediately tries to communicate with Discovery Service.
                     // Error handling in ODataContextEngine is currently suboptimal and class ContextServiceClaimsProvider is constructed very early in the DXA initialization.
                     // Therefore, we just log the error here and continue; GetContextClaims will throw an exception later on (if we even get to that point).
+                    Log.Error("Error initializing the ContextServiceClaimsProvider.");
                     Log.Error(ex);
                 }
             }
