@@ -14,7 +14,9 @@ namespace Sdl.Web.Common.Models
     [Serializable]
     public class RegionModel : ViewModel, ISyndicationFeedItemProvider
     {
-        private const string XpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\", allowedComponentTypes: [{1}], minOccurs: {2}}} -->";
+        private const string XpmRegionMarkup = "<!-- Start Region: {{title: \"{0}\",{1} allowedComponentTypes: [{2}], {3}}} -->";
+        private const string occurenceConstraintMarkupUnlimited = "minOccurs: {0}";
+        private const string occurenceConstraintMarkup = "minOccurs: {0}, maxOccurs: {1}";
         private const string XpmComponentTypeMarkup = "{{schema: \"{0}\", template: \"{1}\"}}";
 
         /// <summary>
@@ -39,6 +41,11 @@ namespace Sdl.Web.Common.Models
         public string Name { get; private set; }
 
         /// <summary>
+        /// Gets or set the Id of Schema that representing a structure definition for this Region.
+        /// </summary>
+        public string SchemaId { get; set; }
+
+        /// <summary>
         /// Gets the Entities that the Region contains.
         /// </summary>
         public IList<EntityModel> Entities { get; private set; } = new List<EntityModel>();
@@ -52,7 +59,7 @@ namespace Sdl.Web.Common.Models
 
         public RegionModel()
         {
-            
+
         }
 
         /// <summary>
@@ -73,7 +80,7 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         /// <param name="name">The name of the Region.</param>
         /// <param name="qualifiedViewName">The qualified name of the View to use to render the Region. Format: format AreaName:ControllerName:ViewName.</param>
-        public RegionModel(string name, string qualifiedViewName) 
+        public RegionModel(string name, string qualifiedViewName)
             : this(name)
         {
             MvcData = new MvcData(qualifiedViewName)
@@ -92,19 +99,35 @@ namespace Sdl.Web.Common.Models
         /// <returns>The XPM markup.</returns>
         public override string GetXpmMarkup(ILocalization localization)
         {
-            XpmRegion xpmRegion =  localization.GetXpmRegionConfiguration(Name);
+            XpmRegion xpmRegion =  localization.GetXpmRegionConfiguration(SchemaId ?? Name);
             if (xpmRegion == null)
             {
                 return string.Empty;
             }
 
-            // TODO: obtain MinOccurs & MaxOccurs from regions.json
-            return string.Format(
-                XpmRegionMarkup, 
-                Name, 
-                string.Join(", ", xpmRegion.ComponentTypes.Select(ct => string.Format(XpmComponentTypeMarkup, ct.Schema, ct.Template))), 
-                0);
+            int minOccurs = xpmRegion.OccurrenceConstraint?.MinOccurs ?? 0;
+            int maxOccurs = xpmRegion.OccurrenceConstraint?.MaxOccurs ?? -1;
+            string occurrenceConstraint = "";
+            occurrenceConstraint = maxOccurs == -1
+                ? string.Format(occurenceConstraintMarkupUnlimited, minOccurs)
+                : string.Format(occurenceConstraintMarkup, minOccurs, maxOccurs);
 
+            object pathToRegion = string.Empty;
+            if (XpmMetadata != null)
+            {
+                XpmMetadata.TryGetValue("FullyQualifiedName", out pathToRegion);
+                if (pathToRegion != null)
+                {
+                    pathToRegion = $" path: \"{pathToRegion}\",";
+                }
+            }
+
+            return string.Format(
+                XpmRegionMarkup,
+                Name,
+                pathToRegion,
+                string.Join(", ", xpmRegion.ComponentTypes.Select(ct => string.Format(XpmComponentTypeMarkup, ct.Schema, ct.Template))),
+                occurrenceConstraint);
         }
 
         /// <summary>
