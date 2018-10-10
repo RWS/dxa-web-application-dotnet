@@ -86,7 +86,7 @@ namespace Sdl.Web.Common.Logging
             ILog log = Log;            
             if (log.IsErrorEnabled)
             {
-                log.Error(ex.Message, ex);
+                log.Error(ex.ToString(), ex);
             }
         }
 
