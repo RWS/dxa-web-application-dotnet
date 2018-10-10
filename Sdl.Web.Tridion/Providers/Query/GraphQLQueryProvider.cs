@@ -52,7 +52,7 @@ namespace Sdl.Web.Tridion.Providers.Query
             int n = HasMore ? queryParams.PageSize : results.Edges.Count;
             var resultList = results.Edges.Select(edge => edge.Node).ToList();
             Cursor = n > 0 ? results.Edges[n - 1].Cursor : null;
-            return resultList;
+            return HasMore ? resultList.GetRange(0, queryParams.PageSize) : resultList;
         }
 
         protected InputItemFilter BuildFilter(SimpleBrokerQuery queryParams)
