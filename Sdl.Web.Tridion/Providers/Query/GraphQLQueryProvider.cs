@@ -42,15 +42,21 @@ namespace Sdl.Web.Tridion.Providers.Query
             InputItemFilter filter = BuildFilter(queryParams);
             InputSortParam sort = BuildSort(queryParams);
             var client = PCAClientFactory.Instance.CreateClient();
+            int pageSize = queryParams.PageSize > 0 ? queryParams.PageSize + 1 : queryParams.PageSize;
             var results = client.ExecuteItemQuery(filter, sort, new Pagination
             {
-                First = queryParams.PageSize + 1,
+                First = pageSize,
                 After = queryParams.Cursor
             }, null, ContentIncludeMode.Exclude, false, null);
-
+            var resultList = results.Edges.Select(edge => edge.Node).ToList();
+            if (pageSize == -1)
+            {
+                // returning all items with pageSize = -1
+                Cursor = null;
+                return resultList;
+            }
             HasMore = results.Edges.Count > queryParams.PageSize;
             int n = HasMore ? queryParams.PageSize : results.Edges.Count;
-            var resultList = results.Edges.Select(edge => edge.Node).ToList();
             Cursor = n > 0 ? results.Edges[n - 1].Cursor : null;
             return HasMore ? resultList.GetRange(0, queryParams.PageSize) : resultList;
         }
