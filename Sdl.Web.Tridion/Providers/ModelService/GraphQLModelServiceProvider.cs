@@ -203,7 +203,7 @@ namespace Sdl.Web.Tridion.ModelService
                 if (parentSitemapItemId == null)
                 {
                     // requesting from root so just return descendants from root
-                    var tree0 = Client.GetSitemapSubtree(ns, pubId, null, descendantLevels, includeAncestors, null);
+                    var tree0 = Client.GetSitemapSubtree(ns, pubId, null, descendantLevels, includeAncestors ? Ancestor.INCLUDE : Ancestor.NONE, null);
                     return tree0.Cast<ISitemapItem>().ToList();
                 }
 
@@ -219,7 +219,7 @@ namespace Sdl.Web.Tridion.ModelService
                     return subtree0;
                 }
 
-                var tree = Client.GetSitemapSubtree(ns, pubId, parentSitemapItemId, descendantLevels, false, null);
+                var tree = Client.GetSitemapSubtree(ns, pubId, parentSitemapItemId, descendantLevels, Ancestor.NONE, null);
                 List<ISitemapItem> items = new List<ISitemapItem>();
                 foreach (TaxonomySitemapItem x in tree.Where(x => x.Items != null))
                 {
