@@ -98,27 +98,31 @@ namespace Sdl.Web.Tridion.ModelService
         public PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes)
         {
             const string msg =
-               "PCA client returned an unexpected response when retrieving page model data for page url {0}.";
+               "PCA client returned an unexpected response when retrieving page model data for page url {0} or {1}.";
             dynamic json;
+
+            // DXA supports "extensionless URLs" and "index pages".
+            // For example: the index Page at root level (aka the Home Page) has a CM URL path of /index.html
+            // It can be addressed in the DXA web application in several ways:
+            //      1. /index.html – exactly the same as the CM URL
+            //      2. /index – the file extension doesn't have to be specified explicitly {"extensionless URLs")
+            //      3. / - the file name of an index page doesn't have to be specified explicitly either.
+            // Note that the third option is the most clean one and considered the "canonical URL" in DXA; links to an index Page will be generated like that.
+            // The problem with these "URL compression" features is that if a URL does not end with a slash (nor an extension), you don't 
+            // know upfront if the URL addresses a regular Page or an index Page (within a nested SG).  
+            // To determine this, DXA first tries the regular Page and if it doesn't exist, it appends /index.html and tries again.
+            // TODO: The above should be handled by PCA (See CRQ-11703)
             try
             {
-                // TODO: This could be fixed by sending two graphQL queries in a single go. Need to
-                // wait for PCA client fix for this however
                 json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
                     GetCanonicalUrlPath(urlPath, true),
                     ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
                     ContentIncludeMode.IncludeAndRender, null);
             }
-            catch (GraphQLClientException e)
-            {
-                Log.Error(msg, urlPath, e.Message);
-                throw new DxaException(string.Format(msg, urlPath), e);
-            }
-            catch (PcaException)
+            catch (Exception)
             {
                 try
                 {
-                    // try index page
                     json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
                         GetCanonicalUrlPath(urlPath, false),
                         ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
@@ -127,7 +131,9 @@ namespace Sdl.Web.Tridion.ModelService
                 catch (GraphQLClientException e)
                 {
                     Log.Error(msg, urlPath, e.Message);
-                    throw new DxaException(string.Format(msg, urlPath), e);
+                    throw new DxaException(
+                        string.Format(msg, GetCanonicalUrlPath(urlPath, true), 
+                        GetCanonicalUrlPath(urlPath, false)), e);
                 }
                 catch (PcaException)
                 {
@@ -197,7 +203,7 @@ namespace Sdl.Web.Tridion.ModelService
                 if (parentSitemapItemId == null)
                 {
                     // requesting from root so just return descendants from root
-                    var tree0 = Client.GetSitemapSubtree(ns, pubId, null, descendantLevels, includeAncestors, null);
+                    var tree0 = Client.GetSitemapSubtree(ns, pubId, null, descendantLevels, includeAncestors ? Ancestor.INCLUDE : Ancestor.NONE, null);
                     return tree0.Cast<ISitemapItem>().ToList();
                 }
 
@@ -213,7 +219,7 @@ namespace Sdl.Web.Tridion.ModelService
                     return subtree0;
                 }
 
-                var tree = Client.GetSitemapSubtree(ns, pubId, parentSitemapItemId, descendantLevels, false, null);
+                var tree = Client.GetSitemapSubtree(ns, pubId, parentSitemapItemId, descendantLevels, Ancestor.NONE, null);
                 List<ISitemapItem> items = new List<ISitemapItem>();
                 foreach (TaxonomySitemapItem x in tree.Where(x => x.Items != null))
                 {

@@ -19,7 +19,7 @@ namespace Sdl.Web.Tridion.Providers.ModelService
                 TaxonomySitemapItem node = leafNodes[0] as TaxonomySitemapItem;
                 leafNodes.RemoveAt(0);
                 if (!node.HasChildNodes.HasValue || !node.HasChildNodes.Value) continue;
-                var subtree = client.GetSitemapSubtree(ns, pubId, node.Id, requestLevels, false, null);
+                var subtree = client.GetSitemapSubtree(ns, pubId, node.Id, requestLevels, Ancestor.NONE, null);
                 if (node.Items == null) node.Items = new List<ISitemapItem>();
                 node.Items.AddRange(subtree[0].Items ?? new List<ISitemapItem>());
                 leafNodes.AddRange(GetLeafNodes(node));
@@ -30,7 +30,7 @@ namespace Sdl.Web.Tridion.Providers.ModelService
 
         internal static List<ISitemapItem> GetEntireTree(PublicContentApi.PublicContentApi client, ContentNamespace ns, int pubId, string parentSitemapId, bool includeAncestors, int requestLevels)
         {
-            var rootsItems = client.GetSitemapSubtree(ns, pubId, parentSitemapId, requestLevels, includeAncestors, null);
+            var rootsItems = client.GetSitemapSubtree(ns, pubId, parentSitemapId, requestLevels, includeAncestors ? Ancestor.INCLUDE : Ancestor.NONE, null);
             List<ISitemapItem> roots = rootsItems.Cast<ISitemapItem>().ToList();
             if (roots.Count == 0) return new List<ISitemapItem>();
             List<ISitemapItem> tempRoots = new List<ISitemapItem>(roots);
@@ -43,7 +43,7 @@ namespace Sdl.Web.Tridion.Providers.ModelService
                 foreach (var item in leafNodes)
                 {
                     TaxonomySitemapItem n = item as TaxonomySitemapItem;
-                    var children = client.GetSitemapSubtree(ns, pubId, n.Id, requestLevels, false, null);
+                    var children = client.GetSitemapSubtree(ns, pubId, n.Id, requestLevels, Ancestor.NONE, null);
                     if (children == null) continue;
                     n.Items = children[0].Items;
                     List<ISitemapItem> leaves = GetLeafNodes(n);
