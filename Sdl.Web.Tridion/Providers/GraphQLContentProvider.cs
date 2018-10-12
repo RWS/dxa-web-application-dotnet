@@ -260,6 +260,10 @@ namespace Sdl.Web.Tridion.Mapping
                 }
 
                 var client = PCAClientFactory.Instance.CreateClient();
+                // Important: The content we are getting back is not model based so we need to inform
+                // the PCA so it doesn't attempt to treat it as a R2/DD4T model and attempt conversion
+                // since this will fail and we'll end up with no content being returned.
+                client.DefaultContentType = ContentType.RAW;
                 try
                 {
                     var page = client.GetPage(CmUri.NamespaceIdentiferToId(localization.CmUriScheme),

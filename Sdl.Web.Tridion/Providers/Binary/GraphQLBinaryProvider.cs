@@ -99,13 +99,13 @@ namespace Sdl.Web.Tridion.Providers.Binary
             {
                 if (binaryComponent.Variants.Edges == null || binaryComponent.Variants.Edges.Count == 0)
                 {
-                    Log.Error("Empty variants returned by GraphQL query for binary compeont: " + binaryComponent.CmUri());
+                    Log.Error("Empty variants returned by GraphQL query for binary component: " + binaryComponent.CmUri());
                     return null;
                 }
                 var variant = binaryComponent.Variants.Edges[0].Node;
                 if (string.IsNullOrEmpty(variant.DownloadUrl))
                 {
-                    Log.Error("Binary variant download Url is missing for binary compeont: " + binaryComponent.CmUri());
+                    Log.Error("Binary variant download Url is missing for binary component: " + binaryComponent.CmUri());
                     return null;
                 }
                 Log.Debug("Attempting to get binary at : " + variant.DownloadUrl);

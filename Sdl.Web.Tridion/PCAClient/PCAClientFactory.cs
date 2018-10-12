@@ -8,6 +8,7 @@ using Sdl.Web.Delivery.ServicesCore.ClaimStore;
 using Sdl.Web.HttpClient.Auth;
 using Sdl.Web.IQQuery.API;
 using Sdl.Web.IQQuery.Client;
+using Sdl.Web.PublicContentApi;
 using Sdl.Web.PublicContentApi.ContentModel;
 
 namespace Sdl.Web.Tridion.PCAClient
@@ -133,7 +134,8 @@ namespace Sdl.Web.Tridion.PCAClient
         {
             var graphQL = new GraphQLClient.GraphQLClient(_endpoint, new Logger(), _oauth);
             var client = new PublicContentApi.PublicContentApi(graphQL, new Logger());
-
+            // just make sure our requests come back as R2 json
+            client.DefaultModelType = DataModelType.R2;
             // add context data to client
             IClaimStore claimStore = AmbientDataContext.CurrentClaimStore;
             if (claimStore == null)
