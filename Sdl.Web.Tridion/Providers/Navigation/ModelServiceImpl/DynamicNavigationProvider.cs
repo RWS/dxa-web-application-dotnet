@@ -207,7 +207,7 @@ namespace Sdl.Web.Tridion.Navigation.ModelServiceImpl
                             IEnumerable<SitemapItem> items = SiteConfiguration.ModelServiceProvider.GetChildSitemapItems(sitemapItemId, localization,
                                 filter.IncludeAncestors,
                                 filter.DescendantLevels) ?? new SitemapItem[0];
-                            items = items.OrderBy(i => i.Id);
+                            items = items.OrderBy(i => i.OriginalTitle);
                             RebuildParentRelationships(items, null);
                             return items;
                         }
