@@ -46,6 +46,8 @@ namespace Sdl.Web.Tridion.ModelService
                 var client = PCAClientFactory.Instance.CreateClient();
                 client.DefaultModelType = DataModelType.R2;
                 client.DefaultContentType = ContentType.MODEL;
+                client.ModelSericeLinkRenderingType = ModelServiceLinkRendering.Relative;
+                client.TcdlLinkRenderingType = TcdlLinkRendering.Relative;
                 return client;
             }
         }
