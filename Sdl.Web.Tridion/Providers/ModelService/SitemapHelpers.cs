@@ -38,7 +38,6 @@ namespace Sdl.Web.Tridion.Providers.ModelService
             while (index < tempRoots.Count)
             {
                 ISitemapItem root = tempRoots[index];
-
                 List<ISitemapItem> leafNodes = GetLeafNodes(root);
                 foreach (var item in leafNodes)
                 {
@@ -172,7 +171,6 @@ namespace Sdl.Web.Tridion.Providers.ModelService
             {
                 result.Items.Add(Convert(x));
             }
-
             return result;
         }
 

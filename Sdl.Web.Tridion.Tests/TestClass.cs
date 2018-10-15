@@ -35,7 +35,7 @@ namespace Sdl.Web.Tridion.Tests
                 new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, ReferenceLoopHandling = ReferenceLoopHandling.Ignore }
                 );
             Console.WriteLine("---- JSON Representation of {0} ----", objectToSerialize.GetType().FullName);
-            System.Diagnostics.Trace.WriteLine(json);
+            Console.WriteLine(json);
         }
 
         protected TException AssertThrowsException<TException>(Action action, string actionName = null)
