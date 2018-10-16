@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -127,6 +127,7 @@
     <Compile Include="Models\Entity\ExceptionEntity.cs" />
     <Compile Include="Models\EntityModel.cs" />
     <Compile Include="Models\Entity\Configuration.cs" />
+    <Compile Include="Models\Entity\Topic.cs" />
     <Compile Include="Models\KeywordModel.cs" />
     <Compile Include="Models\Navigation\TaxonomyNode.cs" />
     <Compile Include="Models\ISyndicationFeedItemProvider.cs" />
