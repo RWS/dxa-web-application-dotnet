@@ -381,7 +381,7 @@ namespace Sdl.Web.Tridion.Tests
             AssertExpectedTaxonomyNode(keyword11, testKeyword11.Title, 0, "keyword11");
         }
 
-        [Ignore] // TODO: put back after sitemapSubtree includeAncestor changes
+        [TestMethod]
         public void GetNavigationSubtree_IncludeAncestorsAndChildrenKeyword_Success()
         {
             TaxonomyNode testTaxonomyRoot = GetTestTaxonomy(null, -1);
@@ -415,7 +415,7 @@ namespace Sdl.Web.Tridion.Tests
             AssertExpectedTaxonomyNode(topLevelKeyword2, "Top-level Keyword 2", 0, "topLevelKeyword2");
         }
 
-        [Ignore] // TODO: put back after sitemapSubtree includeAncestor changes
+        [TestMethod]
         public void GetNavigationSubtree_IncludeAncestorsAndChildrenKeywordOrdered_Success() // See TSI-1964
         {
             TaxonomyNode testTaxonomyRoot = GetTestTaxonomy(null, -1);
@@ -442,7 +442,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
 
-        [Ignore] // TODO: put back after sitemapSubtree includeAncestor changes
+        [TestMethod]
         public void GetNavigationSubtree_IncludeAncestorsClassifiedPage_Success()
         {
             ILocalization testLocalization = TestFixture.ParentLocalization;
@@ -478,7 +478,7 @@ namespace Sdl.Web.Tridion.Tests
 
         }
 
-        [Ignore] // TODO: put back after sitemapSubtree includeAncestor changes
+        [TestMethod]
         public void GetNavigationSubtree_IncludeAncestorsAndChildrenClassifiedPage_Success()
         {
             ILocalization testLocalization = TestFixture.ParentLocalization;

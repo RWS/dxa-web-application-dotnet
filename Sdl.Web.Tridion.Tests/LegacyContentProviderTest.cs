@@ -21,11 +21,10 @@ namespace Sdl.Web.Tridion.Tests
             DefaultInitialize(testContext);
         }
 
-        [Ignore]
         [TestMethod]
         public void GetEntityModel_NoXpmMetadataOnLive_Success() // See TSI-1942
         {
-            const string testEntityId = TestFixture.ArticleDcpEntityId;
+            string testEntityId = GetArticleDcpEntityId();
             ILocalization testLocalization = TestFixture.LegacyChildLocalization;
 
             EntityModel entityModel = TestContentProvider.GetEntityModel(testEntityId, testLocalization);
