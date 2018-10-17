@@ -17,6 +17,7 @@ namespace Sdl.Web.Common.Models
         private static readonly IDictionary<MvcData, Type> _viewToModelTypeMapping = new Dictionary<MvcData, Type>();
         private static readonly IDictionary<Type, SemanticInfo> _modelTypeToSemanticInfoMapping = new Dictionary<Type, SemanticInfo>();
         private static readonly IDictionary<string, ISet<Type>> _semanticTypeToModelTypesMapping = new Dictionary<string, ISet<Type>>();
+        private static readonly IDictionary<string, Type> _stronglyTypedTopicModelMapping = new Dictionary<string, Type>();
 
         private class SemanticInfo
         {
@@ -164,6 +165,15 @@ namespace Sdl.Web.Common.Models
         }
 
         /// <summary>
+        /// Gets all registered Strongly Typed Topic Models and their Semantic Entity Names (as keys of the dictionary).
+        /// </summary>
+        /// <returns></returns>
+        public static IDictionary<string, Type> GetStronglyTypedTopicModels()
+        {
+            return _stronglyTypedTopicModelMapping;
+        }
+
+        /// <summary>
         /// Gets a mapping from property names to associated Semantic Properties for a given Model Type.
         /// </summary>
         /// <param name="modelType">The Model Type.</param>
@@ -187,6 +197,13 @@ namespace Sdl.Web.Common.Models
                         _semanticTypeToModelTypesMapping.Add(semanticTypeName, mappedModelTypes);
                     }
                     mappedModelTypes.Add(modelType);
+
+                    string[] semanticTypeNameParts = semanticTypeName.Split(':');
+                    if (semanticTypeNameParts[0] == ViewModel.DitaVocabulary)
+                    {
+                        Log.Debug($"Registered Strongly Typed Topic Model: '{semanticTypeNameParts[1]}' -> '{modelType.FullName}'");
+                        _stronglyTypedTopicModelMapping.Add(semanticTypeNameParts[1], modelType);
+                    }
                 }
 
                 if (Log.IsDebugEnabled)

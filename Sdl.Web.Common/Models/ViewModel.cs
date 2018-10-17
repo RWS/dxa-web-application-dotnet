@@ -19,6 +19,11 @@ namespace Sdl.Web.Common.Models
         public const string CoreVocabulary = "http://www.sdl.com/web/schemas/core";
 
         /// <summary>
+        /// The internal/built-in Vocabulary ID used for DITA mapping.
+        /// </summary>
+        public const string DitaVocabulary = "DITA"; // TODO: use nicer URI format?
+
+        /// <summary>
         /// The Vocabulary ID for types defined by schema.org.
         /// </summary>
         public const string SchemaOrgVocabulary = "http://schema.org/";
