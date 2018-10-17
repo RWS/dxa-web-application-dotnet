@@ -382,6 +382,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        [Ignore] // TODO. See TSI-3635.
         public void GetNavigationSubtree_IncludeAncestorsAndChildrenKeyword_Success()
         {
             TaxonomyNode testTaxonomyRoot = GetTestTaxonomy(null, -1);
@@ -416,6 +417,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        [Ignore] // TODO. See TSI-3635.
         public void GetNavigationSubtree_IncludeAncestorsAndChildrenKeywordOrdered_Success() // See TSI-1964
         {
             TaxonomyNode testTaxonomyRoot = GetTestTaxonomy(null, -1);
@@ -443,6 +445,7 @@ namespace Sdl.Web.Tridion.Tests
 
 
         [TestMethod]
+        [Ignore] // TODO. See TSI-3635.
         public void GetNavigationSubtree_IncludeAncestorsClassifiedPage_Success()
         {
             ILocalization testLocalization = TestFixture.ParentLocalization;
@@ -479,6 +482,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        [Ignore] // TODO. See TSI-3635.
         public void GetNavigationSubtree_IncludeAncestorsAndChildrenClassifiedPage_Success()
         {
             ILocalization testLocalization = TestFixture.ParentLocalization;
