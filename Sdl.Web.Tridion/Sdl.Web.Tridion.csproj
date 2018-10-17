@@ -131,7 +131,7 @@
       <HintPath>..\packages\Sdl.Web.Context.Client.11.0.0\lib\net462\Sdl.Web.Context.Api.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Context.OData.Client, Version=11.0.0.0, Culture=neutral, PublicKeyToken=ddfc895746e5ee6b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sdl.Web.Context.Client.11.0.0\lib\net462\Sdl.Web.Context.OData.Client.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Context.Client.11.0.0\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.DataModel">
       <HintPath>..\packages\Sdl.Dxa.DataModel.$(SdlDxaDataModelPackageVersion)\lib\net452\Sdl.Web.DataModel.dll</HintPath>
@@ -203,7 +203,7 @@
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net462\Tridion.ContentDelivery.UGC.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Context.Image.Proxy">
-      <HintPath>..\packages\Sdl.Web.Context.Image.$(SdlWebContextImagePackageVersion)\lib\net462\Sdl.Web.Context.Image.Proxy.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Context.Image.$(SdlWebContextImagePackageVersion)\lib\net45\Sdl.Web.Context.Image.Proxy.dll</HintPath>
     </Reference>
     <Compile Include="PCAClient\Logger.cs" />
     <Compile Include="Providers\Binary\CILBinaryProvider.cs" />
