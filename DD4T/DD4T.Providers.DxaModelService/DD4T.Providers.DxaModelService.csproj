@@ -86,7 +86,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Start\UnityConfig.cs" />
     <Compile Include="BaseProvider.cs" />
     <Compile Include="Caching\DependencyMappings.cs" />
     <Compile Include="Caching\DxaCacheAgent.cs" />
@@ -103,7 +102,6 @@
     <Compile Include="TridionTaxonomyProvider.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
