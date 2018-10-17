@@ -116,7 +116,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.Context.Api">
-      <HintPath>..\packages\Sdl.Web.Context.Client.11.0.0\lib\net462\Sdl.Web.Context.Api.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Context.Client.11.0.0\lib\net45\Sdl.Web.Context.Api.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Context.OData.Client">
       <HintPath>..\packages\Sdl.Web.Context.Client.11.0.0\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
