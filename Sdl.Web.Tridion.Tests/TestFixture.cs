@@ -40,7 +40,6 @@ namespace Sdl.Web.Tridion.Tests
     internal class TestFixture : ILocalizationResolver
     {
         internal static readonly string HomePageId = "277"; // /autotest-parent homepage Id
-        internal const string ArticleDcpEntityId = "9712-9711";        
         internal const string NavigationTaxonomyTitle = "Test Taxonomy [Navigation]";
         internal const string TopLevelKeyword1Title = "Top-level Keyword 1";
         internal const string TopLevelKeyword2Title = "Top-level Keyword 2";
@@ -58,8 +57,6 @@ namespace Sdl.Web.Tridion.Tests
         internal const string TaxonomyIndexPageRelativeUrlPath = "regression/taxonomy";
         internal const string Tsi811PageRelativeUrlPath = "regression/tsi-811";
         internal const string Tsi1278PageRelativeUrlPath = "tsi-1278_trådløst.html";
-        //internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-9791.jpg";
-        internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-508.jpg";
         internal const string Tsi1308PageRelativeUrlPath = "regression/tsi-1308";
         internal const string Tsi1757PageRelativeUrlPath = "regression/tsi-1757";
         internal const string Tsi1614PageRelativeUrlPath = "tsi-1614.html";

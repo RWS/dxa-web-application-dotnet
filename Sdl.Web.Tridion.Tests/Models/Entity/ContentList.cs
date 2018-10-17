@@ -12,7 +12,6 @@ namespace Sdl.Web.Tridion.Tests.Models
     [SemanticEntity("ContentQuery")]
     public class ContentList<T> : DynamicList where T : EntityModel
     {
-        //TODO add concept of filtering/query (filter options and active filters/query)
         [SemanticProperty("s:headline")]
         public string Headline { get; set; }
         public Link Link { get; set; }

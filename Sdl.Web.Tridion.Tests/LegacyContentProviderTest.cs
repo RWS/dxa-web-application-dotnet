@@ -21,11 +21,10 @@ namespace Sdl.Web.Tridion.Tests
             DefaultInitialize(testContext);
         }
 
-        [Ignore]
         [TestMethod]
         public void GetEntityModel_NoXpmMetadataOnLive_Success() // See TSI-1942
         {
-            const string testEntityId = TestFixture.ArticleDcpEntityId;
+            string testEntityId = GetArticleDcpEntityId();
             ILocalization testLocalization = TestFixture.LegacyChildLocalization;
 
             EntityModel entityModel = TestContentProvider.GetEntityModel(testEntityId, testLocalization);
@@ -64,6 +63,12 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(string.Empty, testArticle.GetXpmMarkup(testLocalization), "testArticle.GetXpmMarkup(testLocalization)");
         }
 
+        [TestMethod]
+        [Ignore] // TODO. See TSI-3636
+        public override void GetPageModel_RichTextImageWithHtmlClass_Success() 
+        {
+            // Test is temporarily disabled because of a Known Issue with DD4T->R2 conversion. See TSI-3636
+        }
 
     }
 }
