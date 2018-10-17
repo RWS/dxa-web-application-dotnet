@@ -63,6 +63,12 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(string.Empty, testArticle.GetXpmMarkup(testLocalization), "testArticle.GetXpmMarkup(testLocalization)");
         }
 
+        [TestMethod]
+        [Ignore] // TODO. See TSI-3636
+        public override void GetPageModel_RichTextImageWithHtmlClass_Success() 
+        {
+            // Test is temporarily disabled because of a Known Issue with DD4T->R2 conversion. See TSI-3636
+        }
 
     }
 }

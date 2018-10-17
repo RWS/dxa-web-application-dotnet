@@ -465,7 +465,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_RichTextImageWithHtmlClass_Success() // See TSI-1614
+        public virtual void GetPageModel_RichTextImageWithHtmlClass_Success() // See TSI-1614
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1614PageRelativeUrlPath);
 
