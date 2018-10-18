@@ -120,6 +120,7 @@
     <Compile Include="Models\Page\Tsi811PageModel.cs" />
     <Compile Include="ContentProviderTest.cs" />
     <Compile Include="Models\Region\SmartTargetRegion.cs" />
+    <Compile Include="Models\Topic\TestSpecializedTopic.cs" />
     <Compile Include="Models\Topic\TestStronglyTypedTopic.cs" />
     <Compile Include="R2ContentProviderTest.cs" />
     <Compile Include="StaticNavigationProviderTest.cs" />

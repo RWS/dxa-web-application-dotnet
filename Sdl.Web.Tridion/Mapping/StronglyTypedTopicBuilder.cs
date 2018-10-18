@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using HtmlAgilityPack;
+using System.Text;
+using System.Xml;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
@@ -36,8 +37,8 @@ namespace Sdl.Web.Tridion.Mapping
                 Topic genericTopic = entityModel as Topic;
                 if (genericTopic != null)
                 {
-                    Log.Debug("Generic Topic encountered. Trying to convert to Strongly Typed Topic...");
-                    EntityModel stronglyTypedTopic = BuildStronglyTypedTopic(genericTopic);
+                    Log.Debug("Generic Topic encountered...");
+                    EntityModel stronglyTypedTopic = ConvertToStronglyTypedTopic(genericTopic);
                     if (stronglyTypedTopic != null)
                     {
                         Log.Debug($"Converted {genericTopic} to {stronglyTypedTopic}");
@@ -52,11 +53,25 @@ namespace Sdl.Web.Tridion.Mapping
         }
         #endregion
 
-        public EntityModel BuildStronglyTypedTopic(Topic genericTopic)
+        /// <summary>
+        /// Tries to convert a given generic Topic to a Strongly Typed Topic Model.
+        /// </summary>
+        /// <param name="genericTopic">The generic Topic to convert.</param>
+        /// <returns>The Strongly Typed Topic Model or <c>null</c> if the generic Topic cannot be converted.</returns>
+        public EntityModel ConvertToStronglyTypedTopic(Topic genericTopic)
         {
             using (new Tracer(genericTopic))
             {
-                HtmlNode rootElement = null;
+                Log.Debug($"Trying to convert {genericTopic} to Strongly Typed Topic Model...");
+
+                IEnumerable<Tuple<string, Type>> registeredTopicTypes = ModelTypeRegistry.GetModelTypesForVocabulary(ViewModel.DitaVocabulary);
+                if (registeredTopicTypes == null)
+                {
+                    Log.Debug("No Strongly Typed Topic Models registered.");
+                    return null;
+                }
+
+                XmlElement rootElement = null;
                 try
                 {
                     rootElement = ParseHtml(genericTopic.TopicBody);
@@ -68,52 +83,85 @@ namespace Sdl.Web.Tridion.Mapping
                     return null;
                 }
 
-                Type stronglyTypedTopicType = DetermineStronglyTypedTopicType(rootElement);
-                if (stronglyTypedTopicType == null)
+                Type topicType = DetermineTopicType(rootElement, registeredTopicTypes);
+                if (topicType == null)
                 {
                     Log.Debug("No matching Strongly Typed Topic Model found.");
                     return null;
                 }
-                Log.Debug("Matching Strongly Typed Topic Model found: '{0}'.", stronglyTypedTopicType.FullName);
 
-                EntityModel stronglyTypedTopic = (EntityModel)stronglyTypedTopicType.CreateInstance();
-                MapSemanticProperties(stronglyTypedTopic, rootElement);
-
-                return stronglyTypedTopic;
+                return BuildStronglyTypedTopic(topicType, rootElement);
             }
         }
 
         #region Overridables
-        protected virtual HtmlNode ParseHtml(string html)
+        protected virtual XmlElement ParseHtml(string xhtml)
         {
-            using (new Tracer(html))
+            using (new Tracer(xhtml))
             {
-                HtmlDocument topicHtmlDoc = new HtmlDocument();
-                topicHtmlDoc.LoadHtml($"<html>{html}</html>");
-                return topicHtmlDoc.DocumentNode.FirstChild;
+                XmlDocument topicXmlDoc = new XmlDocument();
+                topicXmlDoc.LoadXml($"<topic>{xhtml}</topic>");
+                return topicXmlDoc.DocumentElement;
             }
         }
 
         protected virtual string GetPropertyXPath(string propertyName)
         {
-            return $".//*[contains(@class, '{propertyName} ')]";
+            if (propertyName == "_Content")
+                return ".";
+
+            string[] propertyNameSegments = propertyName.Split('/');
+            StringBuilder xPathBuilder = new StringBuilder(".");
+            foreach (string propertyNameSegment in propertyNameSegments)
+            {
+                xPathBuilder.Append($"//*[contains(@class, '{propertyNameSegment} ')]");
+            }
+            return xPathBuilder.ToString();
         }
 
-        protected virtual Type DetermineStronglyTypedTopicType(HtmlNode rootElement)
+        protected virtual Type DetermineTopicType(XmlElement rootElement, IEnumerable<Tuple<string, Type>> registeredTopicTypes)
         {
-            foreach (KeyValuePair<string, Type> kvp in ModelTypeRegistry.GetStronglyTypedTopicModels())
+            Type bestMatch = null;
+            int bestMatchClassPos = -1;
+
+            foreach (Tuple<string, Type> tuple in registeredTopicTypes)
             {
-                string xpath = GetPropertyXPath(kvp.Key);
-                Log.Debug($"Trying XPath '{xpath}' for type '{kvp.Value.FullName}'");
-                if (rootElement.SelectSingleNode(xpath) != null)
+                string propertyName = tuple.Item1;
+                Type modelType = tuple.Item2;
+                string xPath = GetPropertyXPath(propertyName);
+
+                Log.Debug($"Trying XPath '{xPath}' for type '{modelType.FullName}'");
+                XmlElement matchedElement = rootElement.SelectSingleNode(xPath) as XmlElement;
+                if (matchedElement != null)
                 {
-                    return kvp.Value;
+                    int classPos = matchedElement.GetAttribute("class").IndexOf(propertyName);
+                    if (classPos > bestMatchClassPos)
+                    {
+                        bestMatch = modelType;
+                        bestMatchClassPos = classPos;
+                    }
                 }
             }
-            return null;
+
+            return bestMatch;
         }
 
-        protected virtual void MapSemanticProperties(EntityModel stronglyTypedTopic, HtmlNode rootElement)
+        protected virtual EntityModel BuildStronglyTypedTopic(Type modelType, XmlElement htmlElement)
+        {
+            Log.Debug($"Building Strongly Typed Topic Model '{modelType.FullName}'...");
+            EntityModel result = (EntityModel)modelType.CreateInstance();
+            MapBaseProperties(result, htmlElement);
+            MapSemanticProperties(result, htmlElement);
+            return result;
+        }
+
+        protected virtual void MapBaseProperties(EntityModel stronglyTypedTopic, XmlElement htmlElement)
+        {
+            stronglyTypedTopic.Id = htmlElement.GetAttributeNode("id")?.Value;
+            stronglyTypedTopic.HtmlClasses = htmlElement.GetAttributeNode("class")?.Value;
+        }
+
+        protected virtual void MapSemanticProperties(EntityModel stronglyTypedTopic, XmlElement rootElement)
         {
             Type modelType = stronglyTypedTopic.GetType();
             IDictionary<string, List<SemanticProperty>> propertySemanticsMap = ModelTypeRegistry.GetPropertySemantics(modelType);
@@ -121,7 +169,7 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 PropertyInfo modelProperty = modelType.GetProperty(propertySemantics.Key);
                 List<SemanticProperty> semanticProperties = propertySemantics.Value;
-                HtmlNodeCollection htmlElements = null;
+                XmlNodeList htmlElements = null;
                 foreach (SemanticProperty ditaProperty in semanticProperties.Where(sp => sp.SemanticType.Vocab == ViewModel.DitaVocabulary))
                 {
                     string ditaPropertyName = ditaProperty.PropertyName;
@@ -153,65 +201,70 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        protected virtual object GetPropertyValue(Type modelPropertyType, HtmlNodeCollection htmlElements)
+        protected virtual object GetPropertyValue(Type modelPropertyType, XmlNodeList htmlElements)
         {
             bool isListProperty = modelPropertyType.IsGenericList();
             Type targetType = modelPropertyType.GetUnderlyingGenericListType() ?? modelPropertyType;
 
             object result;
-            switch (targetType.FullName)
+            if (targetType == typeof(string))
             {
-                case "System.String":
-                    if (isListProperty)
-                    {
-                        result = htmlElements.Select(e => e.InnerHtml).ToList();
-                    }
-                    else
-                    {
-                        result = htmlElements[0].InnerHtml;
-                    }
-                    break;
-
-                case "Sdl.Web.Common.Models.Link":
-                    if (isListProperty)
-                    {
-                        result = htmlElements.Select(e => GetLink(e)).ToList();
-                    }
-                    else
-                    {
-                        result = GetLink(htmlElements[0]);
-                    }
-                    break;
-
-                default:
-                    throw new DxaException($"Unexpected property type '{targetType.FullName}'");
+                if (isListProperty)
+                    result = htmlElements.OfType<XmlElement>().Select(e => e.InnerText).ToList();
+                else
+                    result = htmlElements[0].InnerText;
             }
-
+            else if (targetType == typeof(RichText))
+            {
+                if (isListProperty)
+                    result = htmlElements.OfType<XmlElement>().Select(e => new RichText(e.InnerXml)).ToList();
+                else
+                    result = new RichText(htmlElements[0].InnerXml);
+            }
+            else if (targetType == typeof(Link))
+            {
+                if (isListProperty)
+                    result = htmlElements.OfType<XmlElement>().Select(e => BuildLink(e)).ToList();
+                else
+                    result = BuildLink(htmlElements[0] as XmlElement);
+            }
+            else if (typeof(EntityModel).IsAssignableFrom(targetType))
+            {
+                if (isListProperty)
+                    result = htmlElements.OfType<XmlElement>().Select(e => BuildStronglyTypedTopic(targetType, e)).ToList();
+                else
+                    result = BuildStronglyTypedTopic(targetType, (XmlElement)htmlElements[0]);
+            }
+            else
+            {
+                throw new DxaException($"Unexpected property type '{targetType.FullName}'");
+            }
+            
             return result;
         }
 
-        protected virtual Link GetLink(HtmlNode htmlElement)
+        protected virtual Link BuildLink(XmlElement htmlElement)
         {
-            HtmlNode hyperlink;
+            XmlElement hyperlink;
             if (htmlElement.Name == "a")
             {
                 hyperlink = htmlElement;
             }
             else
             {
-                hyperlink = htmlElement.SelectSingleNode(".//a");
+                hyperlink = htmlElement.SelectSingleNode(".//a") as XmlElement;
                 if (hyperlink == null)
                 {
-                    Log.Debug($"No hyperlink found in HTML element: {htmlElement.OuterHtml}");
+                    Log.Debug($"No hyperlink found in HTML element: {htmlElement.OuterXml}");
                     return null;
                 }
             }
 
             return new Link
             {
-                Url = hyperlink.GetAttributeValue("href", string.Empty),
+                Url = hyperlink.GetAttribute("href"),
                 LinkText = hyperlink.InnerText,
-                AlternateText = hyperlink.GetAttributeValue("title", null)
+                AlternateText = hyperlink.GetAttributeNode("title")?.Value
             };
         }
         #endregion

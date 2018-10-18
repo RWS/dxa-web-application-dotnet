@@ -17,7 +17,7 @@ namespace Sdl.Web.Common.Models
         private static readonly IDictionary<MvcData, Type> _viewToModelTypeMapping = new Dictionary<MvcData, Type>();
         private static readonly IDictionary<Type, SemanticInfo> _modelTypeToSemanticInfoMapping = new Dictionary<Type, SemanticInfo>();
         private static readonly IDictionary<string, ISet<Type>> _semanticTypeToModelTypesMapping = new Dictionary<string, ISet<Type>>();
-        private static readonly IDictionary<string, Type> _stronglyTypedTopicModelMapping = new Dictionary<string, Type>();
+        private static readonly IDictionary<string, IList<Tuple<string, Type>>> _vocabularyToModelTypesMapping = new Dictionary<string, IList<Tuple<string, Type>>>();
 
         private class SemanticInfo
         {
@@ -165,12 +165,15 @@ namespace Sdl.Web.Common.Models
         }
 
         /// <summary>
-        /// Gets all registered Strongly Typed Topic Models and their Semantic Entity Names (as keys of the dictionary).
+        /// Gets all registered Model Types (and associated Semantic Entity names) for a given Vocabulary ID.
         /// </summary>
-        /// <returns></returns>
-        public static IDictionary<string, Type> GetStronglyTypedTopicModels()
+        /// <param name="vocabularyId">The vocabulary ID.</param>
+        /// <returns>A set of Entity Name / Model Type tuples or <c>null</c> if no types were registered for the given vocabulary.</returns>
+        public static IEnumerable<Tuple<string, Type>> GetModelTypesForVocabulary(string vocabularyId)
         {
-            return _stronglyTypedTopicModelMapping;
+            IList<Tuple<string, Type>> result;
+            _vocabularyToModelTypesMapping.TryGetValue(vocabularyId, out result);
+            return result;
         }
 
         /// <summary>
@@ -199,11 +202,16 @@ namespace Sdl.Web.Common.Models
                     mappedModelTypes.Add(modelType);
 
                     string[] semanticTypeNameParts = semanticTypeName.Split(':');
-                    if (semanticTypeNameParts[0] == ViewModel.DitaVocabulary)
+                    string vocabularyId = semanticTypeNameParts[0];
+                    string entityName = semanticTypeNameParts[1];
+
+                    IList<Tuple<string, Type>> entityNameModelTypeTuples;
+                    if (!_vocabularyToModelTypesMapping.TryGetValue(vocabularyId, out entityNameModelTypeTuples))
                     {
-                        Log.Debug($"Registered Strongly Typed Topic Model: '{semanticTypeNameParts[1]}' -> '{modelType.FullName}'");
-                        _stronglyTypedTopicModelMapping.Add(semanticTypeNameParts[1], modelType);
+                        entityNameModelTypeTuples = new List<Tuple<string, Type>>();
+                        _vocabularyToModelTypesMapping.Add(vocabularyId, entityNameModelTypeTuples);
                     }
+                    entityNameModelTypeTuples.Add(new Tuple<string, Type>(entityName, modelType));
                 }
 
                 if (Log.IsDebugEnabled)

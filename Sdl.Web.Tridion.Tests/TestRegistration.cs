@@ -37,6 +37,7 @@ namespace Sdl.Web.Tridion.Tests
 
             // Strongly Typed Topic Models
             RegisterViewModel(typeof(TestStronglyTypedTopic));
+            RegisterViewModel(typeof(TestSpecializedTopic));
 
             // Page Views
             RegisterViewModel("GeneralPage", typeof(PageModel));
