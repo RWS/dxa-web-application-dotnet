@@ -114,13 +114,13 @@
       <Private>True</Private>
     </Reference>    
     <Reference Include="Sdl.Web.Context.Api">
-      <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.Api.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net462\Sdl.Web.Context.Api.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Context.Image.Proxy">
-      <HintPath>..\packages\Sdl.Web.Context.Image.$(SdlWebContextImagePackageVersion)\lib\net45\Sdl.Web.Context.Image.Proxy.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Context.Image.$(SdlWebContextImagePackageVersion)\lib\net462\Sdl.Web.Context.Image.Proxy.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Context.OData.Client">
-      <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net45\Sdl.Web.Context.OData.Client.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net462\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Common">
       <HintPath>..\packages\Sdl.Dxa.Framework.Web8.$(DxaFrameworkPackageVersion)\lib\net462\Sdl.Web.Common.dll</HintPath>
