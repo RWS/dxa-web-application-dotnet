@@ -66,38 +66,41 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(result.Sections, "result.Sections");
             Assert.AreEqual(2, result.Sections.Count, "result.Sections.Count");
             Assert.AreEqual(result.FirstSection, result.Sections[0], "result.Sections[0]");
-            Assert.IsNull(result.FirstLink, "result.FirstLink");
             Assert.IsNull(result.Links, "result.Links");
+            Assert.IsNull(result.FirstChildLink, "result.FirstChildLink");
+            Assert.IsNull(result.ChildLinks, "result.ChildLinks");
         }
 
         [TestMethod]
-        public void BuildStronglyTypedTopic_Links_Success()
+        public void TryConvertToStronglyTypedTopic_Links_Success()
         {
             Topic genericTopic = new Topic
             {
-                TopicBody = "<div class=\"body \"></div><div class=\"related-links \">" +
+                TopicBody = "<div class=\"body \" /><div class=\"related-links \">" +
                     "<div class=\"childlink \"><strong><a class=\"link \" href=\"/firstlink.html\">First link text</a></strong></div>" +
                     "<div class=\"childlink \"><strong><a class=\"link \" href=\"/secondlink.html\">Second link text</a></strong></div>" +
                     "</div>"
             };
 
-            TestStronglyTypedTopic result = _testModelBuilder.ConvertToStronglyTypedTopic(genericTopic) as TestStronglyTypedTopic;
+            TestStronglyTypedTopic result = _testModelBuilder.TryConvertToStronglyTypedTopic(genericTopic) as TestStronglyTypedTopic;
             Assert.IsNotNull(result, "result");
 
             OutputJson(result);
 
             Assert.IsNull(result.Title, "result.Title");
             Assert.AreEqual(string.Empty, result.Body, "result.Body");
-            Assert.IsNotNull(result.FirstLink, "result.FirstLink");
-            Assert.AreEqual("/firstlink.html", result.FirstLink.Url, "result.FirstLink.Url");
-            Assert.AreEqual("First link text", result.FirstLink.LinkText, "result.FirstLink.LinkText");
-            Assert.IsNull(result.FirstLink.AlternateText, "result.FirstLink.AlternateText");
             Assert.IsNotNull(result.Links, "result.Links");
             Assert.AreEqual(2, result.Links.Count, "result.Links.Count");
+            Assert.IsNotNull(result.FirstChildLink, "result.FirstChildLink");
+            Assert.AreEqual("/firstlink.html", result.FirstChildLink.Url, "result.FirstChildLink.Url");
+            Assert.AreEqual("First link text", result.FirstChildLink.LinkText, "result.FirstChildLink.LinkText");
+            Assert.IsNull(result.FirstChildLink.AlternateText, "result.FirstChildLink.AlternateText");
+            Assert.IsNotNull(result.ChildLinks, "result.ChildLinks");
+            Assert.AreEqual(2, result.ChildLinks.Count, "result.ChildLinks.Count");
         }
 
         [TestMethod]
-        public void BuildStronglyTypedTopic_SpecializedTopic_Success()
+        public void TryConvertToStronglyTypedTopic_SpecializedTopic_Success()
         {
             string testTitle = "DITA title";
             string testBody = "<div class=\"section lcIntro \" id=\"s1\">Intro section</div><div class=\"section lcObjectives \" id=\"s2\">Objectives section</div>";
@@ -107,7 +110,7 @@ namespace Sdl.Web.Tridion.Tests
                 TopicBody = $"<h1 class=\"title \">{testTitle}</h1><div class=\"body lcBaseBody lcOverviewBody \" id=\"b1\">{testBody}</div>"
             };
 
-            TestSpecializedTopic result = _testModelBuilder.ConvertToStronglyTypedTopic(genericTopic) as TestSpecializedTopic;
+            TestSpecializedTopic result = _testModelBuilder.TryConvertToStronglyTypedTopic(genericTopic) as TestSpecializedTopic;
             Assert.IsNotNull(result, "result");
 
             OutputJson(result);
@@ -118,6 +121,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(result.Body.Intro, "result.Body.Intro");
             Assert.IsNotNull(result.Body.Objectives, "result.Body.Objectives");
             Assert.IsNotNull(result.Body.Objectives.Content, "result.Body.Objectives.Content");
+            Assert.IsNotNull(result.Body.Sections, "result.Body.Sections");
 
             Assert.AreEqual("Intro section", result.Intro.ToString(), "result.Intro.ToString()");
             Assert.AreEqual("Objectives section", result.Objectives.ToString(), "result.Objectives.ToString()");
@@ -129,6 +133,12 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual("s2", result.Body.Objectives.Id, "result.Body.Objectives.Id");
             Assert.AreEqual("section lcObjectives ", result.Body.Objectives.HtmlClasses, "result.Body.Objectives.HtmlClasses");
             Assert.AreEqual("Objectives section", result.Body.Objectives.Content.ToString(), "result.Body.Objectives.Content.ToString()");
+
+            Assert.AreEqual(2, result.Body.Sections.Count, "result.Body.Sections.Count");
+            Assert.AreEqual("s1", result.Body.Sections[0].Id, "result.Body.Sections[0].Id");
+            Assert.AreEqual("s2", result.Body.Sections[1].Id, "result.Body.Sections[1].Id");
+            Assert.AreEqual("section lcIntro ", result.Body.Sections[0].HtmlClasses, "result.Body.Sections[0].HtmlClasses");
+            Assert.AreEqual("section lcObjectives ", result.Body.Sections[1].HtmlClasses, "result.Body.Sections[1].HtmlClasses");
         }
 
     }

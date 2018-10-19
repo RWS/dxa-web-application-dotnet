@@ -21,7 +21,7 @@ namespace Sdl.Web.Common.Models
         /// <summary>
         /// The internal/built-in Vocabulary ID used for DITA mapping.
         /// </summary>
-        public const string DitaVocabulary = "DITA"; // TODO: use nicer URI format?
+        public const string DitaVocabulary = "http://www.sdl.com/web/schemas/dita";
 
         /// <summary>
         /// The Vocabulary ID for types defined by schema.org.

@@ -201,9 +201,9 @@ namespace Sdl.Web.Common.Models
                     }
                     mappedModelTypes.Add(modelType);
 
-                    string[] semanticTypeNameParts = semanticTypeName.Split(':');
-                    string vocabularyId = semanticTypeNameParts[0];
-                    string entityName = semanticTypeNameParts[1];
+                    int entityNameSeparatorPos = semanticTypeName.LastIndexOf(':');
+                    string vocabularyId = semanticTypeName.Substring(0, entityNameSeparatorPos);
+                    string entityName = semanticTypeName.Substring(entityNameSeparatorPos + 1);
 
                     IList<Tuple<string, Type>> entityNameModelTypeTuples;
                     if (!_vocabularyToModelTypesMapping.TryGetValue(vocabularyId, out entityNameModelTypeTuples))
@@ -351,10 +351,10 @@ namespace Sdl.Web.Common.Models
 
                         case SemanticProperty.Self:
                             Type elementType = GetElementType(propertyInfo.PropertyType);
-                            if (!typeof(MediaItem).IsAssignableFrom(elementType) && !typeof(Link).IsAssignableFrom(elementType) && (elementType != typeof(string)))
+                            if (!typeof(MediaItem).IsAssignableFrom(elementType) && !typeof(Link).IsAssignableFrom(elementType) && (elementType != typeof(string)) && (elementType != typeof(RichText)))
                             {
                                 throw new DxaException(
-                                    $"Invalid semantics for property {modelType.Name}.{propertyInfo.Name}. Properties with [SemanticProperty(\"_self\")] annotation must be of type MediaItem, Link or String.");
+                                    $"Invalid semantics for property {modelType.Name}.{propertyInfo.Name}. Properties with [SemanticProperty(\"_self\")] annotation must be of type MediaItem, Link, String or RichText.");
                             }
                             break;
                     }

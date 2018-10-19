@@ -22,11 +22,14 @@ namespace Sdl.Web.Tridion.Tests.Models.Topic
         [SemanticProperty("section")]
         public List<string> Sections { get; set; }
 
+        [SemanticProperty("link")]
+        public List<Link> Links { get; set; }
+
         [SemanticProperty("childlink")]
-        public Link FirstLink { get; set; }
+        public Link FirstChildLink { get; set; }
 
         [SemanticProperty("related-links/childlink")]
         // TODO: Support for low-level XPaths: [SemanticProperty("xpath:.//*[contains(@class, 'related-links' )]//*[contains(@class, 'childlink' )]")]
-        public List<Link> Links { get; set; }
+        public List<Link> ChildLinks { get; set; }
     }
 }

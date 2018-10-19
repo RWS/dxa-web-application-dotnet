@@ -26,7 +26,7 @@ namespace Sdl.Web.Common.Models.Entity
         /// Gets or sets the topic body.
         /// </summary>
         /// <remarks>
-        /// The topic body is HTML which contains _all_ DITA properties (incl. title, body, related-links, nested topics)
+        /// The topic body is an XHTML fragment which contains _all_ DITA properties (incl. title, body, related-links, nested topics)
         /// </remarks>
         [SemanticProperty("topicBody")]
         [JsonProperty(PropertyName = "topicBody")] // DDWebApp expects camel case
