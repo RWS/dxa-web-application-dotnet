@@ -152,9 +152,11 @@ namespace Sdl.Web.Tridion.Statics
                             }
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         // Our binary cache folder probably doesn't exist. 
+                        Log.Warn($"Failed to cache binary at {localFilePath}");
+                        Log.Warn(ex.Message);
                     }
                 }
 
