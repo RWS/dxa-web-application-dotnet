@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Sdl.Web.Common.Logging;
 using System;
 
 namespace Sdl.Web.Common.Models.Entity
@@ -31,5 +32,22 @@ namespace Sdl.Web.Common.Models.Entity
         [SemanticProperty("topicBody")]
         [JsonProperty(PropertyName = "topicBody")] // DDWebApp expects camel case
         public string TopicBody { get; set; }
+
+        /// <summary>
+        /// Registers this View Model Type.
+        /// </summary>
+        /// <remarks>
+        /// Although this View Model Type is part of the DXA Framework, it has to be registered like any other View Model Type.
+        /// In order to work with Tridion Docs content, it will be associated with specific MVC data.
+        /// A DXA Web Application/Module that wants to work with Tridion Docs content should call this method
+        /// unless it defines its own View Model Type for generic Topics.
+        /// </remarks>
+        public static void Register()
+        {
+            using (new Tracer())
+            {
+                ModelTypeRegistry.RegisterViewModel(new MvcData("Ish:Entity:Topic"), typeof(Topic));
+            }
+        }
     }
 }
