@@ -197,13 +197,15 @@ namespace Sdl.Web.Tridion.ModelService
                 if (descendantLevels == -1)
                 {
                     var tree0 = SitemapHelpers.GetEntireTree(Client, ns, pubId, parentSitemapItemId, includeAncestors, _descendantDepth);
-                    if (parentSitemapItemId == null) return tree0;
-                    if (parentSitemapItemId.Split('-').Length == 1) return tree0;
+                    // If parent node not specified we return entire tree
+                    if (parentSitemapItemId == null) return tree0;        
+                    // root node specified so return the direct children of this node
                     List<ISitemapItem> items0 = new List<ISitemapItem>();
                     foreach (TaxonomySitemapItem x in tree0.OfType<TaxonomySitemapItem>())
                     {
                         items0.AddRange(x.Items);
                     }
+                    items0 = items0.OrderBy(i => i.OriginalTitle).ToList();
                     return items0;
                 }
 
@@ -212,18 +214,18 @@ namespace Sdl.Web.Tridion.ModelService
 
                 if (parentSitemapItemId == null)
                 {
-                    // requesting from root so just return descendants from root
+                    // Requesting from root so just return descendants from root
                     var tree0 = Client.GetSitemapSubtree(ns, pubId, null, descendantLevels, includeAncestors ? Ancestor.INCLUDE : Ancestor.NONE, null);
                     return tree0.Cast<ISitemapItem>().ToList();
                 }
 
                 if (includeAncestors)
                 {
-                    // we are looking for a particular item, we need to request the entire
+                    // We are looking for a particular item, we need to request the entire
                     // subtree first
                     var subtree0 = SitemapHelpers.GetEntireTree(Client, ns, pubId, parentSitemapItemId, true, _descendantDepth);
 
-                    // now we prune descendants from our deseried node
+                    // Prune descendants from our deseried node
                     ISitemapItem node = SitemapHelpers.FindNode(subtree0, parentSitemapItemId);
                     SitemapHelpers.Prune(node, 0, descendantLevels);
                     return subtree0;
@@ -235,6 +237,7 @@ namespace Sdl.Web.Tridion.ModelService
                 {
                     items.AddRange(x.Items);
                 }
+                items = items.OrderBy(i => i.OriginalTitle).ToList();
                 return items;
             }
             catch (GraphQLClientException e)

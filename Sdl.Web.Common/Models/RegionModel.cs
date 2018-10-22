@@ -118,7 +118,8 @@ namespace Sdl.Web.Common.Models
                 XpmMetadata.TryGetValue("FullyQualifiedName", out pathToRegion);
                 if (pathToRegion != null)
                 {
-                    pathToRegion = $" path: \"{pathToRegion}\",";
+                    string value = pathToRegion as string;
+                    pathToRegion = $" path: \"{value?.Replace("\\", "\\\\")}\",";
                 }
             }
 

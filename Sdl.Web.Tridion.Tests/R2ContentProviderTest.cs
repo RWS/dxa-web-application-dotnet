@@ -65,7 +65,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(4, numExcludes, "numExcludes");
         }
 
-        [Ignore]  // retroFit requires publishing with a change to TBB parameter.
+        [TestMethod]
         public void GetPageModel_RetrofitMapping_Success() // See TSI-1757
         {
             ILocalization testLocalization = TestFixture.ChildLocalization;
