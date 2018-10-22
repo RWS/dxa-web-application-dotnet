@@ -5,6 +5,9 @@ using Sdl.Web.Common.Models.Entity;
 using Sdl.Web.Common;
 using Sdl.Web.Tridion.Tests.Models.Topic;
 using Sdl.Web.Tridion.Tests.Models;
+using Sdl.Web.DataModel;
+using System.Collections.Generic;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -99,6 +102,71 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNull(result.ChildLinks, "result.ChildLinks");
             Assert.IsNotNull(result.MvcData, "result.MvcData");
             Assert.AreEqual(result.GetDefaultView(null), result.MvcData, "result.MvcData");
+        }
+
+        [TestMethod]
+        public void BuildEntityModel_ThroughModelBuilderPipeline_Success()
+        {
+            ILocalization testLocalization = new TridionDocs.Localization.DocsLocalization();
+
+            string testTitle = "DITA title";
+            string testBody = "<div class=\"section \">First section</div><div class=\"section \">Second section</div>";
+            Topic genericTopic = new Topic
+            {
+                TopicTitle = "Test topic title",
+                TopicBody = $"<h1 class=\"title \">{testTitle}</h1><div class=\"body \">{testBody}</div>"
+            };
+
+            PageModelData testPageModelData = new PageModelData
+            {
+                Id = "666",
+                Regions = new List<RegionModelData>
+                {
+                    new RegionModelData
+                    {
+                        Name = "Main",
+                        Entities = new List<EntityModelData>
+                        {
+                            new EntityModelData
+                            {
+                                SchemaId =  "1", // Tridion Docs uses a hard-coded/fake Schema ID.
+                                Content = new ContentModelData
+                                {
+                                    { "topicTitle", genericTopic.TopicTitle },
+                                    { "topicBody", genericTopic.TopicBody }
+                                },
+                                MvcData = new DataModel.MvcData
+                                {
+                                    AreaName = "Ish",
+                                    ViewName = "Topic"
+                                }
+                            }
+                        },
+                        MvcData = new DataModel.MvcData
+                        {
+                            AreaName = "Core", // TODO: test with ISH data
+                            ViewName = "Main"
+                        }
+                    }
+                },
+                MvcData = new DataModel.MvcData
+                {
+                    AreaName = "Test",
+                    ViewName = "SimpleTestPage"
+                }
+            };
+
+            PageModel pageModel = ModelBuilderPipeline.CreatePageModel(testPageModelData, false, testLocalization);
+            Assert.IsNotNull(pageModel, "pageModel");
+
+            OutputJson(pageModel);
+
+            TestStronglyTypedTopic result = pageModel.Regions["Main"].Entities[0] as TestStronglyTypedTopic;
+            Assert.IsNotNull(result);
+
+            Assert.AreEqual(testTitle, result.Title, "result.Title");
+            Assert.AreEqual(testBody, result.BodyRichText.ToString(), "result.BodyRichText.ToString()");
+            Assert.AreEqual("First section", result.FirstSection, "result.FirstSection");
         }
 
         [TestMethod]
