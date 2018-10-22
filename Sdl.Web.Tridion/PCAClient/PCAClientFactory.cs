@@ -174,7 +174,7 @@ namespace Sdl.Web.Tridion.PCAClient
 
             if (forwardedClaims.Count <= 0) return client;
 
-            foreach (var claim in forwardedClaims)
+            foreach (var claim in forwardedClaims.Where(claim => !claim.Key.Equals("taf:session:preview:preview_session")))
             {
                 client.GlobalContextData.ClaimValues.Add(new ClaimValue
                 {
