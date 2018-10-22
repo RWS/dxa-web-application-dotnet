@@ -97,6 +97,8 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNull(result.Links, "result.Links");
             Assert.IsNull(result.FirstChildLink, "result.FirstChildLink");
             Assert.IsNull(result.ChildLinks, "result.ChildLinks");
+            Assert.IsNotNull(result.MvcData, "result.MvcData");
+            Assert.AreEqual(result.GetDefaultView(null), result.MvcData, "result.MvcData");
         }
 
         [TestMethod]
@@ -168,6 +170,12 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual("s2", result.Body.Sections[1].Id, "result.Body.Sections[1].Id");
             Assert.AreEqual("section lcIntro ", result.Body.Sections[0].HtmlClasses, "result.Body.Sections[0].HtmlClasses");
             Assert.AreEqual("section lcObjectives ", result.Body.Sections[1].HtmlClasses, "result.Body.Sections[1].HtmlClasses");
+
+            Assert.IsNotNull(result.MvcData, "result.MvcData");
+            Assert.AreEqual(result.GetDefaultView(null), result.MvcData, "result.MvcData");
+            Assert.IsNotNull(result.Body.MvcData, "result.Body.MvcData");
+            Assert.AreEqual(result.Body.GetDefaultView(null), result.Body.MvcData, "result.Body.MvcData");
+
         }
 
     }

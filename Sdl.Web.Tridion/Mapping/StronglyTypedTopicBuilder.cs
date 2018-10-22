@@ -213,6 +213,12 @@ namespace Sdl.Web.Tridion.Mapping
             EntityModel result = (EntityModel)modelType.CreateInstance();
             MapBaseProperties(result, htmlElement);
             MapSemanticProperties(result, htmlElement);
+
+            // Let the View Model determine the View to be used.
+            // Do this after mapping all properties so that the View name can be derived from the properties if needed.
+            // NOTE: Currently passing in null for Context Localization (not expecting this to be used).
+            result.MvcData = result.GetDefaultView(null);
+
             return result;
         }
 

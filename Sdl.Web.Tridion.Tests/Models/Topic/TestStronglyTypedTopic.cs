@@ -1,5 +1,6 @@
 ﻿using Sdl.Web.Common.Models;
 using System.Collections.Generic;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Tridion.Tests.Models.Topic
 {
@@ -31,5 +32,10 @@ namespace Sdl.Web.Tridion.Tests.Models.Topic
         [SemanticProperty("related-links/childlink")]
         // TODO: Support for low-level XPaths: [SemanticProperty("xpath:.//*[contains(@class, 'related-links' )]//*[contains(@class, 'childlink' )]")]
         public List<Link> ChildLinks { get; set; }
+
+        public override MvcData GetDefaultView(ILocalization localization)
+        {
+            return new MvcData("Test:Entity:TestStronglyTypedTopic");
+        }
     }
 }
