@@ -22,7 +22,7 @@ namespace Sdl.Web.Tridion.PCAClient
         private readonly Uri _endpoint;
         private readonly Uri _iqEndpoint;
         private readonly string _iqSearchIndex;
-
+        private readonly bool _claimForwarding = true;
         private readonly IAuthentication _oauth;
         private const string PreviewSessionTokenHeader = "x-preview-session-token";
         private const string PreviewSessionTokenCookie = "preview-session-token";
@@ -31,11 +31,16 @@ namespace Sdl.Web.Tridion.PCAClient
             new Lazy<PCAClientFactory>(() => new PCAClientFactory());
 
         public static PCAClientFactory Instance => lazy.Value;
-
+        
         private PCAClientFactory()
         {
             try
             {
+                var setting = WebConfigurationManager.AppSettings["pca-claim-forwarding"];
+                if (!string.IsNullOrEmpty(setting))
+                {
+                    _claimForwarding = setting.Equals("true", StringComparison.InvariantCultureIgnoreCase);
+                }
                 string uri = WebConfigurationManager.AppSettings["pca-service-uri"];
                 if (string.IsNullOrEmpty(uri))
                 {
@@ -74,7 +79,7 @@ namespace Sdl.Web.Tridion.PCAClient
                 }
 
                 _oauth = new OAuth(DiscoveryServiceProvider.DefaultTokenProvider);
-                Log.Debug($"PCAClient found at URL '{_endpoint}'.");
+                Log.Debug($"PCAClient found at URL '{_endpoint}' with claim forwarding = {_claimForwarding}");
                 Log.Info(_iqEndpoint == null
                     ? "Unable to retrieve endpoint for IQ Search Service."
                     : $"IQSearch found at URL '{_iqEndpoint}'.");
@@ -156,14 +161,15 @@ namespace Sdl.Web.Tridion.PCAClient
             {
                 client.HttpClient.Headers[PreviewSessionTokenHeader] = cookies[PreviewSessionTokenCookie];              
             }
-
+           
+            if (!_claimForwarding) return client;
             // Forward all claims
             var forwardedClaimValues = AmbientDataContext.ForwardedClaims;
             if (forwardedClaimValues == null || forwardedClaimValues.Count <= 0) return client;
             Dictionary<Uri, object> forwardedClaims =
                 forwardedClaimValues.Select(claim => new Uri(claim, UriKind.RelativeOrAbsolute))
                     .Distinct()
-                    .Where(uri => claimStore.Contains(uri) && claimStore.Get<object>(uri) != null)
+                    .Where(uri => claimStore.Contains(uri) && claimStore.Get<object>(uri) != null && !uri.ToString().Equals("taf:session:preview:preview_session"))
                     .ToDictionary(uri => uri, uri => claimStore.Get<object>(uri));
 
             if (forwardedClaims.Count <= 0) return client;
