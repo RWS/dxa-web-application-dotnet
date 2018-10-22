@@ -214,8 +214,8 @@ namespace Sdl.Web.Mvc.Context
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("Unable to evaluate Device Family '{0}'", deviceFamily);
-                        Log.Error(ex);
+                        Log.Warn("Unable to evaluate Device Family '{0}'", deviceFamily);
+                        Log.Warn(ex.ToString());
                         return string.Empty;
                     }
                 }
