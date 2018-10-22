@@ -8,6 +8,7 @@ using Sdl.Web.Tridion.Tests.Models;
 using Sdl.Web.DataModel;
 using System.Collections.Generic;
 using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -107,7 +108,8 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void BuildEntityModel_ThroughModelBuilderPipeline_Success()
         {
-            ILocalization testLocalization = new TridionDocs.Localization.DocsLocalization();
+            ILocalization testLocalization = new DocsLocalization();
+            testLocalization.EnsureInitialized();
 
             string testTitle = "DITA title";
             string testBody = "<div class=\"section \">First section</div><div class=\"section \">Second section</div>";
@@ -167,6 +169,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(testTitle, result.Title, "result.Title");
             Assert.AreEqual(testBody, result.BodyRichText.ToString(), "result.BodyRichText.ToString()");
             Assert.AreEqual("First section", result.FirstSection, "result.FirstSection");
+            Assert.AreEqual(result.GetDefaultView(null), result.MvcData, "result.MvcData");
         }
 
         [TestMethod]

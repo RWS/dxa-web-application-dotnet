@@ -77,6 +77,7 @@
   <ItemGroup>
     <Compile Include="CacheRegions.cs" />
     <Compile Include="Configuration\ComponentType.cs" />
+    <Compile Include="Configuration\DocsLocalization.cs" />
     <Compile Include="Configuration\LocalizationResources.cs" />
     <Compile Include="Configuration\LocalizationMappingsManager.cs" />
     <Compile Include="Configuration\OccurrenceConstraint.cs" />
