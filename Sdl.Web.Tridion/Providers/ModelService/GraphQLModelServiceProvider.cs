@@ -13,7 +13,6 @@ using Sdl.Web.GraphQLClient.Exceptions;
 using Sdl.Web.PublicContentApi;
 using Sdl.Web.PublicContentApi.ContentModel;
 using Sdl.Web.PublicContentApi.Exceptions;
-using Sdl.Web.PublicContentApi.Utils;
 using Sdl.Web.Tridion.PCAClient;
 using Sdl.Web.Tridion.Providers.ModelService;
 
@@ -52,9 +51,6 @@ namespace Sdl.Web.Tridion.ModelService
             }
         }
 
-        protected ContentNamespace GetNamespace(ILocalization localization)
-            => CmUri.NamespaceIdentiferToId(localization.CmUriScheme);
-
         public EntityModelData GetEntityModelData(string entityId, ILocalization localization)
         {
             try
@@ -66,7 +62,7 @@ namespace Sdl.Web.Tridion.ModelService
                 string[] ids = entityId.Split('-');
                 if (ids.Length != 2) return null;
 
-                var json = Client.GetEntityModelData(GetNamespace(localization), int.Parse(localization.Id),
+                var json = Client.GetEntityModelData(localization.Namespace(), localization.PublicationId(),
                     int.Parse(ids[0]), int.Parse(ids[1]),                    
                     ContentIncludeMode.IncludeAndRender, null);
                 return LoadModel<EntityModelData>(json);
@@ -87,7 +83,7 @@ namespace Sdl.Web.Tridion.ModelService
         {
             try
             {
-                var json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id), pageId,
+                var json = Client.GetPageModelData(localization.Namespace(), localization.PublicationId(), pageId,
                     addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
                     ContentIncludeMode.IncludeAndRender, null);
                 return LoadModel<PageModelData>(json);
@@ -124,7 +120,7 @@ namespace Sdl.Web.Tridion.ModelService
             // TODO: The above should be handled by PCA (See CRQ-11703)
             try
             {
-                json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
+                json = Client.GetPageModelData(localization.Namespace(), localization.PublicationId(),
                     GetCanonicalUrlPath(urlPath, true),
                     addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
                     ContentIncludeMode.IncludeAndRender, null);
@@ -133,7 +129,7 @@ namespace Sdl.Web.Tridion.ModelService
             {
                 try
                 {
-                    json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
+                    json = Client.GetPageModelData(localization.Namespace(), localization.PublicationId(),
                         GetCanonicalUrlPath(urlPath, false),
                         addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
                         ContentIncludeMode.IncludeAndRender, null);
@@ -158,8 +154,8 @@ namespace Sdl.Web.Tridion.ModelService
         {
             try
             {
-                var ns = GetNamespace(localization);
-                var publicationId = int.Parse(localization.Id);
+                var ns = localization.Namespace();
+                var publicationId = localization.PublicationId();
                 var tree = SitemapHelpers.GetEntireTree(Client, ns, publicationId, _descendantDepth);
                 return (TaxonomyNode)SitemapHelpers.Convert(tree);
             }
@@ -190,8 +186,8 @@ namespace Sdl.Web.Tridion.ModelService
         {
             try
             {
-                int pubId = int.Parse(localization.Id);
-                ContentNamespace ns = GetNamespace(localization);
+                int pubId = localization.PublicationId();
+                ContentNamespace ns = localization.Namespace();
 
                 // Check if we are requesting the entire tree
                 if (descendantLevels == -1)

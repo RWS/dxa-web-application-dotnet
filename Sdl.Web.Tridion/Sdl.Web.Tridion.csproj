@@ -48,6 +48,7 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="PCAClient\Extensions.cs" />
     <Compile Include="Providers\ModelService\SitemapHelpers.cs" />
     <Compile Include="Resolvers\Localization\GraphQLMashupLocalizationResolver.cs" />
     <Compile Include="TridionDocs\Localization\DocsLocalization.cs" />
