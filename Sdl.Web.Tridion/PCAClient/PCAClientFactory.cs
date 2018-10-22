@@ -169,12 +169,12 @@ namespace Sdl.Web.Tridion.PCAClient
             Dictionary<Uri, object> forwardedClaims =
                 forwardedClaimValues.Select(claim => new Uri(claim, UriKind.RelativeOrAbsolute))
                     .Distinct()
-                    .Where(uri => claimStore.Contains(uri) && claimStore.Get<object>(uri) != null)
+                    .Where(uri => claimStore.Contains(uri) && claimStore.Get<object>(uri) != null && !uri.ToString().Equals("taf:session:preview:preview_session"))
                     .ToDictionary(uri => uri, uri => claimStore.Get<object>(uri));
 
             if (forwardedClaims.Count <= 0) return client;
 
-            foreach (var claim in forwardedClaims.Where(claim => !claim.Key.Equals("taf:session:preview:preview_session")))
+            foreach (var claim in forwardedClaims)
             {
                 client.GlobalContextData.ClaimValues.Add(new ClaimValue
                 {
