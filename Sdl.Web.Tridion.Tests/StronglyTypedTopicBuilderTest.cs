@@ -41,6 +41,34 @@ namespace Sdl.Web.Tridion.Tests
 
 
         [TestMethod]
+        public void BuildEntityModel_NoMatchingStronglyTypedTopic_Success()
+        {
+            Topic genericTopic = new Topic
+            {
+                TopicBody = null
+            };
+
+            EntityModel testEntityModel = genericTopic;
+            _testModelBuilder.BuildEntityModel(ref testEntityModel, null, null, TestFixture.ParentLocalization);
+
+            Assert.AreSame(genericTopic, testEntityModel, "testEntityModel");
+        }
+
+        [TestMethod]
+        public void BuildEntityModel_TopicBodyIllFormedXml_Success()
+        {
+            Topic genericTopic = new Topic
+            {
+                TopicBody = "<IllFormedXML>"
+            };
+
+            EntityModel testEntityModel = genericTopic;
+            _testModelBuilder.BuildEntityModel(ref testEntityModel, null, null, TestFixture.ParentLocalization);
+
+            Assert.AreSame(genericTopic, testEntityModel, "testEntityModel");
+        }
+
+        [TestMethod]
         public void BuildEntityModel_TitleBodySections_Success()
         {
             string testTitle = "DITA title";
@@ -79,10 +107,11 @@ namespace Sdl.Web.Tridion.Tests
                 TopicBody = "<div class=\"body \" /><div class=\"related-links \">" +
                     "<div class=\"childlink \"><strong><a class=\"link \" href=\"/firstlink.html\">First link text</a></strong></div>" +
                     "<div class=\"childlink \"><strong><a class=\"link \" href=\"/secondlink.html\">Second link text</a></strong></div>" +
+                    "<div class=\"parentlink \"><strong><a class=\"link \" href=\"/thirdlink.html\">Third link text</a></strong></div>" +
                     "</div>"
             };
 
-            TestStronglyTypedTopic result = _testModelBuilder.TryConvertToStronglyTypedTopic(genericTopic) as TestStronglyTypedTopic;
+            TestStronglyTypedTopic result = _testModelBuilder.TryConvertToStronglyTypedTopic<TestStronglyTypedTopic>(genericTopic);
             Assert.IsNotNull(result, "result");
 
             OutputJson(result);
@@ -90,7 +119,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNull(result.Title, "result.Title");
             Assert.AreEqual(string.Empty, result.Body, "result.Body");
             Assert.IsNotNull(result.Links, "result.Links");
-            Assert.AreEqual(2, result.Links.Count, "result.Links.Count");
+            Assert.AreEqual(3, result.Links.Count, "result.Links.Count");
             Assert.IsNotNull(result.FirstChildLink, "result.FirstChildLink");
             Assert.AreEqual("/firstlink.html", result.FirstChildLink.Url, "result.FirstChildLink.Url");
             Assert.AreEqual("First link text", result.FirstChildLink.LinkText, "result.FirstChildLink.LinkText");
