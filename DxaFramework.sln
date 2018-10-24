@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Site", "Site\Sdl.Web.Site.csproj", "{4B9E8878-0810-4CD1-B57A-D06589C49FE2}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -28,8 +28,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.ModelService", "Sdl.Web.ModelService\Sdl.Web.ModelService.csproj", "{5A58A2B2-6C7E-4183-8EFF-76D4282E5C66}"
 EndProject
 Project("{7CF6DF6D-3B04-46F8-A40B-537D21BCA0B4}") = "Sdl.Web.Documentation", "Sdl.Web.Documentation\Sdl.Web.Documentation.shfbproj", "{5020F45F-C6A3-4010-9E5A-724B831E1F08}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl.Web.Modules.TridionDocsMashup", "..\dxa-modules\webapp-net\TridionDocsMashup\Sdl.Web.Modules.TridionDocsMashup.csproj", "{87029FAF-C593-4C5C-ABB2-3C83E84257CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,10 +66,6 @@ Global
 		{5020F45F-C6A3-4010-9E5A-724B831E1F08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5020F45F-C6A3-4010-9E5A-724B831E1F08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5020F45F-C6A3-4010-9E5A-724B831E1F08}.Release|Any CPU.Build.0 = Release|Any CPU
-		{87029FAF-C593-4C5C-ABB2-3C83E84257CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{87029FAF-C593-4C5C-ABB2-3C83E84257CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{87029FAF-C593-4C5C-ABB2-3C83E84257CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{87029FAF-C593-4C5C-ABB2-3C83E84257CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
