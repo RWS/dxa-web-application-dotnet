@@ -57,7 +57,7 @@ namespace Sdl.Web.Tridion
                     // Attempt to resolve it from Docs
                     var client = PCAClientFactory.Instance.CreateClient();
                     var publication = client.GetPublication(ContentNamespace.Docs, int.Parse(localizationId), null, null);
-                    return publication != null ? new DocsLocalization {Id = publication.PublicationId.ToString()} : base.GetLocalization(localizationId);
+                    return publication != null ? new DocsLocalization(publication.PublicationId) : base.GetLocalization(localizationId);
                 }
 
                 return result;

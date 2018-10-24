@@ -32,7 +32,7 @@ namespace Sdl.Web.Common.Configuration
         /// Initializes an new <see cref="DocsLocalization"/> instance for a given Publication identifier.
         /// </summary>
         /// <param name="publicationId">The Tridion Docs Publication Identifier.</param>
-        public DocsLocalization(uint publicationId) : this()
+        public DocsLocalization(int publicationId) : this()
         {
             Id = publicationId.ToString();
         }
