@@ -770,15 +770,13 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             string defaultModuleName = SiteConfiguration.GetDefaultModuleName();
-            string areaName = data.AreaName ?? defaultModuleName;
             return new MvcData
             {
                 ControllerName = data.ControllerName ?? defaultControllerName,
-                ControllerAreaName = data.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName(),
+                ControllerAreaName = data.ControllerAreaName ?? defaultModuleName,
                 ActionName = data.ActionName ?? defaultControllerName,
                 ViewName = data.ViewName,
-                // remap "Ish" area onto our default module name here so Docs content can be rendered
-                AreaName = areaName.Equals("Ish") ? defaultModuleName : areaName,
+                AreaName = data.AreaName ?? defaultModuleName,
                 RouteValues = data.Parameters
             };
         }

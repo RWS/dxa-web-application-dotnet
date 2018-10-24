@@ -7,7 +7,6 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.PublicContentApi.ContentModel;
 using Sdl.Web.PublicContentApi.Utils;
 using Sdl.Web.Tridion.PCAClient;
-using Sdl.Web.Tridion.TridionDocs.Localization;
 
 namespace Sdl.Web.Tridion
 {

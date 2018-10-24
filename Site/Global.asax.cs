@@ -16,6 +16,7 @@ using Sdl.Web.Mvc.Html;
 using Unity;
 using Unity.Mvc5;
 using Unity.ServiceLocation;
+using Sdl.Web.Common.Models.Entity;
 
 namespace Sdl.Web.Site
 {
@@ -139,6 +140,7 @@ namespace Sdl.Web.Site
             
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
+            Topic.Register(); // Register generic Topic View Model so that Tridion Docs content can be handled.
             RegisterDisplayModes();
             _initialized = true;
         }
