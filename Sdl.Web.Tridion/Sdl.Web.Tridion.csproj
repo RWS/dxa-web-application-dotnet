@@ -48,7 +48,6 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="DocsLocalization.cs" />
     <Compile Include="Mapping\StronglyTypedTopicBuilder.cs" />
     <Compile Include="PCAClient\Extensions.cs" />
     <Compile Include="Providers\ModelService\SitemapHelpers.cs" />
