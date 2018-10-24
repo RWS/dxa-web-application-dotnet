@@ -16,6 +16,69 @@ namespace Sdl.Web.Common.Configuration
     /// </remarks>
     public class DocsLocalization : Localization
     {
+        private static List<SemanticVocabulary> _semanticVocabs;
+        private static List<SemanticSchema> _semanticSchemas;
+
+        /// <summary>
+        /// Class constructor
+        /// </summary>
+        static DocsLocalization()
+        {
+            const string rootElementName = "Topic";
+            const string topicBodyFieldName = "topicBody";
+            const string topicTitleFieldName = "topicTitle";
+            const string coreVocabularyPrefix = "tri";
+
+            using (new Tracer())
+            {
+                // Predefined Topic schema that always has an ID of 1 (deployer adds this)
+                SemanticSchema topicSchema = new SemanticSchema
+                {
+                    Id = 1,
+                    RootElement = rootElementName,
+                    Fields = new List<SemanticSchemaField>
+                    {
+                        new SemanticSchemaField
+                        {
+                            Name = topicBodyFieldName,
+                            Path = $"/{rootElementName}/{topicBodyFieldName}",
+                            IsMultiValue = false,
+                            Semantics = new List<FieldSemantics>
+                            {
+                                new FieldSemantics {Prefix = coreVocabularyPrefix, Entity = rootElementName, Property = topicBodyFieldName}
+                            },
+                            Fields = new List<SemanticSchemaField>()
+                        },
+                        new SemanticSchemaField
+                        {
+                            Name = topicTitleFieldName,
+                            Path = $"/{rootElementName}/{topicTitleFieldName}",
+                            IsMultiValue = false,
+                            Semantics = new List<FieldSemantics>
+                            {
+                                new FieldSemantics {Prefix = coreVocabularyPrefix, Entity = rootElementName, Property = topicTitleFieldName}
+                            },
+                            Fields = new List<SemanticSchemaField>()
+                        }
+                    },
+                    Semantics = new List<SchemaSemantics>
+                    {
+                        new FieldSemantics {Prefix = coreVocabularyPrefix, Entity = rootElementName}
+                    }
+                };
+
+                _semanticSchemas = new List<SemanticSchema>
+                {
+                    topicSchema
+                };
+
+                _semanticVocabs = new List<SemanticVocabulary>
+                {
+                    new SemanticVocabulary { Prefix = coreVocabularyPrefix, Vocab = Models.ViewModel.CoreVocabulary }
+                };
+            }
+        }
+
         /// <summary>
         /// Initializes a new <see cref="DocLocalization"/> instance.
         /// </summary>
@@ -56,64 +119,16 @@ namespace Sdl.Web.Common.Configuration
         {
             using (new Tracer())
             {
-                const string rootElementName = "Topic";
-                const string topicBodyFieldName = "topicBody";
-                const string topicTitleFieldName = "topicTitle";
-                const string coreVocabularyPrefix = "tri";
-
-                LastRefresh = DateTime.Now;
-
-                // Predefined Topic schema that always has an ID of 1 (deployer adds this)
-                SemanticSchema schema = new SemanticSchema
-                {
-                    Id = 1,
-                    RootElement = rootElementName,
-                    Fields = new List<SemanticSchemaField>
-                    {
-                        new SemanticSchemaField
-                        {
-                            Name = topicBodyFieldName,
-                            Path = $"/{rootElementName}/{topicBodyFieldName}",
-                            IsMultiValue = false,
-                            Semantics = new List<FieldSemantics>
-                            {
-                                new FieldSemantics {Prefix = coreVocabularyPrefix, Entity = rootElementName, Property = topicBodyFieldName}
-                            },
-                            Fields = new List<SemanticSchemaField>()
-                        },
-                        new SemanticSchemaField
-                        {
-                            Name = topicTitleFieldName,
-                            Path = $"/{rootElementName}/{topicTitleFieldName}",
-                            IsMultiValue = false,
-                            Semantics = new List<FieldSemantics>
-                            {
-                                new FieldSemantics {Prefix = coreVocabularyPrefix, Entity = rootElementName, Property = topicTitleFieldName}
-                            },
-                            Fields = new List<SemanticSchemaField>()
-                        }
-                    },
-                    Semantics = new List<SchemaSemantics>
-                    {
-                        new FieldSemantics {Prefix = coreVocabularyPrefix, Entity = rootElementName}
-                    }
-                };
-
-                List<SemanticVocabulary> vocabs = new List<SemanticVocabulary>
-                {
-                    new SemanticVocabulary { Prefix = coreVocabularyPrefix, Vocab = Models.ViewModel.CoreVocabulary }
-                };
-
-                SetSemanticSchemas(new List<SemanticSchema> { schema }, vocabs);
+                SetSemanticSchemas(_semanticSchemas, _semanticVocabs);
 
                 // TODO: does this make sense for Docs?
+                // We should keep the Load as lightweight as possible; if this is needed at all, it should be done in the class constructor.
                 List<string> mediaPatterns = new List<string>();
                 mediaPatterns.Add("^/favicon.ico");
                 mediaPatterns.Add($"^{Path}/{SiteConfiguration.SystemFolder}/assets/.*");
                 mediaPatterns.Add($"^{Path}/{SiteConfiguration.SystemFolder}/.*\\.json$");
                 StaticContentUrlPattern = string.Join("|", mediaPatterns);
                 _staticContentUrlRegex = new Regex(StaticContentUrlPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
             }
         }
 
