@@ -50,10 +50,7 @@ namespace Sdl.Web.Mvc.Controllers
                     }
 
                     PageModelWithHttpResponseData pageModelWithHttpResponseData = pageModel as PageModelWithHttpResponseData;
-                    if (pageModelWithHttpResponseData != null)
-                    {
-                        pageModelWithHttpResponseData.SetHttpResponseData(System.Web.HttpContext.Current.Response);
-                    }
+                    pageModelWithHttpResponseData?.SetHttpResponseData(System.Web.HttpContext.Current.Response);
 
                     SetupViewData(pageModel);
                     PageModel model = (EnrichModel(pageModel) as PageModel) ?? pageModel;

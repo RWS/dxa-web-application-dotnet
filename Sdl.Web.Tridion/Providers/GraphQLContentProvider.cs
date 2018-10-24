@@ -11,7 +11,6 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
 using Sdl.Web.PublicContentApi;
-using Sdl.Web.PublicContentApi.Utils;
 using Sdl.Web.Tridion.PCAClient;
 using Sdl.Web.Tridion.Providers.Query;
 using Sdl.Web.Tridion.Statics;
@@ -266,8 +265,8 @@ namespace Sdl.Web.Tridion.Mapping
                 client.DefaultContentType = ContentType.RAW;
                 try
                 {
-                    var page = client.GetPage(CmUri.NamespaceIdentiferToId(localization.CmUriScheme),
-                        int.Parse(localization.Id), urlPath, null, ContentIncludeMode.IncludeAndRender, null);
+                    var page = client.GetPage(localization.Namespace(),
+                        localization.PublicationId(), urlPath, null, ContentIncludeMode.IncludeAndRender, null);
                     return JsonConvert.SerializeObject(page.RawContent.Data);
                 }
                 catch (Exception)

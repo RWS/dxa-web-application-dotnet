@@ -1,5 +1,4 @@
-﻿using System;
-using Sdl.Web.Common;
+﻿using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.PublicContentApi;
 using Sdl.Web.PublicContentApi.Utils;
