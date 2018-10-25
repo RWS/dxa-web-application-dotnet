@@ -86,7 +86,7 @@ namespace Sdl.Web.Tridion.Mapping
                 XmlElement rootElement = null;
                 try
                 {
-                    rootElement = ParseXhtml(genericTopic.TopicBody);
+                    rootElement = ParseXhtml(genericTopic);
                 }
                 catch (Exception ex)
                 {
@@ -126,13 +126,22 @@ namespace Sdl.Web.Tridion.Mapping
             => (T)TryConvertToStronglyTypedTopic(genericTopic, typeof(T));
 
         #region Overridables
-        protected virtual XmlElement ParseXhtml(string xhtml)
+        protected virtual XmlElement ParseXhtml(GenericTopic genericTopic)
         {
-            using (new Tracer(xhtml))
+            using (new Tracer(genericTopic))
             {
                 XmlDocument topicXmlDoc = new XmlDocument();
-                topicXmlDoc.LoadXml($"<topic>{xhtml}</topic>");
-                return topicXmlDoc.DocumentElement;
+                topicXmlDoc.LoadXml($"<topic>{genericTopic.TopicBody}</topic>");
+
+                XmlElement topicElement = topicXmlDoc.DocumentElement;
+
+                // Inject GenericTopic's TopicTitle as additional HTML element
+                XmlElement topicTitleElement = topicXmlDoc.CreateElement("h1");
+                topicTitleElement.SetAttribute("class", "_topicTitle");
+                topicTitleElement.InnerText = genericTopic.TopicTitle;
+                topicElement.AppendChild(topicTitleElement);
+
+                return topicElement;
             }
         }
 

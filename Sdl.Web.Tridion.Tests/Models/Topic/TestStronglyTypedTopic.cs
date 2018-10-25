@@ -8,6 +8,9 @@ namespace Sdl.Web.Tridion.Tests.Models.Topic
     // TODO: Support for low-level XPaths: [SemanticEntity(Vocab = XPathVocabulary, EntityName = ".//*[contains(@class, 'body ')]", Prefix ="xpath")]
     public class TestStronglyTypedTopic : EntityModel
     {
+        [SemanticProperty("_topicTitle")]
+        public string TopicTitle { get; set; }
+
         [SemanticProperty("title")]
         public string Title { get; set; }
 

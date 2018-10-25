@@ -79,7 +79,7 @@ namespace Sdl.Web.Tridion.Tests
             string testBody = "<div class=\"section \">First section</div><div class=\"section \">Second section</div>";
             GenericTopic genericTopic = new GenericTopic
             {
-                TopicTitle = "Test topic title",
+                TopicTitle = "<Test topic title>",
                 TopicBody = $"<h1 class=\"title \">{testTitle}</h1><div class=\"body \">{testBody}</div>"
             };
 
@@ -90,6 +90,7 @@ namespace Sdl.Web.Tridion.Tests
 
             TestStronglyTypedTopic result = testEntityModel as TestStronglyTypedTopic;
             Assert.IsNotNull(result, "result");
+            Assert.AreEqual(genericTopic.TopicTitle, result.TopicTitle, "result.TopicTitle");
             Assert.AreEqual(testTitle, result.Title, "result.Title");
             Assert.AreEqual("First sectionSecond section", result.Body, "result.Body"); // HTML tags should get stripped ("InnerText")
             Assert.IsNotNull(result.BodyRichText, "result.BodyRichText");
@@ -116,7 +117,7 @@ namespace Sdl.Web.Tridion.Tests
             string testBody = "<div class=\"section \">First section</div><div class=\"section \">Second section</div>";
             GenericTopic genericTopic = new GenericTopic
             {
-                TopicTitle = "Test topic title",
+                TopicTitle = "<Test topic title>",
                 TopicBody = $"<h1 class=\"title \">{testTitle}</h1><div class=\"body \">{testBody}</div>"
             };
 
@@ -169,6 +170,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(result);
 
             Assert.AreEqual(testTopicId, result.Id, "result.Id");
+            Assert.AreEqual(genericTopic.TopicTitle, result.TopicTitle, "result.TopicTitle");
             Assert.AreEqual(testTitle, result.Title, "result.Title");
             Assert.AreEqual(testBody, result.BodyRichText.ToString(), "result.BodyRichText.ToString()");
             Assert.AreEqual("First section", result.FirstSection, "result.FirstSection");
