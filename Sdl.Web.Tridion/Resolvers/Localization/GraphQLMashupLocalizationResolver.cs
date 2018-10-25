@@ -82,6 +82,7 @@ namespace Sdl.Web.Tridion
             if (!KnownLocalizations.TryGetValue(localizationId, out result))
             {
                 result = new DocsLocalization { Id = localizationId };
+                KnownLocalizations[localizationId] = result;
             }
 
             result.EnsureInitialized();
