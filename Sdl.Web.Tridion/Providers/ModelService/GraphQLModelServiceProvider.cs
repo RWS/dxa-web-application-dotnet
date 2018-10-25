@@ -13,7 +13,7 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.DataModel;
-using Sdl.Web.Tridion.PCAClient;
+using Sdl.Web.Tridion.ApiClient;
 using Sdl.Web.Tridion.Providers.ModelService;
 
 namespace Sdl.Web.Tridion.ModelService
@@ -38,11 +38,11 @@ namespace Sdl.Web.Tridion.ModelService
             _binder.AddDataModelExtension(extension);
         }
 
-        protected ApiClient Client
+        protected Sdl.Tridion.Api.Client.ApiClient Client
         {
             get
             {
-                var client = PCAClientFactory.Instance.CreateClient();
+                var client = ApiClientFactory.Instance.CreateClient();
                 client.DefaultModelType = DataModelType.R2;
                 client.DefaultContentType = ContentType.MODEL;
                 client.ModelSericeLinkRenderingType = ModelServiceLinkRendering.Relative;

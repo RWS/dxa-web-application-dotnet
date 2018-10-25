@@ -3,7 +3,7 @@ using Sdl.Tridion.Api.Client.Utils;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 
-namespace Sdl.Web.Tridion.PCAClient
+namespace Sdl.Web.Tridion.ApiClient
 {
     public static class Extensions
     {

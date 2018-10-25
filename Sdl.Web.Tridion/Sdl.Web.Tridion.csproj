@@ -49,7 +49,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Mapping\StronglyTypedTopicBuilder.cs" />
-    <Compile Include="PCAClient\Extensions.cs" />
+    <Compile Include="ApiClient\Extensions.cs" />
     <Compile Include="Providers\ModelService\SitemapHelpers.cs" />
     <Compile Include="Resolvers\Localization\GraphQLMashupLocalizationResolver.cs" />
     <Reference Include="DD4T.ContentModel">
@@ -193,7 +193,7 @@
     <Reference Include="Sdl.Web.Context.Image.Proxy">
       <HintPath>..\packages\Sdl.Web.Context.Image.$(SdlWebContextImagePackageVersion)\lib\net462\Sdl.Web.Context.Image.Proxy.dll</HintPath>
     </Reference>
-    <Compile Include="PCAClient\Logger.cs" />
+    <Compile Include="ApiClient\Logger.cs" />
     <Compile Include="Providers\Binary\CILBinaryProvider.cs" />
     <Compile Include="Providers\Binary\GraphQLBinaryProvider.cs" />
     <Compile Include="Providers\Caching\CacheProvider.cs" />
@@ -207,8 +207,8 @@
     <Compile Include="Providers\Query\BrokerQueryProvider.cs" />
     <Compile Include="Providers\Query\GraphQLQueryProvider.cs" />
     <Compile Include="Resolvers\Linking\GraphQLLinkResolver.cs" />
-    <Compile Include="PCAClient\OAuth.cs" />
-    <Compile Include="PCAClient\PCAClientException.cs" />
+    <Compile Include="ApiClient\OAuth.cs" />
+    <Compile Include="ApiClient\ApiClientException.cs" />
     <Compile Include="Resolvers\Localization\CdApiLocalizationResolver.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -239,7 +239,7 @@
     <Compile Include="Providers\Navigation\ModelServiceImpl\DynamicNavigationProvider.cs" />
     <Compile Include="Providers\Navigation\CILImpl\DynamicNavigationProvider.cs" />
     <Compile Include="Providers\Navigation\StaticNavigationProvider.cs" />
-    <Compile Include="PCAClient\PCAClientFactory.cs" />
+    <Compile Include="ApiClient\ApiClientFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\CommonAssemblyInfo.cs" />
     <Compile Include="ContentManager\TcmUri.cs" />

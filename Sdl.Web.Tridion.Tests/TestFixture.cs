@@ -9,12 +9,12 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
+using Sdl.Web.Tridion.ApiClient;
 using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Navigation;
 using Sdl.Web.Tridion.Caching;
 using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.ModelService;
-using Sdl.Web.Tridion.PCAClient;
 using Sdl.Web.Tridion.Providers.Binary;
 
 namespace Sdl.Web.Tridion.Tests
@@ -144,7 +144,7 @@ namespace Sdl.Web.Tridion.Tests
             };
 
             // map path of publications to Ids
-            var client = PCAClientFactory.Instance.CreateClient();
+            var client = ApiClientFactory.Instance.CreateClient();
             var publications = client.GetPublications(ContentNamespace.Sites, null, null, null, null);
             Assert.AreNotEqual(0, publications.Edges.Count,
                 "No publications returned from content service. Check you have published all the relevant publications.");

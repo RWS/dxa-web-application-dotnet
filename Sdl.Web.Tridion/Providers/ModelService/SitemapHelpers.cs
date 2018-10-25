@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sdl.Tridion.Api.Client;
 using Sdl.Tridion.Api.Client.ContentModel;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
@@ -10,7 +9,7 @@ namespace Sdl.Web.Tridion.Providers.ModelService
 {
     internal static class SitemapHelpers
     {
-        internal static ISitemapItem GetEntireTree(ApiClient client, ContentNamespace ns, int pubId, int requestLevels)
+        internal static ISitemapItem GetEntireTree(Sdl.Tridion.Api.Client.ApiClient client, ContentNamespace ns, int pubId, int requestLevels)
         {
             ISitemapItem root = client.GetSitemap(ns, pubId, requestLevels, null);
             if (root == null) return null;
@@ -29,7 +28,7 @@ namespace Sdl.Web.Tridion.Providers.ModelService
             return root;
         }
 
-        internal static List<ISitemapItem> GetEntireTree(ApiClient client, ContentNamespace ns, int pubId, string parentSitemapId, bool includeAncestors, int requestLevels)
+        internal static List<ISitemapItem> GetEntireTree(Sdl.Tridion.Api.Client.ApiClient client, ContentNamespace ns, int pubId, string parentSitemapId, bool includeAncestors, int requestLevels)
         {
             var rootsItems = client.GetSitemapSubtree(ns, pubId, parentSitemapId, requestLevels, includeAncestors ? Ancestor.INCLUDE : Ancestor.NONE, null);
             List<ISitemapItem> roots = rootsItems.Cast<ISitemapItem>().ToList();

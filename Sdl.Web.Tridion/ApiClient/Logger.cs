@@ -2,7 +2,7 @@
 using Sdl.Tridion.Api.Client.Core;
 using Sdl.Web.Common.Logging;
 
-namespace Sdl.Web.Tridion.PCAClient
+namespace Sdl.Web.Tridion.ApiClient
 {
     /// <summary>
     /// Log implementation used by the PCA client just forwards on logging to be handled by the DXA

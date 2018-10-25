@@ -2,7 +2,7 @@
 using Sdl.Tridion.Api.Client.Utils;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Tridion.PCAClient;
+using Sdl.Web.Tridion.ApiClient;
 
 namespace Sdl.Web.Tridion.Linking
 {
@@ -27,7 +27,7 @@ namespace Sdl.Web.Tridion.Linking
             string url = null;
             if (sourceUri.IsCmUri())
             {
-                var client = PCAClientFactory.Instance.CreateClient();
+                var client = ApiClientFactory.Instance.CreateClient();
                 var cmUri = new CmUri(sourceUri);
                 switch (cmUri.ItemType)
                 {

@@ -12,7 +12,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
-using Sdl.Web.Tridion.PCAClient;
+using Sdl.Web.Tridion.ApiClient;
 using Sdl.Web.Tridion.Providers.Query;
 using Sdl.Web.Tridion.Statics;
 
@@ -259,7 +259,7 @@ namespace Sdl.Web.Tridion.Mapping
                     urlPath += Constants.DefaultExtension;
                 }
 
-                var client = PCAClientFactory.Instance.CreateClient();
+                var client = ApiClientFactory.Instance.CreateClient();
                 // Important: The content we are getting back is not model based so we need to inform
                 // the PCA so it doesn't attempt to treat it as a R2/DD4T model and attempt conversion
                 // since this will fail and we'll end up with no content being returned.

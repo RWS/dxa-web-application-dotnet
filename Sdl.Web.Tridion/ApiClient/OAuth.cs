@@ -5,7 +5,7 @@ using Sdl.Tridion.Api.Http.Client.Request;
 using Sdl.Web.Delivery.DiscoveryService;
 using Sdl.Web.Delivery.Service;
 
-namespace Sdl.Web.Tridion.PCAClient
+namespace Sdl.Web.Tridion.ApiClient
 {
     public class OAuth : IAuthentication
     {
