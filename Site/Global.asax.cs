@@ -140,7 +140,7 @@ namespace Sdl.Web.Site
             
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
-            Topic.Register(); // Register generic Topic View Model so that Tridion Docs content can be handled.
+            GenericTopic.Register(); // Register generic Topic View Model so that Tridion Docs content can be handled.
             RegisterDisplayModes();
             _initialized = true;
         }

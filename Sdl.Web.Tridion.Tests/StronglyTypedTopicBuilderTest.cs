@@ -47,7 +47,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void BuildEntityModel_NoMatchingStronglyTypedTopic_Success()
         {
-            Topic genericTopic = new Topic
+            GenericTopic genericTopic = new GenericTopic
             {
                 TopicBody = null
             };
@@ -61,7 +61,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void BuildEntityModel_TopicBodyIllFormedXml_Success()
         {
-            Topic genericTopic = new Topic
+            GenericTopic genericTopic = new GenericTopic
             {
                 TopicBody = "<IllFormedXML>"
             };
@@ -77,7 +77,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testTitle = "DITA title";
             string testBody = "<div class=\"section \">First section</div><div class=\"section \">Second section</div>";
-            Topic genericTopic = new Topic
+            GenericTopic genericTopic = new GenericTopic
             {
                 TopicTitle = "Test topic title",
                 TopicBody = $"<h1 class=\"title \">{testTitle}</h1><div class=\"body \">{testBody}</div>"
@@ -114,7 +114,7 @@ namespace Sdl.Web.Tridion.Tests
             string testTopicId = "1612-1970";
             string testTitle = "DITA title";
             string testBody = "<div class=\"section \">First section</div><div class=\"section \">Second section</div>";
-            Topic genericTopic = new Topic
+            GenericTopic genericTopic = new GenericTopic
             {
                 TopicTitle = "Test topic title",
                 TopicBody = $"<h1 class=\"title \">{testTitle}</h1><div class=\"body \">{testBody}</div>"
@@ -178,7 +178,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void TryConvertToStronglyTypedTopic_Links_Success()
         {
-            Topic genericTopic = new Topic
+            GenericTopic genericTopic = new GenericTopic
             {
                 Id = "16121970",
                 TopicBody = "<div class=\"body \" /><div class=\"related-links \">" +
@@ -211,7 +211,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testTitle = "DITA title";
             string testBody = "<div class=\"section lcIntro \" id=\"s1\">Intro section</div><div class=\"section lcObjectives \" id=\"s2\">Objectives section</div>";
-            Topic genericTopic = new Topic
+            GenericTopic genericTopic = new GenericTopic
             {
                 TopicTitle = "Specialized topic title",
                 TopicBody = $"<h1 class=\"title \">{testTitle}</h1><div class=\"body lcBaseBody lcOverviewBody \" id=\"b1\">{testBody}</div>"

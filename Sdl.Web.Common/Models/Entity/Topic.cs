@@ -14,7 +14,7 @@ namespace Sdl.Web.Common.Models.Entity
     /// This generic Topic can be transformed into a user-defined, Strongly Typed Topic Model using an additional Model Builder: the "StronglyTypedTopicBuilder".
     /// </remarks>
     [Serializable]
-    public class Topic : EntityModel
+    public class GenericTopic : EntityModel
     {
         /// <summary>
         /// Gets or sets the topic title.
@@ -46,7 +46,7 @@ namespace Sdl.Web.Common.Models.Entity
         {
             using (new Tracer())
             {
-                ModelTypeRegistry.RegisterViewModel(new MvcData("Ish:Entity:Topic"), typeof(Topic));
+                ModelTypeRegistry.RegisterViewModel(new MvcData("Ish:Entity:Topic"), typeof(GenericTopic));
             }
         }
     }
