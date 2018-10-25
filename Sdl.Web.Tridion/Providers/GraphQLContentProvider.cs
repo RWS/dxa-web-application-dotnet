@@ -5,13 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using Newtonsoft.Json;
+using Sdl.Tridion.Api.Client;
+using Sdl.Tridion.Api.Client.ContentModel;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
-using Sdl.Web.PublicContentApi;
-using Sdl.Web.Tridion.PCAClient;
+using Sdl.Web.Tridion.ApiClient;
 using Sdl.Web.Tridion.Providers.Query;
 using Sdl.Web.Tridion.Statics;
 
@@ -206,7 +207,7 @@ namespace Sdl.Web.Tridion.Mapping
                         .Select(
                             c =>
                                 ModelBuilderPipeline.CreateEntityModel(
-                                    CreateEntityModelData((PublicContentApi.ContentModel.Component) c), resultType,
+                                    CreateEntityModelData((Component) c), resultType,
                                     localization))
                         .ToList();
                 }
@@ -221,7 +222,7 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }
 
-        protected virtual EntityModelData CreateEntityModelData(PublicContentApi.ContentModel.Component component)
+        protected virtual EntityModelData CreateEntityModelData(Component component)
         {
             ContentModelData standardMeta = new ContentModelData();
             foreach (var meta in component.CustomMetas.Edges)
@@ -258,7 +259,7 @@ namespace Sdl.Web.Tridion.Mapping
                     urlPath += Constants.DefaultExtension;
                 }
 
-                var client = PCAClientFactory.Instance.CreateClient();
+                var client = ApiClientFactory.Instance.CreateClient();
                 // Important: The content we are getting back is not model based so we need to inform
                 // the PCA so it doesn't attempt to treat it as a R2/DD4T model and attempt conversion
                 // since this will fail and we'll end up with no content being returned.
@@ -266,7 +267,7 @@ namespace Sdl.Web.Tridion.Mapping
                 try
                 {
                     var page = client.GetPage(localization.Namespace(),
-                        localization.PublicationId(), urlPath, null, ContentIncludeMode.IncludeAndRender, null);
+                        localization.PublicationId(), urlPath, null, ContentIncludeMode.IncludeDataAndRender, null);
                     return JsonConvert.SerializeObject(page.RawContent.Data);
                 }
                 catch (Exception)

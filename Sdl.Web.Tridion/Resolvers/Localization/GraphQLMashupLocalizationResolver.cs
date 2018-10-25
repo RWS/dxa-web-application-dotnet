@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using Sdl.Tridion.Api.Client.Utils;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.PublicContentApi.ContentModel;
-using Sdl.Web.PublicContentApi.Utils;
-using Sdl.Web.Tridion.PCAClient;
+using Sdl.Tridion.Api.Client.ContentModel;
+using Sdl.Web.Tridion.ApiClient;
 
 namespace Sdl.Web.Tridion
 {
@@ -55,7 +55,7 @@ namespace Sdl.Web.Tridion
                     else
                     {
                         // Attempt to resolve it from Docs
-                        var client = PCAClientFactory.Instance.CreateClient();
+                        var client = ApiClientFactory.Instance.CreateClient();
                         Publication publication = client.GetPublication(ContentNamespace.Docs, int.Parse(localizationId), null, null);
                         result = publication != null ? new DocsLocalization(publication.PublicationId) : base.GetLocalization(localizationId);
                     }

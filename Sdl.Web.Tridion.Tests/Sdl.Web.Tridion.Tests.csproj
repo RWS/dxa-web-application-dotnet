@@ -20,7 +20,7 @@
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <TargetFrameworkProfile />
     <DxaDataModelVersion>2.1.0-beta-201810171524</DxaDataModelVersion>
-    <SdlPCAPackageVersion>2.1.0-beta-201810181358</SdlPCAPackageVersion>
+    <SdlPCAPackageVersion>2.1.0-beta-201810251303</SdlPCAPackageVersion>
     <SdlDeliveryVersion>11.0.0</SdlDeliveryVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -101,9 +101,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlDeliveryVersion)\lib\net462\Sdl.Web.Delivery.Model.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.PublicContentApi">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Sdl.Web.PublicContentApi.$(SdlPCAPackageVersion)\lib\net462\Sdl.Web.PublicContentApi.dll</HintPath>
+     <Reference Include="Sdl.Tridion.Api.Client">
+      <HintPath>..\packages\Sdl.Tridion.Api.Client.$(SdlPCAPackageVersion)\lib\net462\Sdl.Tridion.Api.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ServiceModel" />
