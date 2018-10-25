@@ -235,7 +235,15 @@ namespace Sdl.Web.Common.Configuration
         /// </summary>
         /// <param name="urlPath">The URL path.</param>
         /// <returns><c>true</c> if the URL refers to a static content item.</returns>
-        public virtual bool IsStaticContentUrl(string urlPath) => _staticContentUrlRegex.IsMatch(urlPath);
+        public virtual bool IsStaticContentUrl(string urlPath)
+        {
+            if (_staticContentUrlRegex == null)
+            {
+                EnsureInitialized();
+                _staticContentUrlRegex = new Regex(StaticContentUrlPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            }
+            return _staticContentUrlRegex.IsMatch(urlPath);
+        }
 
         /// <summary>
         /// Gets a CM identifier (URI) for a given Model identifier.
@@ -504,7 +512,6 @@ namespace Sdl.Web.Common.Configuration
                     mediaPatterns.Add($"^{Path}/{SiteConfiguration.SystemFolder}/.*\\.json$");
 
                     StaticContentUrlPattern = String.Join("|", mediaPatterns);
-                    _staticContentUrlRegex = new Regex(StaticContentUrlPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
                     try
                     {

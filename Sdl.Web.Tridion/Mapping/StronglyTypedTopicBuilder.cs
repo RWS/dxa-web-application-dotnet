@@ -107,7 +107,12 @@ namespace Sdl.Web.Tridion.Mapping
                     }
                 }
 
-                return BuildStronglyTypedTopic(topicType, rootElement);
+                EntityModel stronglyTypedTopic = BuildStronglyTypedTopic(topicType, rootElement);
+
+                if (stronglyTypedTopic.Id == null)
+                    stronglyTypedTopic.Id = genericTopic.Id;
+
+                return stronglyTypedTopic;
             }
         }
 
@@ -140,7 +145,7 @@ namespace Sdl.Web.Tridion.Mapping
             StringBuilder xPathBuilder = new StringBuilder(".");
             foreach (string propertyNameSegment in propertyNameSegments)
             {
-                xPathBuilder.Append($"//*[contains(@class, '{propertyNameSegment} ')]");
+                xPathBuilder.Append($"//*[contains(@class, '{propertyNameSegment}')]");
             }
             return xPathBuilder.ToString();
         }
@@ -184,6 +189,13 @@ namespace Sdl.Web.Tridion.Mapping
             {
                 string propertyName = tuple.Item1;
                 Type modelType = tuple.Item2;
+
+                if (string.IsNullOrEmpty(propertyName))
+                {
+                    Log.Debug($"Skipping Type '{modelType.FullName}' (no EntityName specified).");
+                    continue;
+                }
+
                 string xPath = GetPropertyXPath(propertyName);
 
                 Log.Debug($"Trying XPath \"{xPath}\" for type '{modelType.FullName}'");

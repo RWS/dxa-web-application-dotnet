@@ -111,6 +111,7 @@ namespace Sdl.Web.Tridion.Tests
             ILocalization testLocalization = new DocsLocalization();
             testLocalization.EnsureInitialized();
 
+            string testTopicId = "1612-1970";
             string testTitle = "DITA title";
             string testBody = "<div class=\"section \">First section</div><div class=\"section \">Second section</div>";
             Topic genericTopic = new Topic
@@ -131,6 +132,7 @@ namespace Sdl.Web.Tridion.Tests
                         {
                             new EntityModelData
                             {
+                                Id = testTopicId,
                                 SchemaId =  "1", // Tridion Docs uses a hard-coded/fake Schema ID.
                                 Content = new ContentModelData
                                 {
@@ -166,6 +168,7 @@ namespace Sdl.Web.Tridion.Tests
             TestStronglyTypedTopic result = pageModel.Regions["Main"].Entities[0] as TestStronglyTypedTopic;
             Assert.IsNotNull(result);
 
+            Assert.AreEqual(testTopicId, result.Id, "result.Id");
             Assert.AreEqual(testTitle, result.Title, "result.Title");
             Assert.AreEqual(testBody, result.BodyRichText.ToString(), "result.BodyRichText.ToString()");
             Assert.AreEqual("First section", result.FirstSection, "result.FirstSection");
@@ -177,6 +180,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             Topic genericTopic = new Topic
             {
+                Id = "16121970",
                 TopicBody = "<div class=\"body \" /><div class=\"related-links \">" +
                     "<div class=\"childlink \"><strong><a class=\"link \" href=\"/firstlink.html\">First link text</a></strong></div>" +
                     "<div class=\"childlink \"><strong><a class=\"link \" href=\"/secondlink.html\">Second link text</a></strong></div>" +
@@ -189,6 +193,7 @@ namespace Sdl.Web.Tridion.Tests
 
             OutputJson(result);
 
+            Assert.AreEqual(genericTopic.Id, result.Id, "result.Id");
             Assert.IsNull(result.Title, "result.Title");
             Assert.AreEqual(string.Empty, result.Body, "result.Body");
             Assert.IsNotNull(result.Links, "result.Links");
@@ -248,7 +253,6 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(result.Body.GetDefaultView(null), result.Body.MvcData, "result.Body.MvcData");
 
         }
-
     }
 
 }
