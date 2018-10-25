@@ -45,31 +45,47 @@ namespace Sdl.Web.Tridion
                     if (localizationId.StartsWith("ish:"))
                     {
                         CmUri uri = CmUri.FromString(localizationId);
-                        return new DocsLocalization {Id = uri.PublicationId.ToString()};
+                        result = new DocsLocalization(uri.PublicationId);
                     }
-
-                    if (localizationId.StartsWith("tcm:"))
+                    else if (localizationId.StartsWith("tcm:"))
                     {
                         CmUri uri = CmUri.FromString(localizationId);
-                        return new Localization { Id = uri.PublicationId.ToString() };
+                        result = new Localization { Id = uri.PublicationId.ToString() };
+                    }
+                    else
+                    {
+                        // Attempt to resolve it from Docs
+                        var client = PCAClientFactory.Instance.CreateClient();
+                        Publication publication = client.GetPublication(ContentNamespace.Docs, int.Parse(localizationId), null, null);
+                        result = publication != null ? new DocsLocalization(publication.PublicationId) : base.GetLocalization(localizationId);
                     }
 
-                    // Attempt to resolve it from Docs
-                    var client = PCAClientFactory.Instance.CreateClient();
-                    var publication = client.GetPublication(ContentNamespace.Docs, int.Parse(localizationId), null, null);
-                    return publication != null ? new DocsLocalization(publication.PublicationId) : base.GetLocalization(localizationId);
+                    KnownLocalizations[localizationId] = result;
                 }
 
                 return result;
             }
-        }      
+        }
 
         protected virtual ILocalization ResolveDocsLocalization(Uri url)
         {
-            var urlPath = url.GetComponents(UriComponents.Path, UriFormat.Unescaped);
-            if (string.IsNullOrEmpty(urlPath)) return null;
-            var match = DocsPattern.Match(urlPath);
-            return !match.Success ? null : new DocsLocalization { Id = match.Groups["pubId"].Value };
+            // Try if the URL looks like a Tridion Docs / DDWebApp URL
+            string urlPath = url.GetComponents(UriComponents.Path, UriFormat.Unescaped);
+            if (string.IsNullOrEmpty(urlPath))
+                return null; // No, it doesn't
+            Match match = DocsPattern.Match(urlPath);
+            if (!match.Success)
+                return null; // No, it doesn't
+
+            string localizationId = match.Groups["pubId"].Value;
+            ILocalization result;
+            if (!KnownLocalizations.TryGetValue(localizationId, out result))
+            {
+                result = new DocsLocalization { Id = localizationId };
+            }
+
+            result.EnsureInitialized();
+            return result;
         }
     }
 }

@@ -18,6 +18,7 @@ namespace Sdl.Web.Common.Configuration
     {
         private static List<SemanticVocabulary> _semanticVocabs;
         private static List<SemanticSchema> _semanticSchemas;
+        private static string _staticContentUrlPattern;
 
         /// <summary>
         /// Class constructor
@@ -76,6 +77,14 @@ namespace Sdl.Web.Common.Configuration
                 {
                     new SemanticVocabulary { Prefix = coreVocabularyPrefix, Vocab = Models.ViewModel.CoreVocabulary }
                 };
+
+                List<string> mediaPatterns = new List<string>
+                {
+                    "^/favicon.ico",
+                    $"^/{SiteConfiguration.SystemFolder}/assets/.*",
+                    $"^/{SiteConfiguration.SystemFolder}/.*\\.json$"
+                };
+                _staticContentUrlPattern = string.Join("|", mediaPatterns);
             }
         }
 
@@ -120,15 +129,7 @@ namespace Sdl.Web.Common.Configuration
             using (new Tracer())
             {
                 SetSemanticSchemas(_semanticSchemas, _semanticVocabs);
-
-                // TODO: does this make sense for Docs?
-                // We should keep the Load as lightweight as possible; if this is needed at all, it should be done in the class constructor.
-                List<string> mediaPatterns = new List<string>();
-                mediaPatterns.Add("^/favicon.ico");
-                mediaPatterns.Add($"^{Path}/{SiteConfiguration.SystemFolder}/assets/.*");
-                mediaPatterns.Add($"^{Path}/{SiteConfiguration.SystemFolder}/.*\\.json$");
-                StaticContentUrlPattern = string.Join("|", mediaPatterns);
-                _staticContentUrlRegex = new Regex(StaticContentUrlPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                StaticContentUrlPattern = _staticContentUrlPattern;
             }
         }
 
