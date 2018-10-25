@@ -36,8 +36,6 @@ namespace Sdl.Web.Tridion
                         ContentNamespace.Sites,
                         urlLeftPart);
 
-                mapping = new PublicationMapping {PublicationId = 5, Port = "8882"};
-
                 if (mapping == null || mapping.Port != url.Port.ToString()) // See CRQ-1195
                 {
                     throw new DxaUnknownLocalizationException($"No matching Localization found for URL '{urlLeftPart}'");
