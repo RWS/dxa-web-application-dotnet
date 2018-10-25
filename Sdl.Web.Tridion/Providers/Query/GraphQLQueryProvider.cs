@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using Sdl.Web.Common.Models;
-using Sdl.Web.PublicContentApi.ContentModel;
-using Sdl.Web.PublicContentApi.Utils;
-using Sdl.Web.Tridion.PCAClient;
 using System;
 using System.Linq;
-using Sdl.Web.PublicContentApi;
+using Sdl.Tridion.Api.Client;
+using Sdl.Tridion.Api.Client.ContentModel;
+using Sdl.Tridion.Api.Client.Utils;
+using Sdl.Web.Tridion.ApiClient;
 
 namespace Sdl.Web.Tridion.Providers.Query
 {   
@@ -19,7 +19,7 @@ namespace Sdl.Web.Tridion.Providers.Query
         {
             InputItemFilter filter = BuildFilter(queryParams);
             InputSortParam sort = BuildSort(queryParams);
-            var client = PCAClientFactory.Instance.CreateClient();
+            var client = ApiClientFactory.Instance.CreateClient();
             var results = client.ExecuteItemQuery(filter, sort, new Pagination
             {
                 First = queryParams.PageSize + 1,
@@ -41,7 +41,7 @@ namespace Sdl.Web.Tridion.Providers.Query
         {
             InputItemFilter filter = BuildFilter(queryParams);
             InputSortParam sort = BuildSort(queryParams);
-            var client = PCAClientFactory.Instance.CreateClient();
+            var client = ApiClientFactory.Instance.CreateClient();
             int pageSize = queryParams.PageSize > 0 ? queryParams.PageSize + 1 : queryParams.PageSize;
             var results = client.ExecuteItemQuery(filter, sort, new Pagination
             {

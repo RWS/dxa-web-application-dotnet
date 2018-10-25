@@ -2,22 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Configuration;
+using Sdl.Tridion.Api.Client;
+using Sdl.Tridion.Api.Client.ContentModel;
+using Sdl.Tridion.Api.GraphQL.Client;
+using Sdl.Tridion.Api.Http.Client.Auth;
+using Sdl.Tridion.Api.IQQuery.API;
+using Sdl.Tridion.Api.IQQuery.Client;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Delivery.DiscoveryService;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore;
-using Sdl.Web.HttpClient.Auth;
-using Sdl.Web.IQQuery.API;
-using Sdl.Web.IQQuery.Client;
-using Sdl.Web.PublicContentApi;
-using Sdl.Web.PublicContentApi.ContentModel;
 
-namespace Sdl.Web.Tridion.PCAClient
+namespace Sdl.Web.Tridion.ApiClient
 {
     /// <summary>
-    /// Public Content Api Factory creates PCA clients with context claim forwarding and
-    /// OAuthentication.
+    /// Api Client Factory creates clients with context claim forwarding and
+    /// OAuthentication for using the GraphQL Api.
     /// </summary>
-    public sealed class PCAClientFactory
+    public sealed class ApiClientFactory
     {
         private readonly Uri _endpoint;
         private readonly Uri _iqEndpoint;
@@ -27,12 +28,12 @@ namespace Sdl.Web.Tridion.PCAClient
         private const string PreviewSessionTokenHeader = "x-preview-session-token";
         private const string PreviewSessionTokenCookie = "preview-session-token";
 
-        private static readonly Lazy<PCAClientFactory> lazy =
-            new Lazy<PCAClientFactory>(() => new PCAClientFactory());
+        private static readonly Lazy<ApiClientFactory> lazy =
+            new Lazy<ApiClientFactory>(() => new ApiClientFactory());
 
-        public static PCAClientFactory Instance => lazy.Value;
+        public static ApiClientFactory Instance => lazy.Value;
         
-        private PCAClientFactory()
+        private ApiClientFactory()
         {
             try
             {
@@ -63,7 +64,7 @@ namespace Sdl.Web.Tridion.PCAClient
                 }
                 if (_endpoint == null)
                 {
-                    throw new PCAClientException("Unable to retrieve endpoint for Public Content Api");
+                    throw new ApiClientException("Unable to retrieve endpoint for Public Content Api");
                 }
 
                 uri = WebConfigurationManager.AppSettings["iq-service-uri"];
@@ -135,10 +136,10 @@ namespace Sdl.Web.Tridion.PCAClient
         /// Return a fully constructed Public Content Api client
         /// </summary>
         /// <returns>Public Content Api Client</returns>
-        public PublicContentApi.PublicContentApi CreateClient()
+        public Sdl.Tridion.Api.Client.ApiClient CreateClient()
         {
-            var graphQL = new GraphQLClient.GraphQLClient(_endpoint, new Logger(), _oauth);
-            var client = new PublicContentApi.PublicContentApi(graphQL, new Logger());
+            var graphQL = new GraphQLClient(_endpoint, new Logger(), _oauth);
+            var client = new Sdl.Tridion.Api.Client.ApiClient(graphQL, new Logger());
             // just make sure our requests come back as R2 json
             client.DefaultModelType = DataModelType.R2;
             // add context data to client
