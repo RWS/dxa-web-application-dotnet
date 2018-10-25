@@ -1,7 +1,7 @@
-﻿using Sdl.Web.Common;
-using Sdl.Web.PublicContentApi.ContentModel;
+﻿using Sdl.Tridion.Api.Client.ContentModel;
+using Sdl.Tridion.Api.Client.Utils;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.PublicContentApi.Utils;
 
 namespace Sdl.Web.Tridion.PCAClient
 {

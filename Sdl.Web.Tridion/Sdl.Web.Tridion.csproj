@@ -13,7 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SdlDxaDataModelPackageVersion>2.1.0-beta-201810171524</SdlDxaDataModelPackageVersion>
-    <SdlPCAPackageVersion>2.1.0-beta-201810181358</SdlPCAPackageVersion>
+    <SdlPCAPackageVersion>2.1.0-beta-201810251303</SdlPCAPackageVersion>
     <SdlWebDeliveryPackageVersion>11.0.0</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>11.0.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>11.0.0</SdlWebContextImagePackageVersion>
@@ -116,6 +116,9 @@
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Sdl.Tridion.Api.Client">
+      <HintPath>..\packages\Sdl.Tridion.Api.Client.$(SdlPCAPackageVersion)\lib\net462\Sdl.Tridion.Api.Client.dll</HintPath>
+    </Reference>
     <Reference Include="Sdl.Web.Context.Api">
       <HintPath>..\packages\Sdl.Web.Context.Client.11.0.0\lib\net462\Sdl.Web.Context.Api.dll</HintPath>
     </Reference>
@@ -148,10 +151,6 @@
     <Reference Include="Sdl.Web.Delivery.ServicesCore">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net462\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
-    </Reference>
-    <Reference Include="Sdl.Web.PublicContentApi">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Sdl.Web.PublicContentApi.$(SdlPCAPackageVersion)\lib\net462\Sdl.Web.PublicContentApi.dll</HintPath>
     </Reference>
     <Reference Include="StackExchange.Redis.StrongName">
       <HintPath>..\packages\StackExchange.Redis.StrongName.1.1.605\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>

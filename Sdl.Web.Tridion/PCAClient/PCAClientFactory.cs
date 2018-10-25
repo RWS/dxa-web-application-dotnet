@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Configuration;
+using Sdl.Tridion.Api.Client;
+using Sdl.Tridion.Api.Client.ContentModel;
+using Sdl.Tridion.Api.GraphQL.Client;
+using Sdl.Tridion.Api.Http.Client.Auth;
+using Sdl.Tridion.Api.IQQuery.API;
+using Sdl.Tridion.Api.IQQuery.Client;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Delivery.DiscoveryService;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore;
-using Sdl.Web.HttpClient.Auth;
-using Sdl.Web.IQQuery.API;
-using Sdl.Web.IQQuery.Client;
-using Sdl.Web.PublicContentApi;
-using Sdl.Web.PublicContentApi.ContentModel;
 
 namespace Sdl.Web.Tridion.PCAClient
 {
@@ -135,10 +136,10 @@ namespace Sdl.Web.Tridion.PCAClient
         /// Return a fully constructed Public Content Api client
         /// </summary>
         /// <returns>Public Content Api Client</returns>
-        public PublicContentApi.PublicContentApi CreateClient()
+        public ApiClient CreateClient()
         {
-            var graphQL = new GraphQLClient.GraphQLClient(_endpoint, new Logger(), _oauth);
-            var client = new PublicContentApi.PublicContentApi(graphQL, new Logger());
+            var graphQL = new GraphQLClient(_endpoint, new Logger(), _oauth);
+            var client = new ApiClient(graphQL, new Logger());
             // just make sure our requests come back as R2 json
             client.DefaultModelType = DataModelType.R2;
             // add context data to client

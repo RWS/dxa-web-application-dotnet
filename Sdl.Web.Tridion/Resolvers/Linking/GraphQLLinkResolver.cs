@@ -1,7 +1,7 @@
-﻿using Sdl.Web.Common;
+﻿using Sdl.Tridion.Api.Client;
+using Sdl.Tridion.Api.Client.Utils;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.PublicContentApi;
-using Sdl.Web.PublicContentApi.Utils;
 using Sdl.Web.Tridion.PCAClient;
 
 namespace Sdl.Web.Tridion.Linking

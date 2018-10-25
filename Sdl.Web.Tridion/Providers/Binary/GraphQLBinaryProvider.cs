@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Sdl.Tridion.Api.Client.ContentModel;
+using Sdl.Tridion.Api.Client.Utils;
+using Sdl.Tridion.Api.GraphQL.Client;
+using Sdl.Tridion.Api.Http.Client.Request;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.GraphQLClient;
-using Sdl.Web.PublicContentApi.ContentModel;
 using Sdl.Web.Tridion.PCAClient;
-using Sdl.Web.HttpClient.Request;
-using Sdl.Web.PublicContentApi.Utils;
 
 namespace Sdl.Web.Tridion.Providers.Binary
 {

@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Configuration;
 using Newtonsoft.Json;
+using Sdl.Tridion.Api.Client;
+using Sdl.Tridion.Api.Client.ContentModel;
+using Sdl.Tridion.Api.Client.Exceptions;
+using Sdl.Tridion.Api.GraphQL.Client.Exceptions;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.DataModel;
-using Sdl.Web.GraphQLClient.Exceptions;
-using Sdl.Web.PublicContentApi;
-using Sdl.Web.PublicContentApi.ContentModel;
-using Sdl.Web.PublicContentApi.Exceptions;
 using Sdl.Web.Tridion.PCAClient;
 using Sdl.Web.Tridion.Providers.ModelService;
 
@@ -38,7 +38,7 @@ namespace Sdl.Web.Tridion.ModelService
             _binder.AddDataModelExtension(extension);
         }
 
-        protected PublicContentApi.PublicContentApi Client
+        protected ApiClient Client
         {
             get
             {
@@ -64,7 +64,7 @@ namespace Sdl.Web.Tridion.ModelService
 
                 var json = Client.GetEntityModelData(localization.Namespace(), localization.PublicationId(),
                     int.Parse(ids[0]), int.Parse(ids[1]),                    
-                    ContentIncludeMode.IncludeAndRender, null);
+                    ContentIncludeMode.IncludeDataAndRender, null);
                 return LoadModel<EntityModelData>(json);
             }
             catch (GraphQLClientException e)
@@ -85,7 +85,7 @@ namespace Sdl.Web.Tridion.ModelService
             {
                 var json = Client.GetPageModelData(localization.Namespace(), localization.PublicationId(), pageId,
                     addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                    ContentIncludeMode.IncludeAndRender, null);
+                    ContentIncludeMode.IncludeDataAndRender, null);
                 return LoadModel<PageModelData>(json);
             }
             catch (GraphQLClientException e)
@@ -123,7 +123,7 @@ namespace Sdl.Web.Tridion.ModelService
                 json = Client.GetPageModelData(localization.Namespace(), localization.PublicationId(),
                     GetCanonicalUrlPath(urlPath, true),
                     addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                    ContentIncludeMode.IncludeAndRender, null);
+                    ContentIncludeMode.IncludeDataAndRender, null);
             }
             catch (Exception)
             {
@@ -132,7 +132,7 @@ namespace Sdl.Web.Tridion.ModelService
                     json = Client.GetPageModelData(localization.Namespace(), localization.PublicationId(),
                         GetCanonicalUrlPath(urlPath, false),
                         addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                        ContentIncludeMode.IncludeAndRender, null);
+                        ContentIncludeMode.IncludeDataAndRender, null);
                 }
                 catch (GraphQLClientException e)
                 {

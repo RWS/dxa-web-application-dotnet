@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using Sdl.Web.Common.Models;
-using Sdl.Web.PublicContentApi.ContentModel;
-using Sdl.Web.PublicContentApi.Utils;
 using Sdl.Web.Tridion.PCAClient;
 using System;
 using System.Linq;
-using Sdl.Web.PublicContentApi;
+using Sdl.Tridion.Api.Client;
+using Sdl.Tridion.Api.Client.ContentModel;
+using Sdl.Tridion.Api.Client.Utils;
 
 namespace Sdl.Web.Tridion.Providers.Query
 {   

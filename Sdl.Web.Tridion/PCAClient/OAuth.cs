@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net;
+using Sdl.Tridion.Api.Http.Client.Auth;
+using Sdl.Tridion.Api.Http.Client.Request;
 using Sdl.Web.Delivery.DiscoveryService;
 using Sdl.Web.Delivery.Service;
-using Sdl.Web.HttpClient.Auth;
-using Sdl.Web.HttpClient.Request;
 
 namespace Sdl.Web.Tridion.PCAClient
 {

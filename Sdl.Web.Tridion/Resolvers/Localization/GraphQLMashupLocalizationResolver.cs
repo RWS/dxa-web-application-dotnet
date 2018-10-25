@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using Sdl.Tridion.Api.Client.Utils;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.PublicContentApi.ContentModel;
-using Sdl.Web.PublicContentApi.Utils;
 using Sdl.Web.Tridion.PCAClient;
+using Sdl.Tridion.Api.Client.ContentModel;
 
 namespace Sdl.Web.Tridion
 {
