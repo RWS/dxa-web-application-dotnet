@@ -14,6 +14,7 @@ namespace Sdl.Web.Common.Models.Entity
     /// This generic Topic can be transformed into a user-defined, Strongly Typed Topic Model using an additional Model Builder: the "StronglyTypedTopicBuilder".
     /// </remarks>
     [Serializable]
+    [SemanticEntity("Topic")]
     public class GenericTopic : EntityModel
     {
         /// <summary>
