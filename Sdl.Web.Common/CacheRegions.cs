@@ -22,6 +22,7 @@ namespace Sdl.Web.Common
         public const string BinaryPublishDate = "BinaryPublishDate";
         public const string ModelService = "ModelService";
         public const string PublicationMapping = "PublicationMapping";
+        public const string LinkResolving = "LinkResolving";
         public const string RenderedOutput = "RenderedOutput";
 
         /// <summary>
