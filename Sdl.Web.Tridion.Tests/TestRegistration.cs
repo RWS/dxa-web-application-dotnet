@@ -36,7 +36,7 @@ namespace Sdl.Web.Tridion.Tests
             RegisterViewModel("Test:CompLinkTest", typeof(CompLinkTest));
             RegisterViewModel("Test:TSI2316Test", typeof(Tsi2316TestEntity));
 
-            Topic.Register(); // Generic Topic Model
+            GenericTopic.Register(); // Generic Topic Model
 
             // Strongly Typed Topic Models
             RegisterViewModel(typeof(TestStronglyTypedTopic));

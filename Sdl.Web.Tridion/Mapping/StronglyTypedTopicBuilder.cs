@@ -17,13 +17,13 @@ using System.Collections;
 namespace Sdl.Web.Tridion.Mapping
 {
     /// <summary>
-    /// Model Builder used to convert generic <see cref="Topic"/> Entity Models to Strongly Typed Topic Models.
+    /// Model Builder used to convert <see cref="GenericTopic"/> Entity Models to Strongly Typed Topic Models.
     /// </summary>
     /// <remarks>
     /// This class has two use cases:
     /// <list type="bullet">
     ///     <item>It can act as an Entity Model Builder which is configured in the <see cref="ModelBuilderPipeline"/>.</item>
-    ///     <item>It can be used directly to convert a given generic <see cref="Topic"/>. See <see cref="TryConvertToStronglyTypedTopic{T}(Topic)"/>.</item>
+    ///     <item>It can be used directly to convert a given <see cref="GenericTopic"/>. See <see cref="TryConvertToStronglyTypedTopic{T}(GenericTopic)"/>.</item>
     /// </list>
     /// </remarks>
     public class StronglyTypedTopicBuilder : IEntityModelBuilder
@@ -45,7 +45,7 @@ namespace Sdl.Web.Tridion.Mapping
                     throw new DxaException($"The {GetType().Name} must be configured after the DefaultModelBuilder.");
                 }
 
-                Topic genericTopic = entityModel as Topic;
+                GenericTopic genericTopic = entityModel as GenericTopic;
                 if (genericTopic != null)
                 {
                     Log.Debug("Generic Topic encountered...");
@@ -70,7 +70,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="genericTopic">The generic Topic to convert.</param>
         /// <param name="ofType">The type of the Strongly Typed Topic Model to convert to. If not specified (or <c>null</c>), the type will be determined from the XHTML.</param>
         /// <returns>The Strongly Typed Topic Model or <c>null</c> if the generic Topic cannot be converted.</returns>
-        public EntityModel TryConvertToStronglyTypedTopic(Topic genericTopic, Type ofType = null)
+        public EntityModel TryConvertToStronglyTypedTopic(GenericTopic genericTopic, Type ofType = null)
         {
             using (new Tracer(genericTopic, ofType))
             {
@@ -86,7 +86,7 @@ namespace Sdl.Web.Tridion.Mapping
                 XmlElement rootElement = null;
                 try
                 {
-                    rootElement = ParseXhtml(genericTopic.TopicBody);
+                    rootElement = ParseXhtml(genericTopic);
                 }
                 catch (Exception ex)
                 {
@@ -122,17 +122,26 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="genericTopic">The generic Topic to convert.</param>
         /// <typeparam name="T">The type of the Strongly Typed Topic Model to convert to.</typeparam>
         /// <returns>The Strongly Typed Topic Model or <c>null</c> if the generic Topic cannot be converted to the given type.</returns>
-        public T TryConvertToStronglyTypedTopic<T>(Topic genericTopic) where T: EntityModel
+        public T TryConvertToStronglyTypedTopic<T>(GenericTopic genericTopic) where T: EntityModel
             => (T)TryConvertToStronglyTypedTopic(genericTopic, typeof(T));
 
         #region Overridables
-        protected virtual XmlElement ParseXhtml(string xhtml)
+        protected virtual XmlElement ParseXhtml(GenericTopic genericTopic)
         {
-            using (new Tracer(xhtml))
+            using (new Tracer(genericTopic))
             {
                 XmlDocument topicXmlDoc = new XmlDocument();
-                topicXmlDoc.LoadXml($"<topic>{xhtml}</topic>");
-                return topicXmlDoc.DocumentElement;
+                topicXmlDoc.LoadXml($"<topic>{genericTopic.TopicBody}</topic>");
+
+                XmlElement topicElement = topicXmlDoc.DocumentElement;
+
+                // Inject GenericTopic's TopicTitle as additional HTML element
+                XmlElement topicTitleElement = topicXmlDoc.CreateElement("h1");
+                topicTitleElement.SetAttribute("class", "_topicTitle");
+                topicTitleElement.InnerText = genericTopic.TopicTitle;
+                topicElement.AppendChild(topicTitleElement);
+
+                return topicElement;
             }
         }
 
