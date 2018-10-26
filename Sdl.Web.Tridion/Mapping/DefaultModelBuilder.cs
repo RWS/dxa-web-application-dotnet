@@ -662,7 +662,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (htmlFragment == null)
                 {
                     // Embedded Entity Model (for Media Items)
-                    MediaItem mediaItem = (MediaItem) ModelBuilderPipeline.CreateEntityModel((EntityModelData) fragment, typeof(MediaItem), localization);
+                    MediaItem mediaItem = (MediaItem)ModelBuilderPipeline.CreateEntityModel((EntityModelData)fragment, typeof(MediaItem), localization);
                     mediaItem.IsEmbedded = true;
                     if (mediaItem.MvcData == null)
                     {
