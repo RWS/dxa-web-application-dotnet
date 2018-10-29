@@ -6,6 +6,7 @@ using Sdl.Tridion.Api.Client.Utils;
 using Sdl.Tridion.Api.GraphQL.Client;
 using Sdl.Tridion.Api.Http.Client.Request;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Tridion.ApiClient;
@@ -21,67 +22,126 @@ namespace Sdl.Web.Tridion.Providers.Binary
 
         public DateTime GetBinaryLastPublishedDate(ILocalization localization, string urlPath)
         {
-            var client = ApiClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(), urlPath, null, null);
-            return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}", CacheRegions.BinaryPublishDate, () =>
+            {
+                var client = ApiClientFactory.Instance.CreateClient();
+                var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(), urlPath, null, null);
+                return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+            });
         }
 
         public async Task<DateTime> GetBinaryLastPublishedDateAsync(ILocalization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var client = ApiClientFactory.Instance.CreateClient();
-            var binary = await client.GetBinaryComponentAsync(localization.Namespace(), localization.PublicationId(), urlPath, null, null, cancellationToken);
-            return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
+                CacheRegions.BinaryPublishDate,
+                async () =>
+                {
+                    var client = ApiClientFactory.Instance.CreateClient();
+                    var binary =
+                        await
+                            client.GetBinaryComponentAsync(localization.Namespace(), localization.PublicationId(),
+                                urlPath, null, null, cancellationToken).ConfigureAwait(false);
+                    return binary == null
+                        ? DateTime.MinValue
+                        : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+                });
         }
 
         public DateTime GetBinaryLastPublishedDate(ILocalization localization, int binaryId)
         {
-            var client = ApiClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(), binaryId, null, null);
-            return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
+                CacheRegions.BinaryPublishDate,
+                () =>
+                {
+                    var client = ApiClientFactory.Instance.CreateClient();
+                    var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(),
+                        binaryId, null, null);
+                    return binary == null
+                        ? DateTime.MinValue
+                        : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+                });
         }
 
         public async Task<DateTime> GetBinaryLastPublishedDateAsync(ILocalization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var client = ApiClientFactory.Instance.CreateClient();
-            var binary = await client.GetBinaryComponentAsync(localization.Namespace(), localization.PublicationId(), binaryId, null, null, cancellationToken);
-            return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
+                CacheRegions.BinaryPublishDate,
+                async () =>
+                {
+                    var client = ApiClientFactory.Instance.CreateClient();
+                    var binary =
+                        await
+                            client.GetBinaryComponentAsync(localization.Namespace(), localization.PublicationId(),
+                                binaryId, null, null, cancellationToken).ConfigureAwait(false);
+                    return binary == null
+                        ? DateTime.MinValue
+                        : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+                });
         }
 
         public Tuple<byte[],string> GetBinary(ILocalization localization, int binaryId)
-        {            
-            var client = ApiClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(), binaryId,
-                null, null);
-            var data = GetBinaryData(client, binary);
-            if (data == null) throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
-            return data;
+        {
+            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
+                CacheRegions.Binary,
+                () =>
+                {
+                    var client = ApiClientFactory.Instance.CreateClient();
+                    var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(),
+                        binaryId,
+                        null, null);
+                    var data = GetBinaryData(client, binary);
+                    if (data == null) throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
+                    return data;
+                });
         }
 
         public async Task<Tuple<byte[], string>> GetBinaryAsync(ILocalization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var client = ApiClientFactory.Instance.CreateClient();
-            var binary = await client.GetBinaryComponentAsync(localization.Namespace(), localization.PublicationId(), binaryId, null, null, cancellationToken);
-            var data = await GetBinaryDataAsync(client, binary, cancellationToken);
-            if (data == null) throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
-            return data;
+            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
+                CacheRegions.Binary,
+                async () =>
+                {
+                    var client = ApiClientFactory.Instance.CreateClient();
+                    var binary =
+                        await
+                            client.GetBinaryComponentAsync(localization.Namespace(), localization.PublicationId(),
+                                binaryId, null, null, cancellationToken).ConfigureAwait(false);
+                    var data = await GetBinaryDataAsync(client, binary, cancellationToken).ConfigureAwait(false);
+                    if (data == null) throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
+                    return data;
+                });
         }             
 
         public Tuple<byte[],string> GetBinary(ILocalization localization, string urlPath)
         {
-            var client = ApiClientFactory.Instance.CreateClient();
-            var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(), urlPath, null, null);
-            var data = GetBinaryData(client, binary);
-            if(data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
-            return data;
+            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
+                CacheRegions.Binary,
+                () =>
+                {
+                    var client = ApiClientFactory.Instance.CreateClient();
+                    var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(),
+                        urlPath, null, null);
+                    var data = GetBinaryData(client, binary);
+                    if (data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
+                    return data;
+                });
         }
 
         public async Task<Tuple<byte[], string>> GetBinaryAsync(ILocalization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var client = ApiClientFactory.Instance.CreateClient();
-            var binary = await client.GetBinaryComponentAsync(localization.Namespace(), localization.PublicationId(), urlPath, null, null, cancellationToken);
-            var data = await GetBinaryDataAsync(client, binary, cancellationToken);
-            if (data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
-            return data;
+            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
+                CacheRegions.Binary,
+                async () =>
+                {
+                    var client = ApiClientFactory.Instance.CreateClient();
+                    var binary =
+                        await
+                            client.GetBinaryComponentAsync(localization.Namespace(), localization.PublicationId(),
+                                urlPath, null, null, cancellationToken).ConfigureAwait(false);
+                    var data = await GetBinaryDataAsync(client, binary, cancellationToken).ConfigureAwait(false);
+                    if (data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
+                    return data;
+                });
         }
 
         protected virtual Tuple<byte[],string> GetBinaryData(IGraphQLClient client, BinaryComponent binaryComponent)
