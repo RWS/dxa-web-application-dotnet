@@ -20,6 +20,7 @@ namespace Sdl.Web.Common
         public const string ComponentPresentation = "ComponentPresentation"; // DD4T ComponentPresentation
         public const string Other = "Other"; // Other DD4T object
         public const string BinaryPublishDate = "BinaryPublishDate";
+        public const string Binary = "Binary";
         public const string ModelService = "ModelService";
         public const string PublicationMapping = "PublicationMapping";
         public const string LinkResolving = "LinkResolving";
