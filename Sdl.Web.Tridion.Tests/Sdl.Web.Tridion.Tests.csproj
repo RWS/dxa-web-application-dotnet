@@ -20,7 +20,7 @@
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <TargetFrameworkProfile />
     <DxaDataModelVersion>2.1.0-beta-201810171524</DxaDataModelVersion>
-    <SdlPCAPackageVersion>2.1.0-beta-201810251303</SdlPCAPackageVersion>
+    <SdlPCAPackageVersion>2.1.0-beta-201810291030</SdlPCAPackageVersion>
     <SdlDeliveryVersion>11.0.0</SdlDeliveryVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

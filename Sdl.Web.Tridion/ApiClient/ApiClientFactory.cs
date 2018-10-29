@@ -6,11 +6,11 @@ using Sdl.Tridion.Api.Client;
 using Sdl.Tridion.Api.Client.ContentModel;
 using Sdl.Tridion.Api.GraphQL.Client;
 using Sdl.Tridion.Api.Http.Client.Auth;
-using Sdl.Tridion.Api.IQQuery.API;
-using Sdl.Tridion.Api.IQQuery.Client;
+using Sdl.Tridion.Api.IqQuery;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Delivery.DiscoveryService;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore;
+using Sdl.Tridion.Api.IqQuery.Client;
 
 namespace Sdl.Web.Tridion.ApiClient
 {
@@ -108,8 +108,8 @@ namespace Sdl.Web.Tridion.ApiClient
         /// <typeparam name="TSearchResultSet">Type used for result set</typeparam>
         /// <typeparam name="TSearchResult">Type ised for result</typeparam>
         /// <returns>IQ Search Client</returns>
-        public IQSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>()
-            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IQSearchClient<TSearchResultSet, TSearchResult>(_iqEndpoint, _oauth, _iqSearchIndex);
+        public IqSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>()
+            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IqSearchClient<TSearchResultSet, TSearchResult>(_iqEndpoint, _oauth, _iqSearchIndex);
 
         /// <summary>
         /// Returns a fully constructed IQ Search client
@@ -118,8 +118,8 @@ namespace Sdl.Web.Tridion.ApiClient
         /// <typeparam name="TSearchResult">Type ised for result</typeparam>
         /// <param name="searchIndex">Search Index</param>
         /// <returns>IQ Search Client</returns>
-        public IQSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>(string searchIndex)
-            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IQSearchClient<TSearchResultSet, TSearchResult>(_iqEndpoint, _oauth, searchIndex);
+        public IqSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>(string searchIndex)
+            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IqSearchClient<TSearchResultSet, TSearchResult>(_iqEndpoint, _oauth, searchIndex);
 
         /// <summary>
         /// Returns a fully constructed IQ Search client
@@ -129,8 +129,8 @@ namespace Sdl.Web.Tridion.ApiClient
         /// <param name="endpoint">IQ Search endpoint</param>
         /// <param name="searchIndex">Search Index</param>
         /// <returns></returns>
-        public IQSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>(Uri endpoint, string searchIndex)
-            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IQSearchClient<TSearchResultSet, TSearchResult>(endpoint, _oauth, searchIndex);
+        public IqSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>(Uri endpoint, string searchIndex)
+            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IqSearchClient<TSearchResultSet, TSearchResult>(endpoint, _oauth, searchIndex);
 
         /// <summary>
         /// Return a fully constructed Public Content Api client
@@ -138,26 +138,26 @@ namespace Sdl.Web.Tridion.ApiClient
         /// <returns>Public Content Api Client</returns>
         public Sdl.Tridion.Api.Client.ApiClient CreateClient()
         {
-            var graphQL = new GraphQLClient(_endpoint, new Logger(), _oauth);
-            var client = new Sdl.Tridion.Api.Client.ApiClient(graphQL, new Logger());
+            var graphQl = new GraphQLClient(_endpoint, new Logger(), _oauth);
+            var client = new Sdl.Tridion.Api.Client.ApiClient(graphQl, new Logger())
+            {
+                DefaultModelType = DataModelType.R2
+            };
             // just make sure our requests come back as R2 json
-            client.DefaultModelType = DataModelType.R2;
             // add context data to client
-            IClaimStore claimStore = AmbientDataContext.CurrentClaimStore;
+            var claimStore = AmbientDataContext.CurrentClaimStore;
             if (claimStore == null)
             {
                 Log.Warn("No claimstore found so unable to populate claims for PCA.");
             }
             
-            Dictionary<string, string[]> headers =
-                claimStore?.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
+            var headers = claimStore?.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
             if (headers != null && headers.ContainsKey(PreviewSessionTokenHeader))
             {
                 client.HttpClient.Headers[PreviewSessionTokenHeader] = headers[PreviewSessionTokenHeader];
             }
 
-            Dictionary<string, string> cookies =
-                 claimStore?.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
+            var cookies = claimStore?.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
             if (cookies != null && cookies.ContainsKey(PreviewSessionTokenCookie))
             {
                 client.HttpClient.Headers[PreviewSessionTokenHeader] = cookies[PreviewSessionTokenCookie];              
@@ -167,7 +167,7 @@ namespace Sdl.Web.Tridion.ApiClient
             // Forward all claims
             var forwardedClaimValues = AmbientDataContext.ForwardedClaims;
             if (forwardedClaimValues == null || forwardedClaimValues.Count <= 0) return client;
-            Dictionary<Uri, object> forwardedClaims =
+            var forwardedClaims =
                 forwardedClaimValues.Select(claim => new Uri(claim, UriKind.RelativeOrAbsolute))
                     .Distinct()
                     .Where(uri => claimStore.Contains(uri) && claimStore.Get<object>(uri) != null && !uri.ToString().Equals("taf:session:preview:preview_session"))

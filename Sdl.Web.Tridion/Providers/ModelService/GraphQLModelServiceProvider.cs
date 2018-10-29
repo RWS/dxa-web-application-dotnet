@@ -73,7 +73,7 @@ namespace Sdl.Web.Tridion.ModelService
                 Log.Error(msg, entityId, e.Message);
                 throw new DxaException(string.Format(msg, entityId), e);
             }
-            catch (PcaException)
+            catch (ApiException)
             {
                 return null;
             }
@@ -95,7 +95,7 @@ namespace Sdl.Web.Tridion.ModelService
                 Log.Error(msg, pageId, e.Message);
                 throw new DxaException(string.Format(msg, pageId), e);
             }
-            catch (PcaException)
+            catch (ApiException)
             {
                 return null;
             }
@@ -141,7 +141,7 @@ namespace Sdl.Web.Tridion.ModelService
                         string.Format(msg, GetCanonicalUrlPath(urlPath, true), 
                         GetCanonicalUrlPath(urlPath, false)), e);
                 }
-                catch (PcaException)
+                catch (ApiException)
                 {
                     // no page found here, client will handle the details
                     return null;
@@ -165,7 +165,7 @@ namespace Sdl.Web.Tridion.ModelService
                 Log.Error(msg, e.Message);
                 throw new DxaException(msg, e);
             }
-            catch (PcaException)
+            catch (ApiException)
             {
                 return null;
             }
@@ -243,7 +243,7 @@ namespace Sdl.Web.Tridion.ModelService
                 Log.Error(msg, parentSitemapItemId, e.Message);
                 throw new DxaException(string.Format(msg, parentSitemapItemId), e);
             }
-            catch (PcaException)
+            catch (ApiException)
             {
 
             }
