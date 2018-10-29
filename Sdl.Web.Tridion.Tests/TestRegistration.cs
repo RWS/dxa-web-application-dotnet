@@ -1,6 +1,8 @@
 ﻿using System;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Tests.Models;
+using Sdl.Web.Tridion.Tests.Models.Topic;
+using Sdl.Web.Common.Models.Entity;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -33,6 +35,12 @@ namespace Sdl.Web.Tridion.Tests
             RegisterViewModel("Test:TSI1757Test3", typeof(Tsi1757TestEntity3));
             RegisterViewModel("Test:CompLinkTest", typeof(CompLinkTest));
             RegisterViewModel("Test:TSI2316Test", typeof(Tsi2316TestEntity));
+
+            GenericTopic.Register(); // Generic Topic Model
+
+            // Strongly Typed Topic Models
+            RegisterViewModel(typeof(TestStronglyTypedTopic));
+            RegisterViewModel(typeof(TestSpecializedTopic));
 
             // Page Views
             RegisterViewModel("GeneralPage", typeof(PageModel));
@@ -95,6 +103,15 @@ namespace Sdl.Web.Tridion.Tests
                 ControllerName = controllerName
             };
             ModelTypeRegistry.RegisterViewModel(mvcData, modelType);
+        }
+
+
+        /// <summary>
+        /// Registers a View Model Type without associated View.
+        /// </summary>
+        private static void RegisterViewModel(Type modelType)
+        {
+            ModelTypeRegistry.RegisterViewModel(null, modelType);
         }
     }
 }

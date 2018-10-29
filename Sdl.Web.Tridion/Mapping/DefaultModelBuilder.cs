@@ -662,7 +662,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (htmlFragment == null)
                 {
                     // Embedded Entity Model (for Media Items)
-                    MediaItem mediaItem = (MediaItem) ModelBuilderPipeline.CreateEntityModel((EntityModelData) fragment, typeof(MediaItem), localization);
+                    MediaItem mediaItem = (MediaItem)ModelBuilderPipeline.CreateEntityModel((EntityModelData)fragment, typeof(MediaItem), localization);
                     mediaItem.IsEmbedded = true;
                     if (mediaItem.MvcData == null)
                     {
@@ -770,15 +770,13 @@ namespace Sdl.Web.Tridion.Mapping
             }
 
             string defaultModuleName = SiteConfiguration.GetDefaultModuleName();
-            string areaName = data.AreaName ?? defaultModuleName;
             return new MvcData
             {
                 ControllerName = data.ControllerName ?? defaultControllerName,
-                ControllerAreaName = data.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName(),
+                ControllerAreaName = data.ControllerAreaName ?? defaultModuleName,
                 ActionName = data.ActionName ?? defaultControllerName,
                 ViewName = data.ViewName,
-                // remap "Ish" area onto our default module name here so Docs content can be rendered
-                AreaName = areaName.Equals("Ish") ? defaultModuleName : areaName,
+                AreaName = data.AreaName ?? defaultModuleName,
                 RouteValues = data.Parameters
             };
         }
@@ -794,6 +792,29 @@ namespace Sdl.Web.Tridion.Mapping
             result.HtmlClasses = regionModelData.HtmlClasses;
             result.MvcData = mvcData;
             result.XpmMetadata = localization.IsXpmEnabled ? regionModelData.XpmMetadata : null;
+            result.SchemaId = regionModelData.SchemaId;
+
+            if (!string.IsNullOrEmpty(regionModelData.SchemaId))
+            {
+                SemanticSchema semanticSchema = SemanticMapping.GetSchema(regionModelData.SchemaId, localization);
+
+                Type modelType = ModelTypeRegistry.GetViewModelType(mvcData);
+
+                MappingData mappingData = new MappingData
+                {
+                    SourceViewModel = regionModelData,
+                    ModelType = modelType,
+                    PropertyValidation = new Validation
+                    {
+                        MainSchema = semanticSchema,
+                        InheritedSchemas = GetInheritedSemanticSchemas(regionModelData, localization)
+                    },
+                    Fields = null,
+                    MetadataFields = regionModelData.Metadata,
+                    Localization = localization
+                };
+                MapSemanticProperties(result, mappingData);
+            }
 
             if (regionModelData.Regions != null)
             {

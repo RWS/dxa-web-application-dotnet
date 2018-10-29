@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Sdl.Tridion.Api.Client;
+using Sdl.Tridion.Api.Client.ContentModel;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
-using Sdl.Web.PublicContentApi;
-using Sdl.Web.PublicContentApi.ContentModel;
+using Sdl.Web.Tridion.ApiClient;
 using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Navigation;
 using Sdl.Web.Tridion.Caching;
 using Sdl.Web.Tridion.Mapping;
 using Sdl.Web.Tridion.ModelService;
-using Sdl.Web.Tridion.PCAClient;
 using Sdl.Web.Tridion.Providers.Binary;
 
 namespace Sdl.Web.Tridion.Tests
@@ -40,7 +40,6 @@ namespace Sdl.Web.Tridion.Tests
     internal class TestFixture : ILocalizationResolver
     {
         internal static readonly string HomePageId = "277"; // /autotest-parent homepage Id
-        internal const string ArticleDcpEntityId = "9712-9711";        
         internal const string NavigationTaxonomyTitle = "Test Taxonomy [Navigation]";
         internal const string TopLevelKeyword1Title = "Top-level Keyword 1";
         internal const string TopLevelKeyword2Title = "Top-level Keyword 2";
@@ -58,8 +57,6 @@ namespace Sdl.Web.Tridion.Tests
         internal const string TaxonomyIndexPageRelativeUrlPath = "regression/taxonomy";
         internal const string Tsi811PageRelativeUrlPath = "regression/tsi-811";
         internal const string Tsi1278PageRelativeUrlPath = "tsi-1278_trådløst.html";
-        //internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-9791.jpg";
-        internal const string Tsi1278StaticContentItemRelativeUrlPath = "Images/trådløst_tcm{0}-508.jpg";
         internal const string Tsi1308PageRelativeUrlPath = "regression/tsi-1308";
         internal const string Tsi1757PageRelativeUrlPath = "regression/tsi-1757";
         internal const string Tsi1614PageRelativeUrlPath = "tsi-1614.html";
@@ -147,7 +144,7 @@ namespace Sdl.Web.Tridion.Tests
             };
 
             // map path of publications to Ids
-            var client = PCAClientFactory.Instance.CreateClient();
+            var client = ApiClientFactory.Instance.CreateClient();
             var publications = client.GetPublications(ContentNamespace.Sites, null, null, null, null);
             Assert.AreNotEqual(0, publications.Edges.Count,
                 "No publications returned from content service. Check you have published all the relevant publications.");

@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Configuration;
 using Newtonsoft.Json;
+using Sdl.Tridion.Api.Client;
+using Sdl.Tridion.Api.Client.ContentModel;
+using Sdl.Tridion.Api.Client.Exceptions;
+using Sdl.Tridion.Api.GraphQL.Client.Exceptions;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.DataModel;
-using Sdl.Web.GraphQLClient.Exceptions;
-using Sdl.Web.PublicContentApi;
-using Sdl.Web.PublicContentApi.ContentModel;
-using Sdl.Web.PublicContentApi.Exceptions;
-using Sdl.Web.PublicContentApi.Utils;
-using Sdl.Web.Tridion.PCAClient;
+using Sdl.Web.Tridion.ApiClient;
 using Sdl.Web.Tridion.Providers.ModelService;
 
 namespace Sdl.Web.Tridion.ModelService
@@ -39,10 +38,18 @@ namespace Sdl.Web.Tridion.ModelService
             _binder.AddDataModelExtension(extension);
         }
 
-        protected PublicContentApi.PublicContentApi Client => PCAClientFactory.Instance.CreateClient();
-
-        protected ContentNamespace GetNamespace(ILocalization localization)
-            => CmUri.NamespaceIdentiferToId(localization.CmUriScheme);
+        protected Sdl.Tridion.Api.Client.ApiClient Client
+        {
+            get
+            {
+                var client = ApiClientFactory.Instance.CreateClient();
+                client.DefaultModelType = DataModelType.R2;
+                client.DefaultContentType = ContentType.MODEL;
+                client.ModelSericeLinkRenderingType = ModelServiceLinkRendering.Relative;
+                client.TcdlLinkRenderingType = TcdlLinkRendering.Relative;
+                return client;
+            }
+        }
 
         public EntityModelData GetEntityModelData(string entityId, ILocalization localization)
         {
@@ -55,10 +62,9 @@ namespace Sdl.Web.Tridion.ModelService
                 string[] ids = entityId.Split('-');
                 if (ids.Length != 2) return null;
 
-                var json = Client.GetEntityModelData(GetNamespace(localization), int.Parse(localization.Id),
-                    int.Parse(ids[0]), int.Parse(ids[1]),
-                    ContentType.MODEL, DataModelType.R2, DcpType.DEFAULT,
-                    ContentIncludeMode.IncludeAndRender, null);
+                var json = Client.GetEntityModelData(localization.Namespace(), localization.PublicationId(),
+                    int.Parse(ids[0]), int.Parse(ids[1]),                    
+                    ContentIncludeMode.IncludeDataAndRender, null);
                 return LoadModel<EntityModelData>(json);
             }
             catch (GraphQLClientException e)
@@ -67,7 +73,7 @@ namespace Sdl.Web.Tridion.ModelService
                 Log.Error(msg, entityId, e.Message);
                 throw new DxaException(string.Format(msg, entityId), e);
             }
-            catch (PcaException)
+            catch (ApiException)
             {
                 return null;
             }
@@ -77,9 +83,9 @@ namespace Sdl.Web.Tridion.ModelService
         {
             try
             {
-                var json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id), pageId,
-                    ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                    ContentIncludeMode.IncludeAndRender, null);
+                var json = Client.GetPageModelData(localization.Namespace(), localization.PublicationId(), pageId,
+                    addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
+                    ContentIncludeMode.IncludeDataAndRender, null);
                 return LoadModel<PageModelData>(json);
             }
             catch (GraphQLClientException e)
@@ -89,7 +95,7 @@ namespace Sdl.Web.Tridion.ModelService
                 Log.Error(msg, pageId, e.Message);
                 throw new DxaException(string.Format(msg, pageId), e);
             }
-            catch (PcaException)
+            catch (ApiException)
             {
                 return null;
             }
@@ -98,38 +104,44 @@ namespace Sdl.Web.Tridion.ModelService
         public PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes)
         {
             const string msg =
-               "PCA client returned an unexpected response when retrieving page model data for page url {0}.";
+               "PCA client returned an unexpected response when retrieving page model data for page url {0} or {1}.";
             dynamic json;
+
+            // DXA supports "extensionless URLs" and "index pages".
+            // For example: the index Page at root level (aka the Home Page) has a CM URL path of /index.html
+            // It can be addressed in the DXA web application in several ways:
+            //      1. /index.html – exactly the same as the CM URL
+            //      2. /index – the file extension doesn't have to be specified explicitly {"extensionless URLs")
+            //      3. / - the file name of an index page doesn't have to be specified explicitly either.
+            // Note that the third option is the most clean one and considered the "canonical URL" in DXA; links to an index Page will be generated like that.
+            // The problem with these "URL compression" features is that if a URL does not end with a slash (nor an extension), you don't 
+            // know upfront if the URL addresses a regular Page or an index Page (within a nested SG).  
+            // To determine this, DXA first tries the regular Page and if it doesn't exist, it appends /index.html and tries again.
+            // TODO: The above should be handled by PCA (See CRQ-11703)
             try
             {
-                // TODO: This could be fixed by sending two graphQL queries in a single go. Need to
-                // wait for PCA client fix for this however
-                json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
+                json = Client.GetPageModelData(localization.Namespace(), localization.PublicationId(),
                     GetCanonicalUrlPath(urlPath, true),
-                    ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                    ContentIncludeMode.IncludeAndRender, null);
+                    addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
+                    ContentIncludeMode.IncludeDataAndRender, null);
             }
-            catch (GraphQLClientException e)
-            {
-                Log.Error(msg, urlPath, e.Message);
-                throw new DxaException(string.Format(msg, urlPath), e);
-            }
-            catch (PcaException)
+            catch (Exception)
             {
                 try
                 {
-                    // try index page
-                    json = Client.GetPageModelData(GetNamespace(localization), int.Parse(localization.Id),
+                    json = Client.GetPageModelData(localization.Namespace(), localization.PublicationId(),
                         GetCanonicalUrlPath(urlPath, false),
-                        ContentType.MODEL, DataModelType.R2, addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
-                        ContentIncludeMode.IncludeAndRender, null);
+                        addIncludes ? PageInclusion.INCLUDE : PageInclusion.EXCLUDE,
+                        ContentIncludeMode.IncludeDataAndRender, null);
                 }
                 catch (GraphQLClientException e)
                 {
                     Log.Error(msg, urlPath, e.Message);
-                    throw new DxaException(string.Format(msg, urlPath), e);
+                    throw new DxaException(
+                        string.Format(msg, GetCanonicalUrlPath(urlPath, true), 
+                        GetCanonicalUrlPath(urlPath, false)), e);
                 }
-                catch (PcaException)
+                catch (ApiException)
                 {
                     // no page found here, client will handle the details
                     return null;
@@ -142,8 +154,8 @@ namespace Sdl.Web.Tridion.ModelService
         {
             try
             {
-                var ns = GetNamespace(localization);
-                var publicationId = int.Parse(localization.Id);
+                var ns = localization.Namespace();
+                var publicationId = localization.PublicationId();
                 var tree = SitemapHelpers.GetEntireTree(Client, ns, publicationId, _descendantDepth);
                 return (TaxonomyNode)SitemapHelpers.Convert(tree);
             }
@@ -153,7 +165,7 @@ namespace Sdl.Web.Tridion.ModelService
                 Log.Error(msg, e.Message);
                 throw new DxaException(msg, e);
             }
-            catch (PcaException)
+            catch (ApiException)
             {
                 return null;
             }
@@ -174,20 +186,22 @@ namespace Sdl.Web.Tridion.ModelService
         {
             try
             {
-                int pubId = int.Parse(localization.Id);
-                ContentNamespace ns = GetNamespace(localization);
+                int pubId = localization.PublicationId();
+                ContentNamespace ns = localization.Namespace();
 
                 // Check if we are requesting the entire tree
                 if (descendantLevels == -1)
                 {
                     var tree0 = SitemapHelpers.GetEntireTree(Client, ns, pubId, parentSitemapItemId, includeAncestors, _descendantDepth);
-                    if (parentSitemapItemId == null) return tree0;
-                    if (parentSitemapItemId.Split('-').Length == 1) return tree0;
+                    // If parent node not specified we return entire tree
+                    if (parentSitemapItemId == null) return tree0;        
+                    // root node specified so return the direct children of this node
                     List<ISitemapItem> items0 = new List<ISitemapItem>();
                     foreach (TaxonomySitemapItem x in tree0.OfType<TaxonomySitemapItem>())
                     {
                         items0.AddRange(x.Items);
                     }
+                    items0 = items0.OrderBy(i => i.OriginalTitle).ToList();
                     return items0;
                 }
 
@@ -196,29 +210,30 @@ namespace Sdl.Web.Tridion.ModelService
 
                 if (parentSitemapItemId == null)
                 {
-                    // requesting from root so just return descendants from root
-                    var tree0 = Client.GetSitemapSubtree(ns, pubId, null, descendantLevels, includeAncestors, null);
+                    // Requesting from root so just return descendants from root
+                    var tree0 = Client.GetSitemapSubtree(ns, pubId, null, descendantLevels, includeAncestors ? Ancestor.INCLUDE : Ancestor.NONE, null);
                     return tree0.Cast<ISitemapItem>().ToList();
                 }
 
                 if (includeAncestors)
                 {
-                    // we are looking for a particular item, we need to request the entire
+                    // We are looking for a particular item, we need to request the entire
                     // subtree first
                     var subtree0 = SitemapHelpers.GetEntireTree(Client, ns, pubId, parentSitemapItemId, true, _descendantDepth);
 
-                    // now we prune descendants from our deseried node
+                    // Prune descendants from our deseried node
                     ISitemapItem node = SitemapHelpers.FindNode(subtree0, parentSitemapItemId);
                     SitemapHelpers.Prune(node, 0, descendantLevels);
                     return subtree0;
                 }
 
-                var tree = Client.GetSitemapSubtree(ns, pubId, parentSitemapItemId, descendantLevels, false, null);
+                var tree = Client.GetSitemapSubtree(ns, pubId, parentSitemapItemId, descendantLevels, Ancestor.NONE, null);
                 List<ISitemapItem> items = new List<ISitemapItem>();
                 foreach (TaxonomySitemapItem x in tree.Where(x => x.Items != null))
                 {
                     items.AddRange(x.Items);
                 }
+                items = items.OrderBy(i => i.OriginalTitle).ToList();
                 return items;
             }
             catch (GraphQLClientException e)
@@ -228,7 +243,7 @@ namespace Sdl.Web.Tridion.ModelService
                 Log.Error(msg, parentSitemapItemId, e.Message);
                 throw new DxaException(string.Format(msg, parentSitemapItemId), e);
             }
-            catch (PcaException)
+            catch (ApiException)
             {
 
             }

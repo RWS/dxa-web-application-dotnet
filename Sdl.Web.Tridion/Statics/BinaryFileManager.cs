@@ -140,27 +140,33 @@ namespace Sdl.Web.Tridion.Statics
                 {
                     try
                     {
-                        string[] files = Directory.GetFiles(localFilePath, $"{binaryId}_*",
-                            SearchOption.TopDirectoryOnly);
-                        if (files.Length > 0)
+                        if (Directory.Exists(localFilePath))
                         {
-                            localFilePath = files[0];
-                            if (IsCached(() => provider.GetBinaryLastPublishedDate(localization, binaryId), localFilePath,
-                                localization))
+                            string[] files = Directory.GetFiles(localFilePath, $"{binaryId}*",
+                                SearchOption.TopDirectoryOnly);
+                            if (files.Length > 0)
                             {
-                                return localFilePath;
+                                localFilePath = files[0];
+                                if (IsCached(() => provider.GetBinaryLastPublishedDate(localization, binaryId),
+                                    localFilePath,
+                                    localization))
+                                {
+                                    return localFilePath;
+                                }
                             }
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         // Our binary cache folder probably doesn't exist. 
+                        Log.Warn($"Failed to cache binary at {localFilePath}");
+                        Log.Warn(ex.Message);
                     }
                 }
 
                 var data = provider.GetBinary(localization, binaryId);
                 string ext = Path.GetExtension(data.Item2) ?? "";
-                localFilePath = $"{localFilePath}/{localization.Id}-{binaryId}{ext}";
+                localFilePath = $"{localFilePath}/{binaryId}{ext}";
                 WriteBinaryToFile(data.Item1, localFilePath, null);
                 return localFilePath;
             }

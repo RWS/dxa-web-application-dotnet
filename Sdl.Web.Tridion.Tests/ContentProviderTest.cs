@@ -38,6 +38,14 @@ namespace Sdl.Web.Tridion.Tests
             _testLocalizationInitializer = testLocalizationInitializer;
         }
 
+        protected string GetArticleDcpEntityId()
+        {
+            string articleDynamicPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticleDynamicPageRelativeUrlPath);
+            PageModel articleDynamicPageModel = TestContentProvider.GetPageModel(articleDynamicPageUrlPath, TestLocalization, false);
+            EntityModel articleDcp = articleDynamicPageModel.Regions["Main"].Entities[0];
+            return articleDcp.Id;
+        }
+
         [TestMethod]
         public void GetPageModel_NonExistent_Exception()
         {
@@ -174,7 +182,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual("TSI-1308 Test Page", pageMeta["description"], "pageMeta[description]");
         }
 
-        [Ignore] // todo: need to put this back eventually
+        [TestMethod]
         public void GetPageModel_TitleDescriptionImage_Success() // See TSI-2277
         {
             string testPage1UrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2277Page1RelativeUrlPath);
@@ -185,7 +193,7 @@ namespace Sdl.Web.Tridion.Tests
 
             Assert.IsNotNull(pageModel1, "pageModel1");
             OutputJson(pageModel1);
-            Assert.IsNotNull(pageModel2, "pageModel2");
+            Assert.IsNotNull(pageModel2, "pageModel1");
             OutputJson(pageModel2);
 
             const string articleHeadline = "Article headline";
@@ -194,11 +202,14 @@ namespace Sdl.Web.Tridion.Tests
             const string siteSuffix = " | My Site";
 
             Assert.AreEqual(articleHeadline + siteSuffix, pageModel1.Title, "pageModel1.Title");
-            Assert.AreEqual(articleHeadline, pageModel1.Meta["description"], "pageModel1.Meta['description']");         
+            Assert.AreEqual(articleHeadline, pageModel1.Meta["description"], "pageModel1.Meta['description']");
+            Assert.IsFalse(pageModel1.Meta.ContainsKey("og:description"));
 
-            //TODO: some content not published correctly
-            //Assert.AreEqual(articleStandardMetaName + siteSuffix, pageModel2.Title, "pageModel2.Title");
-            //Assert.AreEqual(articleStandardMetaDescription, pageModel2.Meta["description"], "pageModel2.Meta['description']");
+            Assert.AreEqual(articleStandardMetaName + siteSuffix, pageModel2.Title, "pageModel2.Title");
+            Assert.AreEqual(articleStandardMetaDescription, pageModel2.Meta["description"], "pageModel2.Meta['description']");
+            string ogDescription;
+            Assert.IsTrue(pageModel2.Meta.TryGetValue("og:description", out ogDescription), "pageModel2.Meta['og: description']");
+            Assert.AreEqual(articleStandardMetaDescription, ogDescription, "ogDescription");
         }
 
         [TestMethod]
@@ -259,8 +270,7 @@ namespace Sdl.Web.Tridion.Tests
 
             Article dcpArticle = pageModel.Regions["Main"].Entities[0] as Article;
             Assert.IsNotNull(dcpArticle, "dcpArticle");
-            //TODO: Temp removal
-            //Assert.AreEqual(TestFixture.ArticleDcpEntityId, dcpArticle.Id, "dcpArticle.Id"); // EntityModel.Id for DCP is different
+            Assert.IsTrue(dcpArticle.Id.Contains("-"), "dcpArticle.Id should contain dash");
             Assert.AreEqual(referenceArticle.Headline, dcpArticle.Headline, "dcpArticle.Headline");
             AssertEqualCollections(referenceArticle.ArticleBody, dcpArticle.ArticleBody, "dcpArticle.ArticleBody");
             AssertEqualCollections(referenceArticle.XpmPropertyMetadata, dcpArticle.XpmPropertyMetadata, "dcpArticle.XpmPropertyMetadata");
@@ -371,8 +381,8 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(666.666, publishedKeyword.NumberField, "publishedKeyword.NumberField");
             Assert.AreEqual(new DateTime(1970, 12, 16, 12, 34, 56), publishedKeyword.DateField, "publishedKeyword.DateField");
             Assert.IsNotNull(publishedKeyword.CompLinkField, "publishedKeyword.CompLinkField");
-            //TODO: temp removal
-            //Assert.AreEqual(TestFixture.ArticleDcpEntityId.Split('-')[0], publishedKeyword.CompLinkField.Id, "publishedKeyword.CompLinkField.Id");
+            string articleId = GetArticleDcpEntityId().Split('-')[0];
+            Assert.AreEqual(articleId, publishedKeyword.CompLinkField.Id, "publishedKeyword.CompLinkField.Id");
             Assert.IsNotNull(publishedKeyword.KeywordField, "publishedKeyword.KeywordField");
             Assert.AreEqual("Keyword 1.1", publishedKeyword.KeywordField.Title, "publishedKeyword.KeywordField");
         }
@@ -458,8 +468,8 @@ namespace Sdl.Web.Tridion.Tests
             StringAssert.Matches(firstHtmlFragment, new Regex(linkPattern2));
         }
 
-        [Ignore]
-        public void GetPageModel_RichTextImageWithHtmlClass_Success() // See TSI-1614
+        [TestMethod]
+        public virtual void GetPageModel_RichTextImageWithHtmlClass_Success() // See TSI-1614
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1614PageRelativeUrlPath);
 
@@ -485,10 +495,10 @@ namespace Sdl.Web.Tridion.Tests
 
             Common.Models.Configuration configEntity = pageModel.Regions["Nav"].Entities[0] as Common.Models.Configuration;
             Assert.IsNotNull(configEntity, "configEntity");
-            //TODO: temp removal
-            //string rawCompLink = TestLocalization.GetCmUri(TestFixture.ArticleDcpEntityId.Split('-')[0]); // 9712 on dxadevweb85.ams.dev
-            //Assert.AreEqual(rawCompLink, configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultContentLink']");
-            //Assert.AreEqual("pt,mx", configEntity.Settings["suppressLocalizations"], "configEntity.Settings['suppressLocalizations']");
+            string articleId = GetArticleDcpEntityId().Split('-')[0];
+            string rawCompLink = TestLocalization.GetCmUri(articleId);
+            Assert.AreEqual(rawCompLink, configEntity.Settings["defaultContentLink"], "configEntity.Settings['defaultContentLink']");
+            Assert.AreEqual("pt,mx", configEntity.Settings["suppressLocalizations"], "configEntity.Settings['suppressLocalizations']");
         }
 
         [TestMethod]
@@ -571,11 +581,10 @@ namespace Sdl.Web.Tridion.Tests
             AssertThrowsException<DxaException>(() => TestContentProvider.GetEntityModel("666", TestLocalization));
         }
 
-        [Ignore]
         [TestMethod]
         public void GetEntityModel_XpmMetadataOnStaging_Success()
         {
-            const string testEntityId = TestFixture.ArticleDcpEntityId;
+            string testEntityId = GetArticleDcpEntityId();
 
             EntityModel entityModel = TestContentProvider.GetEntityModel(testEntityId, TestLocalization);
 
@@ -606,13 +615,16 @@ namespace Sdl.Web.Tridion.Tests
             AssertThrowsException<DxaItemNotFoundException>(() => TestContentProvider.GetStaticContentItem(testStaticContentItemUrlPath, TestLocalization));
         }
 
-        [Ignore] // TODO: should put this back later when we can save using hardcoded ids
         [TestMethod]
         public void GetStaticContentItem_InternationalizedUrl_Success() // See TSI-1278
         {
-            string testStaticContentItemUrlPath = TestLocalization.GetAbsoluteUrlPath(
-                string.Format(TestFixture.Tsi1278StaticContentItemRelativeUrlPath, TestLocalization.Id)
-                );
+            // Since we don't know the URL of the binary upfront, we obtain it from a known Page Model.
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1278PageRelativeUrlPath);
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+            Assert.IsNotNull(pageModel, "pageModel");
+            MediaItem testImage = pageModel.Regions["Main"].Entities[0] as MediaItem;
+            Assert.IsNotNull(testImage, "testImage");
+            string testStaticContentItemUrlPath = testImage.Url;
 
             using (StaticContentItem testStaticContentItem = TestContentProvider.GetStaticContentItem(testStaticContentItemUrlPath, TestLocalization))
             {

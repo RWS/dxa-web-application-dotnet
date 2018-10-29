@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using Sdl.Tridion.Api.Client.Utils;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.PublicContentApi.ContentModel;
-using Sdl.Web.PublicContentApi.Utils;
-using Sdl.Web.Tridion.PCAClient;
-using Sdl.Web.Tridion.TridionDocs.Localization;
+using Sdl.Tridion.Api.Client.ContentModel;
+using Sdl.Web.Tridion.ApiClient;
 
 namespace Sdl.Web.Tridion
 {
@@ -18,7 +17,7 @@ namespace Sdl.Web.Tridion
     {
         private static readonly Regex DocsPattern =
             new Regex(
-                @"(^(?<pubId>\d+))|(^(?<pubId>\d+)/(?<itemId>\d+))|(^binary/(?<pubId>\d+)/(?<itemId>\d+))|(^api/binary/(?<pubId>\d+)/(?<itemId>\d+))|(^api/page/(?<pubId>\d+)/(?<pageId>\d+))|(^api/topic/(?<pubId>\d+)/(?<componentId>\d+)/(?<templateId>\d+))|(^api/toc/(?<pubId>\d+))|(^api/pageIdByReference/(?<pubId>\d+))",
+                @"(^(?<pubId>\d+))|(^(?<pubId>\d+)/(?<itemId>\d+))|(^binary/(?<pubId>\d+)/(?<itemId>\d+))|(^api/binary/(?<pubId>\d+)/(?<itemId>\d+))|(^api/page/(?<pubId>\d+)/(?<pageId>\d+))|(^api/topic/(?<pubId>\d+)/(?<componentId>\d+)/(?<templateId>\d+))|(^api/toc/(?<pubId>\d+))|(^api/pageIdByReference/(?<pubId>\d+))|(^api/conditions/(?<pubId>\d+))|(^api/comments/(?<pubId>\d+)/(?<itemId>\d+))",
                 RegexOptions.Compiled);
      
         /// <summary>
@@ -46,31 +45,48 @@ namespace Sdl.Web.Tridion
                     if (localizationId.StartsWith("ish:"))
                     {
                         CmUri uri = CmUri.FromString(localizationId);
-                        return new DocsLocalization {Id = uri.PublicationId.ToString()};
+                        result = new DocsLocalization(uri.PublicationId);
                     }
-
-                    if (localizationId.StartsWith("tcm:"))
+                    else if (localizationId.StartsWith("tcm:"))
                     {
                         CmUri uri = CmUri.FromString(localizationId);
-                        return new Localization { Id = uri.PublicationId.ToString() };
+                        result = new Localization { Id = uri.PublicationId.ToString() };
+                    }
+                    else
+                    {
+                        // Attempt to resolve it from Docs
+                        var client = ApiClientFactory.Instance.CreateClient();
+                        Publication publication = client.GetPublication(ContentNamespace.Docs, int.Parse(localizationId), null, null);
+                        result = publication != null ? new DocsLocalization(publication.PublicationId) : base.GetLocalization(localizationId);
                     }
 
-                    // Attempt to resolve it from Docs
-                    var client = PCAClientFactory.Instance.CreateClient();
-                    var publication = client.GetPublication(ContentNamespace.Docs, int.Parse(localizationId), null, null);
-                    return publication != null ? new DocsLocalization {Id = publication.PublicationId.ToString()} : base.GetLocalization(localizationId);
+                    KnownLocalizations[localizationId] = result;
                 }
 
                 return result;
             }
-        }      
+        }
 
         protected virtual ILocalization ResolveDocsLocalization(Uri url)
         {
-            var urlPath = url.GetComponents(UriComponents.Path, UriFormat.Unescaped);
-            if (string.IsNullOrEmpty(urlPath)) return null;
-            var match = DocsPattern.Match(urlPath);
-            return !match.Success ? null : new DocsLocalization { Id = match.Groups["pubId"].Value };
+            // Try if the URL looks like a Tridion Docs / DDWebApp URL
+            string urlPath = url.GetComponents(UriComponents.Path, UriFormat.Unescaped);
+            if (string.IsNullOrEmpty(urlPath))
+                return null; // No, it doesn't
+            Match match = DocsPattern.Match(urlPath);
+            if (!match.Success)
+                return null; // No, it doesn't
+
+            string localizationId = match.Groups["pubId"].Value;
+            ILocalization result;
+            if (!KnownLocalizations.TryGetValue(localizationId, out result))
+            {
+                result = new DocsLocalization { Id = localizationId };
+                KnownLocalizations[localizationId] = result;
+            }
+
+            result.EnsureInitialized();
+            return result;
         }
     }
 }

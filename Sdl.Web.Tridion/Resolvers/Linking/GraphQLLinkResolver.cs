@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Sdl.Tridion.Api.Client;
+using Sdl.Tridion.Api.Client.Utils;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.PublicContentApi;
-using Sdl.Web.PublicContentApi.Utils;
-using Sdl.Web.Tridion.PCAClient;
+using Sdl.Web.Tridion.ApiClient;
 
 namespace Sdl.Web.Tridion.Linking
 {
@@ -25,27 +25,30 @@ namespace Sdl.Web.Tridion.Linking
         {
             if (sourceUri == null) return null;
 
-            string url = null;
-            if (sourceUri.IsCmUri())
-            {
-                var client = PCAClientFactory.Instance.CreateClient();
-                var cmUri = new CmUri(sourceUri);
-                switch (cmUri.ItemType)
-                {
-                    case ItemType.Component:
-                        url = resolveToBinary ? 
-                            client.ResolveBinaryLink(cmUri.Namespace, cmUri.PublicationId, cmUri.ItemId, null) : 
-                            client.ResolveComponentLink(cmUri.Namespace, cmUri.PublicationId, cmUri.ItemId, null, null);
-                        break;
-                    case ItemType.Page:
-                        url = client.ResolvePageLink(cmUri.Namespace, cmUri.PublicationId, cmUri.ItemId);
-                        break;
-                }              
-            }
-            else
-            {
-                url = sourceUri;
-            }
+            string url = SiteConfiguration.CacheProvider.GetOrAdd($"{sourceUri}:{resolveToBinary}:{localization?.Id}",
+                CacheRegions.LinkResolving,
+                () =>
+                {                  
+                    if (sourceUri.IsCmUri())
+                    {
+                        var client = ApiClientFactory.Instance.CreateClient();
+                        var cmUri = new CmUri(sourceUri);
+                        switch (cmUri.ItemType)
+                        {
+                            case ItemType.Component:
+                                return resolveToBinary ?
+                                    client.ResolveBinaryLink(cmUri.Namespace, cmUri.PublicationId, cmUri.ItemId, null) :
+                                    client.ResolveComponentLink(cmUri.Namespace, cmUri.PublicationId, cmUri.ItemId, null, null);
+                            case ItemType.Page:
+                                return client.ResolvePageLink(cmUri.Namespace, cmUri.PublicationId, cmUri.ItemId);
+                        }
+                    }
+                    else
+                    {
+                        return sourceUri;
+                    }
+                    return null;
+                });                       
 
             // Strip off default extension / page name
             if (url == null || !url.EndsWith(Constants.DefaultExtension)) return url;

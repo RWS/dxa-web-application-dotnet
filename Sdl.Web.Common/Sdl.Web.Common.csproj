@@ -9,10 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Sdl.Web.Common</RootNamespace>
     <AssemblyName>Sdl.Web.Common</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.1.0-beta-201804241437</SdlDxaDataModelPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.1.0-beta-201810171524</SdlDxaDataModelPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -52,10 +52,10 @@
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.DataModel">
-      <HintPath>..\packages\Sdl.Dxa.DataModel.$(SdlDxaDataModelPackageVersion)\lib\net452\Sdl.Web.DataModel.dll</HintPath>
+      <HintPath>..\packages\Sdl.Dxa.DataModel.$(SdlDxaDataModelPackageVersion)\lib\net462\Sdl.Web.DataModel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -77,8 +77,10 @@
   <ItemGroup>
     <Compile Include="CacheRegions.cs" />
     <Compile Include="Configuration\ComponentType.cs" />
+    <Compile Include="Configuration\DocsLocalization.cs" />
     <Compile Include="Configuration\LocalizationResources.cs" />
     <Compile Include="Configuration\LocalizationMappingsManager.cs" />
+    <Compile Include="Configuration\OccurrenceConstraint.cs" />
     <Compile Include="Configuration\ScreenWidth.cs" />
     <Compile Include="Configuration\SiteConfiguration.cs" />
     <Compile Include="Configuration\Localization.cs" />
@@ -126,6 +128,7 @@
     <Compile Include="Models\Entity\ExceptionEntity.cs" />
     <Compile Include="Models\EntityModel.cs" />
     <Compile Include="Models\Entity\Configuration.cs" />
+    <Compile Include="Models\Entity\Topic.cs" />
     <Compile Include="Models\KeywordModel.cs" />
     <Compile Include="Models\Navigation\TaxonomyNode.cs" />
     <Compile Include="Models\ISyndicationFeedItemProvider.cs" />

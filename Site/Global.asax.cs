@@ -5,8 +5,7 @@ using System.Web.Configuration;
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.WebPages;
-using Microsoft.Practices.ServiceLocation;
-using Microsoft.Practices.Unity;
+using CommonServiceLocator;
 using Microsoft.Practices.Unity.Configuration;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
@@ -14,7 +13,10 @@ using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.Context;
 using Sdl.Web.Mvc.Formats;
 using Sdl.Web.Mvc.Html;
+using Unity;
 using Unity.Mvc5;
+using Unity.ServiceLocation;
+using Sdl.Web.Common.Models.Entity;
 
 namespace Sdl.Web.Site
 {
@@ -138,6 +140,7 @@ namespace Sdl.Web.Site
             
             RegisterRoutes(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
+            GenericTopic.Register(); // Register generic Topic View Model so that Tridion Docs content can be handled.
             RegisterDisplayModes();
             _initialized = true;
         }

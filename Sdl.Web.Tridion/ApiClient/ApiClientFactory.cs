@@ -2,38 +2,46 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Configuration;
+using Sdl.Tridion.Api.Client;
+using Sdl.Tridion.Api.Client.ContentModel;
+using Sdl.Tridion.Api.GraphQL.Client;
+using Sdl.Tridion.Api.Http.Client.Auth;
+using Sdl.Tridion.Api.IqQuery;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Delivery.DiscoveryService;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore;
-using Sdl.Web.HttpClient.Auth;
-using Sdl.Web.IQQuery.API;
-using Sdl.Web.IQQuery.Client;
-using Sdl.Web.PublicContentApi.ContentModel;
+using Sdl.Tridion.Api.IqQuery.Client;
 
-namespace Sdl.Web.Tridion.PCAClient
+namespace Sdl.Web.Tridion.ApiClient
 {
     /// <summary>
-    /// Public Content Api Factory creates PCA clients with context claim forwarding and
-    /// OAuthentication.
+    /// Api Client Factory creates clients with context claim forwarding and
+    /// OAuthentication for using the GraphQL Api.
     /// </summary>
-    public sealed class PCAClientFactory
+    public sealed class ApiClientFactory
     {
         private readonly Uri _endpoint;
         private readonly Uri _iqEndpoint;
-
+        private readonly string _iqSearchIndex;
+        private readonly bool _claimForwarding = true;
         private readonly IAuthentication _oauth;
         private const string PreviewSessionTokenHeader = "x-preview-session-token";
         private const string PreviewSessionTokenCookie = "preview-session-token";
 
-        private static readonly Lazy<PCAClientFactory> lazy =
-            new Lazy<PCAClientFactory>(() => new PCAClientFactory());
+        private static readonly Lazy<ApiClientFactory> lazy =
+            new Lazy<ApiClientFactory>(() => new ApiClientFactory());
 
-        public static PCAClientFactory Instance => lazy.Value;
-
-        private PCAClientFactory()
+        public static ApiClientFactory Instance => lazy.Value;
+        
+        private ApiClientFactory()
         {
             try
             {
+                var setting = WebConfigurationManager.AppSettings["pca-claim-forwarding"];
+                if (!string.IsNullOrEmpty(setting))
+                {
+                    _claimForwarding = setting.Equals("true", StringComparison.InvariantCultureIgnoreCase);
+                }
                 string uri = WebConfigurationManager.AppSettings["pca-service-uri"];
                 if (string.IsNullOrEmpty(uri))
                 {
@@ -56,10 +64,11 @@ namespace Sdl.Web.Tridion.PCAClient
                 }
                 if (_endpoint == null)
                 {
-                    throw new PCAClientException("Unable to retrieve endpoint for Public Content Api");
+                    throw new ApiClientException("Unable to retrieve endpoint for Public Content Api");
                 }
 
                 uri = WebConfigurationManager.AppSettings["iq-service-uri"];
+                _iqSearchIndex = WebConfigurationManager.AppSettings["iq-search-index"];
                 if (string.IsNullOrEmpty(uri))
                 {
                     IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
@@ -71,10 +80,19 @@ namespace Sdl.Web.Tridion.PCAClient
                 }
 
                 _oauth = new OAuth(DiscoveryServiceProvider.DefaultTokenProvider);
-                Log.Debug($"PCAClient found at URL '{_endpoint}'.");
+                Log.Debug($"PCAClient found at URL '{_endpoint}' with claim forwarding = {_claimForwarding}");
                 Log.Info(_iqEndpoint == null
                     ? "Unable to retrieve endpoint for IQ Search Service."
                     : $"IQSearch found at URL '{_iqEndpoint}'.");
+                if (!string.IsNullOrEmpty(_iqSearchIndex))
+                {
+                    Log.Info($"IQ Search Index = {_iqSearchIndex}");
+                }
+                else
+                {
+                    Log.Warn(
+                        "No IQ Search Index configured, using default udp-index. Please add the appSetting iq-search-index and set to your search index name.");
+                }
             }
             catch (Exception ex)
             {
@@ -89,47 +107,70 @@ namespace Sdl.Web.Tridion.PCAClient
         /// </summary>
         /// <typeparam name="TSearchResultSet">Type used for result set</typeparam>
         /// <typeparam name="TSearchResult">Type ised for result</typeparam>
+        /// <returns>IQ Search Client</returns>
+        public IqSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>()
+            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IqSearchClient<TSearchResultSet, TSearchResult>(_iqEndpoint, _oauth, _iqSearchIndex);
+
+        /// <summary>
+        /// Returns a fully constructed IQ Search client
+        /// </summary>
+        /// <typeparam name="TSearchResultSet">Type used for result set</typeparam>
+        /// <typeparam name="TSearchResult">Type ised for result</typeparam>
+        /// <param name="searchIndex">Search Index</param>
+        /// <returns>IQ Search Client</returns>
+        public IqSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>(string searchIndex)
+            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IqSearchClient<TSearchResultSet, TSearchResult>(_iqEndpoint, _oauth, searchIndex);
+
+        /// <summary>
+        /// Returns a fully constructed IQ Search client
+        /// </summary>
+        /// <typeparam name="TSearchResultSet">Type used for result set</typeparam>
+        /// <typeparam name="TSearchResult">Type ised for result</typeparam>
+        /// <param name="endpoint">IQ Search endpoint</param>
+        /// <param name="searchIndex">Search Index</param>
         /// <returns></returns>
-        public IQSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>()
-            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IQSearchClient<TSearchResultSet, TSearchResult>(_iqEndpoint, _oauth);
+        public IqSearchClient<TSearchResultSet, TSearchResult> CreateSearchClient<TSearchResultSet, TSearchResult>(Uri endpoint, string searchIndex)
+            where TSearchResultSet : IQueryResultData<TSearchResult> where TSearchResult : IQueryResult => new IqSearchClient<TSearchResultSet, TSearchResult>(endpoint, _oauth, searchIndex);
 
         /// <summary>
         /// Return a fully constructed Public Content Api client
         /// </summary>
         /// <returns>Public Content Api Client</returns>
-        public PublicContentApi.PublicContentApi CreateClient()
+        public Sdl.Tridion.Api.Client.ApiClient CreateClient()
         {
-            var graphQL = new GraphQLClient.GraphQLClient(_endpoint, new Logger(), _oauth);
-            var client = new PublicContentApi.PublicContentApi(graphQL, new Logger());
-
+            var graphQl = new GraphQLClient(_endpoint, new Logger(), _oauth);
+            var client = new Sdl.Tridion.Api.Client.ApiClient(graphQl, new Logger())
+            {
+                DefaultModelType = DataModelType.R2
+            };
+            // just make sure our requests come back as R2 json
             // add context data to client
-            IClaimStore claimStore = AmbientDataContext.CurrentClaimStore;
+            var claimStore = AmbientDataContext.CurrentClaimStore;
             if (claimStore == null)
             {
                 Log.Warn("No claimstore found so unable to populate claims for PCA.");
             }
             
-            Dictionary<string, string[]> headers =
-                claimStore?.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
+            var headers = claimStore?.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
             if (headers != null && headers.ContainsKey(PreviewSessionTokenHeader))
             {
                 client.HttpClient.Headers[PreviewSessionTokenHeader] = headers[PreviewSessionTokenHeader];
             }
 
-            Dictionary<string, string> cookies =
-                 claimStore?.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
+            var cookies = claimStore?.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
             if (cookies != null && cookies.ContainsKey(PreviewSessionTokenCookie))
             {
                 client.HttpClient.Headers[PreviewSessionTokenHeader] = cookies[PreviewSessionTokenCookie];              
             }
-
+           
+            if (!_claimForwarding) return client;
             // Forward all claims
             var forwardedClaimValues = AmbientDataContext.ForwardedClaims;
             if (forwardedClaimValues == null || forwardedClaimValues.Count <= 0) return client;
-            Dictionary<Uri, object> forwardedClaims =
+            var forwardedClaims =
                 forwardedClaimValues.Select(claim => new Uri(claim, UriKind.RelativeOrAbsolute))
                     .Distinct()
-                    .Where(uri => claimStore.Contains(uri) && claimStore.Get<object>(uri) != null)
+                    .Where(uri => claimStore.Contains(uri) && claimStore.Get<object>(uri) != null && !uri.ToString().Equals("taf:session:preview:preview_session"))
                     .ToDictionary(uri => uri, uri => claimStore.Get<object>(uri));
 
             if (forwardedClaims.Count <= 0) return client;

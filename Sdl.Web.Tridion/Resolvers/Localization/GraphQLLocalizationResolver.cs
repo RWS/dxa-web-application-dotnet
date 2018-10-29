@@ -1,10 +1,10 @@
 ﻿using System;
+using Sdl.Tridion.Api.Client.ContentModel;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.PublicContentApi.ContentModel;
-using Sdl.Web.Tridion.PCAClient;
+using Sdl.Web.Tridion.ApiClient;
 
 namespace Sdl.Web.Tridion
 {
@@ -32,10 +32,10 @@ namespace Sdl.Web.Tridion
                 }
 
                 // NOTE: we're not using UrlToLocalizationMapping here, because we may match too eagerly on a base URL when there is a matching mapping with a more specific URL.
-                PublicationMapping mapping = PCAClientFactory.Instance.CreateClient().GetPublicationMapping(
-                        ContentNamespace.Sites,
-                        urlLeftPart);
-
+                PublicationMapping mapping = SiteConfiguration.CacheProvider.GetOrAdd($"{urlLeftPart}", CacheRegions.PublicationMapping, () => ApiClientFactory.Instance.CreateClient().GetPublicationMapping(
+                    ContentNamespace.Sites,
+                    urlLeftPart));
+               
                 if (mapping == null || mapping.Port != url.Port.ToString()) // See CRQ-1195
                 {
                     throw new DxaUnknownLocalizationException($"No matching Localization found for URL '{urlLeftPart}'");

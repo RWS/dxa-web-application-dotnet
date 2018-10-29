@@ -17,6 +17,7 @@ namespace Sdl.Web.Common.Models
         private static readonly IDictionary<MvcData, Type> _viewToModelTypeMapping = new Dictionary<MvcData, Type>();
         private static readonly IDictionary<Type, SemanticInfo> _modelTypeToSemanticInfoMapping = new Dictionary<Type, SemanticInfo>();
         private static readonly IDictionary<string, ISet<Type>> _semanticTypeToModelTypesMapping = new Dictionary<string, ISet<Type>>();
+        private static readonly IDictionary<string, IList<Tuple<string, Type>>> _vocabularyToModelTypesMapping = new Dictionary<string, IList<Tuple<string, Type>>>();
 
         private class SemanticInfo
         {
@@ -164,6 +165,18 @@ namespace Sdl.Web.Common.Models
         }
 
         /// <summary>
+        /// Gets all registered Model Types (and associated Semantic Entity names) for a given Vocabulary ID.
+        /// </summary>
+        /// <param name="vocabularyId">The vocabulary ID.</param>
+        /// <returns>A set of Entity Name / Model Type tuples or <c>null</c> if no types were registered for the given vocabulary.</returns>
+        public static IEnumerable<Tuple<string, Type>> GetModelTypesForVocabulary(string vocabularyId)
+        {
+            IList<Tuple<string, Type>> result;
+            _vocabularyToModelTypesMapping.TryGetValue(vocabularyId, out result);
+            return result;
+        }
+
+        /// <summary>
         /// Gets a mapping from property names to associated Semantic Properties for a given Model Type.
         /// </summary>
         /// <param name="modelType">The Model Type.</param>
@@ -187,6 +200,18 @@ namespace Sdl.Web.Common.Models
                         _semanticTypeToModelTypesMapping.Add(semanticTypeName, mappedModelTypes);
                     }
                     mappedModelTypes.Add(modelType);
+
+                    int entityNameSeparatorPos = semanticTypeName.LastIndexOf(':');
+                    string vocabularyId = semanticTypeName.Substring(0, entityNameSeparatorPos);
+                    string entityName = semanticTypeName.Substring(entityNameSeparatorPos + 1);
+
+                    IList<Tuple<string, Type>> entityNameModelTypeTuples;
+                    if (!_vocabularyToModelTypesMapping.TryGetValue(vocabularyId, out entityNameModelTypeTuples))
+                    {
+                        entityNameModelTypeTuples = new List<Tuple<string, Type>>();
+                        _vocabularyToModelTypesMapping.Add(vocabularyId, entityNameModelTypeTuples);
+                    }
+                    entityNameModelTypeTuples.Add(new Tuple<string, Type>(entityName, modelType));
                 }
 
                 if (Log.IsDebugEnabled)
@@ -326,10 +351,10 @@ namespace Sdl.Web.Common.Models
 
                         case SemanticProperty.Self:
                             Type elementType = GetElementType(propertyInfo.PropertyType);
-                            if (!typeof(MediaItem).IsAssignableFrom(elementType) && !typeof(Link).IsAssignableFrom(elementType) && (elementType != typeof(string)))
+                            if (!typeof(MediaItem).IsAssignableFrom(elementType) && !typeof(Link).IsAssignableFrom(elementType) && (elementType != typeof(string)) && (elementType != typeof(RichText)))
                             {
                                 throw new DxaException(
-                                    $"Invalid semantics for property {modelType.Name}.{propertyInfo.Name}. Properties with [SemanticProperty(\"_self\")] annotation must be of type MediaItem, Link or String.");
+                                    $"Invalid semantics for property {modelType.Name}.{propertyInfo.Name}. Properties with [SemanticProperty(\"_self\")] annotation must be of type MediaItem, Link, String or RichText.");
                             }
                             break;
                     }
