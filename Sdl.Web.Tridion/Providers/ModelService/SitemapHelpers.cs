@@ -151,7 +151,8 @@ namespace Sdl.Web.Tridion.Providers.ModelService
             result.Title = item.Title;
             result.Id = item.Id;
             result.OriginalTitle = item.OriginalTitle;
-            result.Visible = item.Visible.Value;
+            if(item.Visible.HasValue)
+                result.Visible = item.Visible.Value;
             if (item.PublishedDate != null)
             {
                 result.PublishedDate = DateTime.ParseExact(item.PublishedDate, "MM/dd/yyyy HH:mm:ss", null);
