@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Configuration;
+using Newtonsoft.Json;
 using Sdl.Tridion.Api.Client;
 using Sdl.Tridion.Api.Client.ContentModel;
 using Sdl.Tridion.Api.GraphQL.Client;
@@ -45,7 +46,7 @@ namespace Sdl.Web.Tridion.ApiClient
                 string uri = WebConfigurationManager.AppSettings["pca-service-uri"];
                 if (string.IsNullOrEmpty(uri))
                 {
-                    IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
+                    var discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
                     Uri contentServiceUri = discoveryService.ContentServiceUri;
                     if (contentServiceUri == null)
                     {
@@ -71,7 +72,7 @@ namespace Sdl.Web.Tridion.ApiClient
                 _iqSearchIndex = WebConfigurationManager.AppSettings["iq-search-index"];
                 if (string.IsNullOrEmpty(uri))
                 {
-                    IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
+                    var discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
                     _iqEndpoint = discoveryService.IQServiceUri;
                 }
                 else
@@ -140,11 +141,11 @@ namespace Sdl.Web.Tridion.ApiClient
         {
             var graphQl = new GraphQLClient(_endpoint, new Logger(), _oauth);
             var client = new Sdl.Tridion.Api.Client.ApiClient(graphQl, new Logger())
-            {
+            {   // Make sure our requests come back as R2 json
                 DefaultModelType = DataModelType.R2
             };
-            // just make sure our requests come back as R2 json
-            // add context data to client
+           
+            // Add context data to client
             var claimStore = AmbientDataContext.CurrentClaimStore;
             if (claimStore == null)
             {
@@ -163,7 +164,7 @@ namespace Sdl.Web.Tridion.ApiClient
                 client.HttpClient.Headers[PreviewSessionTokenHeader] = cookies[PreviewSessionTokenCookie];              
             }
            
-            if (!_claimForwarding) return client;
+            if (!_claimForwarding || claimStore == null) return client;
             // Forward all claims
             var forwardedClaimValues = AmbientDataContext.ForwardedClaims;
             if (forwardedClaimValues == null || forwardedClaimValues.Count <= 0) return client;
@@ -180,7 +181,7 @@ namespace Sdl.Web.Tridion.ApiClient
                 client.GlobalContextData.ClaimValues.Add(new ClaimValue
                 {
                     Uri = claim.Key.ToString(),
-                    Value = claim.Value.ToString(),
+                    Value = JsonConvert.SerializeObject(claim.Value),
                     Type = ClaimValueType.STRING
                 });
             }
