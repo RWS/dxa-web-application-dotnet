@@ -50,7 +50,7 @@
       <HintPath>..\packages\Unity.5.8.11\lib\net46\CommonServiceLocator.dll</HintPath>
       <Private>True</Private>
     </Reference>
-        <Reference Include="Unity.Abstractions">
+    <Reference Include="Unity.Abstractions">
       <HintPath>..\packages\Unity.5.8.11\lib\net46\Unity.Abstractions.dll</HintPath>
       <Private>True</Private>
     </Reference>
@@ -82,7 +82,6 @@
       <HintPath>..\packages\Unity.5.8.11\lib\net46\Unity.ServiceLocation.dll</HintPath>
       <Private>True</Private>
     </Reference>
-
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.5.28\lib\net45\Moq.dll</HintPath>
     </Reference>
@@ -101,7 +100,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlDeliveryVersion)\lib\net462\Sdl.Web.Delivery.Model.dll</HintPath>
     </Reference>
-     <Reference Include="Sdl.Tridion.Api.Client">
+    <Reference Include="Sdl.Tridion.Api.Client">
       <HintPath>..\packages\Sdl.Tridion.Api.Client.$(SdlPCAPackageVersion)\lib\net462\Sdl.Tridion.Api.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -144,6 +143,7 @@
     <Compile Include="Models\Entity\Tsi1758TestEntity.cs" />
     <Compile Include="Models\Entity\CompLinkTest.cs" />
     <Compile Include="Models\Entity\Tsi2316TestEntity.cs" />
+    <Compile Include="Models\Entity\Tsi3010TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi811TestEntity.cs" />
     <Compile Include="Models\Page\Tsi2285PageModel.cs" />
     <Compile Include="Models\Page\Tsi811PageModel.cs" />
