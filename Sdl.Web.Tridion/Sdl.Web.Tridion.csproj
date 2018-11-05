@@ -48,6 +48,7 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ApiClient\GlobalClaimManager.cs" />
     <Compile Include="Mapping\StronglyTypedTopicBuilder.cs" />
     <Compile Include="ApiClient\Extensions.cs" />
     <Compile Include="Providers\ModelService\SitemapHelpers.cs" />
