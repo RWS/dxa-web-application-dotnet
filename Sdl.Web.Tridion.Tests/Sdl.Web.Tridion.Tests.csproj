@@ -146,6 +146,7 @@
     <Compile Include="Models\Entity\Tsi2844TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi3010TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi811TestEntity.cs" />
+    <Compile Include="Models\Page\Tsi2844PageModel.cs" />
     <Compile Include="Models\Page\Tsi2285PageModel.cs" />
     <Compile Include="Models\Page\Tsi811PageModel.cs" />
     <Compile Include="ContentProviderTest.cs" />

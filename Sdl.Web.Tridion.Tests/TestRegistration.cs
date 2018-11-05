@@ -52,6 +52,7 @@ namespace Sdl.Web.Tridion.Tests
             RegisterViewModel("Test:SimpleTestPage", typeof(PageModel));
             RegisterViewModel("Test:TSI811TestPage", typeof(Tsi811PageModel));
             RegisterViewModel("Test:TSI2285TestPage", typeof(Tsi2285PageModel));
+            RegisterViewModel("Test:TSI2844Page", typeof(Tsi2844PageModel));
 
             // Region Views
             RegisterViewModel("2-Column", typeof(RegionModel));
