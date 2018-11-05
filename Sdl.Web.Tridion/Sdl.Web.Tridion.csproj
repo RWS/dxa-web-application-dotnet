@@ -13,7 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SdlDxaDataModelPackageVersion>2.1.0-beta-201810171524</SdlDxaDataModelPackageVersion>
-    <SdlPCAPackageVersion>2.1.0-beta-201810291030</SdlPCAPackageVersion>
+    <SdlPCAPackageVersion>2.1.0-beta-201810301130</SdlPCAPackageVersion>
     <SdlWebDeliveryPackageVersion>11.0.0</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>11.0.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>11.0.0</SdlWebContextImagePackageVersion>
@@ -48,6 +48,7 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ApiClient\GlobalClaimManager.cs" />
     <Compile Include="Mapping\StronglyTypedTopicBuilder.cs" />
     <Compile Include="ApiClient\Extensions.cs" />
     <Compile Include="Providers\ModelService\SitemapHelpers.cs" />

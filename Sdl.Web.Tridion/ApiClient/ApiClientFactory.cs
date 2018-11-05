@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Configuration;
+using Newtonsoft.Json;
 using Sdl.Tridion.Api.Client;
 using Sdl.Tridion.Api.Client.ContentModel;
 using Sdl.Tridion.Api.GraphQL.Client;
@@ -13,7 +15,7 @@ using Sdl.Web.Delivery.ServicesCore.ClaimStore;
 using Sdl.Tridion.Api.IqQuery.Client;
 
 namespace Sdl.Web.Tridion.ApiClient
-{
+{   
     /// <summary>
     /// Api Client Factory creates clients with context claim forwarding and
     /// OAuthentication for using the GraphQL Api.
@@ -28,11 +30,13 @@ namespace Sdl.Web.Tridion.ApiClient
         private const string PreviewSessionTokenHeader = "x-preview-session-token";
         private const string PreviewSessionTokenCookie = "preview-session-token";
 
+        private readonly ConcurrentDictionary<string, ClaimValue> _globalClaimValues = new ConcurrentDictionary<string, ClaimValue>();
+
         private static readonly Lazy<ApiClientFactory> lazy =
             new Lazy<ApiClientFactory>(() => new ApiClientFactory());
 
-        public static ApiClientFactory Instance => lazy.Value;
-        
+        public static ApiClientFactory Instance => lazy.Value;       
+
         private ApiClientFactory()
         {
             try
@@ -45,7 +49,7 @@ namespace Sdl.Web.Tridion.ApiClient
                 string uri = WebConfigurationManager.AppSettings["pca-service-uri"];
                 if (string.IsNullOrEmpty(uri))
                 {
-                    IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
+                    var discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
                     Uri contentServiceUri = discoveryService.ContentServiceUri;
                     if (contentServiceUri == null)
                     {
@@ -71,7 +75,7 @@ namespace Sdl.Web.Tridion.ApiClient
                 _iqSearchIndex = WebConfigurationManager.AppSettings["iq-search-index"];
                 if (string.IsNullOrEmpty(uri))
                 {
-                    IDiscoveryService discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
+                    var discoveryService = DiscoveryServiceProvider.Instance.ServiceClient;
                     _iqEndpoint = discoveryService.IQServiceUri;
                 }
                 else
@@ -100,6 +104,27 @@ namespace Sdl.Web.Tridion.ApiClient
                 Log.Error(ex, error);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Add a global claim to send to client
+        /// </summary>
+        /// <param name="claim">Claim to send</param>
+        public void AddGlobalClaim(ClaimValue claim)
+        {
+            if (claim == null) return;
+            _globalClaimValues.AddOrUpdate(claim.Uri, claim, (s, value) => value);
+        }
+
+        /// <summary>
+        /// Remove global claim from client
+        /// </summary>
+        /// <param name="claim">Claim to remove</param>
+        public void RemoveGlobalClaim(ClaimValue claim)
+        {
+            if (claim == null) return;
+            ClaimValue removed;
+            _globalClaimValues.TryRemove(claim.Uri, out removed);
         }
 
         /// <summary>
@@ -140,30 +165,48 @@ namespace Sdl.Web.Tridion.ApiClient
         {
             var graphQl = new GraphQLClient(_endpoint, new Logger(), _oauth);
             var client = new Sdl.Tridion.Api.Client.ApiClient(graphQl, new Logger())
-            {
+            {   // Make sure our requests come back as R2 json
                 DefaultModelType = DataModelType.R2
             };
-            // just make sure our requests come back as R2 json
-            // add context data to client
+           
+            // Add context data to client
             var claimStore = AmbientDataContext.CurrentClaimStore;
             if (claimStore == null)
             {
-                Log.Warn("No claimstore found so unable to populate claims for PCA.");
+                Log.Warn("No claimstore found (is the ADF module configured in the Web.Config?) so unable to populate claims for PCA.");
             }
             
             var headers = claimStore?.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
             if (headers != null && headers.ContainsKey(PreviewSessionTokenHeader))
             {
+                Log.Debug($"Adding {PreviewSessionTokenHeader} to client.");
                 client.HttpClient.Headers[PreviewSessionTokenHeader] = headers[PreviewSessionTokenHeader];
             }
 
             var cookies = claimStore?.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
             if (cookies != null && cookies.ContainsKey(PreviewSessionTokenCookie))
             {
+                Log.Debug($"Adding {PreviewSessionTokenCookie} to client.");
                 client.HttpClient.Headers[PreviewSessionTokenHeader] = cookies[PreviewSessionTokenCookie];              
             }
-           
-            if (!_claimForwarding) return client;
+            
+            foreach (var claim in _globalClaimValues)
+            {
+                Log.Debug($"Forwarding on global claim {claim.Key} with value {claim.Value}");
+                client.GlobalContextData.ClaimValues.Add(claim.Value);
+            }
+
+            if (!_claimForwarding)
+            {
+                Log.Info("Claim forwarding from the claimstore has been disabled. Set pca-claim-forwarding to true in your appSettings to allow forwarding.");
+                return client;
+            }
+
+            if (claimStore == null)
+            {
+                Log.Info("The claimstore is not avaialble so no claim forwarding from claimstore will be performed. Make sure the ADF module is configured in the Web.Config to enable this option.");
+                return client;
+            }
             // Forward all claims
             var forwardedClaimValues = AmbientDataContext.ForwardedClaims;
             if (forwardedClaimValues == null || forwardedClaimValues.Count <= 0) return client;
@@ -173,14 +216,19 @@ namespace Sdl.Web.Tridion.ApiClient
                     .Where(uri => claimStore.Contains(uri) && claimStore.Get<object>(uri) != null && !uri.ToString().Equals("taf:session:preview:preview_session"))
                     .ToDictionary(uri => uri, uri => claimStore.Get<object>(uri));
 
-            if (forwardedClaims.Count <= 0) return client;
+            if (forwardedClaims.Count <= 0)
+            {
+                Log.Debug("No claims from claimstore to forward.");
+                return client;
+            }
 
             foreach (var claim in forwardedClaims)
             {
+                Log.Debug($"Forwarding claim {claim.Key} from claimstore to PCA client.");
                 client.GlobalContextData.ClaimValues.Add(new ClaimValue
                 {
                     Uri = claim.Key.ToString(),
-                    Value = claim.Value.ToString(),
+                    Value = JsonConvert.SerializeObject(claim.Value),
                     Type = ClaimValueType.STRING
                 });
             }

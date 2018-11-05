@@ -5,6 +5,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Tests.Models;
 using Sdl.Web.DataModel;
+using Sdl.Web.DataModel.Extension;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -91,6 +92,69 @@ namespace Sdl.Web.Tridion.Tests
             Tsi1757TestEntity2 testEntity2 = testEntity3.CompLinkField[1] as Tsi1757TestEntity2;
             Assert.IsNotNull(testEntity2, "testEntity2");
             Assert.AreEqual("This is the textField of TSI-1757 Test Component 2", testEntity2.TextField, "testEntity2.TextField");
+        }
+
+
+        [TestMethod]
+        public void GetPageModel_WithTargetGroupConditions_Success() // See TSI-2844, TSI-3010, TSI-3637
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi3010PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Tsi3010TestEntity testEntity = pageModel.Regions["Main"].Entities[0] as Tsi3010TestEntity;
+
+            Assert.IsNotNull(testEntity, "testEntity");
+            Assert.IsNotNull(testEntity.ExtensionData, "testEntity.ExtensionData");
+            Condition[] conditions = testEntity.ExtensionData["TargetGroupConditions"] as Condition[];
+            Assert.IsNotNull(conditions, "conditions");
+            Assert.AreEqual(3, conditions.Length, "conditions.Count");
+
+            CustomerCharacteristicCondition ccCondition = conditions.OfType<CustomerCharacteristicCondition>().FirstOrDefault();
+            Assert.IsNotNull(ccCondition, "ccCondition");
+            Assert.AreEqual("Browser", ccCondition.Name, "ccCondition.Name");
+            Assert.AreEqual("Chrome", ccCondition.Value, "ccCondition.Value");
+            Assert.AreEqual(ConditionOperator.StringEquals, ccCondition.Operator, "ccCondition.Operator");
+            Assert.AreEqual(false, ccCondition.Negate, "ccCondition.Negate");
+
+            TrackingKeyCondition tkCondition = conditions.OfType<TrackingKeyCondition>().FirstOrDefault();
+            Assert.IsNotNull(tkCondition, "tkCondition");
+            Assert.AreEqual("Top-level Keyword 1", tkCondition.TrackingKeyTitle, "tkCondition.TrackingKeyTitle");
+            Assert.AreEqual(3.0, tkCondition.Value, "tkCondition.Value");
+            Assert.AreEqual(ConditionOperator.Equals, tkCondition.Operator, "tkCondition.Operator");
+            Assert.AreEqual(true, tkCondition.Negate, "tkCondition.Negate");
+
+            TargetGroupCondition tgCondition = conditions.OfType<TargetGroupCondition>().FirstOrDefault();
+            Assert.IsNotNull(tgCondition, "tgCondition");
+        }
+
+        [TestMethod]
+        public void GetPageModel_WithInheritedMetadata_Success() // See TSI-2844, TSI-3723
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2844PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Tsi2844TestEntity testEntity = pageModel.Regions["Main"].Entities[0] as Tsi2844TestEntity;
+            Assert.IsNotNull(testEntity, "testEntity");
+
+            Assert.AreEqual("Tsi2844 TextValue XPM", testEntity.SingleLineText, "testEntity.SingleLineText"); // From Component Content
+            Assert.AreEqual("Tsi2844 Metadata TextValue JAVA", testEntity.MetadataTextField, "testEntity.MetadataTextField"); // From Component Metadata
+            Assert.AreEqual("TSI-2844 Folder Metadata Text Value", testEntity.FolderMetadataTextField, "testEntity.FolderMetadataTextField"); // From Folder Metadata
+
+            // Traces of the use of Extension Data to convey the Schema IDs of the ancestor Metadata Schemas
+            Assert.IsNotNull(testEntity.ExtensionData, "testEntity.ExtensionData");
+            string[] schemas = testEntity.ExtensionData["Schemas"] as string[];
+            Assert.IsNotNull(schemas, "schemas");
+            Assert.AreEqual(1, schemas.Length, "schemas.Length");
+
+            // TODO: Test metadata inheritance on Page Model itself
         }
 
     }

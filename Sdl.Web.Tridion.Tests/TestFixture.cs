@@ -19,24 +19,6 @@ using Sdl.Web.Tridion.Providers.Binary;
 
 namespace Sdl.Web.Tridion.Tests
 {
-    internal class TestDataModelExtensions : IDataModelExtension
-    {
-        public Type ResolveDataModelType(string assemblyName, string typeName)
-        {
-            // perform type remapping as the type names returned from model-service do not match so we
-            // remap here to correctly deserialize.
-            switch (typeName)
-            {
-                case "TaxonomyNodeModelData":
-                    return typeof(TaxonomyNode);
-                case "SitemapItemModelData":
-                    return typeof(SitemapItem);
-            }
-            // check for any extensions
-            return Type.GetType($"Sdl.Web.DataModel.Extension.{typeName}");
-        }
-    }
-
     internal class TestFixture : ILocalizationResolver
     {
         internal static readonly string HomePageId = "277"; // /autotest-parent homepage Id
@@ -69,6 +51,8 @@ namespace Sdl.Web.Tridion.Tests
         internal const string Tsi2285PageRelativeUrlPath = "regression/tsi-2285";
         internal const string Tsi2287PageRelativeUrlPath = "system/include/header";
         internal const string Tsi2316PageRelativeUrlPath = "regression/tsi-2316";
+        internal const string Tsi2844PageRelativeUrlPath = "regression/tsi-2844";
+        internal const string Tsi3010PageRelativeUrlPath = "regression/tsi-3010";
 
         private static readonly IEnumerable<ILocalization> _testLocalizations;
         private static readonly ILocalization _parentLocalization;
@@ -212,10 +196,11 @@ namespace Sdl.Web.Tridion.Tests
 
         internal static void InitializeProviders()
         {
-            object modelServiceProvider;
-            if (_testProviders.TryGetValue(typeof(IModelServiceProvider), out modelServiceProvider))
+            object msProvider;
+            if (_testProviders.TryGetValue(typeof(IModelServiceProvider), out msProvider))
             {
-                ((IModelServiceProvider)modelServiceProvider).AddDataModelExtension(new TestDataModelExtensions());
+                IModelServiceProvider modelServiceProvider = (IModelServiceProvider)msProvider;
+                modelServiceProvider.AddDataModelExtension(new DefaultModelBuilder());
             }
 
             SiteConfiguration.InitializeProviders(interfaceType =>
