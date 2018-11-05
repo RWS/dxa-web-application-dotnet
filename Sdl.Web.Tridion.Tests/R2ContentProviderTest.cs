@@ -131,5 +131,31 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(tgCondition, "tgCondition");
         }
 
+        [TestMethod]
+        public void GetPageModel_WithInheritedMetadata_Success() // See TSI-2844, TSI-3723
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2844PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Tsi2844TestEntity testEntity = pageModel.Regions["Main"].Entities[0] as Tsi2844TestEntity;
+            Assert.IsNotNull(testEntity, "testEntity");
+
+            Assert.AreEqual("Tsi2844 TextValue XPM", testEntity.SingleLineText, "testEntity.SingleLineText"); // From Component Content
+            Assert.AreEqual("Tsi2844 Metadata TextValue JAVA", testEntity.MetadataTextField, "testEntity.MetadataTextField"); // From Component Metadata
+            Assert.AreEqual("TSI-2844 Folder Metadata Text Value", testEntity.FolderMetadataTextField, "testEntity.FolderMetadataTextField"); // From Folder Metadata
+
+            // Traces of the use of Extension Data to convey the Schema IDs of the ancestor Metadata Schemas
+            Assert.IsNotNull(testEntity.ExtensionData, "testEntity.ExtensionData");
+            string[] schemas = testEntity.ExtensionData["Schemas"] as string[];
+            Assert.IsNotNull(schemas, "schemas");
+            Assert.AreEqual(1, schemas.Length, "schemas.Length");
+
+            // TODO: Test metadata inheritance on Page Model itself
+        }
+
     }
 }
