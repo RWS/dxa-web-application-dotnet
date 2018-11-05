@@ -82,31 +82,38 @@ namespace Sdl.Web.Tridion.Mapping
                         XpmMetadata = localization.IsXpmEnabled ? pageModelData.XpmMetadata : null,
                     };
                 }
-                else if (pageModelData.SchemaId == null)
+                else 
                 {
-                    // Custom Page Model, but no custom metadata.
-                    pageModel = (PageModel) modelType.CreateInstance(pageModelData.Id);
-                    pageModel.ExtensionData = pageModelData.ExtensionData;
-                    pageModel.HtmlClasses = pageModelData.HtmlClasses;
-                    pageModel.XpmMetadata = localization.IsXpmEnabled ? pageModelData.XpmMetadata : null;
-                }
-                else
-                {
-                    // Custom Page Model with custom metadata; do full-blown model mapping.
-                    MappingData mappingData = new MappingData
+                    // Custom Page Model
+                    List<SemanticSchema> inheritedSemanticSchemas = GetInheritedSemanticSchemas(pageModelData, localization);
+                    SemanticSchema mainSemanticSchema = (pageModelData.SchemaId != null) ? SemanticMapping.GetSchema(pageModelData.SchemaId, localization) : inheritedSemanticSchemas.FirstOrDefault();
+
+                    if (mainSemanticSchema == null)
                     {
-                        SourceViewModel = pageModelData,
-                        ModelId = pageModelData.Id,
-                        ModelType = modelType,
-                        PropertyValidation = new Validation
+                        // Custom Page Model, but no custom metadata.
+                        pageModel = (PageModel)modelType.CreateInstance(pageModelData.Id);
+                        pageModel.ExtensionData = pageModelData.ExtensionData;
+                        pageModel.HtmlClasses = pageModelData.HtmlClasses;
+                        pageModel.XpmMetadata = localization.IsXpmEnabled ? pageModelData.XpmMetadata : null;
+                    }
+                    else
+                    {
+                        // Custom Page Model with custom metadata; do full-blown model mapping.
+                        MappingData mappingData = new MappingData
                         {
-                            MainSchema = SemanticMapping.GetSchema(pageModelData.SchemaId, localization),
-                            InheritedSchemas = GetInheritedSemanticSchemas(pageModelData, localization)
-                        },
-                        MetadataFields = pageModelData.Metadata,
-                        Localization = localization
-                    };
-                    pageModel = (PageModel) CreateViewModel(mappingData);
+                            SourceViewModel = pageModelData,
+                            ModelId = pageModelData.Id,
+                            ModelType = modelType,
+                            PropertyValidation = new Validation
+                            {
+                                MainSchema = mainSemanticSchema,
+                                InheritedSchemas = inheritedSemanticSchemas
+                            },
+                            MetadataFields = pageModelData.Metadata,
+                            Localization = localization
+                        };
+                        pageModel = (PageModel)CreateViewModel(mappingData);
+                    }
                 }
 
                 pageModel.MvcData = mvcData;
