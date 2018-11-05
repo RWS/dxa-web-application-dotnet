@@ -51,6 +51,7 @@ namespace Sdl.Web.Tridion.Tests
         internal const string Tsi2285PageRelativeUrlPath = "regression/tsi-2285";
         internal const string Tsi2287PageRelativeUrlPath = "system/include/header";
         internal const string Tsi2316PageRelativeUrlPath = "regression/tsi-2316";
+        internal const string Tsi2844PageRelativeUrlPath = "regression/tsi-2844";
         internal const string Tsi3010PageRelativeUrlPath = "regression/tsi-3010";
 
         private static readonly IEnumerable<ILocalization> _testLocalizations;
