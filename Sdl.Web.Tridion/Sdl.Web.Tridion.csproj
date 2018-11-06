@@ -204,7 +204,6 @@
     <Compile Include="ContentManager\CmUri.cs" />
     <Compile Include="Providers\Context\ContextServiceClaimsProvider.cs" />
     <Compile Include="Providers\GraphQLContentProvider.cs" />
-    <Compile Include="Providers\ModelService\ModelService.cs" />
     <Compile Include="Providers\Query\BrokerQueryProvider.cs" />
     <Compile Include="Providers\Query\GraphQLQueryProvider.cs" />
     <Compile Include="Resolvers\Linking\GraphQLLinkResolver.cs" />
