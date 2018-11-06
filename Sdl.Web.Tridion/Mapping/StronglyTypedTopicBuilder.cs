@@ -8,7 +8,6 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
 using Sdl.Web.Common;
-using Sdl.Web.Common.Models.Entity;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Mapping;

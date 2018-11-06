@@ -16,7 +16,7 @@ using Sdl.Web.Mvc.Html;
 using Unity;
 using Unity.Mvc5;
 using Unity.ServiceLocation;
-using Sdl.Web.Common.Models.Entity;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Site
 {

@@ -2,7 +2,6 @@
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Tests.Models;
 using Sdl.Web.Tridion.Tests.Models.Topic;
-using Sdl.Web.Common.Models.Entity;
 
 namespace Sdl.Web.Tridion.Tests
 {
