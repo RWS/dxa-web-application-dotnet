@@ -1,7 +1,6 @@
 ﻿using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Mapping;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sdl.Web.Common.Models.Entity;
 using Sdl.Web.Common;
 using Sdl.Web.Tridion.Tests.Models.Topic;
 using Sdl.Web.Tridion.Tests.Models;
