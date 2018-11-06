@@ -173,7 +173,7 @@ namespace Sdl.Web.Tridion.ApiClient
             var claimStore = AmbientDataContext.CurrentClaimStore;
             if (claimStore == null)
             {
-                Log.Warn("No claimstore found (is the ADF module configured in the Web.Config?) so unable to populate claims for PCA.");
+                Log.Debug("No claimstore found (is the ADF module configured in the Web.Config?) so unable to populate claims for PCA.");
             }
             
             var headers = claimStore?.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
@@ -198,13 +198,13 @@ namespace Sdl.Web.Tridion.ApiClient
 
             if (!_claimForwarding)
             {
-                Log.Info("Claim forwarding from the claimstore has been disabled. Set pca-claim-forwarding to true in your appSettings to allow forwarding.");
+                Log.Debug("Claim forwarding from the claimstore has been disabled. Set pca-claim-forwarding to true in your appSettings to allow forwarding.");
                 return client;
             }
 
             if (claimStore == null)
             {
-                Log.Info("The claimstore is not avaialble so no claim forwarding from claimstore will be performed. Make sure the ADF module is configured in the Web.Config to enable this option.");
+                Log.Debug("The claimstore is not available so no claim forwarding from claimstore will be performed. Make sure the ADF module is configured in the Web.Config to enable this option.");
                 return client;
             }
             // Forward all claims
