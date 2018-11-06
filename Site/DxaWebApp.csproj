@@ -29,7 +29,7 @@
     <SdlWebContextClientPackageVersion>11.0.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>11.0.0</SdlWebContextImagePackageVersion>
     <SdlWebDataModelPackageVersion>2.1.0</SdlWebDataModelPackageVersion>
-    <DxaFrameworkPackageVersion>2.1.0-beta-201810171545</DxaFrameworkPackageVersion>
+    <DxaFrameworkPackageVersion>2.1.0</DxaFrameworkPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
