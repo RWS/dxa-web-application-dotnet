@@ -7,6 +7,9 @@ using Sdl.Web.Delivery.Service;
 
 namespace Sdl.Web.Tridion.ApiClient
 {
+    /// <summary>
+    /// OAuth provider
+    /// </summary>
     public class OAuth : IAuthentication
     {
         private readonly IOAuthTokenProvider _tokenProvider;
