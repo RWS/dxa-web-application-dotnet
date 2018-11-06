@@ -163,7 +163,7 @@ namespace Sdl.Web.Tridion.Mapping
             };
         }
 
-        string IRawDataProvider.GetPageContent(string urlPath, ILocalization localization)
+        public virtual string GetPageContent(string urlPath, ILocalization localization)
         {
             // TODO: let the DXA Model Service provide raw Page Content too (?)
             using (new Tracer(urlPath, localization))

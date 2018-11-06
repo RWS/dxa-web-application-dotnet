@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Web;
 using Newtonsoft.Json;
 using Sdl.Tridion.Api.Client;
@@ -14,14 +12,13 @@ using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
 using Sdl.Web.Tridion.ApiClient;
 using Sdl.Web.Tridion.Providers.Query;
-using Sdl.Web.Tridion.Statics;
 
 namespace Sdl.Web.Tridion.Mapping
 {
     /// <summary>
     /// GraphQL Content Provider implementation (based on Public Content Api).
     /// </summary>
-    public class GraphQLContentProvider : IContentProvider, IRawDataProvider
+    public class GraphQLContentProvider : DefaultContentProvider
     {
         #region Cursor Indexing
         internal class CursorIndexer
@@ -86,95 +83,13 @@ namespace Sdl.Web.Tridion.Mapping
             }
         }       
         #endregion
-
-        private readonly IModelService _modelService;
-
-        public GraphQLContentProvider()
-        {
-            _modelService = new Providers.ModelService.ModelService();
-            ModelBuilderPipeline.Init();
-        }
-
-        /// <summary>
-        /// Gets a Page Model for a given URL path.
-        /// </summary>
-        /// <param name="urlPath">The URL path (unescaped).</param>
-        /// <param name="localization">The context <see cref="ILocalization"/>.</param>
-        /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
-        /// <returns>The Page Model.</returns>
-        /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given URL.</exception>
-        public virtual PageModel GetPageModel(string urlPath, ILocalization localization, bool addIncludes = true)
-            => _modelService.GetPageModel(urlPath, localization, addIncludes);
-
-        /// <summary>
-        /// Gets a Page Model for a given Page Id.
-        /// </summary>
-        /// <param name="pageId">Page Id</param>
-        /// <param name="localization">The context Localization.</param>
-        /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
-        /// <returns>The Page Model.</returns>
-        /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given Id.</exception>
-        public virtual PageModel GetPageModel(int pageId, ILocalization localization, bool addIncludes = true)
-            => _modelService.GetPageModel(pageId, localization, addIncludes);
-
-        /// <summary>
-        /// Gets an Entity Model for a given Entity Identifier.
-        /// </summary>
-        /// <param name="id">The Entity Identifier. Must be in format {ComponentID}-{TemplateID}.</param>
-        /// <param name="localization">The context Localization.</param>
-        /// <returns>The Entity Model.</returns>
-        /// <exception cref="DxaItemNotFoundException">If no Entity Model exists for the given URL.</exception>
-        public virtual EntityModel GetEntityModel(string id, ILocalization localization)
-            => _modelService.GetEntityModel(id, localization);
-
-        /// <summary>
-        /// Gets a Static Content Item for a given URL path.
-        /// </summary>
-        /// <param name="urlPath">The URL path (unescaped).</param>
-        /// <param name="localization">The context Localization.</param>
-        /// <returns>The Static Content Item.</returns>
-        public virtual StaticContentItem GetStaticContentItem(string urlPath, ILocalization localization)
-        {
-            using (new Tracer(urlPath, localization))
-            {
-                string localFilePath = BinaryFileManager.Instance.GetCachedFile(urlPath, localization);
-
-                return new StaticContentItem(
-                    new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan),
-                    MimeMapping.GetMimeMapping(localFilePath),
-                    File.GetLastWriteTime(localFilePath),
-                    Encoding.UTF8
-                    );
-            }
-        }
-
-        /// <summary>
-        /// Gets a Static Content Item for a given Id.
-        /// </summary>
-        /// <param name="binaryId">The Id of the binary.</param>
-        /// <param name="localization">The context Localization.</param>
-        /// <returns>The Static Content Item.</returns>
-        public virtual StaticContentItem GetStaticContentItem(int binaryId, ILocalization localization)
-        {
-            using (new Tracer(binaryId, localization))
-            {
-                string localFilePath = BinaryFileManager.Instance.GetCachedFile(binaryId, localization);
-
-                return new StaticContentItem(
-                    new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan),
-                    MimeMapping.GetMimeMapping(localFilePath),
-                    File.GetLastWriteTime(localFilePath),
-                    Encoding.UTF8
-                    );
-            }
-        }
-
+      
         /// <summary>
         /// Populates a Dynamic List by executing the query it specifies.
         /// </summary>
         /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
         /// <param name="localization">The context Localization.</param>
-        public virtual void PopulateDynamicList(DynamicList dynamicList, ILocalization localization)
+        public override void PopulateDynamicList(DynamicList dynamicList, ILocalization localization)
         {
             using (new Tracer(dynamicList, localization))
             {              
@@ -250,7 +165,7 @@ namespace Sdl.Web.Tridion.Mapping
             };
         }
 
-        string IRawDataProvider.GetPageContent(string urlPath, ILocalization localization)
+        public override string GetPageContent(string urlPath, ILocalization localization)
         {
             using (new Tracer(urlPath, localization))
             {
