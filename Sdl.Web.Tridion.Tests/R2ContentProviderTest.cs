@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Tests.Models;
@@ -9,6 +8,9 @@ using Sdl.Web.DataModel.Extension;
 
 namespace Sdl.Web.Tridion.Tests
 {
+    /// <summary>
+    /// Unit/integration tests for the <see cref="GraphQLContentProvider"/> using R2 Data Model.
+    /// </summary>
     [TestClass]
     public class R2ContentProviderTest : ContentProviderTest
     {
