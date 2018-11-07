@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Tridion.Mapping;
+using Sdl.Web.Tridion.ModelService;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -17,7 +18,7 @@ namespace Sdl.Web.Tridion.Tests
         [ClassInitialize]
         public static void Initialize(TestContext testContext)
         {
-            DefaultInitialize(testContext);
+            DefaultInitialize(testContext, typeof(DefaultModelServiceProvider));
         }
     }
 }

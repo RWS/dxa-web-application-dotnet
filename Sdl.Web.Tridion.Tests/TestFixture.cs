@@ -7,14 +7,11 @@ using Sdl.Tridion.Api.Client.ContentModel;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common.Models;
-using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.Tridion.ApiClient;
 using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Navigation;
 using Sdl.Web.Tridion.Caching;
 using Sdl.Web.Tridion.Mapping;
-using Sdl.Web.Tridion.ModelService;
 using Sdl.Web.Tridion.Providers.Binary;
 
 namespace Sdl.Web.Tridion.Tests
@@ -64,7 +61,6 @@ namespace Sdl.Web.Tridion.Tests
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
             { typeof(ICacheProvider), new DefaultCacheProvider() },
-            { typeof(IModelServiceProvider), new GraphQLModelServiceProvider() },
             { typeof(IContentProvider), new GraphQLContentProvider() },
             { typeof(INavigationProvider), new StaticNavigationProvider() },
             { typeof(ILinkResolver), new GraphQLLinkResolver() },
@@ -195,18 +191,17 @@ namespace Sdl.Web.Tridion.Tests
             }
         }
 
-        internal static void InitializeProviders()
+        internal static void InitializeProviders(Type modelServiceProviderType)
         {
-            object msProvider;
-            if (_testProviders.TryGetValue(typeof(IModelServiceProvider), out msProvider))
-            {
-                IModelServiceProvider modelServiceProvider = (IModelServiceProvider)msProvider;
-                modelServiceProvider.AddDataModelExtension(new DefaultModelBuilder());
-            }
+            IModelServiceProvider modelServiceProvider = 
+                (IModelServiceProvider) Activator.CreateInstance(modelServiceProviderType);
+            modelServiceProvider.AddDataModelExtension(new DefaultModelBuilder());
 
             SiteConfiguration.InitializeProviders(interfaceType =>
             {
                 object provider;
+                if (interfaceType == typeof(IModelServiceProvider))
+                    return modelServiceProvider;
                 _testProviders.TryGetValue(interfaceType, out provider);
                 return provider;
             });

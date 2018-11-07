@@ -7,6 +7,7 @@ using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Delivery.Core;
 using Sdl.Web.Delivery.Model.Meta;
+using Sdl.Web.Tridion.ModelService;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -21,10 +22,12 @@ namespace Sdl.Web.Tridion.Tests
             TypeLoader.FindConcreteType(typeof(IBinaryMeta));
         }
 
-        protected static void DefaultInitialize(TestContext testContext)
+        protected static void DefaultInitialize(TestContext testContext, Type modelServiceProviderType = null)
         {
             Log.Info("==== {0} ====", testContext.FullyQualifiedTestClassName);
-            TestFixture.InitializeProviders();
+            if (modelServiceProviderType == null)
+                modelServiceProviderType = typeof(GraphQLModelServiceProvider);
+            TestFixture.InitializeProviders(modelServiceProviderType);
         }
 
         protected void OutputJson(object objectToSerialize)
