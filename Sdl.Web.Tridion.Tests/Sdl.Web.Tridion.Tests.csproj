@@ -125,6 +125,7 @@
   <ItemGroup>
     <Compile Include="CacheProviderTest.cs" />
     <Compile Include="DefaultContentProviderTest.cs" />
+    <Compile Include="LegacyDynamicNavigationProviderTest.cs" />
     <Compile Include="LocalizationResolverTest.cs" />
     <Compile Include="ContextServiceClaimsProviderTest.cs" />
     <Compile Include="DefaultCacheProviderTest.cs" />
