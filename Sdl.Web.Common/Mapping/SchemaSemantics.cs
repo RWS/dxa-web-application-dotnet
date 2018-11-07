@@ -42,7 +42,7 @@ namespace Sdl.Web.Common.Mapping
         /// </summary>
         /// <param name="vocabOrPrefix">Vocabulary prefix</param>
         /// <param name="entity">Entity name</param>
-        /// <param name="localization">The context Localization (used to determine <see cref="Vocab"/> from <param name="vocabOrPrefix"></param>).</param>
+        /// <param name="localization">The context Localization (used to determine <see cref="Vocab"/> from <paramref name="vocabOrPrefix">).</param>
         public SchemaSemantics(string vocabOrPrefix, string entity, ILocalization localization)
         {
             Entity = entity;

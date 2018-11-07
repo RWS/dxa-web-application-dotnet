@@ -21,8 +21,10 @@ namespace DD4T.Providers.DxaModelService
         public TridionComponentPresentationProvider(IProvidersCommonServices providersCommonServices)
             : base(providersCommonServices)
         {
+#pragma warning disable 618
             _selectByComponentTemplateId = Configuration.SelectComponentByComponentTemplateId;
             _selectByOutputFormat = Configuration.SelectComponentByOutputFormat;
+#pragma warning restore 618
             _cpFactoryList = new Dictionary<int, T.ComponentPresentationFactory>();
             _cmFactoryList = new Dictionary<int,TMeta.ComponentMetaFactory>();
         }

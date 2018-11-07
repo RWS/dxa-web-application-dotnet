@@ -5,19 +5,6 @@ namespace Sdl.Web.Common.Interfaces
     /// <summary>
     /// Interface for Content Provider extension point.
     /// </summary>
-    /// <remarks>
-    /// Although this interface existed in STRI 1.0, it is not compatible in DXA 1.1.
-    /// <list type="bullet">
-    ///     <item><see cref="GetPageModel"/> and <see cref="GetEntityModel"/> now returned strongly typed results (DXA View Models).</item>
-    ///     <item>All methods now have a parameter to explicitly pass in the context <see cref="ILocalization"/>.</item>
-    ///     <item>GetPageContent and GetEntityContent have been removed; these would leak the underlying data representation.</item>
-    ///     <item>GetNavigationModel has been moved to a separate <see cref="INavigationProvider"/> interface.</item>
-    ///     <item><see cref="GetStaticContentItem"/> method has been added.</item>
-    ///     <Item><see cref="ContentResolver"/> property has been deprecated, because <see cref="IContentResolver"/> is deprecated 
-    ///         and the new extension points can be accessed through <see cref="Sdl.Web.Common.Configuration.SiteConfiguration"/>.</Item>
-    ///     <Item><see cref="PopulateDynamicList"/> no longer returns a value; the Content List provided as parameter is populated.</Item>
-    /// </list>
-    /// </remarks>
     public interface IContentProvider
     {
         /// <summary>
