@@ -8,7 +8,6 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
-using Sdl.Web.Tridion.ModelService;
 using Sdl.Web.Tridion.Navigation;
 
 namespace Sdl.Web.Tridion.Tests
@@ -16,7 +15,7 @@ namespace Sdl.Web.Tridion.Tests
     [TestClass]
     public class DynamicNavigationProviderTest : TestClass
     {
-        private static readonly INavigationProvider _testNavigationProvider = new Navigation.ModelServiceImpl.DynamicNavigationProvider();
+        private static readonly INavigationProvider _testNavigationProvider = new DynamicNavigationProvider();
         private static readonly IOnDemandNavigationProvider _testOnDemandNavigationProvider = (IOnDemandNavigationProvider) _testNavigationProvider;
 
         [ClassInitialize]

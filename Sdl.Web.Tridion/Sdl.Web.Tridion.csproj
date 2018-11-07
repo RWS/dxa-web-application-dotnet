@@ -233,8 +233,6 @@
     <Compile Include="Providers\ModelService\DefaultModelServiceProvider.cs" />
     <Compile Include="Providers\ModelService\GraphQLModelServiceProvider.cs" />
     <Compile Include="Providers\Navigation\DynamicNavigationProvider.cs" />
-    <Compile Include="Providers\Navigation\ModelServiceImpl\DynamicNavigationProvider.cs" />
-    <Compile Include="Providers\Navigation\CILImpl\DynamicNavigationProvider.cs" />
     <Compile Include="Providers\Navigation\StaticNavigationProvider.cs" />
     <Compile Include="ApiClient\ApiClientFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
