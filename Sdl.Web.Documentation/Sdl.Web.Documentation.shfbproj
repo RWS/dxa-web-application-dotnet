@@ -56,7 +56,9 @@
       <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Web.Tridion.dll" />
       <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Web.Tridion.xml" />
       <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Web.DataModel.dll" />
-      <DocumentationSource sourceFile="Sdl.Web.DataModel.XML" />
+      <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Web.DataModel.XML" />
+      <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Tridion.Api.Client.dll" />
+      <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Tridion.Api.Client.XML" />
     </DocumentationSources>
     <VisibleItems>InheritedMembers, InheritedFrameworkMembers, EditorBrowsableNever, NonBrowsable</VisibleItems>
     <ProjectSummary>
