@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,11 +11,14 @@ using Sdl.Web.Tridion.Navigation;
 
 namespace Sdl.Web.Tridion.Tests
 {
+    /// <summary>
+    /// Unit/integration tests for the <see cref="DynamicNavigationProvider"/> based on GraphQL Model Service.
+    /// </summary>
     [TestClass]
     public class DynamicNavigationProviderTest : TestClass
     {
-        private static readonly INavigationProvider _testNavigationProvider = new DynamicNavigationProvider();
-        private static readonly IOnDemandNavigationProvider _testOnDemandNavigationProvider = (IOnDemandNavigationProvider) _testNavigationProvider;
+        protected static readonly INavigationProvider _testNavigationProvider = new DynamicNavigationProvider();
+        protected static readonly IOnDemandNavigationProvider _testOnDemandNavigationProvider = (IOnDemandNavigationProvider) _testNavigationProvider;
 
         [ClassInitialize]
         public static void Initialize(TestContext testContext)

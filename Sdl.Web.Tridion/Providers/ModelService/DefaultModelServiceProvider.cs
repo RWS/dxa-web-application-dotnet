@@ -152,7 +152,10 @@ namespace Sdl.Web.Tridion.ModelService
                     PublicationId = int.Parse(localization.Id),
                     Binder = _binder
                 };
-                return _modelServiceClient.PerformRequest<TaxonomyNode>(request).Response;
+
+                TaxonomyNode result = _modelServiceClient.PerformRequest<TaxonomyNode>(request).Response;
+                NullifyEmptyUrl(result);
+                return result;
             }
             catch (ModelServiceException e)
             {
@@ -163,6 +166,20 @@ namespace Sdl.Web.Tridion.ModelService
             catch (ItemNotFoundException)
             {
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// Convert empty URL into a null value for the given <see cref="SitemapItem"/> and its decendants.
+        /// </summary>
+        private void NullifyEmptyUrl(SitemapItem sitemapItem)
+        {
+            if (sitemapItem.Url == string.Empty)
+                sitemapItem.Url = null;
+
+            foreach (SitemapItem childItem in sitemapItem.Items)
+            {
+                NullifyEmptyUrl(childItem);
             }
         }
 
