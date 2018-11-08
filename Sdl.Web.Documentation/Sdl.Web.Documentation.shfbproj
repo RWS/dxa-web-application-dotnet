@@ -49,8 +49,6 @@
     <DocumentationSources>
       <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Web.Common.dll" />
       <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Web.Common.xml" />
-      <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Web.ModelService.dll" />
-      <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Web.ModelService.xml" />
       <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Web.Mvc.dll" />
       <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Web.Mvc.xml" />
       <DocumentationSource sourceFile="..\Sdl.Web.Tridion\bin\$(Configuration)\Sdl.Web.Tridion.dll" />
