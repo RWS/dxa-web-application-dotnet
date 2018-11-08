@@ -42,7 +42,7 @@ The following repositories with source code are available:
  - https://github.com/sdl/dxa-modules - Modules (.NET and Java)
  - https://github.com/sdl/dxa-web-application-dotnet - ASP.NET MVC web application (including framework)
  - https://github.com/sdl/dxa-web-application-java - Java Spring MVC web application (including framework)
-
+ - https://github.com/sdl/graphql-client - GraphQL client (.NET and Java)
 
 Branches and Contributions
 --------------------------
