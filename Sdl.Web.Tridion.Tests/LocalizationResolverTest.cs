@@ -8,16 +8,15 @@ using Sdl.Web.Common.Interfaces;
 namespace Sdl.Web.Tridion.Tests
 {
     [TestClass]
-    public class LocalizationResolverTest : TestClass
+    public abstract class LocalizationResolverTest : TestClass
     {
-        private const string TestBaseUrl = "http://dxatest.ams.dev:98";
+        protected const string TestBaseUrl = "http://dxatest.ams.dev:98";
 
-        private static readonly ILocalizationResolver _testLocalizationResolver = new GraphQLLocalizationResolver();
+        protected readonly ILocalizationResolver _testLocalizationResolver = new GraphQLLocalizationResolver();
 
-        [ClassInitialize]
-        public static void Initialize(TestContext testContext)
+        protected LocalizationResolverTest(ILocalizationResolver testLocalizationResolver)
         {
-            DefaultInitialize(testContext);
+            _testLocalizationResolver = testLocalizationResolver;
         }
 
         [TestMethod]
