@@ -50,7 +50,7 @@ namespace Sdl.Web.Tridion
                     else if (localizationId.StartsWith("tcm:"))
                     {
                         CmUri uri = CmUri.FromString(localizationId);
-                        result = new Localization { Id = uri.PublicationId.ToString() };
+                        result = new Localization { Id = uri.ItemId.ToString() };
                     }
                     else
                     {

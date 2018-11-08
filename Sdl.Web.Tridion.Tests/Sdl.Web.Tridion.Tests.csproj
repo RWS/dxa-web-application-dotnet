@@ -124,7 +124,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CacheProviderTest.cs" />
+    <Compile Include="CdApiLocalizationResolverTest.cs" />
     <Compile Include="DefaultContentProviderTest.cs" />
+    <Compile Include="GraphQLLocalizationResolverTest.cs" />
+    <Compile Include="GraphQLMashupLocalizationResolverTest.cs" />
     <Compile Include="LegacyDynamicNavigationProviderTest.cs" />
     <Compile Include="LocalizationResolverTest.cs" />
     <Compile Include="ContextServiceClaimsProviderTest.cs" />
