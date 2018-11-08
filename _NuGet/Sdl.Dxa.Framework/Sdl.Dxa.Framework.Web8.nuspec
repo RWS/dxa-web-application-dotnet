@@ -33,7 +33,6 @@
         <file src="..\..\Sdl.Web.Tridion\bin\Release\*.dll" exclude="**\Sdl.Web.Delivery*.dll;**\Sdl.Web.Context*.dll;**\Tridion.ContentDelivery*.dll;**\Microsoft.*.dll;**\System.Spatial.dll;**\System.Web*.dll;**\Newtonsoft.Json.dll" target="lib\net462" />
         <file src="Sdl.Dxa.Framework.Web8.targets" target="build\net462" />
         <file src="..\..\Sdl.Web.Tridion\bin\Release\Sdl.Web.Common.xml" target="lib\net462" />
-        <file src="..\..\Sdl.Web.Tridion\bin\Release\Sdl.Web.ModelService.xml" target="lib\net462" />
         <file src="..\..\Sdl.Web.Tridion\bin\Release\Sdl.Web.Mvc.xml" target="lib\net462" />
         <file src="..\..\Sdl.Web.Tridion\bin\Release\Sdl.Web.Tridion.xml" target="lib\net462" />
     </files>
