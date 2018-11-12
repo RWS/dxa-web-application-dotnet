@@ -3,7 +3,6 @@ using Sdl.Web.Mvc.Context;
 using System;
 using System.Web;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Mvc.Configuration
@@ -18,11 +17,11 @@ namespace Sdl.Web.Mvc.Configuration
         /// <summary>
         /// The current request localization
         /// </summary>
-        public static ILocalization Localization
+        public static Localization Localization
         {
             get
             {
-                return (ILocalization)GetFromContextStore("Localization") ?? (ILocalization)AddToContextStore("Localization", GetCurrentLocalization());
+                return (Localization)GetFromContextStore("Localization") ?? (Localization)AddToContextStore("Localization", GetCurrentLocalization());
             }
             set
             {
@@ -161,7 +160,7 @@ namespace Sdl.Web.Mvc.Configuration
             return ScreenWidth.Large;
         }
 
-        protected static ILocalization GetCurrentLocalization() 
+        protected static Localization GetCurrentLocalization() 
             => HttpContext.Current == null ? null : SiteConfiguration.LocalizationResolver.ResolveLocalization(HttpContext.Current.Request.Url);
 
         protected static object GetFromContextStore(string key) 

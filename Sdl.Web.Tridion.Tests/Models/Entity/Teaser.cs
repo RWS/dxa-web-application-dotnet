@@ -82,7 +82,7 @@ namespace Sdl.Web.Tridion.Tests.Models
         /// </summary>
         /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>A single syndication feed item containing information extracted from this <see cref="Teaser"/>.</returns>
-        public IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(ILocalization localization)
+        public IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(Localization localization)
         {
             Link link = Link;
             if (link == null && Media != null)

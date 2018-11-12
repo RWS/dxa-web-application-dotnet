@@ -108,7 +108,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void BuildEntityModel_ThroughModelBuilderPipeline_Success()
         {
-            ILocalization testLocalization = new DocsLocalization();
+            Localization testLocalization = new DocsLocalization();
             testLocalization.EnsureInitialized();
 
             string testTopicId = "1612-1970";

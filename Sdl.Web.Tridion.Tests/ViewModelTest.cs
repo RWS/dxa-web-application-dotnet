@@ -80,7 +80,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void ExtractSyndicationFeedItems_Teasers_Success()
         {
-            ILocalization testLocalization = TestFixture.ParentLocalization;
+            Localization testLocalization = TestFixture.ParentLocalization;
             Teaser testTeaser1 = new Teaser
             {
                 Headline = "Test Teaser 1",
@@ -127,7 +127,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void ExtractSyndicationFeedItems_None_Success()
         {
-            ILocalization testLocalization = TestFixture.ParentLocalization;
+            Localization testLocalization = TestFixture.ParentLocalization;
             PageModel testPageModel = new PageModel("666");
             OutputJson(testPageModel);
 

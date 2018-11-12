@@ -1,5 +1,6 @@
 ﻿using System.Web.Configuration;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -51,7 +52,7 @@ namespace Sdl.Web.Tridion.ModelService
         /// <summary>
         /// Get page model data object.
         /// </summary>
-        public PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes)
+        public PageModelData GetPageModelData(string urlPath, Localization localization, bool addIncludes)
         {
             try
             {                                           
@@ -80,7 +81,7 @@ namespace Sdl.Web.Tridion.ModelService
             }
         }
     
-        public PageModelData GetPageModelData(int pageId, ILocalization localization, bool addIncludes)
+        public PageModelData GetPageModelData(int pageId, Localization localization, bool addIncludes)
         {
             try
             {
@@ -112,7 +113,7 @@ namespace Sdl.Web.Tridion.ModelService
         /// <summary>
         /// Get entity model data object.
         /// </summary>
-        public EntityModelData GetEntityModelData(string entityId, ILocalization localization)
+        public EntityModelData GetEntityModelData(string entityId, Localization localization)
         {
             try
             {
@@ -143,7 +144,7 @@ namespace Sdl.Web.Tridion.ModelService
         /// <summary>
         /// Get site map item.
         /// </summary>
-        public TaxonomyNode GetSitemapItem(ILocalization localization)
+        public TaxonomyNode GetSitemapItem(Localization localization)
         {
             try
             {
@@ -186,7 +187,7 @@ namespace Sdl.Web.Tridion.ModelService
         /// <summary>
         /// Get child site map items.
         /// </summary>
-        public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, ILocalization localization,
+        public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, Localization localization,
             bool includeAncestors, int descendantLevels)
         {
             try

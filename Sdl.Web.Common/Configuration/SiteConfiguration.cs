@@ -208,7 +208,7 @@ namespace Sdl.Web.Common.Configuration
         /// Take a partial URL (so not including protocol, domain, port) and make it full by
         /// Adding the protocol, domain, port etc. from the given localization
         /// </summary>
-        public static string MakeFullUrl(string url, ILocalization loc)
+        public static string MakeFullUrl(string url, Localization loc)
         {
             if (url.StartsWith(loc.Path))
             {
@@ -225,7 +225,7 @@ namespace Sdl.Web.Common.Configuration
         public static string GetUniqueId(string prefix) => prefix + Guid.NewGuid().ToString("N");
 
         #region Thread Safe Settings Update Helper Methods
-        public static bool CheckSettingsNeedRefresh(string type, ILocalization localization) // TODO: Move to class Localization
+        public static bool CheckSettingsNeedRefresh(string type, Localization localization) // TODO: Move to class Localization
         {
             Dictionary<string, DateTime> localizationRefreshStates;
             if (!_refreshStates.TryGetValue(localization.Id, out localizationRefreshStates))

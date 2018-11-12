@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ServiceModel.Syndication;
 using Newtonsoft.Json;
 using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Models
 {
@@ -77,7 +76,7 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The XPM markup.</returns>
-        public abstract string GetXpmMarkup(ILocalization localization);
+        public abstract string GetXpmMarkup(Localization localization);
 
         #region Helper methods for syndication feed providers
         /// <summary>
@@ -86,7 +85,7 @@ namespace Sdl.Web.Common.Models
         /// <param name="feedItemProviders">The set of feed item providers.</param>
         /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>The concatenated syndication feed items.</returns>
-        protected IEnumerable<SyndicationItem> ConcatenateSyndicationFeedItems(IEnumerable<ISyndicationFeedItemProvider> feedItemProviders, ILocalization localization)
+        protected IEnumerable<SyndicationItem> ConcatenateSyndicationFeedItems(IEnumerable<ISyndicationFeedItemProvider> feedItemProviders, Localization localization)
         {
             List<SyndicationItem> result = new List<SyndicationItem>();
             foreach (ISyndicationFeedItemProvider feedItemProvider in feedItemProviders)
@@ -102,7 +101,7 @@ namespace Sdl.Web.Common.Models
         /// <param name="link">The <see cref="Link"/> instance.</param>
         /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>The syndication item link or <c>null</c> if <paramref name="link"/> is <c>null</c> or an empty link.</returns>
-        protected SyndicationLink CreateSyndicationLink(Link link, ILocalization localization)
+        protected SyndicationLink CreateSyndicationLink(Link link, Localization localization)
         {
             if (string.IsNullOrEmpty(link?.Url))
             {
@@ -121,7 +120,7 @@ namespace Sdl.Web.Common.Models
         /// <param name="publishDate">The date/time this item was published/created. If <c>null</c>, publish date is not included in the feed.</param>
         /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>The syndication feed item.</returns>
-        protected SyndicationItem CreateSyndicationItem(string title, object summary, Link link, DateTime? publishDate, ILocalization localization)
+        protected SyndicationItem CreateSyndicationItem(string title, object summary, Link link, DateTime? publishDate, Localization localization)
         {
             SyndicationItem result = new SyndicationItem
             {

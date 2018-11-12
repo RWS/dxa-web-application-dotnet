@@ -1,4 +1,5 @@
-﻿using Sdl.Web.Common.Models;
+﻿using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Interfaces
 {
@@ -12,7 +13,7 @@ namespace Sdl.Web.Common.Interfaces
         /// </summary>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Model (Sitemap root Item).</returns>
-        SitemapItem GetNavigationModel(ILocalization localization);
+        SitemapItem GetNavigationModel(Localization localization);
 
         /// <summary>
         /// Gets Navigation Links for the top navigation menu for the given request URL path.
@@ -20,7 +21,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="requestUrlPath">The request URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Links.</returns>
-        NavigationLinks GetTopNavigationLinks(string requestUrlPath, ILocalization localization);
+        NavigationLinks GetTopNavigationLinks(string requestUrlPath, Localization localization);
 
         /// <summary>
         /// Gets Navigation Links for the context navigation panel for the given request URL path.
@@ -28,7 +29,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="requestUrlPath">The request URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Links.</returns>
-        NavigationLinks GetContextNavigationLinks(string requestUrlPath, ILocalization localization);
+        NavigationLinks GetContextNavigationLinks(string requestUrlPath, Localization localization);
 
         /// <summary>
         /// Gets Navigation Links for the breadcrumb trail for the given request URL path.
@@ -36,6 +37,6 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="requestUrlPath">The request URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Links.</returns>
-        NavigationLinks GetBreadcrumbNavigationLinks(string requestUrlPath, ILocalization localization);
+        NavigationLinks GetBreadcrumbNavigationLinks(string requestUrlPath, Localization localization);
     }
 }

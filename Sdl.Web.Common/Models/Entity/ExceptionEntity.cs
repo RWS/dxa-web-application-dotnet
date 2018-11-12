@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
-using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
 {
@@ -29,7 +29,7 @@ namespace Sdl.Web.Common.Models
             MvcData = GetDefaultView(null);
         }
 
-        public override MvcData GetDefaultView(ILocalization localization)
+        public override MvcData GetDefaultView(Localization localization)
         {
             return new MvcData("EntityError");
         }

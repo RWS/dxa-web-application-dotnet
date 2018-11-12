@@ -20,7 +20,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
     {
         protected static readonly string DateTimeFormat = "MM/dd/yyyy HH:mm:ss";
 
-        public DateTime GetBinaryLastPublishedDate(ILocalization localization, string urlPath)
+        public DateTime GetBinaryLastPublishedDate(Localization localization, string urlPath)
         {
             return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}", CacheRegions.BinaryPublishDate, () =>
             {
@@ -30,7 +30,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
             });
         }
 
-        public async Task<DateTime> GetBinaryLastPublishedDateAsync(ILocalization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<DateTime> GetBinaryLastPublishedDateAsync(Localization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
                 CacheRegions.BinaryPublishDate,
@@ -47,7 +47,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
                 });
         }
 
-        public DateTime GetBinaryLastPublishedDate(ILocalization localization, int binaryId)
+        public DateTime GetBinaryLastPublishedDate(Localization localization, int binaryId)
         {
             return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
                 CacheRegions.BinaryPublishDate,
@@ -62,7 +62,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
                 });
         }
 
-        public async Task<DateTime> GetBinaryLastPublishedDateAsync(ILocalization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<DateTime> GetBinaryLastPublishedDateAsync(Localization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
                 CacheRegions.BinaryPublishDate,
@@ -79,7 +79,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
                 });
         }
 
-        public Tuple<byte[],string> GetBinary(ILocalization localization, int binaryId)
+        public Tuple<byte[],string> GetBinary(Localization localization, int binaryId)
         {
             return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
                 CacheRegions.Binary,
@@ -95,7 +95,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
                 });
         }
 
-        public async Task<Tuple<byte[], string>> GetBinaryAsync(ILocalization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Tuple<byte[], string>> GetBinaryAsync(Localization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
                 CacheRegions.Binary,
@@ -112,7 +112,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
                 });
         }             
 
-        public Tuple<byte[],string> GetBinary(ILocalization localization, string urlPath)
+        public Tuple<byte[],string> GetBinary(Localization localization, string urlPath)
         {
             return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
                 CacheRegions.Binary,
@@ -127,7 +127,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
                 });
         }
 
-        public async Task<Tuple<byte[], string>> GetBinaryAsync(ILocalization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Tuple<byte[], string>> GetBinaryAsync(Localization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
                 CacheRegions.Binary,

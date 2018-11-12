@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Tests.Models;
 using Sdl.Web.DataModel;
@@ -71,7 +71,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetPageModel_RetrofitMapping_Success() // See TSI-1757
         {
-            ILocalization testLocalization = TestFixture.ChildLocalization;
+            Localization testLocalization = TestFixture.ChildLocalization;
             string testPageUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1757PageRelativeUrlPath);
 
             PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);

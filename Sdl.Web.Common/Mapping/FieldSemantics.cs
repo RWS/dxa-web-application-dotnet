@@ -1,4 +1,4 @@
-﻿using Sdl.Web.Common.Interfaces;
+﻿using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Mapping
 {
@@ -34,7 +34,7 @@ namespace Sdl.Web.Common.Mapping
         /// <param name="entity">Entity name</param>
         /// <param name="property">Semantic property name</param>
         /// <param name="localization">The context Localization (used to determine the semantic Vocabulary URI from <paramref name="vocabOrPrefix"/>).</param>
-        public FieldSemantics(string vocabOrPrefix, string entity, string property, ILocalization localization)
+        public FieldSemantics(string vocabOrPrefix, string entity, string property, Localization localization)
             : base(vocabOrPrefix, entity, localization)
         {
             Property = property;

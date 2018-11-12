@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Utils;
 
 namespace Sdl.Web.Common.Models
@@ -63,7 +63,7 @@ namespace Sdl.Web.Common.Models
         /// <remarks>
         /// If this method is overridden in a subclass, it will be possible to render "embedded" Entity Models of that type using the Html.DxaEntity method.
         /// </remarks>
-        public virtual MvcData GetDefaultView(ILocalization localization) => null;
+        public virtual MvcData GetDefaultView(Localization localization) => null;
 
         #endregion
 
@@ -74,7 +74,7 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The XPM markup.</returns>
-        public override string GetXpmMarkup(ILocalization localization)
+        public override string GetXpmMarkup(Localization localization)
             => (XpmMetadata == null) ? string.Empty : $"<!-- Start Component Presentation: {JsonConvert.SerializeObject(XpmMetadata)} -->";
 
         /// <summary>

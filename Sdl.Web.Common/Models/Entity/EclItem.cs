@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml;
-using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 
 namespace Sdl.Web.Common.Models
@@ -89,7 +89,7 @@ namespace Sdl.Web.Common.Models
         /// </remarks>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The XPM markup.</returns>
-        public override string GetXpmMarkup(ILocalization localization)
+        public override string GetXpmMarkup(Localization localization)
         {
             if (XpmMetadata != null && !string.IsNullOrEmpty(EclUri))
             {

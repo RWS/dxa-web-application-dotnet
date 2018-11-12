@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ServiceModel.Syndication;
-using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
 {
@@ -9,6 +9,6 @@ namespace Sdl.Web.Common.Models
     /// </summary>
     public interface ISyndicationFeedItemProvider
     {
-        IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(ILocalization localization);
+        IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(Localization localization);
     }
 }

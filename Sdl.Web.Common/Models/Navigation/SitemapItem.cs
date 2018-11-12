@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Common.Models
 {
@@ -71,7 +70,7 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         /// <param name="localization">The context <see cref="ILocalization"/></param>
         /// <returns>The <see cref="Link"/> Entity Model.</returns>
-        public virtual Link CreateLink(ILocalization localization)
+        public virtual Link CreateLink(Localization localization)
         {
             return new Link
             {

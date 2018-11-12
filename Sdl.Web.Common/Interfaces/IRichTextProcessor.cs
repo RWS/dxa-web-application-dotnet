@@ -1,4 +1,5 @@
-﻿using Sdl.Web.Common.Models;
+﻿using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Interfaces
 {
@@ -20,6 +21,6 @@ namespace Sdl.Web.Common.Interfaces
         ///     <item>Resolve inline links</item>
         /// </list>
         /// </remarks>
-        RichText ProcessRichText(string xhtml, ILocalization localization);
+        RichText ProcessRichText(string xhtml, Localization localization);
     }
 }

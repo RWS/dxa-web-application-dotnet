@@ -49,7 +49,7 @@ namespace Sdl.Web.Tridion.Statics
             => SiteConfiguration.BinaryProvider ?? new CILBinaryProvider();
 
         private static bool IsCached(Func<DateTime> getLastPublishedDate, string localFilePath,
-            ILocalization localization)
+            Localization localization)
         {
             DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
                 localFilePath,
@@ -86,7 +86,7 @@ namespace Sdl.Web.Tridion.Statics
         /// <param name="urlPath">The URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The path to the local file.</returns>
-        internal string GetCachedFile(string urlPath, ILocalization localization)
+        internal string GetCachedFile(string urlPath, Localization localization)
         {
             IBinaryProvider provider = Provider;
 
@@ -128,7 +128,7 @@ namespace Sdl.Web.Tridion.Statics
         /// <param name="binaryId">The binary Id.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The path to the local file.</returns>
-        internal string GetCachedFile(int binaryId, ILocalization localization)
+        internal string GetCachedFile(int binaryId, Localization localization)
         {
             IBinaryProvider provider = Provider;
 

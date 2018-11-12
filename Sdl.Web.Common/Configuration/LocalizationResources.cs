@@ -13,13 +13,13 @@ namespace Sdl.Web.Common.Configuration
     /// </summary>
     public class LocalizationResources : ILocalizationResources
     {
-        private readonly ILocalization _localization;
+        private readonly Localization _localization;
         private IDictionary<string, IDictionary<string, string>> _config;
         private IDictionary _resources;
 
         private readonly object _loadLock = new object();
 
-        public LocalizationResources(ILocalization localization)
+        public LocalizationResources(Localization localization)
         {
             _localization = localization;
         }

@@ -133,7 +133,7 @@ namespace Sdl.Web.Tridion.Tests.Models
         /// <remarks>
         /// This makes it possible possible to render "embedded" MediaManagerDistribution Models using the Html.DxaEntity method.
         /// </remarks>
-        public override MvcData GetDefaultView(ILocalization localization)
+        public override MvcData GetDefaultView(Localization localization)
         {
             return new MvcData("MediaManager:" + EclDisplayTypeId);
         }

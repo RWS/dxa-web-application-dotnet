@@ -5,7 +5,7 @@ using Sdl.Web.Common.Logging;
 using System;
 using System.Globalization;
 using System.Linq;
-using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
 {
@@ -83,7 +83,7 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The XPM markup.</returns>
-        public override string GetXpmMarkup(ILocalization localization)
+        public override string GetXpmMarkup(Localization localization)
         {
             if (XpmMetadata == null)
             {
@@ -115,7 +115,7 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>The extracted syndication feed items; a concatentation of syndication feed items provided by <see cref="Regions"/> (if any).</returns>
-        public virtual IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(ILocalization localization)
+        public virtual IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(Localization localization)
         {
             return ConcatenateSyndicationFeedItems(Regions, localization);
         }
@@ -125,7 +125,7 @@ namespace Sdl.Web.Common.Models
         /// Filters (i.e. removes) conditional Entities which don't meet the conditions.
         /// </summary>
         /// <param name="localization">The context Localization.</param>
-        public void FilterConditionalEntities(ILocalization localization)
+        public void FilterConditionalEntities(Localization localization)
         {
             using (new Tracer(localization, this))
             {

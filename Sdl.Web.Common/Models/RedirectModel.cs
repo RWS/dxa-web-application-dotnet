@@ -1,5 +1,5 @@
 ﻿using System;
-using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
 {
@@ -19,7 +19,7 @@ namespace Sdl.Web.Common.Models
             RedirectUrl = redirectUrl;
         }
 
-        public override string GetXpmMarkup(ILocalization localization)
+        public override string GetXpmMarkup(Localization localization)
         {
             return null;
         }
