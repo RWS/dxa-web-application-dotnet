@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 
@@ -35,13 +35,13 @@ namespace Sdl.Web.Common.Mapping
         /// </summary>
         public List<SchemaSemantics> Semantics { get; set; }
 
-        public ILocalization Localization { get; set; }
+        public Localization Localization { get; set; }
 
         /// <summary>
         /// Initializes an existing instance.
         /// </summary>
         /// <param name="localization">The context Localization.</param>
-        public void Initialize(ILocalization localization)
+        public void Initialize(Localization localization)
         {
             Localization = localization;
             foreach (SchemaSemantics semantics in Semantics)

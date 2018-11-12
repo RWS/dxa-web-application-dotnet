@@ -17,7 +17,7 @@ namespace Sdl.Web.Common.Configuration
     /// <summary>
     /// Represents a "Localization" - a Site or variant (e.g. language).
     /// </summary>
-    public class Localization : ILocalization
+    public class Localization
     {
         protected string _path;
         protected string _culture;
@@ -181,7 +181,7 @@ namespace Sdl.Web.Common.Configuration
         /// <remarks>
         /// A typical use case is a multi-language site consisting of separate Localizations for each language.
         /// </remarks>
-        public virtual List<ILocalization> SiteLocalizations { get; protected set; }
+        public virtual List<Localization> SiteLocalizations { get; protected set; }
 
         /// <summary>
         /// Gets the date/time at which this <see cref="ILocalization"/> was last (re-)loaded.
@@ -361,7 +361,7 @@ namespace Sdl.Web.Common.Configuration
                 if (allSiteLocalizations)
                 {
                     // Refresh all Site Localizations (variants)
-                    foreach (ILocalization localization in SiteLocalizations)
+                    foreach (Localization localization in SiteLocalizations)
                     {
                         try
                         {
@@ -475,12 +475,12 @@ namespace Sdl.Web.Common.Configuration
                         if (localizationData.SiteLocalizations != null)
                         {
                             ILocalizationResolver localizationResolver = SiteConfiguration.LocalizationResolver;
-                            SiteLocalizations = new List<ILocalization>();
+                            SiteLocalizations = new List<Localization>();
                             foreach (SiteLocalizationData siteLocalizationData in localizationData.SiteLocalizations)
                             {
                                 try
                                 {
-                                    ILocalization siteLocalization = localizationResolver.GetLocalization(siteLocalizationData.Id);
+                                    Localization siteLocalization = localizationResolver.GetLocalization(siteLocalizationData.Id);
                                     if (siteLocalization.LastRefresh == DateTime.MinValue)
                                     {
                                         // Localization is not fully initialized yet; partially initialize it using the Site Localization Data.

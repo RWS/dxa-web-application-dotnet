@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Sdl.Web.Common.Logging;
+﻿using Sdl.Web.Common.Logging;
 using System;
 
 namespace Sdl.Web.Common.Models

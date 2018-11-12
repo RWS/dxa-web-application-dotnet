@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel.Syndication;
-using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Common.Models
 {
@@ -27,7 +27,7 @@ namespace Sdl.Web.Common.Models
         [SemanticProperty(IgnoreMapping = true)]
         public List<EntityModel> QueryResults { get; set; }
 
-        public abstract Query GetQuery(ILocalization localization);
+        public abstract Query GetQuery(Localization localization);
 
         [JsonIgnore]
         [SemanticProperty(IgnoreMapping = true)]
@@ -39,7 +39,7 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>The extracted syndication feed items; a concatentation of syndication feed items provided by <see cref="QueryResults"/> (if any).</returns>
-        public virtual IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(ILocalization localization)
+        public virtual IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(Localization localization)
         {
             return ConcatenateSyndicationFeedItems(QueryResults.OfType<ISyndicationFeedItemProvider>(), localization);
         }

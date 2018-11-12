@@ -1,4 +1,5 @@
-﻿using Sdl.Web.Common.Models;
+﻿using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.DataModel;
 
@@ -18,7 +19,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="localization">The context Localization.</param>
         /// <param name="addIncludes">Add include pages.</param>
         /// <returns>Page Model Data</returns>
-        PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes);
+        PageModelData GetPageModelData(string urlPath, Localization localization, bool addIncludes);
 
         /// <summary>
         /// Returns the Page Model Data for a given page Id.
@@ -27,7 +28,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="localization">The context Localization.</param>
         /// <param name="addIncludes">Add include pages.</param>
         /// <returns>Page Model Data</returns>
-        PageModelData GetPageModelData(int pageId, ILocalization localization, bool addIncludes);
+        PageModelData GetPageModelData(int pageId, Localization localization, bool addIncludes);
 
         /// <summary>
         /// Gets the Entity Model Data given an entity id of the format {ComponentID}-{TemplateID}
@@ -35,14 +36,14 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="entityId">Entity Id.</param>
         /// <param name="localization">The context Localization.</param>
         /// <returns>Entity Model Data.</returns>
-        EntityModelData GetEntityModelData(string entityId, ILocalization localization);
+        EntityModelData GetEntityModelData(string entityId, Localization localization);
 
         /// <summary>
         /// Gets the Site map for a given localization.
         /// </summary>
         /// <param name="localization">The context Localization.</param>
         /// <returns>Taxonomy Node</returns>
-        TaxonomyNode GetSitemapItem(ILocalization localization);
+        TaxonomyNode GetSitemapItem(Localization localization);
 
         /// <summary>
         /// Gets the child site map items of a given parent site map item.
@@ -52,7 +53,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="includeAncestors">Include Ancestors.</param>
         /// <param name="descendantLevels">Descendant Levels.</param>
         /// <returns></returns>
-        SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, ILocalization localization,
+        SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, Localization localization,
             bool includeAncestors, int descendantLevels);
     }
 }

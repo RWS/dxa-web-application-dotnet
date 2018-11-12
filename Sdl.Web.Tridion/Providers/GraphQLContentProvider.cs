@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using Sdl.Tridion.Api.Client;
 using Sdl.Tridion.Api.Client.ContentModel;
 using Sdl.Web.Common;
-using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
@@ -89,7 +89,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// </summary>
         /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
         /// <param name="localization">The context Localization.</param>
-        public override void PopulateDynamicList(DynamicList dynamicList, ILocalization localization)
+        public override void PopulateDynamicList(DynamicList dynamicList, Localization localization)
         {
             using (new Tracer(dynamicList, localization))
             {              
@@ -165,7 +165,7 @@ namespace Sdl.Web.Tridion.Mapping
             };
         }
 
-        public override string GetPageContent(string urlPath, ILocalization localization)
+        public override string GetPageContent(string urlPath, Localization localization)
         {
             using (new Tracer(urlPath, localization))
             {

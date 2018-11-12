@@ -18,7 +18,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void Load_Success()
         {
-            ILocalization testLocalization = TestFixture.ParentLocalization;
+            Localization testLocalization = TestFixture.ParentLocalization;
 
             OutputJson(testLocalization);
 
@@ -37,7 +37,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(2, testLocalization.SiteLocalizations.Count, "testLocalization.SiteLocalizations.Count");
             Assert.AreNotEqual(DateTime.MinValue, testLocalization.LastRefresh, "testLocalization.LastRefresh");
 
-            foreach (ILocalization siteLocalization in testLocalization.SiteLocalizations)
+            foreach (Localization siteLocalization in testLocalization.SiteLocalizations)
             {
                 // Check that Site Localizations are "pre-initialized".
                 Assert.IsNotNull(siteLocalization.Id, "siteLocalization.Id");

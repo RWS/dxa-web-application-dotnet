@@ -1,7 +1,6 @@
 ﻿using System;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Tridion.ContentDelivery.DynamicContent;
 
@@ -34,7 +33,7 @@ namespace Sdl.Web.Tridion
         /// <param name="url">The URL to resolve.</param>
         /// <returns>A <see cref="ILocalization"/> instance which base URL matches that of the given URL.</returns>
         /// <exception cref="DxaUnknownLocalizationException">If no matching Localization can be found.</exception>
-        public override ILocalization ResolveLocalization(Uri url)
+        public override Localization ResolveLocalization(Uri url)
         {
             using (new Tracer(url))
             {
@@ -71,7 +70,7 @@ namespace Sdl.Web.Tridion
                     throw new DxaUnknownLocalizationException($"No matching Localization found for URL '{urlLeftPart}'");
                 }
 
-                ILocalization result;
+                Localization result;
                 lock (KnownLocalizations)
                 {
                     string localizationId = mapping.PublicationId.ToString();
@@ -97,11 +96,11 @@ namespace Sdl.Web.Tridion
             }
         }
 
-        public override ILocalization GetLocalization(string localizationId)
+        public override Localization GetLocalization(string localizationId)
         {
             using (new Tracer(localizationId))
             {
-                ILocalization result;
+                Localization result;
                 if (!KnownLocalizations.TryGetValue(localizationId, out result))
                 {
                     // No localization found so lets return a partially constructed one and fully resolve it later.

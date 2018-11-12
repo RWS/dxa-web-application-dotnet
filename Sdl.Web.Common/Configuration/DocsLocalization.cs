@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using Sdl.Web.Common.Mapping;
 using Sdl.Web.Common.Logging;
 
@@ -16,9 +14,9 @@ namespace Sdl.Web.Common.Configuration
     /// </remarks>
     public class DocsLocalization : Localization
     {
-        private static List<SemanticVocabulary> _semanticVocabs;
-        private static List<SemanticSchema> _semanticSchemas;
-        private static string _staticContentUrlPattern;
+        private static readonly List<SemanticVocabulary> _semanticVocabs;
+        private static readonly List<SemanticSchema> _semanticSchemas;
+        private static readonly string _staticContentUrlPattern;
 
         /// <summary>
         /// Class constructor

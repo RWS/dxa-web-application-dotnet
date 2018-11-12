@@ -28,7 +28,7 @@ namespace Sdl.Web.Mvc.Controllers
 
                 INavigationProvider navigationProvider = SiteConfiguration.NavigationProvider;
                 string requestUrlPath = Request.Url.LocalPath;
-                ILocalization localization = WebRequestContext.Localization;
+                Localization localization = WebRequestContext.Localization;
                 NavigationLinks model;
                 switch (navType)
                 {

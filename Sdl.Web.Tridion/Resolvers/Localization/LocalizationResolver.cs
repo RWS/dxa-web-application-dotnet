@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 
@@ -11,9 +12,9 @@ namespace Sdl.Web.Tridion
     /// </summary>
     public abstract class LocalizationResolver : ILocalizationResolver
     {
-        private readonly IDictionary<string, ILocalization> _knownLocalizations = new Dictionary<string, ILocalization>();
+        private readonly IDictionary<string, Localization> _knownLocalizations = new Dictionary<string, Localization>();
 
-        protected IDictionary<string, ILocalization> KnownLocalizations => _knownLocalizations;
+        protected IDictionary<string, Localization> KnownLocalizations => _knownLocalizations;
 
         #region ILocalizationResolver Members
         /// <summary>
@@ -22,7 +23,7 @@ namespace Sdl.Web.Tridion
         /// <param name="url">The URL to resolve.</param>
         /// <returns>A <see cref="ILocalization"/> instance which base URL matches that of the given URL.</returns>
         /// <exception cref="DxaUnknownLocalizationException">If no matching Localization can be found.</exception>
-        public abstract ILocalization ResolveLocalization(Uri url);
+        public abstract Localization ResolveLocalization(Uri url);
 
         /// <summary>
         /// Gets a <see cref="ILocalization"/> by its identifier.
@@ -30,11 +31,11 @@ namespace Sdl.Web.Tridion
         /// <param name="localizationId">The Localization identifier.</param>
         /// <returns>A <see cref="ILocalization"/> instance with the given identifier.</returns>
         /// <exception cref="DxaUnknownLocalizationException">If no matching Localization can be found.</exception>
-        public virtual ILocalization GetLocalization(string localizationId)
+        public virtual Localization GetLocalization(string localizationId)
         {
             using (new Tracer(localizationId))
             {
-                ILocalization result;
+                Localization result;
                 if (!_knownLocalizations.TryGetValue(localizationId, out result))
                 {
                     throw new DxaUnknownLocalizationException($"No Localization found with ID '{localizationId}'");

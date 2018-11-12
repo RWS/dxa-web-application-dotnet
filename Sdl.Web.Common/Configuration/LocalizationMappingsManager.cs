@@ -4,7 +4,6 @@ using System.Linq;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Mapping;
-using Newtonsoft.Json;
 
 namespace Sdl.Web.Common.Configuration
 {  
@@ -13,7 +12,7 @@ namespace Sdl.Web.Common.Configuration
     /// </summary>
     public class LocalizationMappingsManager : ILocalizationMappingsManager
     {
-        private readonly ILocalization _localization;
+        private readonly Localization _localization;
 
         // schemas for semantic mapping
         private SemanticSchema[] _semanticSchemas;
@@ -32,7 +31,7 @@ namespace Sdl.Web.Common.Configuration
         private readonly object _loadLock = new object();
 
 
-        public LocalizationMappingsManager(ILocalization localization)
+        public LocalizationMappingsManager(Localization localization)
         {           
             _localization = localization;
         }

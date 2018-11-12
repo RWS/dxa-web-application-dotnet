@@ -122,7 +122,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>The Strongly Typed Page Model (an instance of class <see cref="PageModel"/> or a subclass).</returns>
         public static PageModel CreatePageModel(PageModelData pageModelData, bool includePageRegions,
-            ILocalization localization)
+            Localization localization)
         {
             using (new Tracer(pageModelData, localization))
             {
@@ -179,7 +179,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="baseModelType">The base type for the Entity Model to build.</param>
         /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>The strongly typed Entity Model. Will be of type <paramref name="baseModelType"/> or a subclass.</returns>
-        public static EntityModel CreateEntityModel(EntityModelData entityModelData, Type baseModelType, ILocalization localization)
+        public static EntityModel CreateEntityModel(EntityModelData entityModelData, Type baseModelType, Localization localization)
         {                        
             using (new Tracer(entityModelData, localization))
             {
@@ -220,7 +220,7 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
         internal static PageModel CreatePageModelInternal(PageModelData pageModelData, bool includePageRegions,
-          ILocalization localization)
+          Localization localization)
         {
             PageModel pageModel = null;
             foreach (IPageModelBuilder pageModelBuilder in _pageModelBuilders)
@@ -235,7 +235,7 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
         internal static EntityModel CreateEntityModelInternal(EntityModelData entityModelData, Type baseModelType,
-            ILocalization localization)
+            Localization localization)
         {
             EntityModel entityModel = null;
             foreach (IEntityModelBuilder entityModelBuilder in _entityModelBuilders)

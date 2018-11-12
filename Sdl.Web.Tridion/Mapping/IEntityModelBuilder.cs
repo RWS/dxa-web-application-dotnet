@@ -1,6 +1,5 @@
 ﻿using System;
 using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
 
@@ -19,6 +18,6 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="entityModelData">The DXA R2 Data Model.</param>
         /// <param name="baseModelType">The base type for the Entity Model to build.</param>
         /// <param name="localization">The context <see cref="ILocalization"/>.</param>
-        void BuildEntityModel(ref EntityModel entityModel, EntityModelData entityModelData, Type baseModelType, ILocalization localization);
+        void BuildEntityModel(ref EntityModel entityModel, EntityModelData entityModelData, Type baseModelType, Localization localization);
     }
 }
