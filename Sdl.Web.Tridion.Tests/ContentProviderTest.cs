@@ -118,7 +118,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(3, pageModel.Regions.Count, "pageModel.Regions.Count");
             Assert.IsNotNull(pageModel.Regions.FirstOrDefault(r => r.Name == "Nav"));
             Assert.IsNotNull(pageModel.Regions.FirstOrDefault(r => r.Name == "Info"));
-            Assert.IsNotNull(pageModel.Regions.FirstOrDefault(r => r.Name == "Main"));
+            Assert.IsNotNull(pageModel.Regions.FirstOrDefault(r => r.Name == "Logo"));
         }
 
         [TestMethod]
