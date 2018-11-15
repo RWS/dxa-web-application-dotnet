@@ -115,7 +115,10 @@ namespace Sdl.Web.Tridion.Tests
             OutputJson(pageModel);
 
             Assert.AreEqual("Header", pageModel.Title, "pageModel.Title");
-            Assert.AreEqual(2, pageModel.Regions.Count, "pageModel.Regions.Count");
+            Assert.AreEqual(3, pageModel.Regions.Count, "pageModel.Regions.Count");
+            Assert.IsNotNull(pageModel.Regions.FirstOrDefault(r => r.Name == "Nav"));
+            Assert.IsNotNull(pageModel.Regions.FirstOrDefault(r => r.Name == "Info"));
+            Assert.IsNotNull(pageModel.Regions.FirstOrDefault(r => r.Name == "Main"));
         }
 
         [TestMethod]
