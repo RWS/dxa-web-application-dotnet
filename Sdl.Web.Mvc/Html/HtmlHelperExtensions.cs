@@ -437,7 +437,7 @@ namespace Sdl.Web.Mvc.Html
         public static MvcHtmlString DxaPageMarkup(this HtmlHelper htmlHelper)
         {
             // TODO TSI-776: this method should output "semantic" attributes on the HTML element representing the Page like we do for DxaRegionMarkup, DxaEntityMarkup and DxaPropertyMarkup
-            if (!WebRequestContext.Localization.IsXpmEnabled)
+            if (!WebRequestContext.IsPreview)
             {
                 return MvcHtmlString.Empty;
             }
@@ -470,6 +470,11 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The HTML/RDFa attributes for the Region. These should be included in an HTML start tag.</returns>
         public static MvcHtmlString DxaRegionMarkup(this HtmlHelper htmlHelper, RegionModel region)
         {
+            if (!WebRequestContext.IsPreview)
+            {
+                return MvcHtmlString.Empty;
+            }
+
             return Markup.RenderRegionAttributes(region);
         }
 
@@ -493,6 +498,11 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The HTML/RDFa attributes for the Entity. These should be included in an HTML start tag.</returns>
         public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper, EntityModel entity)
         {
+            if (!WebRequestContext.IsPreview)
+            {
+                return MvcHtmlString.Empty;
+            }
+
             return Markup.RenderEntityAttributes(entity);
         }
 
@@ -505,6 +515,11 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
         public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, string propertyName, int index = 0)
         {
+            if (!WebRequestContext.IsPreview)
+            {
+                return MvcHtmlString.Empty;
+            }
+
             EntityModel entity = (EntityModel) htmlHelper.ViewData.Model;
             return Markup.RenderPropertyAttributes(entity, propertyName, index);
         }
@@ -519,6 +534,11 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
         public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, EntityModel entity, string propertyName, int index = 0)
         {
+            if (!WebRequestContext.IsPreview)
+            {
+                return MvcHtmlString.Empty;
+            }
+
             return Markup.RenderPropertyAttributes(entity, propertyName, index);
         }
 
@@ -531,6 +551,11 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
         public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, Expression<Func<object>> propertyExpression, int index = 0)
         {
+            if (!WebRequestContext.IsPreview)
+            {
+                return MvcHtmlString.Empty;
+            }
+
             MemberExpression memberExpression = propertyExpression.Body as MemberExpression;
             if (memberExpression == null)
             {
