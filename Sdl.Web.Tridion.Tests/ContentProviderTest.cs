@@ -114,11 +114,13 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(pageModel, "pageModel");
             OutputJson(pageModel);
 
-            Assert.AreEqual("Header", pageModel.Title, "pageModel.Title");
-            Assert.AreEqual(3, pageModel.Regions.Count, "pageModel.Regions.Count");
-            Assert.IsNotNull(pageModel.Regions.FirstOrDefault(r => r.Name == "Nav"));
-            Assert.IsNotNull(pageModel.Regions.FirstOrDefault(r => r.Name == "Info"));
-            Assert.IsNotNull(pageModel.Regions.FirstOrDefault(r => r.Name == "Logo"));
+            Assert.AreEqual("Header", pageModel.Title, "pageModel.Title"); // This is the essence of this test (TSI-2287)
+            Assert.IsTrue(pageModel.Regions.ContainsKey("Nav"), "pageModel.Regions.ContainsKey('Nav')"); // Legacy Region
+            Assert.IsTrue(pageModel.Regions.ContainsKey("Info"), "pageModel.Regions.ContainsKey('Info')"); // Legacy Region
+            if (!TestLocalization.Path.Contains("legacy"))
+            {
+                Assert.IsTrue(pageModel.Regions.ContainsKey("Main"), "pageModel.Regions.ContainsKey('Main')"); // Native Region
+            }
         }
 
         [TestMethod]
