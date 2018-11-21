@@ -13,7 +13,7 @@ using Sdl.Web.Tridion.Providers.Binary;
 using Image = System.Drawing.Image; // TODO: Shouldn't use System.Drawing namespace in a web application.
 
 namespace Sdl.Web.Tridion.Statics
-{   
+{
     /// <summary>
     /// Ensures a Binary file is cached on the file-system from the Tridion Broker DB
     /// </summary>
@@ -22,8 +22,8 @@ namespace Sdl.Web.Tridion.Statics
         #region Inner classes
         internal class Dimensions
         {
-            internal int Width; 
-            internal int Height; 
+            internal int Width;
+            internal int Height;
             internal bool NoStretch;
 
             /// <summary>
@@ -44,7 +44,7 @@ namespace Sdl.Web.Tridion.Statics
         /// </summary>
         internal static BinaryFileManager Instance { get; } = new BinaryFileManager();
 
-        private static IBinaryProvider Provider 
+        private static IBinaryProvider Provider
             // Default to CIL binary provider if no implementation specified
             => SiteConfiguration.BinaryProvider ?? new CILBinaryProvider();
 
@@ -59,11 +59,11 @@ namespace Sdl.Web.Tridion.Statics
 
             if (localization.LastRefresh.CompareTo(lastPublishedDate) < 0)
             {
-                //File has been modified since last application start but we don't care
+                //File has been modified since last application start
                 Log.Debug(
-                    "Binary at path '{0}' is modified, but only since last application restart, so no action required",
+                    "Binary at path '{0}' is modified",
                     localFilePath);
-                return true;
+                return false;
             }
 
             FileInfo fi = new FileInfo(localFilePath);
@@ -104,13 +104,13 @@ namespace Sdl.Web.Tridion.Statics
             using (new Tracer(urlPath, localization, localFilePath))
             {
                 Dimensions dimensions;
-                urlPath = StripDimensions(urlPath, out dimensions);                    
+                urlPath = StripDimensions(urlPath, out dimensions);
                 if (!localization.IsXpmEnabled && File.Exists(localFilePath))
                 {
                     if (IsCached(() => provider.GetBinaryLastPublishedDate(localization, urlPath), localFilePath, localization))
                     {
                         return localFilePath;
-                    }                 
+                    }
                 }
 
                 var binary = provider.GetBinary(localization, urlPath);
@@ -182,7 +182,7 @@ namespace Sdl.Web.Tridion.Statics
         private static void WriteBinaryToFile(byte[] binary, string physicalPath, Dimensions dimensions)
         {
             using (new Tracer(binary, physicalPath, dimensions))
-            {                
+            {
                 try
                 {
                     if (!File.Exists(physicalPath))
@@ -198,7 +198,7 @@ namespace Sdl.Web.Tridion.Statics
                     if (dimensions != null && (dimensions.Width > 0 || dimensions.Height > 0))
                     {
                         ImageFormat imgFormat = GetImageFormat(physicalPath);
-                        if(imgFormat != null) buffer = ResizeImage(buffer, dimensions, imgFormat);
+                        if (imgFormat != null) buffer = ResizeImage(buffer, dimensions, imgFormat);
                     }
 
                     lock (NamedLocker.GetLock(physicalPath))
@@ -212,7 +212,7 @@ namespace Sdl.Web.Tridion.Statics
                 catch (IOException)
                 {
                     // file probabaly accessed by a different thread in a different process, locking failed
-                    Log.Warn("Cannot write to {0}. This can happen sporadically, let the next thread handle this.", physicalPath);                  
+                    Log.Warn("Cannot write to {0}. This can happen sporadically, let the next thread handle this.", physicalPath);
                 }
             }
         }
@@ -360,7 +360,7 @@ namespace Sdl.Web.Tridion.Statics
                 {
                     dimensions.Height = Convert.ToInt32(dim);
                 }
-                if(!string.IsNullOrEmpty(match.Groups[5].ToString()))
+                if (!string.IsNullOrEmpty(match.Groups[5].ToString()))
                 {
                     dimensions.NoStretch = true;
                 }
