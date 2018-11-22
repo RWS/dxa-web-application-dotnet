@@ -72,5 +72,11 @@ namespace Sdl.Web.Tridion.Tests
             // Test is temporarily disabled because of a Known Issue with DD4T->R2 conversion. See TSI-3636
         }
 
+        [TestMethod]
+        [Ignore] // TODO CRQ-12313: SmartTarget Test Pages use Native Regions so won't work with DD4T Data Model.
+        public override void GetPageModel_SmartTarget_Success()
+        {
+        }
+
     }
 }

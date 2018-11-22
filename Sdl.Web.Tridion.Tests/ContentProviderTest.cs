@@ -507,7 +507,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_SmartTarget_Success()
+        public virtual void GetPageModel_SmartTarget_Success()
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.SmartTargetTestPageRelativeUrlPath);
 
