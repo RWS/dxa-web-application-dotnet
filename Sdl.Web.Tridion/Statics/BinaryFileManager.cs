@@ -57,7 +57,7 @@ namespace Sdl.Web.Tridion.Statics
                 getLastPublishedDate
                 );
 
-            if (localization.LastRefresh.CompareTo(lastPublishedDate) < 0)
+            if (localization.LastRefresh != DateTime.MinValue && localization.LastRefresh.CompareTo(lastPublishedDate) < 0)
             {
                 //File has been modified since last application start
                 Log.Debug(
@@ -163,10 +163,12 @@ namespace Sdl.Web.Tridion.Statics
                         Log.Warn(ex.Message);
                     }
                 }
-
                 var data = provider.GetBinary(localization, binaryId);
-                string ext = Path.GetExtension(data.Item2) ?? "";
-                localFilePath = $"{localFilePath}/{binaryId}{ext}";
+                if (string.IsNullOrEmpty(Path.GetExtension(localFilePath)))
+                {
+                    string ext = Path.GetExtension(data.Item2) ?? "";
+                    localFilePath = $"{localFilePath}/{binaryId}{ext}";
+                }
                 WriteBinaryToFile(data.Item1, localFilePath, null);
                 return localFilePath;
             }
