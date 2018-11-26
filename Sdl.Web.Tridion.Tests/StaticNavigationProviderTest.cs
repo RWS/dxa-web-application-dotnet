@@ -21,7 +21,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetNavigationModel_Success()
         {
-            ILocalization testLocalization = TestFixture.ParentLocalization;
+            Localization testLocalization = TestFixture.ParentLocalization;
 
             SitemapItem rootSitemapItem = _testNavigationProvider.GetNavigationModel(testLocalization);
 
@@ -43,7 +43,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetTopNavigationLinks_Success()
         {
-            ILocalization testLocalization = TestFixture.ParentLocalization;
+            Localization testLocalization = TestFixture.ParentLocalization;
 
             NavigationLinks testNavLinks = _testNavigationProvider.GetTopNavigationLinks(testLocalization.Path, testLocalization);
 
@@ -55,7 +55,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetContextNavigationLinks_Root_Success()
         {
-            ILocalization testLocalization = TestFixture.ParentLocalization;
+            Localization testLocalization = TestFixture.ParentLocalization;
 
             NavigationLinks navLinks = _testNavigationProvider.GetContextNavigationLinks(testLocalization.Path, testLocalization);
 
@@ -69,7 +69,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetContextNavigationLinks_TaxonomyTestPage1_Success()
         {
-            ILocalization testLocalization = TestFixture.ParentLocalization;
+            Localization testLocalization = TestFixture.ParentLocalization;
             string testUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.TaxonomyTestPage1RelativeUrlPath);
 
             NavigationLinks navLinks = _testNavigationProvider.GetContextNavigationLinks(testUrlPath, testLocalization);
@@ -87,7 +87,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetBreadcrumbNavigationLinks_Root_Success()
         {
-            ILocalization testLocalization = TestFixture.ParentLocalization;
+            Localization testLocalization = TestFixture.ParentLocalization;
 
             NavigationLinks navLinks = _testNavigationProvider.GetBreadcrumbNavigationLinks(testLocalization.Path, testLocalization);
 
@@ -101,7 +101,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetBreadcrumbNavigationLinks_TaxonomyTestPage1_Success()
         {
-            ILocalization testLocalization = TestFixture.ParentLocalization;
+            Localization testLocalization = TestFixture.ParentLocalization;
             string testUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.TaxonomyTestPage1RelativeUrlPath);
 
             NavigationLinks navLinks = _testNavigationProvider.GetBreadcrumbNavigationLinks(testUrlPath, testLocalization);
@@ -117,7 +117,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
 
-        private void AssertValidHomePageLink(NavigationLinks navLinks, ILocalization testLocalization)
+        private void AssertValidHomePageLink(NavigationLinks navLinks, Localization testLocalization)
         {
             Link homePageLink = navLinks.Items.FirstOrDefault(link => link.LinkText == "Home");
             Assert.IsNotNull(homePageLink, "Home Page Link not found");

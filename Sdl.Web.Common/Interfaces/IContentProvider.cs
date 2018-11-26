@@ -1,4 +1,5 @@
-﻿using Sdl.Web.Common.Models;
+﻿using Sdl.Web.Common.Configuration;
+using Sdl.Web.Common.Models;
 
 namespace Sdl.Web.Common.Interfaces
 {
@@ -9,7 +10,7 @@ namespace Sdl.Web.Common.Interfaces
     /// Although this interface existed in STRI 1.0, it is not compatible in DXA 1.1.
     /// <list type="bullet">
     ///     <item><see cref="GetPageModel"/> and <see cref="GetEntityModel"/> now returned strongly typed results (DXA View Models).</item>
-    ///     <item>All methods now have a parameter to explicitly pass in the context <see cref="ILocalization"/>.</item>
+    ///     <item>All methods now have a parameter to explicitly pass in the context <see cref="Localization"/>.</item>
     ///     <item>GetPageContent and GetEntityContent have been removed; these would leak the underlying data representation.</item>
     ///     <item>GetNavigationModel has been moved to a separate <see cref="INavigationProvider"/> interface.</item>
     ///     <item><see cref="GetStaticContentItem"/> method has been added.</item>
@@ -28,17 +29,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
         /// <returns>The Page Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given URL.</exception>
-        PageModel GetPageModel(string urlPath, ILocalization localization, bool addIncludes = true);
-
-        /// <summary>
-        /// Gets a Page Model for a given Page Id.
-        /// </summary>
-        /// <param name="pageId">Page Id</param>
-        /// <param name="localization">The context Localization.</param>
-        /// <param name="addIncludes">Indicates whether include Pages should be expanded.</param>
-        /// <returns>The Page Model.</returns>
-        /// <exception cref="DxaItemNotFoundException">If no Page Model exists for the given Id.</exception>
-        PageModel GetPageModel(int pageId, ILocalization localization, bool addIncludes = true);
+        PageModel GetPageModel(string urlPath, Localization localization, bool addIncludes = true);
 
         /// <summary>
         /// Gets an Entity Model for a given Entity Identifier.
@@ -47,7 +38,7 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="localization">The context Localization.</param>
         /// <returns>The Entity Model.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Entity Model exists for the given URL.</exception>
-        EntityModel GetEntityModel(string id, ILocalization localization);
+        EntityModel GetEntityModel(string id, Localization localization);
 
         /// <summary>
         /// Gets a Static Content Item (binary) for a given URL path.
@@ -56,22 +47,13 @@ namespace Sdl.Web.Common.Interfaces
         /// <param name="localization">The context Localization.</param>
         /// <returns>The Static Content Item.</returns>
         /// <exception cref="DxaItemNotFoundException">If no Static Content Item exists for the given URL.</exception>
-        StaticContentItem GetStaticContentItem(string urlPath, ILocalization localization);
-
-        /// <summary>
-        /// Gets a Static Content Item (binary) for a given binary Id.
-        /// </summary>
-        /// <param name="binaryId">Id of binary.</param>
-        /// <param name="localization">The context Localization.</param>
-        /// <returns>The Static Content Item.</returns>
-        /// <exception cref="DxaItemNotFoundException">If no Static Content Item exists for the given URL.</exception>
-        StaticContentItem GetStaticContentItem(int binaryId, ILocalization localization);
+        StaticContentItem GetStaticContentItem(string urlPath, Localization localization);
 
         /// <summary>
         /// Populates a Dynamic List by executing the query it specifies.
         /// </summary>
         /// <param name="dynamicList">The Dynamic List which specifies the query and is to be populated.</param>
         /// <param name="localization">The context Localization.</param>
-        void PopulateDynamicList(DynamicList dynamicList, ILocalization localization);
+        void PopulateDynamicList(DynamicList dynamicList, Localization localization);
     }
 }

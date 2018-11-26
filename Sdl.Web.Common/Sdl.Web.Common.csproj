@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.1.0-beta-201810171524</SdlDxaDataModelPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.1.0</SdlDxaDataModelPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -97,10 +97,10 @@
     <Compile Include="Interfaces\IBinaryProvider.cs" />
     <Compile Include="Interfaces\ICacheProvider.cs" />
     <Compile Include="Interfaces\IConditionalEntityEvaluator.cs" />
+    <Compile Include="Interfaces\IContentProviderExt.cs" />
     <Compile Include="Interfaces\IContextClaimsProvider.cs" />
     <Compile Include="Interfaces\IDataModelExtension.cs" />
     <Compile Include="Interfaces\ILinkResolver.cs" />
-    <Compile Include="Interfaces\ILocalization.cs" />
     <Compile Include="Interfaces\ILocalizationMappingsManager.cs" />
     <Compile Include="Interfaces\ILocalizationResolver.cs" />
     <Compile Include="Interfaces\ILocalizationResources.cs" />
@@ -128,7 +128,7 @@
     <Compile Include="Models\Entity\ExceptionEntity.cs" />
     <Compile Include="Models\EntityModel.cs" />
     <Compile Include="Models\Entity\Configuration.cs" />
-    <Compile Include="Models\Entity\Topic.cs" />
+    <Compile Include="Models\Entity\GenericTopic.cs" />
     <Compile Include="Models\KeywordModel.cs" />
     <Compile Include="Models\Navigation\TaxonomyNode.cs" />
     <Compile Include="Models\ISyndicationFeedItemProvider.cs" />

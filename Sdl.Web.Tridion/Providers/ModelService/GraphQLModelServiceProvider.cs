@@ -8,6 +8,7 @@ using Sdl.Tridion.Api.Client.ContentModel;
 using Sdl.Tridion.Api.Client.Exceptions;
 using Sdl.Tridion.Api.GraphQL.Client.Exceptions;
 using Sdl.Web.Common;
+using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
@@ -51,7 +52,7 @@ namespace Sdl.Web.Tridion.ModelService
             }
         }
 
-        public EntityModelData GetEntityModelData(string entityId, ILocalization localization)
+        public EntityModelData GetEntityModelData(string entityId, Localization localization)
         {
             try
             {
@@ -79,7 +80,7 @@ namespace Sdl.Web.Tridion.ModelService
             }
         }
 
-        public PageModelData GetPageModelData(int pageId, ILocalization localization, bool addIncludes)
+        public PageModelData GetPageModelData(int pageId, Localization localization, bool addIncludes)
         {
             try
             {
@@ -101,7 +102,7 @@ namespace Sdl.Web.Tridion.ModelService
             }
         }
 
-        public PageModelData GetPageModelData(string urlPath, ILocalization localization, bool addIncludes)
+        public PageModelData GetPageModelData(string urlPath, Localization localization, bool addIncludes)
         {
             const string msg =
                "PCA client returned an unexpected response when retrieving page model data for page url {0} or {1}.";
@@ -150,7 +151,7 @@ namespace Sdl.Web.Tridion.ModelService
             return LoadModel<PageModelData>(json);
         }
 
-        public TaxonomyNode GetSitemapItem(ILocalization localization)
+        public TaxonomyNode GetSitemapItem(Localization localization)
         {
             try
             {
@@ -171,7 +172,7 @@ namespace Sdl.Web.Tridion.ModelService
             }
         }
 
-        public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, ILocalization localization, bool includeAncestors, int descendantLevels)
+        public SitemapItem[] GetChildSitemapItems(string parentSitemapItemId, Localization localization, bool includeAncestors, int descendantLevels)
             => SitemapHelpers.Convert(
                     GetChildSitemapItemsInternal(
                         parentSitemapItemId, localization, includeAncestors, descendantLevels
@@ -182,7 +183,7 @@ namespace Sdl.Web.Tridion.ModelService
         /// Replicate the behavior of the CIL implementation when it comes to requesting items rooted at
         /// a point with a specific depth level + include ancestors
         /// </summary>
-        protected List<ISitemapItem> GetChildSitemapItemsInternal(string parentSitemapItemId, ILocalization localization, bool includeAncestors, int descendantLevels)
+        protected List<ISitemapItem> GetChildSitemapItemsInternal(string parentSitemapItemId, Localization localization, bool includeAncestors, int descendantLevels)
         {
             try
             {

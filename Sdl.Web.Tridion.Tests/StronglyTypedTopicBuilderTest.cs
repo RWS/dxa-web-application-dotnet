@@ -1,7 +1,6 @@
 ﻿using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Mapping;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sdl.Web.Common.Models.Entity;
 using Sdl.Web.Common;
 using Sdl.Web.Tridion.Tests.Models.Topic;
 using Sdl.Web.Tridion.Tests.Models;
@@ -109,7 +108,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void BuildEntityModel_ThroughModelBuilderPipeline_Success()
         {
-            ILocalization testLocalization = new DocsLocalization();
+            Localization testLocalization = new DocsLocalization();
             testLocalization.EnsureInitialized();
 
             string testTopicId = "1612-1970";

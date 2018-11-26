@@ -97,7 +97,7 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         /// <param name="localization">The context Localization.</param>
         /// <returns>The XPM markup.</returns>
-        public override string GetXpmMarkup(ILocalization localization)
+        public override string GetXpmMarkup(Localization localization)
         {
             XpmRegion xpmRegion =  localization.GetXpmRegionConfiguration(SchemaId ?? Name);
             if (xpmRegion == null)
@@ -189,7 +189,7 @@ namespace Sdl.Web.Common.Models
         /// </summary>
         /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>The extracted syndication feed items; a concatentation of syndication feed items provided by <see cref="Entities"/> (if any).</returns>
-        public virtual IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(ILocalization localization)
+        public virtual IEnumerable<SyndicationItem> ExtractSyndicationFeedItems(Localization localization)
         {
             return ConcatenateSyndicationFeedItems(Entities.OfType<ISyndicationFeedItemProvider>(), localization);
         }
@@ -202,7 +202,7 @@ namespace Sdl.Web.Common.Models
         /// <remarks>
         /// Applies to this Region and all its nested Regions.
         /// </remarks>
-        public void FilterConditionalEntities(ILocalization localization)
+        public void FilterConditionalEntities(Localization localization)
         {
             using (new Tracer(localization, this))
             {

@@ -19,8 +19,8 @@
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <TargetFrameworkProfile />
-    <DxaDataModelVersion>2.1.0-beta-201810171524</DxaDataModelVersion>
-    <SdlPCAPackageVersion>2.1.0-beta-201810301130</SdlPCAPackageVersion>
+    <DxaDataModelVersion>2.1.0</DxaDataModelVersion>
+    <SdlPCAPackageVersion>2.1.0</SdlPCAPackageVersion>
     <SdlDeliveryVersion>11.0.0</SdlDeliveryVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -124,6 +124,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CacheProviderTest.cs" />
+    <Compile Include="CdApiLocalizationResolverTest.cs" />
+    <Compile Include="DefaultContentProviderTest.cs" />
+    <Compile Include="GraphQLLocalizationResolverTest.cs" />
+    <Compile Include="GraphQLMashupLocalizationResolverTest.cs" />
+    <Compile Include="LegacyDynamicNavigationProviderTest.cs" />
     <Compile Include="LocalizationResolverTest.cs" />
     <Compile Include="ContextServiceClaimsProviderTest.cs" />
     <Compile Include="DefaultCacheProviderTest.cs" />
@@ -146,6 +151,7 @@
     <Compile Include="Models\Entity\Tsi2844TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi3010TestEntity.cs" />
     <Compile Include="Models\Entity\Tsi811TestEntity.cs" />
+    <Compile Include="Models\Page\Tsi2844PageModel.cs" />
     <Compile Include="Models\Page\Tsi2285PageModel.cs" />
     <Compile Include="Models\Page\Tsi811PageModel.cs" />
     <Compile Include="ContentProviderTest.cs" />

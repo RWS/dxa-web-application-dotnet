@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using Sdl.Tridion.Api.Client.Utils;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Tridion.Api.Client.ContentModel;
 using Sdl.Web.Tridion.ApiClient;
@@ -26,7 +25,7 @@ namespace Sdl.Web.Tridion
         /// <param name="url">The URL to resolve.</param>
         /// <returns>A <see cref="ILocalization"/> instance which base URL matches that of the given URL.</returns>
         /// <exception cref="DxaUnknownLocalizationException">If no matching Localization can be found.</exception>
-        public override ILocalization ResolveLocalization(Uri url)
+        public override Localization ResolveLocalization(Uri url)
         {
             using (new Tracer(url))
             {
@@ -34,11 +33,11 @@ namespace Sdl.Web.Tridion
             }
         }
       
-        public override ILocalization GetLocalization(string localizationId)
+        public override Localization GetLocalization(string localizationId)
         {
             using (new Tracer(localizationId))
             {
-                ILocalization result;
+                Localization result;
                 if (!KnownLocalizations.TryGetValue(localizationId, out result))
                 {
                     // Check for namespace prefix (ish: or tcm:)
@@ -50,7 +49,7 @@ namespace Sdl.Web.Tridion
                     else if (localizationId.StartsWith("tcm:"))
                     {
                         CmUri uri = CmUri.FromString(localizationId);
-                        result = new Localization { Id = uri.PublicationId.ToString() };
+                        result = new Localization { Id = uri.ItemId.ToString() };
                     }
                     else
                     {
@@ -67,7 +66,7 @@ namespace Sdl.Web.Tridion
             }
         }
 
-        protected virtual ILocalization ResolveDocsLocalization(Uri url)
+        protected virtual Localization ResolveDocsLocalization(Uri url)
         {
             // Try if the URL looks like a Tridion Docs / DDWebApp URL
             string urlPath = url.GetComponents(UriComponents.Path, UriFormat.Unescaped);
@@ -78,7 +77,7 @@ namespace Sdl.Web.Tridion
                 return null; // No, it doesn't
 
             string localizationId = match.Groups["pubId"].Value;
-            ILocalization result;
+            Localization result;
             if (!KnownLocalizations.TryGetValue(localizationId, out result))
             {
                 result = new DocsLocalization { Id = localizationId };

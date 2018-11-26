@@ -4,15 +4,14 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
-using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
 using Sdl.Web.Common;
-using Sdl.Web.Common.Models.Entity;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Mapping;
 using System.Collections;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Tridion.Mapping
 {
@@ -36,7 +35,7 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="entityModelData">The DXA R2 Data Model.</param>
         /// <param name="baseModelType">The base type for the Entity Model to build.</param>
         /// <param name="localization">The context <see cref="ILocalization"/>.</param>
-        public void BuildEntityModel(ref EntityModel entityModel, EntityModelData entityModelData, Type baseModelType, ILocalization localization)
+        public void BuildEntityModel(ref EntityModel entityModel, EntityModelData entityModelData, Type baseModelType, Localization localization)
         {
             using (new Tracer(entityModel, entityModelData, baseModelType, localization))
             {

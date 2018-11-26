@@ -20,17 +20,17 @@ namespace Sdl.Web.Tridion.Providers.Binary
     {
         protected static readonly string DateTimeFormat = "MM/dd/yyyy HH:mm:ss";
 
-        public DateTime GetBinaryLastPublishedDate(ILocalization localization, string urlPath)
+        public DateTime GetBinaryLastPublishedDate(Localization localization, string urlPath)
         {
             return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}", CacheRegions.BinaryPublishDate, () =>
             {
                 var client = ApiClientFactory.Instance.CreateClient();
                 var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(), urlPath, null, null);
-                return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+                return binary == null ? DateTime.MinValue : DateTime.ParseExact(binary.LastPublishDate, DateTimeFormat, null);
             });
         }
 
-        public async Task<DateTime> GetBinaryLastPublishedDateAsync(ILocalization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<DateTime> GetBinaryLastPublishedDateAsync(Localization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
                 CacheRegions.BinaryPublishDate,
@@ -43,11 +43,11 @@ namespace Sdl.Web.Tridion.Providers.Binary
                                 urlPath, null, null, cancellationToken).ConfigureAwait(false);
                     return binary == null
                         ? DateTime.MinValue
-                        : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+                        : DateTime.ParseExact(binary.LastPublishDate, DateTimeFormat, null);
                 });
         }
 
-        public DateTime GetBinaryLastPublishedDate(ILocalization localization, int binaryId)
+        public DateTime GetBinaryLastPublishedDate(Localization localization, int binaryId)
         {
             return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
                 CacheRegions.BinaryPublishDate,
@@ -58,11 +58,11 @@ namespace Sdl.Web.Tridion.Providers.Binary
                         binaryId, null, null);
                     return binary == null
                         ? DateTime.MinValue
-                        : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+                        : DateTime.ParseExact(binary.LastPublishDate, DateTimeFormat, null);
                 });
         }
 
-        public async Task<DateTime> GetBinaryLastPublishedDateAsync(ILocalization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<DateTime> GetBinaryLastPublishedDateAsync(Localization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
                 CacheRegions.BinaryPublishDate,
@@ -75,11 +75,11 @@ namespace Sdl.Web.Tridion.Providers.Binary
                                 binaryId, null, null, cancellationToken).ConfigureAwait(false);
                     return binary == null
                         ? DateTime.MinValue
-                        : DateTime.ParseExact(binary.InitialPublishDate, DateTimeFormat, null);
+                        : DateTime.ParseExact(binary.LastPublishDate, DateTimeFormat, null);
                 });
         }
 
-        public Tuple<byte[],string> GetBinary(ILocalization localization, int binaryId)
+        public Tuple<byte[], string> GetBinary(Localization localization, int binaryId)
         {
             return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
                 CacheRegions.Binary,
@@ -95,7 +95,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
                 });
         }
 
-        public async Task<Tuple<byte[], string>> GetBinaryAsync(ILocalization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Tuple<byte[], string>> GetBinaryAsync(Localization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
                 CacheRegions.Binary,
@@ -110,9 +110,9 @@ namespace Sdl.Web.Tridion.Providers.Binary
                     if (data == null) throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
                     return data;
                 });
-        }             
+        }
 
-        public Tuple<byte[],string> GetBinary(ILocalization localization, string urlPath)
+        public Tuple<byte[], string> GetBinary(Localization localization, string urlPath)
         {
             return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
                 CacheRegions.Binary,
@@ -127,7 +127,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
                 });
         }
 
-        public async Task<Tuple<byte[], string>> GetBinaryAsync(ILocalization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Tuple<byte[], string>> GetBinaryAsync(Localization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
                 CacheRegions.Binary,
@@ -144,10 +144,10 @@ namespace Sdl.Web.Tridion.Providers.Binary
                 });
         }
 
-        protected virtual Tuple<byte[],string> GetBinaryData(IGraphQLClient client, BinaryComponent binaryComponent)
+        protected virtual Tuple<byte[], string> GetBinaryData(IGraphQLClient client, BinaryComponent binaryComponent)
         {
             if (binaryComponent == null) return null;
-          
+
             if (binaryComponent?.Variants == null)
             {
                 Log.Error("Unable to get binary data for CmUri (Variants null): " + binaryComponent.CmUri());
@@ -172,11 +172,11 @@ namespace Sdl.Web.Tridion.Providers.Binary
                     AbsoluteUri = variant.DownloadUrl
                 }).ResponseData, variant.Path);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Error(ex, "Unable to get binary data for CmUri: " + binaryComponent.CmUri());
                 return null;
-            }          
+            }
         }
 
         protected virtual async Task<Tuple<byte[], string>> GetBinaryDataAsync(IGraphQLClient client, BinaryComponent binaryComponent, CancellationToken cancellationToken = default(CancellationToken))
@@ -204,6 +204,6 @@ namespace Sdl.Web.Tridion.Providers.Binary
                 Log.Error(ex, "Unable to get binary data for CmUri: " + binaryComponent.CmUri());
                 return null;
             }
-        }       
+        }
     }
 }

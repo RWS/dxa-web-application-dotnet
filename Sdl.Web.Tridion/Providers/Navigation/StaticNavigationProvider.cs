@@ -23,7 +23,7 @@ namespace Sdl.Web.Tridion.Navigation
         /// </summary>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Model (Sitemap root Item).</returns>
-        public virtual SitemapItem GetNavigationModel(ILocalization localization)
+        public virtual SitemapItem GetNavigationModel(Localization localization)
         {
             using (new Tracer(localization))
             {
@@ -42,7 +42,7 @@ namespace Sdl.Web.Tridion.Navigation
         /// <param name="requestUrlPath">The request URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Links.</returns>
-        public virtual NavigationLinks GetTopNavigationLinks(string requestUrlPath, ILocalization localization)
+        public virtual NavigationLinks GetTopNavigationLinks(string requestUrlPath, Localization localization)
         {
             using (new Tracer(requestUrlPath, localization))
             {
@@ -60,7 +60,7 @@ namespace Sdl.Web.Tridion.Navigation
         /// <param name="requestUrlPath">The request URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Links.</returns>
-        public virtual NavigationLinks GetContextNavigationLinks(string requestUrlPath, ILocalization localization)
+        public virtual NavigationLinks GetContextNavigationLinks(string requestUrlPath, Localization localization)
         {
             using (new Tracer(requestUrlPath, localization))
             {
@@ -98,7 +98,7 @@ namespace Sdl.Web.Tridion.Navigation
         /// <param name="requestUrlPath">The request URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The Navigation Links.</returns>
-        public virtual NavigationLinks GetBreadcrumbNavigationLinks(string requestUrlPath, ILocalization localization)
+        public virtual NavigationLinks GetBreadcrumbNavigationLinks(string requestUrlPath, Localization localization)
         {
             using (new Tracer(requestUrlPath, localization))
             {
@@ -126,7 +126,7 @@ namespace Sdl.Web.Tridion.Navigation
         }
         #endregion
 
-        private SitemapItem BuildNavigationModel(ILocalization localization)
+        private SitemapItem BuildNavigationModel(Localization localization)
         {
             using (new Tracer(localization))
             {

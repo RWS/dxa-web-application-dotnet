@@ -1,6 +1,6 @@
 ﻿using Sdl.Web.Common.Models;
 using System.Collections.Generic;
-using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Configuration;
 
 namespace Sdl.Web.Tridion.Tests.Models.Topic
 {
@@ -19,7 +19,7 @@ namespace Sdl.Web.Tridion.Tests.Models.Topic
         [SemanticProperty("lcBaseBody")]
         public TestSpecializedBody Body { get; set; }
 
-        public override MvcData GetDefaultView(ILocalization localization)
+        public override MvcData GetDefaultView(Localization localization)
         {
             return new MvcData("Test:Topic:TestSpecializedTopic");
         }
@@ -37,7 +37,7 @@ namespace Sdl.Web.Tridion.Tests.Models.Topic
         [SemanticProperty("section")]
         public List<TestSpecializedSection> Sections { get; set; }
 
-        public override MvcData GetDefaultView(ILocalization localization)
+        public override MvcData GetDefaultView(Localization localization)
         {
             return new MvcData("Test:Entity:TestSpecializedBody");
         }

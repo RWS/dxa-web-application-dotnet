@@ -8,25 +8,24 @@ using Sdl.Web.Common.Interfaces;
 namespace Sdl.Web.Tridion.Tests
 {
     [TestClass]
-    public class LocalizationResolverTest : TestClass
+    public abstract class LocalizationResolverTest : TestClass
     {
-        private const string TestBaseUrl = "http://dxatest.ams.dev:98";
+        protected const string TestBaseUrl = "http://dxatest.ams.dev:98";
 
-        private static readonly ILocalizationResolver _testLocalizationResolver = new GraphQLLocalizationResolver();
+        protected readonly ILocalizationResolver _testLocalizationResolver = new GraphQLLocalizationResolver();
 
-        [ClassInitialize]
-        public static void Initialize(TestContext testContext)
+        protected LocalizationResolverTest(ILocalizationResolver testLocalizationResolver)
         {
-            DefaultInitialize(testContext);
+            _testLocalizationResolver = testLocalizationResolver;
         }
 
         [TestMethod]
         public void ResolveLocalization_Existing_Success()
         {
-            ILocalization testLocalization = TestFixture.ParentLocalization;
+            Localization testLocalization = TestFixture.ParentLocalization;
             Uri testUrl = new Uri(TestBaseUrl + testLocalization.Path);
 
-            ILocalization resolvedLocalization =  _testLocalizationResolver.ResolveLocalization(testUrl);
+            Localization resolvedLocalization =  _testLocalizationResolver.ResolveLocalization(testUrl);
 
             Assert.IsNotNull(resolvedLocalization, "resolvedLocalization");
             OutputJson(resolvedLocalization);
@@ -40,12 +39,12 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void ResolveLocalization_EscapedChars_Success() // See CRQ-1585
         {
-            ILocalization testLocalization = TestFixture.ParentLocalization;
+            Localization testLocalization = TestFixture.ParentLocalization;
             string testPageUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1278PageRelativeUrlPath);
 
             Uri testUrl = new Uri(TestBaseUrl + testPageUrlPath);
 
-            ILocalization resolvedLocalization = _testLocalizationResolver.ResolveLocalization(testUrl);
+            Localization resolvedLocalization = _testLocalizationResolver.ResolveLocalization(testUrl);
 
             Assert.IsNotNull(resolvedLocalization, "resolvedLocalization");
             OutputJson(resolvedLocalization);
@@ -66,13 +65,13 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetLocalization_Known_Success()
         {
-            ILocalization testLocalization = TestFixture.ParentLocalization;
+            Localization testLocalization = TestFixture.ParentLocalization;
             Uri testUrl = new Uri(TestBaseUrl + testLocalization.Path);
 
             // Ensure that the test Localization is Known and initialized before starting the test
             _testLocalizationResolver.ResolveLocalization(testUrl);
 
-            ILocalization resolvedLocalization = _testLocalizationResolver.GetLocalization(testLocalization.Id);
+            Localization resolvedLocalization = _testLocalizationResolver.GetLocalization(testLocalization.Id);
 
             Assert.IsNotNull(resolvedLocalization, "resolvedLocalization");
             OutputJson(resolvedLocalization);
@@ -87,7 +86,7 @@ namespace Sdl.Web.Tridion.Tests
         {
             string testLocalizationId = "666666";
 
-            ILocalization resolvedLocalization = _testLocalizationResolver.GetLocalization(testLocalizationId);
+            Localization resolvedLocalization = _testLocalizationResolver.GetLocalization(testLocalizationId);
 
             // ILocalizationResolver.GetLocalization on an unknown Localization ID should return a Localization instance with only LocalizationId set.
             Assert.IsNotNull(resolvedLocalization, "resolvedLocalization");

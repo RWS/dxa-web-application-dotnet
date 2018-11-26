@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Tests.Models;
 using Sdl.Web.DataModel;
@@ -9,6 +8,9 @@ using Sdl.Web.DataModel.Extension;
 
 namespace Sdl.Web.Tridion.Tests
 {
+    /// <summary>
+    /// Unit/integration tests for the <see cref="GraphQLContentProvider"/> using R2 Data Model.
+    /// </summary>
     [TestClass]
     public class R2ContentProviderTest : ContentProviderTest
     {
@@ -69,7 +71,7 @@ namespace Sdl.Web.Tridion.Tests
         [TestMethod]
         public void GetPageModel_RetrofitMapping_Success() // See TSI-1757
         {
-            ILocalization testLocalization = TestFixture.ChildLocalization;
+            Localization testLocalization = TestFixture.ChildLocalization;
             string testPageUrlPath = testLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1757PageRelativeUrlPath);
 
             PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, testLocalization, addIncludes: false);
@@ -132,7 +134,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_WithInheritedMetadata_Success() // See TSI-2844, TSI-3723
+        public void GetPageModel_WithInheritedEntityMetadata_Success() // See TSI-2844, TSI-3723
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2844PageRelativeUrlPath);
 
@@ -153,8 +155,25 @@ namespace Sdl.Web.Tridion.Tests
             string[] schemas = testEntity.ExtensionData["Schemas"] as string[];
             Assert.IsNotNull(schemas, "schemas");
             Assert.AreEqual(1, schemas.Length, "schemas.Length");
+        }
 
-            // TODO: Test metadata inheritance on Page Model itself
+        [TestMethod]
+        public void GetPageModel_WithInheritedPageMetadata_Success() // See TSI-2844, CRQ-12170
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2844Page2RelativeUrlPath);
+
+            Tsi2844PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false) as Tsi2844PageModel;
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Assert.AreEqual("TSI-2844 Structure Group Metadata", pageModel.FolderMetadataTextField, "pageModel.FolderMetadataTextField");
+
+            // Traces of the use of Extension Data to convey the Schema IDs of the ancestor Metadata Schemas
+            Assert.IsNotNull(pageModel.ExtensionData, "pageModel.ExtensionData");
+            string[] schemas = pageModel.ExtensionData["Schemas"] as string[];
+            Assert.IsNotNull(schemas, "schemas");
+            Assert.AreEqual(1, schemas.Length, "schemas.Length");
         }
 
     }

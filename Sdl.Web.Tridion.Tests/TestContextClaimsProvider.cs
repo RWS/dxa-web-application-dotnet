@@ -7,7 +7,7 @@ namespace Sdl.Web.Tridion.Tests
 {
     internal class TestContextClaimsProvider : IContextClaimsProvider
     {
-        public IDictionary<string, object> GetContextClaims(string aspectName, ILocalization localization)
+        public IDictionary<string, object> GetContextClaims(string aspectName, Localization localization)
         {
             throw new NotImplementedException();
         }

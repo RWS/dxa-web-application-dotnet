@@ -2,7 +2,6 @@
 using Sdl.Web.Common.Models;
 using Sdl.Web.Tridion.Tests.Models;
 using Sdl.Web.Tridion.Tests.Models.Topic;
-using Sdl.Web.Common.Models.Entity;
 
 namespace Sdl.Web.Tridion.Tests
 {
@@ -52,11 +51,15 @@ namespace Sdl.Web.Tridion.Tests
             RegisterViewModel("Test:SimpleTestPage", typeof(PageModel));
             RegisterViewModel("Test:TSI811TestPage", typeof(Tsi811PageModel));
             RegisterViewModel("Test:TSI2285TestPage", typeof(Tsi2285PageModel));
+            RegisterViewModel("Test:TSI2844Page", typeof(Tsi2844PageModel));
 
             // Region Views
             RegisterViewModel("2-Column", typeof(RegionModel));
             RegisterViewModel("3-Column", typeof(RegionModel));
             RegisterViewModel("4-Column", typeof(RegionModel));
+            RegisterViewModel("Multi-Column", typeof(RegionModel));
+            RegisterViewModel("Additional", typeof(RegionModel));
+            RegisterViewModel("Article", typeof(RegionModel));
             RegisterViewModel("Hero", typeof(RegionModel));
             RegisterViewModel("Info", typeof(RegionModel));
             RegisterViewModel("Left", typeof(RegionModel));

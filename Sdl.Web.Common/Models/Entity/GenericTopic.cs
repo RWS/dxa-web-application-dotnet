@@ -1,8 +1,7 @@
-﻿using Newtonsoft.Json;
-using Sdl.Web.Common.Logging;
+﻿using Sdl.Web.Common.Logging;
 using System;
 
-namespace Sdl.Web.Common.Models.Entity
+namespace Sdl.Web.Common.Models
 {
 
     /// <summary>
@@ -21,7 +20,6 @@ namespace Sdl.Web.Common.Models.Entity
         /// Gets or sets the topic title.
         /// </summary>
         [SemanticProperty("topicTitle")]
-        [JsonProperty(PropertyName = "topicTitle")] // DDWebApp expects camel case
         public string TopicTitle { get; set; }
 
         /// <summary>
@@ -31,7 +29,6 @@ namespace Sdl.Web.Common.Models.Entity
         /// The topic body is an XHTML fragment which contains _all_ DITA properties (incl. title, body, related-links, nested topics)
         /// </remarks>
         [SemanticProperty("topicBody")]
-        [JsonProperty(PropertyName = "topicBody")] // DDWebApp expects camel case
         public string TopicBody { get; set; }
 
         /// <summary>

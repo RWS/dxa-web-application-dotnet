@@ -7,14 +7,11 @@ using Sdl.Tridion.Api.Client.ContentModel;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common.Models;
-using Sdl.Web.Common.Models.Navigation;
 using Sdl.Web.Tridion.ApiClient;
 using Sdl.Web.Tridion.Linking;
 using Sdl.Web.Tridion.Navigation;
 using Sdl.Web.Tridion.Caching;
 using Sdl.Web.Tridion.Mapping;
-using Sdl.Web.Tridion.ModelService;
 using Sdl.Web.Tridion.Providers.Binary;
 
 namespace Sdl.Web.Tridion.Tests
@@ -52,18 +49,18 @@ namespace Sdl.Web.Tridion.Tests
         internal const string Tsi2287PageRelativeUrlPath = "system/include/header";
         internal const string Tsi2316PageRelativeUrlPath = "regression/tsi-2316";
         internal const string Tsi2844PageRelativeUrlPath = "regression/tsi-2844";
+        internal const string Tsi2844Page2RelativeUrlPath = "regression/tsi-2844/tsi-2844-page-metadata";
         internal const string Tsi3010PageRelativeUrlPath = "regression/tsi-3010";
 
-        private static readonly IEnumerable<ILocalization> _testLocalizations;
-        private static readonly ILocalization _parentLocalization;
-        private static readonly ILocalization _childLocalization;
-        private static readonly ILocalization _legacyParentLocalization;
-        private static readonly ILocalization _legacyChildLocalization;
+        private static readonly IEnumerable<Localization> _testLocalizations;
+        private static readonly Localization _parentLocalization;
+        private static readonly Localization _childLocalization;
+        private static readonly Localization _legacyParentLocalization;
+        private static readonly Localization _legacyChildLocalization;
 
         private static readonly IDictionary<Type, object> _testProviders = new Dictionary<Type, object>
         {
             { typeof(ICacheProvider), new DefaultCacheProvider() },
-            { typeof(IModelServiceProvider), new GraphQLModelServiceProvider() },
             { typeof(IContentProvider), new GraphQLContentProvider() },
             { typeof(INavigationProvider), new StaticNavigationProvider() },
             { typeof(ILinkResolver), new GraphQLLinkResolver() },
@@ -155,7 +152,7 @@ namespace Sdl.Web.Tridion.Tests
             TestRegistration.RegisterViewModels();
         }
 
-        internal static ILocalization ParentLocalization
+        internal static Localization ParentLocalization
         {
             get
             {
@@ -164,7 +161,7 @@ namespace Sdl.Web.Tridion.Tests
             }
         }
 
-        internal static ILocalization ChildLocalization
+        internal static Localization ChildLocalization
         {
             get
             {
@@ -173,7 +170,7 @@ namespace Sdl.Web.Tridion.Tests
             }
         }
 
-        internal static ILocalization LegacyParentLocalization
+        internal static Localization LegacyParentLocalization
         {
             get
             {
@@ -182,7 +179,7 @@ namespace Sdl.Web.Tridion.Tests
             }
         }
 
-        internal static ILocalization LegacyChildLocalization
+        internal static Localization LegacyChildLocalization
         {
             get
             {
@@ -194,32 +191,31 @@ namespace Sdl.Web.Tridion.Tests
             }
         }
 
-        internal static void InitializeProviders()
+        internal static void InitializeProviders(Type modelServiceProviderType)
         {
-            object msProvider;
-            if (_testProviders.TryGetValue(typeof(IModelServiceProvider), out msProvider))
-            {
-                IModelServiceProvider modelServiceProvider = (IModelServiceProvider)msProvider;
-                modelServiceProvider.AddDataModelExtension(new DefaultModelBuilder());
-            }
+            IModelServiceProvider modelServiceProvider = 
+                (IModelServiceProvider) Activator.CreateInstance(modelServiceProviderType);
+            modelServiceProvider.AddDataModelExtension(new DefaultModelBuilder());
 
             SiteConfiguration.InitializeProviders(interfaceType =>
             {
                 object provider;
+                if (interfaceType == typeof(IModelServiceProvider))
+                    return modelServiceProvider;
                 _testProviders.TryGetValue(interfaceType, out provider);
                 return provider;
             });
         }
 
         #region ILocalizationResolver members
-        public ILocalization ResolveLocalization(Uri url)
+        public Localization ResolveLocalization(Uri url)
         {
             throw new NotImplementedException();
         }
 
-        public ILocalization GetLocalization(string localizationId)
+        public Localization GetLocalization(string localizationId)
         {
-            ILocalization result = _testLocalizations.FirstOrDefault(loc => loc.Id == localizationId);
+            Localization result = _testLocalizations.FirstOrDefault(loc => loc.Id == localizationId);
             if (result == null)
             {
                 throw new DxaUnknownLocalizationException("Unknown Localization ID: " + localizationId);

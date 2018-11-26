@@ -15,12 +15,12 @@ namespace Sdl.Web.Tridion.Tests
     [TestClass]
     public abstract class ContentProviderTest : TestClass
     {
-        private readonly Func<ILocalization> _testLocalizationInitializer;
-        private ILocalization _testLocalization;
+        private readonly Func<Localization> _testLocalizationInitializer;
+        private Localization _testLocalization;
 
         protected IContentProvider TestContentProvider { get; }
 
-        protected ILocalization TestLocalization
+        protected Localization TestLocalization
         {
             get
             {
@@ -32,7 +32,7 @@ namespace Sdl.Web.Tridion.Tests
             }
         }
 
-        protected ContentProviderTest(IContentProvider contentProvider, Func<ILocalization> testLocalizationInitializer)
+        protected ContentProviderTest(IContentProvider contentProvider, Func<Localization> testLocalizationInitializer)
         {
             TestContentProvider = contentProvider;
             _testLocalizationInitializer = testLocalizationInitializer;
@@ -114,8 +114,13 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(pageModel, "pageModel");
             OutputJson(pageModel);
 
-            Assert.AreEqual("Header", pageModel.Title, "pageModel.Title");
-            Assert.AreEqual(2, pageModel.Regions.Count, "pageModel.Regions.Count");
+            Assert.AreEqual("Header", pageModel.Title, "pageModel.Title"); // This is the essence of this test (TSI-2287)
+            Assert.IsTrue(pageModel.Regions.ContainsKey("Nav"), "pageModel.Regions.ContainsKey('Nav')"); // Legacy Region
+            Assert.IsTrue(pageModel.Regions.ContainsKey("Info"), "pageModel.Regions.ContainsKey('Info')"); // Legacy Region
+            if (!TestLocalization.Path.Contains("legacy"))
+            {
+                Assert.IsTrue(pageModel.Regions.ContainsKey("Main"), "pageModel.Regions.ContainsKey('Main')"); // Native Region
+            }
         }
 
         [TestMethod]
@@ -502,7 +507,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_SmartTarget_Success()
+        public virtual void GetPageModel_SmartTarget_Success()
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.SmartTargetTestPageRelativeUrlPath);
 

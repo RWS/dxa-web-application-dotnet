@@ -2,7 +2,7 @@
 using Sdl.Web.Common.Models;
 using System;
 using System.Collections.Generic;
-using Sdl.Web.Common.Interfaces;
+using Sdl.Web.Common.Configuration;
 using IPage = DD4T.ContentModel.IPage;
 
 namespace Sdl.Web.Tridion.Mapping
@@ -18,8 +18,8 @@ namespace Sdl.Web.Tridion.Mapping
     /// <seealso cref="ModelBuilderPipeline"/>
     public interface IModelBuilder
     {
-        void BuildPageModel(ref PageModel pageModel, IPage page, IEnumerable<IPage> includes, ILocalization localization);
-        void BuildEntityModel(ref EntityModel entityModel, IComponentPresentation cp, ILocalization localization);
-        void BuildEntityModel(ref EntityModel entityModel, IComponent component, Type baseModelType, ILocalization localization);
+        void BuildPageModel(ref PageModel pageModel, IPage page, IEnumerable<IPage> includes, Localization localization);
+        void BuildEntityModel(ref EntityModel entityModel, IComponentPresentation cp, Localization localization);
+        void BuildEntityModel(ref EntityModel entityModel, IComponent component, Type baseModelType, Localization localization);
     }
 }

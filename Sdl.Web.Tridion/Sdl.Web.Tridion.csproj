@@ -12,8 +12,8 @@
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.1.0-beta-201810171524</SdlDxaDataModelPackageVersion>
-    <SdlPCAPackageVersion>2.1.0-beta-201810301130</SdlPCAPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.1.0</SdlDxaDataModelPackageVersion>
+    <SdlPCAPackageVersion>2.1.0</SdlPCAPackageVersion>
     <SdlWebDeliveryPackageVersion>11.0.0</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>11.0.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>11.0.0</SdlWebContextImagePackageVersion>
@@ -164,9 +164,6 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.3.0\lib\netstandard1.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation">
       <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
     </Reference>
@@ -204,7 +201,6 @@
     <Compile Include="ContentManager\CmUri.cs" />
     <Compile Include="Providers\Context\ContextServiceClaimsProvider.cs" />
     <Compile Include="Providers\GraphQLContentProvider.cs" />
-    <Compile Include="Providers\ModelService\ModelService.cs" />
     <Compile Include="Providers\Query\BrokerQueryProvider.cs" />
     <Compile Include="Providers\Query\GraphQLQueryProvider.cs" />
     <Compile Include="Resolvers\Linking\GraphQLLinkResolver.cs" />
@@ -237,8 +233,6 @@
     <Compile Include="Providers\ModelService\DefaultModelServiceProvider.cs" />
     <Compile Include="Providers\ModelService\GraphQLModelServiceProvider.cs" />
     <Compile Include="Providers\Navigation\DynamicNavigationProvider.cs" />
-    <Compile Include="Providers\Navigation\ModelServiceImpl\DynamicNavigationProvider.cs" />
-    <Compile Include="Providers\Navigation\CILImpl\DynamicNavigationProvider.cs" />
     <Compile Include="Providers\Navigation\StaticNavigationProvider.cs" />
     <Compile Include="ApiClient\ApiClientFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
