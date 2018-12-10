@@ -1,16 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
 using DD4T.ContentModel.Contracts.Caching;
 using DD4T.Utils.Caching;
+using Sdl.Web.Common.Interfaces;
 
 namespace Sdl.Web.Tridion.Caching
 {
     /// <summary>
     /// Default Cache Provider implementation based on CIL caching.
     /// </summary>
-    public class DefaultCacheProvider : CacheProvider
+    public class DefaultCacheProvider : ICacheProvider
     {
-        private readonly CacheProvider _cacheProvider;
+        private readonly ICacheProvider _cacheProvider;
 
         public DefaultCacheProvider()
         {
@@ -37,10 +39,7 @@ namespace Sdl.Web.Tridion.Caching
         /// <param name="value">The value. If <c>null</c>, this effectively removes the key from the cache.</param>
         /// <param name="dependencies">An optional set of dependent item IDs. Can be used to invalidate the cached item.</param>
         /// <typeparam name="T">The type of the value to add.</typeparam>
-        public override void Store<T>(string key, string region, T value, IEnumerable<string> dependencies = null)
-        {      
-            _cacheProvider.Store(key, region, value, dependencies);
-        }
+        public void Store<T>(string key, string region, T value, IEnumerable<string> dependencies = null) => _cacheProvider.Store(key, region, value, dependencies);
 
         /// <summary>
         /// Tries to get a cached value for a given key and cache region.
@@ -50,10 +49,18 @@ namespace Sdl.Web.Tridion.Caching
         /// <param name="value">The cached value (output).</param>
         /// <typeparam name="T">The type of the value to get.</typeparam>
         /// <returns><c>true</c> if a cached value was found for the given key and cache region.</returns>
-        public override bool TryGet<T>(string key, string region, out T value)
-        {
-            return _cacheProvider.TryGet(key, region, out value);
-        }
+        public bool TryGet<T>(string key, string region, out T value) => _cacheProvider.TryGet(key, region, out value);
+
+        /// <summary>
+        /// Tries to get a cached value for a given key and cache region adding a new value if it didn't already exist.
+        /// </summary>
+        /// <typeparam name="T">The type of the value to get.</typeparam>
+        /// <param name="key">The key.</param>
+        /// <param name="region">The name of the cache region. Different cache regions can have different retention policies.</param>
+        /// <param name="addFunction">Add function.</param>
+        /// <param name="dependencies">An optional set of dependent item IDs. Can be used to invalidate the cached item.</param>
+        /// <returns>Value to cache.</returns>
+        public T GetOrAdd<T>(string key, string region, Func<T> addFunction, IEnumerable<string> dependencies = null) => _cacheProvider.GetOrAdd(key, region, addFunction, dependencies);
 
         #endregion
     }

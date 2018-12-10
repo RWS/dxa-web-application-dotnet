@@ -157,6 +157,7 @@
     <Compile Include="Models\Query\Query.cs" />
     <Compile Include="Models\Query\SimpleBrokerQuery.cs" />
     <Compile Include="Utils\Hash.cs" />
+    <Compile Include="Utils\TimeOut.cs" />
     <Compile Include="Utils\UrlEncoding.cs" />
   </ItemGroup>
   <ItemGroup>
