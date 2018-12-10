@@ -1,107 +1,156 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Common.Logging;
+using Sdl.Web.Common.Utils;
 
 namespace Sdl.Web.Tridion.Caching
 {
     /// <summary>
-    /// Abstract base class for DXA Cache Providers
+    /// Abstract base class for DXA Cache Providers providing a lock-free thread safe wrapper.
     /// </summary>
     public abstract class CacheProvider : ICacheProvider
     {
-        private const int WaitForAddingTimeout = 15000; // ms
+        private const int Timeout = 15000; // in milliseconds
 
-        private static readonly IDictionary<string, EventWaitHandle> _addingEvents = new ConcurrentDictionary<string, EventWaitHandle>();
+        [ThreadStatic]
+        private static HashSet<uint> _reentries;
+        [ThreadStatic]
+        private static int _reentriesCount;
+        private readonly int[] _slots = new int[257];
 
-        #region ICacheProvider members
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract void Store<T>(string key, string region, T value, IEnumerable<string> dependencies = null);
 
-        public abstract bool TryGet<T>(string key, string region, out T value);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public abstract object Get(string key, string region, IEnumerable<string> dependencies = null);
 
-        /// <summary>
-        /// Tries to gets a value for a given key and cache region. If not found, add a value obtained from a given function.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="region">The name of the cache region. Different cache regions can have different retention policies.</param>
-        /// <param name="addFunction">A function (delegate) used to obtain the value to add in case an existing cached value is not found.</param>
-        /// <param name="dependencies">An optional set of dependent item IDs. Can be used to invalidate the cached item.</param>
-        /// <typeparam name="T">The type of the value to get or add.</typeparam>
-        /// <remarks>
-        /// This method is thread-safe; it prevents the same key being added by multiple threads in case of a race condition.
-        /// </remarks>
-        /// <returns>The cached value.</returns>
-        public virtual T GetOrAdd<T>(string key, string region, Func<T> addFunction, IEnumerable<string> dependencies = null)
+        public bool TryGet<T>(string key, string region, out T value)
         {
-            T result;
-            if (TryGet(key, region, out result))
+            var hash = CalcSlotIndex(key, region);
+            T cachedValue;
+            if (TryGetCachedValue(key, region, out cachedValue))
             {
-                return result;
+                value = cachedValue;
+                return true;
             }
 
-            // Indicate to other threads that we're adding a value
-            EventWaitHandle addingEvent = new ManualResetEvent(false);
-            string qualifiedKey = GetQualifiedKey(key, region);
-            try
+            // Spin while we wait for the lock to become available
+            uint t = TimeOut.GetTime();
+            while (Interlocked.CompareExchange(ref _slots[hash], 0, 0) != 0)
             {
-                _addingEvents.Add(qualifiedKey, addingEvent);
-            }
-            catch (ArgumentException)
-            {
-                // Another thread is already adding a value (race condition); retry getting the value.
-                if (TryGet(key, region, out result))
+                if (TryGetCachedValue(key, region, out cachedValue))
                 {
-                    return result;
+                    value = cachedValue;
+                    return true;
                 }
+                Thread.Sleep(1);
+                if (TimeOut.UpdateTimeOut(t, Timeout) <= 0) break;
             }
 
+            // Try again since another thread may of finished with this bucket
+            if (TryGetCachedValue(key, region, out cachedValue))
+            {
+                value = cachedValue;
+                return true;
+            }
+            value = default(T);
+            return false;
+        }
+
+        public T GetOrAdd<T>(string key, string region, Func<T> addFunction, IEnumerable<string> dependencies = null)
+        {
+            // Guard against a re-entrant caching call using the same cache key. 
+            // In this case we know we can return the generated value directly since it will be cached 
+            // at the highest level
+            if (_reentries == null) _reentries = new HashSet<uint>();
+            var hashKey = CalcHash(key, region);
+            if (_reentries.Contains(hashKey))
+            {
+                return addFunction();
+            }
             try
             {
-                // Obtain the actual value. This may be time-consuming (otherwise there would be no reason to cache).
-                result = addFunction();
-                Store(key, region, result, dependencies);
+                Interlocked.Increment(ref _reentriesCount);
+                _reentries.Add(hashKey);
+                T cachedValue;
+                if (TryGetCachedValue(key, region, out cachedValue)) return cachedValue;
+                var hash = CalcSlotIndex(key, region);
+                var threadId = Thread.CurrentThread.ManagedThreadId;
+                var usedBy = Interlocked.CompareExchange(ref _slots[hash], threadId, 0);
+                // If empty slot or used by current thread we can just create cache value since 
+                // other threads accessing this cache key have not created it.
+                if (usedBy == 0 || usedBy == threadId)
+                    return CreateCacheValue<T>(hash, key, region, addFunction, dependencies);
+
+                // Slot in use so someone else is potentially creating this cache value. Spin
+                // for a fixed length of time or until slot becomes free so we can grab it ourselves.
+                var t = TimeOut.GetTime();
+                while (Interlocked.CompareExchange(ref _slots[hash], threadId, 0) != 0)
+                {
+                    if (TryGetCachedValue(key, region, out cachedValue)) return cachedValue;
+                    Thread.Sleep(1);
+                    if (TimeOut.UpdateTimeOut(t, Timeout) <= 0) break;
+                }
+
+                return _slots[hash] == threadId ? CreateCacheValue<T>(hash, key, region, addFunction, dependencies) : addFunction();
             }
             finally
             {
-                // Unblock other threads which are awaiting it.
-                addingEvent.Set();
-                _addingEvents.Remove(qualifiedKey);
+                _reentries.Remove(hashKey);
+                Interlocked.Decrement(ref _reentriesCount);
             }
-
-            return result;
         }
-        #endregion
 
-        protected bool AwaitAddingValue(string key, string region)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool TryGetCachedValue<T>(string key, string region, out T value)
         {
-            string qualifiedKey = GetQualifiedKey(key, region);
-
-            // Check if another thread is adding a value for the key/region:
-            EventWaitHandle addingEvent;
-            if (!_addingEvents.TryGetValue(qualifiedKey, out addingEvent))
+            var cachedValue = Get(key, region);
+            if (cachedValue != null)
             {
-                return false;
-            }
-
-            Log.Debug("Awaiting adding of value for key '{0}' in region '{1}' ...", key, region);
-            if (!addingEvent.WaitOne(WaitForAddingTimeout))
-            {
-                // To facilitate diagnosis of deadlock conditions, first log a warning and then wait another timeout period.
-                Log.Warn("Waiting for adding of value for key '{0}' in cache region '{1}' for {2} seconds.", key, region, WaitForAddingTimeout / 1000);
-                if (!addingEvent.WaitOne(WaitForAddingTimeout))
+                if (!(cachedValue is T))
                 {
                     throw new DxaException(
-                        $"Timeout waiting for adding of value for key '{key}' in cache region '{region}'.");
+                        $"Cached value for key '{key}' in region '{region}' is of type {cachedValue.GetType().FullName} instead of {typeof(T).FullName}."
+                        );
                 }
+                value = (T)cachedValue;
+                return true;
             }
-            Log.Debug("Done awaiting.");
-
-            return true;
+            value = default(T);
+            return false;
         }
 
-        protected static string GetQualifiedKey(string key, string region) => $"{region}::{key}";
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private T CreateCacheValue<T>(uint hash, string key, string region, Func<T> addFunction,
+            IEnumerable<string> dependencies)
+        {
+            try
+            {
+                T cachedValue;
+                if (TryGetCachedValue<T>(key, region, out cachedValue)) return cachedValue;
+                var value = addFunction();
+                Store(key, region, value, dependencies);
+                return value;
+            }
+            finally
+            {
+                Interlocked.CompareExchange(ref _slots[hash], 0, Thread.CurrentThread.ManagedThreadId);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private uint CalcSlotIndex(string key, string region)
+            => ((CalcHash(key, region) % (uint)_slots.Length) * (uint)_reentriesCount) % (uint)_slots.Length;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static uint CalcHash(string key, string region)
+            => Hash.Murmur3(CalcHashKey(key, region));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static string CalcHashKey(string key, string region)
+            => $"{region}:{key}";
     }
 }
