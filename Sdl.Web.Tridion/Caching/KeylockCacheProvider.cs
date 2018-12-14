@@ -64,6 +64,7 @@ namespace Sdl.Web.Tridion.Caching
                         if (cachedValue == null && (cachedValue = addFunction()) != null)
                         {
                             // Note that dependencies are not used?
+                            Debug.Assert(_cilCacheProvider != null, "_cilCacheProvider != null");
                             _cilCacheProvider.Set(key, cachedValue, region);
                             Store(key, region, cachedValue, dependencies);
                         }
