@@ -18,8 +18,8 @@ namespace Sdl.Web.Tridion.Caching
             Debug.Assert(_cilCacheProvider != null, "_cilCacheProvider != null");
 
             // prevent deadlocks if we're storing something here and in GetOrAdd.
-
-            lock (KeyLocks.GetOrAdd(key, new object()))
+            var hash = CalcHashKey(key, region);
+            lock (KeyLocks.GetOrAdd(hash, new object()))
             {
                 try
                 {
@@ -29,7 +29,7 @@ namespace Sdl.Web.Tridion.Caching
                 {
                     // We don't need the lock anymore
                     object tempKeyLock;
-                    KeyLocks.TryRemove(key, out tempKeyLock);
+                    KeyLocks.TryRemove(hash, out tempKeyLock);
                 }
             }
         }
@@ -53,7 +53,9 @@ namespace Sdl.Web.Tridion.Caching
 
             if (cachedValue == null)
             {
-                lock (KeyLocks.GetOrAdd(key, new object()))
+                var hash = CalcHashKey(key, region);
+
+                lock (KeyLocks.GetOrAdd(hash, new object()))
                 {
                     try
                     {
@@ -73,7 +75,7 @@ namespace Sdl.Web.Tridion.Caching
                     {
                         // We don't need the lock anymore
                         object tempKeyLock;
-                        KeyLocks.TryRemove(key, out tempKeyLock);
+                        KeyLocks.TryRemove(hash, out tempKeyLock);
                     }
                 }
             }
@@ -87,7 +89,7 @@ namespace Sdl.Web.Tridion.Caching
             return (T) cachedValue;
         }
 
-        private string CalcHashKey(string key, string region)
+        private static string CalcHashKey(string key, string region)
         {
            return $"{region}:{key}";
         }
