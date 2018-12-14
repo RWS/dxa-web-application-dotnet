@@ -11,7 +11,7 @@ namespace Sdl.Web.Tridion.Caching
 {
     public class LockFreeCacheProvider : ICacheProvider
     {
-        private static readonly int Timeout = 15000; // lock aquire timeout in milliseconds
+        private static readonly int Timeout = 150; // lock aquire timeout in milliseconds
 
         [ThreadStatic]
         private static HashSet<uint> _reentries;
@@ -47,7 +47,6 @@ namespace Sdl.Web.Tridion.Caching
                     value = cachedValue;
                     return true;
                 }
-                Thread.Sleep(1);
                 if (TimeOut.UpdateTimeOut(t, Timeout) <= 0) break;
             }
 
@@ -95,9 +94,6 @@ namespace Sdl.Web.Tridion.Caching
                 {
                     cachedValue = GetCachedValue<T>(key, region);
                     if (cachedValue != null) return cachedValue;
-                    //hash += hash; // probe forward to identify a free slot
-                    //hash %= (uint)_slots.Length;
-                    Thread.Sleep(1);
                     if (TimeOut.UpdateTimeOut(t, Timeout) <= 0) break;
                 }
 
