@@ -86,7 +86,8 @@ namespace Sdl.Web.Tridion.Caching
         private T GetCachedValue<T>(string key, string region)
         {
             var cachedValue = _cilCacheProvider.Get(key, region);
-            return (T) cachedValue;
+
+            return cachedValue == null ? default(T) : (T) cachedValue;
         }
 
         private static string CalcHashKey(string key, string region)
