@@ -11,14 +11,15 @@ namespace Sdl.Web.Tridion.Caching
 {
     public class LockFreeCacheProvider : ICacheProvider
     {
-        private static readonly int Timeout = 150; // lock aquire timeout in milliseconds
+        private static readonly int WriteTimeout = 10; 
+        private static readonly int ReadTimeout = 150;
 
         [ThreadStatic]
         private static HashSet<uint> _reentries;
         [ThreadStatic]
-        private static int _reentriesCount = 0;
+        private static int _reentriesCount;
         private readonly ICacheProvider<object> _cilCacheProvider = CacheFactory<object>.CreateFromConfiguration();
-        private readonly int[] _slots = new int[257];
+        private readonly int[] _slots = new int[2053];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Store<T>(string key, string region, T value, IEnumerable<string> dependencies = null)
@@ -47,7 +48,7 @@ namespace Sdl.Web.Tridion.Caching
                     value = cachedValue;
                     return true;
                 }
-                if (TimeOut.UpdateTimeOut(t, Timeout) <= 0) break;
+                if (TimeOut.UpdateTimeOut(t, ReadTimeout) <= 0) break;
             }
 
             // Try again since another thread may of finished with this bucket
@@ -94,7 +95,7 @@ namespace Sdl.Web.Tridion.Caching
                 {
                     cachedValue = GetCachedValue<T>(key, region);
                     if (cachedValue != null) return cachedValue;
-                    if (TimeOut.UpdateTimeOut(t, Timeout) <= 0) break;
+                    if (TimeOut.UpdateTimeOut(t, WriteTimeout) <= 0) break;
                 }
 
                 return _slots[hash] == threadId ? CreateCacheValue<T>(hash, key, region, addFunction, dependencies) : addFunction();
