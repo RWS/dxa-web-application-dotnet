@@ -86,5 +86,10 @@ namespace Sdl.Web.Tridion.Caching
             var cachedValue = _cilCacheProvider.Get(key, region);
             return (T) cachedValue;
         }
+
+        private string CalcHashKey(string key, string region)
+        {
+           return $"{region}:{key}";
+        }
     }
 }
