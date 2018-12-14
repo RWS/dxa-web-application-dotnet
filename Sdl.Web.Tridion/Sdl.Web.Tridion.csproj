@@ -187,6 +187,7 @@
     <Compile Include="Caching\DxaCacheProvider.cs" />
     <Compile Include="Caching\DD4TCacheProvider.cs" />
     <Compile Include="Caching\DefaultCacheProvider.cs" />
+    <Compile Include="Caching\KeylockCacheProvider.cs" />
     <Compile Include="Caching\LockFreeCacheProvider.cs" />
     <Compile Include="Context\ContextServiceClaimsProvider.cs" />
     <Compile Include="CdApiLocalizationResolver.cs" />
