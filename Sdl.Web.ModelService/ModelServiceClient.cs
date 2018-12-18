@@ -104,7 +104,7 @@ namespace Sdl.Web.ModelService
             Uri requestUri = request.BuildRequestUri(this);
             bool success = true;
             uint hashcode = 0;
-            string responseBody = null;
+            string responseBody = string.Empty;
             try
             {
                 responseBody = PerformRequest(requestUri);
