@@ -52,6 +52,7 @@
     <Compile Include="Mapping\StronglyTypedTopicBuilder.cs" />
     <Compile Include="ApiClient\Extensions.cs" />
     <Compile Include="Providers\Caching\DxaCacheProvider.cs" />
+    <Compile Include="Providers\Caching\KeylockCacheProvider.cs" />
     <Compile Include="Providers\ModelService\SitemapHelpers.cs" />
     <Compile Include="Resolvers\Localization\GraphQLMashupLocalizationResolver.cs" />
     <Reference Include="DD4T.ContentModel">
