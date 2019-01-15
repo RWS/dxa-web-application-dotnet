@@ -93,8 +93,9 @@ namespace Sdl.Web.Tridion.Caching
                 Log.Warn("Waiting for adding of value for key '{0}' in cache region '{1}' for {2} seconds.", key, region, WaitForAddingTimeout / 1000);
                 if (!addingEvent.WaitOne(WaitForAddingTimeout))
                 {
-                    throw new DxaException(
-                        $"Timeout waiting for adding of value for key '{key}' in cache region '{region}'.");
+                    //throw new DxaException(
+                    //    $"Timeout waiting for adding of value for key '{key}' in cache region '{region}'.");
+                    return false;
                 }
             }
             Log.Debug("Done awaiting.");
