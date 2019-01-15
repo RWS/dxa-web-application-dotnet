@@ -1,22 +1,21 @@
-﻿using Sdl.Web.Delivery.DiscoveryService;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
-using System.IO;
-using Newtonsoft.Json;
-using Sdl.Web.Delivery.Service;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Sdl.Web.Delivery.DiscoveryService.Tridion.WebDelivery.Platform;
-using Sdl.Web.Delivery.ServicesCore.ClaimStore;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Sdl.Web.Delivery.Core;
+using Sdl.Web.Delivery.DiscoveryService;
+using Sdl.Web.Delivery.DiscoveryService.Tridion.WebDelivery.Platform;
+using Sdl.Web.Delivery.Service;
+using Sdl.Web.Delivery.ServicesCore.ClaimStore;
 using Sdl.Web.ModelService.Request;
 
 namespace Sdl.Web.ModelService
 {
     /// <summary>
-    /// Client for the DXA Model Service
+    ///     Client for the DXA Model Service
     /// </summary>
     public class ModelServiceClient
     {
@@ -34,20 +33,15 @@ namespace Sdl.Web.ModelService
 
         private class ModelServiceError
         {
-            [JsonProperty("status")]
-            public int Status { get; set; }
+            [JsonProperty("status")] public int Status { get; set; }
 
-            [JsonProperty("error")]
-            public string Error { get; set; }
+            [JsonProperty("error")] public string Error { get; set; }
 
-            [JsonProperty("exception")]
-            public string Exception { get; set; }
+            [JsonProperty("exception")] public string Exception { get; set; }
 
-            [JsonProperty("message")]
-            public string Message { get; set; }
+            [JsonProperty("message")] public string Message { get; set; }
 
-            [JsonProperty("path")]
-            public string Path { get; set; }
+            [JsonProperty("path")] public string Path { get; set; }
 
             public override string ToString()
                 => $"Status={Status}, Error='{Error}', Exception='{Exception}', Message='{Message}', Path='{Path}'";
@@ -89,7 +83,7 @@ namespace Sdl.Web.ModelService
         };
 
         /// <summary>
-        /// Perform Model Service request
+        ///     Perform Model Service request
         /// </summary>
         public ModelServiceResponse<string> PerformRequest(IModelServiceRequest request)
         {
@@ -97,14 +91,14 @@ namespace Sdl.Web.ModelService
         }
 
         /// <summary>
-        /// Perform Model Service request
+        ///     Perform Model Service request
         /// </summary>
         public ModelServiceResponse<T> PerformRequest<T>(IModelServiceRequest request)
         {
             Uri requestUri = request.BuildRequestUri(this);
             bool success = true;
             uint hashcode = 0;
-            string responseBody = null;
+            string responseBody;
             try
             {
                 responseBody = PerformRequest(requestUri);
@@ -115,10 +109,6 @@ namespace Sdl.Web.ModelService
                 success = false;
                 responseBody = e.ResponseBody;
             }
-            catch
-            {
-                success = false;
-            }
 
             ModelServiceError serviceError;
             try
@@ -126,12 +116,13 @@ namespace Sdl.Web.ModelService
                 if (success)
                 {
                     T responseObject;
-                    if (typeof (T) == typeof (string))
-                        responseObject = (T) Convert.ChangeType(responseBody, typeof (T));
+                    if (typeof(T) == typeof(string))
+                        responseObject = (T) Convert.ChangeType(responseBody, typeof(T));
                     else
                         responseObject = JsonConvert.DeserializeObject<T>(responseBody, JsonSettings(request.Binder));
                     return ModelServiceResponse<T>.Create(responseObject, hashcode);
                 }
+
                 serviceError = JsonConvert.DeserializeObject<ModelServiceError>(responseBody);
             }
             catch (Exception ex)
@@ -141,8 +132,10 @@ namespace Sdl.Web.ModelService
                 {
                     responseBody = responseBody.Substring(0, maxCharactersToLog) + "...";
                 }
+
                 throw new ModelServiceException(
-                    $"{ModelServiceName} returned an unexpected response from request '{requestUri}' of {responseBody}.", ex);
+                    $"{ModelServiceName} returned an unexpected response from request '{requestUri}' of {responseBody}.",
+                    ex);
             }
 
             if (serviceError == null || serviceError.Status == (int) HttpStatusCode.NotFound)
@@ -190,35 +183,28 @@ namespace Sdl.Web.ModelService
                 }
             }
 
-            int attempt = 0;
-            do
+            try
             {
-                try
+                using (WebResponse response = request.GetResponse())
                 {
-                    attempt++;
-                    using (WebResponse response = request.GetResponse())
-                    {
-                        return GetResponseBody(response);                        
-                    }
+                    return GetResponseBody(response);
                 }
-                catch (WebException ex)
+            }
+            catch (WebException ex)
+            {
+                if (ex.Status != WebExceptionStatus.ProtocolError)
                 {
-                    if (ex.Status == WebExceptionStatus.Timeout && attempt < RetryCount)
-                    {
-                        Task.Delay(TimeSpan.FromMilliseconds(2000)).Wait();
-                    }
-                    else
-                    {
-                        if (ex.Status != WebExceptionStatus.ProtocolError)
-                        {
-                            throw new ModelServiceException(
-                                $"{ModelServiceName} request for URL '{requestUri}' failed: {ex.Status}", ex);
-                        }
-                        throw new ModelServiceRequestException(GetResponseBody(ex.Response));
-                    }
+                    throw new ModelServiceException(
+                        $"{ModelServiceName} request for URL '{requestUri}' failed: {ex.Status}", ex);
                 }
-            } while (true);
-        }       
+
+                throw new ModelServiceRequestException(GetResponseBody(ex.Response));
+            }
+            catch (Exception e)
+            {
+                throw new ModelServiceRequestException(e.Message);
+            }
+        }
 
         private static void SetCookie(HttpWebRequest httpWebRequest, string name, string value)
         {
@@ -234,12 +220,13 @@ namespace Sdl.Web.ModelService
                 {
                     return null;
                 }
+
                 using (StreamReader streamReader = new StreamReader(responseStream))
                 {
                     return streamReader.ReadToEnd();
                 }
             }
-        }      
+        }
 
         private static Uri GetModelServiceUri(string uri)
         {
@@ -252,6 +239,7 @@ namespace Sdl.Web.ModelService
                 {
                     throw new ModelServiceException("Content Service Capability not found in Discovery Service.");
                 }
+
                 ContentKeyValuePair modelServiceExtensionProperty = contentService.ExtensionProperties
                     .FirstOrDefault(
                         xp => xp.Key.Equals(ModelServiceExtensionPropertyName, StringComparison.OrdinalIgnoreCase));
@@ -260,14 +248,17 @@ namespace Sdl.Web.ModelService
                     throw new ModelServiceException(
                         $"{ModelServiceName} is not registered; no extension property called '{ModelServiceExtensionPropertyName}' found on Content Service Capability.");
                 }
+
                 uri = modelServiceExtensionProperty.Value ?? string.Empty;
             }
+
             uri = uri.TrimEnd('/') + '/';
-            Uri baseUri;          
+            Uri baseUri;
             if (!Uri.TryCreate(uri, UriKind.Absolute, out baseUri))
             {
                 throw new ModelServiceException($"{ModelServiceName} is using an invalid uri '{uri}'.");
             }
+
             return baseUri;
         }
     }
