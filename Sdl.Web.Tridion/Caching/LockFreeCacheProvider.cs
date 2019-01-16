@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Utils;
 using Sdl.Web.Delivery.Caching;
@@ -30,20 +31,19 @@ namespace Sdl.Web.Tridion.Caching
 
         public bool TryGet<T>(string key, string region, out T value)
         {
-            uint hash = CalcSlotIndex(key, region);
-            var cachedValue = GetCachedValue<T>(key, region);
-            if (cachedValue != null)
+            var hash = CalcSlotIndex(key, region);
+            T cachedValue;
+            if (TryGetCachedValue(key, region, out cachedValue))
             {
                 value = cachedValue;
                 return true;
             }
 
             // Spin while we wait for the lock to become available
-            uint t = TimeOut.GetTime();
+            var t = TimeOut.GetTime();
             while (Interlocked.CompareExchange(ref _slots[hash], 0, 0) != 0)
             {
-                cachedValue = GetCachedValue<T>(key, region);
-                if (cachedValue != null)
+                if (TryGetCachedValue(key, region, out cachedValue))
                 {
                     value = cachedValue;
                     return true;
@@ -52,8 +52,7 @@ namespace Sdl.Web.Tridion.Caching
             }
 
             // Try again since another thread may of finished with this bucket
-            cachedValue = GetCachedValue<T>(key, region);
-            if (cachedValue != null)
+            if (TryGetCachedValue(key, region, out cachedValue))
             {
                 value = cachedValue;
                 return true;
@@ -68,7 +67,7 @@ namespace Sdl.Web.Tridion.Caching
             // In this case we know we can return the generated value directly since it will be cached 
             // at the highest level
             if (_reentries == null) _reentries = new HashSet<uint>();
-            uint hashKey = CalcHash(key, region);
+            var hashKey = CalcHash(key, region);
             if (_reentries.Contains(hashKey))
             {
                 return addFunction();
@@ -77,11 +76,11 @@ namespace Sdl.Web.Tridion.Caching
             {
                 Interlocked.Increment(ref _reentriesCount);
                 _reentries.Add(hashKey);
-                var cachedValue = GetCachedValue<T>(key, region);
-                if (cachedValue != null) return cachedValue;
-                uint hash = CalcSlotIndex(key, region);
-                int threadId = Thread.CurrentThread.ManagedThreadId;
-                int usedBy = Interlocked.CompareExchange(ref _slots[hash], threadId, 0);
+                T cachedValue;
+                if (TryGetCachedValue(key, region, out cachedValue)) return cachedValue;
+                var hash = CalcSlotIndex(key, region);
+                var threadId = Thread.CurrentThread.ManagedThreadId;
+                var usedBy = Interlocked.CompareExchange(ref _slots[hash], threadId, 0);
                 // If empty slot or used by current thread we can just create cache value since 
                 // other threads accessing this cache key have not created it.
                 if (usedBy == 0 || usedBy == threadId)
@@ -90,11 +89,10 @@ namespace Sdl.Web.Tridion.Caching
                 // Slot in use so someone else is potentially creating this cache value so spin
                 // for a fixed length of time or until slot becomes free so we can grab it ourselves.
                 // We also probe forwards a fixed length in slots to reduce spin time
-                uint t = TimeOut.GetTime();
+                var t = TimeOut.GetTime();
                 while (Interlocked.CompareExchange(ref _slots[hash], threadId, 0) != 0)
                 {
-                    cachedValue = GetCachedValue<T>(key, region);
-                    if (cachedValue != null) return cachedValue;
+                    if (TryGetCachedValue(key, region, out cachedValue)) return cachedValue;
                     if (TimeOut.UpdateTimeOut(t, WriteTimeout) <= 0) break;
                 }
 
@@ -108,10 +106,22 @@ namespace Sdl.Web.Tridion.Caching
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private T GetCachedValue<T>(string key, string region)
+        private bool TryGetCachedValue<T>(string key, string region, out T value)
         {
             var cachedValue = _cilCacheProvider.Get(key, region);
-            return cachedValue != null ? (T)cachedValue : default(T);
+            if (cachedValue != null)
+            {
+                if (!(cachedValue is T))
+                {
+                    throw new DxaException(
+                        $"Cached value for key '{key}' in region '{region}' is of type {cachedValue.GetType().FullName} instead of {typeof(T).FullName}."
+                        );
+                }
+                value = (T)cachedValue;
+                return true;
+            }
+            value = default(T);
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -120,8 +130,8 @@ namespace Sdl.Web.Tridion.Caching
         {
             try
             {
-                var cachedValue = GetCachedValue<T>(key, region);
-                if (cachedValue != null) return cachedValue;
+                T cachedValue;
+                if (TryGetCachedValue<T>(key, region, out cachedValue)) return cachedValue;
                 var value = addFunction();
                 Store(key, region, value, dependencies);
                 return value;
@@ -137,11 +147,11 @@ namespace Sdl.Web.Tridion.Caching
             => ((CalcHash(key, region) % (uint)_slots.Length) * (uint)_reentriesCount) % (uint)_slots.Length;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private uint CalcHash(string key, string region)
+        private static uint CalcHash(string key, string region)
             => Hash.Murmur3(CalcHashKey(key, region));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private string CalcHashKey(string key, string region)
+        private static string CalcHashKey(string key, string region)
             => $"{region}:{key}";
     }
 }
