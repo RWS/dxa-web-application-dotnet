@@ -13,7 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SdlDxaDataModelPackageVersion>2.1.0</SdlDxaDataModelPackageVersion>
-    <SdlPCAPackageVersion>2.1.0</SdlPCAPackageVersion>
+    <SdlPCAPackageVersion>2.1.1</SdlPCAPackageVersion>
     <SdlWebDeliveryPackageVersion>11.0.0</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>11.0.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>11.0.0</SdlWebContextImagePackageVersion>
@@ -51,6 +51,8 @@
     <Compile Include="ApiClient\GlobalClaimManager.cs" />
     <Compile Include="Mapping\StronglyTypedTopicBuilder.cs" />
     <Compile Include="ApiClient\Extensions.cs" />
+    <Compile Include="Providers\Caching\DxaCacheProvider.cs" />
+    <Compile Include="Providers\Caching\KeylockCacheProvider.cs" />
     <Compile Include="Providers\ModelService\SitemapHelpers.cs" />
     <Compile Include="Resolvers\Localization\GraphQLMashupLocalizationResolver.cs" />
     <Reference Include="DD4T.ContentModel">
@@ -195,7 +197,6 @@
     <Compile Include="Providers\Binary\CILBinaryProvider.cs" />
     <Compile Include="Providers\Binary\GraphQLBinaryProvider.cs" />
     <Compile Include="Providers\Caching\CacheProvider.cs" />
-    <Compile Include="Providers\Caching\DxaCacheProvider.cs" />
     <Compile Include="Providers\Caching\DD4TCacheProvider.cs" />
     <Compile Include="Providers\Caching\DefaultCacheProvider.cs" />
     <Compile Include="ContentManager\CmUri.cs" />

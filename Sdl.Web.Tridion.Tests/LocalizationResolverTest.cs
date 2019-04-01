@@ -10,7 +10,7 @@ namespace Sdl.Web.Tridion.Tests
     [TestClass]
     public abstract class LocalizationResolverTest : TestClass
     {
-        protected const string TestBaseUrl = "http://dxatest.ams.dev:98";
+        protected const string TestBaseUrl = "http://dxatest.ams.sdldev.net:98";
 
         protected readonly ILocalizationResolver _testLocalizationResolver = new GraphQLLocalizationResolver();
 

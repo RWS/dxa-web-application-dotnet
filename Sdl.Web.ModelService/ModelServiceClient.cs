@@ -1,18 +1,18 @@
-﻿using Sdl.Web.Delivery.DiscoveryService;
-using System;
+﻿using System;
 using System.Linq;
 using System.Net;
 using System.IO;
-using Newtonsoft.Json;
-using Sdl.Web.Delivery.Service;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
+using Sdl.Web.Delivery.Service;
+using Sdl.Web.Delivery.DiscoveryService;
 using Sdl.Web.Delivery.DiscoveryService.Tridion.WebDelivery.Platform;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore;
-using System.Threading.Tasks;
 using Sdl.Web.Delivery.Core;
 using Sdl.Web.Delivery.ServicesCore.ClaimStore.Cookie;
 using Sdl.Web.ModelService.Request;
+using Newtonsoft.Json;
 
 namespace Sdl.Web.ModelService
 {
@@ -150,7 +150,7 @@ namespace Sdl.Web.ModelService
             Uri requestUri = request.BuildRequestUri(this);
             bool success = true;
             uint hashcode = 0;
-            string responseBody = null;
+            string responseBody = string.Empty;
             try
             {
                 responseBody = PerformRequest(requestUri);
@@ -188,7 +188,8 @@ namespace Sdl.Web.ModelService
                     responseBody = responseBody.Substring(0, maxCharactersToLog) + "...";
                 }
                 throw new ModelServiceException(
-                    $"{ModelServiceName} returned an unexpected response from request '{requestUri}' of {responseBody}.", ex);
+                    $"{ModelServiceName} returned an unexpected response from request '{requestUri}' of {responseBody}.",
+                    ex);
             }
 
             if (serviceError == null || serviceError.Status == (int) HttpStatusCode.NotFound)
@@ -233,7 +234,7 @@ namespace Sdl.Web.ModelService
                 if ((cookies != null) && cookies.ContainsKey(PreviewSessionTokenCookie))
                 {
                     SetCookie(request, PreviewSessionTokenCookie, cookies[PreviewSessionTokenCookie]);
-                }             
+                }
 
                 // Forward all claims on to model-service
                 var forwardedClaimValues = AmbientDataContext.ForwardedClaims;
@@ -247,12 +248,14 @@ namespace Sdl.Web.ModelService
 
                     if (forwardedClaims.Count > 0)
                     {
-                        ClaimCookieSerializer serializer = new ClaimCookieSerializer(AmbientDataContext.ForwardedClaimsCookieName);
+                        ClaimCookieSerializer serializer =
+                            new ClaimCookieSerializer(AmbientDataContext.ForwardedClaimsCookieName);
                         List<ClaimsCookie> claimsCookies = serializer.SerializeClaims(forwardedClaims);
                         foreach (ClaimsCookie claimsCookie in claimsCookies)
                         {
                             byte[] cookieValue = claimsCookie.Value;
-                            Cookie cookie = new Cookie(claimsCookie.Name, new System.Text.ASCIIEncoding().GetString(cookieValue));                        
+                            Cookie cookie = new Cookie(claimsCookie.Name,
+                                new System.Text.ASCIIEncoding().GetString(cookieValue));
                             SetCookie(request, cookie.Name, cookie.Value);
                         }
                     }
@@ -266,35 +269,27 @@ namespace Sdl.Web.ModelService
                 }
             }
 
-            int attempt = 0;
-            do
+            try
             {
-                try
+                using (WebResponse response = request.GetResponse())
                 {
-                    attempt++;
-                    using (WebResponse response = request.GetResponse())
-                    {
-                        return GetResponseBody(response);                        
-                    }
+                    return GetResponseBody(response);
                 }
-                catch (WebException ex)
+            }
+            catch (WebException ex)
+            {
+                if (ex.Status != WebExceptionStatus.ProtocolError)
                 {
-                    if (ex.Status == WebExceptionStatus.Timeout && attempt < RetryCount)
-                    {
-                        Task.Delay(TimeSpan.FromMilliseconds(2000)).Wait();
-                    }
-                    else
-                    {
-                        if (ex.Status != WebExceptionStatus.ProtocolError)
-                        {
-                            throw new ModelServiceException(
-                                $"{ModelServiceName} request for URL '{requestUri}' failed: {ex.Status}", ex);
-                        }
-                        throw new ModelServiceRequestException(GetResponseBody(ex.Response));
-                    }
+                    throw new ModelServiceException(
+                        $"{ModelServiceName} request for URL '{requestUri}' failed: {ex.Status}", ex);
                 }
-            } while (true);
-        }       
+                throw new ModelServiceRequestException(GetResponseBody(ex.Response));
+            }
+            catch (Exception e)
+            {
+                throw new ModelServiceRequestException(e.Message);
+            }
+        }
 
         private static void SetCookie(HttpWebRequest httpWebRequest, string name, string value)
         {

@@ -76,7 +76,23 @@ namespace Sdl.Web.Tridion.Tests
             Assert.AreEqual(testValue, cachedValue);
         }
 
-        [TestMethod]
+        //[TestMethod]
+        // Currently we disable this test because we have changed how caching works. 
+        // In the old scheme we would block threads until the first thread that came to generate the cache value 
+        // finished and then signal waiting threads to then continue. 
+        // This strategy is not very good in practise since it blocked progress and was difficult to reason about. 
+        //
+        // For example:
+        //  You have to hope the scheduller doesn't suspend the thread doing the work for too long and that all
+        //  waiting threads yield. If the thread doing the work is unlucky and not switched in by the scheduler
+        //  then it will block all other threads and no progress will be made. Equally if its constantly 
+        //  switched in and out, progress is very very slow.
+        //
+        // Now we just accept the fact that in a bad situation with mutliple threads accessing the exact same key 
+        // for the first time we just take the hit and let each thread calculate the value. Only one thread 
+        // (the first) will get to write the value to the cache but all others will at least make progress.
+        // In a good situation you will not get lots of threads trying to calculate the same thing and the cache
+        // value will exist because some thread at some point calculated it.
         public void GetOrAdd_RaceCondition_Success()
         {
             const string testRegion = "GetOrAdd_RaceCondition_Success";
