@@ -64,8 +64,7 @@ namespace Sdl.Web.Common.Configuration
                 }
             }
 
-            SemanticSchema result;
-            if (!_semanticSchemaMap.TryGetValue(schemaId, out result))
+            if (schemaId == null || !_semanticSchemaMap.TryGetValue(schemaId, out var result))
             {
                 throw new DxaException(
                     $"Semantic schema '{schemaId}' not defined in Localization [{this}]. {Constants.CheckSettingsUpToDate}"
