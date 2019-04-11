@@ -579,6 +579,11 @@ namespace Sdl.Web.Tridion.Mapping
                 return GetLinkUrl(entityModelData, localization);
             }
 
+            if (string.IsNullOrWhiteSpace(entityModelData.SchemaId))
+            {
+                return null;
+            }
+
             if (!typeof(EntityModel).IsAssignableFrom(targetType))
             {
                 throw new DxaException($"Cannot map Component Link to property of type '{targetType.Name}'.");
