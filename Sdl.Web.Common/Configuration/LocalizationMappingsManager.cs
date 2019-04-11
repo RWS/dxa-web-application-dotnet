@@ -53,6 +53,11 @@ namespace Sdl.Web.Common.Configuration
         /// <returns>The Semantic Schema configuration.</returns>
         public virtual SemanticSchema GetSemanticSchema(string schemaId)
         {
+            if (schemaId == null)
+            {
+                throw new DxaException("Schema Id must not be null.");
+            }
+
             // This method is called a lot, so intentionally no Tracer here.
             if (_semanticSchemas == null)
             {
@@ -63,7 +68,7 @@ namespace Sdl.Web.Common.Configuration
                     semanticSchema.Initialize(_localization);
                 }
             }
-
+           
             SemanticSchema result;
             if (!_semanticSchemaMap.TryGetValue(schemaId, out result))
             {
