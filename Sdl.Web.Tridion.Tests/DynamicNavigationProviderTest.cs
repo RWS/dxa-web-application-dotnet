@@ -381,8 +381,7 @@ namespace Sdl.Web.Tridion.Tests
             TaxonomyNode keyword11 = topLevelKeyword1.Items[0] as TaxonomyNode;
             AssertExpectedTaxonomyNode(keyword11, testKeyword11.Title, 0, "keyword11");
         }
-
-        [TestMethod]
+       
         [Ignore] // TODO. See TSI-3635.
         public void GetNavigationSubtree_IncludeAncestorsAndChildrenKeyword_Success()
         {
@@ -417,7 +416,6 @@ namespace Sdl.Web.Tridion.Tests
             AssertExpectedTaxonomyNode(topLevelKeyword2, "Top-level Keyword 2", 0, "topLevelKeyword2");
         }
 
-        [TestMethod]
         [Ignore] // TODO. See TSI-3635.
         public void GetNavigationSubtree_IncludeAncestorsAndChildrenKeywordOrdered_Success() // See TSI-1964
         {
@@ -444,8 +442,6 @@ namespace Sdl.Web.Tridion.Tests
             AssertExpectedTaxonomyNode(topLevelKeyword1.Items[1] as TaxonomyNode, TestFixture.Keyword1_2Title, 3, "topLevelKeyword1.Items[1]");
         }
 
-
-        [TestMethod]
         [Ignore] // TODO. See TSI-3635.
         public void GetNavigationSubtree_IncludeAncestorsClassifiedPage_Success()
         {
@@ -481,8 +477,7 @@ namespace Sdl.Web.Tridion.Tests
             AssertExpectedTaxonomyNode(topLevelKeyword2, TestFixture.TopLevelKeyword2Title, 0, "topLevelKeyword2");
 
         }
-
-        [TestMethod]
+       
         [Ignore] // TODO. See TSI-3635.
         public void GetNavigationSubtree_IncludeAncestorsAndChildrenClassifiedPage_Success()
         {
