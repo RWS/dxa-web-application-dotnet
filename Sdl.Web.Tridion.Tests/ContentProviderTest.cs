@@ -53,7 +53,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_ImplicitIndexPage_Success()
+        public virtual void GetPageModel_ImplicitIndexPage_Success()
         {
             string testPageUrlPath = TestLocalization.Path; // Implicitly address the home page (index.html)
             string testPageUrlPath2 = TestLocalization.Path.Substring(1); // URL path not starting with slash
@@ -85,7 +85,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_WithIncludes_Success()
+        public virtual void GetPageModel_WithIncludes_Success()
         {
             // make sure you publish the settings for 401 AutoTest Parent + 500 AutoTest Parent (Legacy) to
             // staging environment.
@@ -105,7 +105,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_IncludePage_Success() // See TSI-2287
+        public virtual void GetPageModel_IncludePage_Success() // See TSI-2287
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2287PageRelativeUrlPath);
 
@@ -124,7 +124,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_InternationalizedUrl_Success() // See TSI-1278
+        public virtual void GetPageModel_InternationalizedUrl_Success() // See TSI-1278
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1278PageRelativeUrlPath);
 
@@ -139,7 +139,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_EclItem_Success()
+        public virtual void GetPageModel_EclItem_Success()
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.MediaManagerTestPageRelativeUrlPath);
 
@@ -188,7 +188,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_TitleDescriptionImage_Success() // See TSI-2277
+        public virtual void GetPageModel_TitleDescriptionImage_Success() // See TSI-2277
         {
             string testPage1UrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2277Page1RelativeUrlPath);
             string testPage2UrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2277Page2RelativeUrlPath);
@@ -218,7 +218,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_XpmMetadataOnStaging_Success()
+        public virtual void GetPageModel_XpmMetadataOnStaging_Success()
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
 
@@ -259,7 +259,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_DynamicComponentPresentation_Success()
+        public virtual void GetPageModel_DynamicComponentPresentation_Success()
         {
             string articlePageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
             string articleDynamicPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticleDynamicPageRelativeUrlPath);
@@ -284,7 +284,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_EmbeddedEntityModels_Success() // See TSI-1758
+        public virtual void GetPageModel_EmbeddedEntityModels_Success() // See TSI-1758
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1758PageRelativeUrlPath);
 
@@ -309,7 +309,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_OptionalFieldsXpmMetadata_Success() // See TSI-1946
+        public virtual void GetPageModel_OptionalFieldsXpmMetadata_Success() // See TSI-1946
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1946PageRelativeUrlPath);
 
@@ -336,7 +336,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_KeywordMapping_Success() // See TSI-811
+        public virtual void GetPageModel_KeywordMapping_Success() // See TSI-811
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi811PageRelativeUrlPath);
 
@@ -367,7 +367,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_KeywordExpansion_Success() // See TSI-2316 (only applies to R2 Model mapping)
+        public virtual void GetPageModel_KeywordExpansion_Success() // See TSI-2316 (only applies to R2 Model mapping)
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2316PageRelativeUrlPath);
 
@@ -403,7 +403,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_ConditionalEntities_Success()
+        public virtual void GetPageModel_ConditionalEntities_Success()
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ArticlePageRelativeUrlPath);
 
@@ -489,7 +489,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_LanguageSelector_Success() // See TSI-2225
+        public virtual void GetPageModel_LanguageSelector_Success() // See TSI-2225
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2225PageRelativeUrlPath);
 
@@ -524,7 +524,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_CustomPageModelNoMetadata_Success() // See TSI-2285
+        public virtual void GetPageModel_CustomPageModelNoMetadata_Success() // See TSI-2285
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi2285PageRelativeUrlPath);
 
@@ -538,7 +538,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetPageModel_ComponentLinks_Success()
+        public virtual void GetPageModel_ComponentLinks_Success()
         {
             const int expectedNumberOfLinks = 4;
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ComponentLinkTestPageRelativeUrlPath);
@@ -587,7 +587,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetEntityModel_XpmMetadataOnStaging_Success()
+        public virtual void GetEntityModel_XpmMetadataOnStaging_Success()
         {
             string testEntityId = GetArticleDcpEntityId();
 
@@ -621,7 +621,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void GetStaticContentItem_InternationalizedUrl_Success() // See TSI-1278
+        public virtual void GetStaticContentItem_InternationalizedUrl_Success() // See TSI-1278
         {
             // Since we don't know the URL of the binary upfront, we obtain it from a known Page Model.
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1278PageRelativeUrlPath);
@@ -642,7 +642,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
-        public void PopulateDynamicList_TeaserFallbackToDescription_Success() // See TSI-1852
+        public virtual void PopulateDynamicList_TeaserFallbackToDescription_Success() // See TSI-1852
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.Tsi1852PageRelativeUrlPath);
 
