@@ -116,11 +116,7 @@ namespace Sdl.Web.Tridion.Tests
 
             Assert.AreEqual("Header", pageModel.Title, "pageModel.Title"); // This is the essence of this test (TSI-2287)
             Assert.IsTrue(pageModel.Regions.ContainsKey("Nav"), "pageModel.Regions.ContainsKey('Nav')"); // Legacy Region
-            Assert.IsTrue(pageModel.Regions.ContainsKey("Info"), "pageModel.Regions.ContainsKey('Info')"); // Legacy Region
-            if (!TestLocalization.Path.Contains("legacy"))
-            {
-                Assert.IsTrue(pageModel.Regions.ContainsKey("Main"), "pageModel.Regions.ContainsKey('Main')"); // Native Region
-            }
+            Assert.IsTrue(pageModel.Regions.ContainsKey("Info"), "pageModel.Regions.ContainsKey('Info')"); // Legacy Region           
         }
 
         [TestMethod]
