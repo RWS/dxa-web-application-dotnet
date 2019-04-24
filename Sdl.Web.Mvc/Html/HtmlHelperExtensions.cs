@@ -212,7 +212,7 @@ namespace Sdl.Web.Mvc.Html
                 string controllerAreaName = mvcData.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName();
 
                 RouteValueDictionary parameters = new RouteValueDictionary();
-                int parentContainerSize = (int) htmlHelper.ViewData[DxaViewDataItems.ContainerSize];
+                int parentContainerSize = (int) (htmlHelper.ViewData[DxaViewDataItems.ContainerSize] == null ? 0 : htmlHelper.ViewData[DxaViewDataItems.ContainerSize]);
                 if (parentContainerSize == 0)
                 {
                     parentContainerSize = SiteConfiguration.MediaHelper.GridSize;
