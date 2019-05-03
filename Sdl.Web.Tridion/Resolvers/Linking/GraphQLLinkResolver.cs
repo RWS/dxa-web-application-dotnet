@@ -10,7 +10,7 @@ namespace Sdl.Web.Tridion.Linking
     /// <summary>
     /// Default Link Resolver implementation
     /// </summary>
-    public class GraphQLLinkResolver : ILinkResolver
+    public class GraphQLLinkResolver : ILinkResolver, ILinkResolver2
     {
         #region ILinkResolver Members
 
@@ -22,13 +22,19 @@ namespace Sdl.Web.Tridion.Linking
         /// <param name="localization">The context Localization (optional, since the TCM URI already contains a Publication ID, but this allows resolving in a different context).</param>
         /// <returns>The resolved URL.</returns>
         public string ResolveLink(string sourceUri, bool resolveToBinary = false, Localization localization = null)
+            => ResolveLink(sourceUri, resolveToBinary, localization, null);
+        #endregion
+
+        #region ILinkResolver2 Members
+        public string ResolveLink(string sourceUri, bool resolveToBinary = false, Localization localization = null,
+            string contextId = null)
         {
             if (sourceUri == null) return null;
 
             string url = SiteConfiguration.CacheProvider.GetOrAdd($"{sourceUri}:{resolveToBinary}:{localization?.Id}",
                 CacheRegions.LinkResolving,
                 () =>
-                {                  
+                {
                     if (sourceUri.IsCmUri())
                     {
                         var client = ApiClientFactory.Instance.CreateClient();
@@ -36,9 +42,28 @@ namespace Sdl.Web.Tridion.Linking
                         switch (cmUri.ItemType)
                         {
                             case ItemType.Component:
-                                return resolveToBinary ?
-                                    client.ResolveBinaryLink(cmUri.Namespace, cmUri.PublicationId, cmUri.ItemId, null) :
-                                    client.ResolveComponentLink(cmUri.Namespace, cmUri.PublicationId, cmUri.ItemId, null, null);
+                                string resolved = null;
+                                if (resolveToBinary)
+                                {
+                                    resolved = client.ResolveBinaryLink(cmUri.Namespace, cmUri.PublicationId,
+                                        cmUri.ItemId, null);
+                                }
+
+                                if (resolved != null)
+                                    return resolved;
+
+                                int pageId;
+                                CmUri pageCmUri;
+                                if (CmUri.TryParse(contextId, out pageCmUri))
+                                {
+                                    pageId = cmUri.ItemId;
+                                }
+                                else if (!int.TryParse(contextId, out pageId))
+                                {
+                                    pageId = -1;
+                                }
+
+                                return client.ResolveComponentLink(cmUri.Namespace, cmUri.PublicationId, cmUri.ItemId, pageId, null);
                             case ItemType.Page:
                                 return client.ResolvePageLink(cmUri.Namespace, cmUri.PublicationId, cmUri.ItemId);
                         }
@@ -48,7 +73,7 @@ namespace Sdl.Web.Tridion.Linking
                         return sourceUri;
                     }
                     return null;
-                });                       
+                });
 
             // Strip off default extension / page name
             if (url == null || !url.EndsWith(Constants.DefaultExtension)) return url;
@@ -58,7 +83,9 @@ namespace Sdl.Web.Tridion.Linking
                 url = url.Substring(0, url.Length - Constants.DefaultExtensionLessPageName.Length);
             }
             return url;
+
         }
         #endregion
+
     }
 }
