@@ -10,7 +10,7 @@ namespace Sdl.Web.Tridion.Linking
     /// <summary>
     /// Default Link Resolver implementation
     /// </summary>
-    public class GraphQLLinkResolver : ILinkResolver, ILinkResolver2
+    public class GraphQLLinkResolver : ILinkResolver, ILinkResolverExt
     {
         #region ILinkResolver Members
 
@@ -22,12 +22,11 @@ namespace Sdl.Web.Tridion.Linking
         /// <param name="localization">The context Localization (optional, since the TCM URI already contains a Publication ID, but this allows resolving in a different context).</param>
         /// <returns>The resolved URL.</returns>
         public string ResolveLink(string sourceUri, bool resolveToBinary = false, Localization localization = null)
-            => ResolveLink(sourceUri, resolveToBinary, localization, null);
+            => ResolveLink(sourceUri, null, resolveToBinary, localization);
         #endregion
 
-        #region ILinkResolver2 Members
-        public string ResolveLink(string sourceUri, bool resolveToBinary = false, Localization localization = null,
-            string contextId = null)
+        #region ILinkResolverExt Members
+        public string ResolveLink(string sourceUri, string pageContextId, bool resolveToBinary = false, Localization localization = null)
         {
             if (sourceUri == null) return null;
 
@@ -54,11 +53,11 @@ namespace Sdl.Web.Tridion.Linking
 
                                 int pageId;
                                 CmUri pageCmUri;
-                                if (CmUri.TryParse(contextId, out pageCmUri))
+                                if (CmUri.TryParse(pageContextId, out pageCmUri))
                                 {
                                     pageId = cmUri.ItemId;
                                 }
-                                else if (!int.TryParse(contextId, out pageId))
+                                else if (!int.TryParse(pageContextId, out pageId))
                                 {
                                     pageId = -1;
                                 }
