@@ -11,6 +11,18 @@ namespace Sdl.Web.Tridion.Caching
 {
     /// <summary>
     /// Key lock cache provider wraps CIL cache access with lock syncronisation.
+    /// 
+    /// 1. Prevents multiple threads doing the same heavy lifting:
+    ///     Lock syncronisation is used so only the first thread to take the lock will generate the cache value. All 
+    ///     subsequent threads will block until the first thread completes.
+    ///    
+    /// 2. Prevents each thread from getting deadlocked by its own locks (re-entrant caching):
+    ///     The API provided by the ICacheProvider allows clients to pass a lamda function for calculating the
+    ///     cache value. A potential issue with this mechanism is the lamda function could try to retrieve a value
+    ///     from the cache that uses the same cache key (even a different key that has a hash collision may cause 
+    ///     this). This can result in a deadlock. We resolve this issue by dealing with re-entrant lamda functions 
+    ///     using a thread local atomic counter. When a lock is taken the lock object used is created based on the cache 
+    ///     key and also this local atomic counter. 
     /// </summary>
     public class KeylockCacheProvider : ICacheProvider
     {
