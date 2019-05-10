@@ -23,6 +23,8 @@ namespace Sdl.Web.Tridion.Mapping
     /// </summary>
     public class DefaultModelBuilder : IPageModelBuilder, IEntityModelBuilder, IDataModelExtension
     {
+        private static readonly string PageContextIdExtensionDataProperty = "pageContextId";
+
         protected class Validation
         {
             public SemanticSchema MainSchema { get; set; }
@@ -120,10 +122,15 @@ namespace Sdl.Web.Tridion.Mapping
                 pageModel.Meta = pageModelData.Meta ?? new Dictionary<string, string>();
                 pageModel.Title = PostProcessPageTitle(pageModelData, localization); // TODO TSI-2210: This should eventually be done in Model Service.
                 pageModel.Url = pageModelData.UrlPath;
+                string pageContextId = pageModel.Id;
                 if (pageModelData.Regions != null)
                 {
                     IEnumerable<RegionModelData> regions = includePageRegions ? pageModelData.Regions : pageModelData.Regions.Where(r => r.IncludePageId == null);
-                    pageModel.Regions.UnionWith(regions.Select(data => CreateRegionModel(data, localization)));
+                    pageModel.Regions.UnionWith(regions.Select(data =>
+                    {                        
+                        SetPageContextId(data, pageContextId);
+                        return CreateRegionModel(data, localization);
+                    }));
                     pageModel.IsVolatile |= pageModel.Regions.Any(region => region.IsVolatile);
                 }
             }      
@@ -437,16 +444,17 @@ namespace Sdl.Web.Tridion.Mapping
             switch (sourceType.Name)
             {
                 case "String":
+                    string pageContextId = GetPageContextId(mappingData?.SourceViewModel);
                     if (isArray)
                     {
                         foreach (string fieldValue in (string[]) fieldValues)
                         {
-                            mappedValues.Add(MapString(fieldValue, bareTargetType));
+                            mappedValues.Add(MapString(fieldValue, bareTargetType, pageContextId));
                         }
                     }
                     else
                     {
-                        mappedValues.Add(MapString((string) fieldValues, bareTargetType));
+                        mappedValues.Add(MapString((string) fieldValues, bareTargetType, pageContextId));
                     }
                     break;
 
@@ -534,7 +542,7 @@ namespace Sdl.Web.Tridion.Mapping
             return isListProperty ? mappedValues : ((mappedValues.Count == 0) ? null : mappedValues[0]);
         }
 
-        protected virtual object MapString(string stringValue, Type targetType)
+        protected virtual object MapString(string stringValue, Type targetType, string pageContextId)
         {
             if (targetType == typeof(RichText))
             {
@@ -551,7 +559,7 @@ namespace Sdl.Web.Tridion.Mapping
                 return new Link
                 {
                     Id = stringValue.Split('-')[1],
-                    Url = SiteConfiguration.LinkResolver.ResolveLink(stringValue, resolveToBinary: true)
+                    Url = ((ILinkResolverExt)SiteConfiguration.LinkResolver).ResolveLink(stringValue, resolveToBinary: true, pageContextId: pageContextId)
                 };
             }
 
@@ -653,6 +661,14 @@ namespace Sdl.Web.Tridion.Mapping
         protected virtual string GetKeywordDisplayText(KeywordModelData keywordModelData)
             => string.IsNullOrEmpty(keywordModelData.Description) ? keywordModelData.Title : keywordModelData.Description;
 
+        protected void SetPageContextId(ViewModelData sourceViewModel, string pageContextId) 
+            => sourceViewModel?.SetExtensionData(PageContextIdExtensionDataProperty, pageContextId);
+
+        protected string GetPageContextId(ViewModelData sourceViewModel) 
+            => sourceViewModel?.ExtensionData != null && sourceViewModel.ExtensionData.ContainsKey(PageContextIdExtensionDataProperty)
+            ? (string) sourceViewModel.ExtensionData[PageContextIdExtensionDataProperty]
+            : null;
+
         protected virtual string GetLinkUrl(EntityModelData entityModelData, Localization localization)
         {
             if (entityModelData.LinkUrl != null)
@@ -662,7 +678,7 @@ namespace Sdl.Web.Tridion.Mapping
 
             Log.Debug($"Link URL for Entity Model '{entityModelData.Id}' not resolved by Model Service.");
             string componentUri = localization.GetCmUri(entityModelData.Id);
-            return SiteConfiguration.LinkResolver.ResolveLink(componentUri);
+            return ((ILinkResolverExt)SiteConfiguration.LinkResolver).ResolveLink(componentUri, GetPageContextId(entityModelData));
         }
 
         protected virtual object MapRichText(RichTextData richTextData, Type targetType, Localization localization)
@@ -837,8 +853,10 @@ namespace Sdl.Web.Tridion.Mapping
 
             if (regionModelData.Entities != null)
             {
+                string pageContextId = GetPageContextId(regionModelData);
                 foreach (EntityModelData entityModelData in regionModelData.Entities)
                 {
+                    SetPageContextId(entityModelData, pageContextId);
                     EntityModel entityModel;
                     try
                     {
