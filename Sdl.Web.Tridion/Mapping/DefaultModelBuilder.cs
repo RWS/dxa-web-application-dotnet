@@ -542,6 +542,9 @@ namespace Sdl.Web.Tridion.Mapping
             return isListProperty ? mappedValues : ((mappedValues.Count == 0) ? null : mappedValues[0]);
         }
 
+        protected virtual object MapString(string stringValue, Type targetType)
+            => MapString(stringValue, targetType, null);
+
         protected virtual object MapString(string stringValue, Type targetType, string pageContextId)
         {
             if (targetType == typeof(RichText))
@@ -556,20 +559,23 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     throw new DxaException($"Cannot map string to type Link: '{stringValue}'");
                 }
+                ILinkResolverExt linkResolverExt = SiteConfiguration.LinkResolver as ILinkResolverExt;
                 return new Link
                 {
                     Id = stringValue.Split('-')[1],
-                    Url = ((ILinkResolverExt)SiteConfiguration.LinkResolver).ResolveLink(stringValue, resolveToBinary: true, pageContextId: pageContextId)
+                    Url = (linkResolverExt == null) ? SiteConfiguration.LinkResolver.ResolveLink(stringValue, resolveToBinary: true) :
+                        linkResolverExt.ResolveLink(stringValue, pageContextId: pageContextId, resolveToBinary: true)
                 };
             }
 
-            if (!string.IsNullOrEmpty(stringValue) && targetType == typeof (int) && stringValue.Contains("."))
+            if (!string.IsNullOrEmpty(stringValue) && targetType == typeof(int) && stringValue.Contains("."))
             {
                 // Simple cast from floating point to int
-                return (int) (double)Convert.ChangeType(stringValue, typeof (double), CultureInfo.InvariantCulture.NumberFormat);
+                return (int)(double)Convert.ChangeType(stringValue, typeof(double), CultureInfo.InvariantCulture.NumberFormat);
             }
             return Convert.ChangeType(stringValue, targetType, CultureInfo.InvariantCulture.NumberFormat);
         }
+
 
         protected virtual object MapComponentLink(EntityModelData entityModelData, Type targetType, Localization localization)
         {
