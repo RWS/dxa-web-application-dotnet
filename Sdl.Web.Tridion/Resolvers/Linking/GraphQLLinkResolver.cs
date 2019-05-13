@@ -30,7 +30,7 @@ namespace Sdl.Web.Tridion.Linking
         {
             if (sourceUri == null) return null;
 
-            string url = SiteConfiguration.CacheProvider.GetOrAdd($"{sourceUri}:{resolveToBinary}:{localization?.Id}",
+            string url = SiteConfiguration.CacheProvider.GetOrAdd($"{sourceUri}:{pageContextId}:{resolveToBinary}:{localization?.Id}",
                 CacheRegions.LinkResolving,
                 () =>
                 {

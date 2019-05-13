@@ -29,6 +29,7 @@ namespace Sdl.Web.Tridion.Tests
         internal const string ArticleDynamicPageRelativeUrlPath = "test_article_dynamic";
         internal const string ComponentLinkTestPageRelativeUrlPath = "comp_link_test_page";
         internal const string ComponentLinkTest2PageRelativeUrlPath = "comp_link_test_page_2";
+        internal const string ComponentLinkTest2BPageRelativeUrlPath = "regression/comp_link_test_page_2";
         internal const string MediaManagerTestPageRelativeUrlPath = "mm_test.html";
         internal const string SmartTargetTestPageRelativeUrlPath = "smoke/smart-target-smoke-test";
         internal const string ContextExpressionsTestPageRelativeUrlPath = "smoke/context-expression-smoke-test";
