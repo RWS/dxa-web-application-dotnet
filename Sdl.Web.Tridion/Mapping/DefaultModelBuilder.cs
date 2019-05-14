@@ -449,12 +449,12 @@ namespace Sdl.Web.Tridion.Mapping
                     {
                         foreach (string fieldValue in (string[]) fieldValues)
                         {
-                            mappedValues.Add(MapString(fieldValue, bareTargetType, pageContextId));
+                            mappedValues.Add(MapString(fieldValue, bareTargetType, pageContextId, mappingData.Localization));
                         }
                     }
                     else
                     {
-                        mappedValues.Add(MapString((string) fieldValues, bareTargetType, pageContextId));
+                        mappedValues.Add(MapString((string) fieldValues, bareTargetType, pageContextId, mappingData.Localization));
                     }
                     break;
 
@@ -543,9 +543,9 @@ namespace Sdl.Web.Tridion.Mapping
         }
 
         protected virtual object MapString(string stringValue, Type targetType)
-            => MapString(stringValue, targetType, null);
+            => MapString(stringValue, targetType, null, null);
 
-        protected virtual object MapString(string stringValue, Type targetType, string pageContextId)
+        protected virtual object MapString(string stringValue, Type targetType, string pageContextId, Localization localization)
         {
             if (targetType == typeof(RichText))
             {
@@ -559,7 +559,15 @@ namespace Sdl.Web.Tridion.Mapping
                 {
                     throw new DxaException($"Cannot map string to type Link: '{stringValue}'");
                 }
+
+                if (localization != null)
+                {
+                    TcmUri tcmUri = new TcmUri(stringValue) {PublicationId = int.Parse(localization.Id)};
+                    stringValue = tcmUri.ToString();
+                }
+
                 ILinkResolverExt linkResolverExt = SiteConfiguration.LinkResolver as ILinkResolverExt;
+                
                 return new Link
                 {
                     Id = stringValue.Split('-')[1],
@@ -575,7 +583,6 @@ namespace Sdl.Web.Tridion.Mapping
             }
             return Convert.ChangeType(stringValue, targetType, CultureInfo.InvariantCulture.NumberFormat);
         }
-
 
         protected virtual object MapComponentLink(EntityModelData entityModelData, Type targetType, Localization localization)
         {

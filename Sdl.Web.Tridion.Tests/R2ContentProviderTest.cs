@@ -38,7 +38,7 @@ namespace Sdl.Web.Tridion.Tests
             RegionModel mainRegion = pageModel.Regions["Main"];
             EntityModel[] entitiesWithExtensionData =
                 mainRegion.Entities.Where(
-                    e => e.ExtensionData != null).ToArray();
+                    e => e.ExtensionData != null && e.ExtensionData.ContainsKey("ContextExpressions")).ToArray();
 
             int numIncludes = 0;
             int numExcludes = 0;
