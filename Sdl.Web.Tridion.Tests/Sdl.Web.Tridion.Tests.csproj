@@ -136,6 +136,7 @@
     <Compile Include="LocalizationTest.cs" />
     <Compile Include="MockConditionalEntityEvaluator.cs" />
     <Compile Include="Models\Entity\Article.cs" />
+    <Compile Include="Models\Entity\CompLinkTest2.cs" />
     <Compile Include="Models\Entity\ContentList.cs" />
     <Compile Include="Models\Entity\Download.cs" />
     <Compile Include="Models\Entity\Image.cs" />

@@ -33,6 +33,7 @@ namespace Sdl.Web.Tridion.Tests
             RegisterViewModel("Test:TSI1757Test2", typeof(Tsi1757TestEntity2));
             RegisterViewModel("Test:TSI1757Test3", typeof(Tsi1757TestEntity3));
             RegisterViewModel("Test:CompLinkTest", typeof(CompLinkTest));
+            RegisterViewModel("Test:CompLinkTest2", typeof(CompLinkTest2));
             RegisterViewModel("Test:TSI2316Test", typeof(Tsi2316TestEntity));
             RegisterViewModel("Test:TSI2844Test", typeof(Tsi2844TestEntity));
             RegisterViewModel("Test:TSI3010Test", typeof(Tsi3010TestEntity));

@@ -534,6 +534,36 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public virtual void GetPageModel_ComponentLinks2_Success()
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ComponentLinkTest2PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            CompLinkTest2 testEntity = pageModel.Regions["Main"].Entities[0] as CompLinkTest2;
+            Assert.IsNotNull(testEntity, "testEntity");
+            Assert.IsNotNull(testEntity.CompLink, "testEntity.CompLink");
+            Assert.AreEqual(1, testEntity.CompLink.Count);
+            Assert.AreEqual($"{TestLocalization.Path}/test_article_page", testEntity.CompLink[0].Url);
+
+            string testPage2UrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ComponentLinkTest2BPageRelativeUrlPath);
+
+            PageModel pageModel2 = TestContentProvider.GetPageModel(testPage2UrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel2, "pageModel");
+            OutputJson(pageModel2);
+
+            CompLinkTest2 testEntity2 = pageModel2.Regions["Main"].Entities[0] as CompLinkTest2;
+            Assert.IsNotNull(testEntity2, "testEntity");
+            Assert.IsNotNull(testEntity2.CompLink, "testEntity.CompLink");
+            Assert.AreEqual(1, testEntity2.CompLink.Count);
+            Assert.AreEqual($"{TestLocalization.Path}/regression/crq-14184", testEntity2.CompLink[0].Url);
+        }
+
+        [TestMethod]
         public virtual void GetPageModel_ComponentLinks_Success()
         {
             const int expectedNumberOfLinks = 4;
