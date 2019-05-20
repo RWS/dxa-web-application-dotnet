@@ -702,21 +702,14 @@ namespace Sdl.Web.Tridion.Mapping
                 string htmlFragment = fragment as string;
                 if (htmlFragment == null)
                 {
-                    EntityModel embeddedItem;
                     var entityModelData = (EntityModelData)fragment;
-                    if (entityModelData.BinaryContent != null)
-                    {
-                        embeddedItem = ModelBuilderPipeline.CreateEntityModel(entityModelData, typeof(MediaItem), localization);
-                        embeddedItem.IsEmbedded = true;
-                    }
-                    else
-                    {
-                        embeddedItem = ModelBuilderPipeline.CreateEntityModel(entityModelData, typeof(EntityModel), localization);
-                    }                    
+                    EntityModel embeddedItem = ModelBuilderPipeline.CreateEntityModel(entityModelData, 
+                        entityModelData.BinaryContent != null ? typeof(MediaItem) : typeof(EntityModel), localization);
                     if (embeddedItem.MvcData == null)
                     {
                         embeddedItem.MvcData = embeddedItem.GetDefaultView(localization);
                     }
+                    embeddedItem.IsEmbedded = true;
                     fragments.Add(embeddedItem);
                 }
                 else
