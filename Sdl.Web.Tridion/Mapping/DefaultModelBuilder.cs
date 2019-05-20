@@ -703,11 +703,11 @@ namespace Sdl.Web.Tridion.Mapping
                 if (htmlFragment == null)
                 {
                     EntityModel embeddedItem;
-                    var entityModelData = fragment as EntityModelData;
-                    if (entityModelData?.BinaryContent != null)
+                    var entityModelData = (EntityModelData)fragment;
+                    if (entityModelData.BinaryContent != null)
                     {
                         embeddedItem = ModelBuilderPipeline.CreateEntityModel(entityModelData, typeof(MediaItem), localization);
-                        ((MediaItem)embeddedItem).IsEmbedded = true;
+                        embeddedItem.IsEmbedded = true;
                     }
                     else
                     {
