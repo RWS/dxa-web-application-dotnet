@@ -702,14 +702,15 @@ namespace Sdl.Web.Tridion.Mapping
                 string htmlFragment = fragment as string;
                 if (htmlFragment == null)
                 {
-                    // Embedded Entity Model (for Media Items)
-                    MediaItem mediaItem = (MediaItem)ModelBuilderPipeline.CreateEntityModel((EntityModelData)fragment, typeof(MediaItem), localization);
-                    mediaItem.IsEmbedded = true;
-                    if (mediaItem.MvcData == null)
+                    var entityModelData = (EntityModelData)fragment;
+                    EntityModel embeddedItem = ModelBuilderPipeline.CreateEntityModel(entityModelData, 
+                        entityModelData.BinaryContent != null ? typeof(MediaItem) : typeof(EntityModel), localization);
+                    if (embeddedItem.MvcData == null)
                     {
-                        mediaItem.MvcData = mediaItem.GetDefaultView(localization);
+                        embeddedItem.MvcData = embeddedItem.GetDefaultView(localization);
                     }
-                    fragments.Add(mediaItem);
+                    embeddedItem.IsEmbedded = true;
+                    fragments.Add(embeddedItem);
                 }
                 else
                 {
@@ -718,7 +719,6 @@ namespace Sdl.Web.Tridion.Mapping
                 }
             }
             RichText richText = new RichText(fragments);
-
             if (targetType == typeof(RichText))
             {
                 return richText;

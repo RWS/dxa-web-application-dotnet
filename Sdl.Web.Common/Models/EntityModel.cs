@@ -23,6 +23,12 @@ namespace Sdl.Web.Common.Models
         public string Id { get; set; }
 
         /// <summary>
+        /// Gets or sets a flag to distinguish if this is an embedded Entity in an RTF field.
+        /// </summary>
+        [SemanticProperty(IgnoreMapping = true)]
+        public bool IsEmbedded { get; set; }
+
+        /// <summary>
         /// Gets or sets metadata used to render XPM property markup.
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]

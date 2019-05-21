@@ -564,6 +564,25 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        public virtual void GetPageModel_RTFEmbeddedEntity_Success()
+        {
+            string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.CRQ12781PageRelativeUrlPath);
+
+            PageModel pageModel = TestContentProvider.GetPageModel(testPageUrlPath, TestLocalization, addIncludes: false);
+
+            Assert.IsNotNull(pageModel, "pageModel");
+            OutputJson(pageModel);
+
+            Article testEntity = pageModel.Regions["Main"].Entities[0] as Article;
+            Assert.IsNotNull(testEntity, "testEntity");
+            Assert.IsNotNull(testEntity.ArticleBody, "testEntity.ArticleBody");
+            Assert.AreEqual(4, testEntity.ArticleBody[0].Content.Fragments.Count());
+            Article embedded = testEntity.ArticleBody[0].Content.Fragments.ToList()[3] as Article;
+            Assert.IsNotNull(embedded);
+            Assert.IsTrue(embedded.IsEmbedded);
+        }
+
+        [TestMethod]
         public virtual void GetPageModel_ComponentLinks_Success()
         {
             const int expectedNumberOfLinks = 4;

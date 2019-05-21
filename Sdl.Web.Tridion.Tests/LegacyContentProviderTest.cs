@@ -84,5 +84,11 @@ namespace Sdl.Web.Tridion.Tests
         {
             base.GetPageModel_IncludePage_Success();
         }
+
+        [TestMethod]
+        [Ignore]
+        public override void GetPageModel_RTFEmbeddedEntity_Success()
+        {            
+        }
     }
 }
