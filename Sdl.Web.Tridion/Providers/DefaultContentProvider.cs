@@ -49,9 +49,10 @@ namespace Sdl.Web.Tridion.Mapping
                         () =>
                         {
                             PageModel pageModel = LoadPageModel(ref urlPath, addIncludes, localization);
-                            if (pageModel.NoCache || pageModel.IsVolatile || pageModel.HasNoCacheAttribute)
+                            if (pageModel.NoCache || pageModel.HasNoCacheAttribute)
                             {
                                 result = pageModel;
+                                pageModel.IsVolatile = true;
                                 return null;
                             }
                             return pageModel;
@@ -99,9 +100,10 @@ namespace Sdl.Web.Tridion.Mapping
                         () =>
                         {
                             PageModel pageModel = LoadPageModel(pageId, addIncludes, localization);
-                            if (pageModel.NoCache)
+                            if (pageModel.NoCache || pageModel.HasNoCacheAttribute)
                             {
                                 result = pageModel;
+                                pageModel.IsVolatile = true;
                                 return null;
                             }
                             return pageModel;
@@ -148,7 +150,7 @@ namespace Sdl.Web.Tridion.Mapping
                         () =>
                         {
                             EntityModel entityModel = LoadEntityModel(id, localization);
-                            if (entityModel.IsVolatile || entityModel.HasNoCacheAttribute)
+                            if (entityModel.HasNoCacheAttribute)
                             {
                                 // this entity has been marked for no caching so we return null to prevent a cache write                         
                                 entityModel.IsVolatile = true;
