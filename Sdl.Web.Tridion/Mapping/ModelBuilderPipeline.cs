@@ -127,49 +127,16 @@ namespace Sdl.Web.Tridion.Mapping
             using (new Tracer(pageModelData, localization))
             {
                 PageModel pageModel = null;
-                if (CacheRegions.IsViewModelCachingEnabled) // quick way to avoid all caching on viewmodels
+                foreach (IPageModelBuilder pageModelBuilder in _pageModelBuilders)
                 {
-                    string key = $"{pageModelData.Id}-{includePageRegions}-{localization.Id}";
-                    PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                       key,
-                       CacheRegions.PageModel,
-                       () =>
-                       {
-                           pageModel = CreatePageModelInternal(pageModelData, includePageRegions, localization);
-                           if (pageModel.NoCache || pageModel.IsVolatile || pageModel.HasNoCacheAttribute)
-                           {
-                               // this page has been marked to no caching so we return null to prevent a cache write                               
-                               Log.Trace($"PageModel with id={pageModelData.Id} MvcData={pageModel.MvcData} includePageRegions={includePageRegions} localization={localization.Id} was marked for no caching.");
-                               return null;
-                           }
-                           Log.Trace($"PageModel with id={pageModelData.Id} MvcData={pageModel.MvcData} includePageRegions={includePageRegions} localization={localization.Id} added to cache.");
-                           return pageModel;
-                       }
-                       );
-
-                    if (cachedPageModel != null)
-                    {
-                        // don't return the cached Page Model itself, because we don't want dynamic logic to modify the cached state.
-                        pageModel = (PageModel)cachedPageModel.DeepCopy();
-                    }
+                    pageModelBuilder.BuildPageModel(ref pageModel, pageModelData, includePageRegions, localization);
                 }
-                else
+                if (pageModel == null)
                 {
-                    pageModel = CreatePageModelInternal(pageModelData, includePageRegions, localization);
+                    throw new DxaException("Page Model is null after all Page Model Builders have been run.");
                 }
                 return pageModel;
             }
-        }      
-        
-        private static int CalcHash(EntityModelData entityModelData)
-        {
-            int h0 = entityModelData.Id?.GetHashCode() ?? 0;
-            int h1 = entityModelData.HtmlClasses?.GetHashCode() ?? 0;
-            int h2 = (int)entityModelData.SerializationHashCode;
-            int h3 = entityModelData.LinkUrl?.GetHashCode() ?? 0;
-            int h4 = entityModelData.MvcData?.GetHashCode() ?? 0;
-
-            return Hash.CombineHashCodes(h0, h1, h2, h3, h4);
         }
 
         /// <summary>
@@ -179,74 +146,22 @@ namespace Sdl.Web.Tridion.Mapping
         /// <param name="baseModelType">The base type for the Entity Model to build.</param>
         /// <param name="localization">The context <see cref="ILocalization"/>.</param>
         /// <returns>The strongly typed Entity Model. Will be of type <paramref name="baseModelType"/> or a subclass.</returns>
-        public static EntityModel CreateEntityModel(EntityModelData entityModelData, Type baseModelType, Localization localization)
-        {                        
+        public static EntityModel CreateEntityModel(EntityModelData entityModelData, Type baseModelType,
+            Localization localization)
+        {
             using (new Tracer(entityModelData, localization))
             {
-                EntityModel entityModel = null;               
-                if (CacheRegions.IsViewModelCachingEnabled) // quick way to avoid all caching on viewmodels
+                EntityModel entityModel = null;
+                foreach (IEntityModelBuilder entityModelBuilder in _entityModelBuilders)
                 {
-                    string key = $"{localization.Id}-{CalcHash(entityModelData)}";
-                    EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                       key,
-                       CacheRegions.EntityModel,
-                       () =>
-                       {
-                           entityModel = CreateEntityModelInternal(entityModelData, baseModelType, localization);
-                           if (entityModel.IsVolatile || entityModel.HasNoCacheAttribute)
-                           {
-                               // this entity has been marked for no caching so we return null to prevent a cache write                         
-                               Log.Trace($"EntityModel with id={entityModelData.Id} MvcData={entityModel.MvcData} localization={localization.Id} was marked for no caching.");
-                               entityModel.IsVolatile = true;
-                               return null;
-                           }
-                           Log.Trace($"EntityModel with id={entityModelData.Id} MvcData={entityModel.MvcData} localization={localization.Id} was added to cache.");
-                           return entityModel;
-                       }
-                       );
-
-                    if (cachedEntityModel != null)
-                    {
-                        // don't return the cached Page Model itself, because we don't want dynamic logic to modify the cached state.
-                        entityModel = (EntityModel)cachedEntityModel.DeepCopy();
-                    }
+                    entityModelBuilder.BuildEntityModel(ref entityModel, entityModelData, baseModelType, localization);
                 }
-                else
+                if (entityModel == null)
                 {
-                    entityModel = CreateEntityModelInternal(entityModelData, baseModelType, localization);
+                    throw new DxaException("Entity Model is null after all Entity Model Builders have been run.");
                 }
                 return entityModel;
             }
-        }
-
-        internal static PageModel CreatePageModelInternal(PageModelData pageModelData, bool includePageRegions,
-          Localization localization)
-        {
-            PageModel pageModel = null;
-            foreach (IPageModelBuilder pageModelBuilder in _pageModelBuilders)
-            {
-                pageModelBuilder.BuildPageModel(ref pageModel, pageModelData, includePageRegions, localization);
-            }
-            if (pageModel == null)
-            {
-                throw new DxaException("Page Model is null after all Page Model Builders have been run.");
-            }
-            return pageModel;
-        }
-
-        internal static EntityModel CreateEntityModelInternal(EntityModelData entityModelData, Type baseModelType,
-            Localization localization)
-        {
-            EntityModel entityModel = null;
-            foreach (IEntityModelBuilder entityModelBuilder in _entityModelBuilders)
-            {
-                entityModelBuilder.BuildEntityModel(ref entityModel, entityModelData, baseModelType, localization);
-            }
-            if (entityModel == null)
-            {
-                throw new DxaException("Entity Model is null after all Entity Model Builders have been run.");
-            }
-            return entityModel;
-        }
+        }       
     }
 }

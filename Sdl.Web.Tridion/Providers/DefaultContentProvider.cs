@@ -49,9 +49,10 @@ namespace Sdl.Web.Tridion.Mapping
                         () =>
                         {
                             PageModel pageModel = LoadPageModel(ref urlPath, addIncludes, localization);
-                            if (pageModel.NoCache)
+                            if (pageModel.NoCache || pageModel.HasNoCacheAttribute)
                             {
                                 result = pageModel;
+                                pageModel.IsVolatile = true;
                                 return null;
                             }
                             return pageModel;
@@ -99,9 +100,10 @@ namespace Sdl.Web.Tridion.Mapping
                         () =>
                         {
                             PageModel pageModel = LoadPageModel(pageId, addIncludes, localization);
-                            if (pageModel.NoCache)
+                            if (pageModel.NoCache || pageModel.HasNoCacheAttribute)
                             {
                                 result = pageModel;
+                                pageModel.IsVolatile = true;
                                 return null;
                             }
                             return pageModel;
@@ -139,17 +141,32 @@ namespace Sdl.Web.Tridion.Mapping
         {
             using (new Tracer(id, localization))
             {
-                EntityModel result;
+                EntityModel result = null;
                 if (CacheRegions.IsViewModelCachingEnabled)
                 {
                     EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
                         $"{id}-{localization.Id}", // key
                         CacheRegions.EntityModel,
-                        () => LoadEntityModel(id, localization)
-                        );
+                        () =>
+                        {
+                            EntityModel entityModel = LoadEntityModel(id, localization);
+                            if (entityModel.HasNoCacheAttribute)
+                            {
+                                // this entity has been marked for no caching so we return null to prevent a cache write                         
+                                entityModel.IsVolatile = true;
+                                result = entityModel;
+                                return null;
+                            }
 
-                    // Don't return the cached Entity Model itself, because we don't want dynamic logic to modify the cached state.
-                    result = (EntityModel)cachedEntityModel.DeepCopy();
+                            return entityModel;
+                        }
+                    );
+
+                    if (cachedEntityModel != null)
+                    {
+                        // Don't return the cached Entity Model itself, because we don't want dynamic logic to modify the cached state.
+                        result = (EntityModel) cachedEntityModel.DeepCopy();
+                    }
                 }
                 else
                 {

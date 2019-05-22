@@ -149,7 +149,7 @@ namespace Sdl.Web.Common.Models
         #endregion
 
         /// <summary>
-        /// Returns true if View Model is volatile and should not be cached
+        /// Returns true if View Model is volatile and should not be cached using Output Caching
         /// </summary>
         [SemanticProperty(IgnoreMapping = true)]
         [JsonIgnore]
