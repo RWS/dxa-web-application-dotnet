@@ -5,14 +5,14 @@
         <!-- Version is set by ciBuild.proj -->
         <version>0.0.0</version>
         <!-- NOTE: Visual Studio's NuGet UI only shows 'id' and 'description' -->
-        <title>SDL Digital eXperience Accelerator R2 Data Model</title>
+        <title>DD4T Provider for SDL Digital eXperience Accelerator Model Service</title>
         <authors>SDL Group</authors>
         <projectUrl>https://github.com/sdl/dxa-web-application-dotnet</projectUrl>
         <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
         <iconUrl>http://dr0muzwhcp26z.cloudfront.net/static/corporate/SDL-logo-2014.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>SDL Digital eXperience Accelerator R2 Data Model.</description>
-        <copyright>Copyright 2015-2017 SDL Group</copyright>
+        <description>DD4T Provider for SDL Digital eXperience Accelerator Model Service</description>
+        <copyright>Copyright 2015-2019 SDL Group</copyright>
         <tags>SDL DD4T DXA Model Service Provider</tags>
         <references>
             <reference file="DD4T.Providers.DxaModelService.dll" />

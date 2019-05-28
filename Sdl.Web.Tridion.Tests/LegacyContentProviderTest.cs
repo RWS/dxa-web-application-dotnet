@@ -78,5 +78,17 @@ namespace Sdl.Web.Tridion.Tests
         {
         }
 
+        [TestMethod]
+        [Ignore] // TODO CRQ-12313 Add back once this issue is resolved
+        public override void GetPageModel_IncludePage_Success()
+        {
+            base.GetPageModel_IncludePage_Success();
+        }
+
+        [TestMethod]
+        [Ignore]
+        public override void GetPageModel_RTFEmbeddedEntity_Success()
+        {            
+        }
     }
 }

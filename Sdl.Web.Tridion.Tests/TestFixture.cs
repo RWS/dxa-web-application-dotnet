@@ -28,6 +28,8 @@ namespace Sdl.Web.Tridion.Tests
         internal const string ArticlePageRelativeUrlPath = "test_article_page";
         internal const string ArticleDynamicPageRelativeUrlPath = "test_article_dynamic";
         internal const string ComponentLinkTestPageRelativeUrlPath = "comp_link_test_page";
+        internal const string ComponentLinkTest2PageRelativeUrlPath = "comp_link_test_page_2";
+        internal const string ComponentLinkTest2BPageRelativeUrlPath = "regression/comp_link_test_page_2";
         internal const string MediaManagerTestPageRelativeUrlPath = "mm_test.html";
         internal const string SmartTargetTestPageRelativeUrlPath = "smoke/smart-target-smoke-test";
         internal const string ContextExpressionsTestPageRelativeUrlPath = "smoke/context-expression-smoke-test";
@@ -51,6 +53,7 @@ namespace Sdl.Web.Tridion.Tests
         internal const string Tsi2844PageRelativeUrlPath = "regression/tsi-2844";
         internal const string Tsi2844Page2RelativeUrlPath = "regression/tsi-2844/tsi-2844-page-metadata";
         internal const string Tsi3010PageRelativeUrlPath = "regression/tsi-3010";
+        internal const string CRQ12781PageRelativeUrlPath = "CRQ_12781_Test_Page.html";
 
         private static readonly IEnumerable<Localization> _testLocalizations;
         private static readonly Localization _parentLocalization;

@@ -1,16 +1,18 @@
-﻿using Sdl.Web.Common;
+﻿using Sdl.Tridion.Api.Client.Utils;
+using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Tridion.ContentManager;
 using Tridion.ContentDelivery.Web.Linking;
+using CmUri = Sdl.Tridion.Api.Client.Utils.CmUri;
 
 namespace Sdl.Web.Tridion.Linking
 {
     /// <summary>
     /// Default Link Resolver implementation
     /// </summary>
-    public class DefaultLinkResolver : ILinkResolver
+    public class DefaultLinkResolver : ILinkResolver, ILinkResolverExt
     {
         #region ILinkResolver Members
 
@@ -21,7 +23,12 @@ namespace Sdl.Web.Tridion.Linking
         /// <param name="resolveToBinary">Specifies whether a link to a Multimedia Component should be resolved directly to its Binary (<c>true</c>) or as a regular Component link.</param>
         /// <param name="localization">The context Localization (optional, since the TCM URI already contains a Publication ID, but this allows resolving in a different context).</param>
         /// <returns>The resolved URL.</returns>
-        public string ResolveLink(string sourceUri, bool resolveToBinary = false, Localization localization = null)
+        public string ResolveLink(string sourceUri, bool resolveToBinary = false, Localization localization = null) 
+            => ResolveLink(sourceUri, null, resolveToBinary, localization);
+        #endregion
+
+        #region ILinkResolverExt Members
+        public string ResolveLink(string sourceUri, string pageContextId, bool resolveToBinary = false, Localization localization = null)
         {
             if (sourceUri == null)
             {
@@ -32,7 +39,7 @@ namespace Sdl.Web.Tridion.Linking
             if (sourceUri.IsCmIdentifier())
             {
                 Tridion.ContentManager.TcmUri tcmUri = new Tridion.ContentManager.TcmUri(sourceUri);
-                url = ResolveLink(tcmUri, resolveToBinary, localization);
+                url = ResolveLink(tcmUri, pageContextId, resolveToBinary, localization);
             }
             else
             {
@@ -52,8 +59,8 @@ namespace Sdl.Web.Tridion.Linking
         }
         #endregion
 
-        private static string ResolveLink(Tridion.ContentManager.TcmUri tcmUri, bool resolveToBinary, Localization localization)
-        {
+        private static string ResolveLink(Tridion.ContentManager.TcmUri tcmUri, string pageContextId, bool resolveToBinary, Localization localization)
+        {           
             switch (tcmUri.ItemType)
             {
                 case ItemType.Page:
@@ -66,7 +73,21 @@ namespace Sdl.Web.Tridion.Linking
                     {
                         binaryLink = ResolveBinaryLink(tcmUri, localization);
                     }
-                    return binaryLink ?? ResolveComponentLink(tcmUri, localization);
+                    if (binaryLink != null)
+                        return binaryLink;
+
+                    int pageId;
+                    CmUri cmUri;
+                    if (CmUri.TryParse(pageContextId, out cmUri))
+                    {
+                        pageId = cmUri.ItemId;
+                    }
+                    else if (!int.TryParse(pageContextId, out pageId))
+                    {
+                        pageId = -1;
+                    }
+
+                    return ResolveComponentLink(tcmUri, localization, pageId);
 
                 default:
                     throw new DxaException("Unexpected item type in TCM URI: " + tcmUri);
@@ -76,10 +97,10 @@ namespace Sdl.Web.Tridion.Linking
         private static string GetPublicationUri(Tridion.ContentManager.TcmUri tcmUri, Localization localization)
             => (localization == null) ? $"tcm:0-{tcmUri.PublicationId}-1" : localization.GetCmUri();
 
-        private static string ResolveComponentLink(Tridion.ContentManager.TcmUri tcmUri, Localization localization)
+        private static string ResolveComponentLink(Tridion.ContentManager.TcmUri tcmUri, Localization localization, int pageId)
         {
             ComponentLink linker = new ComponentLink(GetPublicationUri(tcmUri, localization));
-            Link link = linker.GetLink(tcmUri.ItemId);
+            Link link = linker.GetLink(pageId, tcmUri.ItemId, -1, null, "", false, false);
             return link.IsResolved ? link.Url : null;
         }
 
@@ -95,6 +116,6 @@ namespace Sdl.Web.Tridion.Linking
             PageLink linker = new PageLink(GetPublicationUri(tcmUri, localization));
             Link link = linker.GetLink(tcmUri.ItemId);
             return link.IsResolved ? link.Url : null;
-        }
+        }       
     }
 }

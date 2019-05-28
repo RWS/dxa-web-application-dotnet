@@ -42,10 +42,7 @@ namespace Sdl.Web.Common.Models
         public long FileSize { get; set; }
 
         [SemanticProperty(IgnoreMapping = true)]
-        public string MimeType { get; set; }
-
-        [SemanticProperty(IgnoreMapping = true)]
-        public bool IsEmbedded { get; set; }
+        public string MimeType { get; set; }      
 
         /// <summary>
         /// Gets the file size with units.

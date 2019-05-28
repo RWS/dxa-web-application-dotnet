@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
@@ -32,10 +33,8 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="date">Date to format</param>
         /// <param name="format">Format string (default is "D")</param>
         /// <returns>Formatted date</returns>
-        public static string Date(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
-        {
-            return date != null ? ((DateTime)date).ToString(format, WebRequestContext.Localization.CultureInfo) : null;
-        }
+        public static string Date(this HtmlHelper htmlHelper, DateTime? date, string format = "D") 
+            => date?.ToString(format, WebRequestContext.Localization.CultureInfo);
 
         /// <summary>
         /// Show a text representation of the difference between a given date and now
@@ -46,25 +45,22 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>Localized versions of "Today", "Yesterday", "X days ago" (for less than a week ago) or the formatted date</returns>
         public static string DateDiff(this HtmlHelper htmlHelper, DateTime? date, string format = "D")
         {
-            if (date != null)
+            if (date == null) return null;
+            int dayDiff = (int)(DateTime.Now.Date - ((DateTime)date).Date).TotalDays;
+            if (dayDiff <= 0)
             {
-                int dayDiff = (int)(DateTime.Now.Date - ((DateTime)date).Date).TotalDays;
-                if (dayDiff <= 0)
-                {
-                    return htmlHelper.Resource("core.todayText");
-                }
-                if (dayDiff == 1)
-                {
-                    return htmlHelper.Resource("core.yesterdayText");
-                }
-                if (dayDiff <= 7)
-                {
-                    return String.Format(htmlHelper.Resource("core.xDaysAgoText"), dayDiff);
-                }
-
-                return ((DateTime)date).ToString(format, WebRequestContext.Localization.CultureInfo);
+                return htmlHelper.Resource("core.todayText");
             }
-            return null;
+            if (dayDiff == 1)
+            {
+                return htmlHelper.Resource("core.yesterdayText");
+            }
+            if (dayDiff <= 7)
+            {
+                return string.Format(htmlHelper.Resource("core.xDaysAgoText"), dayDiff);
+            }
+
+            return ((DateTime)date).ToString(format, WebRequestContext.Localization.CultureInfo);
         }
 
         /// <summary>
@@ -73,10 +69,8 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="htmlHelper">HtmlHelper</param>
         /// <param name="resourceName">The resource key (eg core.readMoreText)</param>
         /// <returns>The resource value, or key name if none found</returns>
-        public static string Resource(this HtmlHelper htmlHelper, string resourceName)
-        {
-            return (string)Resource(htmlHelper.ViewContext.HttpContext, resourceName);
-        }
+        public static string Resource(this HtmlHelper htmlHelper, string resourceName) 
+            => (string)Resource(htmlHelper.ViewContext.HttpContext, resourceName);
 
         /// <summary>
         /// Read a resource string and format it with parameters
@@ -85,10 +79,8 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="resourceName">The resource key (eg core.readMoreText)</param>
         /// <param name="parameters">Format parameters</param>
         /// <returns>The formatted resource value, or key name if none found</returns>
-        public static string FormatResource(this HtmlHelper htmlHelper, string resourceName, params object[] parameters)
-        {
-            return string.Format(htmlHelper.Resource(resourceName), parameters);
-        }        
+        public static string FormatResource(this HtmlHelper htmlHelper, string resourceName, params object[] parameters) 
+            => string.Format(htmlHelper.Resource(resourceName), parameters);
 
         /// <summary>
         /// Read a resource string and format it with parameters
@@ -97,10 +89,8 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="resourceName">The resource key (eg core.readMoreText)</param>
         /// <param name="parameters">Format parameters</param>
         /// <returns>The formatted resource value, or key name if none found</returns>
-        public static object FormatResource(this HttpContextBase httpContext, string resourceName, params object[] parameters)
-        {
-            return string.Format((string)httpContext.Resource(resourceName), parameters);
-        }
+        public static object FormatResource(this HttpContextBase httpContext, string resourceName, params object[] parameters) 
+            => string.Format((string)httpContext.Resource(resourceName), parameters);
 
         /// <summary>
         /// Read a resource value
@@ -108,10 +98,8 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="httpContext">The HttpContext</param>
         /// <param name="resourceName">The resource key (eg core.readMoreText)</param>
         /// <returns>The resource value, or key name if none found</returns>
-        public static object Resource(this HttpContextBase httpContext, string resourceName)
-        {
-            return httpContext.GetGlobalResourceObject(CultureInfo.CurrentUICulture.ToString(), resourceName);
-        }
+        public static object Resource(this HttpContextBase httpContext, string resourceName) 
+            => httpContext.GetGlobalResourceObject(CultureInfo.CurrentUICulture.ToString(), resourceName);
 
         /// <summary>
         /// Convert a number into a filesize display value
@@ -162,22 +150,18 @@ namespace Sdl.Web.Mvc.Html
                 //need to know their width
                 if (containerSize == 0)
                 {
-                    containerSize = (int) helper.ViewData[DxaViewDataItems.ContainerSize];
+                    containerSize = GetViewData<int>(helper, DxaViewDataItems.ContainerSize);
                 }
 
                 return new MvcHtmlString(media.ToHtml(widthFactor, aspect, cssClass, containerSize));
             }
         }
 
-        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, string widthFactor = null, string cssClass = null)
-        {
-            return Media(helper, media, widthFactor, SiteConfiguration.MediaHelper.DefaultMediaAspect, cssClass);
-        }
+        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, string widthFactor = null, string cssClass = null) 
+            => Media(helper, media, widthFactor, SiteConfiguration.MediaHelper.DefaultMediaAspect, cssClass);
 
-        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, double aspect, string cssClass = null)
-        {
-            return Media(helper, media, null, aspect, cssClass);
-        }
+        public static MvcHtmlString Media(this HtmlHelper helper, MediaItem media, double aspect, string cssClass = null) 
+            => Media(helper, media, null, aspect, cssClass);
 
         #region Region/Entity rendering extension methods
         /// <summary>
@@ -212,7 +196,7 @@ namespace Sdl.Web.Mvc.Html
                 string controllerAreaName = mvcData.ControllerAreaName ?? SiteConfiguration.GetDefaultModuleName();
 
                 RouteValueDictionary parameters = new RouteValueDictionary();
-                int parentContainerSize = (int) htmlHelper.ViewData[DxaViewDataItems.ContainerSize];
+                int parentContainerSize = GetViewData<int>(htmlHelper, DxaViewDataItems.ContainerSize);
                 if (parentContainerSize == 0)
                 {
                     parentContainerSize = SiteConfiguration.MediaHelper.GridSize;
@@ -456,11 +440,8 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
         /// <returns>The HTML/RDFa attributes for the Region. These should be included in an HTML start tag.</returns>
         /// <remarks>This method will throw an exception if the current Model does not represent a Region.</remarks>
-        public static MvcHtmlString DxaRegionMarkup(this HtmlHelper htmlHelper)
-        {
-            RegionModel region = (RegionModel) htmlHelper.ViewData.Model;
-            return htmlHelper.DxaRegionMarkup(region);
-        }
+        public static MvcHtmlString DxaRegionMarkup(this HtmlHelper htmlHelper) 
+            => htmlHelper.DxaRegionMarkup((RegionModel)htmlHelper.ViewData.Model);
 
         /// <summary>
         /// Generates semantic markup (HTML/RDFa attributes) for a given Region Model.
@@ -468,10 +449,8 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
         /// <param name="region">The Region Model to generate semantic markup for.</param>
         /// <returns>The HTML/RDFa attributes for the Region. These should be included in an HTML start tag.</returns>
-        public static MvcHtmlString DxaRegionMarkup(this HtmlHelper htmlHelper, RegionModel region)
-        {
-            return Markup.RenderRegionAttributes(region);
-        }
+        public static MvcHtmlString DxaRegionMarkup(this HtmlHelper htmlHelper, RegionModel region) 
+            => Markup.RenderRegionAttributes(region);
 
         /// <summary>
         /// Generates semantic markup (HTML/RDFa attributes) for the current Entity Model.
@@ -479,11 +458,8 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
         /// <returns>The HTML/RDFa attributes for the Entity. These should be included in an HTML start tag.</returns>
         /// <remarks>This method will throw an exception if the current Model does not represent an Entity.</remarks>
-        public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper)
-        {
-            EntityModel entity = (EntityModel) htmlHelper.ViewData.Model;
-            return htmlHelper.DxaEntityMarkup(entity);
-        }
+        public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper) 
+            => htmlHelper.DxaEntityMarkup((EntityModel)htmlHelper.ViewData.Model);
 
         /// <summary>
         /// Generates semantic markup (HTML/RDFa attributes) for a given Entity Model.
@@ -491,10 +467,8 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="htmlHelper">The HtmlHelper instance on which the extension method operates.</param>
         /// <param name="entity">The Entity Model to generate semantic markup for.</param>
         /// <returns>The HTML/RDFa attributes for the Entity. These should be included in an HTML start tag.</returns>
-        public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper, EntityModel entity)
-        {
-            return Markup.RenderEntityAttributes(entity);
-        }
+        public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper, EntityModel entity) 
+            => Markup.RenderEntityAttributes(entity);
 
         /// <summary>
         /// Generates semantic markup (HTML/RDFa attributes) for a given property of the current Entity Model.
@@ -503,11 +477,8 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="propertyName">The name of the property.</param>
         /// <param name="index">The index of the property value (for multi-value properties).</param>
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
-        public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, string propertyName, int index = 0)
-        {
-            EntityModel entity = (EntityModel) htmlHelper.ViewData.Model;
-            return Markup.RenderPropertyAttributes(entity, propertyName, index);
-        }
+        public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, string propertyName, int index = 0) 
+            => Markup.RenderPropertyAttributes((EntityModel)htmlHelper.ViewData.Model, propertyName, index);
 
         /// <summary>
         /// Generates semantic markup (HTML/RDFa attributes) for a given property of a given Entity Model.
@@ -517,10 +488,8 @@ namespace Sdl.Web.Mvc.Html
         /// <param name="propertyName">The name of the property.</param>
         /// <param name="index">The index of the property value (for multi-value properties).</param>
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
-        public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, EntityModel entity, string propertyName, int index = 0)
-        {
-            return Markup.RenderPropertyAttributes(entity, propertyName, index);
-        }
+        public static MvcHtmlString DxaPropertyMarkup(this HtmlHelper htmlHelper, EntityModel entity, string propertyName, int index = 0) 
+            => Markup.RenderPropertyAttributes(entity, propertyName, index);
 
         /// <summary>
         /// Generates semantic markup (HTML/RDFa attributes) for a given property.
@@ -603,18 +572,17 @@ namespace Sdl.Web.Mvc.Html
         /// </summary>
         /// <param name="model">The Page Or Region Model</param>
         /// <returns>The Regions obtained from the model.</returns>
-        private static RegionModelSet GetRegions(object model)
+        private static RegionModelSet GetRegions(object model) 
+            => (model is PageModel ? ((PageModel)model).Regions : ((RegionModel)model).Regions);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T GetViewData<T>(this HtmlHelper htmlHelper, string key)
         {
-            RegionModelSet result;
-            if (model is PageModel)
+            if (htmlHelper.ViewData?.ContainsKey(key) == true)
             {
-                result = ((PageModel)model).Regions;
+                return (T) htmlHelper.ViewData[key];
             }
-            else
-            {
-                result = ((RegionModel)model).Regions;
-            }
-            return result;
+            return default(T);
         }
     }
 }
