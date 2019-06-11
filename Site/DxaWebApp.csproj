@@ -85,23 +85,23 @@
       <HintPath>..\packages\Microsoft.Extensions.Primitives.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Primitives.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.OData.Client">
-      <HintPath>..\packages\Microsoft.OData.Client.7.5.1\lib\net45\Microsoft.OData.Client.dll</HintPath>
+      <HintPath>..\packages\Microsoft.OData.Client.7.5.4\lib\net45\Microsoft.OData.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.OData.Core">
-      <HintPath>..\packages\Microsoft.OData.Core.7.5.1\lib\portable-net45+win8+wpa81\Microsoft.OData.Core.dll</HintPath>
+      <HintPath>..\packages\Microsoft.OData.Core.7.5.4\lib\portable-net45+win8+wpa81\Microsoft.OData.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.OData.Edm">
-      <HintPath>..\packages\Microsoft.OData.Edm.7.5.1\lib\portable-net45+win8+wpa81\Microsoft.OData.Edm.dll</HintPath>
+      <HintPath>..\packages\Microsoft.OData.Edm.7.5.4\lib\portable-net45+win8+wpa81\Microsoft.OData.Edm.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Spatial">
-      <HintPath>..\packages\Microsoft.Spatial.7.5.1\lib\portable-net45+win8+wpa81\Microsoft.Spatial.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Spatial.7.5.4\lib\portable-net45+win8+wpa81\Microsoft.Spatial.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="CommonServiceLocator">
-      <HintPath>..\packages\Unity.5.8.11\lib\net46\CommonServiceLocator.dll</HintPath>
+      <HintPath>..\packages\Unity.5.8.13\lib\net46\CommonServiceLocator.dll</HintPath>
       <Private>True</Private>
     </Reference>   
     <Reference Include="Microsoft.Web.Infrastructure">
@@ -147,11 +147,11 @@
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Mvc">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.7\lib\net45\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Razor">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.7\lib\net45\System.Web.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Routing">
       <Private>True</Private>
@@ -159,11 +159,11 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web.WebPages">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages.Razor">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
@@ -178,23 +178,23 @@
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net462\Tridion.ContentDelivery.UGC.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Abstractions">
-      <HintPath>..\packages\Unity.5.8.11\lib\net46\Unity.Abstractions.dll</HintPath>
+      <HintPath>..\packages\Unity.5.8.13\lib\net46\Unity.Abstractions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Unity.Configuration">
-      <HintPath>..\packages\Unity.5.8.11\lib\net46\Unity.Configuration.dll</HintPath>
+      <HintPath>..\packages\Unity.5.8.13\lib\net46\Unity.Configuration.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Unity.Container">
-      <HintPath>..\packages\Unity.5.8.11\lib\net46\Unity.Container.dll</HintPath>
+      <HintPath>..\packages\Unity.5.8.13\lib\net46\Unity.Container.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Unity.Interception">
-      <HintPath>..\packages\Unity.5.8.11\lib\net46\Unity.Interception.dll</HintPath>
+      <HintPath>..\packages\Unity.5.8.13\lib\net46\Unity.Interception.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Unity.Interception.Configuration">
-      <HintPath>..\packages\Unity.5.8.11\lib\net46\Unity.Interception.Configuration.dll</HintPath>
+      <HintPath>..\packages\Unity.5.8.13\lib\net46\Unity.Interception.Configuration.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Unity.Mvc5">
@@ -202,11 +202,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Unity.RegistrationByConvention">
-      <HintPath>..\packages\Unity.5.8.11\lib\net46\Unity.RegistrationByConvention.dll</HintPath>
+      <HintPath>..\packages\Unity.5.8.13\lib\net46\Unity.RegistrationByConvention.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Unity.ServiceLocation">
-      <HintPath>..\packages\Unity.5.8.11\lib\net46\Unity.ServiceLocation.dll</HintPath>
+      <HintPath>..\packages\Unity.5.8.13\lib\net46\Unity.ServiceLocation.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

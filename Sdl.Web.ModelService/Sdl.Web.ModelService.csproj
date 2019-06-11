@@ -45,10 +45,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.OData.Client">
-      <HintPath>..\packages\Microsoft.OData.Client.7.5.1\lib\net45\Microsoft.OData.Client.dll</HintPath>
+      <HintPath>..\packages\Microsoft.OData.Client.7.5.4\lib\net45\Microsoft.OData.Client.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.OData.Edm">
-      <HintPath>..\packages\Microsoft.OData.Edm.7.5.1\lib\portable-net45+win8+wpa81\Microsoft.OData.Edm.dll</HintPath>
+      <HintPath>..\packages\Microsoft.OData.Edm.7.5.4\lib\portable-net45+win8+wpa81\Microsoft.OData.Edm.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
