@@ -113,7 +113,7 @@ namespace Sdl.Web.Tridion.Mapping
 
                 var cachedDynamicList = SiteConfiguration.CacheProvider.GetOrAdd(
                     $"PopulateDynamicList-{dynamicList.Id}-{simpleBrokerQuery.GetHashCode()}", // key
-                    CacheRegions.SearchQuery,
+                    CacheRegions.BrokerQuery,
                     () =>
                     {
                         var brokerQuery = new GraphQLQueryProvider();
