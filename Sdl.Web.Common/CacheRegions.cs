@@ -24,6 +24,7 @@ namespace Sdl.Web.Common
         public const string ModelService = "ModelService";
         public const string PublicationMapping = "PublicationMapping";
         public const string LinkResolving = "LinkResolving";
+        public const string SearchQuery = "CIL-BROKER"; // Using same region as CIL broker queries to avoid introducing a new region for GraphQL search queries
         public const string RenderedOutput = "RenderedOutput";
 
         /// <summary>

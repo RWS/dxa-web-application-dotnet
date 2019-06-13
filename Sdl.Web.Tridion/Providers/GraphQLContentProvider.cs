@@ -107,33 +107,45 @@ namespace Sdl.Web.Tridion.Mapping
                 simpleBrokerQuery.Cursor = cursors[start];
 
                 // the cursor retrieved may of came from a different start index so we update start
-                simpleBrokerQuery.Start = cursors.StartIndex;
-                dynamicList.Start = cursors.StartIndex;
-            
-                var brokerQuery = new GraphQLQueryProvider();
+                int startIndex = cursors.StartIndex;
+                simpleBrokerQuery.Start = startIndex;
+                dynamicList.Start = startIndex;
 
-                var components = brokerQuery.ExecuteQueryItems(simpleBrokerQuery).ToList();
-                Log.Debug($"Broker Query returned {components.Count} results. HasMore={brokerQuery.HasMore}");
+                var cachedDynamicList = SiteConfiguration.CacheProvider.GetOrAdd(
+                    $"PopulateDynamicList-{dynamicList.Id}-{simpleBrokerQuery.GetHashCode()}", // key
+                    CacheRegions.SearchQuery,
+                    () =>
+                    {
+                        var brokerQuery = new GraphQLQueryProvider();
 
-                if (components.Count > 0)
-                {
-                    Type resultType = dynamicList.ResultType;
-                    dynamicList.QueryResults = components
-                        .Select(
-                            c =>
-                                ModelBuilderPipeline.CreateEntityModel(
-                                    CreateEntityModelData((Component) c), resultType,
-                                    localization))
-                        .ToList();
-                }
+                        var components = brokerQuery.ExecuteQueryItems(simpleBrokerQuery).ToList();
+                        Log.Debug($"Broker Query returned {components.Count} results. HasMore={brokerQuery.HasMore}");
 
-                dynamicList.HasMore = brokerQuery.HasMore;
+                        if (components.Count > 0)
+                        {
+                            Type resultType = dynamicList.ResultType;
+                            dynamicList.QueryResults = components
+                                .Select(
+                                    c =>
+                                        ModelBuilderPipeline.CreateEntityModel(
+                                            CreateEntityModelData((Component) c), resultType,
+                                            localization))
+                                .ToList();
+                        }
 
-                if (brokerQuery.HasMore)
-                {
-                    // update cursor
-                    cursors[simpleBrokerQuery.Start + simpleBrokerQuery.PageSize] = brokerQuery.Cursor;
-                }
+                        dynamicList.HasMore = brokerQuery.HasMore;
+
+                        if (brokerQuery.HasMore)
+                        {
+                            // update cursor
+                            cursors[simpleBrokerQuery.Start + simpleBrokerQuery.PageSize] = brokerQuery.Cursor;
+                        }
+
+                        return dynamicList;
+                    });
+               
+                dynamicList.QueryResults = cachedDynamicList.QueryResults;
+                dynamicList.HasMore = cachedDynamicList.HasMore;
             }
         }
 
