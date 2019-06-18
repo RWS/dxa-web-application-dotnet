@@ -3,6 +3,7 @@ using Sdl.Tridion.Api.Client.ContentModel;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.ApiClient;
 
 namespace Sdl.Web.Tridion
@@ -31,7 +32,7 @@ namespace Sdl.Web.Tridion
                 }
 
                 // NOTE: we're not using UrlToLocalizationMapping here, because we may match too eagerly on a base URL when there is a matching mapping with a more specific URL.
-                PublicationMapping mapping = SiteConfiguration.CacheProvider.GetOrAdd($"{urlLeftPart}", CacheRegions.PublicationMapping, () => ApiClientFactory.Instance.CreateClient().GetPublicationMapping(
+                PublicationMapping mapping = SiteConfiguration.CacheProvider.GetOrAdd($"{urlLeftPart}:{WebRequestContext.CacheKeySalt}", CacheRegions.PublicationMapping, () => ApiClientFactory.Instance.CreateClient().GetPublicationMapping(
                     ContentNamespace.Sites,
                     urlLeftPart));
                

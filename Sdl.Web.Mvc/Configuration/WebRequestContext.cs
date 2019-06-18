@@ -139,6 +139,21 @@ namespace Sdl.Web.Mvc.Configuration
         public static bool IsInclude 
             => (bool?)GetFromContextStore("IsInclude") ?? (bool)AddToContextStore("IsInclude", RequestUrl.Contains("system/include/"));
 
+        /// <summary>
+        /// Cache key salt used to "mix" in with keys used for caching to provie uniqueness per request.
+        /// </summary>
+        public static int CacheKeySalt
+        {
+            get
+            {
+                return (int?)GetFromContextStore("CacheKeySalt") ?? 0;
+            }
+            set
+            {
+                AddToContextStore("CacheKeySalt", value);
+            }
+        }      
+    
         protected static ScreenWidth CalculateScreenWidth()
         {
             int width = IsContextCookiePresent ? ContextEngine.GetClaims<BrowserClaims>().DisplayWidth : MaxWidth;

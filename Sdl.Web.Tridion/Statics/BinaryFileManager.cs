@@ -9,6 +9,7 @@ using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Providers.Binary;
 using Image = System.Drawing.Image; // TODO: Shouldn't use System.Drawing namespace in a web application.
 
@@ -52,7 +53,7 @@ namespace Sdl.Web.Tridion.Statics
             Localization localization)
         {
             DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
-                localFilePath,
+                $"{localFilePath}:{WebRequestContext.CacheKeySalt}",
                 CacheRegions.BinaryPublishDate,
                 getLastPublishedDate
                 );

@@ -9,6 +9,7 @@ using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
+using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.ApiClient;
 
 namespace Sdl.Web.Tridion.Providers.Binary
@@ -22,7 +23,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
 
         public DateTime GetBinaryLastPublishedDate(Localization localization, string urlPath)
         {
-            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}", CacheRegions.BinaryPublishDate, () =>
+            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}:{WebRequestContext.CacheKeySalt}", CacheRegions.BinaryPublishDate, () =>
             {
                 var client = ApiClientFactory.Instance.CreateClient();
                 var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(), urlPath, null, null);
@@ -32,7 +33,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
 
         public async Task<DateTime> GetBinaryLastPublishedDateAsync(Localization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
+            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}:{WebRequestContext.CacheKeySalt}",
                 CacheRegions.BinaryPublishDate,
                 async () =>
                 {
@@ -49,7 +50,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
 
         public DateTime GetBinaryLastPublishedDate(Localization localization, int binaryId)
         {
-            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
+            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}:{WebRequestContext.CacheKeySalt}",
                 CacheRegions.BinaryPublishDate,
                 () =>
                 {
@@ -64,7 +65,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
 
         public async Task<DateTime> GetBinaryLastPublishedDateAsync(Localization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
+            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}:{WebRequestContext.CacheKeySalt}",
                 CacheRegions.BinaryPublishDate,
                 async () =>
                 {
@@ -81,7 +82,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
 
         public Tuple<byte[], string> GetBinary(Localization localization, int binaryId)
         {
-            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
+            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}:{WebRequestContext.CacheKeySalt}",
                 CacheRegions.Binary,
                 () =>
                 {
@@ -97,7 +98,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
 
         public async Task<Tuple<byte[], string>> GetBinaryAsync(Localization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
+            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}:{WebRequestContext.CacheKeySalt}",
                 CacheRegions.Binary,
                 async () =>
                 {
@@ -114,7 +115,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
 
         public Tuple<byte[], string> GetBinary(Localization localization, string urlPath)
         {
-            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
+            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}:{WebRequestContext.CacheKeySalt}",
                 CacheRegions.Binary,
                 () =>
                 {
@@ -129,7 +130,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
 
         public async Task<Tuple<byte[], string>> GetBinaryAsync(Localization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
+            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}:{WebRequestContext.CacheKeySalt}",
                 CacheRegions.Binary,
                 async () =>
                 {
