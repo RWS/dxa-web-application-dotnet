@@ -52,7 +52,7 @@ namespace Sdl.Web.Tridion.Statics
             Localization localization)
         {
             DateTime lastPublishedDate = SiteConfiguration.CacheProvider.GetOrAdd(
-                $"{localFilePath}",
+                localFilePath,
                 CacheRegions.BinaryPublishDate,
                 getLastPublishedDate
                 );
