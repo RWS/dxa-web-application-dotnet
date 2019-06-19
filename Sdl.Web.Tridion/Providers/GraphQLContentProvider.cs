@@ -10,7 +10,6 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
-using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.ApiClient;
 using Sdl.Web.Tridion.Providers.Query;
 
@@ -113,7 +112,7 @@ namespace Sdl.Web.Tridion.Mapping
                 dynamicList.Start = startIndex;
 
                 var cachedDynamicList = SiteConfiguration.CacheProvider.GetOrAdd(
-                    $"PopulateDynamicList-{dynamicList.Id}-{simpleBrokerQuery.GetHashCode()}:{WebRequestContext.CacheKeySalt}", // key
+                    $"PopulateDynamicList-{dynamicList.Id}-{simpleBrokerQuery.GetHashCode()}", // key
                     CacheRegions.BrokerQuery,
                     () =>
                     {

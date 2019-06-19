@@ -7,7 +7,6 @@ using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
-using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Mapping;
 
 namespace Sdl.Web.Tridion.Navigation
@@ -29,7 +28,7 @@ namespace Sdl.Web.Tridion.Navigation
             using (new Tracer(localization))
             {
                 return SiteConfiguration.CacheProvider.GetOrAdd(
-                    $"{localization.Id}:{WebRequestContext.CacheKeySalt}", // key
+                    $"{localization.Id}", // key
                     CacheRegions.StaticNavigation,
                     () => BuildNavigationModel(localization)
                     // TODO: dependency on navigation.json Page

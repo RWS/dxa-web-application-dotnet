@@ -3,7 +3,6 @@ using Sdl.Tridion.Api.Client.Utils;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
-using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.ApiClient;
 
 namespace Sdl.Web.Tridion.Linking
@@ -31,7 +30,7 @@ namespace Sdl.Web.Tridion.Linking
         {
             if (sourceUri == null) return null;
 
-            string url = SiteConfiguration.CacheProvider.GetOrAdd($"{sourceUri}:{pageContextId}:{resolveToBinary}:{localization?.Id}:{WebRequestContext.CacheKeySalt}",
+            string url = SiteConfiguration.CacheProvider.GetOrAdd($"{sourceUri}:{pageContextId}:{resolveToBinary}:{localization?.Id}",
                 CacheRegions.LinkResolving,
                 () =>
                 {
