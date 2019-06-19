@@ -9,6 +9,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Models.Navigation;
+using Sdl.Web.Mvc.Configuration;
 
 namespace Sdl.Web.Tridion.Navigation
 {
@@ -33,7 +34,7 @@ namespace Sdl.Web.Tridion.Navigation
             using (new Tracer(localization))
             {
                 var cachedNavModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                    $"GetNavigationModel:{localization.Id}",
+                    $"GetNavigationModel:{localization.Id}:{WebRequestContext.CacheKeySalt}",
                     CacheRegions.DynamicNavigation,
                     () =>
                     {
@@ -68,7 +69,7 @@ namespace Sdl.Web.Tridion.Navigation
                     return null;
 
                 return SiteConfiguration.CacheProvider.GetOrAdd(
-                    $"GetTopNavigationLinks:{requestUrlPath}-{localization.Id}",
+                    $"GetTopNavigationLinks:{requestUrlPath}-{localization.Id}:{WebRequestContext.CacheKeySalt}",
                     CacheRegions.DynamicNavigation,
                     () => new NavigationLinks
                     {
@@ -94,7 +95,7 @@ namespace Sdl.Web.Tridion.Navigation
                 if (navModel == null)
                     return null;
                 return SiteConfiguration.CacheProvider.GetOrAdd(
-                    $"GetContextNavigationLinks:{requestUrlPath}-{localization.Id}",
+                    $"GetContextNavigationLinks:{requestUrlPath}-{localization.Id}:{WebRequestContext.CacheKeySalt}",
                     CacheRegions.DynamicNavigation,
                     () =>
                     {
@@ -133,7 +134,7 @@ namespace Sdl.Web.Tridion.Navigation
                 if (navModel == null)
                     return null;
                 return SiteConfiguration.CacheProvider.GetOrAdd(
-                    $"GetBreadcrumbNavigationLinks:{requestUrlPath}-{localization.Id}",
+                    $"GetBreadcrumbNavigationLinks:{requestUrlPath}-{localization.Id}:{WebRequestContext.CacheKeySalt}",
                     CacheRegions.DynamicNavigation,
                     () =>
                     {
@@ -198,7 +199,7 @@ namespace Sdl.Web.Tridion.Navigation
                     filter = new NavigationFilter { DescendantLevels = 1, IncludeAncestors = false };
                 }
                 IEnumerable<SitemapItem> cachedNavModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                    $"GetNavigationSubtree:{sitemapItemId}-{localization.Id}-{filter.IncludeAncestors}-{filter.DescendantLevels}",
+                    $"GetNavigationSubtree:{sitemapItemId}-{localization.Id}-{filter.IncludeAncestors}-{filter.DescendantLevels}:{WebRequestContext.CacheKeySalt}",
                     CacheRegions.DynamicNavigation,
                     () =>
                     {

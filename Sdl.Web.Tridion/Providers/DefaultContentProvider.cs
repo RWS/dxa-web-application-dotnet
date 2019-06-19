@@ -10,6 +10,7 @@ using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.DataModel;
+using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Providers.Query;
 using Sdl.Web.Tridion.Statics;
 using Tridion.ContentDelivery.DynamicContent;
@@ -44,7 +45,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (CacheRegions.IsViewModelCachingEnabled)
                 {
                     PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                        $"{urlPath}:{addIncludes}", // Cache Page Models with and without includes separately
+                        $"{urlPath}:{addIncludes}:{WebRequestContext.CacheKeySalt}", // Cache Page Models with and without includes separately
                         CacheRegions.PageModel,
                         () =>
                         {
@@ -95,7 +96,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (CacheRegions.IsViewModelCachingEnabled)
                 {
                     PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                        $"{localization.Id}-{pageId}:{addIncludes}", // Cache Page Models with and without includes separately
+                        $"{localization.Id}-{pageId}:{addIncludes}:{WebRequestContext.CacheKeySalt}", // Cache Page Models with and without includes separately
                         CacheRegions.PageModel,
                         () =>
                         {
@@ -145,7 +146,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (CacheRegions.IsViewModelCachingEnabled)
                 {
                     EntityModel cachedEntityModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                        $"{id}-{localization.Id}", // key
+                        $"{id}-{localization.Id}:{WebRequestContext.CacheKeySalt}", // key
                         CacheRegions.EntityModel,
                         () =>
                         {
