@@ -11,6 +11,7 @@ namespace Sdl.Web.Common.Models
     /// Abstract base class for Entity Models which get populated dynamically.
     /// </summary>
     [Serializable]
+    [DxaNoOutputCache]
     public abstract class DynamicList : EntityModel, ISyndicationFeedItemProvider
     {
         protected DynamicList()
