@@ -12,8 +12,8 @@
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <SdlDxaDataModelPackageVersion>2.1.0</SdlDxaDataModelPackageVersion>
-    <SdlPCAPackageVersion>2.1.1</SdlPCAPackageVersion>
+    <SdlDxaDataModelPackageVersion>2.2.0</SdlDxaDataModelPackageVersion>
+    <SdlPCAPackageVersion>2.2.0</SdlPCAPackageVersion>
     <SdlWebDeliveryPackageVersion>11.0.0</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>11.0.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>11.0.0</SdlWebContextImagePackageVersion>

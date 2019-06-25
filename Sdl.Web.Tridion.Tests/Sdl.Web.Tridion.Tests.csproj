@@ -19,8 +19,8 @@
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <TargetFrameworkProfile />
-    <DxaDataModelVersion>2.1.0</DxaDataModelVersion>
-    <SdlPCAPackageVersion>2.1.1</SdlPCAPackageVersion>
+    <DxaDataModelVersion>2.2.0</DxaDataModelVersion>
+    <SdlPCAPackageVersion>2.2.0</SdlPCAPackageVersion>
     <SdlDeliveryVersion>11.0.0</SdlDeliveryVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
