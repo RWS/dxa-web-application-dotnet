@@ -155,7 +155,7 @@ namespace Sdl.Web.Mvc.OutputCache
 
             // we normally do not want view rendered output cached in preview but we can have the option to turn this off if set in the
             // web.config (for debug/testing purposes)            
-            commitCache = (_ignorePreview || !WebRequestContext.IsPreview) && (!IgnoreCaching(ctx.Controller)) && commitCache;
+            commitCache = (_ignorePreview || !WebRequestContext.IsSessionPreview) && (!IgnoreCaching(ctx.Controller)) && commitCache;
             Action<ViewModel,bool> callback = GetCallback(ctx);
             if (callback == null) return;
             RemoveCallback(ctx);

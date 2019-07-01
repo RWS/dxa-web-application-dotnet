@@ -4,6 +4,8 @@ using System;
 using System.Web;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Common.Logging;
+using System.Collections.Generic;
+using Sdl.Web.Delivery.ServicesCore.ClaimStore;
 
 namespace Sdl.Web.Mvc.Configuration
 {
@@ -13,6 +15,8 @@ namespace Sdl.Web.Mvc.Configuration
     public class WebRequestContext
     {
         private const int MaxWidth = 1024;
+        private const string PreviewSessionTokenHeader = "x-preview-session-token";
+        private const string PreviewSessionTokenCookie = "preview-session-token";
 
         /// <summary>
         /// The current request localization
@@ -130,8 +134,34 @@ namespace Sdl.Web.Mvc.Configuration
         /// <summary>
         /// True if the request is from XPM (NOTE currently always true for staging as we cannot reliably distinguish XPM requests)
         /// </summary>
+        [Obsolete]
         public static bool IsPreview 
             => (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", Localization.IsXpmEnabled);
+
+        /// <summary>
+        /// True if the request is from XPM Session Preview
+        /// </summary>
+        public static bool IsSessionPreview
+        {
+            get
+            {
+                var claimStore = AmbientDataContext.CurrentClaimStore;
+                if (claimStore == null) return false;
+
+                var headers = claimStore?.Get<Dictionary<string, string[]>>(new Uri(WebClaims.REQUEST_HEADERS));
+                if (headers != null && headers.ContainsKey(PreviewSessionTokenHeader))
+                {
+                    return true;
+                }
+
+                var cookies = claimStore?.Get<Dictionary<string, string>>(new Uri(WebClaims.REQUEST_COOKIES));
+                if (cookies != null && cookies.ContainsKey(PreviewSessionTokenCookie))
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
 
         /// <summary>
         /// True if the request is an include page
