@@ -98,14 +98,13 @@ namespace Sdl.Web.Tridion.Statics
                 // manually added to web application.
                 return localFilePath;
             }
-            // Attempt cache location with fallback to retrieval from CIL. Note we don't check cache
-            // when running under XPM
+            // Attempt cache location with fallback to retrieval from CIL. 
             localFilePath = $"{baseDir}/{localization.BinaryCacheFolder}/{urlPath}";
             using (new Tracer(urlPath, localization, localFilePath))
             {
                 Dimensions dimensions;
                 urlPath = StripDimensions(urlPath, out dimensions);
-                if (!localization.IsXpmEnabled && File.Exists(localFilePath))
+                if (File.Exists(localFilePath))
                 {
                     if (IsCached(() => provider.GetBinaryLastPublishedDate(localization, urlPath), localFilePath, localization))
                     {
@@ -136,32 +135,29 @@ namespace Sdl.Web.Tridion.Statics
             string localFilePath = $"{baseDir}/{localization.BinaryCacheFolder}";
             using (new Tracer(binaryId, localization, localFilePath))
             {
-                if (!localization.IsXpmEnabled)
+                try
                 {
-                    try
+                    if (Directory.Exists(localFilePath))
                     {
-                        if (Directory.Exists(localFilePath))
+                        string[] files = Directory.GetFiles(localFilePath, $"{binaryId}*",
+                            SearchOption.TopDirectoryOnly);
+                        if (files.Length > 0)
                         {
-                            string[] files = Directory.GetFiles(localFilePath, $"{binaryId}*",
-                                SearchOption.TopDirectoryOnly);
-                            if (files.Length > 0)
+                            localFilePath = files[0];
+                            if (IsCached(() => provider.GetBinaryLastPublishedDate(localization, binaryId),
+                                localFilePath,
+                                localization))
                             {
-                                localFilePath = files[0];
-                                if (IsCached(() => provider.GetBinaryLastPublishedDate(localization, binaryId),
-                                    localFilePath,
-                                    localization))
-                                {
-                                    return localFilePath;
-                                }
+                                return localFilePath;
                             }
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        // Our binary cache folder probably doesn't exist. 
-                        Log.Warn($"Failed to cache binary at {localFilePath}");
-                        Log.Warn(ex.Message);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    // Our binary cache folder probably doesn't exist. 
+                    Log.Warn($"Failed to cache binary at {localFilePath}");
+                    Log.Warn(ex.Message);
                 }
                 var data = provider.GetBinary(localization, binaryId);
                 if (string.IsNullOrEmpty(Path.GetExtension(localFilePath)))
