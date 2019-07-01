@@ -98,7 +98,7 @@ namespace Sdl.Web.Tridion.Statics
                 // manually added to web application.
                 return localFilePath;
             }
-            // Attempt cache location with fallback to retrieval from CIL. 
+            // Attempt cache location with fallback to retrieval from content service
             localFilePath = $"{baseDir}/{localization.BinaryCacheFolder}/{urlPath}";
             using (new Tracer(urlPath, localization, localFilePath))
             {
