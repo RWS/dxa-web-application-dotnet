@@ -26,10 +26,12 @@ namespace Sdl.Web.Tridion.Providers.Binary
             return componentMeta.LastPublicationDate;
         }
 
+#pragma warning disable 1998
         public async Task<DateTime> GetBinaryLastPublishedDateAsync(Localization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
         {
             throw new NotImplementedException();
         }
+#pragma warning restore 1998
 
         public DateTime GetBinaryLastPublishedDate(Localization localization, int binaryId)
         {

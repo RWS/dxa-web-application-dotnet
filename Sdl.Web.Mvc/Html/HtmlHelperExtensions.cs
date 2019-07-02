@@ -214,7 +214,7 @@ namespace Sdl.Web.Mvc.Html
 
                 MvcHtmlString result = htmlHelper.Action(actionName, controllerName, parameters);
                 // If the Entity is being rendered inside a Region (typical), we don't have to transform the XPM markup attributes here; it will be done in DxaRegion.
-                if (!(htmlHelper.ViewData.Model is RegionModel) && WebRequestContext.IsPreview)
+                if (!(htmlHelper.ViewData.Model is RegionModel) && WebRequestContext.Localization.IsXpmEnabled)
                 {
                     result = new MvcHtmlString(Markup.TransformXpmMarkupAttributes(result.ToString()));
                 }
@@ -301,7 +301,7 @@ namespace Sdl.Web.Mvc.Html
 
                 MvcHtmlString result = htmlHelper.Action(actionName, controllerName, new { Region = region, containerSize = containerSize, area = controllerAreaName });
 
-                if (WebRequestContext.IsPreview)
+                if (WebRequestContext.Localization.IsXpmEnabled)
                 {
                     result = new MvcHtmlString(Markup.TransformXpmMarkupAttributes(result.ToString()));
                 }
