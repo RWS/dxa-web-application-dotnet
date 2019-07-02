@@ -100,7 +100,7 @@ namespace Sdl.Web.Mvc.OutputCache
                     // n.b. we should only do this if our text/html content
                     if (ctx.HttpContext.Response.ContentType.Equals("text/html"))
                     {
-                        if (model != null && WebRequestContext.IsPreview)
+                        if (model != null && WebRequestContext.Localization.IsXpmEnabled)
                         {
                             html = Markup.TransformXpmMarkupAttributes(html);
                         }

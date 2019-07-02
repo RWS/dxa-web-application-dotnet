@@ -110,7 +110,7 @@ namespace Sdl.Web.Mvc.Html
                     $"prefix=\"{string.Join(" ", prefixMappings.Select(pm => $"{pm.Key}: {pm.Value}"))}\" typeof=\"{string.Join(" ", semanticTypes)}\"";
             }
 
-            if (WebRequestContext.IsPreview)
+            if (WebRequestContext.Localization.IsXpmEnabled)
             {
                 string xpmMarkupAttr = RenderXpmMarkupAttribute(entityModel);
                 if (string.IsNullOrEmpty(markup))
@@ -163,7 +163,7 @@ namespace Sdl.Web.Mvc.Html
                 markup = $"property=\"{string.Join(" ", semanticPropertyNames)}\"";
             }
 
-            if (WebRequestContext.IsPreview)
+            if (WebRequestContext.Localization.IsXpmEnabled)
             {
                 string xpmMarkupAttr = RenderXpmMarkupAttribute(entityModel, propertyName, index);
                 if (string.IsNullOrEmpty(markup))
@@ -189,7 +189,7 @@ namespace Sdl.Web.Mvc.Html
             // TODO: "Region" is not a valid semantic type!
             string markup = $"typeof=\"{"Region"}\" resource=\"{regionModel.Name}\"";
 
-            if (WebRequestContext.IsPreview)
+            if (WebRequestContext.Localization.IsXpmEnabled)
             {
                 markup += " " + RenderXpmMarkupAttribute(regionModel);
             }
