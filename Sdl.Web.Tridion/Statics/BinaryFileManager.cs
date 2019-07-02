@@ -9,7 +9,6 @@ using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
-using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Tridion.Providers.Binary;
 using Image = System.Drawing.Image; // TODO: Shouldn't use System.Drawing namespace in a web application.
 
@@ -45,7 +44,7 @@ namespace Sdl.Web.Tridion.Statics
         /// </summary>
         internal static BinaryFileManager Instance { get; } = new BinaryFileManager();
 
-        private static IBinaryProvider Provider
+        internal static IBinaryProvider Provider
             // Default to CIL binary provider if no implementation specified
             => SiteConfiguration.BinaryProvider ?? new CILBinaryProvider();
 
@@ -99,14 +98,13 @@ namespace Sdl.Web.Tridion.Statics
                 // manually added to web application.
                 return localFilePath;
             }
-            // Attempt cache location with fallback to retrieval from content service. Note we don't check cache
-            // when running under XPM session preview
+            // Attempt cache location with fallback to retrieval from content service.
             localFilePath = $"{baseDir}/{localization.BinaryCacheFolder}/{urlPath}";
             using (new Tracer(urlPath, localization, localFilePath))
             {
                 Dimensions dimensions;
                 urlPath = StripDimensions(urlPath, out dimensions);
-                if (!WebRequestContext.IsSessionPreview && File.Exists(localFilePath))
+                if (File.Exists(localFilePath))
                 {
                     if (IsCached(() => provider.GetBinaryLastPublishedDate(localization, urlPath), localFilePath, localization))
                     {
@@ -137,39 +135,38 @@ namespace Sdl.Web.Tridion.Statics
             string localFilePath = $"{baseDir}/{localization.BinaryCacheFolder}";
             using (new Tracer(binaryId, localization, localFilePath))
             {
-                if (!WebRequestContext.IsSessionPreview)
+                try
                 {
-                    try
+                    if (Directory.Exists(localFilePath))
                     {
-                        if (Directory.Exists(localFilePath))
+                        string[] files = Directory.GetFiles(localFilePath, $"{binaryId}*",
+                            SearchOption.TopDirectoryOnly);
+                        if (files.Length > 0)
                         {
-                            string[] files = Directory.GetFiles(localFilePath, $"{binaryId}*",
-                                SearchOption.TopDirectoryOnly);
-                            if (files.Length > 0)
+                            localFilePath = files[0];
+                            if (IsCached(() => provider.GetBinaryLastPublishedDate(localization, binaryId),
+                                localFilePath,
+                                localization))
                             {
-                                localFilePath = files[0];
-                                if (IsCached(() => provider.GetBinaryLastPublishedDate(localization, binaryId),
-                                    localFilePath,
-                                    localization))
-                                {
-                                    return localFilePath;
-                                }
+                                return localFilePath;
                             }
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        // Our binary cache folder probably doesn't exist. 
-                        Log.Warn($"Failed to cache binary at {localFilePath}");
-                        Log.Warn(ex.Message);
-                    }
                 }
+                catch (Exception ex)
+                {
+                    // Our binary cache folder probably doesn't exist. 
+                    Log.Warn($"Failed to cache binary at {localFilePath}");
+                    Log.Warn(ex.Message);
+                }
+
                 var data = provider.GetBinary(localization, binaryId);
                 if (string.IsNullOrEmpty(Path.GetExtension(localFilePath)))
                 {
                     string ext = Path.GetExtension(data.Item2) ?? "";
                     localFilePath = $"{localFilePath}/{binaryId}{ext}";
                 }
+
                 WriteBinaryToFile(data.Item1, localFilePath, null);
                 return localFilePath;
             }
@@ -238,7 +235,7 @@ namespace Sdl.Web.Tridion.Statics
             }
         }
 
-        private static byte[] ResizeImage(byte[] imageData, Dimensions dimensions, ImageFormat imageFormat)
+        internal static byte[] ResizeImage(byte[] imageData, Dimensions dimensions, ImageFormat imageFormat)
         {
             using (new Tracer(imageData.Length, dimensions, imageFormat))
             {
@@ -327,7 +324,7 @@ namespace Sdl.Web.Tridion.Statics
             }
         }
 
-        private static ImageFormat GetImageFormat(string path)
+        internal static ImageFormat GetImageFormat(string path)
         {
             if (string.IsNullOrEmpty(path)) return null;
             switch (Path.GetExtension(path).ToLower())
@@ -346,7 +343,7 @@ namespace Sdl.Web.Tridion.Statics
             }
         }
 
-        private static string StripDimensions(string path, out Dimensions dimensions)
+        internal static string StripDimensions(string path, out Dimensions dimensions)
         {
             dimensions = new Dimensions();
             Regex re = new Regex(@"_(w(\d+))?(_h(\d+))?(_n)?\.");
