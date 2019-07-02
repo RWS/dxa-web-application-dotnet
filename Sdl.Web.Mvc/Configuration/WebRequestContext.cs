@@ -134,7 +134,7 @@ namespace Sdl.Web.Mvc.Configuration
         /// <summary>
         /// True if the request is from XPM (NOTE currently always true for staging as we cannot reliably distinguish XPM requests)
         /// </summary>
-        [Obsolete]
+        [Obsolete("Use WebRequestContext.IsSessionPreview or Localization.IsXpmEnabled")]
         public static bool IsPreview 
             => (bool?)GetFromContextStore("IsPreview") ?? (bool)AddToContextStore("IsPreview", Localization.IsXpmEnabled);
 

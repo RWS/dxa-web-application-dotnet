@@ -11,22 +11,22 @@ namespace Sdl.Web.Common
     public static class CacheRegions
     {
         public const string PageModel = "PageModel";
-        [Obsolete]
+        [Obsolete("Not used in DXA 2.2")]
         public const string IncludePageModel = "IncludePageModel";
         public const string EntityModel = "EntityModel";
         public const string StaticNavigation = "Navigation_Static";
         public const string DynamicNavigation = "Navigation_Dynamic";
-        [Obsolete]
+        [Obsolete("Not used in DXA 2.2")]
         public const string NavigationTaxonomy = "NavTaxonomy";
-        [Obsolete]
+        [Obsolete("Not used in DXA 2.2")]
         public const string Page = "Page"; // DD4T Page
-        [Obsolete]
+        [Obsolete("Not used in DXA 2.2")]
         public const string ComponentPresentation = "ComponentPresentation"; // DD4T ComponentPresentation
         public const string Other = "Other"; // Other DD4T object
         public const string BinaryPublishDate = "BinaryPublishDate";
-        [Obsolete]
+        [Obsolete("Not used in DXA 2.2")]
         public const string Binary = "Binary";
-        [Obsolete]
+        [Obsolete("Not used in DXA 2.2")]
         public const string ModelService = "ModelService";
         public const string PublicationMapping = "PublicationMapping";
         public const string LinkResolving = "LinkResolving";

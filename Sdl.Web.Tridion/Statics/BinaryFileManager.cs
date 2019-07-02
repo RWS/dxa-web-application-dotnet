@@ -100,7 +100,7 @@ namespace Sdl.Web.Tridion.Statics
                 return localFilePath;
             }
             // Attempt cache location with fallback to retrieval from content service. Note we don't check cache
-            // when running under XPM
+            // when running under XPM session preview
             localFilePath = $"{baseDir}/{localization.BinaryCacheFolder}/{urlPath}";
             using (new Tracer(urlPath, localization, localFilePath))
             {
