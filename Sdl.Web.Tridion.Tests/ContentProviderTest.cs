@@ -494,7 +494,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(pageModel, "pageModel");
             OutputJson(pageModel);
 
-            Common.Models.Configuration configEntity = pageModel.Regions["Nav"].Entities[0] as Common.Models.Configuration;
+            Common.Models.Configuration configEntity = pageModel.Regions["Main"].Entities[0] as Common.Models.Configuration;
             Assert.IsNotNull(configEntity, "configEntity");
             string articleId = GetArticleDcpEntityId().Split('-')[0];
             string rawCompLink = TestLocalization.GetCmUri(articleId);
@@ -534,6 +534,7 @@ namespace Sdl.Web.Tridion.Tests
         }
 
         [TestMethod]
+        [Ignore] // TODO: This test relies on mapping a TCM URI in a text field to a Link. The TCM URI should be patched after cms-import of Test Module.
         public virtual void GetPageModel_ComponentLinks2_Success()
         {
             string testPageUrlPath = TestLocalization.GetAbsoluteUrlPath(TestFixture.ComponentLinkTest2PageRelativeUrlPath);
