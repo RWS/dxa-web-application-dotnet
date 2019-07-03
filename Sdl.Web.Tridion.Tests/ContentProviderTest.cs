@@ -494,7 +494,7 @@ namespace Sdl.Web.Tridion.Tests
             Assert.IsNotNull(pageModel, "pageModel");
             OutputJson(pageModel);
 
-            Common.Models.Configuration configEntity = pageModel.Regions["Nav"].Entities[0] as Common.Models.Configuration;
+            Common.Models.Configuration configEntity = pageModel.Regions["Main"].Entities[0] as Common.Models.Configuration;
             Assert.IsNotNull(configEntity, "configEntity");
             string articleId = GetArticleDcpEntityId().Split('-')[0];
             string rawCompLink = TestLocalization.GetCmUri(articleId);
