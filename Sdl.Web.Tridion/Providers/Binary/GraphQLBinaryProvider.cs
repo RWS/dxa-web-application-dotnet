@@ -81,67 +81,47 @@ namespace Sdl.Web.Tridion.Providers.Binary
 
         public Tuple<byte[], string> GetBinary(Localization localization, int binaryId)
         {
-            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
-                CacheRegions.Binary,
-                () =>
-                {
-                    var client = ApiClientFactory.Instance.CreateClient();
-                    var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(),
-                        binaryId,
-                        null, null);
-                    var data = GetBinaryData(client, binary);
-                    if (data == null) throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
-                    return data;
-                });
+            var client = ApiClientFactory.Instance.CreateClient();
+            var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(),
+                binaryId,
+                null, null);
+            var data = GetBinaryData(client, binary);
+            if (data == null) throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
+            return data;
         }
 
         public async Task<Tuple<byte[], string>> GetBinaryAsync(Localization localization, int binaryId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{binaryId}",
-                CacheRegions.Binary,
-                async () =>
-                {
-                    var client = ApiClientFactory.Instance.CreateClient();
-                    var binary =
-                        await
-                            client.GetBinaryComponentAsync(localization.Namespace(), localization.PublicationId(),
-                                binaryId, null, null, cancellationToken).ConfigureAwait(false);
-                    var data = await GetBinaryDataAsync(client, binary, cancellationToken).ConfigureAwait(false);
-                    if (data == null) throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
-                    return data;
-                });
+            var client = ApiClientFactory.Instance.CreateClient();
+            var binary =
+                await
+                    client.GetBinaryComponentAsync(localization.Namespace(), localization.PublicationId(),
+                        binaryId, null, null, cancellationToken).ConfigureAwait(false);
+            var data = await GetBinaryDataAsync(client, binary, cancellationToken).ConfigureAwait(false);
+            if (data == null) throw new DxaItemNotFoundException(binaryId.ToString(), localization.Id);
+            return data;
         }
 
         public Tuple<byte[], string> GetBinary(Localization localization, string urlPath)
         {
-            return SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
-                CacheRegions.Binary,
-                () =>
-                {
-                    var client = ApiClientFactory.Instance.CreateClient();
-                    var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(),
-                        urlPath, null, null);
-                    var data = GetBinaryData(client, binary);
-                    if (data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
-                    return data;
-                });
+            var client = ApiClientFactory.Instance.CreateClient();
+            var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(),
+                urlPath, null, null);
+            var data = GetBinaryData(client, binary);
+            if (data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
+            return data;
         }
 
         public async Task<Tuple<byte[], string>> GetBinaryAsync(Localization localization, string urlPath, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await SiteConfiguration.CacheProvider.GetOrAdd($"{localization.Id}-{urlPath}",
-                CacheRegions.Binary,
-                async () =>
-                {
-                    var client = ApiClientFactory.Instance.CreateClient();
-                    var binary =
-                        await
-                            client.GetBinaryComponentAsync(localization.Namespace(), localization.PublicationId(),
-                                urlPath, null, null, cancellationToken).ConfigureAwait(false);
-                    var data = await GetBinaryDataAsync(client, binary, cancellationToken).ConfigureAwait(false);
-                    if (data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
-                    return data;
-                });
+            var client = ApiClientFactory.Instance.CreateClient();
+            var binary =
+                await
+                    client.GetBinaryComponentAsync(localization.Namespace(), localization.PublicationId(),
+                        urlPath, null, null, cancellationToken).ConfigureAwait(false);
+            var data = await GetBinaryDataAsync(client, binary, cancellationToken).ConfigureAwait(false);
+            if (data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
+            return data;
         }
 
         protected virtual Tuple<byte[], string> GetBinaryData(IGraphQLClient client, BinaryComponent binaryComponent)

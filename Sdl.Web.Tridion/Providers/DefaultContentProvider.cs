@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -187,7 +188,29 @@ namespace Sdl.Web.Tridion.Mapping
         public virtual StaticContentItem GetStaticContentItem(string urlPath, Localization localization)
         {
             using (new Tracer(urlPath, localization))
-            {
+            {               
+                if (WebRequestContext.IsSessionPreview)
+                {
+                    // If running under an XPM session preview go directly to BinaryProvider and avoid any
+                    // caching logic provided by the BinaryFileManager. We still need to perform image
+                    // resizing due to responsive image urls.
+                    BinaryFileManager.Dimensions dims;
+                    urlPath = BinaryFileManager.StripDimensions(urlPath, out dims);
+                    var binary = BinaryFileManager.Provider.GetBinary(localization, urlPath);
+                    byte[] binaryData = binary.Item1;
+                    if (dims != null && (dims.Width > 0 || dims.Height > 0))
+                    {
+                        ImageFormat imgFormat = BinaryFileManager.GetImageFormat(binary.Item2);
+                        if (imgFormat != null) binaryData = BinaryFileManager.ResizeImage(binaryData, dims, imgFormat);
+                    }
+
+                    return new StaticContentItem(
+                        new MemoryStream(binaryData),
+                        MimeMapping.GetMimeMapping(binary.Item2),
+                        DateTime.Now,
+                        Encoding.UTF8);
+                }
+
                 string localFilePath = BinaryFileManager.Instance.GetCachedFile(urlPath, localization);
 
                 return new StaticContentItem(
@@ -209,6 +232,18 @@ namespace Sdl.Web.Tridion.Mapping
         {
             using (new Tracer(binaryId, localization))
             {
+                // If running under an XPM session preview go directly to BinaryProvider and avoid any
+                // caching logic provided by the BinaryFileManager.
+                if (WebRequestContext.IsSessionPreview)
+                {
+                    var binary = BinaryFileManager.Provider.GetBinary(localization, binaryId);
+                    return new StaticContentItem(
+                        new MemoryStream(binary.Item1),
+                        MimeMapping.GetMimeMapping(binary.Item2),
+                        DateTime.Now,
+                        Encoding.UTF8);
+                }
+
                 string localFilePath = BinaryFileManager.Instance.GetCachedFile(binaryId, localization);
 
                 return new StaticContentItem(

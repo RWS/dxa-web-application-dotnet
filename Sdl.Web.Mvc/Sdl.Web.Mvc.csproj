@@ -53,6 +53,10 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Sdl.Web.Delivery.ServicesCore">
+      <HintPath>..\packages\Sdl.Web.Delivery.11.0.0\lib\net462\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
