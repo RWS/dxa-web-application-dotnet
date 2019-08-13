@@ -21,10 +21,12 @@
         </references>
         <dependencies>
             <!-- NOTE: We don't use package dependencies for everything, because we don't want direct references to transitive dependencies and the explicit reference above don't control those.-->
+            <dependency id="Log4net" version="2.0.3" />
             <dependency id="Newtonsoft.Json" version="11.0.2" />
             <dependency id="Sdl.Web.Delivery" version="11.0.0" />
             <dependency id="Sdl.Web.Context.Image" version="11.0.0" />
             <dependency id="Sdl.Web.Context.Client" version="11.0.0" />
+            <dependency id="Sdl.Tridion.Api.Client" version="2.2.0" />
         </dependencies>
     </metadata>
     <files>
