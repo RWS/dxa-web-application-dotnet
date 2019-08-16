@@ -12,6 +12,34 @@ using Sdl.Web.Context.OData.Client;
 
 namespace Sdl.Web.Tridion.Context
 {
+    internal class ODataContextEngineInstance
+    {
+        private static volatile ODataContextEngine _instance;
+        private static readonly object _syncRoot = new object();
+
+        public static ODataContextEngine Instance
+        {
+            get
+            {
+                if (_instance != null) return _instance;
+                lock (_syncRoot)
+                {
+                    if (_instance != null) return _instance;
+                    try
+                    {
+                        _instance = new ODataContextEngine();
+                    }
+                    catch
+                    {
+                        Log.Error("Error initializing the ContextServiceClaimsProvider.");
+                    }
+                }
+
+                return _instance;
+            }
+        }
+    }
+
     /// <summary>
     /// DXA Context Claims Provider using the SDL Web 8 CDaaS Context Service.
     /// </summary>
@@ -20,9 +48,8 @@ namespace Sdl.Web.Tridion.Context
     /// </remarks>
     public class ContextServiceClaimsProvider : IContextClaimsProvider
     {
-        private static readonly ODataContextEngine _contextEngineClient;
         private static readonly bool _usePublicationEvidence;
-        private readonly object _lock = new object();
+        private static readonly object _lock = new object();
 
         /// <summary>
         /// Class constructor
@@ -31,28 +58,22 @@ namespace Sdl.Web.Tridion.Context
         {
             using (new Tracer())
             {
-                try
+                if (ODataContextEngineInstance.Instance != null)
                 {
-                    _contextEngineClient = new ODataContextEngine();
-
-                    // The 8.5 Context Service can not handle Publication ID "evidence" if it has not been configured with a reference to CD Data Store (see CRQ-3440).
-                    // To avoid issues with a 8.5 Context Service without this configuration, we only include the Publication ID evidence if explicitly configured.
-                    // The Context Expression Module installer will configure this.
-                    string contextServicePublicationEvidenceSetting = WebConfigurationManager.AppSettings["context-service-publication-evidence"];
-                    Log.Debug("context-service-publication-evidence setting: '{0}'", contextServicePublicationEvidenceSetting);
-
-                    if (!string.IsNullOrEmpty(contextServicePublicationEvidenceSetting))
-                    {
-                        _usePublicationEvidence = Convert.ToBoolean(contextServicePublicationEvidenceSetting);
-                    }
+                    Log.Info("Succesfully initialized ContextServiceEngine.");
                 }
-                catch (Exception ex)
+                
+                // The 8.5 Context Service can not handle Publication ID "evidence" if it has not been configured with a reference to CD Data Store (see CRQ-3440).
+                // To avoid issues with a 8.5 Context Service without this configuration, we only include the Publication ID evidence if explicitly configured.
+                // The Context Expression Module installer will configure this.
+                string contextServicePublicationEvidenceSetting =
+                    WebConfigurationManager.AppSettings["context-service-publication-evidence"];
+                Log.Debug("context-service-publication-evidence setting: '{0}'",
+                    contextServicePublicationEvidenceSetting);
+
+                if (!string.IsNullOrEmpty(contextServicePublicationEvidenceSetting))
                 {
-                    // ODataContextEngine construction can fail for several reasons, because it immediately tries to communicate with Discovery Service.
-                    // Error handling in ODataContextEngine is currently suboptimal and class ContextServiceClaimsProvider is constructed very early in the DXA initialization.
-                    // Therefore, we just log the error here and continue; GetContextClaims will throw an exception later on (if we even get to that point).
-                    Log.Error("Error initializing the ContextServiceClaimsProvider.");
-                    Log.Error(ex);
+                    _usePublicationEvidence = Convert.ToBoolean(contextServicePublicationEvidenceSetting);
                 }
             }
         }
@@ -74,11 +95,8 @@ namespace Sdl.Web.Tridion.Context
         {
             using (new Tracer(aspectName))
             {
-                if (_contextEngineClient == null)
-                {
-                    // Apparently an exception occurred in the class constructor; it should have logged the exception already.
-                    throw new DxaException("Context Engine Client was not initialized. Check the log file for errors.");
-                }
+                var contextEngineClient = ODataContextEngineInstance.Instance;
+                if (contextEngineClient == null) return new Dictionary<string, object>();
 
                 string userAgent = null;
                 string contextCookieValue = null;
@@ -114,7 +132,7 @@ namespace Sdl.Web.Tridion.Context
                     IEvidence evidence = evidenceBuilder.Build();
                     lock (_lock)
                     {
-                        contextMap = _contextEngineClient.Resolve(evidence);
+                        contextMap = contextEngineClient.Resolve(evidence);
                     }
                 }
                 catch (Exception ex)
