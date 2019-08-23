@@ -289,5 +289,5 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.2.2.0\build\net462\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.2.2.0')" />
+  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.2.2.2\build\net462\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.2.2.0')" />
 </Project>
