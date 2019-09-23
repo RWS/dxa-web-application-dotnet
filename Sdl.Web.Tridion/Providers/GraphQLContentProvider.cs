@@ -164,12 +164,20 @@ namespace Sdl.Web.Tridion.Mapping
 
             // The semantic mapping requires that some metadata fields exist. This may not be the case so we map some component meta properties onto them
             // if they don't exist.
-            if (!standardMeta.ContainsKey("dateCreated"))
+            const string dateCreated = "dateCreated";
+            if (!standardMeta.ContainsKey(dateCreated))
             {
-                standardMeta.Add("dateCreated", component.LastPublishDate);
+                standardMeta.Add(dateCreated, component.LastPublishDate);
             }
-            const string dateTimeFormat = "MM/dd/yyyy HH:mm:ss";
-            standardMeta["dateCreated"] = DateTime.ParseExact((string)standardMeta["dateCreated"], dateTimeFormat, null);
+            else
+            {
+                if(standardMeta[dateCreated] is string[])
+                {
+                    standardMeta[dateCreated] = ((string[])standardMeta[dateCreated])[0];
+                }
+            }
+            const string dateTimeFormat = "MM/dd/yyyy HH:mm:ss";           
+            standardMeta["dateCreated"] = DateTime.ParseExact((string)standardMeta[dateCreated], dateTimeFormat, null);
             if (!standardMeta.ContainsKey("name"))
             {
                 standardMeta.Add("name", component.Title);
