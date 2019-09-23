@@ -152,9 +152,14 @@ namespace Sdl.Web.Tridion.Mapping
         protected virtual EntityModelData CreateEntityModelData(Component component)
         {
             ContentModelData standardMeta = new ContentModelData();
-            foreach (var meta in component.CustomMetas.Edges)
+            var groups = component.CustomMetas.Edges.GroupBy(x => x.Node.Key).ToList();
+            foreach (var group in groups)
             {
-                standardMeta.Add(meta.Node.Key, meta.Node.Value);
+                var values = group.Select(x => x.Node.Value).ToArray();
+                if (values.Length == 1)
+                    standardMeta.Add(group.Key, values[0]);
+                else
+                    standardMeta.Add(group.Key, values);
             }
 
             // The semantic mapping requires that some metadata fields exist. This may not be the case so we map some component meta properties onto them
