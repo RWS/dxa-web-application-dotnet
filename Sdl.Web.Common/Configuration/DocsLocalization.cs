@@ -131,6 +131,11 @@ namespace Sdl.Web.Common.Configuration
             }
         }
 
+        public override void Refresh(bool allSiteLocalizations = false)
+        {
+            // nothing to refresh here
+        }
+
         public override IDictionary GetResources(string sectionName = null)
             => new Hashtable(); // no resources so return empty hash to avoid default impl
     }
