@@ -96,6 +96,8 @@ namespace Sdl.Web.Common.Utils
                     case ',': urlCopy.Append("%2C"); break;
                     case '{': urlCopy.Append("%7B"); break;
                     case '}': urlCopy.Append("%7D"); break;
+                    case '(': urlCopy.Append("%28"); break;
+                    case ')': urlCopy.Append("%29"); break;
                     case '[': urlCopy.Append("%5B"); break;
                     case ']': urlCopy.Append("%5D"); break;
                     case ':': urlCopy.Append("%3A"); break;
