@@ -21,7 +21,7 @@
     <TargetFrameworkProfile />
     <DxaDataModelVersion>2.2.0</DxaDataModelVersion>
     <SdlPCAPackageVersion>2.2.0</SdlPCAPackageVersion>
-    <SdlDeliveryVersion>11.0.0</SdlDeliveryVersion>
+    <SdlDeliveryVersion>11.0.1062</SdlDeliveryVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

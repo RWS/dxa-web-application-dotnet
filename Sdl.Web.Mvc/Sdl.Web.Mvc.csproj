@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <SdlWebDeliveryPackageVersion>11.0.1062</SdlWebDeliveryPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -54,7 +55,7 @@
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.Delivery.ServicesCore">
-      <HintPath>..\packages\Sdl.Web.Delivery.11.0.0\lib\net462\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
+      <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net462\Sdl.Web.Delivery.ServicesCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
