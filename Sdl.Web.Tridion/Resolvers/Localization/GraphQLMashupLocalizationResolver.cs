@@ -59,7 +59,7 @@ namespace Sdl.Web.Tridion
                         result = publication != null ? new DocsLocalization(publication.PublicationId) : base.GetLocalization(localizationId);
                     }
 
-                    KnownLocalizations[localizationId] = result;
+                    KnownLocalizations.Add(localizationId, result);
                 }
 
                 return result;
@@ -81,7 +81,7 @@ namespace Sdl.Web.Tridion
             if (!KnownLocalizations.TryGetValue(localizationId, out result))
             {
                 result = new DocsLocalization { Id = localizationId };
-                KnownLocalizations[localizationId] = result;
+                KnownLocalizations.Add(localizationId, result);
             }
 
             result.EnsureInitialized();
