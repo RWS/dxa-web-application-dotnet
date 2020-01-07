@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Sdl.Web.Common.Interfaces;
@@ -14,14 +15,14 @@ namespace Sdl.Web.Common.Configuration
     public class LocalizationResources : ILocalizationResources
     {
         private readonly Localization _localization;
-        private IDictionary<string, IDictionary<string, string>> _config;
+        private ConcurrentDictionary<string, IDictionary<string, string>> _config = new ConcurrentDictionary<string, IDictionary<string, string>>();
         private IDictionary _resources;
 
         private readonly object _loadLock = new object();
 
         public LocalizationResources(Localization localization)
         {
-            _localization = localization;
+            _localization = localization;           
         }
 
         /// <summary>
@@ -29,8 +30,12 @@ namespace Sdl.Web.Common.Configuration
         /// </summary>
         public virtual void Reload()
         {
-            _resources = null;
-            _config = null;          
+            lock (_loadLock)
+            {
+                _resources = LoadResources();
+            }
+            
+            _config.Clear();
         }
 
         /// <summary>
@@ -53,16 +58,19 @@ namespace Sdl.Web.Common.Configuration
                 string sectionName = key.Substring(0, key.LastIndexOf(".", StringComparison.Ordinal));
                 string propertyName = keyParts[keyParts.Length - 1];
 
-                IDictionary<string, string> configSection;
-                if (_config == null || !_config.TryGetValue(sectionName, out configSection))
+                var configSection = _config.GetOrAdd(sectionName, (k) => LoadConfigSection(k));
+                if (configSection == null)
                 {
-                    configSection = LoadConfigSection(sectionName);
+                    Log.Debug("Configuration section '{0}' does not exist for Localization [{1}]. GetConfigValue returns null.", sectionName, this);
+                    return null;
                 }
+
                 string configValue;
                 if (!configSection.TryGetValue(propertyName, out configValue))
                 {
                     Log.Debug("Configuration key '{0}' does not exist in section '{1}' for Localization [{2}]. GetConfigValue returns null.", propertyName, sectionName, this);
                 }
+
                 return configValue;
             }
         }
@@ -71,20 +79,9 @@ namespace Sdl.Web.Common.Configuration
         /// Gets resources.
         /// </summary>
         /// <param name="sectionName">Optional name of the section for which to get resource. If not specified (or <c>null</c>), all resources are obtained.</param>
-        public virtual IDictionary GetResources(string sectionName = null)
-        {
-            if (_resources != null) return _resources;
-            lock (_loadLock)
-            {
-                if (_resources == null)
-                {
-                    LoadResources();
-                }
-            }
-            return _resources;
-        }   
+        public virtual IDictionary GetResources(string sectionName = null) => _resources;
 
-        protected void LoadResources()
+        protected IDictionary LoadResources()
         {
             using (new Tracer(this))
             {
@@ -93,7 +90,7 @@ namespace Sdl.Web.Common.Configuration
                     BootstrapData resourcesData = null;
                     _localization.LoadStaticContentItem("resources/_all.json", ref resourcesData);
 
-                    var newResources = new Hashtable();
+                    var allResources = new Hashtable();
                     foreach (string staticContentItemUrl in resourcesData.Files)
                     {
                         string type =
@@ -108,16 +105,16 @@ namespace Sdl.Web.Common.Configuration
                         foreach (KeyValuePair<string, object> resource in resources)
                         {
                             //we ensure resource key uniqueness by adding the type (which comes from the filename)
-                            newResources.Add($"{type}.{resource.Key}", resource.Value);
+                            allResources.Add($"{type}.{resource.Key}", resource.Value);
                         }
                     }
 
-                    _resources = newResources;
+                    return allResources;
                 }
                 catch (Exception)
                 {
                     Log.Warn("Failed to open 'resources/_all.json'");
-                    _resources = new Dictionary<string, object>();
+                    return new ConcurrentDictionary<string, object>();
                 }
             }
         }
@@ -126,19 +123,10 @@ namespace Sdl.Web.Common.Configuration
         {
             using (new Tracer(sectionName, this))
             {
-                lock (_loadLock)
-                {
-                    if (_config == null)
-                    {
-                        _config = new Dictionary<string, IDictionary<string, string>>();
-                    }
-
-                    string configItemUrl = $"{_localization.Path}/{SiteConfiguration.SystemFolder}/config/{sectionName}.json";
-                    string configJson = SiteConfiguration.ContentProvider.GetStaticContentItem(configItemUrl, _localization).GetText();
-                    IDictionary<string, string> configSection = JsonConvert.DeserializeObject<Dictionary<string, string>>(configJson);
-                    _config[sectionName] = configSection;
-                    return configSection;
-                }
+                string configItemUrl = $"{_localization.Path}/{SiteConfiguration.SystemFolder}/config/{sectionName}.json";
+                string configJson = SiteConfiguration.ContentProvider.GetStaticContentItem(configItemUrl, _localization).GetText();
+                IDictionary<string, string> configSection = JsonConvert.DeserializeObject<Dictionary<string, string>>(configJson);
+                return configSection;
             }
         }      
     }

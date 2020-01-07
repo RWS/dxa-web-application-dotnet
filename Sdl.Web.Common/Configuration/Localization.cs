@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web;
 using Newtonsoft.Json;
 using Sdl.Web.Common.Interfaces;
@@ -187,7 +188,7 @@ namespace Sdl.Web.Common.Configuration
         /// Gets the date/time at which this <see cref="ILocalization"/> was last (re-)loaded.
         /// </summary>
         public DateTime LastRefresh { get; protected set; }
-     
+
         /// <summary>
         /// Gets an absolute (server-relative) URL path for a given context-relative URL path.
         /// </summary>
@@ -335,19 +336,17 @@ namespace Sdl.Web.Common.Configuration
         {
             // No Tracer here; Load already has a Tracer.
             // Note that Load itself also obtains a load lock, but we might get a race condition on LastRefresh if we don't lock here too.
-            lock (_loadLock)
+            if (LastRefresh != DateTime.MinValue) return;
+            
+            try
             {
-                if (LastRefresh != DateTime.MinValue) return;
-                try
-                {
-                    Load();
-                }
-                catch (Exception)
-                {
-                    // If an exception occurs during Loading, the Localization should remain uninitialized.
-                    LastRefresh = DateTime.MinValue;
-                    throw;
-                }
+                Load();
+            }
+            catch (Exception)
+            {
+                // If an exception occurs during Loading, the Localization should remain uninitialized.
+                LastRefresh = DateTime.MinValue;
+                throw;
             }
         }
 
@@ -377,9 +376,18 @@ namespace Sdl.Web.Common.Configuration
                 else
                 {
                     // Refresh only this Localization                  
-                    _resourceManager.Reload();
-                    _mappingsManager.Reload();
-                    Load();
+                    try
+                    {
+                        _resourceManager.Reload();
+                        _mappingsManager.Reload();
+                        Load();
+                    }
+                    catch (Exception)
+                    {
+                        // If an exception occurs during Loading, the Localization should remain uninitialized.
+                        LastRefresh = DateTime.MinValue;
+                        throw;
+                    }
                 }
             }
         }
@@ -395,20 +403,17 @@ namespace Sdl.Web.Common.Configuration
         {
             using (new Tracer(relativeUrl, deserializedObject, this))
             {
-                lock (_loadLock)
+                // Because of "optimistic locking", the object may already have been loaded at this point.
+                if (deserializedObject != null)
                 {
-                    // Because of "optimistic locking", the object may already have been loaded at this point.
-                    if (deserializedObject != null)
-                    {
-                        return;
-                    }
-
-                    string urlPath = (relativeUrl.StartsWith("/"))
-                        ? Path + relativeUrl
-                        : $"{Path}/{SiteConfiguration.SystemFolder}/{relativeUrl}";
-                    string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(urlPath, this).GetText();
-                    deserializedObject = JsonConvert.DeserializeObject<T>(jsonData);
+                    return;
                 }
+
+                string urlPath = (relativeUrl.StartsWith("/"))
+                    ? Path + relativeUrl
+                    : $"{Path}/{SiteConfiguration.SystemFolder}/{relativeUrl}";
+                string jsonData = SiteConfiguration.ContentProvider.GetStaticContentItem(urlPath, this).GetText();
+                deserializedObject = JsonConvert.DeserializeObject<T>(jsonData);
             }
         }
 
@@ -418,9 +423,6 @@ namespace Sdl.Web.Common.Configuration
             {
                 lock (_loadLock)
                 {
-                    // NOTE: intentionally setting LastRefresh first, because while loading other classes (e.g. BinaryFileManager) may be using LastRefresh to detect stale content.
-                    LastRefresh = DateTime.Now;
-
                     List<string> mediaPatterns = new List<string>();
 
                     VersionData versionData = null;
@@ -523,7 +525,11 @@ namespace Sdl.Web.Common.Configuration
                     catch (Exception e)
                     {
                         Log.Warn(e.Message);
-                    }                  
+                    }
+
+                    _resourceManager.Reload();
+
+                    LastRefresh = DateTime.Now;
                 }
             }
         }
