@@ -107,7 +107,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
         {
             var client = ApiClientFactory.Instance.CreateClient();
             var binary = client.GetBinaryComponent(localization.Namespace(), localization.PublicationId(),
-                UrlEncoding.UrlPathEncode(urlPath), null, null);
+                UrlEncoding.UrlPartialPathEncode(urlPath), null, null);
             var data = GetBinaryData(client, binary);
             if (data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
             return data;
@@ -119,7 +119,7 @@ namespace Sdl.Web.Tridion.Providers.Binary
             var binary =
                 await
                     client.GetBinaryComponentAsync(localization.Namespace(), localization.PublicationId(),
-                        UrlEncoding.UrlPathEncode(urlPath), null, null, cancellationToken).ConfigureAwait(false);
+                        UrlEncoding.UrlPartialPathEncode(urlPath), null, null, cancellationToken).ConfigureAwait(false);
             var data = await GetBinaryDataAsync(client, binary, cancellationToken).ConfigureAwait(false);
             if (data == null) throw new DxaItemNotFoundException(urlPath, localization.Id);
             return data;
