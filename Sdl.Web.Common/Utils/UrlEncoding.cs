@@ -69,55 +69,6 @@ namespace Sdl.Web.Common.Utils
         /// </summary>
         /// <param name="url">Unencoded url path</param>
         /// <returns>Encoded url path.</returns>
-        public static string UrlPathEncode(string url)
-        {
-            if (string.IsNullOrEmpty(url))
-                return url;
-                      
-            url = UrlEncodeNonAscii(url);
-
-            int length = url.Length;
-            StringBuilder urlCopy = new StringBuilder(length);
-
-            for (int i = 0; i < length; i++)
-            {
-                char c = url[i];
-                switch (c)
-                {
-                    case ' ': urlCopy.Append("%20"); break;
-                    case '"': urlCopy.Append("%22"); break;
-                    case '#': urlCopy.Append("%23"); break;
-                    case '$': urlCopy.Append("%24"); break;
-                    case '%': urlCopy.Append("%25"); break;
-                    case '&': urlCopy.Append("%26"); break;
-                    case '^': urlCopy.Append("%5E"); break;
-                    case '=': urlCopy.Append("%3D"); break;
-                    case '+': urlCopy.Append("%2B"); break;
-                    case ',': urlCopy.Append("%2C"); break;
-                    case '{': urlCopy.Append("%7B"); break;
-                    case '}': urlCopy.Append("%7D"); break;
-                    case '(': urlCopy.Append("%28"); break;
-                    case ')': urlCopy.Append("%29"); break;
-                    case '[': urlCopy.Append("%5B"); break;
-                    case ']': urlCopy.Append("%5D"); break;
-                    case ':': urlCopy.Append("%3A"); break;
-                    case ';': urlCopy.Append("%3B"); break;
-                    case '@': urlCopy.Append("%40"); break;
-                    case '<': urlCopy.Append("%3C"); break;
-                    case '>': urlCopy.Append("%3E"); break;
-                    case '?': urlCopy.Append("%3F"); break;                    
-                    default: urlCopy.Append(c); break;
-                }
-            }
-
-            return urlCopy.ToString();
-        }
-
-        /// <summary>
-        /// Performs an encoding of the url path. 
-        /// </summary>
-        /// <param name="url">Unencoded url path</param>
-        /// <returns>Encoded url path.</returns>
         public static string UrlPartialPathEncode(string url)
         {
             if (string.IsNullOrEmpty(url))
@@ -159,5 +110,12 @@ namespace Sdl.Web.Common.Utils
 
             return urlCopy.ToString();
         }
+
+        /// <summary>
+        /// Performs an encoding of the url path. 
+        /// </summary>
+        /// <param name="url">Unencoded url path</param>
+        /// <returns>Encoded url path.</returns>
+        public static string UrlPathEncode(string url) => string.IsNullOrEmpty(url) ? url : UrlPartialPathEncode(UrlEncodeNonAscii(url));
     }
 }
