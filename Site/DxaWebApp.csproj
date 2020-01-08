@@ -25,11 +25,11 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <!-- NOTE: We let NuGet update the DXA Framework Package Version in ciBuild.proj -->
-    <SdlWebDeliveryPackageVersion>11.0.0</SdlWebDeliveryPackageVersion>
+    <SdlWebDeliveryPackageVersion>11.0.1062</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>11.0.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>11.0.0</SdlWebContextImagePackageVersion>
     <SdlWebDataModelPackageVersion>2.2.0</SdlWebDataModelPackageVersion>
-    <DxaFrameworkPackageVersion>2.2.0</DxaFrameworkPackageVersion>
+    <DxaFrameworkPackageVersion>2.2.2</DxaFrameworkPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -289,5 +289,5 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.2.2.2\build\net462\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.2.2.2')" />
+  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.$(DxaFrameworkPackageVersion)\build\net462\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.$(DxaFrameworkPackageVersion)')" />
 </Project>

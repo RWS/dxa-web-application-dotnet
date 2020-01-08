@@ -14,7 +14,7 @@
     <TargetFrameworkProfile />
     <SdlDxaDataModelPackageVersion>2.2.0</SdlDxaDataModelPackageVersion>
     <SdlPCAPackageVersion>2.2.0</SdlPCAPackageVersion>
-    <SdlWebDeliveryPackageVersion>11.0.0</SdlWebDeliveryPackageVersion>
+    <SdlWebDeliveryPackageVersion>11.0.1062</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>11.0.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>11.0.0</SdlWebContextImagePackageVersion>
   </PropertyGroup>
