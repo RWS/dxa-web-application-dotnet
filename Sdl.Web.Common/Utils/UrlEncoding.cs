@@ -82,28 +82,31 @@ namespace Sdl.Web.Common.Utils
                 char c = url[i];
                 switch (c)
                 {
-                    case ' ': urlCopy.Append("%20"); break;
+                    case '!': urlCopy.Append("%21"); break;
                     case '"': urlCopy.Append("%22"); break;
                     case '#': urlCopy.Append("%23"); break;
                     case '$': urlCopy.Append("%24"); break;
                     case '%': urlCopy.Append("%25"); break;
                     case '&': urlCopy.Append("%26"); break;
-                    case '^': urlCopy.Append("%5E"); break;
-                    case '=': urlCopy.Append("%3D"); break;
-                    case '+': urlCopy.Append("%2B"); break;
-                    case ',': urlCopy.Append("%2C"); break;
-                    case '{': urlCopy.Append("%7B"); break;
-                    case '}': urlCopy.Append("%7D"); break;
+                    case '\'': urlCopy.Append("%27"); break;
                     case '(': urlCopy.Append("%28"); break;
                     case ')': urlCopy.Append("%29"); break;
-                    case '[': urlCopy.Append("%5B"); break;
-                    case ']': urlCopy.Append("%5D"); break;
+                    case '*': urlCopy.Append("%2A"); break;
+                    case ',': urlCopy.Append("%2C"); break;
                     case ':': urlCopy.Append("%3A"); break;
                     case ';': urlCopy.Append("%3B"); break;
-                    case '@': urlCopy.Append("%40"); break;
                     case '<': urlCopy.Append("%3C"); break;
+                    case '=': urlCopy.Append("%3D"); break;
                     case '>': urlCopy.Append("%3E"); break;
                     case '?': urlCopy.Append("%3F"); break;
+                    case '@': urlCopy.Append("%40"); break;
+                    case '[': urlCopy.Append("%5B"); break;
+                    case ']': urlCopy.Append("%5D"); break;
+                    case '^': urlCopy.Append("%5E"); break;
+                    case '{': urlCopy.Append("%7B"); break;
+                    case '|': urlCopy.Append("%7C"); break;
+                    case '}': urlCopy.Append("%7D"); break;
+                    case '~': urlCopy.Append("%7E"); break;
                     default: urlCopy.Append(c); break;
                 }
             }
