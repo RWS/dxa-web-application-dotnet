@@ -69,12 +69,10 @@ namespace Sdl.Web.Common.Utils
         /// </summary>
         /// <param name="url">Unencoded url path</param>
         /// <returns>Encoded url path.</returns>
-        public static string UrlPathEncode(string url)
+        public static string UrlPartialPathEncode(string url)
         {
             if (string.IsNullOrEmpty(url))
                 return url;
-                      
-            url = UrlEncodeNonAscii(url);
 
             int length = url.Length;
             StringBuilder urlCopy = new StringBuilder(length);
@@ -105,12 +103,19 @@ namespace Sdl.Web.Common.Utils
                     case '@': urlCopy.Append("%40"); break;
                     case '<': urlCopy.Append("%3C"); break;
                     case '>': urlCopy.Append("%3E"); break;
-                    case '?': urlCopy.Append("%3F"); break;                    
+                    case '?': urlCopy.Append("%3F"); break;
                     default: urlCopy.Append(c); break;
                 }
             }
 
             return urlCopy.ToString();
         }
+
+        /// <summary>
+        /// Performs an encoding of the url path. 
+        /// </summary>
+        /// <param name="url">Unencoded url path</param>
+        /// <returns>Encoded url path.</returns>
+        public static string UrlPathEncode(string url) => string.IsNullOrEmpty(url) ? url : UrlPartialPathEncode(UrlEncodeNonAscii(url));
     }
 }
