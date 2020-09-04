@@ -48,11 +48,11 @@
     <NoWarn>1591,1574,1570,1572,1573</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net">
-      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog">
+      <HintPath>..\packages\NLog.4.7.4\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="Sdl.Web.DataModel">
       <HintPath>..\packages\Sdl.Dxa.DataModel.$(SdlDxaDataModelPackageVersion)\lib\net462\Sdl.Web.DataModel.dll</HintPath>
@@ -60,7 +60,11 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Web.Extensions" />
@@ -111,8 +115,8 @@
     <Compile Include="Interfaces\IQueryProvider.cs" />
     <Compile Include="Interfaces\IRichTextProcessor.cs" />
     <Compile Include="Interfaces\IUnknownLocalizationHandler.cs" />
-    <Compile Include="Logging\Log4NetLogger.cs" />
     <Compile Include="Logging\Log.cs" />
+    <Compile Include="Logging\NLogLogger.cs" />
     <Compile Include="Logging\Tracer.cs" />
     <Compile Include="Mapping\BaseModelBuilder.cs" />
     <Compile Include="Mapping\FieldSemantics.cs" />
