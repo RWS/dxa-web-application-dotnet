@@ -176,7 +176,6 @@
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Log.config" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Shared\SectionError.cshtml" />
     <Content Include="Unity.config">
@@ -211,6 +210,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Shared\SiteMapXml.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="NLog.config" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

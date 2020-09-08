@@ -6,7 +6,7 @@ namespace Sdl.Web.Common.Logging
 {
     /// <summary>
     /// Log class used by framework to generate log information. This class will use whatever ILogger implementation
-    /// is provided through unity and default to using the Log4Net implementation if no logger is configured.
+    /// is provided through unity and default to using the NLog implementation if no logger is configured.
     /// </summary>
     public static class Log
     {
@@ -23,7 +23,7 @@ namespace Sdl.Web.Common.Logging
                 }
 
                 // No Logger configured/initialized yet
-                return _logger ?? (_logger = new Log4NetLogger());
+                return _logger ?? (_logger = new NLogLogger());
             }
             set
             {
