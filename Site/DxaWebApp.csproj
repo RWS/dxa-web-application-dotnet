@@ -117,8 +117,8 @@
       <HintPath>..\packages\NLog.4.7.4\lib\net45\NLog.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Sdl.Tridion.Api.Client, Version=2.2.1.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\Sdl.Tridion.Api.Client.2.2.1-beta-201909271447\lib\net462\Sdl.Tridion.Api.Client.dll</HintPath>
+    <Reference Include="Sdl.Tridion.Api.Client">
+      <HintPath>..\packages\Sdl.Tridion.Api.Client.2.2.0\lib\net462\Sdl.Tridion.Api.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.Common, Version=2.2.6.0, Culture=neutral, PublicKeyToken=null">
