@@ -1,7 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Target Name="CopyDxaFrameworkLibsToOutput">
     <ItemGroup>
-      <DxaFrameworkLibs Include="..\packages\Sdl.Dxa.Framework.Web8.2.2.2\lib\net462\*.*" />
+      <DxaFrameworkLibs Include="..\packages\Sdl.Dxa.Framework.Web8.2.2.6\lib\net462\*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(DxaFrameworkLibs)" DestinationFolder="$(OutputPath)" />
   </Target>
