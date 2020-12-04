@@ -82,16 +82,17 @@ namespace Sdl.Web.Common.Utils
                 char c = url[i];
                 switch (c)
                 {
+                    case ' ': urlCopy.Append("%20"); break;
                     case '!': urlCopy.Append("%21"); break;
                     case '"': urlCopy.Append("%22"); break;
                     case '#': urlCopy.Append("%23"); break;
                     case '$': urlCopy.Append("%24"); break;
-                    case '%': urlCopy.Append("%25"); break;
                     case '&': urlCopy.Append("%26"); break;
                     case '\'': urlCopy.Append("%27"); break;
                     case '(': urlCopy.Append("%28"); break;
                     case ')': urlCopy.Append("%29"); break;
                     case '*': urlCopy.Append("%2A"); break;
+                    case '+': urlCopy.Append("%2B"); break;
                     case ',': urlCopy.Append("%2C"); break;
                     case ':': urlCopy.Append("%3A"); break;
                     case ';': urlCopy.Append("%3B"); break;
