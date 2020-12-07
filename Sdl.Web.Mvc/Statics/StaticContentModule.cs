@@ -198,7 +198,6 @@ namespace Sdl.Web.Mvc.Statics
 
         private static void SendHealthCheckResponse(HttpResponse httpResponse)
         {
-            Log.Warn("Sending HTTP 200 (OK) response.");
             httpResponse.StatusCode = (int)HttpStatusCode.OK;
             httpResponse.ContentType = "text/plain";
             httpResponse.Write("DXA Health Check OK.");
