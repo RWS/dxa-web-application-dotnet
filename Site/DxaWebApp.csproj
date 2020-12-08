@@ -29,7 +29,7 @@
     <SdlWebContextClientPackageVersion>11.0.0</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>11.0.0</SdlWebContextImagePackageVersion>
     <SdlWebDataModelPackageVersion>2.2.0</SdlWebDataModelPackageVersion>
-    <DxaFrameworkPackageVersion>2.2.6</DxaFrameworkPackageVersion>
+    <DxaFrameworkPackageVersion>2.2.8</DxaFrameworkPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -121,8 +121,8 @@
       <HintPath>..\packages\Sdl.Tridion.Api.Client.2.2.0\lib\net462\Sdl.Tridion.Api.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Sdl.Web.Common, Version=2.2.6.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.2.2.6\lib\net462\Sdl.Web.Common.dll</HintPath>
+    <Reference Include="Sdl.Web.Common">
+      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.$(DxaFrameworkPackageVersion)\lib\net462\Sdl.Web.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.Context.Api">
@@ -134,8 +134,8 @@
     <Reference Include="Sdl.Web.Context.OData.Client">
       <HintPath>..\packages\Sdl.Web.Context.Client.$(SdlWebContextClientPackageVersion)\lib\net462\Sdl.Web.Context.OData.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Sdl.Web.Mvc, Version=2.2.6.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.2.2.6\lib\net462\Sdl.Web.Mvc.dll</HintPath>
+    <Reference Include="Sdl.Web.Mvc">
+      <HintPath>..\packages\Sdl.Dxa.Framework.Web8.$(DxaFrameworkPackageVersion)\lib\net462\Sdl.Web.Mvc.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="StackExchange.Redis.StrongName">
@@ -302,12 +302,11 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.$(DxaFrameworkPackageVersion)\build\net462\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.$(DxaFrameworkPackageVersion)')" />
-  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.2.2.6\build\net462\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.2.2.6\build\net462\Sdl.Dxa.Framework.Web8.targets')" />
+  <Import Project="..\packages\Sdl.Dxa.Framework.Web8.$(DxaFrameworkPackageVersion)\build\net462\Sdl.Dxa.Framework.Web8.targets" Condition="Exists('..\packages\Sdl.Dxa.Framework.Web8.$(DxaFrameworkPackageVersion)\build\net462\Sdl.Dxa.Framework.Web8.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Sdl.Dxa.Framework.Web8.2.2.6\build\net462\Sdl.Dxa.Framework.Web8.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Sdl.Dxa.Framework.Web8.2.2.6\build\net462\Sdl.Dxa.Framework.Web8.targets'))" />
+    <Error Condition="!Exists('..\packages\Sdl.Dxa.Framework.Web8.$(DxaFrameworkPackageVersion)\build\net462\Sdl.Dxa.Framework.Web8.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Sdl.Dxa.Framework.Web8.$(DxaFrameworkPackageVersion)\build\net462\Sdl.Dxa.Framework.Web8.targets'))" />
   </Target>
 </Project>
