@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Configuration;
 using Sdl.Web.Common.Interfaces;
@@ -86,8 +87,9 @@ namespace Sdl.Web.Tridion.Statics
         /// <param name="urlPath">The URL path.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The path to the local file.</returns>
-        internal string GetCachedFile(string urlPath, Localization localization)
+        internal string GetCachedFile(string urlPath, Localization localization, out MemoryStream memoryStream)
         {
+            memoryStream = null;
             IBinaryProvider provider = Provider;
 
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -113,10 +115,7 @@ namespace Sdl.Web.Tridion.Statics
                 }
 
                 var binary = provider.GetBinary(localization, urlPath);
-                if (binary != null)
-                {
-                    WriteBinaryToFile(binary.Item1, localFilePath, dimensions);
-                }
+                WriteBinaryToFile(binary.Item1, localFilePath, dimensions, out memoryStream);
                 return localFilePath;
             }
         }
@@ -127,8 +126,9 @@ namespace Sdl.Web.Tridion.Statics
         /// <param name="binaryId">The binary Id.</param>
         /// <param name="localization">The Localization.</param>
         /// <returns>The path to the local file.</returns>
-        internal string GetCachedFile(int binaryId, Localization localization)
+        internal string GetCachedFile(int binaryId, Localization localization, out MemoryStream memoryStream)
         {
+            memoryStream = null;
             IBinaryProvider provider = Provider;
 
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -163,11 +163,11 @@ namespace Sdl.Web.Tridion.Statics
                 var data = provider.GetBinary(localization, binaryId);
                 if (string.IsNullOrEmpty(Path.GetExtension(localFilePath)))
                 {
-                    string ext = Path.GetExtension(data.Item2) ?? "";
+                    var ext = Path.GetExtension(data.Item2) ?? "";
                     localFilePath = $"{localFilePath}/{binaryId}{ext}";
                 }
 
-                WriteBinaryToFile(data.Item1, localFilePath, null);
+                WriteBinaryToFile(data.Item1, localFilePath, null, out memoryStream);
                 return localFilePath;
             }
         }
@@ -179,8 +179,11 @@ namespace Sdl.Web.Tridion.Statics
         /// <param name="physicalPath">String the file path to write to</param>
         /// <param name="dimensions">Dimensions of file</param>
         /// <returns>True is binary was written to disk, false otherwise</returns>
-        private static void WriteBinaryToFile(byte[] binary, string physicalPath, Dimensions dimensions)
+        private static void WriteBinaryToFile(byte[] binary, string physicalPath, Dimensions dimensions, out MemoryStream memoryStream)
         {
+            memoryStream = null;
+            if (binary == null) return;
+            byte[] buffer = binary;
             using (new Tracer(binary, physicalPath, dimensions))
             {
                 try
@@ -193,8 +196,7 @@ namespace Sdl.Web.Tridion.Statics
                             fileInfo.Directory.Create();
                         }
                     }
-
-                    byte[] buffer = binary;
+                   
                     if (dimensions != null && (dimensions.Width > 0 || dimensions.Height > 0))
                     {
                         ImageFormat imgFormat = GetImageFormat(physicalPath);
@@ -203,16 +205,21 @@ namespace Sdl.Web.Tridion.Statics
 
                     lock (NamedLocker.GetLock(physicalPath))
                     {
-                        using (FileStream fileStream = new FileStream(physicalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+                        using (FileStream fileStream = new FileStream(physicalPath, FileMode.Create,
+                            FileAccess.ReadWrite, FileShare.ReadWrite))
                         {
                             fileStream.Write(buffer, 0, buffer.Length);
                         }
                     }
+
+                    NamedLocker.RemoveLock(physicalPath);
                 }
                 catch (IOException)
                 {
-                    // file probabaly accessed by a different thread in a different process, locking failed
+                    // file possibly accessed by a different thread in a different process, locking failed
                     Log.Warn("Cannot write to {0}. This can happen sporadically, let the next thread handle this.", physicalPath);
+                    Thread.Sleep(1000);
+                    memoryStream = new MemoryStream(buffer);
                 }
             }
         }
