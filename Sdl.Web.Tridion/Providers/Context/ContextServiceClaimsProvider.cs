@@ -78,7 +78,7 @@ namespace Sdl.Web.Tridion.Context
                 if (_contextEngineClient == null)
                 {
                     // Apparently an exception occurred in the class constructor; it should have logged the exception already.
-                    throw new DxaException("Context Engine Client was not initialized. Check the log file for errors.");
+                    return new Dictionary<string, object>();
                 }
 
                 string userAgent = null;

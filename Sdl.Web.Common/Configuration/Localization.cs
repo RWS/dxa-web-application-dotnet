@@ -187,7 +187,7 @@ namespace Sdl.Web.Common.Configuration
         /// <summary>
         /// Gets the date/time at which this <see cref="ILocalization"/> was last (re-)loaded.
         /// </summary>
-        public DateTime LastRefresh { get; protected set; }
+        public DateTime LastRefresh { get; protected set; } = DateTime.MinValue;
 
         /// <summary>
         /// Gets an absolute (server-relative) URL path for a given context-relative URL path.
@@ -360,6 +360,7 @@ namespace Sdl.Web.Common.Configuration
                 if (allSiteLocalizations)
                 {
                     // Refresh all Site Localizations (variants)
+                    if (SiteLocalizations == null) return;
                     foreach (Localization localization in SiteLocalizations)
                     {
                         try
@@ -456,6 +457,12 @@ namespace Sdl.Web.Common.Configuration
                     {
                         LoadStaticContentItem("config/_all.json", ref localizationData);
 
+                        if (localizationData == null)
+                        {
+                            Log.Error("Failed to retrieve config/_all.json. Check site settings has been published correctly.");
+                            return;
+                        }
+
                         IsDefaultLocalization = localizationData.IsDefaultLocalization;
                         IsXpmEnabled = localizationData.IsXpmEnabled;
 
@@ -503,6 +510,7 @@ namespace Sdl.Web.Common.Configuration
                     catch (DxaItemNotFoundException)
                     {
                         Log.Warn("HTML design is not published nor does file 'config/_all.json' exist on disk.");
+                        return;
                     }
                                    
 
