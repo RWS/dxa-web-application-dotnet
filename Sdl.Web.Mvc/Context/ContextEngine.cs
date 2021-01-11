@@ -183,6 +183,7 @@ namespace Sdl.Web.Mvc.Context
                         foreach (XElement conditionElement in deviceFamilyElement.Descendants("condition"))
                         {
                             string contextClaimName = conditionElement.Attribute("context-claim").Value;
+                            if (!HasContextClaim(contextClaimName)) continue;
                             string expectedValue = conditionElement.Attribute("value").Value;
 
                             if (expectedValue.StartsWith("<"))
@@ -224,6 +225,8 @@ namespace Sdl.Web.Mvc.Context
                 return string.Empty;
             }
         }
+
+        private bool HasContextClaim(string name) => _claims.ContainsKey(name);
 
         private T GetContextClaim<T>(string name)
         {
