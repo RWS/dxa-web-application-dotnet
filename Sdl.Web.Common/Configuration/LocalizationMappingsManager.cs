@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Sdl.Web.Common.Interfaces;
@@ -44,7 +45,7 @@ namespace Sdl.Web.Common.Configuration
             _semanticSchemas = null;
             _semanticVocabularies = null;
             _xpmRegionConfiguration = null;
-        }      
+        }
 
         /// <summary>
         /// Gets Semantic Schema for a given schema identifier.
@@ -61,20 +62,31 @@ namespace Sdl.Web.Common.Configuration
             // This method is called a lot, so intentionally no Tracer here.
             if (_semanticSchemas == null)
             {
-                _localization.LoadStaticContentItem("mappings/schemas.json", ref _semanticSchemas);
-                _semanticSchemaMap = _semanticSchemas.ToDictionary(ss => ss.Id.ToString(CultureInfo.InvariantCulture));
-                foreach (SemanticSchema semanticSchema in _semanticSchemas)
+                try
                 {
-                    semanticSchema.Initialize(_localization);
+                    _localization.LoadStaticContentItem("mappings/schemas.json", ref _semanticSchemas);
+                    _semanticSchemaMap =
+                        _semanticSchemas.ToDictionary(ss => ss.Id.ToString(CultureInfo.InvariantCulture));
+                    foreach (SemanticSchema semanticSchema in _semanticSchemas)
+                    {
+                        semanticSchema.Initialize(_localization);
+                    }
+                }
+                catch
+                {
+                    // failed to load schemas.json
+                    throw new DxaException(
+                        $"Semantic schema '{schemaId}' not defined in Localization [{this}]. {Constants.CheckSettingsUpToDate}"
+                    );
                 }
             }
-           
+
             SemanticSchema result;
             if (!_semanticSchemaMap.TryGetValue(schemaId, out result))
             {
                 throw new DxaException(
                     $"Semantic schema '{schemaId}' not defined in Localization [{this}]. {Constants.CheckSettingsUpToDate}"
-                    );
+                );
             }
 
             return result;
@@ -118,7 +130,14 @@ namespace Sdl.Web.Common.Configuration
             // This method is called a lot, so intentionally no Tracer here.
             if (_semanticVocabularies == null)
             {
-                _localization.LoadStaticContentItem("mappings/vocabularies.json", ref _semanticVocabularies);
+                try
+                {
+                    _localization.LoadStaticContentItem("mappings/vocabularies.json", ref _semanticVocabularies);
+                }
+                catch
+                {
+                    Log.Warn("Semantic Vocabularies not available");
+                }
             }
             return _semanticVocabularies;
         }
@@ -132,11 +151,17 @@ namespace Sdl.Web.Common.Configuration
         {
             if (_semanticVocabularies == null)
             {
-                _semanticVocabularyMap = GetSemanticVocabularies().ToDictionary(sv => sv.Prefix);
+                lock (_loadLock)
+                {
+                    if (_semanticVocabularyMap == null)
+                    {
+                        _semanticVocabularyMap = GetSemanticVocabularies().ToDictionary(sv => sv.Prefix);
+                    }
+                }
             }
 
             SemanticVocabulary result;
-            if (!_semanticVocabularyMap.TryGetValue(prefix, out result))
+            if (_semanticVocabularyMap == null || !_semanticVocabularyMap.TryGetValue(prefix, out result))
             {
                 throw new DxaException($"No vocabulary defined for prefix '{prefix}' in Localization [{this}]. {Constants.CheckSettingsUpToDate}");
             }
@@ -152,22 +177,28 @@ namespace Sdl.Web.Common.Configuration
         public virtual XpmRegion GetXpmRegionConfiguration(string regionName)
         {
             // This method is called a lot, so intentionally no Tracer here.
+            XpmRegion result = null;
             if (_xpmRegionConfiguration == null)
             {
                 lock (_loadLock)
                 {
                     if (_xpmRegionConfiguration == null)
                     {
-                        _localization.LoadStaticContentItem("mappings/regions.json", ref _xpmRegionConfiguration);
-                        _xpmRegionConfigurationMap = _xpmRegionConfiguration.ToDictionary(xpmRegion => xpmRegion.Region);
+                        try
+                        {
+                            _localization.LoadStaticContentItem("mappings/regions.json", ref _xpmRegionConfiguration);
+                            _xpmRegionConfigurationMap = _xpmRegionConfiguration.ToDictionary(xpmRegion => xpmRegion.Region);
+                            if (!_xpmRegionConfigurationMap.TryGetValue(regionName, out result))
+                            {
+                                Log.Warn("XPM Region '{0}' is not defined in Localization [{1}].", regionName, this);
+                            }
+                        }
+                        catch
+                        {
+                            Log.Warn("Problem loading XPM regions.");
+                        }
                     }
                 }
-            }
-
-            XpmRegion result;
-            if (!_xpmRegionConfigurationMap.TryGetValue(regionName, out result))
-            {
-                Log.Warn("XPM Region '{0}' is not defined in Localization [{1}].", regionName, this);
             }
 
             return result;
@@ -187,20 +218,28 @@ namespace Sdl.Web.Common.Configuration
         {
             using (new Tracer(pageTypeIdentifier, this))
             {
-                if (_includePageUrls == null)
+                try
                 {
-                    _localization.LoadStaticContentItem("mappings/includes.json", ref _includePageUrls);
-                }
+                    if (_includePageUrls == null)
+                    {
+                        _localization.LoadStaticContentItem("mappings/includes.json", ref _includePageUrls);
+                    }
+                    string[] result;
+                    if (!_includePageUrls.TryGetValue(pageTypeIdentifier, out result))
+                    {
+                        throw new DxaException(
+                            $"Localization [{this}] does not contain includes for Page Type '{pageTypeIdentifier}'. {Constants.CheckSettingsUpToDate}"
+                        );
+                    }
 
-                string[] result;
-                if (!_includePageUrls.TryGetValue(pageTypeIdentifier, out result))
+                    return result;
+                }
+                catch
                 {
                     throw new DxaException(
                         $"Localization [{this}] does not contain includes for Page Type '{pageTypeIdentifier}'. {Constants.CheckSettingsUpToDate}"
-                        );
+                    );
                 }
-
-                return result;
             }
         }
     }

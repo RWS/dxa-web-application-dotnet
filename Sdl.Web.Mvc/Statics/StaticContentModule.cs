@@ -142,7 +142,8 @@ namespace Sdl.Web.Mvc.Statics
 
                         if (!response.SuppressContent)
                         {
-                              staticContentItem.GetContentStream().CopyTo(response.OutputStream);                    
+                              staticContentItem.GetContentStream().CopyTo(response.OutputStream);     
+                              staticContentItem.GetContentStream().Close();
                         }
                     }
                 }
@@ -193,7 +194,12 @@ namespace Sdl.Web.Mvc.Statics
             httpResponse.StatusCode = (int)HttpStatusCode.NotFound;
             httpResponse.ContentType = "text/plain";
             httpResponse.Write(message);
-            httpResponse.End(); // This terminates the HTTP processing pipeline
+            // Terminate http processing pipeline normally would be done with:
+            //   httpResponse.End(); 
+            // This generates a ThreadAbortException so it can be replaced with the following code:
+            httpResponse.Flush(); // Sends all currently buffered output to the client.
+            httpResponse.SuppressContent = true;  // Gets or sets a value indicating whether to send HTTP content to the client.
+            HttpContext.Current.ApplicationInstance.CompleteRequest(); // Causes ASP.NET to bypass all events and filtering in the HTTP pipeline chain of execution and directly execute the EndRequest event.
         }
 
         private static void SendHealthCheckResponse(HttpResponse httpResponse)
@@ -201,7 +207,9 @@ namespace Sdl.Web.Mvc.Statics
             httpResponse.StatusCode = (int)HttpStatusCode.OK;
             httpResponse.ContentType = "text/plain";
             httpResponse.Write("DXA Health Check OK.");
-            httpResponse.End(); // This terminates the HTTP processing pipeline
+            httpResponse.Flush();
+            httpResponse.SuppressContent = true;
+            HttpContext.Current.ApplicationInstance.CompleteRequest();
         }
     }
 }

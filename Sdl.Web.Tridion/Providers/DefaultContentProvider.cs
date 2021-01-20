@@ -188,7 +188,7 @@ namespace Sdl.Web.Tridion.Mapping
         public virtual StaticContentItem GetStaticContentItem(string urlPath, Localization localization)
         {
             using (new Tracer(urlPath, localization))
-            {               
+            {
                 if (WebRequestContext.IsSessionPreview)
                 {
                     // If running under an XPM session preview go directly to BinaryProvider and avoid any
@@ -211,14 +211,27 @@ namespace Sdl.Web.Tridion.Mapping
                         Encoding.UTF8);
                 }
 
-                string localFilePath = BinaryFileManager.Instance.GetCachedFile(urlPath, localization);
+                MemoryStream memoryStream;
+                Stream dataStream;
+                string localFilePath =
+                    BinaryFileManager.Instance.GetCachedFile(urlPath, localization, out memoryStream);
+
+                if (memoryStream == null)
+                {
+                    dataStream = new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096,
+                        FileOptions.SequentialScan);
+                }
+                else
+                {
+                    dataStream = memoryStream;
+                }
 
                 return new StaticContentItem(
-                    new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan),
+                    dataStream,
                     MimeMapping.GetMimeMapping(localFilePath),
                     File.GetLastWriteTime(localFilePath),
                     Encoding.UTF8
-                    );
+                );
             }
         }
 
@@ -244,10 +257,22 @@ namespace Sdl.Web.Tridion.Mapping
                         Encoding.UTF8);
                 }
 
-                string localFilePath = BinaryFileManager.Instance.GetCachedFile(binaryId, localization);
+                MemoryStream memoryStream;
+                Stream dataStream;
+                string localFilePath = BinaryFileManager.Instance.GetCachedFile(binaryId, localization, out memoryStream);
+
+                if (memoryStream == null)
+                {
+                    dataStream = new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096,
+                        FileOptions.SequentialScan);
+                }
+                else
+                {
+                    dataStream = memoryStream;
+                }
 
                 return new StaticContentItem(
-                    new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan),
+                    dataStream,
                     MimeMapping.GetMimeMapping(localFilePath),
                     File.GetLastWriteTime(localFilePath),
                     Encoding.UTF8
