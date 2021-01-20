@@ -31,9 +31,15 @@ namespace Sdl.Web.Tridion
                 }
 
                 // NOTE: we're not using UrlToLocalizationMapping here, because we may match too eagerly on a base URL when there is a matching mapping with a more specific URL.
-                PublicationMapping mapping = SiteConfiguration.CacheProvider.GetOrAdd($"{urlLeftPart}", CacheRegions.PublicationMapping, () => ApiClientFactory.Instance.CreateClient().GetPublicationMapping(
-                    ContentNamespace.Sites,
-                    urlLeftPart));
+                PublicationMapping mapping = null;
+                try
+                {
+                    mapping = ApiClientFactory.Instance.CreateClient().GetPublicationMapping(ContentNamespace.Sites, urlLeftPart);
+                }
+                catch
+                {
+                    Log.Error($"Failed to get publication mapping for url {urlLeftPart}");
+                }
                
                 if (mapping == null || mapping.Port != url.Port.ToString()) // See CRQ-1195
                 {
