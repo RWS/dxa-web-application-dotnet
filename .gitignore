@@ -13,3 +13,4 @@ Site/Areas/
 *.psess
 *.nupkg
 Sdl.Web.Documentation/Help/LastBuild.log
+dist/

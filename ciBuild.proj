@@ -1,63 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.5" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <!-- Remember to run msbuild ciBuild.csproj /t:Restore first so the MSBuild extension package is installed from nuget -->
+    <Import Project="packages\MSBuild.Extension.Pack.1.9.1\build\net40\MSBuild.Extension.Pack.targets" Condition="Exists('packages\MSBuild.Extension.Pack.1.9.1\build\net40\MSBuild.Extension.Pack.targets')"/>
+
     <PropertyGroup>
         <!-- Input parameters -->
+        <BuildConfiguration>Release</BuildConfiguration>
+        <ProjectDirectory>$(MSBuildProjectDirectory)</ProjectDirectory>    
+
+        <!-- Version -->
         <Version Condition="'$(VERSION)' == ''">0.0.0.0</Version>
         <Version Condition="'$(VERSION)' != ''">$(VERSION)</Version>
-        <IsPreRelease>true</IsPreRelease>
-        <PublishSymbols>false</PublishSymbols>
-        <BuildConfiguration>Release</BuildConfiguration>
-        <ProjectDirectory>$(MSBuildProjectDirectory)</ProjectDirectory>
-        <CdTestDeployFolder>\\saintjohn01.ams.dev\C$\inetpub\wwwroot\GitVersion</CdTestDeployFolder>
-        <NuGetRepositoryUrl/>
-        <NugetSymbolServerUrl/>
-        <NuGet>NuGet.exe</NuGet>
-        <NuGetPackageDirectory>$(ProjectDirectory)\_NuGet</NuGetPackageDirectory>
-        <DxaFrameworkPackageDirectory>$(NuGetPackageDirectory)\Sdl.Dxa.Framework</DxaFrameworkPackageDirectory>
         <VersionMajor>$(Version.Split('.')[0])</VersionMajor>
         <VersionMinor>$(Version.Split('.')[1])</VersionMinor>
         <VersionPatch>$(Version.Split('.')[2])</VersionPatch>
         <VersionBuild>$(Version.Split('.')[3])</VersionBuild>
-        <PreReleaseLabel Condition="'$(IsPreRelease)' == 'true'">-beta-$([System.DateTime]::Now.ToString(&quot;yyyyMMddHHmm&quot;))</PreReleaseLabel>
-        <PackageVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)$(PreReleaseLabel)</PackageVersion>
+        <PackageVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)</PackageVersion>
+
         <!--Tools-->
+        <NuGet>&quot;$(ProjectDirectory)\_tools\NuGet.exe&quot;</NuGet>
+        <NuGetPackageDirectory>$(ProjectDirectory)\_NuGet</NuGetPackageDirectory>
+        <DxaFrameworkPackageDirectory>$(NuGetPackageDirectory)\Sdl.Dxa.Framework</DxaFrameworkPackageDirectory>
+
         <MsTestExe Condition="'$(MsTestExe)'=='' And Exists('$(MSBuildProgramFiles32)\Microsoft Visual Studio 14.0\Common7\IDE\MSTest.exe')">$(MSBuildProgramFiles32)\Microsoft Visual Studio 14.0\Common7\IDE\MSTest.exe</MsTestExe>
         <MsTestExe Condition="'$(MsTestExe)'=='' And Exists('$(MSBuildProgramFiles32)\Microsoft Visual Studio 12.0\Common7\IDE\MSTest.exe')">$(MSBuildProgramFiles32)\Microsoft Visual Studio 12.0\Common7\IDE\MSTest.exe</MsTestExe>
         <MsTestExe Condition="'$(MsTestExe)'=='' And Exists('$(MSBuildProgramFiles32)\Microsoft Visual Studio\2017\TestAgent\Common7\IDE\MSTest.exe')">$(MSBuildProgramFiles32)\Microsoft Visual Studio\2017\TestAgent\Common7\IDE\MSTest.exe</MsTestExe>
     </PropertyGroup>
+
+    <!-- ======================================================================================================================= -->
+    <!-- You should run msbuild with this target first to make sure all packages are installed before building everything else   -->
+    <!-- ======================================================================================================================= -->
+    <Target Name="Restore">
+        <Message Text="Clearing NuGet cache..."/>
+        <Exec Command="$(NuGet) locals all -Clear" />
+        <Message Text="Restoring NuGet packages..."/>
+        <Exec Command="_tools\RestorePackages DxaFramework.sln" WorkingDirectory="$(ProjectDirectory)" />
+    </Target>
+
     <!-- ==================================================================================  -->
     <Target Name="Build">
         <Message Importance="high" Text="Start build..."/>
         <CallTarget Targets="PrepareBuild"/>
         <CallTarget Targets="RunBuild"/>
-        <CallTarget Targets="Test"/>
-        <CallTarget Targets="CreateDocs"/>
         <CallTarget Targets="CreatePackages"/>
-        <CallTarget Condition="'$(NuGetRepositoryUrl)' != ''" Targets="PublishPackages"/>
-        <CallTarget Condition="'$(NuGetRepositoryUrl)' != ''" Targets="UpdatePackageRefs"/>
     </Target>
-    <!-- ==================================================================================  -->
+
+    <!-- =============================================================================================================================================  -->
     <Target Name="PrepareBuild">
-        <Message Importance="high" Text="Preparing build..."/>
-        <Message Text="Clearing NuGet cache..."/>
-        <Exec Command="$(NuGet) locals all -Clear"/>
-        <Message Text="Restoring NuGet packages..."/>
-        <Exec Command="$(NuGet) restore DxaFramework.sln" WorkingDirectory="$(ProjectDirectory)" />
-        <Exec Command="$(NuGet) restore DD4T\DD4T.Providers.DxaModelService\DD4T.Providers.DxaModelService.csproj -PackagesDirectory packages " WorkingDirectory="$(ProjectDirectory)"/>
+        <Message Text="Preparing build..." Importance="high" />
+        <Message Text="Setting Assembly Info"/>
+
         <ItemGroup>
-            <AssemblyInfo Include="[assembly: AssemblyVersion(&quot;$(VersionMajor).$(VersionMinor).$(VersionPatch).0&quot;)]"/>
-            <AssemblyInfo Include="[assembly: AssemblyFileVersion(&quot;$(Version)&quot;)]"/>
-            <AssemblyInfo Include="[assembly: AssemblyInformationalVersion(&quot;$(PackageVersion)&quot;)]"/>
-            <AssemblyInfo Include="[assembly: AssemblyCopyright(&quot;Copyright © 2014-$([System.DateTime]::Now.ToString(&quot;yyyy&quot;)) SDL Group&quot;)]"/>
+        <AssemblyInfoFile Include="$(ProjectDirectory)\CommonAssemblyInfo.cs">
+            <Attributes>Normal</Attributes>
+        </AssemblyInfoFile>
         </ItemGroup>
-        <Message Text="Updating CommonAssemblyInfo..."/>
-        <WriteLinesToFile File="$(ProjectDirectory)\CommonAssemblyInfo.cs" Lines="@(AssemblyInfo)" Overwrite="False"/>
+
+        <Message Text="Setting Assembly Info @(AssemblyInfoFile)"/>
+
+        <MSBuild.ExtensionPack.Framework.DateAndTime TaskAction="Get" Format="yyyy">
+        <Output TaskParameter="Result" PropertyName="Year"/>
+        </MSBuild.ExtensionPack.Framework.DateAndTime>
+
+        <MSBuild.ExtensionPack.FileSystem.File TaskAction="SetAttributes" Files="@(AssemblyInfoFile)"/>
+
+        <MSBuild.ExtensionPack.Framework.AssemblyInfo
+        AssemblyInfoFiles="@(AssemblyInfoFile)"
+        AssemblyVersion="$(Version)"
+        AssemblyFileVersion="$(VersionMajor).$(VersionMinor).$(VersionPatch).$(VersionBuild)"
+        AssemblyCopyright="Copyright &#169; 2014-$(Year) SDL Group"
+        SkipVersioning="false"
+        />
+
+        <Message Text="Restoring NuGet packages for extensions..."/>
+        <Exec Command="_tools\RestorePackages DxaFramework.sln" WorkingDirectory="$(ProjectDirectory)" />
     </Target>
-    <!-- ==================================================================================  -->
-    <Target Name="UpdatePackageRefs">
-        <Message Importance="high" Text="Updating NuGet Package References..."/>
-        <Exec Command="$(NuGet) update &quot;$(ProjectDirectory)\Site\DxaWebApp.csproj&quot; -Prerelease -Id Sdl.Dxa.Framework.Web8"/>
-    </Target>
+
     <!-- ==================================================================================  -->
     <Target Name="RunBuild">
         <Message Importance="high" Text="Running build commands..."/>
@@ -66,6 +85,7 @@
         <MSBuild Projects="$(ProjectDirectory)\DD4T\DD4T.Providers.DxaModelService\DD4T.Providers.DxaModelService.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true"/>
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Tridion.Tests\Sdl.Web.Tridion.Tests.csproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU" StopOnFirstFailure="true"/>
     </Target>
+
     <!-- ==================================================================================  -->
     <Target Name="CreatePackages">
         <Message Importance="high" Text="Creating NuGet packages in '$(NuGetPackageDirectory)' ..."/>
@@ -79,6 +99,7 @@
         <!-- Create symbols nuget package. Note the use of .symbols in the filename! -->
         <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.Web8.symbols.nuspec -Symbols -Version $(PackageVersion)" WorkingDirectory="$(DxaFrameworkPackageDirectory)"/>
     </Target>
+
     <!-- ==================================================================================  -->
     <Target Name="PublishPackages" Condition="'$(NuGetRepositoryUrl)' != ''">
         <Message Importance="high" Text="Publishing NuGet packages to '$(NuGetRepositoryUrl)' ..."/>
@@ -91,6 +112,7 @@
              available. -->
         <Exec Command="$(NuGet) push Sdl.Dxa.Framework.Web8.$(PackageVersion).symbols.nupkg -Source $(NugetSymbolServerUrl)" Condition="'$(PublishSymbols)' == 'true' AND '$(NugetSymbolServerUrl)' != ''" WorkingDirectory="$(DxaFrameworkPackageDirectory)"/>
     </Target>
+
     <!-- ==================================================================================  -->
     <!-- Sandcastle Help File Builder (SHFB)
          Notes:
@@ -103,25 +125,41 @@
     <Target Name="CreateDocs">
         <Message Importance="high" Text="Creating API documentation..."/>
         <MSBuild Projects="$(ProjectDirectory)\Sdl.Web.Documentation\Sdl.Web.Documentation.shfbproj" Properties="Configuration=$(BuildConfiguration);Platform=AnyCPU;Version=$(PackageVersion)" StopOnFirstFailure="true"/>
-    </Target>
-    <!-- ==================================================================================  -->
-    <Target Name="DeployOutput">
-        <Message Text="Deploying output to '$(CdTestDeployFolder)'..."/>
-        <ItemGroup>
-            <ConfigFiles Include="$(ProjectDirectory)\Site\*.config;$(ProjectDirectory)\Site\Global.asax"/>
-            <ViewFiles Include="$(ProjectDirectory)\Site\Views\**\*"/>
-            <AreaFiles Include="$(ProjectDirectory)\Site\Areas\**\*"/>
-            <BinFiles Include="$(ProjectDirectory)\Site\bin\*"/>
-        </ItemGroup>
-        <Copy DestinationFolder="$(CdTestDeployFolder)" SourceFiles="@(ConfigFiles)"/>
-        <Copy DestinationFolder="$(CdTestDeployFolder)\Views\%(RecursiveDir)" SourceFiles="@(ViewFiles)"/>
-        <Copy DestinationFolder="$(CdTestDeployFolder)\Areas\%(RecursiveDir)" SourceFiles="@(AreaFiles)"/>
-        <Copy DestinationFolder="$(CdTestDeployFolder)\bin\%(RecursiveDir)" SourceFiles="@(BinFiles)"/>
-    </Target>
+    </Target> 
+
     <!-- ==================================================================================  -->
     <Target Condition="'$(BuildConfiguration)' == 'Release'" Name="Test">
         <Message Text="Running unit tests..."/>
         <Exec Command="packages\OpenCover.4.6.519\tools\OpenCover.Console.exe -register:user &quot;-target:$(MsTestExe)&quot; &quot;-targetargs:/testcontainer:Sdl.Web.Tridion.Tests\bin\$(BuildConfiguration)\Sdl.Web.Tridion.Tests.dll /resultsfile:TestResults.trx&quot; &quot;-filter:+[Sdl.*]* -[*Test*]*&quot; -output:CoverageReports\Coverage.xml&quot;"/>
         <Exec Command="packages\ReportGenerator.2.4.4.0\tools\ReportGenerator.exe &quot;-reports:CoverageReports\Coverage.xml&quot; &quot;-targetdir:CoverageReports&quot;"/>
     </Target>
+
+    <!-- =============================================================================================================================================  -->
+    <PropertyGroup>
+        <DstFolder>$(ProjectDirectory)\dist</DstFolder>              
+    </PropertyGroup>
+    <Target Name="Artifacts">
+        <Message Text="Generating artifacts ..." Importance="high" />
+        <ItemGroup>
+            <ConfigFiles Include="$(ProjectDirectory)\Site\*.config;$(ProjectDirectory)\Site\Global.asax"/>
+            <ViewFiles Include="$(ProjectDirectory)\Site\Views\**\*"/>
+            <AreaFiles Include="$(ProjectDirectory)\Site\Areas\**\*"/>
+            <BinFiles Include="$(ProjectDirectory)\Site\bin\*"/>
+            <InstallationFiles Include="$(ProjectDirectory)\installation\**\*"/>
+            <SrcFilesA Include="$(ProjectDirectory)\CommonAssemblyInfo.cs;$(ProjectDirectory)\DxaWebApp.sln;"/>
+            <SrcFilesB Include="$(ProjectDirectory)\Site\**\*" Exclude="$(ProjectDirectory)\Site\bin\**\*;$(ProjectDirectory)\Site\obj\**\*" />
+        </ItemGroup>
+        <RemoveDir Directories="$(DstFolder)" />
+
+        <Copy DestinationFolder="$(DstFolder)\web\dist" SourceFiles="@(ConfigFiles)"/>
+        <Copy DestinationFolder="$(DstFolder)\web\dist\Views\%(RecursiveDir)" SourceFiles="@(ViewFiles)"/>
+        <Copy DestinationFolder="$(DstFolder)\web\dist\Areas\%(RecursiveDir)" SourceFiles="@(AreaFiles)"/>
+        <Copy DestinationFolder="$(DstFolder)\web\dist\bin\%(RecursiveDir)" SourceFiles="@(BinFiles)"/>
+        
+        <Copy DestinationFolder="$(DstFolder)\web\%(RecursiveDir)" SourceFiles="@(InstallationFiles)"/>
+        <Copy DestinationFolder="$(DstFolder)\web\src\%(RecursiveDir)" SourceFiles="@(SrcFilesA)"/>
+        <Copy DestinationFolder="$(DstFolder)\web\src\Site\%(RecursiveDir)" SourceFiles="@(SrcFilesB)"/>
+
+        <RemoveDir Directories="$(DstFolder)\tmp" />
+    </Target>     
 </Project>
