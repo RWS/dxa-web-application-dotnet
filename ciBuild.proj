@@ -160,6 +160,5 @@
         <Copy DestinationFolder="$(DstFolder)\web\src\%(RecursiveDir)" SourceFiles="@(SrcFilesA)"/>
         <Copy DestinationFolder="$(DstFolder)\web\src\Site\%(RecursiveDir)" SourceFiles="@(SrcFilesB)"/>
 
-        <RemoveDir Directories="$(DstFolder)\tmp" />
     </Target>     
 </Project>
