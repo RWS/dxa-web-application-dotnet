@@ -13,8 +13,8 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Sdl.Web.Site</RootNamespace>
     <AssemblyName>Sdl.Web.Site</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <MvcBuildViews>true</MvcBuildViews>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>    
+    <MvcBuildViews Condition="'$(TRAVIS)' == ''">true</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
@@ -174,7 +174,7 @@
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>copy "$(ProjectDir)\..\Sdl.Web.Tridion\bin\$(ConfigurationName)\*.*" "$(TargetDir)" /y
+    <PreBuildEvent Condition="'$(TRAVIS)' == ''">copy "$(ProjectDir)\..\Sdl.Web.Tridion\bin\$(ConfigurationName)\*.*" "$(TargetDir)" /y
 </PreBuildEvent>
   </PropertyGroup>
 </Project>

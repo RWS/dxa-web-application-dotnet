@@ -1,6 +1,8 @@
 SDL Digital Experience Accelerator ASP.NET MVC web application
 ===
-
+Build status
+------------
+- 1.8: [![Build Status](https://travis-ci.com/sdl/dxa-web-application-dotnet.svg?branch=release%2F1.8)](https://travis-ci.com/sdl/dxa-web-application-dotnet)
 About
 -----
 The SDL Digital Experience Accelerator (DXA) is a reference implementation of SDL Tridion Sites 9 and SDL Web 8 intended to help you create, design and publish an SDL Tridion/Web-based website quickly.
