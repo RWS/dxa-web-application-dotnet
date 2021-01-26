@@ -14,7 +14,7 @@
     <RootNamespace>Sdl.Web.Site</RootNamespace>
     <AssemblyName>Sdl.Web.Site</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <MvcBuildViews>true</MvcBuildViews>
+    <MvcBuildViews Condition="'$(TRAVIS)' == ''">true</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
@@ -229,6 +229,7 @@
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <Message Importance="high" Text="Compiling Views.."/>
     <!--    
       Normally this would work but on docker it failed:
       <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" /> -->
