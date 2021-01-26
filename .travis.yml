@@ -1,0 +1,4 @@
+language: csharp
+script:
+  - msbuild ciBuild.proj /t:Restore
+  - msbuild ciBuild.proj
