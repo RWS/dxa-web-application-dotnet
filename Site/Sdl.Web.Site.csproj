@@ -254,7 +254,7 @@
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>copy "$(ProjectDir)\..\Sdl.Web.Tridion\bin\$(ConfigurationName)\*.*" "$(TargetDir)" /y
+    <PreBuildEvent Condition="'$(TRAVIS)' == ''">copy "$(ProjectDir)\..\Sdl.Web.Tridion\bin\$(ConfigurationName)\*.*" "$(TargetDir)" /y
 </PreBuildEvent>
   </PropertyGroup>
 </Project>
