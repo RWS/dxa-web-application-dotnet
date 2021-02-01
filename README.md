@@ -2,9 +2,9 @@ SDL Digital Experience Accelerator ASP.NET MVC web application
 ===
 Build status
 ------------
-- Develop: [![Build Status](https://travis-ci.com/sdl/dxa-web-application-dotnet.svg?branch=develop)](https://travis-ci.com/sdl/dxa-web-application-dotnet)
-- 2.2: [![Build Status](https://travis-ci.com/sdl/dxa-web-application-dotnet.svg?branch=release%2F2.2)](https://travis-ci.com/sdl/dxa-web-application-dotnet)
-- 1.8: [![Build Status](https://travis-ci.com/sdl/dxa-web-application-dotnet.svg?branch=release%2F1.8)](https://travis-ci.com/sdl/dxa-web-application-dotnet)
+- Develop: ![Build Status](https://github.com/sdl/dxa-web-application-dotnet/workflows/Build/badge.svg?branch=develop)
+- 2.2: ![Build Status](https://github.com/sdl/dxa-web-application-dotnet/workflows/Build/badge.svg?branch=release/2.2)
+- 1.8: ![Build Status](https://github.com/sdl/dxa-web-application-dotnet/workflows/Build/badge.svg?branch=release/1.8)
 
 About
 -----
