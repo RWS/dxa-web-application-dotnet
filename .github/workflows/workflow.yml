@@ -1,5 +1,5 @@
 
-name: Build DXA web application + framework
+name: Build
 
 on:
   push:
