@@ -16,8 +16,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.0.2      
     - name: Restore NuGet Packages
       run: nuget restore DxaFramework.sln
     - name: Build and Publish Web App
