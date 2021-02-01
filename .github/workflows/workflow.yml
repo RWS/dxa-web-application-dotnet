@@ -1,0 +1,22 @@
+name: Build
+
+on:
+  push:
+    branches: [ develop, release/2.2, release/1.8 ]
+  pull_request:
+    branches: [ develop, release/2.2, release/1.8 ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+    - name: Restore NuGet Packages
+      run: nuget restore DxaFramework.sln
+    - name: Build and Publish Web App
+      run: msbuild DxaFramework.sln /p:Configuration=Release
+      
