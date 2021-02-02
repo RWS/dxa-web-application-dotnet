@@ -3,7 +3,6 @@ SDL Digital Experience Accelerator ASP.NET MVC web application
 Build status
 ------------
 - Develop: ![Build Status](https://github.com/sdl/dxa-web-application-dotnet/workflows/Build/badge.svg?branch=develop)
-- 2.2: ![Build Status](https://github.com/sdl/dxa-web-application-dotnet/workflows/Build/badge.svg?branch=release/2.2)
 - 1.8: ![Build Status](https://github.com/sdl/dxa-web-application-dotnet/workflows/Build/badge.svg?branch=release/1.8)
 
 About
@@ -68,7 +67,7 @@ Of course, it is also possible (and appreciated) to report an issue without asso
 
 License
 -------
-Copyright (c) 2014-2020 SDL Group.
+Copyright (c) 2014-2021 SDL Group.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
