@@ -5,6 +5,12 @@ Build status
 - Develop: ![Build Status](https://github.com/sdl/dxa-web-application-dotnet/workflows/Build/badge.svg?branch=develop)
 - 1.8: ![Build Status](https://github.com/sdl/dxa-web-application-dotnet/workflows/Build/badge.svg?branch=release/1.8)
 
+Prerequisites
+-------------
+For building .NET repositories you must have the following installed:
+- Visual Studio 2019
+- .NET Framework 4.6.2
+
 About
 -----
 The SDL Digital Experience Accelerator (DXA) is a reference implementation of SDL Tridion Sites 9 and SDL Web 8 intended to help you create, design and publish an SDL Tridion/Web-based website quickly.
