@@ -132,7 +132,7 @@
     <Target Name="Artifacts">
         <Message Text="Generating artifacts ..." Importance="high" />
         <ItemGroup>
-            <ConfigFiles Include="$(ProjectDirectory)\Site\*.config;$(ProjectDirectory)\Site\Global.asax"/>
+            <ConfigFiles Include="$(ProjectDirectory)\Site\*.config;$(ProjectDirectory)\Site\Global.asax" Exclude="$(ProjectDirectory)\Site\packages.config"/>
             <ViewFiles Include="$(ProjectDirectory)\Site\Views\**\*"/>
             <AreaFiles Include="$(ProjectDirectory)\Site\Areas\**\*"/>
             <BinFiles Include="$(ProjectDirectory)\Site\bin\*"/>
