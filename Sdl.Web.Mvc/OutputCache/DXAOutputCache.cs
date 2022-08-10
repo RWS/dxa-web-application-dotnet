@@ -85,6 +85,11 @@ namespace Sdl.Web.Mvc.OutputCache
             SiteConfiguration.CacheProvider.TryGet(cacheKey, CacheRegions.RenderedOutput, out cachedOutput);
             if (cachedOutput == null)
             {
+                if (!(ctx.Controller.ViewData.Model is ViewModel model))
+                {
+                    return;
+                }
+
                 StringWriter cachingWriter = new StringWriter((IFormatProvider) CultureInfo.InvariantCulture);
                 TextWriter originalWriter = ctx.HttpContext.Response.Output;
                 ViewModel model = ctx.Controller.ViewData.Model as ViewModel;
@@ -133,6 +138,10 @@ namespace Sdl.Web.Mvc.OutputCache
             if (ctx.Exception != null)
             {
                 RemoveCallback(ctx);
+                return;
+            }
+            if (!(ctx.Controller.ViewData.Model is ViewModel model))
+            {
                 return;
             }
 
