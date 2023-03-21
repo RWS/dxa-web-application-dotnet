@@ -118,7 +118,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Tridion.Api.Client">
-      <HintPath>..\packages\Sdl.Tridion.Api.Client.2.2.1\lib\net462\Sdl.Tridion.Api.Client.dll</HintPath>
+      <HintPath>..\packages\Sdl.Tridion.Api.Client.2.2.2\lib\net462\Sdl.Tridion.Api.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sdl.Web.Common">
