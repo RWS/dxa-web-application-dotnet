@@ -26,7 +26,7 @@
             <dependency id="Sdl.Web.Delivery" version="11.0.11022" />
             <dependency id="Sdl.Web.Context.Image" version="11.0.0" />
             <dependency id="Sdl.Web.Context.Client" version="11.0.0" />
-            <dependency id="Sdl.Tridion.Api.Client" version="2.2.1" />
+            <dependency id="Sdl.Tridion.Api.Client" version="2.2.2" />
         </dependencies>
     </metadata>
     <files>
