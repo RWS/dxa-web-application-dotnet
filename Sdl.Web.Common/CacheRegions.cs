@@ -32,6 +32,7 @@ namespace Sdl.Web.Common
         public const string LinkResolving = "LinkResolving";
         public const string BrokerQuery = "BrokerQuery";
         public const string RenderedOutput = "RenderedOutput";
+        public const string LocalizationResolving = "LocalizationResolving";
 
         /// <summary>
         /// Returns true if view model caching is enabled in the web applications configuration.
