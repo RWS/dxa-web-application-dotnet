@@ -46,7 +46,7 @@ namespace Sdl.Web.Tridion.Mapping
                 if (CacheRegions.IsViewModelCachingEnabled)
                 {
                     PageModel cachedPageModel = SiteConfiguration.CacheProvider.GetOrAdd(
-                        $"{urlPath}:{addIncludes}:{WebRequestContext.CacheKeySalt}", // Cache Page Models with and without includes separately
+                        $"{localization.Id}:{urlPath}:{addIncludes}:{WebRequestContext.CacheKeySalt}", // Cache Page Models with and without includes separately
                         CacheRegions.PageModel,
                         () =>
                         {
