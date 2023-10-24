@@ -211,7 +211,7 @@ namespace Sdl.Web.Common.Configuration
             {
                 relativePath = relativePath.Substring(1);
             }
-            return $"{Path}/{SiteConfiguration.SystemFolder}/{Version}/{relativePath}";
+            return $"/{SiteConfiguration.SystemFolder}/{Version}/{relativePath}";
         }
 
         /// <summary>
