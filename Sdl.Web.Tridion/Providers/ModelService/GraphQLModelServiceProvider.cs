@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Web.Configuration;
 using Newtonsoft.Json;
 using Sdl.Tridion.Api.Client;
@@ -257,7 +258,7 @@ namespace Sdl.Web.Tridion.ModelService
             JsonSerializerSettings settings = new JsonSerializerSettings()
             {
                 TypeNameHandling = TypeNameHandling.Auto,
-                Binder = _binder,
+                SerializationBinder = (Newtonsoft.Json.Serialization.ISerializationBinder)_binder, // Use SerializationBinder instead of Binder
                 NullValueHandling = NullValueHandling.Ignore,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };

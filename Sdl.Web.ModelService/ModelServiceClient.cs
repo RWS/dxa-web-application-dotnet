@@ -129,10 +129,11 @@ namespace Sdl.Web.ModelService
         public JsonSerializerSettings JsonSettings(SerializationBinder binder) => new JsonSerializerSettings()
         {
             TypeNameHandling = TypeNameHandling.Auto,
-            Binder = binder,
+            SerializationBinder = (Newtonsoft.Json.Serialization.ISerializationBinder)binder, // Use SerializationBinder instead of Binder
             NullValueHandling = NullValueHandling.Ignore,
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         };
+
 
         /// <summary>
         /// Perform Model Service request
