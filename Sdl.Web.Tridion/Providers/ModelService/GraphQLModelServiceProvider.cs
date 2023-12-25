@@ -258,7 +258,7 @@ namespace Sdl.Web.Tridion.ModelService
             JsonSerializerSettings settings = new JsonSerializerSettings()
             {
                 TypeNameHandling = TypeNameHandling.Auto,
-                SerializationBinder = (Newtonsoft.Json.Serialization.ISerializationBinder)_binder, // Use SerializationBinder instead of Binder
+                Binder = _binder, 
                 NullValueHandling = NullValueHandling.Ignore,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
