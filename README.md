@@ -9,7 +9,7 @@ Prerequisites
 -------------
 For building .NET repositories you must have the following installed:
 - Visual Studio 2019
-- .NET Framework 4.6.2
+- .NET Framework 4.8
 
 Build
 -----
