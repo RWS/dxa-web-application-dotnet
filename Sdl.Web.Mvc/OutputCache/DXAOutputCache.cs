@@ -165,7 +165,7 @@ namespace Sdl.Web.Mvc.OutputCache
         private static string CalcCacheKey(ActionExecutingContext ctx)
         {
             var sb = new StringBuilder();
-            sb.Append($"{ctx.ActionDescriptor.UniqueId}-{ctx.HttpContext.Request.Url}-{ctx.HttpContext.Request.UserAgent}:{WebRequestContext.CacheKeySalt}");
+            sb.Append($"{ctx.ActionDescriptor.UniqueId}-{WebRequestContext.Localization.Id}-{ctx.HttpContext.Request.Url}-{ctx.HttpContext.Request.UserAgent}:{WebRequestContext.CacheKeySalt}");
             foreach (var p in ctx.ActionParameters.Where(p => p.Value != null))
             {
                 sb.Append($"{p.Key.GetHashCode()}:{p.Value.GetHashCode()}-");
@@ -191,10 +191,10 @@ namespace Sdl.Web.Mvc.OutputCache
         private static string GetKey(ControllerContext ctx)
         {
             string key = "__dxa__";
-            if (ctx.IsChildAction) key += "c";
+            if (ctx.IsChildAction) key += "c";            
             ViewModel model = ctx.Controller.ViewData.Model as ViewModel;
             if (model == null) return key;
-            key += model.GetHashCode();
+            key += $"{WebRequestContext.Localization.Id}-{model.GetHashCode()}";
             return key;
         }
 
