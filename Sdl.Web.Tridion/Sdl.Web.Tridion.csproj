@@ -13,7 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SdlDxaDataModelPackageVersion>2.2.0</SdlDxaDataModelPackageVersion>
-    <SdlPCAPackageVersion>2.2.2</SdlPCAPackageVersion>
+    <SdlPCAPackageVersion>2.2.3</SdlPCAPackageVersion>
     <SdlWebDeliveryPackageVersion>12.0.1197</SdlWebDeliveryPackageVersion>
     <SdlWebContextClientPackageVersion>12.0.1197</SdlWebContextClientPackageVersion>
     <SdlWebContextImagePackageVersion>12.0.1197</SdlWebContextImagePackageVersion>
