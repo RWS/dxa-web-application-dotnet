@@ -5,28 +5,29 @@
         <!-- Version is set by ciBuild.proj -->
         <version>0.0.0</version>
         <!-- NOTE: Visual Studio's NuGet UI only shows 'id' and 'description' -->
-        <title>DD4T Provider for SDL Digital eXperience Accelerator Model Service</title>
-        <authors>SDL Group</authors>
-        <projectUrl>https://github.com/sdl/dxa-web-application-dotnet</projectUrl>
+        <title>DD4T Provider for RWS Digital eXperience Accelerator Model Service</title>
+        <authors>RWS Group</authors>
+        <projectUrl>https://github.com/rws/dxa-web-application-dotnet</projectUrl>
         <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
-        <iconUrl>http://dr0muzwhcp26z.cloudfront.net/static/corporate/SDL-logo-2014.png</iconUrl>
+        <icon>content\images\rws-logo-128.png</icon>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>DD4T Provider for SDL Digital eXperience Accelerator Model Service</description>
-        <copyright>Copyright 2015-2019 SDL Group</copyright>
-        <tags>SDL DD4T DXA Model Service Provider</tags>
+        <description>DD4T Provider for RWS Digital eXperience Accelerator Model Service</description>
+        <copyright>Copyright 2015-2024 RWS Group</copyright>
+        <tags>RWS DD4T DXA Model Service Provider</tags>
         <references>
             <reference file="DD4T.Providers.DxaModelService.dll" />
             <reference file="Sdl.Web.ModelService.dll" />
         </references>
         <dependencies>
-            <dependency id="Sdl.Web.Delivery" version="11.0.11022" />
-            <dependency id="Newtonsoft.Json" version="11.0.2" />
+            <dependency id="Sdl.Web.Delivery" version="12.0.1197" />
+            <dependency id="Newtonsoft.Json" version="13.0.3" />
             <dependency id="DD4T.Core" version="2.2.2" />
             <dependency id="DD4T.Model" version="2.2.2" />
         </dependencies>
     </metadata>
     <files>
-        <file src="..\DD4T\build\bin\DD4T.Providers.DxaModelService.dll" target="lib\net462" />
-        <file src="..\Sdl.Web.ModelService\bin\Release\Sdl.Web.ModelService.dll" target="lib\net462" />
+        <file src="..\DD4T\build\bin\DD4T.Providers.DxaModelService.dll" target="lib\net48" />
+        <file src="..\Sdl.Web.ModelService\bin\Release\Sdl.Web.ModelService.dll" target="lib\net48" />
+		<file src="rws-logo-128.png" target="content\images" />
     </files>
 </package>

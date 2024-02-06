@@ -5,15 +5,15 @@
         <!-- Version is set by ciBuild.proj -->
         <version>0.0.0</version>
         <!-- NOTE: Visual Studio's NuGet UI only shows 'id' and 'description' -->
-        <title>SDL Digital eXperience Accelerator Framework for SDL Web 8</title>
-        <authors>SDL Group</authors>
-        <projectUrl>https://github.com/sdl/dxa-web-application-dotnet</projectUrl>
+        <title>RWS Digital eXperience Accelerator Framework for RWS Tridion Sites</title>
+        <authors>RWS Group</authors>
+        <projectUrl>https://github.com/rws/dxa-web-application-dotnet</projectUrl>
         <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
-        <iconUrl>http://dr0muzwhcp26z.cloudfront.net/static/corporate/SDL-logo-2014.png</iconUrl>
+        <icon>content\images\rws-logo-128.png</icon>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>SDL Digital eXperience Accelerator Framework for SDL Web 8.</description>
-        <copyright>Copyright 2015-2016 SDL Group</copyright>
-        <tags>SDL DXA Web8</tags>
+        <description>RWS Digital eXperience Accelerator Framework for RWS Tridion Sites.</description>
+        <copyright>Copyright 2015-2024 RWS Group</copyright>
+        <tags>RWS DXA Web8 Sites9 Sites10</tags>
         <references>
             <!-- These assemblies form the DXA public API -->
             <reference file="Sdl.Web.Mvc.dll" />
@@ -21,21 +21,22 @@
         </references>
         <dependencies>
             <!-- NOTE: We don't use package dependencies for everything, because we don't want direct references to transitive dependencies and the explicit reference above don't control those.-->
-            <dependency id="NLog" version="4.7.4" />
-            <dependency id="Newtonsoft.Json" version="11.0.2" />
-            <dependency id="Sdl.Web.Delivery" version="11.0.11022" />
-            <dependency id="Sdl.Web.Context.Image" version="11.0.0" />
-            <dependency id="Sdl.Web.Context.Client" version="11.0.0" />
-            <dependency id="Sdl.Tridion.Api.Client" version="2.2.2" />
+            <dependency id="NLog" version="5.2.7" />
+            <dependency id="Newtonsoft.Json" version="13.0.3" />
+            <dependency id="Sdl.Web.Delivery" version="12.0.1197" />
+            <dependency id="Sdl.Web.Context.Image" version="12.0.1197" />
+            <dependency id="Sdl.Web.Context.Client" version="12.0.1197" />
+            <dependency id="Sdl.Tridion.Api.Client" version="2.2.3" />
         </dependencies>
     </metadata>
     <files>
         <!-- NOTE: We're excluding assemblies which come from dependent packages -->
-        <file src="..\..\Sdl.Web.Tridion\bin\Release\*.dll;..\..\Sdl.Web.Tridion\bin\Release\*.pdb" exclude="**\Sdl.Web.Delivery*.dll;**\Sdl.Web.Context*.dll;**\Tridion.ContentDelivery*.dll;**\Microsoft.*.dll;**\System.Spatial.dll;**\System.Web*.dll;**\NLog.dll;**\Sdl.Tridion.Api.Client.dll;**\Newtonsoft.Json.dll" target="lib\net462" />
+        <file src="..\..\Sdl.Web.Tridion\bin\Release\*.dll;..\..\Sdl.Web.Tridion\bin\Release\*.pdb" exclude="**\Sdl.Web.Delivery*.dll;**\Sdl.Web.Context*.dll;**\Tridion.ContentDelivery*.dll;**\Microsoft.*.dll;**\System.Spatial.dll;**\System.Web*.dll;**\NLog.dll;**\Sdl.Tridion.Api.Client.dll;**\Newtonsoft.Json.dll" target="lib\net48" />
     
-        <file src="Sdl.Dxa.Framework.Web8.targets" target="build\net462" />
-        <file src="..\..\Sdl.Web.Tridion\bin\Release\Sdl.Web.Common.xml" target="lib\net462" />
-        <file src="..\..\Sdl.Web.Tridion\bin\Release\Sdl.Web.Mvc.xml" target="lib\net462" />
-        <file src="..\..\Sdl.Web.Tridion\bin\Release\Sdl.Web.Tridion.xml" target="lib\net462" />
+        <file src="Sdl.Dxa.Framework.Web8.targets" target="build\net48" />
+        <file src="..\..\Sdl.Web.Tridion\bin\Release\Sdl.Web.Common.xml" target="lib\net48" />
+        <file src="..\..\Sdl.Web.Tridion\bin\Release\Sdl.Web.Mvc.xml" target="lib\net48" />
+        <file src="..\..\Sdl.Web.Tridion\bin\Release\Sdl.Web.Tridion.xml" target="lib\net48" />
+        <file src="rws-logo-128.png" target="content\images" />
     </files>
 </package>
