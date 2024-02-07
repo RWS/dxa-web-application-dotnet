@@ -9,7 +9,7 @@
         <authors>RWS Group</authors>
         <projectUrl>https://github.com/rws/dxa-web-application-dotnet</projectUrl>
         <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
-        <icon>content\images\rws-logo-128.png</icon>
+        <icon>images\rws-logo-128.png</icon>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>DD4T Provider for RWS Digital eXperience Accelerator Model Service</description>
         <copyright>Copyright 2015-2024 RWS Group</copyright>
@@ -28,6 +28,6 @@
     <files>
         <file src="..\DD4T\build\bin\DD4T.Providers.DxaModelService.dll" target="lib\net48" />
         <file src="..\Sdl.Web.ModelService\bin\Release\Sdl.Web.ModelService.dll" target="lib\net48" />
-		<file src="rws-logo-128.png" target="content\images" />
+		<file src="..\rws-logo-128.png" target="images\" />
     </files>
 </package>
