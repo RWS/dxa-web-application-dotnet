@@ -13,7 +13,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>DD4T Provider for RWS Digital eXperience Accelerator Model Service</description>
         <copyright>Copyright 2015-2024 RWS Group</copyright>
-        <tags>RWS DD4T DXA Model Service Provider</tags>
+        <tags>SDL RWS DD4T DXA Model Service Provider</tags>
         <references>
             <reference file="DD4T.Providers.DxaModelService.dll" />
             <reference file="Sdl.Web.ModelService.dll" />

@@ -13,7 +13,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>RWS Digital eXperience Accelerator Framework for RWS Tridion Sites.</description>
         <copyright>Copyright 2015-2024 RWS Group</copyright>
-        <tags>RWS DXA Web8 Sites9 Sites10</tags>
+        <tags>SDL RWS DXA Sites9.1 Sites9.5 Sites9.6 Sites10</tags>
         <references>
             <!-- These assemblies form the DXA public API -->
             <reference file="Sdl.Web.Mvc.dll" />
