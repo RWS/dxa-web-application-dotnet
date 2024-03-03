@@ -94,7 +94,7 @@
         <Message Importance="high" Text="Creating NuGet packages in '$(NuGetPackageDirectory)' ..."/>
         <Message Text="Package Version: $(PackageVersion)"/>
         <!--Versionize the path to DXA Framework libs in the {package_id}.targets files -->
-        <XmlPoke Namespaces="&lt;Namespace Prefix='msb' Uri='http://schemas.microsoft.com/developer/msbuild/2003' /&gt;" Query="//msb:DxaFrameworkLibs/@Include" Value="..\packages\Sdl.Dxa.Framework.Web8.$(PackageVersion)\lib\net462\*.*" XmlInputPath="$(DxaFrameworkPackageDirectory)\Sdl.Dxa.Framework.Web8.targets"/>
+        <XmlPoke Namespaces="&lt;Namespace Prefix='msb' Uri='http://schemas.microsoft.com/developer/msbuild/2003' /&gt;" Query="//msb:DxaFrameworkLibs/@Include" Value="..\packages\Sdl.Dxa.Framework.Web8.$(PackageVersion)\lib\net48\*.*" XmlInputPath="$(DxaFrameworkPackageDirectory)\Sdl.Dxa.Framework.Web8.targets"/>
         <!-- Create nuget package for Dxa framework -->
         <Exec Command="$(NuGet) pack Sdl.Dxa.Framework.Web8.nuspec -Version $(PackageVersion)" WorkingDirectory="$(DxaFrameworkPackageDirectory)"/>
         <!-- Create nuget package for DD4T DxaModelService provider -->
