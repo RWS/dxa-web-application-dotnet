@@ -98,32 +98,23 @@ namespace Sdl.Web.Mvc.Html
         /// </summary>
         /// <param name="entityModel">The Entity Model.</param>
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
+        /// // Modified for xmp lite
         internal static MvcHtmlString RenderEntityAttributes(EntityModel entityModel)
-        {
+        { 
             string markup = string.Empty;
-
-            IDictionary<string, string> prefixMappings;
-            string[] semanticTypes = ModelTypeRegistry.GetSemanticTypes(entityModel.GetType(), out prefixMappings);
-            if (semanticTypes.Any())
+            if (entityModel != null && entityModel.XpmMetadata != null)
             {
-                markup =
-                    $"prefix=\"{string.Join(" ", prefixMappings.Select(pm => $"{pm.Key}: {pm.Value}"))}\" typeof=\"{string.Join(" ", semanticTypes)}\"";
-            }
-
-            if (WebRequestContext.Localization.IsXpmEnabled)
-            {
-                string xpmMarkupAttr = RenderXpmMarkupAttribute(entityModel);
-                if (string.IsNullOrEmpty(markup))
+                foreach (var key in entityModel.XpmMetadata)
                 {
-                    markup = xpmMarkupAttr;
-                }
-                else
-                {
-                    markup += " " + xpmMarkupAttr;
+                    if (key.Key == "ComponentID")
+                    {
+                        var componentID = entityModel.XpmMetadata[key.Key];
+                        markup = string.Format("data-component-id=\"{0}\"", componentID);
+                        break;
+                    }
                 }
             }
-
-            return new MvcHtmlString(markup);
+            return new MvcHtmlString(markup); 
         }
 
         /// <summary>
@@ -185,43 +176,6 @@ namespace Sdl.Web.Mvc.Html
         {
             // TODO: "Region" is not a valid semantic type!
             string markup = $"typeof=\"{"Region"}\" data-region=\"{regionModel.Name}\"";
-            return new MvcHtmlString(markup);
-        }
-
-        internal static MvcHtmlString DxaEntityGetComponentID(EntityModel entityModel)
-        {
-            string markup = string.Empty;
-            if (entityModel != null && entityModel.XpmMetadata != null)
-            {
-                foreach (var key in entityModel.XpmMetadata)
-                {
-                    if (key.Key == "ComponentID")
-                    {
-                        var componentID = entityModel.XpmMetadata[key.Key];
-                        markup = string.Format("data-component-id=\"{0}\"", componentID);
-                        break;
-                    }
-                }
-            }
-            return new MvcHtmlString(markup);
-        }
-
-        internal static MvcHtmlString DxaGetPageID(PageModel entityModel)
-        {
-            string markup = string.Empty;
-
-            if (entityModel != null && entityModel.XpmMetadata != null)
-            {
-                foreach (var key in entityModel.XpmMetadata)
-                {
-                    if (key.Key == "PageID")
-                    {
-                        var pageID = entityModel.XpmMetadata[key.Key];
-                        markup = string.Format("data-page-id=\"{0}\"", pageID);
-                        break;
-                    }
-                }
-            }
             return new MvcHtmlString(markup);
         }
 

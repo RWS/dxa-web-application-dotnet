@@ -461,6 +461,9 @@ namespace Sdl.Web.Mvc.Html
         public static MvcHtmlString DxaEntityMarkup(this HtmlHelper htmlHelper) 
             => htmlHelper.DxaEntityMarkup((EntityModel)htmlHelper.ViewData.Model);
 
+         
+
+
         /// <summary>
         /// Generates semantic markup (HTML/RDFa attributes) for a given Entity Model.
         /// </summary>
@@ -541,21 +544,6 @@ namespace Sdl.Web.Mvc.Html
 
             return Markup.RenderPropertyAttributes(entityModel, memberExpression.Member, index);
         }
-
-
-        // Method for XPM Lite DxaEntityGetComponentID
-        public static MvcHtmlString DxaEntityGetComponentID(this HtmlHelper htmlHelper)
-        {
-            return Markup.DxaEntityGetComponentID((EntityModel)htmlHelper.ViewData.Model);
-        }
-
-
-        // Method for XPM Lite DxaGetPageID
-        public static MvcHtmlString DxaGetPageID(this HtmlHelper htmlHelper)
-        {
-            return Markup.DxaGetPageID((PageModel)htmlHelper.ViewData.Model);
-        }
-
         #endregion
 
         /// <summary>
