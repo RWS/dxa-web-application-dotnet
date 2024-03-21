@@ -154,25 +154,22 @@ namespace Sdl.Web.Mvc.Html
         /// <returns>The semantic markup (HTML/RDFa attributes).</returns>
         internal static MvcHtmlString RenderPropertyAttributes(EntityModel entityModel, MemberInfo propertyInfo, int index = 0)
         {
+            // Method for XPM Lite
             string markup = string.Empty;
             string propertyName = propertyInfo.Name;
-
-            string[] semanticPropertyNames = ModelTypeRegistry.GetSemanticPropertyNames(propertyInfo.DeclaringType, propertyName);
-            if (semanticPropertyNames != null && semanticPropertyNames.Any())
+            if (entityModel.XpmPropertyMetadata != null)
             {
-                markup = $"property=\"{string.Join(" ", semanticPropertyNames)}\"";
-            }
-
-            if (WebRequestContext.Localization.IsXpmEnabled)
-            {
-                string xpmMarkupAttr = RenderXpmMarkupAttribute(entityModel, propertyName, index);
-                if (string.IsNullOrEmpty(markup))
+                foreach (KeyValuePair<string, string> key in entityModel.XpmPropertyMetadata)
                 {
-                    markup = xpmMarkupAttr;
-                }
-                else
-                {
-                    markup += " " + xpmMarkupAttr;
+                    if (propertyName == key.Key)
+                    {
+                        int indexOfLastColon = key.Value.LastIndexOf(':');
+                        var value = key.Value;
+                        var customFieldName = value.Substring(indexOfLastColon + 1);
+                        string.Format("data-fieldname=\"{0}\" data-index=\"{1}\"", customFieldName, index);
+                        markup = string.Format("data-fieldname=\"{0}\" data-index=\"{1}\"", customFieldName, index);
+                        break;
+                    }
                 }
             }
 
@@ -187,13 +184,44 @@ namespace Sdl.Web.Mvc.Html
         internal static MvcHtmlString RenderRegionAttributes(RegionModel regionModel)
         {
             // TODO: "Region" is not a valid semantic type!
-            string markup = $"typeof=\"{"Region"}\" resource=\"{regionModel.Name}\"";
+            string markup = $"typeof=\"{"Region"}\" data-region=\"{regionModel.Name}\"";
+            return new MvcHtmlString(markup);
+        }
 
-            if (WebRequestContext.Localization.IsXpmEnabled)
+        internal static MvcHtmlString DxaEntityGetComponentID(EntityModel entityModel)
+        {
+            string markup = string.Empty;
+            if (entityModel != null && entityModel.XpmMetadata != null)
             {
-                markup += " " + RenderXpmMarkupAttribute(regionModel);
+                foreach (var key in entityModel.XpmMetadata)
+                {
+                    if (key.Key == "ComponentID")
+                    {
+                        var componentID = entityModel.XpmMetadata[key.Key];
+                        markup = string.Format("data-component-id=\"{0}\"", componentID);
+                        break;
+                    }
+                }
             }
+            return new MvcHtmlString(markup);
+        }
 
+        internal static MvcHtmlString DxaGetPageID(PageModel entityModel)
+        {
+            string markup = string.Empty;
+
+            if (entityModel != null && entityModel.XpmMetadata != null)
+            {
+                foreach (var key in entityModel.XpmMetadata)
+                {
+                    if (key.Key == "PageID")
+                    {
+                        var pageID = entityModel.XpmMetadata[key.Key];
+                        markup = string.Format("data-page-id=\"{0}\"", pageID);
+                        break;
+                    }
+                }
+            }
             return new MvcHtmlString(markup);
         }
 

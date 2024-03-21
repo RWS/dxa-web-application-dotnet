@@ -541,6 +541,21 @@ namespace Sdl.Web.Mvc.Html
 
             return Markup.RenderPropertyAttributes(entityModel, memberExpression.Member, index);
         }
+
+
+        // Method for XPM Lite DxaEntityGetComponentID
+        public static MvcHtmlString DxaEntityGetComponentID(this HtmlHelper htmlHelper)
+        {
+            return Markup.DxaEntityGetComponentID((EntityModel)htmlHelper.ViewData.Model);
+        }
+
+
+        // Method for XPM Lite DxaGetPageID
+        public static MvcHtmlString DxaGetPageID(this HtmlHelper htmlHelper)
+        {
+            return Markup.DxaGetPageID((PageModel)htmlHelper.ViewData.Model);
+        }
+
         #endregion
 
         /// <summary>
