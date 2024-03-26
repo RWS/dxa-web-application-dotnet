@@ -4,30 +4,51 @@
 <!--[if IE 7]><html class="no-js lt-ie9 lt-ie8"><![endif]-->
 <!--[if IE 8]><html class="no-js lt-ie9"><![endif]-->
 <!--[if gt IE 8]><!--><html class="no-js"><!--<![endif]-->
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@Model.Title</title>
-    @foreach (var meta in Model.Meta)
-    {
-        <meta name="@meta.Key" content="@meta.Value">
-    }
-    <link rel="stylesheet" href="@Url.VersionedContent("/assets/css/main.css")">
-    <script src="@Url.VersionedContent("/assets/scripts/header.js")"></script>
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="@Url.VersionedContent("/assets/scripts/ie.js")"></script>
-    <![endif]-->
-</head>
-<body>
-    @RenderBody()
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>@Model.Title</title>
+        @foreach (var meta in Model.Meta)
+        {
+            <meta name="@meta.Key" content="@meta.Value">
+        }
+        <link rel="stylesheet" href="@Url.VersionedContent("/assets/css/main.css")">
+        <link rel="stylesheet" href="/content/xpmlite/css/xpmlite.css">
+        <link rel="stylesheet" href="/content/xpmlite/css/index-DUJwha_e.css">
+        <script src="@Url.VersionedContent("/assets/scripts/header.js")"></script>
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+<script src="@Url.VersionedContent("/assets/scripts/ie.js")"></script>
+<![endif]-->
+    </head>
+    <body>
+        @RenderBody()
+        <div class="page-loader" style="display: none;">
+            <div class="loader">Loading...</div>
+        </div>
+        <div id="root"></div>
+        <script src="@Url.VersionedContent("/assets/scripts/main.js")"></script>
+        @if (WebRequestContext.Localization.IsXpmEnabled)
+        {
+            <script type="text/javascript">
+function getConfig(){
+const config = {
+client_id:'@System.Configuration.ConfigurationManager.AppSettings["client_id"]',
+openapi_baseurl : '@System.Configuration.ConfigurationManager.AppSettings["openapi_baseurl"]',
+authorization_baseurl : '@System.Configuration.ConfigurationManager.AppSettings["authorization_baseurl"]',
+home_structuregroup_tcmid : '@System.Configuration.ConfigurationManager.AppSettings["home_structuregroup_tcmid"]',
+pagetypes_tcmid:'@System.Configuration.ConfigurationManager.AppSettings["pagetypes_tcmid"]',
+contentServiceUrl:'@System.Configuration.ConfigurationManager.AppSettings["contentServiceUrl"]',
+}
+return config;
+}
+            </script>
+            <script src="https://cdn.tiny.cloud/1/8g1oxvrxgbbxlc6m8zzkfzq6js2uyrn04b6hg640ti8b8jq5/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+            <script type="text/javascript" src="/content/xpmlite/js/auth.js"></script>
+            <script type="text/javascript" src="/content/xpmlite/js/xpmlite.js"></script>
+            <script type="text/javascript" src="/content/xpmlite/js/index-DvtBH0IH.js"></script>
+        }
 
-    <script src="@Url.VersionedContent("/assets/scripts/main.js")"></script>
-    @if (WebRequestContext.IsPreview)
-    {
-        <script src="@Url.VersionedContent("/assets/scripts/xpm.js")"></script>
-    }
-    @Html.DxaPageMarkup()
-</body>
+    </body>
 </html>

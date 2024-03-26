@@ -93,6 +93,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Sdl.Web.Delivery.$(SdlWebDeliveryPackageVersion)\lib\net48\Sdl.Web.Delivery.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Sdl.Web.Modules.Core">
+      <HintPath>..\ReferenceDlls\Sdl.Web.Modules.Core.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Spatial">
@@ -169,6 +172,25 @@
     <Compile Include="..\CommonAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="bin\config\cd_ambient_conf.xml" />
+    <Content Include="content\xpmlite\css\index-DUJwha_e.css" />
+    <Content Include="content\xpmlite\css\xpmlite.css" />
+    <Content Include="content\xpmlite\img\Accordian-BjaKMkfd.jpg" />
+    <Content Include="content\xpmlite\img\Articles-BgFycumw.jpg" />
+    <Content Include="content\xpmlite\img\Details Page-CnnegwBC.png" />
+    <Content Include="content\xpmlite\img\dynamic-Bn2xp9ZR.jpg" />
+    <Content Include="content\xpmlite\img\gallery-DOOgWwhd.jpg" />
+    <Content Include="content\xpmlite\img\location-DEGYUjI5.jpg" />
+    <Content Include="content\xpmlite\img\News-CUPW7Led.jpg" />
+    <Content Include="content\xpmlite\img\Offerings Campaign-Bhq28X5g.png" />
+    <Content Include="content\xpmlite\img\ProductsPage-zOSsXWQw.png" />
+    <Content Include="content\xpmlite\img\section-carousel-Cwe2gfLo.jpg" />
+    <Content Include="content\xpmlite\img\section-Cr3EHI0u.jpg" />
+    <Content Include="content\xpmlite\img\tabbed-BIi2HMCt.jpg" />
+    <Content Include="content\xpmlite\img\template-CfLa2DPC.png" />
+    <Content Include="content\xpmlite\js\auth.js" />
+    <Content Include="content\xpmlite\js\index-DvtBH0IH.js" />
+    <Content Include="content\xpmlite\js\xpmlite.js" />
     <Content Include="device-families.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -213,6 +235,75 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="NLog.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Areas\Core\Views\Entity\Accordion.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Article.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Article.featurephone.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Article.smartphone.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Article.tablet.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Carousel.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\CookieNotificationBar.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Download.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\EntityError.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\FooterLinkGroup.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\FooterLinks.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\HeaderLinks.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\HeaderLogo.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Image.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\LanguageSelector.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\OldBrowserNotificationBar.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Partials\GoogleMap.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Partials\GoogleStaticMap.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Partials\Teaser-ImageOverlay.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Partials\Teaser.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Place.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\SocialLinks.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\SocialSharing.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Tab.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Teaser-ImageOverlay.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\Teaser.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\TeaserColored.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\TeaserHero-ImageOverlay.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\TeaserMap.cshtml" />
+    <Content Include="Areas\Core\Views\Entity\YouTubeVideo.cshtml" />
+    <Content Include="Areas\Core\Views\List\List.cshtml" />
+    <Content Include="Areas\Core\Views\List\PagedList.cshtml" />
+    <Content Include="Areas\Core\Views\List\Partials\Pager.cshtml" />
+    <Content Include="Areas\Core\Views\List\ThumbnailList.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\Breadcrumb.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\LeftNavigation.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\SiteMap.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\SiteMapXml.cshtml" />
+    <Content Include="Areas\Core\Views\Navigation\TopNavigation.cshtml" />
+    <Content Include="Areas\Core\Views\Page\GeneralPage.cshtml" />
+    <Content Include="Areas\Core\Views\Page\GeneralPage.featurephone.cshtml" />
+    <Content Include="Areas\Core\Views\Page\GeneralPage.smartphone.cshtml" />
+    <Content Include="Areas\Core\Views\Page\GeneralPage.tablet.cshtml" />
+    <Content Include="Areas\Core\Views\Page\IncludePage.cshtml" />
+    <Content Include="Areas\Core\Views\Page\RedirectPage.cshtml" />
+    <Content Include="Areas\Core\Views\Page\_ViewStart.cshtml" />
+    <Content Include="Areas\Core\Views\Region\2-Column.cshtml" />
+    <Content Include="Areas\Core\Views\Region\3-Column.cshtml" />
+    <Content Include="Areas\Core\Views\Region\4-Column.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Additional.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Article.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Content Tools.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Content.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Footer.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Header.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Hero.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Info.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Left Navigation.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Left.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Links.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Logo.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Main Section.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Main.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Multi-Column.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Nav.cshtml" />
+    <Content Include="Areas\Core\Views\Region\Tools.cshtml" />
+    <Content Include="Areas\Core\Views\web.config" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

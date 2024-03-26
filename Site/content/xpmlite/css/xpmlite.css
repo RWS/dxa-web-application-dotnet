@@ -1,0 +1,147 @@
+/* XPM Lite */
+
+[data-fieldname]:hover {
+    border: 2px solid #008800 !important;
+    transition: all 0.5s;
+  }
+  
+  [data-fieldname]:after {
+    content: " ";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    right: 0px;
+    top: 0px;
+    opacity: 0;
+  }
+  
+  [data-fieldname]:hover::after {
+    opacity: 1;
+    transition: all 0.5s;
+  }
+  #tridion-bar {
+    background-color: #007373 !important;
+    font-size: large !important;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    display: flex;
+    align-items: center;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1030;
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+  #tridion-bar span {
+    font-variant: small-caps;
+    font-weight: normal;
+  }
+  .bg-dark{
+    color: #fff;
+  }
+  #tridion-bar button, #tridion-bar-comment button {
+    transition: background-color 0.2s ease 0s, color 0.2s ease 0s, opacity 0.2s ease 0s;
+    border: 1px solid #fcfdfd;
+    border-radius: 2px;
+    min-width: 70px;
+    padding: 0px 3px;
+    height: 22px;
+    background-color: rgb(227, 230, 235);
+    color: #211a1c;
+    box-sizing: border-box;
+    margin: 0px;
+    margin-block: 0px;
+    margin-inline: 4px;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    font-family: Calibri, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    line-height: 1.5;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    user-select: none;
+    word-break: normal;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .page-loader {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #fefefe;
+    z-index: 100000;
+  }
+  .loader {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -25px 0 0 -25px;
+    font-size: 10px;
+    text-indent: -12345px;
+    border-top: 1px solid rgba(0,0,0, 0.15);
+    border-right: 1px solid rgba(0,0,0, 0.15);
+    border-bottom: 1px solid rgba(0,0,0, 0.15);
+    border-left: 1px solid rgba(0,0,0, .55);
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    -webkit-animation: spinner 700ms infinite linear;
+    -moz-animation: spinner 700ms infinite linear;
+    -ms-animation: spinner 700ms infinite linear;
+    -o-animation: spinner 700ms infinite linear;
+    animation: spinner 700ms infinite linear;
+    will-change: transform;
+    z-index: 100001;
+  }
+  @-webkit-keyframes spinner {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+  
+    100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+    }
+  
+    @-moz-keyframes spinner {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+  
+    100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+    }
+  
+    @keyframes spinner {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+  
+    100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+    }
+  
+    .disabledEditor[data-fieldname]{
+      border:none !important;
+    }
