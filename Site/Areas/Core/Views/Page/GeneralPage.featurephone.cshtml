@@ -1,0 +1,26 @@
+﻿@model PageModel
+@{
+    bool hasLeftBar = Model.Regions.ContainsKey("Left Navigation") || Model.Regions.ContainsKey("Left");
+    int mainContainerSize = hasLeftBar ? 9 : 12;
+}
+@Html.DxaRegion("Header")
+<main class="page-row page-row-expanded @Model.HtmlClasses" role="main">
+    <!-- featurephone view -->  
+    <div class="container-fluid page-border">
+        @Html.DxaRegion("Hero")
+        @Html.DxaRegion("Content Tools")
+        <div class="row">
+            @if (hasLeftBar)
+            {
+                <div class="col-sm-12 col-md-3">
+                    @Html.DxaRegion("Left Navigation", containerSize: 3)
+                    @Html.DxaRegion("Left", containerSize: 3)
+                </div>
+            }
+            <div class="col-sm-12 col-md-@(mainContainerSize)">
+                @Html.DxaRegions(exclude: "Header,Footer,Hero,Content Tools,Left Navigation,Left", containerSize: mainContainerSize)
+            </div>
+        </div>
+    </div>
+</main>
+@Html.DxaRegion("Footer")

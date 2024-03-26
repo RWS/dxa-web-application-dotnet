@@ -1,0 +1,28 @@
+﻿@model Location
+@{
+    var queryString = WebRequestContext.Localization.GetConfigValue("core.mapsApiKey");
+    if (String.IsNullOrEmpty(queryString) || queryString=="xxx")
+    {
+        queryString = "";
+    }
+    else
+    {
+        queryString = String.Format("?key={0}", queryString);
+    }
+    var divId = SiteConfiguration.GetUniqueId("map");
+    var name = (ViewData["MarkerName"] ?? "").ToString();
+    var heightString = (ViewData["MapHeight"] ?? "300px").ToString();
+    var lat = Model.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    var lng = Model.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+}
+<div id="@divId" class="map-canvas" style="height:@heightString"></div>
+<script src="//maps.googleapis.com/maps/api/js@(queryString)"></script>
+<script>
+    function initialize() {
+        var myLatlng = new google.maps.LatLng(@lat, @lng);
+        var mapOptions = { center: myLatlng, zoom: 15 };
+        var map = new google.maps.Map(document.getElementById("@divId"), mapOptions);
+        var marker = new google.maps.Marker({ position: myLatlng, map: map, title: "@name" });
+    }
+    google.maps.event.addDomListener(window, "load", initialize);
+</script>

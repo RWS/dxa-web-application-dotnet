@@ -1,0 +1,25 @@
+﻿@model Location
+@{
+    var queryString = WebRequestContext.Localization.GetConfigValue("core.mapsApiKey");
+    if (String.IsNullOrEmpty(queryString) || queryString=="xxx")
+    {
+        queryString = "";
+    }
+    else
+    {
+        queryString = String.Format("&key={0}", queryString);
+    }
+    var divId = SiteConfiguration.GetUniqueId("map");
+    var name = (ViewData["MarkerName"] ?? "").ToString();
+    var lat = Model.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    var lng = Model.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    var marker = String.Format("&markers={0},{1}", lat, lng);
+    var heightString = (ViewData["MapHeight"] ?? "160").ToString();
+    // TODO: set widthString based on aspect ratio rather than reading from viewdata (which is just hardcoded)
+    var widthString = (ViewData["MapWidth"] ?? "311").ToString();
+    // TODO: set scale of static map for high resolution screens
+    queryString = String.Format("?center={0},{1}&zoom=15&size={2}x{3}{4}{5}", lat, lng, widthString, heightString, marker, queryString);
+}
+<div id="@divId" class="static-map" style="height:@heightString">
+    <img src="//maps.googleapis.com/maps/api/staticmap@(queryString)" alt="@name">
+</div>

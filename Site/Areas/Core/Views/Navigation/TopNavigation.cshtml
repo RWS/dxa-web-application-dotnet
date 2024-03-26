@@ -1,0 +1,18 @@
+﻿@model NavigationLinks
+<ul class="nav navbar-nav main-nav" @Html.DxaEntityMarkup()>
+    @foreach (Link item in Model.Items)
+    {
+        string linkUrl = item.Url;
+        if (Model.Items.Any(link => link.Url.StartsWith(linkUrl) && link.Url.Length > linkUrl.Length))
+        {
+            // Current link URL is part of another. This implies it's an index page. Expand the URL to prevent multiple 'active' links below.
+            if (!linkUrl.EndsWith("/")) { linkUrl += "/"; }
+            linkUrl = @Url.NormalizePageUrlPath(linkUrl);
+        }
+        string requestUrl = @Url.NormalizePageUrlPath(Request.Url.LocalPath);
+        string cssClass = requestUrl.StartsWith(linkUrl) ? "active" : string.Empty;
+        <li class="@cssClass">
+            <a href="@linkUrl" title="@item.AlternateText">@item.LinkText</a>
+        </li>
+    }
+</ul>

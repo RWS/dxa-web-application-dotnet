@@ -1,0 +1,64 @@
+﻿@model ItemList
+@helper TabId(int index)
+{
+    @(Model.Id + "_" + index)
+}
+<article class="rich-text @Model.HtmlClasses" @Html.DxaEntityMarkup()>
+    <div class="content">
+        @if (Model.Headline != null)
+        {
+            <h1 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
+        }
+        @if (Model.ItemListElements.Count > 0)
+        {
+            <div class="panel panel-default">
+                <div class="panel-body tab-container">
+                    <!-- Tab dropdown -->
+                    <div class="dropdown visible-xs">
+                        <select class="tab-group form-control" data-toggle="tab">
+                            @{ int i = 0; }
+                            @foreach (Teaser element in Model.ItemListElements)
+                            {
+                                <option value="#@TabId(i++)" data-toggle="tab">@element.Headline</option>
+                            }
+                        </select>
+                    </div>
+                    <!-- Tab tips -->
+                    <ul class="tab-group nav nav-tabs hidden-xs">
+                        @{ i = 0; }
+                        @foreach (Teaser element in Model.ItemListElements)
+                        {
+                            <li class="@(i==0 ? "active" : String.Empty)">
+                                <a href="#@TabId(i++)" data-toggle="tab" @Html.DxaPropertyMarkup(() => element.Headline)>@element.Headline</a>
+                            </li>
+                        }
+                    </ul>
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        @{ i = 0; }
+                        @foreach (Teaser element in Model.ItemListElements)
+                        {
+                            <div class="tab-pane @(i==0 ? "active" : String.Empty)" id="@TabId(i)" @Html.DxaPropertyMarkup(() => Model.ItemListElements, i++)>
+                                <div @Html.DxaPropertyMarkup(() => element.Text)>
+                                    @Html.DxaRichText(element.Text)
+                                </div>
+                                @if (element.Media != null)
+                                {
+                                    <figure @Html.DxaPropertyMarkup(() => element.Media)>
+                                        @Html.Media(element.Media)
+                                    </figure>
+                                }
+                                @if (element.Link.IsValidLink())
+                                {
+                                    <p @Html.DxaPropertyMarkup(() => element.Link)>
+                                        <a href="@element.Link.Url" title="@element.Link.AlternateText" class="btn btn-primary">@(element.Link.LinkText ?? Html.Resource("core.readMoreLinkText"))</a>
+                                    </p>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</article>

@@ -6,7 +6,6 @@ packages/
 .vs/
 TestResults/
 CoverageReports/
-Site/Areas/
 *.user
 *.suo
 *.vspx

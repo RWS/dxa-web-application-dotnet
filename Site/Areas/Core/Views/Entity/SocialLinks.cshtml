@@ -1,0 +1,13 @@
+﻿@model LinkList<TagLink>
+@{
+    int i = 0;
+}
+<div class="icon-list @Model.HtmlClasses" @Html.DxaEntityMarkup()>
+    @foreach (var link in Model.Links)
+    {
+        <a href="@link.Url" class="fa-stack fa-lg" title="@Html.FormatResource("core.visitUsSocialLinkTitle",link.Tag.DisplayText)" @Html.DxaPropertyMarkup(() => Model.Links, i++)>
+            <i class="fa fa-circle fa-stack-2x"></i>
+            <i class="fa fa-@link.Tag.Key fa-stack-1x"></i>
+        </a>
+    }
+</div>

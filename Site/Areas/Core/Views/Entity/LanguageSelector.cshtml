@@ -1,0 +1,38 @@
+﻿@using System.Collections.Generic
+@using Sdl.Web.Common.Configuration
+@model Configuration
+@{
+    var siteLocalizations = WebRequestContext.Localization.SiteLocalizations;
+    var filteredLocalizations = new List<Localization>();
+    if (siteLocalizations.Count > 1)
+    {
+        var excludedLocalizations = new List<string>();
+        if (Model.Settings.ContainsKey("suppressLocalizations"))
+        {
+            excludedLocalizations = Model.Settings["suppressLocalizations"].Split(',').Select(l => ("/" + l.Trim())).ToList();
+        }
+
+        filteredLocalizations.AddRange(siteLocalizations.Where(siteLoc => !excludedLocalizations.Contains(siteLoc.Path)).Select(s=>s));
+    }
+    var redirectId = "0";
+    if (WebRequestContext.PageModel != null && !string.IsNullOrEmpty(WebRequestContext.PageModel.Id))
+    {
+        redirectId = WebRequestContext.PageModel.Id;
+    }
+    var defaultItem = Model.Settings.ContainsKey("defaultContentLink") ? Model.Settings["defaultContentLink"] : null;
+}
+@if (redirectId != null && filteredLocalizations.Count > 1)
+{
+    <div class="@Model.HtmlClasses" @Html.DxaEntityMarkup()>
+        <select class="selectpicker" data-width="auto">
+            @foreach (var loc in filteredLocalizations)
+            {
+                var parms = "localizationId=" + loc.Id + (defaultItem != null ? "&defaultItem=" + defaultItem : "");
+                parms += "&defaultPath=" + loc.Path;
+                <option value="@loc.Id" data-href="@(WebRequestContext.Localization.Path)/resolve/@(redirectId)?@parms" @(loc.Id == WebRequestContext.Localization.Id ? "selected" : "")>
+                    @loc.Language
+                </option>
+            }
+        </select>
+    </div>
+}

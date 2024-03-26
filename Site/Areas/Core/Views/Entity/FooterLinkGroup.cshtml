@@ -1,0 +1,20 @@
+﻿@model LinkList<Link>
+<div class="@Model.HtmlClasses" @Html.DxaEntityMarkup()>
+    @if (!String.IsNullOrEmpty(Model.Headline))
+    {
+        <div class="h4" @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</div>
+    }
+    @if (Model.Links != null && Model.Links.Count > 0)
+    {
+        <ul class="list-unstyled">
+            @{ int index = 0; }
+            @foreach (var link in Model.Links)
+            {
+                <li @Html.DxaPropertyMarkup(() => Model.Links, index)>
+                    <a href="@link.Url" title="@link.AlternateText">@link.LinkText</a>
+                </li>
+                index++;
+            }
+        </ul>
+    }
+</div>

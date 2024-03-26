@@ -1,0 +1,14 @@
+﻿@model Download
+<div class="@Model.HtmlClasses" @Html.DxaEntityMarkup()>
+    <div class="download-list">
+        <i class="fa @Model.GetIconClass()"></i>
+        <div>
+            <a href="@Model.Url">@Model.FileName</a> 
+            <small class="size" @Html.DxaPropertyMarkup(() => Model.FileSize)>(@Model.GetFriendlyFileSize())</small>
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <small @Html.DxaPropertyMarkup(() => Model.Description)>@Model.Description</small>
+            }
+        </div>
+    </div>
+</div>

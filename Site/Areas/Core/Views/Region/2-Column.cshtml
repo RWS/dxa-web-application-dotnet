@@ -1,0 +1,14 @@
+﻿@model RegionModel
+<div @Html.DxaRegionMarkup()>
+    @for (int i = 0; i < Math.Ceiling(Model.Entities.Count / 2.0); i++)
+    {
+        <div class="row">
+            @for (int j = 0; j < 2 && (2 * i + j < Model.Entities.Count); j++)
+            {
+                <div class="col-sm-6">
+                    @Html.DxaEntity(Model.Entities[2 * i + j], containerSize: 6)
+                </div>
+            }
+        </div>
+    }
+</div>

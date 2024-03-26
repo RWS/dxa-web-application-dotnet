@@ -1,0 +1,72 @@
+﻿@model SitemapItem
+@{
+    //Small screens show 2 columns, so we need to make sure we break the row divs accordinly
+    int cols = WebRequestContext.ScreenWidth == ScreenWidth.Small ? 2 : 3;
+    var items = Model.Items.Where(i=>i.Items.Count>0).ToList();
+    if (Model.Type == "StructureGroup")
+    {
+        // Move the items in the root Structure Group into a new top-level "Home" SitemapItem
+        SitemapItem home = new SitemapItem { Title = Model.Title, Url = Model.Url, Items=new List<SitemapItem>() };
+        foreach(var item in Model.Items)
+        {
+            if (item.Items.Count==0)
+            {
+                home.Items.Add(item);
+            }
+        }
+        items.Insert(0, home);
+    }
+}
+<div>
+    @for (int i = 0; i < Math.Ceiling(items.Count / Convert.ToDouble(cols)); i++)
+    {
+        <div class="row">
+            @for (int j = 0; j < cols && (cols * i + j < items.Count); j++)
+            {
+                var item = items[cols * i + j];
+                <div class="col-sm-6 col-md-4">
+                    <h2>@Link(item)</h2>
+                    <ul class="list-unstyled">
+                        @foreach(SitemapItem childItem in item.Items)
+                        { 
+                            @List(childItem)
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@helper Link(SitemapItem item)
+{
+    if (string.IsNullOrEmpty(item.Url)) 
+    {
+        @item.Title 
+    }
+    else
+    {
+        <a href="@item.Url" title="@item.Title">@item.Title</a>
+    }
+}
+
+@helper List(SitemapItem item)
+{
+    if (item.Url != null && item.Url.EndsWith("/index"))
+    {
+        // Suppres Index Page
+        return;
+    }
+    <li>
+        @Link(item)
+        @if (item.Items.Count > 0)
+        {
+            <ul class="list-unstyled">
+                @foreach (var child in item.Items)
+                {
+                    @List(child)
+                }
+            </ul>
+        }
+    </li>
+}

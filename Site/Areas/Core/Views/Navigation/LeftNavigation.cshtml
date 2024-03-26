@@ -1,0 +1,14 @@
+﻿@model NavigationLinks
+<nav @Html.DxaEntityMarkup()>
+    <ul class="nav nav-sidebar">
+        @foreach (Link item in Model.Items)
+        {
+            string linkUrl = @Url.NormalizePageUrlPath(item.Url);
+            string requestUrl = @Url.NormalizePageUrlPath(Request.Url.LocalPath);
+            string cssClass = requestUrl.StartsWith(linkUrl) ? "active" : string.Empty;
+            <li class="@cssClass">
+                <a href="@linkUrl" title="@item.AlternateText">@item.LinkText</a>
+            </li>
+        }
+    </ul>
+</nav>

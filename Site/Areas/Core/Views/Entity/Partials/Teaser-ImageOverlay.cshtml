@@ -1,0 +1,50 @@
+﻿@using Sdl.Web.Common.Extensions
+@model Teaser
+@{
+    double imageAspect = 0.0;
+    if (ViewBag.RegionName == "Hero")
+    {
+        imageAspect = WebRequestContext.ScreenWidth == ScreenWidth.ExtraSmall ? 2 : (WebRequestContext.ScreenWidth == ScreenWidth.Small ? 2.5 : 3.3);
+    }
+}
+<div @Html.DxaEntityMarkup()>
+    @if (Model.Media != null)
+    {
+        <span @Html.DxaPropertyMarkup(() => Model.Media)>
+            @if (imageAspect == 0)
+            {
+                @Html.Media(Model.Media, "100%")
+            }
+            else
+            {
+                @Html.Media(Model.Media, "100%", imageAspect)
+            }
+        </span>
+    }
+    else
+    {
+        @* 1x1px transparent GIF *@
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="100%">
+    }
+    @if (!String.IsNullOrEmpty(Model.Headline) || !RichText.IsNullOrEmpty(Model.Text))
+    {
+        <div class="overlay overlay-tl ribbon">
+        @if(!String.IsNullOrEmpty(Model.Headline))
+        {
+            <h2 @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h2>
+        }
+        @if(!RichText.IsNullOrEmpty(Model.Text))
+        {
+            <div @Html.DxaPropertyMarkup(() => Model.Text)>@Html.DxaRichText(Model.Text)</div>
+        }
+        </div>
+    }
+    @if (Model.Link.IsLinkWithText())
+    {
+        <div class="carousel-caption">
+            <p @Html.DxaPropertyMarkup(() => Model.Link.LinkText)>
+                <a href="@Model.Link.Url" title="@Model.Link.AlternateText" class="btn btn-primary">@Model.Link.LinkText</a>
+            </p>
+        </div>
+    }
+</div>

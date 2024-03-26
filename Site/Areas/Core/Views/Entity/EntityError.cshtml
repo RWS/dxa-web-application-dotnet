@@ -1,0 +1,11 @@
+﻿@model ExceptionEntity
+<div class="alert alert-danger">
+    <strong>@Html.Resource("core.sectionErrorMessage")</strong>
+    @if (WebRequestContext.IsDeveloperMode)
+    {
+        foreach (string errorMessage in Model.ErrorMessages)
+        {
+            <pre>@errorMessage</pre>
+        }
+    }
+</div>

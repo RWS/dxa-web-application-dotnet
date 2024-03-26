@@ -1,0 +1,38 @@
+﻿@model ContentList<Teaser>
+
+<div class="rich-text @Model.HtmlClasses" @Html.DxaEntityMarkup()>
+    @if (Model.Headline != null)
+    {
+	    <div class="page-header page-header-top">
+		    <h1 class="h3" @Html.DxaPropertyMarkup(() => Model.Headline)>@Model.Headline</h1>
+	    </div>
+    }
+    @if (Model.ItemListElements.Count > 0)
+    {
+        <div class="pull-right">@String.Format(Html.Resource("core.showingItemsText"), Model.Start + 1, Model.Start+Model.ItemListElements.Count)</div>
+        @Html.Partial("Partials/Pager")
+	    <div class="list-group">
+            @foreach(var item in Model.ItemListElements)
+            {
+                if (item.Link.IsValidLink())
+                {
+    		        @:<a href="@item.Link.Url" class="list-group-item">
+                }
+			    <h4 class="list-group-item-heading">@item.Headline</h4>
+                if (item.Date != null)
+                {
+                    <time class="meta small">@Html.DateDiff(item.Date)</time>
+                }
+                if (item.Text != null)
+                {
+			        <p class="list-group-item-text">@item.Text</p>
+                }
+                if (item.Link.IsValidLink())
+                {
+    		        @:</a>
+                }
+            }
+	    </div>
+	    @Html.Partial("Partials/Pager")
+    }
+</div>
