@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading;
+﻿using AsyncKeyedLock;
 using Sdl.Web.Common;
 using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Delivery.Caching;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Sdl.Web.Tridion.Caching
 {
@@ -26,12 +25,13 @@ namespace Sdl.Web.Tridion.Caching
     /// </summary>
     public class KeylockCacheProvider : ICacheProvider
     {
-        private static readonly ConcurrentDictionary<string, object> KeyLocks = new ConcurrentDictionary<string, object>();
+        private static readonly AsyncKeyedLocker<string> _asyncKeyedLocker = new AsyncKeyedLocker<string>(o =>
+        {
+            o.PoolSize = 20;
+            o.PoolInitialFill = 1;
+        });
 
         private readonly ICacheProvider<object> _cilCacheProvider = CacheFactory<object>.CreateFromConfiguration();
-
-        [ThreadStatic]
-        private static int _reentriesCount;
 
         public void Store<T>(string key, string region, T value, IEnumerable<string> dependencies = null)
         {
@@ -39,22 +39,12 @@ namespace Sdl.Web.Tridion.Caching
 
             // prevent deadlocks if we're storing something here and in GetOrAdd.
             var hash = CalcLockHash(key, region);
-            lock (KeyLocks.GetOrAdd(hash, new object()))
+            using (_asyncKeyedLocker.Lock(hash))
             {
-                try
+                // only add if we are sure it hasn't already been added
+                if (!TryGetCachedValue(key, region, out T cachedValue))
                 {
-                    T cachedValue;
-                    // only add if we are sure it hasn't already been added
-                    if (!TryGetCachedValue(key, region, out cachedValue))
-                    {
-                        _cilCacheProvider.Set(key, value, region);
-                    }
-                }
-                finally
-                {
-                    // We don't need the lock anymore
-                    object tempKeyLock;
-                    KeyLocks.TryRemove(hash, out tempKeyLock);
+                    _cilCacheProvider.Set(key, value, region);
                 }
             }
         }
@@ -63,37 +53,25 @@ namespace Sdl.Web.Tridion.Caching
 
         public T GetOrAdd<T>(string key, string region, Func<T> addFunction, IEnumerable<string> dependencies = null)
         {
-            T cachedValue;
-            if (TryGetCachedValue(key, region, out cachedValue)) return cachedValue;
+            if (TryGetCachedValue(key, region, out T cachedValue)) return cachedValue;
             var hash = CalcLockHash(key, region);
-            lock (KeyLocks.GetOrAdd(hash, new object()))
+            using (_asyncKeyedLocker.Lock(hash))
             {
-                try
-                {
-                    // Try and get from cache again in case it has been added in the meantime
-                    if (TryGetCachedValue(key, region, out cachedValue)) return cachedValue;
+                // Try and get from cache again in case it has been added in the meantime
+                if (TryGetCachedValue(key, region, out cachedValue)) return cachedValue;
 
-                    // Still null, so lets run Func()
-                    Interlocked.Increment(ref _reentriesCount);
-                    cachedValue = addFunction();
-                    if (cachedValue != null)
+                // Still null, so lets run Func()
+                cachedValue = addFunction();
+                if (cachedValue != null)
+                {
+                    // Note that dependencies are not used?
+                    Debug.Assert(_cilCacheProvider != null, "_cilCacheProvider != null");
+                    if (_cilCacheProvider.Get(key, region) == null)
                     {
-                        // Note that dependencies are not used?
-                        Debug.Assert(_cilCacheProvider != null, "_cilCacheProvider != null");
-                        if (_cilCacheProvider.Get(key, region) == null)
-                        {
-                            _cilCacheProvider.Set(key, cachedValue, region);
-                        }
-
-                        return cachedValue;
+                        _cilCacheProvider.Set(key, cachedValue, region);
                     }
-                }
-                finally
-                {
-                    Interlocked.Decrement(ref _reentriesCount);
-                    // We don't need the lock anymore
-                    object tempKeyLock;
-                    KeyLocks.TryRemove(hash, out tempKeyLock);
+
+                    return cachedValue;
                 }
             }
             return default(T);
@@ -117,6 +95,6 @@ namespace Sdl.Web.Tridion.Caching
             return false;
         }
 
-        private static string CalcLockHash(string key, string region) => $"{region}:{key}:{_reentriesCount}";
+        private static string CalcLockHash(string key, string region) => $"{region}:{key}";
     }
 }
