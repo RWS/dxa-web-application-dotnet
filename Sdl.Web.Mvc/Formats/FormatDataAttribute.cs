@@ -1,6 +1,7 @@
 ﻿using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Controllers;
 using System;
+using System.Configuration;
 using System.Web.Mvc;
 
 namespace Sdl.Web.Mvc.Formats
@@ -15,12 +16,19 @@ namespace Sdl.Web.Mvc.Formats
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            IDataFormatter formatter = DataFormatters.GetFormatter(filterContext);
-            if (formatter != null)
+            string enableFormatParamSetting = ConfigurationManager.AppSettings["enableformatquery"];
+            bool enableFormatParam = string.IsNullOrEmpty(enableFormatParamSetting) || enableFormatParamSetting.Equals("true", StringComparison.OrdinalIgnoreCase);
+
+            // Check the config allows it
+            if (enableFormatParam)
             {
-                filterContext.Controller.ViewData[DxaViewDataItems.DisableOutputCache] = true;
-                filterContext.Controller.ViewData[DxaViewDataItems.DataFormatter] = formatter;
-                filterContext.Controller.ViewData[DxaViewDataItems.AddIncludes] = formatter.AddIncludes;
+                IDataFormatter formatter = DataFormatters.GetFormatter(filterContext);
+                if (formatter != null)
+                {
+                    filterContext.Controller.ViewData[DxaViewDataItems.DisableOutputCache] = true;
+                    filterContext.Controller.ViewData[DxaViewDataItems.DataFormatter] = formatter;
+                    filterContext.Controller.ViewData[DxaViewDataItems.AddIncludes] = formatter.AddIncludes;
+                }
             }
             else
             {
