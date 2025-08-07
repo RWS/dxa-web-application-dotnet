@@ -67,22 +67,24 @@ namespace Sdl.Web.Tridion
                     }
 
                     string localizationId = mapping.PublicationId.ToString();
-                    if (!KnownLocalizations.TryGetValue(localizationId, out result))
+                    lock (KnownLocalizations)
                     {
-                        result = new Localization
+                        if (!KnownLocalizations.TryGetValue(localizationId, out result))
                         {
-                            Id = localizationId,
-                            Path = mapping.Path
-                        };
-                        KnownLocalizations.Add(localizationId, result);
+                            result = new Localization
+                            {
+                                Id = localizationId,
+                                Path = mapping.Path
+                            };
+                            KnownLocalizations.Add(localizationId, result);
+                        }
+                        else
+                        {
+                            // we fill in the path regardless as it may of been
+                            // a partially created localization.
+                            result.Path = mapping.Path;
+                        }
                     }
-                    else
-                    {
-                        // we fill in the path regardless as it may of been
-                        // a partially created localization.
-                        result.Path = mapping.Path;
-                    }
-
 
                     result.EnsureInitialized();
 
