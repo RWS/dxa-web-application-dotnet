@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.RegularExpressions;
 
 namespace Sdl.Web.Common.Extensions
@@ -23,8 +23,10 @@ namespace Sdl.Web.Common.Extensions
         /// </summary>
         public static bool HasNOrMoreOccurancesOfChar(this string str, int n, char c)
         {
+            if (n <= 0) return true;
+            if (string.IsNullOrEmpty(str)) return false;
             int count = 0;
-            for (int i = 0; i < str.Length || count >= n; i++)
+            for (int i = 0; i < str.Length && count < n; i++)
             {
                 if (str[i] == c)
                 {
@@ -37,7 +39,12 @@ namespace Sdl.Web.Common.Extensions
         /// <summary>
         /// Returns a string converted to camel case.
         /// </summary>
-        public static string ToCamelCase(this string str) => str.Substring(0, 1).ToLower() + str.Substring(1);
+        public static string ToCamelCase(this string str)
+        {
+            if (string.IsNullOrEmpty(str)) return str;
+            if (str.Length == 1) return str.ToLower();
+            return char.ToLower(str[0]) + str.Substring(1);
+        }
 
         /// <summary>
         /// Returns a new string in which all occurances of a specifid string are replaced with a new string

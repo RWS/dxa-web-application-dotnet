@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -319,15 +319,15 @@ namespace Sdl.Web.Tridion.Statics
                 grPhoto.PixelOffsetMode = PixelOffsetMode.HighQuality;
                 grPhoto.DrawImage(imgPhoto, new Rectangle(0, 0, targetW, targetH), cropX, cropY, sourceW, sourceH, GraphicsUnit.Pixel);
                 // Save out to memory and then to a file.  We dispose of all objects to make sure the files don't stay locked.
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    bmPhoto.Save(memoryStream, imageFormat);
-                    original.Dispose();
-                    imgPhoto.Dispose();
-                    bmPhoto.Dispose();
-                    grPhoto.Dispose();
-                    return memoryStream.GetBuffer();
-                }
+                                    using (MemoryStream memoryStream = new MemoryStream())
+                    {
+                        bmPhoto.Save(memoryStream, imageFormat);
+                        original.Dispose();
+                        imgPhoto.Dispose();
+                        bmPhoto.Dispose();
+                        grPhoto.Dispose();
+                        return memoryStream.ToArray();
+                    }
             }
         }
 

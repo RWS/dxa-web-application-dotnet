@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,6 +12,7 @@ using Sdl.Web.Common.Extensions;
 using Sdl.Web.Common.Mapping;
 using System.Collections;
 using Sdl.Web.Common.Configuration;
+using System.IO;
 
 namespace Sdl.Web.Tridion.Mapping
 {
@@ -129,18 +130,30 @@ namespace Sdl.Web.Tridion.Mapping
         {
             using (new Tracer(genericTopic))
             {
-                XmlDocument topicXmlDoc = new XmlDocument();
-                topicXmlDoc.LoadXml($"<topic>{genericTopic.TopicBody}</topic>");
+                XmlReaderSettings settings = new XmlReaderSettings
+                {
+                    DtdProcessing = DtdProcessing.Prohibit,
+                    XmlResolver = null
+                };
+                using (var stringReader = new StringReader($"<topic>{genericTopic.TopicBody}</topic>"))
+                using (var xmlReader = XmlReader.Create(stringReader, settings))
+                {
+                    XmlDocument topicXmlDoc = new XmlDocument
+                    {
+                        XmlResolver = null
+                    };
+                    topicXmlDoc.Load(xmlReader);
 
-                XmlElement topicElement = topicXmlDoc.DocumentElement;
+                    XmlElement topicElement = topicXmlDoc.DocumentElement;
 
-                // Inject GenericTopic's TopicTitle as additional HTML element
-                XmlElement topicTitleElement = topicXmlDoc.CreateElement("h1");
-                topicTitleElement.SetAttribute("class", "_topicTitle");
-                topicTitleElement.InnerText = genericTopic.TopicTitle;
-                topicElement.AppendChild(topicTitleElement);
+                    // Inject GenericTopic's TopicTitle as additional HTML element
+                    XmlElement topicTitleElement = topicXmlDoc.CreateElement("h1");
+                    topicTitleElement.SetAttribute("class", "_topicTitle");
+                    topicTitleElement.InnerText = genericTopic.TopicTitle;
+                    topicElement.AppendChild(topicTitleElement);
 
-                return topicElement;
+                    return topicElement;
+                }
             }
         }
 
